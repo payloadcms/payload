@@ -979,8 +979,8 @@ describe('collections-graphql', () => {
         })
 
         await payload.update({
-          collection: 'cyclical-relationship',
           id: newDoc.id,
+          collection: 'cyclical-relationship',
           data: {
             relationToSelf: newDoc.id,
           },
@@ -1013,16 +1013,16 @@ describe('collections-graphql', () => {
     // publish doc
     const newDoc = await payload.create({
       collection: 'cyclical-relationship',
-      draft: false,
       data: {
         title: publishValue,
       },
+      draft: false,
     })
 
     // create cyclical relationship
     await payload.update({
-      collection: 'cyclical-relationship',
       id: newDoc.id,
+      collection: 'cyclical-relationship',
       data: {
         relationToSelf: newDoc.id,
       },
@@ -1030,12 +1030,12 @@ describe('collections-graphql', () => {
 
     // save new version
     await payload.update({
-      collection: 'cyclical-relationship',
       id: newDoc.id,
-      draft: true,
+      collection: 'cyclical-relationship',
       data: {
         title: draftValue,
       },
+      draft: true,
     })
 
     const draftParentPublishedChild = `{
@@ -1084,10 +1084,10 @@ describe('collections-graphql', () => {
 
     const mediaDoc = await payload.create({
       collection: 'media',
-      file,
       data: {
         title: 'example',
       },
+      file,
     })
 
     // doc with upload relation

@@ -2,16 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 export const CustomIdRow: CollectionConfig = {
   slug: 'customIdRow',
-  labels: {
-    singular: 'Custom Id Row',
-    plural: 'Custom Ids Row',
-  },
   admin: {
-    description: 'Description',
-    listSearchableFields: ['id', 'title', 'description', 'number'],
-    group: 'One',
-    useAsTitle: 'title',
     defaultColumns: ['id', 'number', 'title'],
+    description: 'Description',
+    group: 'One',
+    listSearchableFields: ['id', 'title', 'description', 'number'],
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -36,4 +32,8 @@ export const CustomIdRow: CollectionConfig = {
       ],
     },
   ],
+  labels: {
+    plural: 'Custom Ids Row',
+    singular: 'Custom Id Row',
+  },
 }

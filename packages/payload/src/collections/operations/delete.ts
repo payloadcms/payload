@@ -111,7 +111,6 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
 
     const errors = []
 
-    /* eslint-disable no-param-reassign */
     const promises = docs.map(async (doc) => {
       let result
 

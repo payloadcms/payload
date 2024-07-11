@@ -15,7 +15,12 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type SelectInputProps = Omit<
+export type SelectInputProps = {
+  onChange?: ReactSelectAdapterProps['onChange']
+  options?: OptionObject[]
+  showError?: boolean
+  value?: string | string[]
+} & Omit<
   SelectFieldProps,
   | 'custom'
   | 'disabled'
@@ -29,12 +34,7 @@ export type SelectInputProps = Omit<
   | 'user'
   | 'validate'
   | 'value'
-> & {
-  onChange?: ReactSelectAdapterProps['onChange']
-  options?: OptionObject[]
-  showError?: boolean
-  value?: string | string[]
-}
+>
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {

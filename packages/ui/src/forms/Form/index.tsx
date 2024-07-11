@@ -1,7 +1,6 @@
 'use client'
 import type { FormState } from 'payload'
 
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'

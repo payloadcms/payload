@@ -4,7 +4,6 @@ import type { Page, Post } from '../../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const generateMeta = async (args: { doc: Page | Post }): Promise<Metadata> => {
   const { doc } = args || {}
 

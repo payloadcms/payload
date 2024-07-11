@@ -19,8 +19,8 @@ export const GlobalValidateDraftsOn: GlobalConfig = {
   ],
   versions: {
     drafts: {
-      validate: true,
       autosave: true,
+      validate: true,
     },
   },
 }

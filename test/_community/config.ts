@@ -45,9 +45,7 @@ export default buildConfigWithDefaults({
         {
           name: 'json',
           type: 'json',
-          required: true,
           jsonSchema: {
-            uri: 'a://b/foo.json',
             fileMatch: ['a://b/foo.json'],
             schema: {
               type: 'array',
@@ -69,7 +67,9 @@ export default buildConfigWithDefaults({
                 required: ['id', 'name'], // Specify which properties are required
               },
             },
+            uri: 'a://b/foo.json',
           },
+          required: true,
         },
       ],
     },
@@ -107,6 +107,7 @@ export default buildConfigWithDefaults({
       ({ jsonSchema }) => {
         jsonSchema.definitions.objectWithNumber = {
           type: 'object',
+          additionalProperties: false,
           properties: {
             id: {
               type: 'number',
@@ -114,7 +115,6 @@ export default buildConfigWithDefaults({
             },
           },
           required: true,
-          additionalProperties: false,
         }
         return jsonSchema
       },

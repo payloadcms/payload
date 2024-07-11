@@ -1,6 +1,10 @@
-/* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+import type {
+  Collection,
+  Field,
+  GraphQLInfo,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+} from 'payload'
 
 import {
   GraphQLBoolean,

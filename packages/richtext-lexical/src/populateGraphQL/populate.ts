@@ -24,10 +24,10 @@ export const populate = async ({
   overrideAccess,
   req,
   showHiddenFields,
-}: Arguments & {
+}: {
   collectionSlug: string
   id: number | string
-}): Promise<void> => {
+} & Arguments): Promise<void> => {
   const shouldPopulate = depth && currentDepth <= depth
   // usually depth is checked within recursivelyPopulateFieldsForGraphQL. But since this populate function can be called outside of that (in rest afterRead node hooks) we need to check here too
   if (!shouldPopulate) {

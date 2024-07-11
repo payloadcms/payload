@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { ClientValidate, DateField } from 'payload'
 
@@ -21,13 +20,13 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type DateFieldProps = FormFieldBase & {
+export type DateFieldProps = {
   date?: DateField['admin']['date']
   name?: string
   path?: string
   placeholder?: DateField['admin']['placeholder'] | string
   width?: string
-}
+} & FormFieldBase
 
 const _DateTimeField: React.FC<DateFieldProps> = (props) => {
   const {

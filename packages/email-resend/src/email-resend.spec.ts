@@ -1,6 +1,8 @@
-import { resendAdapter } from './index.js'
-import { Payload } from 'payload'
+import type { Payload } from 'payload'
+
 import { jest } from '@jest/globals'
+
+import { resendAdapter } from './index.js'
 
 describe('email-resend', () => {
   const defaultFromAddress = 'dev@payloadcms.com'
@@ -29,16 +31,16 @@ describe('email-resend', () => {
     ) as jest.Mock
 
     const adapter = resendAdapter({
+      apiKey,
       defaultFromAddress,
       defaultFromName,
-      apiKey,
     })
 
     await adapter({ payload: mockPayload }).sendEmail({
       from,
-      to,
       subject,
       text,
+      to,
     })
 
     // @ts-expect-error
@@ -48,16 +50,16 @@ describe('email-resend', () => {
     expect(request.headers.Authorization).toStrictEqual(`Bearer ${apiKey}`)
     expect(JSON.parse(request.body)).toMatchObject({
       from,
-      to,
       subject,
       text,
+      to,
     })
   })
 
   it('should throw an error if the email fails to send', async () => {
     const errorResponse = {
-      message: 'error information',
       name: 'validation_error',
+      message: 'error information',
       statusCode: 403,
     }
     global.fetch = jest.spyOn(global, 'fetch').mockImplementation(
@@ -69,17 +71,17 @@ describe('email-resend', () => {
     ) as jest.Mock
 
     const adapter = resendAdapter({
+      apiKey,
       defaultFromAddress,
       defaultFromName,
-      apiKey,
     })
 
     await expect(() =>
       adapter({ payload: mockPayload }).sendEmail({
         from,
-        to,
         subject,
         text,
+        to,
       }),
     ).rejects.toThrow(
       `Error sending email: ${errorResponse.statusCode} ${errorResponse.name} - ${errorResponse.message}`,

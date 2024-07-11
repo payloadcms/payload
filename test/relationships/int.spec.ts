@@ -446,7 +446,6 @@ describe('Relationships', () => {
         it('should validate the format of text id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
@@ -456,7 +455,6 @@ describe('Relationships', () => {
         it('should validate the format of number id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),

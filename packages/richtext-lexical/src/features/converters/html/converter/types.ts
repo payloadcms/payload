@@ -21,6 +21,6 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
   nodeTypes: string[]
 }
 
-export type SerializedLexicalNodeWithParent = SerializedLexicalNode & {
+export type SerializedLexicalNodeWithParent = {
   parent?: SerializedLexicalNode
-}
+} & SerializedLexicalNode

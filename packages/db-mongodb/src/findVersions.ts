@@ -101,7 +101,6 @@ export const findVersions: FindVersions = async function findVersions(
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

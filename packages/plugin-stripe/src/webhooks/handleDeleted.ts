@@ -1,10 +1,10 @@
 import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types.js'
 
 type HandleDeleted = (
-  args: Parameters<StripeWebhookHandler>[0] & {
+  args: {
     resourceType: string
     syncConfig: SanitizedStripePluginConfig['sync'][0]
-  },
+  } & Parameters<StripeWebhookHandler>[0],
 ) => void
 
 export const handleDeleted: HandleDeleted = async (args) => {

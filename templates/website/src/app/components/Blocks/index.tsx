@@ -8,7 +8,6 @@ import { CallToActionBlock } from '../../blocks/CallToAction'
 import { ContentBlock } from '../../blocks/Content'
 import { FormBlock } from '../../blocks/Form'
 import { MediaBlock } from '../../blocks/MediaBlock'
-import { RelatedPosts, type RelatedPostsProps } from '../../blocks/RelatedPosts'
 import { toKebabCase } from '../../utilities/toKebabCase'
 
 const blockComponents = {
@@ -17,11 +16,10 @@ const blockComponents = {
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
-  relatedPosts: RelatedPosts,
 }
 
 export const Blocks: React.FC<{
-  blocks: (Page['layout'][0] | RelatedPostsProps)[]
+  blocks: Page['layout'][0][]
 }> = (props) => {
   const { blocks } = props
 

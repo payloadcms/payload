@@ -119,7 +119,6 @@ export const buildColumnState = (args: Args): Column[] => {
       <SortColumn
         Label={Label}
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
-        // eslint-disable-next-line react/jsx-no-duplicate-props
         label={
           'fieldComponentProps' in field && 'label' in field.fieldComponentProps
             ? field.fieldComponentProps.label

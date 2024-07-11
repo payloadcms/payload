@@ -66,10 +66,10 @@ describe('create-payload-app', () => {
 
       const firstResult = await initNext({
         '--debug': true,
-        projectDir,
         dbType: 'mongodb',
-        useDistFiles: true, // create-payload-app/dist/template
         packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true, // create-payload-app/dist/template
       })
 
       // Will fail because we detect top-level layout.tsx file
@@ -90,10 +90,10 @@ describe('create-payload-app', () => {
       // Rerun after moving files
       const result = await initNext({
         '--debug': true,
-        projectDir,
         dbType: 'mongodb',
-        useDistFiles: true, // create-payload-app/dist/app/(payload)
         packageManager: 'pnpm',
+        projectDir,
+        useDistFiles: true, // create-payload-app/dist/app/(payload)
       })
 
       expect(result.success).toEqual(true)
@@ -127,10 +127,10 @@ describe('create-payload-app', () => {
         dependencies: Record<string, string>
       }
       expect(packageJson.dependencies).toMatchObject({
-        payload: expect.any(String),
         '@payloadcms/db-mongodb': expect.any(String),
-        '@payloadcms/richtext-lexical': expect.any(String),
         '@payloadcms/next': expect.any(String),
+        '@payloadcms/richtext-lexical': expect.any(String),
+        payload: expect.any(String),
       })
     })
   })

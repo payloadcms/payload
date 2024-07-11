@@ -10,9 +10,9 @@ import classes from './index.module.scss'
 type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'content' }>
 
 export const ContentBlock: React.FC<
-  Props & {
+  {
     id?: string
-  }
+  } & Props
 > = (props) => {
   const { columns } = props
 

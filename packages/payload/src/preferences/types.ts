@@ -8,7 +8,7 @@ export type PreferenceRequest = {
   user: PayloadRequest['user']
 }
 
-export type PreferenceUpdateRequest = PreferenceRequest & { value: unknown }
+export type PreferenceUpdateRequest = { value: unknown } & PreferenceRequest
 
 export type CollapsedPreferences = string[]
 

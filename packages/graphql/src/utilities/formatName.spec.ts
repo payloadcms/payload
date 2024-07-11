@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 /* eslint-disable jest/prefer-strict-equal */
 import formatName from './formatName'
 

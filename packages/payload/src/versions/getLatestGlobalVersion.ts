@@ -23,7 +23,6 @@ export const getLatestGlobalVersion = async ({
   let latestVersion
 
   if (config.versions?.drafts) {
-    // eslint-disable-next-line prefer-destructuring
     latestVersion = (
       await payload.db.findGlobalVersions({
         global: slug,
