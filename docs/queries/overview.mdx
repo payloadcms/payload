@@ -30,7 +30,7 @@ _The exact query syntax will depend on the API you are using, but the concepts a
 
 <Banner>
   <strong>Tip:</strong>
-  You can also use Queries to restrict which Documents certain users can access within [Access Control](../access-control/overview) functions.
+  You can also use queries within [Access Control](../access-control/overview) functions.
 </Banner>
 
 ## Operators
@@ -60,22 +60,20 @@ The following operators are available for use in queries:
 
 ### And / Or Logic
 
-In addition to defining simple queries, you can join multiple queries together using AND / OR logic.
+In addition to defining simple queries, you can join multiple queries together using AND / OR logic. These can be nested as deeply as you need to create complex queries.
 
 To join queries, use the `and` or `or` keys in your query object:
 
-```js
+```ts
 const query = {
-  or: [
-    // array of OR conditions
+  or: [ // highlight-line
     {
       color: {
         equals: 'mint',
       },
     },
     {
-      and: [
-        // nested array of AND conditions
+      and: [ // highlight-line
         {
           color: {
             equals: 'white',
