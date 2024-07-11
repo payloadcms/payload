@@ -64,7 +64,7 @@ Some plugins have become so widely used that they are adopted as an [Official Pl
 The base [Payload Config](../configuration/overview) allows for a `plugins` property which takes an `array` of [Plugin Configs](./build-your-own).
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 // note: these plugins are not real (yet?)
 import addLastModified from 'payload-add-last-modified'
 import passwordProtect from 'payload-password-protect'
@@ -97,7 +97,7 @@ const config = buildConfig({
 Here is an example what the `addLastModified` plugin from above might look like. It adds a `lastModifiedBy` field to all Payload collections. For full details, see [how to build your own plugin](./build-your-own).
 
 ```ts
-import { Config, Plugin } from 'payload/config'
+import { Config, Plugin } from 'payload'
 
 const addLastModified: Plugin = (incomingConfig: Config): Config => {
   // Find all incoming auth-enabled collections
