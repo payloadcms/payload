@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { LexicalEditor } from 'lexical'
+import type { LexicalEditor, Spread } from 'lexical'
 import type { MutableRefObject } from 'react'
 import type React from 'react'
 
@@ -37,6 +37,9 @@ export type SlashMenuItemInternal = {
   ref: MutableRefObject<HTMLButtonElement | null>
 } & SlashMenuItem
 
-export type SlashMenuGroupInternal = {
-  items: Array<SlashMenuItemInternal>
-} & SlashMenuGroup
+export type SlashMenuGroupInternal = Spread<
+  {
+    items: Array<SlashMenuItemInternal>
+  },
+  SlashMenuGroup
+>
