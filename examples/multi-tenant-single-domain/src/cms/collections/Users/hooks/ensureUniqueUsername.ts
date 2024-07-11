@@ -1,8 +1,10 @@
 import type { FieldHook } from 'payload'
+
 import { ValidationError } from 'payload'
+
 import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
-export const ensureUniqueUsername: FieldHook = async ({ value, req, originalDoc, data }) => {
+export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
   if (originalDoc.username === value) return value
 
@@ -35,8 +37,8 @@ export const ensureUniqueUsername: FieldHook = async ({ value, req, originalDoc,
     // provide a more specific error message
     if (req.user.roles?.includes('super-admin') || tenantIDs.length > 1) {
       const attemptedTenantChange = await req.payload.findByID({
-        collection: 'tenants',
         id: tenantIDToMatch,
+        collection: 'tenants',
       })
 
       throw new ValidationError({

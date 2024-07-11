@@ -1,12 +1,14 @@
 'use client'
 
+import type { Option } from '@payloadcms/ui/elements/ReactSelect'
+import type { OptionObject } from 'payload'
+
+import { SelectInput, useAuth } from '@payloadcms/ui'
 import React from 'react'
-import { useAuth, SelectInput } from '@payloadcms/ui'
-import { OptionObject } from 'payload'
+
 import type { Tenant, User } from '../../../payload-types'
 
 import './index.scss'
-import { Option } from '@payloadcms/ui/elements/ReactSelect'
 
 export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) => {
   const { user } = useAuth<User>()
@@ -23,7 +25,7 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
     }) || []
 
   function setCookie(name: string, value?: string) {
-    var expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT'
+    const expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT'
     document.cookie = name + '=' + (value || '') + expires + '; path=/'
   }
 
@@ -55,9 +57,9 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
         <SelectInput
           label="Select a tenant"
           name="setTenant"
-          path="setTenant"
-          options={options}
           onChange={handleChange}
+          options={options}
+          path="setTenant"
           value={value}
         />
       </div>

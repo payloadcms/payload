@@ -1,11 +1,11 @@
-import { headersWithCors } from "@payloadcms/next/utilities";
-import { Endpoint, APIError, generatePayloadCookie, Collection } from "payload";
+import type { Collection, Endpoint } from 'payload'
+
+import { headersWithCors } from '@payloadcms/next/utilities'
+import { APIError, generatePayloadCookie } from 'payload'
 
 // A custom endpoint that can be reached by POST request
 // at: /api/users/external-users/login
 export const externalUsersLogin: Endpoint = {
-  path: '/external-users/login',
-  method: 'post',
   handler: async (req) => {
     let data: { [key: string]: string } = {}
 
@@ -14,21 +14,24 @@ export const externalUsersLogin: Endpoint = {
         data = await req.json()
       }
     } catch (error) {
+      // swallow error, data is already empty object
     }
-    const { username, password, tenantSlug } = data
+    const { password, tenantSlug, username } = data
 
     if (!username || !password) {
       throw new APIError('Username and Password are required for login.', 400, null, true)
     }
 
-    const fullTenant = (await req.payload.find({
-      collection: 'tenants',
-      where: {
-        slug: {
-          equals: tenantSlug
-        }
-      }
-    })).docs[0]
+    const fullTenant = (
+      await req.payload.find({
+        collection: 'tenants',
+        where: {
+          slug: {
+            equals: tenantSlug,
+          },
+        },
+      })
+    ).docs[0]
 
     const foundUser = await req.payload.find({
       collection: 'users',
@@ -38,32 +41,32 @@ export const externalUsersLogin: Endpoint = {
             and: [
               {
                 email: {
-                  equals: username
-                }
+                  equals: username,
+                },
               },
               {
                 'tenants.tenant': {
-                  equals: fullTenant.id
-                }
+                  equals: fullTenant.id,
+                },
               },
-            ]
+            ],
           },
           {
             and: [
               {
                 username: {
-                  equals: username
-                }
+                  equals: username,
+                },
               },
               {
                 'tenants.tenant': {
-                  equals: fullTenant.id
-                }
+                  equals: fullTenant.id,
+                },
               },
-            ]
-          }
-        ]
-      }
+            ],
+          },
+        ],
+      },
     })
 
     if (foundUser.totalDocs > 0) {
@@ -96,12 +99,24 @@ export const externalUsersLogin: Endpoint = {
           })
         }
 
-        throw new APIError('Unable to login with the provided username and password.', 400, null, true)
+        throw new APIError(
+          'Unable to login with the provided username and password.',
+          400,
+          null,
+          true,
+        )
       } catch (e) {
-        throw new APIError('Unable to login with the provided username and password.', 400, null, true)
+        throw new APIError(
+          'Unable to login with the provided username and password.',
+          400,
+          null,
+          true,
+        )
       }
     }
 
     throw new APIError('Unable to login with the provided username and password.', 400, null, true)
-  }
+  },
+  method: 'post',
+  path: '/external-users/login',
 }

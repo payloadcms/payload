@@ -1,17 +1,18 @@
 import type { CollectionConfig } from 'payload'
+
 import { isSuperAdmin } from '../../access/isSuperAdmin'
 import { tenantRead } from './access/read'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
-  admin: {
-    useAsTitle: 'name',
-  },
   access: {
     create: isSuperAdmin,
+    delete: isSuperAdmin,
     read: tenantRead,
     update: isSuperAdmin,
-    delete: isSuperAdmin,
+  },
+  admin: {
+    useAsTitle: 'name',
   },
   fields: [
     {
@@ -21,20 +22,20 @@ export const Tenants: CollectionConfig = {
     },
     {
       name: 'slug',
+      type: 'text',
       admin: {
         description: 'Used for url paths, example: /tenant-slug/page-slug',
       },
-      type: 'text',
-      required: true,
       index: true,
+      required: true,
     },
     {
-      admin: {
-        position: 'sidebar',
-        description: 'If checked, logging in is not required.',
-      },
       name: 'public',
       type: 'checkbox',
+      admin: {
+        description: 'If checked, logging in is not required.',
+        position: 'sidebar',
+      },
       defaultValue: false,
       index: true,
     },

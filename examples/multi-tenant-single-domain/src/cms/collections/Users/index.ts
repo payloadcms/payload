@@ -1,17 +1,15 @@
 import type { CollectionConfig } from 'payload'
+
 import { isSuperAdmin } from '../../access/isSuperAdmin'
 import { isSuperAdminOrSelf } from './access/isSuperAdminOrSelf'
-import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
+import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
 
 const Users: CollectionConfig = {
   slug: 'users',
-  auth: true,
-  admin: {
-    useAsTitle: 'email',
-  },
   access: {
     create: isSuperAdmin,
+    delete: isSuperAdmin,
     read: (args) => {
       const { req } = args
       if (!req?.user) return false
@@ -25,14 +23,18 @@ const Users: CollectionConfig = {
       }
     },
     update: isSuperAdminOrSelf,
-    delete: isSuperAdmin,
   },
+  admin: {
+    useAsTitle: 'email',
+  },
+  auth: true,
+  endpoints: [externalUsersLogin],
   fields: [
     {
       name: 'roles',
       type: 'select',
-      hasMany: true,
       defaultValue: ['user'],
+      hasMany: true,
       options: ['super-admin', 'user'],
     },
     {
@@ -52,15 +54,15 @@ const Users: CollectionConfig = {
         {
           name: 'tenant',
           type: 'relationship',
-          relationTo: 'tenants',
           index: true,
+          relationTo: 'tenants',
           saveToJWT: true,
         },
         {
           name: 'roles',
           type: 'select',
-          hasMany: true,
           defaultValue: ['viewer'],
+          hasMany: true,
           options: ['super-admin', 'viewer'],
         },
       ],
@@ -68,13 +70,12 @@ const Users: CollectionConfig = {
     {
       name: 'username',
       type: 'text',
-      index: true,
       hooks: {
         beforeValidate: [ensureUniqueUsername],
       },
+      index: true,
     },
   ],
-  endpoints: [externalUsersLogin],
 }
 
 export default Users

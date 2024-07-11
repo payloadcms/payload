@@ -1,7 +1,9 @@
-import type { Access } from "payload";
+import type { Access } from 'payload'
+
 import { parseCookies } from 'payload'
-import { isSuperAdmin } from "../../../access/isSuperAdmin";
-import { getTenantAccessIDs } from "../../../utilities/getTenantAccessIDs";
+
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const byTenant: Access = (args) => {
   const req = args.req
@@ -13,14 +15,13 @@ export const byTenant: Access = (args) => {
 
   // First check for manually selected tenant from cookies
   if (selectedTenant) {
-
     // If it's a super admin,
     // give them read access to only pages for that tenant
     if (superAdmin) {
       return {
         tenant: {
-          equals: selectedTenant
-        }
+          equals: selectedTenant,
+        },
       }
     }
 
@@ -31,8 +32,8 @@ export const byTenant: Access = (args) => {
     if (hasTenantAccess) {
       return {
         tenant: {
-          equals: selectedTenant
-        }
+          equals: selectedTenant,
+        },
       }
     }
   }
@@ -43,14 +44,14 @@ export const byTenant: Access = (args) => {
     return true
   }
 
-  // If not super admin, 
+  // If not super admin,
   // but has access to tenants,
   // give access to only their own tenants
   if (tenantAccessIDs.length) {
     return {
       tenant: {
-        in: tenantAccessIDs
-      }
+        in: tenantAccessIDs,
+      },
     }
   }
 

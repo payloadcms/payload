@@ -1,7 +1,9 @@
-import type { Where, Access } from "payload";
+import type { Access, Where } from 'payload'
+
 import { parseCookies } from 'payload'
-import { isSuperAdmin } from "../../../access/isSuperAdmin";
-import { getTenantAccessIDs } from "../../../utilities/getTenantAccessIDs";
+
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const externalReadAccess: Access = (args) => {
   const req = args.req
@@ -12,13 +14,12 @@ export const externalReadAccess: Access = (args) => {
 
   const publicPageConstraint: Where = {
     'tenant.public': {
-      equals: true
-    }
+      equals: true,
+    },
   }
 
   // First check for manually selected tenant from cookies
   if (selectedTenant) {
-
     // If it's a super admin,
     // give them read access to only pages for that tenant
     if (superAdmin) {
@@ -27,10 +28,10 @@ export const externalReadAccess: Access = (args) => {
           publicPageConstraint,
           {
             tenant: {
-              equals: selectedTenant
-            }
-          }
-        ]
+              equals: selectedTenant,
+            },
+          },
+        ],
       }
     }
 
@@ -44,10 +45,10 @@ export const externalReadAccess: Access = (args) => {
           publicPageConstraint,
           {
             tenant: {
-              equals: selectedTenant
-            }
-          }
-        ]
+              equals: selectedTenant,
+            },
+          },
+        ],
       }
     }
   }
@@ -58,7 +59,7 @@ export const externalReadAccess: Access = (args) => {
     return true
   }
 
-  // If not super admin, 
+  // If not super admin,
   // but has access to tenants,
   // give access to only their own tenants
   if (tenantAccessIDs.length) {
@@ -67,10 +68,10 @@ export const externalReadAccess: Access = (args) => {
         publicPageConstraint,
         {
           tenant: {
-            in: tenantAccessIDs
-          }
-        }
-      ]
+            in: tenantAccessIDs,
+          },
+        },
+      ],
     }
   }
 

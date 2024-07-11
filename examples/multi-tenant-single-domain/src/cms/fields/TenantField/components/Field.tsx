@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
+import type { User } from 'payload/generated-types'
 
-import { useAuth, RelationshipField, useFieldProps } from '@payloadcms/ui'
-import { User } from 'payload/generated-types'
+import { RelationshipField, useAuth, useFieldProps } from '@payloadcms/ui'
+import React from 'react'
 
 export const TenantFieldComponent = () => {
   const { user } = useAuth<User>()
@@ -12,11 +12,11 @@ export const TenantFieldComponent = () => {
     if ((user.tenants && user.tenants.length > 1) || user?.roles?.includes('super-admin')) {
       return (
         <RelationshipField
+          label="Tenant"
           name={path}
           path={path}
-          relationTo="tenants"
-          label="Tenant"
           readOnly={readOnly}
+          relationTo="tenants"
           required
         />
       )

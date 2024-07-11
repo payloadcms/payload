@@ -1,18 +1,16 @@
 import type { CollectionConfig } from 'payload'
+
 import { tenantField } from '../../fields/TenantField'
-import { byTenant } from './access/byTenant'
-import { ensureUniqueSlug } from './hooks/ensureUniqueSlug'
-import { externalReadAccess } from './access/externalReadAccess'
 import { isPayloadAdminPanel } from '../../utilities/isPayloadAdminPanel'
+import { byTenant } from './access/byTenant'
+import { externalReadAccess } from './access/externalReadAccess'
+import { ensureUniqueSlug } from './hooks/ensureUniqueSlug'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
-  admin: {
-    useAsTitle: 'title',
-  },
   access: {
-    update: byTenant,
-    read: async (args) => {
+    delete: byTenant,
+    read: (args) => {
       // when viewing pages inside the admin panel
       // restrict access to the ones your user has access to
       if (isPayloadAdminPanel(args.req)) return byTenant(args)
@@ -21,7 +19,10 @@ export const Pages: CollectionConfig = {
       // you should be able to see your tenants and public tenants
       return externalReadAccess(args)
     },
-    delete: byTenant,
+    update: byTenant,
+  },
+  admin: {
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -31,11 +32,11 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
-      index: true,
       defaultValue: 'home',
       hooks: {
         beforeValidate: [ensureUniqueSlug],
       },
+      index: true,
     },
     tenantField,
   ],

@@ -1,6 +1,7 @@
-import type { Access } from "payload";
-import { isSuperAdmin } from "../../../access/isSuperAdmin";
-import { getTenantAccessIDs } from "../../../utilities/getTenantAccessIDs";
+import type { Access } from 'payload'
+
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const tenantRead: Access = (args) => {
   const req = args.req
@@ -13,11 +14,11 @@ export const tenantRead: Access = (args) => {
   // Allow public tenants to be read by anyone
   const publicConstraint = {
     public: {
-      equals: true
-    }
+      equals: true,
+    },
   }
 
-  // If a user has tenant ID access, 
+  // If a user has tenant ID access,
   // return constraint to allow them to read those tenants
   if (tenantIDs.length) {
     return {
@@ -25,10 +26,10 @@ export const tenantRead: Access = (args) => {
         publicConstraint,
         {
           id: {
-            in: tenantIDs
-          }
-        }
-      ]
+            in: tenantIDs,
+          },
+        },
+      ],
     }
   }
 

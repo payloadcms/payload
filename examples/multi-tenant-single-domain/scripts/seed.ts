@@ -3,10 +3,12 @@
  * and uses the Payload Local API to query the database.
  */
 
+import type { Payload } from 'payload';
+
 import { getPayload } from 'payload'
 import { importConfig } from 'payload/node'
 
-async function findOrCreateTenant({ payload, data }) {
+async function findOrCreateTenant({ data, payload }: { data: any; payload: Payload }) {
   const tenantsQuery = await payload.find({
     collection: 'tenants',
     where: {
@@ -24,7 +26,7 @@ async function findOrCreateTenant({ payload, data }) {
   })
 }
 
-async function findOrCreateUser({ payload, data }) {
+async function findOrCreateUser({ data, payload }: { data: any; payload: Payload }) {
   const usersQuery = await payload.find({
     collection: 'users',
     where: {
@@ -42,7 +44,7 @@ async function findOrCreateUser({ payload, data }) {
   })
 }
 
-async function findOrCreatePage({ payload, data }) {
+async function findOrCreatePage({ data, payload }: { data: any; payload: Payload }) {
   const pagesQuery = await payload.find({
     collection: 'pages',
     where: {
@@ -65,113 +67,113 @@ async function run() {
   const payload = await getPayload({ config: awaitedConfig })
 
   const tenant1 = await findOrCreateTenant({
-    payload,
     data: {
       name: 'Tenant 1',
       slug: 'tenant-1',
     },
+    payload,
   })
 
   const tenant2 = await findOrCreateTenant({
-    payload,
     data: {
       name: 'Tenant 2',
       slug: 'tenant-2',
       public: true,
     },
+    payload,
   })
 
   const tenant3 = await findOrCreateTenant({
-    payload,
     data: {
       name: 'Tenant 3',
       slug: 'tenant-3',
     },
+    payload,
   })
 
-  const superAdmin = await findOrCreateUser({
-    payload,
+  await findOrCreateUser({
     data: {
       email: 'demo@payloadcms.com',
       password: 'demo',
       roles: ['super-admin'],
     },
+    payload,
   })
 
-  const tenantAdmin1 = await findOrCreateUser({
-    payload,
+  await findOrCreateUser({
     data: {
       email: 'tenant1@payloadcms.com',
       password: 'test',
       tenants: [
         {
-          tenant: tenant1.id,
           roles: ['super-admin'],
+          tenant: tenant1.id,
         },
       ],
       username: 'tenant1',
     },
+    payload,
   })
 
-  const tenantAdmin2 = await findOrCreateUser({
-    payload,
+  await findOrCreateUser({
     data: {
       email: 'tenant2@payloadcms.com',
       password: 'test',
       tenants: [
         {
-          tenant: tenant2.id,
           roles: ['super-admin'],
+          tenant: tenant2.id,
         },
       ],
       username: 'tenant2',
     },
+    payload,
   })
 
-  const multiAdmin = await findOrCreateUser({
-    payload,
+  await findOrCreateUser({
     data: {
       email: 'multi-admin@payloadcms.com',
       password: 'test',
       tenants: [
         {
-          tenant: tenant1.id,
           roles: ['super-admin'],
+          tenant: tenant1.id,
         },
         {
-          tenant: tenant2.id,
           roles: ['super-admin'],
+          tenant: tenant2.id,
         },
       ],
       username: 'tenant3',
     },
+    payload,
   })
 
-  const page1 = await findOrCreatePage({
-    payload,
+  await findOrCreatePage({
     data: {
-      title: 'Page for Tenant 1',
+      slug: 'home',
       tenant: tenant1.id,
-      slug: 'home',
+      title: 'Page for Tenant 1',
     },
+    payload,
   })
 
-  const page2 = await findOrCreatePage({
-    payload,
+  await findOrCreatePage({
     data: {
-      title: 'Page for Tenant 2',
+      slug: 'home',
       tenant: tenant2.id,
-      slug: 'home',
+      title: 'Page for Tenant 2',
     },
+    payload,
   })
 
-  const page3 = await findOrCreatePage({
-    payload,
+  await findOrCreatePage({
     data: {
-      title: 'Page for Tenant 3',
-      tenant: tenant3.id,
       slug: 'home',
+      tenant: tenant3.id,
+      title: 'Page for Tenant 3',
     },
+    payload,
   })
 
   process.exit(0)

@@ -1,21 +1,22 @@
+import type { Where } from 'payload'
+
+import configPromise from '@payload-config'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { headers as getHeaders } from 'next/headers.js'
+import { notFound, redirect } from 'next/navigation'
 import React from 'react'
 
-import { headers as getHeaders } from 'next/headers.js'
-import type { Where } from 'payload'
-import { notFound, redirect } from 'next/navigation'
 import { RenderPage } from '../../../components/RenderPage'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@payload-config'
 
-export default async function Page({ params }: { params: { tenant: string; slug?: string[] } }) {
+export default async function Page({ params }: { params: { slug?: string[]; tenant: string } }) {
   const headers = getHeaders()
   const payload = await getPayloadHMR({ config: configPromise })
   const { user } = await payload.auth({ headers })
 
   const tenantsQuery = await payload.find({
     collection: 'tenants',
-    user,
     overrideAccess: false,
+    user,
     where: {
       slug: {
         equals: params.tenant,
@@ -63,8 +64,8 @@ export default async function Page({ params }: { params: { tenant: string; slug?
 
   const pageQuery = await payload.find({
     collection: 'pages',
-    user,
     overrideAccess: false,
+    user,
     where: {
       and: [
         {
