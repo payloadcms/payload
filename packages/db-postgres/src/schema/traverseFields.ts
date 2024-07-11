@@ -8,6 +8,7 @@ import {
   PgNumericBuilder,
   PgUUIDBuilder,
   PgVarcharBuilder,
+  bigint,
   boolean,
   foreignKey,
   index,
@@ -31,8 +32,10 @@ import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
 import { createTableName } from './createTableName.js'
 import { idToUUID } from './idToUUID.js'
+import { numberColumnMap } from './numberColumnMap.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical.js'
+import { withDefault } from './withDefault.js'
 
 type Args = {
   adapter: PostgresAdapter
@@ -108,6 +111,10 @@ export const traverseFields = ({
     let targetIndexes = indexes
 
     if (fieldAffectsData(field)) {
+      if ('dbStore' in field) {
+        if (!field.dbStore) return
+      }
+
       columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
         field.name,
       )}`
@@ -120,7 +127,8 @@ export const traverseFields = ({
         (field.localized || forceLocalized) &&
         field.type !== 'array' &&
         field.type !== 'blocks' &&
-        (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field))
+        (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field)) &&
+        (('dbJsonColumn' in field && field.dbJsonColumn !== true) || !('dbJsonColumn' in field))
       ) {
         hasLocalizedField = true
         targetTable = localesColumns
@@ -152,6 +160,11 @@ export const traverseFields = ({
     switch (field.type) {
       case 'text': {
         if (field.hasMany) {
+          if (field.dbJsonColumn) {
+            targetTable[fieldName] = withDefault(jsonb(columnName), field)
+            break
+          }
+
           if (field.localized) {
             hasLocalizedManyTextField = true
           }
@@ -168,19 +181,24 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = varchar(columnName)
+          targetTable[fieldName] = withDefault(varchar(columnName), field)
         }
         break
       }
       case 'email':
       case 'code':
       case 'textarea': {
-        targetTable[fieldName] = varchar(columnName)
+        targetTable[fieldName] = withDefault(varchar(columnName), field)
         break
       }
 
       case 'number': {
         if (field.hasMany) {
+          if (field.dbJsonColumn) {
+            targetTable[fieldName] = withDefault(jsonb(columnName), field)
+            break
+          }
+
           if (field.localized) {
             hasLocalizedManyNumberField = true
           }
@@ -197,23 +215,29 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = numeric(columnName)
+          targetTable[fieldName] = withDefault(
+            numberColumnMap[field.dbType ?? 'numeric'](fieldName),
+            field,
+          )
         }
         break
       }
 
       case 'richText':
       case 'json': {
-        targetTable[fieldName] = jsonb(columnName)
+        targetTable[fieldName] = withDefault(jsonb(columnName), field)
         break
       }
 
       case 'date': {
-        targetTable[fieldName] = timestamp(columnName, {
-          mode: 'string',
-          precision: 3,
-          withTimezone: true,
-        })
+        targetTable[fieldName] = withDefault(
+          timestamp(columnName, {
+            mode: 'string',
+            precision: 3,
+            withTimezone: true,
+          }),
+          field,
+        )
         break
       }
 
@@ -223,6 +247,11 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
+        if ('hasMany' in field && field.hasMany && field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         const enumName = createTableName({
           adapter,
           config: field,
@@ -309,17 +338,22 @@ export const traverseFields = ({
             }),
           )
         } else {
-          targetTable[fieldName] = adapter.enums[enumName](fieldName)
+          targetTable[fieldName] = withDefault(adapter.enums[enumName](fieldName), field)
         }
         break
       }
 
       case 'checkbox': {
-        targetTable[fieldName] = boolean(columnName)
+        targetTable[fieldName] = withDefault(boolean(columnName), field)
         break
       }
 
       case 'array': {
+        if (field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         const arrayTableName = createTableName({
@@ -429,6 +463,11 @@ export const traverseFields = ({
       }
 
       case 'blocks': {
+        if (field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
@@ -593,6 +632,13 @@ export const traverseFields = ({
           break
         }
 
+        if (field.dbJsonColumn) {
+          if (field.dbJsonColumn) {
+            targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+            break
+          }
+        }
+
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         const {
@@ -717,6 +763,11 @@ export const traverseFields = ({
 
       case 'relationship':
       case 'upload':
+        if ('dbJsonColumn' in field && field.dbJsonColumn) {
+          targetTable[fieldName] = jsonb(fieldName)
+          break
+        }
+
         if (Array.isArray(field.relationTo)) {
           field.relationTo.forEach((relation) => relationships.add(relation))
         } else if (field.type === 'relationship' && field.hasMany) {

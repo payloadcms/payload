@@ -31,6 +31,8 @@ export const traverseFields = ({
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
+    if ('dbStore' in field && !field.dbStore) return
+
     // handle simple relationship
     if (
       depth > 0 &&
@@ -83,6 +85,7 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
+          if (field.dbJsonColumn) break
           const withArray: Result = {
             columns: {
               _parentID: false,
@@ -124,6 +127,7 @@ export const traverseFields = ({
         }
 
         case 'select': {
+          if (field.dbJsonColumn) break
           if (field.hasMany) {
             const withSelect: Result = {
               columns: {
@@ -141,6 +145,7 @@ export const traverseFields = ({
         }
 
         case 'blocks':
+          if (field.dbJsonColumn) break
           field.blocks.forEach((block) => {
             const blockKey = `_blocks_${block.slug}`
 
@@ -181,6 +186,7 @@ export const traverseFields = ({
           break
 
         case 'group':
+          if (field.dbJsonColumn) break
           traverseFields({
             _locales,
             adapter,
