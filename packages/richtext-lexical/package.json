@@ -67,9 +67,10 @@
     "@types/node": "20.12.5",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
-    "esbuild": "^0.21.4",
-    "esbuild-sass-plugin": "^3.3.0",
-    "payload": "workspace:*"
+    "esbuild": "0.23.0",
+    "esbuild-sass-plugin": "3.3.1",
+    "payload": "workspace:*",
+    "swc-plugin-transform-remove-imports": "1.14.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",

@@ -128,7 +128,7 @@
     "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "^0.21.4",
+    "esbuild": "0.23.0",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"

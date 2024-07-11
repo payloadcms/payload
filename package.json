@@ -146,7 +146,6 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
-    "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempy": "^1.0.1",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
