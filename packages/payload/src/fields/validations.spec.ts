@@ -1,5 +1,6 @@
-import type { ValidateOptions } from './config/types.js'
 import { jest } from '@jest/globals'
+
+import type { ValidateOptions } from './config/types.js'
 
 import { number, password, point, relationship, select, text, textarea } from './validations.js'
 
@@ -8,9 +9,7 @@ const t = jest.fn((string) => string)
 let options: ValidateOptions<any, any, any> = {
   data: undefined,
   operation: 'create',
-  siblingData: undefined,
   req: {
-    t,
     context: {},
     payload: {
       config: {
@@ -20,7 +19,9 @@ let options: ValidateOptions<any, any, any> = {
         },
       },
     },
+    t,
   },
+  siblingData: undefined,
 }
 
 describe('Field Validations', () => {
@@ -216,32 +217,32 @@ describe('Field Validations', () => {
 
   describe('relationship', () => {
     const relationCollection = {
+      slug: 'relation',
       fields: [
         {
           name: 'id',
           type: 'text',
         },
       ],
-      slug: 'relation',
     }
 
     const relationshipOptions = {
       ...options,
+      relationTo: 'relation',
       req: {
         ...options.req,
         payload: {
           ...options.req.payload,
-          config: {
-            collections: [relationCollection],
-          },
           collections: {
             relation: {
               config: relationCollection,
             },
           },
+          config: {
+            collections: [relationCollection],
+          },
         },
       },
-      relationTo: 'relation',
     }
     it('should handle required', async () => {
       const val = undefined
@@ -292,8 +293,8 @@ describe('Field Validations', () => {
   describe('select', () => {
     const selectOptions = {
       ...options,
-      options: ['one', 'two', 'three'],
       type: 'select',
+      options: ['one', 'two', 'three'],
     }
     const optionsRequired = {
       ...selectOptions,

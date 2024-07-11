@@ -8,9 +8,9 @@ type LeafContextType = {
   attributes: Record<string, unknown>
   children: React.ReactNode
   editorRef: React.MutableRefObject<HTMLDivElement>
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     name: string
-  }
+  } & FormFieldBase
   leaf: string
   path: string
   schemaPath: string
@@ -27,9 +27,9 @@ const LeafContext = React.createContext<LeafContextType>({
 })
 
 export const LeafProvider: React.FC<
-  LeafContextType & {
+  {
     result: React.ReactNode
-  }
+  } & LeafContextType
 > = (props) => {
   const { children, result, ...rest } = props
 

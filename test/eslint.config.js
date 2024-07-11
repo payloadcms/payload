@@ -6,7 +6,7 @@ import playwright from 'eslint-plugin-playwright'
 let FlatConfig
 
 /** @type {FlatConfig[]} */
-export const index = [
+export const testEslintConfig = [
   ...rootEslintConfig,
   {
     languageOptions: {
@@ -77,4 +77,4 @@ export const index = [
   },
 ]
 
-export default index
+export default testEslintConfig

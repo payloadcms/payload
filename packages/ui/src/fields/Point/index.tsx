@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { ClientValidate } from 'payload'
 
@@ -20,13 +19,13 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
-export type PointFieldProps = FormFieldBase & {
+export type PointFieldProps = {
   name?: string
   path?: string
   placeholder?: string
   step?: number
   width?: string
-}
+} & FormFieldBase
 
 export const _PointField: React.FC<PointFieldProps> = (props) => {
   const {

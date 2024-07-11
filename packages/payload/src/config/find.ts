@@ -73,7 +73,6 @@ export const findConfig = (): string => {
       ? [configPath, outPath, srcPath, rootPath]
       : [configPath, srcPath, rootPath]
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const searchPath of searchPaths) {
     if (!searchPath) continue
 

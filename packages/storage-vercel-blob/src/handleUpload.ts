@@ -5,10 +5,10 @@ import path from 'path'
 
 import type { VercelBlobStorageOptions } from './index.js'
 
-type HandleUploadArgs = Omit<VercelBlobStorageOptions, 'collections'> & {
+type HandleUploadArgs = {
   baseUrl: string
   prefix?: string
-}
+} & Omit<VercelBlobStorageOptions, 'collections'>
 
 export const getHandleUpload = ({
   access = 'public',

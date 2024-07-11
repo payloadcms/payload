@@ -1,19 +1,19 @@
 import reactRules from './rules/react.mjs'
 import reactA11yRules from './rules/react-a11y.mjs'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
-import react from "@eslint-react/eslint-plugin";
+import react from '@eslint-react/eslint-plugin'
 import reactHooks from 'eslint-plugin-react-hooks'
-import globals from 'globals';
+import globals from 'globals'
 import { deepMerge } from '../../deepMerge.js'
 
 /** @type {import('eslint').Linter.FlatConfig} */
 export const index = deepMerge(
-  react.configs["recommended-type-checked"],
+  react.configs['recommended-type-checked'],
   {
-    rules: reactRules
+    rules: reactRules,
   },
   {
-    rules: reactA11yRules
+    rules: reactA11yRules,
   },
   {
     languageOptions: {
@@ -23,8 +23,8 @@ export const index = deepMerge(
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
-        }
-      }
+        },
+      },
     },
     plugins: {
       'jsx-a11y': jsxA11y,
@@ -35,6 +35,6 @@ export const index = deepMerge(
         version: 'detect',
       },
     },
-  }
+  },
 )
 export default index

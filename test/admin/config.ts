@@ -86,14 +86,8 @@ export default buildConfigWithDefaults({
         },
       },
     },
-    routes: customAdminRoutes,
     meta: {
-      titleSuffix: '- Custom CMS',
       description: 'This is a custom meta description',
-      openGraph: {
-        title: 'This is a custom OG title',
-        description: 'This is a custom OG description',
-      },
       icons: [
         {
           type: 'image/png',
@@ -107,7 +101,13 @@ export default buildConfigWithDefaults({
           url: customFaviconLight.src,
         },
       ],
+      openGraph: {
+        description: 'This is a custom OG description',
+        title: 'This is a custom OG title',
+      },
+      titleSuffix: '- Custom CMS',
     },
+    routes: customAdminRoutes,
   },
   collections: [
     UploadCollection,

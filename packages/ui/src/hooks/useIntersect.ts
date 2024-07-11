@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-shadow */
+
 import { useEffect, useRef, useState } from 'react'
 
 type Intersect = [

@@ -17,10 +17,10 @@ const RichTextEditor = lazy(() =>
 )
 
 export const RichTextField: React.FC<
-  FormFieldBase & {
+  {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
 > = (props) => {
   const { richTextComponentMap } = props
 

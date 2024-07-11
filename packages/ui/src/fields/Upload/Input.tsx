@@ -22,7 +22,7 @@ import './index.scss'
 
 const baseClass = 'upload'
 
-export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
+export type UploadInputProps = {
   api?: string
   collection?: ClientCollectionConfig
   customUploadActions?: React.ReactNode[]
@@ -32,7 +32,7 @@ export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
   serverURL?: string
   showError?: boolean
   value?: string
-}
+} & Omit<UploadFieldProps, 'filterOptions'>
 
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {

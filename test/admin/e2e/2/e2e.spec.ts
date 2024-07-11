@@ -67,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -267,8 +267,8 @@ describe('admin2', () => {
         const tableRows = page.locator(tableRowLocator)
 
         await expect(tableRows).toHaveCount(1)
-        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
-        expect(firstId).toEqual(`ID: ${id}`)
+        const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
+        await expect(firstId).toHaveText(`ID: ${id}`)
 
         // Remove filter
         await page.locator('.condition__actions-remove').click()

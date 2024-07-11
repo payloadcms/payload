@@ -1,7 +1,6 @@
-import type { SanitizedConfig } from 'payload'
+import type { type Payload, SanitizedConfig } from 'payload'
 
 import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { type Payload } from 'payload'
 
 import { NextRESTClient } from './NextRESTClient.js'
 
