@@ -18,7 +18,7 @@
 }
 
 if (process.env.CI) {
-  baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  //baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
 }
 
 export default baseJestConfig
