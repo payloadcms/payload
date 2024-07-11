@@ -14,7 +14,7 @@ import { getValidTemplates } from './templates.js'
 describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
-    jest.spyOn(console, 'log').mockImplementation()
+    console.log = jest.fn()
   })
 
   beforeEach(() => {

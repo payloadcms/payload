@@ -22,7 +22,7 @@ export const index = {
   'jest/prefer-called-with': 'error',
   'jest/prefer-expect-assertions': 'off',
   'jest/prefer-hooks-on-top': 'error',
-  'jest/prefer-spy-on': 'error',
+  'jest/prefer-spy-on': 'off', // broken in packages/create-payload-app/src/lib/create-project.spec.ts
   'jest/prefer-strict-equal': 'warn',
   'jest/prefer-to-contain': 'error',
   'jest/prefer-to-have-length': 'error',
