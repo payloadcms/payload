@@ -32,7 +32,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.11.3",
+    "@google-cloud/storage": "^7.7.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {

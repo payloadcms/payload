@@ -44,7 +44,7 @@
     "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
-    "@libsql/client": "^0.5.6",
+    "@libsql/client": "^0.5.2",
     "console-table-printer": "2.11.2",
     "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
@@ -58,7 +58,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "^0.21.5",
+    "esbuild": "^0.21.4",
     "payload": "workspace:*"
   },
   "peerDependencies": {
