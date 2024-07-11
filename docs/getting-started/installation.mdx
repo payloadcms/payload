@@ -27,7 +27,7 @@ To quickly scaffold a new Payload app in the fastest way possible, you can use [
 npx create-payload-app@beta
 ```
 
-Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside. You can now start to [configure your application](../configuration/overview).
+Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside. You can then start [configuring your application](../configuration/overview).
 
 ## Adding to an existing app
 
@@ -119,10 +119,10 @@ export default withPayload(nextConfig) // highlight-line
 
 <Banner type="warning">
   <strong>Important:</strong>
-  Payload is a fully ESM project, and that means the `withPayload` function is an EcmaScript module.
+  Payload is a fully ESM project, and that means the `withPayload` function is an ECMAScript module.
 </Banner>
 
-To import it, you need to make sure your `next.config` file is set up to use ESM.
+To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
 
 You can do this in one of two ways:
 
@@ -133,9 +133,9 @@ In either case, all `require`s and `export`s in your `next.config` file will nee
 
 #### 4. Create a Payload Config and add it to your TypeScript config
 
-Finally, you need to create a barebones Payload Config.
+Finally, you need to create a [Payload Config](../configuration/overview). Generally the Payload Config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`.
 
-Generally the Payload Config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`. Here's what Payload needs at a bare minimum:
+Here's what Payload needs at a bare minimum:
 
 ```ts
 import sharp from 'sharp'
@@ -167,7 +167,7 @@ export default buildConfig({
 
 Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
-Once you have your config created, update your `tsconfig` to include a `path` that points to your config:
+Once you have a Payload Config, update your `tsconfig` to include a `path` that points to it:
 
 ```json
 {
