@@ -7,8 +7,12 @@ import { deepMerge } from '../../deepMerge.js'
 
 /** @type {import('eslint').Linter.FlatConfig} */
 export const index = deepMerge(
-  jestRules,
-  jestDomRules,
+  {
+    rules: jestRules
+  },
+  {
+    rules: jestDomRules
+  },
   {
     plugins: {
       jest,
