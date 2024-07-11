@@ -1,23 +1,20 @@
 import reactRules from './rules/react.mjs'
 import reactA11yRules from './rules/react-a11y.mjs'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
-import eslintPluginReactConfig from 'eslint-plugin-react/configs/recommended.js'
-import eslintPluginReact from 'eslint-plugin-react'
+import react from "@eslint-react/eslint-plugin";
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals';
-import { fixupPluginRules } from '@eslint/compat'
 import { deepMerge } from '../../deepMerge.js'
 
 /** @type {import('eslint').Linter.FlatConfig} */
 export const index = deepMerge(
+  react.configs["recommended-type-checked"],
   {
-    rules: eslintPluginReact.configs.recommended.rules
+    rules: reactRules
   },
   {
-    rules: eslintPluginReactConfig.rules // Only take rules from the config, not plugins, as plugins there are on the old eslint v8 format => add react-hooks plugin myself below
+    rules: reactA11yRules
   },
-  reactRules,
-  reactA11yRules,
   {
     languageOptions: {
       globals: {
@@ -31,7 +28,6 @@ export const index = deepMerge(
     },
     plugins: {
       'jsx-a11y': jsxA11y,
-      react: fixupPluginRules(eslintPluginReact),
       'react-hooks': reactHooks,
     },
     settings: {

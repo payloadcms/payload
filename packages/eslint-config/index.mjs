@@ -52,12 +52,7 @@ const baseRules = {
   'payload/no-jsx-import-statements': 'error',
 }
 
-const reactRules = {
-  'react/no-unused-prop-types': 'off',
-  'react/prop-types': 'off',
-  'react/require-default-props': 'off',
-  'react/destructuring-assignment': 'warn',
-  'react/no-unescaped-entities': 'warn',
+const reactA11yRules = {
   'jsx-a11y/anchor-is-valid': 'warn',
   'jsx-a11y/control-has-associated-label': 'warn',
   'jsx-a11y/no-static-element-interactions': 'warn',
@@ -169,7 +164,7 @@ export const rootEslintConfig = [
         rules: {
           ...baseRules,
           ...typescriptRules,
-          ...reactRules,
+          ...reactA11yRules,
         },
       }
     ),
