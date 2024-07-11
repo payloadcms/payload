@@ -41,7 +41,7 @@ And return the following values:
 </Banner>
 
 <Banner type="info">
-  It is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../getting-started/concepts#depth) for more information.
+  It is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../queries/depth) for more information.
 </Banner>
 
 ## Frameworks
@@ -273,7 +273,7 @@ If you are using relationships or uploads in your front-end application, and you
 
 ### Relationships and/or uploads disappear after editing a document
 
-It is possible that either you are setting an improper [`depth`](../getting-started/concepts#depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
+It is possible that either you are setting an improper [`depth`](../queries/depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
 
 ```tsx
 // Your initial request

@@ -1,0 +1,55 @@
+---
+title: Sort
+label: Sort
+order: 20
+desc: Payload sort allows you to order your documents by a field in ascending or descending order.
+keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload `find` queries support a `sort` parameter through all APIs. Pass the `name` of a top-level field to sort by that field in ascending order. Prefix the name of the field with a minus symbol ("-") to sort in descending order.
+
+Because sorting is handled by the database, the field you wish to sort on must be stored in the database to work; not a [virtual field](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges). It is recommended to enable indexing for the fields where sorting is used.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  A minus symbol ("-") before the field name will sort in descending order. Omitting the minus symbol will sort in ascending order.
+</Banner>
+
+## Local API
+
+To sort Documents in the [Local API](../local-api/overview), you can use the `sort` option in your query:
+
+```ts
+const getPosts = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+    sort: '-createdAt', // highlight-line
+  })
+
+  return posts
+}
+```
+
+## REST API
+
+To sort in the [REST API](../rest-api/overview), you can use the `sort` parameter in your query:
+
+```ts
+fetch('https://localhost:3000/api/posts?sort=-createdAt') // highlight-line
+  .then((response) => response.json())
+  .then((data) => console.log(data))
+```
+
+## GraphQL API
+
+To sort in the [GraphQL API](../graphql/overview), you can use the `sort` parameter in your query:
+
+```ts
+query {
+  Posts(sort: "-createdAt") {
+    docs {
+      color
+    }
+  }
+}
+```
