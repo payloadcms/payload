@@ -10,9 +10,9 @@ Payload is based around a small and intuitive set of concepts. Before starting t
 
 ## Config
 
-<Banner type="info">The Payload config is where you configure everything that Payload does.</Banner>
+<Banner type="info">The Payload Config is where you configure everything that Payload does.</Banner>
 
-By default, the Payload config lives in the root folder of your code and is named `payload.config.ts`, but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
+By default, the Payload Config lives in the root folder of your code and is named `payload.config.ts`, but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
 
 ## Collections
 
@@ -138,7 +138,7 @@ You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few p
 
 If you don't use GraphQL, you can delete those files! But if you do, you'll find that GraphQL is a first-class API in Payload. Either way, the overhead of GraphQL is completely constrained to these endpoints, and will not slow down / affect Payload outside of those endpoints themselves.
 
-For more docs on GraphQL, [click here](/docs/beta/graphql/overview). 
+For more docs on GraphQL, [click here](/docs/beta/graphql/overview).
 
 ## Depth
 
@@ -269,14 +269,14 @@ Payload is abstracted into a set of dedicated packages, and it's a good idea to 
 <Banner type="success">
   <strong>Note:</strong>
   <br/>
-  Version numbers of all official Payload packages are kept in sync - and you should always make sure that you use matching versions for all official Payload packages. 
+  Version numbers of all official Payload packages are kept in sync - and you should always make sure that you use matching versions for all official Payload packages.
 </Banner>
 
 `payload`
 
 The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers - it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete`. It executes access control, hooks, validation, and more.
 
-Payload itself is extremely compact, and can be used in any Node environment. As long as you have `payload` installed and you have access to your Payload config, you can query and mutate your database directly without going through an unnecessary HTTP layer.
+Payload itself is extremely compact, and can be used in any Node environment. As long as you have `payload` installed and you have access to your Payload Config, you can query and mutate your database directly without going through an unnecessary HTTP layer.
 
 Payload also contains all TypeScript definitions, which can be imported from `payload` directly.
 
@@ -288,7 +288,7 @@ import { CollectionConfig, Field, GlobalConfig, Config } from 'payload'
 
 `@payloadcms/next`
 
-Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the admin panel and the entire HTTP layer (REST, GraphQL) that Payload exposes. 
+Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the Admin Panel and the entire HTTP layer (REST, GraphQL) that Payload exposes.
 
 `@payloadcms/graphql`
 
@@ -296,7 +296,7 @@ All of Payload's GraphQL functionality is abstracted into a separate package. Pa
 
 `@payloadcms/ui`
 
-This is the UI library that Payload's admin panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
+This is the UI library that Payload's Admin Panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
 
 `@payloadcms/db-postgres`, `@payloadcms/db-mongodb`
 

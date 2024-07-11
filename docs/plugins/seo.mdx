@@ -8,9 +8,9 @@ keywords: plugins, seo, meta, search, engine, ranking, google
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
 
-This plugin allows you to easily manage SEO metadata for your application from within your admin panel. When enabled on your collections and globals, it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
+This plugin allows you to easily manage SEO metadata for your application from within your [Admin Panel](../admin/overview). When enabled on your [Collections](../configuration/collections) and [Globals](../configuration/globals), it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
 
-As users are editing documents within the admin panel, they have the option to "auto-generate" these fields. When clicked, this plugin will execute your own custom functions that re-generate the title, description, and image. This way you can build your own SEO writing assistance directly into your application. For example, you could append your site name onto the page title, or use the document's excerpt field as the description, or even integrate with some third-party API to generate the image using AI.
+As users are editing documents within the Admin Panel, they have the option to "auto-generate" these fields. When clicked, this plugin will execute your own custom functions that re-generate the title, description, and image. This way you can build your own SEO writing assistance directly into your application. For example, you could append your site name onto the page title, or use the document's excerpt field as the description, or even integrate with some third-party API to generate the image using AI.
 
 To help you visualize what your page might look like in a search engine, a preview is rendered on page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
 
@@ -42,7 +42,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
 import { buildConfig } from 'payload/config';
@@ -205,7 +205,7 @@ seoPlugin({
 There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
 
 <Banner type="info">
-  You will still need to configure the plugin in the Payload config in order to configure the generation functions.
+  You will still need to configure the plugin in the Payload Config in order to configure the generation functions.
   Since these fields are imported and used directly, they don't have access to the plugin config so they may need additional arguments to work the same way.
 </Banner>
 

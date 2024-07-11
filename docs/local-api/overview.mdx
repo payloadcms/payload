@@ -55,9 +55,9 @@ import config from '@payload-config'
 const payload = await getPayloadHMR({ config })
 ```
 
-You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.) 
+You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.)
 
-This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
 
 If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
 
@@ -73,7 +73,7 @@ const config = await importConfig('./payload.config.ts')
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. However, when you import your Payload config, you need to make sure that you can import it safely. 
+Both options function in exactly the same way outside of one having HMR support and the other not. However, when you import your Payload Config, you need to make sure that you can import it safely.
 
 For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
 

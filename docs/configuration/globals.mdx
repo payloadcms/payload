@@ -6,7 +6,11 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
+Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. You can define as many Globals as your application needs. Each Global saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define.
+
+Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
+
+Globals will automatically generate their own [Local API](../local-api/overview). If your application is using the [Admin Panel](../admin/overview), you will also get a fully-featured [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) without any additional configuration.
 
 To define a Global Config, use the `globals` property in your [Payload Config](./overview):
 
@@ -53,7 +57,7 @@ export const Nav: GlobalConfig = {
 
 <Banner type="success">
   <strong>Reminder:</strong>
-  For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub.
+  For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub, or the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
 </Banner>
 
 The following options are available:
@@ -68,7 +72,7 @@ The following options are available:
 | **`endpoints`**    | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                  |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                          |
-| **`hooks`**        | Entry points to "tie in" to collection actions at specific points. [More details](../hooks/overview#global-hooks).  |
+| **`hooks`**        | Entry point for Hooks. [More details](../hooks/overview#global-hooks).  |
 | **`label`**        | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                                                                                                                      |
 | **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.    |
@@ -76,20 +80,23 @@ The following options are available:
 
 _\* An asterisk denotes that a property is required._
 
+### Fields
+
+Fields define the schema of the Global. To learn more, go to the [Fields](../fields/overview) documentation.
 
 ### Access Control
 
-As with Collections, you can specify extremely granular access control (what users can do with this Global) on a Global-by-Global basis. However, Globals only have `update` and `read` access control due to their nature of only having one document. To learn more, go to the [Access Control](../access-control/overview) docs.
+Access Control determines what a user can and cannot do with a Document. To learn more, go to the [Access Control](../access-control/overview) docs.
 
 ### Hooks
 
-Globals also fully support a smaller subset of Hooks. To learn more, go to the [Hooks](../hooks/overview) documentation.
+Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### Admin Options
 
 You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis.
 
-To configure Collection Admin Options, use the `admin` property in your Global Config:
+To configure Admin Options for Globals, use the `admin` property in your Global Config:
 
 ```ts
 import { GlobalConfig } from 'payload'
