@@ -445,6 +445,11 @@ export type CollectionConfig = {
     plural?: Record<string, string> | string
     singular?: Record<string, string> | string
   }
+  /**
+   * Schema configuration options for this collection
+   * @WARNING: If you change this property with existing data, you may need to handle the existing data in your database by using migrations
+   */
+  schemaOptions?: Record<string, any>
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
