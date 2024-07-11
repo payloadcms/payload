@@ -34,7 +34,7 @@ that will be called if for some reason the migration fails to complete successfu
 all changes that you attempt to make within the migration, and the `down` should ideally revert any changes you make.
 
 For an added level of safety, migrations should leverage Payload [transactions](/docs/database/transactions). Migration
-functions should make use of the `req` by adding it to the arguments of your payload local API calls such
+functions should make use of the `req` by adding it to the arguments of your Payload Local API calls such
 as `payload.create` and database adapter methods like `payload.db.create`.
 
 Here is an example migration file:

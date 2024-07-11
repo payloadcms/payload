@@ -134,7 +134,7 @@ Each lexical node has a `version` property which is saved in the database. Every
 
 The problem is, this migration only happens when you open the editor, modify the richText field (so that the field's `setValue` function is called) and save the document. Until you do that for all documents, some documents will still have the old data.
 
-To solve this, we export an `upgradeLexicalData` function which goes through every single document in your payload app and re-saves it, if it has a lexical editor. This way, the data is automatically converted to the new format, and that automatic conversion gets applied to every single document in your app.
+To solve this, we export an `upgradeLexicalData` function which goes through every single document in your Payload app and re-saves it, if it has a lexical editor. This way, the data is automatically converted to the new format, and that automatic conversion gets applied to every single document in your app.
 
 IMPORTANT: Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
 
