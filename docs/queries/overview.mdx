@@ -6,51 +6,32 @@ desc: Payload provides a querying language through all APIs, allowing you to fil
 keywords: query, documents, overview, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload provides an extremely granular querying language through all APIs. Each API takes the same syntax and fully supports all options.
+In Payload, "querying" means filtering or searching through documents within a [Collection](../configuration/collections). The querying language in Payload is designed to be simple and powerful, allowing you to filter documents with extreme precision.
 
-<Banner>
-  <strong>
-    Here, "querying" relates to filtering or searching through documents within a Collection.
-  </strong>
-  You can build queries to pass to Find operations as well as to [restrict which documents certain
-  users can [access](/docs/access-control/overview) via access control functions.
-</Banner>
+Payload provides three common APIs for querying your data:
 
-## Simple queries
+- [Local API](/docs/local-api/overview) - Extremely fast, direct-to-database access
+- [REST API](/docs/rest-api/overview) - Standard HTTP endpoints for querying and mutating data
+- [GraphQL](/docs/graphql/overview) - A full GraphQL API with a GraphQL Playground
 
-For example, say you have a collection as follows:
+Each of these APIs share the same underlying querying language, and fully support all of the same features. This means that you can learn Payload's querying language once, and use it across any of the APIs that you might use.
+
+To query your documents, use the `where` parameter on the `find` operation. The `where` parameter accepts [Operators](#operators) that you can use to filter your documents, such as:
 
 ```ts
-import { CollectionConfig } from 'payload'
-
-export const Post: CollectionConfig = {
-  slug: 'posts',
-  fields: [
-    {
-      name: 'color',
-      type: 'select',
-      options: ['mint', 'dark-gray', 'white'],
-    },
-    {
-      name: 'featured',
-      type: 'checkbox',
-    },
-  ],
-}
-```
-
-You may eventually have a lot of documents within this Collection. If you wanted to find only documents with `color` equal to `mint`, you could write a query as follows:
-
-```js
 const query = {
   color: {
-    // property name to filter on
-    equals: 'mint', // operator to use and value to compare against
+    equals: 'blue',
   },
 }
 ```
 
-The above example demonstrates a simple query but you can get much more complex.
+_The exact query syntax will depend on the API you are using, but the concepts are the same across all APIs._
+
+<Banner>
+  <strong>Tip:</strong>
+  You can also use Queries to restrict which documents certain users can access within [Access Control](../access-control/overview) functions.
+</Banner>
 
 ## Operators
 
