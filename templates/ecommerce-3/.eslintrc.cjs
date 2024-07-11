@@ -32,7 +32,7 @@ module.exports = {
     {
       files: ['*.tsx'],
       rules: {
-        'no-restricted-exports': 'off',
+        'no-restricted-exports': 'error',
       },
     },
   ],
