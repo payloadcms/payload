@@ -2,8 +2,8 @@ import React, { Fragment } from 'react'
 
 import type { Props } from './types'
 
-import { Image } from './Image'
-import { Video } from './Video'
+import { ImageMedia } from './ImageMedia'
+import { VideoMedia } from './VideoMedia'
 
 export const Media: React.FC<Props> = (props) => {
   const { className, htmlElement = 'div', resource } = props
@@ -19,7 +19,7 @@ export const Media: React.FC<Props> = (props) => {
           }
         : {})}
     >
-      {isVideo ? <Video {...props} /> : <Image {...props} />}
+      {isVideo ? <VideoMedia {...props} /> : <ImageMedia {...props} />}
     </Tag>
   )
 }
