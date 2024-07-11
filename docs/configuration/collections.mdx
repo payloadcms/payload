@@ -6,11 +6,9 @@ desc: Structure your Collections for your needs by defining fields, adding slugs
 keywords: collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload Collections are defined through configs of their own. You can define as many Collections as your application needs. Each Collection will automatically scaffold a new collection / table in your database of choice, based on fields that you define.
+A Collection is a group of records, called Documents, that share a schema. You can define as many Collections as your application needs. Each Collection will automatically scaffold a new collection or table in your [Database](../database/overview) based on the [Fields](../fields/overview) that you define.
 
-## Config Options
-
-To define a Collection Config, use the `collection` property in your [Payload Config](./overview).
+To define a Collection Config, use the `collection` property in your [Payload Config](./overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -18,12 +16,14 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   collections: [ // highlight-line
-    // Your Collection Configs go here
+    // Your Collections go here
   ],
 })
 ```
 
-It's often best practice to write your Collections in separate files and then import them into the main Payload Config.
+## Config Options
+
+It's often best practice to write your Collections in separate files and then import them into the main [Payload Config](../overview).
 
 Here is what a simple Collection Config might look like:
 
