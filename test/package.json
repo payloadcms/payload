@@ -64,7 +64,8 @@
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
     "typescript": "5.5.3",
-    "uploadthing": "^6.10.1"
+    "uploadthing": "^6.10.1",
+    "uuid": "10.0.0"
   },
   "overrides": {
     "@types/react": "npm:types-react@19.0.0-rc.0",
