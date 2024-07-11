@@ -65,11 +65,12 @@
     "@payloadcms/ui": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/node": "20.12.5",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
-    "esbuild": "^0.21.4",
-    "esbuild-sass-plugin": "^3.3.0",
-    "payload": "workspace:*"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "esbuild": "0.23.0",
+    "esbuild-sass-plugin": "3.3.1",
+    "payload": "workspace:*",
+    "swc-plugin-transform-remove-imports": "1.14.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
@@ -89,8 +90,8 @@
     "@payloadcms/ui": "workspace:*",
     "lexical": "0.16.1",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -113,7 +114,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

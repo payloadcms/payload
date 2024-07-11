@@ -50,11 +50,11 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:webpack",
+    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:esbuild": "node bundleScss.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:webpack": "webpack --config webpack.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" \"src/app/api/**\" dist/",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -76,27 +76,21 @@
     "react-diff-viewer-continued": "3.2.6",
     "sass": "1.77.4",
     "sonner": "^1.5.0",
+    "uuid": "10.0.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "^1.5.3",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
-    "css-loader": "^6.10.0",
-    "css-minimizer-webpack-plugin": "^6.0.0",
-    "mini-css-extract-plugin": "1.6.2",
+    "esbuild": "0.23.0",
+    "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "postcss-loader": "^8.1.1",
-    "postcss-preset-env": "^9.5.14",
-    "sass-loader": "14.2.1",
-    "swc-loader": "^0.2.6",
-    "swc-plugin-transform-remove-imports": "^1.12.1",
-    "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.78.0",
-    "webpack-cli": "^5.1.4"
+    "swc-plugin-transform-remove-imports": "1.14.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
@@ -148,7 +142,7 @@
     "types": "./dist/index.js"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }
