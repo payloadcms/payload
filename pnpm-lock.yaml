@@ -30,8 +30,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       '@next/bundle-analyzer':
-        specifier: ^14.1.0
-        version: 14.1.4
+        specifier: 15.0.0-canary.53
+        version: 15.0.0-canary.53
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -5747,8 +5747,8 @@ packages:
   /@neon-rs/load@0.0.4:
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
 
-  /@next/bundle-analyzer@14.1.4:
-    resolution: {integrity: sha512-IpF/18HcAOcfHRr24tqPOUpMmVKIqvkCxIubMeRYWCXs3jm7niPGrt8Mu74yMDzfGlUwgQA6Xd6BUc5+jQxcEg==}
+  /@next/bundle-analyzer@15.0.0-canary.53:
+    resolution: {integrity: sha512-maUtAFO4k2UOkVI0/Y66TRg30K/XqhRA5ssFf5hjsTPHzKiO2pP6iSLvs5PU0A647q4HaNhnaNdCmKT4MaLfTw==}
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -15862,7 +15862,7 @@ packages:
     hasBin: true
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      acorn: 8.11.3
+      acorn: 8.12.1
       acorn-walk: 8.3.2
       commander: 7.2.0
       debounce: 1.2.1

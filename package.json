@@ -91,7 +91,7 @@
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",
-    "@next/bundle-analyzer": "^14.1.0",
+    "@next/bundle-analyzer": "15.0.0-canary.53",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
