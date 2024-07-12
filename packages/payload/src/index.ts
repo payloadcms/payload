@@ -542,9 +542,11 @@ export class BasePayload {
     } else if (this.config.email) {
       this.email = this.config.email({ payload: this })
     } else {
-      this.logger.warn(
-        `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
-      )
+      if (process.env.NEXT_PHASE !== 'phase-production-build') {
+        this.logger.warn(
+          `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
+        )
+      }
 
       this.email = consoleEmailAdapter({ payload: this })
     }
