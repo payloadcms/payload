@@ -1,4 +1,4 @@
-import type { ChainedMethods } from '@payloadcms/drizzle/types'
+import type { ChainedMethods, TransactionPg } from '@payloadcms/drizzle/types'
 
 import { chainMethods } from '@payloadcms/drizzle'
 import { sql } from 'drizzle-orm'
@@ -20,12 +20,14 @@ export const countDistinct: CountDistinct = async function countDistinct(
 
   const countResult = await chainMethods({
     methods: chainedMethods,
-    query: db
+    query: (db as TransactionPg)
       .select({
-        count: sql<number>`count
+        // @ts-expect-error generic string is not matching union type from drizzle
+        count: sql<string>`count
             (DISTINCT ${this.tables[tableName].id})`,
       })
       .from(this.tables[tableName])
+      // @ts-expect-error where is picking up libsql types
       .where(where),
   })
 

@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import { createTableName } from '@payloadcms/drizzle'
@@ -20,13 +21,13 @@ export const init: Init = function init(this: SQLiteAdapter) {
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     createTableName({
-      adapter: this,
+      adapter: this as unknown as DrizzleAdapter,
       config: collection,
     })
 
     if (collection.versions) {
       createTableName({
-        adapter: this,
+        adapter: this as unknown as DrizzleAdapter,
         config: collection,
         versions: true,
         versionsCustomName: true,
@@ -67,7 +68,10 @@ export const init: Init = function init(this: SQLiteAdapter) {
   })
 
   this.payload.config.globals.forEach((global) => {
-    const tableName = createTableName({ adapter: this, config: global })
+    const tableName = createTableName({
+      adapter: this as unknown as DrizzleAdapter,
+      config: global,
+    })
 
     buildTable({
       adapter: this,
@@ -82,7 +86,7 @@ export const init: Init = function init(this: SQLiteAdapter) {
 
     if (global.versions) {
       const versionsTableName = createTableName({
-        adapter: this,
+        adapter: this as unknown as DrizzleAdapter,
         config: global,
         versions: true,
         versionsCustomName: true,

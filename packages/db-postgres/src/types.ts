@@ -1,7 +1,7 @@
+import type { Operators } from '@payloadcms/drizzle'
 import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
-  PostgresDB,
   TransactionPg,
 } from '@payloadcms/drizzle/types'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
@@ -13,6 +13,7 @@ import type {
   Relations,
   SQL,
 } from 'drizzle-orm'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type {
   PgColumn,
   PgEnum,
@@ -56,6 +57,8 @@ export type GenericEnum = PgEnum<[string, ...string[]]>
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
+export type PostgresDB = NodePgDatabase<Record<string, unknown>>
+
 export type CountDistinct = (args: {
   db: PostgresDB | TransactionPg
   joins: BuildQueryJoinAliases
@@ -89,7 +92,19 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
-export type PostgresAdapter = DrizzleAdapter & {
+type PostgresDrizzleAdapter = Omit<
+  DrizzleAdapter,
+  | 'countDistinct'
+  | 'deleteWhere'
+  | 'drizzle'
+  | 'dropDatabase'
+  | 'execute'
+  | 'insert'
+  | 'operators'
+  | 'relations'
+>
+
+export type PostgresAdapter = PostgresDrizzleAdapter & {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
@@ -108,11 +123,13 @@ export type PostgresAdapter = DrizzleAdapter & {
   insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  operators: Operators
   pgSchema?: { table: PgTableFn } | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
   rejectInitializing: () => void
+  relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>

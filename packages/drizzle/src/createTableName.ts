@@ -6,7 +6,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 type Args = {
-  adapter: DrizzleAdapter
+  adapter: Pick<DrizzleAdapter, 'tableNameMap' | 'versionsSuffix'>
   /** The collection, global or field config **/
   config: {
     dbName?: DBIdentifierName

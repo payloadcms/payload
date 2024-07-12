@@ -44,7 +44,6 @@
     "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
-    "@libsql/client": "^0.5.2",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.11.2",
     "drizzle-kit": "0.22.7",

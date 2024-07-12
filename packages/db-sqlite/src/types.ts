@@ -1,9 +1,7 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type {
-  BuildQueryJoinAliases,
-  DrizzleAdapter,
-  TransactionSQLite,
-} from '@payloadcms/drizzle/types'
+import type { Operators } from '@payloadcms/drizzle'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { ColumnDataType, DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   SQLiteColumn,
@@ -12,14 +10,6 @@ import type {
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
-
-import {
-  type ColumnDataType,
-  type DrizzleConfig,
-  type Relation,
-  type Relations,
-  type SQL,
-} from 'drizzle-orm'
 
 export type Args = {
   client: Config
@@ -63,14 +53,14 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
-  db: TransactionSQLite
+  db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string
   where: SQL
 }) => Promise<number>
 
 export type DeleteWhere = (args: {
-  db: LibSQLDatabase | TransactionSQLite
+  db: LibSQLDatabase
   tableName: string
   where: SQL
 }) => Promise<void>
@@ -78,7 +68,7 @@ export type DeleteWhere = (args: {
 export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
 
 export type Execute<T> = (args: {
-  db?: TransactionSQLite
+  db?: LibSQLDatabase
   drizzle?: LibSQLDatabase
   raw?: string
   sql?: SQL<unknown>
@@ -89,13 +79,26 @@ export type GenerateDrizzleJSON = (args: {
 }) => Record<string, unknown>
 
 export type Insert = (args: {
-  db: LibSQLDatabase | TransactionSQLite
+  db: LibSQLDatabase
   onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
-export type SQLiteAdapter = DrizzleAdapter & {
+// Explicitly omit drizzle property for complete override in SQLiteAdapter, required in ts 5.5
+type SQLiteDrizzleAdapter = Omit<
+  DrizzleAdapter,
+  | 'countDistinct'
+  | 'deleteWhere'
+  | 'drizzle'
+  | 'dropDatabase'
+  | 'execute'
+  | 'insert'
+  | 'operators'
+  | 'relations'
+>
+
+export type SQLiteAdapter = SQLiteDrizzleAdapter & {
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
@@ -115,8 +118,10 @@ export type SQLiteAdapter = DrizzleAdapter & {
   insert: Insert
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  operators: Operators
   push: boolean
   rejectInitializing: () => void
+  relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
   schema: Record<string, GenericRelation | GenericTable>

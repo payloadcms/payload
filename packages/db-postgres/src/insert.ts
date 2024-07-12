@@ -1,3 +1,5 @@
+import type { TransactionPg } from '@payloadcms/drizzle/types'
+
 import type { Insert } from './types.js'
 
 export const insert: Insert = async function insert({
@@ -10,13 +12,14 @@ export const insert: Insert = async function insert({
   let result
 
   if (onConflictDoUpdate) {
-    result = await db
+    result = await (db as TransactionPg)
       .insert(table)
       .values(values)
+      // @ts-expect-error drizzle-orm confusing libsql and pgsql types
       .onConflictDoUpdate(onConflictDoUpdate)
       .returning()
   } else {
-    result = await db.insert(table).values(values).returning()
+    result = await (db as TransactionPg).insert(table).values(values).returning()
   }
 
   return result

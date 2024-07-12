@@ -109,7 +109,7 @@ export const buildTable = ({
   // Drizzle relations
   const relationsToBuild: RelationMap = new Map()
 
-  const idColType: IDType = setColumnID({ adapter, columns, fields })
+  const idColType: IDType = setColumnID({ columns, fields })
 
   const {
     hasLocalizedField,

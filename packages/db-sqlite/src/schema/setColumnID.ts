@@ -4,10 +4,9 @@ import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
 import { type Field, flattenTopLevelFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import type { IDType, SQLiteAdapter } from '../types.js'
+import type { IDType } from '../types.js'
 
 type Args = {
-  adapter: SQLiteAdapter
   columns: Record<string, SQLiteColumnBuilder>
   fields: Field[]
 }

@@ -1,3 +1,4 @@
+import type { Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -30,7 +31,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { like } from 'drizzle-orm'
+import { ilike, like } from 'drizzle-orm'
 import { createDatabaseAdapter } from 'payload'
 
 import type { Args, SQLiteAdapter } from './types.js'
@@ -69,7 +70,11 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     })
 
     // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
-    const operators = { ...operatorMap, contains: like, like }
+    const operators = {
+      ...operatorMap,
+      contains: ilike,
+      like,
+    } as unknown as Operators
 
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',

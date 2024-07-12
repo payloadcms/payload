@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Connect, Payload } from 'payload'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
@@ -86,7 +87,7 @@ export const connect: Connect = async function connect(
     process.env.PAYLOAD_MIGRATING !== 'true' &&
     this.push !== false
   ) {
-    await pushDevSchema(this)
+    await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
   if (typeof this.resolveInitializing === 'function') this.resolveInitializing()

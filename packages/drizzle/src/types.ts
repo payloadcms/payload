@@ -154,7 +154,7 @@ export type CreateJSONQueryArgs = {
   value: boolean | number | string
 }
 
-export type DrizzleAdapter = BaseDatabaseAdapter & {
+export interface DrizzleAdapter extends BaseDatabaseAdapter {
   convertPathToJSONTraversal: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string

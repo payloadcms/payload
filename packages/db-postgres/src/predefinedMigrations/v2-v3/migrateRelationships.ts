@@ -99,5 +99,6 @@ export const migrateRelationships = async ({
     payload.logger.info('DELETING ROWS')
     payload.logger.info(deleteStatement)
   }
+  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(`${deleteStatement}`))
 }
