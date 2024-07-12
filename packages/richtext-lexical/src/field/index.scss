@@ -1,7 +1,7 @@
 @import '../scss/styles.scss';
 
 .rich-text-lexical {
-  .tooltip:not([aria-hidden='true']) {
+  & > .field-error.tooltip {
     right: auto;
     position: static;
     margin-bottom: 0.2em;
