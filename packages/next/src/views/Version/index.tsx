@@ -58,7 +58,6 @@ export const VersionView: EditViewComponent = async (props) => {
         latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
         latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
       }
-
     } catch (error) {
       return notFound()
     }
@@ -84,7 +83,6 @@ export const VersionView: EditViewComponent = async (props) => {
         latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
         latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
       }
-
     } catch (error) {
       return notFound()
     }

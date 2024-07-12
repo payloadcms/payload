@@ -1,17 +1,8 @@
 'use client'
 
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import type { PaginatedDocs, Where } from 'payload'
 
-import {
-  ReactSelect,
-  fieldBaseClass,
-  useConfig,
-  useDocumentInfo,
-  useTranslation,
-} from '@payloadcms/ui'
+import { ReactSelect, fieldBaseClass, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
