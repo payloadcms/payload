@@ -229,6 +229,12 @@ export interface FieldBase {
   index?: boolean
   label?: LabelFunction | Record<string, string> | false | string
   localized?: boolean
+  /**
+   * The name of the field. Must be alphanumeric and cannot contain ' . '
+   *
+   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
+   * @link https://payloadcms.com/docs/fields/overview#field-names
+   */
   name: string
   required?: boolean
   saveToJWT?: boolean | string
