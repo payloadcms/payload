@@ -138,7 +138,6 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
         required={required}
         {...(labelProps || {})}
       />
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}

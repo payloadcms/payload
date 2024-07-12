@@ -113,7 +113,6 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
           {CustomLabel !== undefined ? (
@@ -143,6 +142,7 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
             <FieldLabel {...getCoordinateFieldLabel('latitude')} />
           )}
           <div className="input-wrapper">
+            <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
             {BeforeInput}
             <input
               disabled={readOnly}
