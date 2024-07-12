@@ -1,7 +1,5 @@
-export * from '../fields/validations.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 export { serverProps } from '../config/types.js'
-
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -19,6 +17,8 @@ export {
   valueIsValueWithRelation,
 } from '../fields/config/types.js'
 
+export * from '../fields/validations.js'
+
 export { validOperators } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
@@ -30,6 +30,10 @@ export { deepMerge } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
+export { getDataByPath } from '../utilities/getDataByPath.js'
+
+export { getSiblingData } from '../utilities/getSiblingData.js'
+
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isNumber } from '../utilities/isNumber.js'
@@ -39,6 +43,8 @@ export {
   isReactComponentOrFunction,
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
+
+export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 

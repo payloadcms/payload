@@ -31,7 +31,7 @@ export const CustomUploadClient = () => {
       <h3>This text was rendered on the client</h3>
       <Upload
         collectionSlug={collectionSlug}
-        customActions={[<CustomDrawerToggler />]}
+        customActions={[<CustomDrawerToggler key={0} />]}
         initialState={initialState}
         uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
       />

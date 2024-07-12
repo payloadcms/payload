@@ -1,4 +1,4 @@
-import type { CollectionAfterReadHook } from 'payload/types'
+import type { CollectionAfterReadHook } from 'payload'
 
 // The `user` collection has access control locked so that users are not publicly accessible
 // This means that we need to populate the authors manually here to protect user privacy

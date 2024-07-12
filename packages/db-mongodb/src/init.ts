@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { PaginateOptions } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 

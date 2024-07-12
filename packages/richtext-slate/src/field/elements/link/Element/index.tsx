@@ -14,8 +14,8 @@ import {
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState, reduceFieldsToValues } from '@payloadcms/ui/shared'
-import { deepCopyObject } from 'payload/shared'
+import { getFormState } from '@payloadcms/ui/shared'
+import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

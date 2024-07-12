@@ -43,7 +43,7 @@ export const packagePublishList = [
   // Unpublished
   // 'plugin-sentry'
   // 'storage-uploadthing',
-  // 'eslint-config-payload',
-  // 'eslint-plugin-payload',
+  // 'eslint-config',
+  // 'eslint-plugin',
   // 'live-preview-vue',
 ]

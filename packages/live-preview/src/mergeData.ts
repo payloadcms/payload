@@ -34,9 +34,9 @@ export const mergeData = async <T>(args: {
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
-  T & {
+  {
     _numberOfRequests?: number
-  }
+  } & T
 > => {
   const {
     apiRoute,

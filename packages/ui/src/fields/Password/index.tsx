@@ -12,7 +12,7 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type PasswordFieldProps = FormFieldBase & {
+export type PasswordFieldProps = {
   autoComplete?: string
   className?: string
   description?: Description
@@ -23,7 +23,7 @@ export type PasswordFieldProps = FormFieldBase & {
   style?: React.CSSProperties
   validate?: Validate
   width?: string
-}
+} & FormFieldBase
 
 const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
   const {

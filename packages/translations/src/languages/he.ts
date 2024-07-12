@@ -311,6 +311,7 @@ export const heTranslations: DefaultTranslationsObject = {
     within: 'בתוך',
   },
   upload: {
+    addImage: 'הוסף תמונה',
     crop: 'חתוך',
     cropToolDescription: 'גרור את הפינות של האזור שנבחר, צייר אזור חדש או התאם את הערכים למטה.',
     dragAndDrop: 'גרור ושחרר קובץ',
@@ -323,6 +324,7 @@ export const heTranslations: DefaultTranslationsObject = {
     height: 'גובה',
     lessInfo: 'פחות מידע',
     moreInfo: 'מידע נוסף',
+    pasteURL: 'הדבק כתובת אתר',
     previewSizes: 'גדלי תצוגה מקדימה',
     selectCollectionToBrowse: 'בחר אוסף לצפייה',
     selectFile: 'בחר קובץ',

@@ -1,12 +1,11 @@
-import type { Config } from 'payload'
-import type { Payload } from 'payload'
-import { jest } from '@jest/globals'
+import type { Config, Payload } from 'payload'
 
+import { jest } from '@jest/globals'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
 import { payloadCloudPlugin } from './plugin.js'
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 const mockedPayload: Payload = jest.fn() as unknown as Payload
 
@@ -18,10 +17,10 @@ describe('plugin', () => {
   beforeEach(() => {
     createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
-        verify: jest.fn(),
         transporter: {
           name: 'Nodemailer - SMTP',
         },
+        verify: jest.fn(),
       } as unknown as ReturnType<typeof nodemailer.createTransport>
     })
 
@@ -33,7 +32,6 @@ describe('plugin', () => {
   })
 
   describe('not in Payload Cloud', () => {
-    // eslint-disable-next-line jest/expect-expect
     it('should return unmodified config', async () => {
       const plugin = payloadCloudPlugin()
       const config = await plugin(createConfig())
@@ -69,7 +67,6 @@ describe('plugin', () => {
     })
 
     describe('email', () => {
-      // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud email', async () => {
         const plugin = payloadCloudPlugin()
         const config = await plugin(createConfig())
@@ -81,7 +78,6 @@ describe('plugin', () => {
         )
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', async () => {
         const plugin = payloadCloudPlugin({ email: false })
         const config = await plugin(createConfig())
@@ -89,7 +85,6 @@ describe('plugin', () => {
         expect(config.email).toBeUndefined()
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('should allow PAYLOAD_CLOUD_EMAIL_* env vars to be unset', async () => {
         delete process.env.PAYLOAD_CLOUD_EMAIL_API_KEY
         delete process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
@@ -116,8 +111,8 @@ describe('plugin', () => {
           email: await nodemailerAdapter({
             defaultFromAddress: 'test@test.com',
             defaultFromName: 'Test',
-            transport: existingTransport,
             skipVerify,
+            transport: existingTransport,
           }),
         })
 

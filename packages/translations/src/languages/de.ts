@@ -322,6 +322,7 @@ export const deTranslations: DefaultTranslationsObject = {
     within: 'innerhalb',
   },
   upload: {
+    addImage: 'Bild hinzufügen',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehen Sie die Ecken des ausgewählten Bereichs, zeichnen Sie einen neuen Bereich oder passen Sie die Werte unten an.',
@@ -336,6 +337,7 @@ export const deTranslations: DefaultTranslationsObject = {
     height: 'Höhe',
     lessInfo: 'Weniger Info',
     moreInfo: 'Mehr Info',
+    pasteURL: 'URL einfügen',
     previewSizes: 'Vorschaugrößen',
     selectCollectionToBrowse: 'Wähle eine Sammlung zum Durchsuchen aus',
     selectFile: 'Datei auswählen',

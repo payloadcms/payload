@@ -18,16 +18,32 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean
   value: SerializedEditorState
 }
+
+const NestProviders = ({ children, providers }) => {
+  if (!providers?.length) {
+    return children
+  }
+  const Component = providers[0]
+  if (providers.length > 1) {
+    return (
+      <Component>
+        <NestProviders providers={providers.slice(1)}>{children}</NestProviders>
+      </Component>
+    )
+  }
+  return <Component>{children}</Component>
+}
+
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const { editorConfig, fieldProps, onChange, path, readOnly, value } = props
 
@@ -90,11 +106,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
         fieldProps={fieldProps}
         parentContext={parentContext}
       >
-        <LexicalEditorComponent
-          editorConfig={editorConfig}
-          editorContainerRef={editorContainerRef}
-          onChange={onChange}
-        />
+        <NestProviders providers={editorConfig.features.providers}>
+          <LexicalEditorComponent
+            editorConfig={editorConfig}
+            editorContainerRef={editorContainerRef}
+            onChange={onChange}
+          />
+        </NestProviders>
       </EditorConfigProvider>
     </LexicalComposer>
   )

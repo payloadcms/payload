@@ -309,6 +309,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     within: '在...之內',
   },
   upload: {
+    addImage: '添加圖片',
     crop: '裁剪',
     cropToolDescription: '拖動所選區域的角落，繪製一個新區域或調整以下的值。',
     dragAndDrop: '拖放一個檔案',
@@ -321,6 +322,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     height: '高度',
     lessInfo: '更少資訊',
     moreInfo: '更多資訊',
+    pasteURL: '貼上網址',
     previewSizes: '預覽尺寸',
     selectCollectionToBrowse: '選擇一個要瀏覽的集合',
     selectFile: '選擇一個文件',

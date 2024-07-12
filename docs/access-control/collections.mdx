@@ -23,7 +23,7 @@ If a Collection supports [`Authentication`](/docs/authentication/overview), the 
 
 | Function                | Allows/Denies Access                                           |
 | ----------------------- | -------------------------------------------------------------- |
-| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel             |
+| **[`admin`](#admin)**   | Used to restrict access to the [Admin Panel](../admin/overview)             |
 | **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
 
 **Example Collection config:**
@@ -167,7 +167,7 @@ const canDeleteCustomer: Access = async ({ req, id }) => {
 
 ### Admin
 
-If the Collection is [used to access the Payload Admin panel](/docs/admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
+If the Collection is use to access the [Admin Panel](../admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
 
 **Available argument properties:**
 

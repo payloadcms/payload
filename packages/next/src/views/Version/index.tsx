@@ -20,6 +20,7 @@ export const VersionView: EditViewComponent = async (props) => {
     docID: id,
     globalConfig,
     permissions,
+    req,
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
@@ -49,6 +50,7 @@ export const VersionView: EditViewComponent = async (props) => {
         depth: 1,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -56,6 +58,7 @@ export const VersionView: EditViewComponent = async (props) => {
         latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
         latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
       }
+
     } catch (error) {
       return notFound()
     }
@@ -73,6 +76,7 @@ export const VersionView: EditViewComponent = async (props) => {
         depth: 1,
         locale: '*',
         overrideAccess: false,
+        req,
         user,
       })
 
@@ -80,6 +84,7 @@ export const VersionView: EditViewComponent = async (props) => {
         latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
         latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
       }
+
     } catch (error) {
       return notFound()
     }

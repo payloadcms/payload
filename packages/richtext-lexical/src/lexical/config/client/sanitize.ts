@@ -21,6 +21,7 @@ export const sanitizeClientFeatures = (
     markdownTransformers: [],
     nodes: [],
     plugins: [],
+    providers: [],
     slashMenu: {
       dynamicGroups: [],
       groups: [],
@@ -45,6 +46,10 @@ export const sanitizeClientFeatures = (
       if (feature.hooks?.save?.length) {
         sanitized.hooks.save = sanitized.hooks.save.concat(feature.hooks.save)
       }
+    }
+
+    if (feature.providers?.length) {
+      sanitized.providers = sanitized.providers.concat(feature.providers)
     }
 
     if (feature.nodes?.length) {

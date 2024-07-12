@@ -317,6 +317,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     within: 'в межах',
   },
   upload: {
+    addImage: 'Додати зображення',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',
@@ -331,6 +332,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     height: 'Висота',
     lessInfo: 'Менше інформації',
     moreInfo: 'Більше інформації',
+    pasteURL: 'Вставити URL',
     previewSizes: 'Попередній перегляд розмірів',
     selectCollectionToBrowse: 'Оберіть колекцію для перегляду',
     selectFile: 'Оберіть файл',

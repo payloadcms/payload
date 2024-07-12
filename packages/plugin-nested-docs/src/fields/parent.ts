@@ -3,9 +3,9 @@ import type { SingleRelationshipField } from 'payload'
 export const createParentField = (
   relationTo: string,
   overrides?: Partial<
-    SingleRelationshipField & {
+    {
       hasMany: false
-    }
+    } & SingleRelationshipField
   >,
 ): SingleRelationshipField => ({
   name: 'parent',

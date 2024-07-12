@@ -320,6 +320,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     within: 'в пределах',
   },
   upload: {
+    addImage: 'Добавить изображение',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
@@ -334,6 +335,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     height: 'Высота',
     lessInfo: 'Меньше информации',
     moreInfo: 'Больше информации',
+    pasteURL: 'Вставить URL',
     previewSizes: 'Предварительный просмотр размеров',
     selectCollectionToBrowse: 'Выберите Коллекцию для просмотра',
     selectFile: 'Выберите файл',

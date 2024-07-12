@@ -13,7 +13,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'

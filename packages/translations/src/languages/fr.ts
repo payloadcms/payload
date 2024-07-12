@@ -325,6 +325,7 @@ export const frTranslations: DefaultTranslationsObject = {
     within: 'dans',
   },
   upload: {
+    addImage: 'Ajouter une image',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',
@@ -339,6 +340,7 @@ export const frTranslations: DefaultTranslationsObject = {
     height: 'Hauteur',
     lessInfo: 'Moins d’infos',
     moreInfo: 'Plus d’infos',
+    pasteURL: `Coller l'URL`,
     previewSizes: 'Tailles d’aperçu',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',
     selectFile: 'Sélectionnez un fichier',

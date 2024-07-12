@@ -22,12 +22,12 @@ import './index.scss'
 const baseClass = 'rich-text-lexical'
 
 const _RichText: React.FC<
-  FormFieldBase & {
+  {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
     width?: string
-  }
+  } & FormFieldBase
 > = (props) => {
   const {
     name,

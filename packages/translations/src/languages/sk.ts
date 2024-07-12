@@ -318,6 +318,7 @@ export const skTranslations: DefaultTranslationsObject = {
     within: 'vnútri',
   },
   upload: {
+    addImage: 'Pridať obrázok',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
@@ -332,6 +333,7 @@ export const skTranslations: DefaultTranslationsObject = {
     height: 'Výška',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
+    pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',
     selectFile: 'Vyberte súbor',

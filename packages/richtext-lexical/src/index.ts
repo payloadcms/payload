@@ -812,12 +812,12 @@ export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
 export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
-
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
+
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
-
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
@@ -830,6 +830,7 @@ export {
 export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/feature.server.js'
 export { TreeViewFeature } from './features/debug/treeView/feature.server.js'
+export { EXPERIMENTAL_TableFeature } from './features/experimental_table/feature.server.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
 
@@ -972,14 +973,14 @@ export {
 } from './lexical/utils/nodeFormat.js'
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
+export type * from './nodeTypes.js'
+
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
-
 export { createServerFeature } from './utilities/createServerFeature.js'
-export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
-export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
-
-export * from './nodeTypes.js'
-
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
+export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
+
+export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

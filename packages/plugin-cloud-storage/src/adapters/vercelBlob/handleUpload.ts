@@ -5,11 +5,11 @@ import path from 'path'
 
 import type { VercelBlobAdapterUploadOptions } from './index.js'
 
-type HandleUploadArgs = VercelBlobAdapterUploadOptions & {
+type HandleUploadArgs = {
   baseUrl: string
   prefix?: string
   token: string
-}
+} & VercelBlobAdapterUploadOptions
 
 export const getHandleUpload = ({
   access = 'public',

@@ -10,9 +10,9 @@ import './index.scss'
 
 const baseClass = 'dropdown-indicator'
 export const DropdownIndicator: React.FC<
-  DropdownIndicatorProps<OptionType, true> & {
+  {
     innerProps: JSX.IntrinsicElements['button']
-  }
+  } & DropdownIndicatorProps<OptionType, true>
 > = (props) => {
   const {
     innerProps: { ref, ...restInnerProps },

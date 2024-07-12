@@ -10,7 +10,7 @@ Enabling Authentication on a Collection automatically exposes additional auth-ba
 
 ## Access
 
-The Access operation returns what a logged in user can and can't do with the collections and globals that are registered via your config. This data can be immensely helpful if your app needs to show and hide certain features based on access control, as the Payload Admin panel does.
+The Access operation returns what a logged in user can and can't do with the collections and globals that are registered via your config. This data can be immensely helpful if your app needs to show and hide certain features based on access control, as the [Admin Panel](../admin/overview) does.
 
 **REST API endpoint**:
 
@@ -271,9 +271,9 @@ const result = await payload.verifyEmail({
 
 ## Unlock
 
-If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The Admin panel features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
+If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
 
-To restrict who is allowed to unlock users, you can utilize the [`unlock`](/docs/access-control/overview#unlock) access control function.
+To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/overview#unlock) access control function.
 
 **Example REST API unlock**:
 
@@ -308,7 +308,7 @@ Payload comes with built-in forgot password functionality. Submitting an email a
 
 The link to reset the user's password contains a token which is what allows the user to securely reset their password.
 
-By default, the Forgot Password operations send users to the Payload Admin panel to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/config#forgot-password).
+By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/config#forgot-password).
 
 **Example REST API Forgot Password**:
 

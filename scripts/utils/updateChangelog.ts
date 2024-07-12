@@ -38,7 +38,7 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
   const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl, writeChangelog } = args
 
   const fromVersion =
-    args.fromVersion || execSync('git describe --tags --abbrev=0').toString().trim()
+    args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
 
   const tag = fromVersion.match(/-(\w+)\.\d+$/)?.[1] || 'latest'
 

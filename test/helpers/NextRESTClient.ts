@@ -1,5 +1,5 @@
 import type { SanitizedConfig, Where } from 'payload'
-import type { ParsedQs } from 'qs'
+import type { ParsedQs } from 'qs-esm'
 
 import {
   REST_DELETE as createDELETE,
@@ -8,7 +8,7 @@ import {
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
 } from '@payloadcms/next/routes'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
 
@@ -69,7 +69,7 @@ export class NextRESTClient {
     this._GRAPHQL_POST = createGraphqlPOST(config)
   }
 
-  private buildHeaders(options: RequestInit & RequestOptions & FileArg): Headers {
+  private buildHeaders(options: FileArg & RequestInit & RequestOptions): Headers {
     const defaultHeaders = {
       'Content-Type': 'application/json',
     }
@@ -147,7 +147,7 @@ export class NextRESTClient {
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: RequestInit & RequestOptions & FileArg): Promise<Response> {
+  async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
@@ -162,7 +162,7 @@ export class NextRESTClient {
 
   async POST(
     path: ValidPath,
-    options: RequestInit & RequestOptions & FileArg = {},
+    options: FileArg & RequestInit & RequestOptions = {},
   ): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)

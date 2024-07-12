@@ -31,9 +31,9 @@ export type FormBlockType = {
 }
 
 export const FormBlock: React.FC<
-  FormBlockType & {
+  {
     id?: string
-  }
+  } & FormBlockType
 > = (props) => {
   const {
     enableIntro,
@@ -132,7 +132,7 @@ export const FormBlock: React.FC<
         <RichText className="mb-8" content={introContent} enableGutter={false} />
       )}
       {!isLoading && hasSubmitted && confirmationType === 'message' && (
-        <RichText className="classes.confirmationMessage" content={confirmationMessage} />
+        <RichText content={confirmationMessage} />
       )}
       {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
       {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}

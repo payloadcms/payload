@@ -6,6 +6,7 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
+  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
   LinkFeature,
@@ -81,6 +82,7 @@ const editorConfig: ServerEditorConfig = {
         TabBlock,
       ],
     }),
+    EXPERIMENTAL_TableFeature(),
   ],
 }
 

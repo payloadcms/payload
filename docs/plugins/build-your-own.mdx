@@ -16,7 +16,7 @@ Building your own [Payload Plugin](./overview) is easy, and if you&apos;re alrea
 
 Our plugin template includes everything you need to build a full life-cycle plugin:
 
-- Example files and functions for extending the payload config
+- Example files and functions for extending the Payload Config
 - A local dev environment to develop the plugin
 - Test suite with integrated GitHub workflow
 
@@ -28,7 +28,7 @@ Here is a brief recap of how to integrate plugins with Payload, to learn more he
 
 ### How to install a plugin
 
-To install any plugin, simply add it to your Payload config in the plugins array.
+To install any plugin, simply add it to your Payload Config in the plugins array.
 
 ```
 import samplePlugin from 'sample-plugin';
@@ -183,7 +183,7 @@ export const samplePlugin =
  }
 ```
 
-1. First, you need to receive the existing Payload config along with any plugin options.
+1. First, you need to receive the existing Payload Config along with any plugin options.
 2. Then set the variable `config` to be equal to a copy of the existing config.
 3. From here, you can extend the config however you like!
 4. Finally, return the config and you&apos;re all set.
@@ -192,7 +192,7 @@ export const samplePlugin =
 
 [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
 
-We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly, else this can cause adverse behavior and conflicts with Payload config and other plugins.
+We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly, else this can cause adverse behavior and conflicts with Payload Config and other plugins.
 
 Let&apos;s say you want to build a plugin that adds a new collection:
 
@@ -204,7 +204,7 @@ config.collections = [
 ]
 ```
 
-First, you need to spread the `config.collections` to ensure that we don&apos;t lose the existing collections. Then you can add any additional collections, just as you would in a regular payload config.
+First, you need to spread the `config.collections` to ensure that we don&apos;t lose the existing collections. Then you can add any additional collections, just as you would in a regular Payload Config.
 
 This same logic is applied to other properties like admin, globals, hooks:
 
@@ -270,7 +270,7 @@ The best way to share and allow others to use your plugin once it is complete is
 
 ### Add payload-plugin topic tag
 
-Apply the tag **payload-plugin** to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
+Apply the tag **payload-plugin** to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing Payload plugins](https://github.com/topics/payload-plugin).
 
 ### Use Semantic Versioning (SemVer)
 

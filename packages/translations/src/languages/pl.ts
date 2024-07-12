@@ -317,6 +317,7 @@ export const plTranslations: DefaultTranslationsObject = {
     within: 'w ciągu',
   },
   upload: {
+    addImage: 'Dodaj obraz',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',
@@ -331,6 +332,7 @@ export const plTranslations: DefaultTranslationsObject = {
     height: 'Wysokość',
     lessInfo: 'Mniej informacji',
     moreInfo: 'Więcej informacji',
+    pasteURL: 'Wklej URL',
     previewSizes: 'Rozmiary podglądu',
     selectCollectionToBrowse: 'Wybierz kolekcję aby przejrzeć',
     selectFile: 'Wybierz plik',

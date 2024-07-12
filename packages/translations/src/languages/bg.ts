@@ -316,6 +316,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     within: 'в рамките на',
   },
   upload: {
+    addImage: 'Добавяне на изображение',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
@@ -330,6 +331,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     height: 'Височина',
     lessInfo: 'По-малко информация',
     moreInfo: 'Повече информация',
+    pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',
     selectFile: 'Избери файл',

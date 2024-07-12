@@ -1,9 +1,9 @@
 import type { FieldValues, PaymentField, PriceCondition } from '../types.js'
 
 export const getPaymentTotal = (
-  args: Partial<PaymentField> & {
+  args: {
     fieldValues: FieldValues
-  },
+  } & Partial<PaymentField>,
 ): number => {
   const { basePrice = 0, fieldValues, priceConditions } = args
 

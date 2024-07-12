@@ -9,13 +9,9 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest, RequestContext } from '../types/index.js'
 import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
 
-export type RichTextFieldProps<
-  Value extends object,
-  AdapterProps,
-  ExtraFieldProperties = {},
-> = Omit<RichTextField<Value, AdapterProps, ExtraFieldProperties>, 'type'> & {
+export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
   path?: string
-}
+} & Omit<RichTextField<Value, AdapterProps, ExtraFieldProperties>, 'type'>
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -146,8 +142,8 @@ export type AfterReadRichTextHook<
   TValue = any,
   TSiblingData = any,
 > = (
-  args: BaseRichTextHookArgs<TData, TValue, TSiblingData> &
-    AfterReadRichTextHookArgs<TData, TValue, TSiblingData>,
+  args: AfterReadRichTextHookArgs<TData, TValue, TSiblingData> &
+    BaseRichTextHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
 export type AfterChangeRichTextHook<
@@ -155,8 +151,8 @@ export type AfterChangeRichTextHook<
   TValue = any,
   TSiblingData = any,
 > = (
-  args: BaseRichTextHookArgs<TData, TValue, TSiblingData> &
-    AfterChangeRichTextHookArgs<TData, TValue, TSiblingData>,
+  args: AfterChangeRichTextHookArgs<TData, TValue, TSiblingData> &
+    BaseRichTextHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
 export type BeforeChangeRichTextHook<
@@ -252,10 +248,10 @@ export type RichTextAdapter<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
-> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> & {
+> = {
   CellComponent: React.FC<any>
   FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-}
+} & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<
   Value extends object = object,

@@ -2,18 +2,21 @@ import type React from 'react'
 import type { Page, Post } from 'src/payload-types'
 
 import { getCachedDocument } from '@/utilities/getDocument'
-import { getCachedRedirect } from '@/utilities/getRedirect'
+import { getCachedRedirects } from '@/utilities/getRedirects'
 import { notFound, redirect } from 'next/navigation'
 
 interface Props {
+  disableNotFound?: boolean
   url: string
 }
 
 /* This component helps us with SSR based dynamic redirects */
-export const PayloadRedirects: React.FC<Props> = async ({ url }) => {
+export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, url }) => {
   const slug = url.startsWith('/') ? url : `${url}`
 
-  const redirectItem = await getCachedRedirect(slug)()
+  const redirects = await getCachedRedirects()()
+
+  const redirectItem = redirects.find((redirect) => redirect.from === slug)
 
   if (redirectItem) {
     if (redirectItem.to?.url) {
@@ -39,5 +42,6 @@ export const PayloadRedirects: React.FC<Props> = async ({ url }) => {
     if (redirectUrl) redirect(redirectUrl)
   }
 
+  if (disableNotFound) return null
   return notFound()
 }

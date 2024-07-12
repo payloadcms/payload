@@ -5,7 +5,7 @@ import { initI18n } from '@payloadcms/translations'
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
 import { createLocalReq, isEntityHidden, parseCookies } from 'payload'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
 
@@ -59,6 +59,7 @@ export const initPage = async ({
     {
       fallbackLocale: null,
       req: {
+        headers,
         host: headers.get('host'),
         i18n,
         query: qs.parse(queryString, {

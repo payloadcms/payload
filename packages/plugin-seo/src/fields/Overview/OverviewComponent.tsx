@@ -14,11 +14,11 @@ const {
   title: { maxLength: maxTitle, minLength: minTitle },
 } = defaults
 
-type OverviewProps = UIField & {
+type OverviewProps = {
   descriptionPath?: string
   imagePath?: string
   titlePath?: string
-}
+} & UIField
 
 export const OverviewComponent: React.FC<OverviewProps> = ({
   descriptionPath: descriptionPathFromContext,

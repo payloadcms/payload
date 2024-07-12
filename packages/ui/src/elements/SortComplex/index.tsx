@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { usePathname, useRouter } from 'next/navigation.js'
 import { sortableFieldTypes } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useEffect, useState } from 'react'
 
 export type SortComplexProps = {

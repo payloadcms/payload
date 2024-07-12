@@ -5,7 +5,9 @@ const defaultOpenGraph: Metadata['openGraph'] = {
   description: 'An open-source website built with Payload and Next.js.',
   images: [
     {
-      url: 'https://payloadcms.com/images/og-image.jpg',
+      url: process.env.NEXT_PUBLIC_SERVER_URL
+        ? `${process.env.NEXT_PUBLIC_SERVER_URL}/website-template-OG.webp`
+        : '/website-template-OG.webp',
     },
   ],
   siteName: 'Payload Website Template',

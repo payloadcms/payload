@@ -33,6 +33,14 @@ Here is an example of how you might target the Dashboard View and change the bac
   If you are building [Custom Components](./overview), it is best to import your own stylesheets directly into your components, rather than using the global stylesheet. You can continue to use the [CSS library](#css-library) as needed.
 </Banner>
 
+## Re-using Payload SCSS variables and utilities
+
+You can re-use Payload's SCSS variables and utilities in your own stylesheets by importing it from the UI package.
+
+```scss
+@import '~@payloadcms/ui/scss';
+```
+
 ## CSS Library
 
 To make it as easy as possible for you to override default styles, Payload uses [BEM naming conventions](http://getbem.com/) for all CSS within the Admin UI. If you provide your own CSS, you can override any built-in styles easily, including targeting nested components and their various component states.

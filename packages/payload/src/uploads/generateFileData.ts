@@ -2,7 +2,7 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
-import mkdirp from 'mkdirp'
+import { mkdirSync } from 'node:fs'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
@@ -107,7 +107,7 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    mkdirp.sync(staticPath)
+    mkdirSync(staticPath, { recursive: true })
   }
 
   let newData = data
@@ -177,13 +177,13 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()
+        ext = file.name.split('.').pop().split('?')[0]
       } else {
         ext = ''
       }
     }
 
-    // Adust SVG mime type. fromBuffer modifies it.
+    // Adjust SVG mime type. fromBuffer modifies it.
     if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
     fileData.mimeType = mime
 
@@ -302,11 +302,10 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const { data, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
-  const {
-    uploadEdits = {},
-  }: {
-    uploadEdits?: UploadEdits
-  } = req.query || {}
+  const uploadEdits =
+    req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
+      ? (req.query.uploadEdits as UploadEdits)
+      : {}
 
   if (uploadEdits.focalPoint) return uploadEdits
 

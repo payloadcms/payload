@@ -6,15 +6,7 @@ export type Preferences = {
   [key: string]: unknown
 }
 
-export type FormProps = (
-  | {
-      action: (formData: FormData) => Promise<void>
-    }
-  | {
-      action?: string
-      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
-    }
-) & {
+export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
@@ -47,7 +39,15 @@ export type FormProps = (
   uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
-}
+} & (
+  | {
+      action: (formData: FormData) => Promise<void>
+    }
+  | {
+      action?: string
+      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
+    }
+)
 
 export type SubmitOptions = {
   action?: string

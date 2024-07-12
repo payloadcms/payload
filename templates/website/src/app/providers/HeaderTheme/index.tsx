@@ -2,13 +2,13 @@
 
 import type { Theme } from '@/providers/Theme/types'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import canUseDOM from '../../utilities/canUseDOM'
 
 export interface ContextType {
   headerTheme?: Theme | null
-  setHeaderTheme: (theme: Theme | null) => void // eslint-disable-line no-unused-vars
+  setHeaderTheme: (theme: Theme | null) => void  
 }
 
 const initialContext: ContextType = {
