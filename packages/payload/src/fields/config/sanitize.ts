@@ -7,6 +7,7 @@ import {
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
+  ProtectedFieldName,
 } from '../../errors/index.js'
 import { deepMerge } from '../../utilities/deepMerge.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
@@ -47,6 +48,8 @@ export const sanitizeFields = async ({
   richTextSanitizationPromises,
   validRelationships,
 }: Args): Promise<Field[]> => {
+  const protectedFieldNames = ['__v', 'salt', 'hash', 'file']
+
   if (!fields) return []
 
   for (let i = 0; i < fields.length; i++) {
@@ -57,6 +60,11 @@ export const sanitizeFields = async ({
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name)
+    }
+
+    // assert that field names are not one of protected names
+    if (fieldAffectsData(field) && protectedFieldNames.includes(field.name)) {
+      throw new ProtectedFieldName(field, field.name)
     }
 
     // Auto-label
