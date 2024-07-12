@@ -6,43 +6,54 @@ desc: You can add hooks to any Collection, several hook types are available incl
 keywords: hooks, collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Collections feature the ability to define the following hooks:
+Collection Hooks are [Hooks](./overview) that run on Documents within a specific [Collection](../configuration/collections). They allow you to execute your own logic during specific events of the Document lifecycle. All [Auth-enabled Collections](../collections/authentication) also receive an additional set of Hooks specific to the authentication flow.
 
-- [beforeOperation](#beforeoperation)
-- [beforeValidate](#beforevalidate)
-- [beforeChange](#beforechange)
-- [afterChange](#afterchange)
-- [beforeRead](#beforeread)
-- [afterRead](#afterread)
-- [beforeDelete](#beforedelete)
-- [afterDelete](#afterdelete)
-- [afterOperation](#afteroperation)
-
-Additionally, `auth`-enabled collections feature the following hooks:
-
-- [beforeLogin](#beforelogin)
-- [afterLogin](#afterlogin)
-- [afterLogout](#afterlogout)
-- [afterRefresh](#afterrefresh)
-- [afterMe](#afterme)
-- [afterForgotPassword](#afterforgotpassword)
-- [refresh](#refresh)
-- [me](#me)
-
-## Config
-
-All collection Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
-
-`collections/exampleHooks.js`
+To add hooks to a Collection, use the `hooks` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload';
 
-export const ExampleHooks: CollectionConfig = {
-  slug: 'example-hooks',
-  fields: [
-    { name: 'name', type: 'text'},
-  ],
+export const CollectionWithHooks: CollectionConfig = {
+  // ...
+  hooks: { // highlight-line
+    // ...
+  },
+}
+```
+
+The following Collection Hooks are available:
+
+- [`beforeOperation`](#beforeoperation)
+- [`beforeValidate`](#beforevalidate)
+- [`beforeChange`](#beforechange)
+- [`afterChange`](#afterchange)
+- [`beforeRead`](#beforeread)
+- [`afterRead`](#afterread)
+- [`beforeDelete`](#beforedelete)
+- [`afterDelete`](#afterdelete)
+- [`afterOperation`](#afteroperation)
+
+Additionally, all [Auth-enabled Collections](../authentication/overview) feature the following Auth-enabled Hooks:
+
+- [`beforeLogin`](#beforelogin)
+- [`afterLogin`](#afterlogin)
+- [`afterLogout`](#afterlogout)
+- [`afterRefresh`](#afterrefresh)
+- [`afterMe`](#afterme)
+- [`afterForgotPassword`](#afterforgotpassword)
+- [`refresh`](#refresh)
+- [`me`](#me)
+
+## Config Options
+
+All Collection Hooks accept an array of synchronous or asynchronous functions. Each Collection Hook receives specific arguments based on its own type, and has the ability to modify specific outputs.
+
+```ts
+import type { CollectionConfig } from 'payload';
+
+export const CollectionWithHooks: CollectionConfig = {
+  // ...
+  // highlight-start
   hooks: {
     beforeOperation: [(args) => {...}],
     beforeValidate: [(args) => {...}],
@@ -54,7 +65,7 @@ export const ExampleHooks: CollectionConfig = {
     afterDelete: [(args) => {...}],
     afterOperation: [(args) => {...}],
 
-    // Auth-enabled hooks
+    // Auth-enabled Hooks
     beforeLogin: [(args) => {...}],
     afterLogin: [(args) => {...}],
     afterLogout: [(args) => {...}],
@@ -64,6 +75,7 @@ export const ExampleHooks: CollectionConfig = {
     refresh: [(args) => {...}],
     me: [(args) => {...}],
   },
+  // highlight-end
 }
 ```
 
@@ -312,7 +324,7 @@ import type { CollectionRefreshHook } from 'payload'
 
 const myRefreshHook: CollectionRefreshHook = async ({
   args, // arguments passed into the `refresh` operation
-  user, // the user as queried from the database 
+  user, // the user as queried from the database
 }) => {...}
 ```
 
@@ -325,7 +337,7 @@ import type { CollectionMeHook } from 'payload'
 
 const meHook: CollectionMeHook = async ({
   args, // arguments passed into the `me` operation
-  user, // the user as queried from the database 
+  user, // the user as queried from the database
 }) => {...}
 ```
 

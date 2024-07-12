@@ -6,28 +6,39 @@ desc: Hooks can be added to any Global and allow you to validate data, flatten l
 keywords: hooks, globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Globals feature the ability to define the following hooks:
+Global Hooks are [Hooks](./overview) that run on [Global](../configuration/globals) Documents. They allow you to execute your own logic during specific events of the Document lifecycle.
 
-- [beforeValidate](#beforevalidate)
-- [beforeChange](#beforechange)
-- [afterChange](#afterchange)
-- [beforeRead](#beforeread)
-- [afterRead](#afterread)
-
-## Config
-
-All Global Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
-
-`globals/example-hooks.js`
+To add hooks to a Global, use the `hooks` property in your [Global Config](../configuration/globals):
 
 ```ts
 import type { GlobalConfig } from 'payload';
 
-const ExampleHooks: GlobalConfig = {
-  slug: 'header',
-  fields: [
-    { name: 'title', type: 'text'},
-  ]
+export const GlobalWithHooks: GlobalConfig = {
+  // ...
+  hooks: { // highlight-line
+    // ...
+  },
+}
+```
+
+The following Global Hooks are available:
+
+- [`beforeValidate`](#beforevalidate)
+- [`beforeChange`](#beforechange)
+- [`afterChange`](#afterchange)
+- [`beforeRead`](#beforeread)
+- [`afterRead`](#afterread)
+
+## Config Options
+
+All Global Hooks accept an array of synchronous or asynchronous functions. Each Global Hook receives specific arguments based on its own type, and has the ability to modify specific outputs.
+
+```ts
+import type { GlobalConfig } from 'payload';
+
+const GlobalWithHooks: GlobalConfig = {
+  // ...
+  // highlight-start
   hooks: {
     beforeValidate: [(args) => {...}],
     beforeChange: [(args) => {...}],
@@ -35,6 +46,7 @@ const ExampleHooks: GlobalConfig = {
     afterChange: [(args) => {...}],
     afterRead: [(args) => {...}],
   }
+  // highlight-end
 }
 ```
 
