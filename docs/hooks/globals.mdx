@@ -66,6 +66,16 @@ const beforeValidateHook: GlobalBeforeValidateHook = async ({
 }
 ```
 
+The following arguments are passed to the `beforeValidate` hook:
+
+| Option                   | Description                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
+| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
+| **`data`**               | The incoming data passed through the operation.                                                                                 |
+| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
+| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+
 ### beforeChange
 
 Immediately following validation, `beforeChange` hooks will run within the `update` operation. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
@@ -81,6 +91,16 @@ const beforeChangeHook: GlobalBeforeChangeHook = async ({
   return data // Return data to update the document with
 }
 ```
+
+The following arguments are passed to the `beforeChange` hook:
+
+| Option                   | Description                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
+| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
+| **`data`**               | The incoming data passed through the operation.                                                                                 |
+| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
+| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
 
 ### afterChange
 
@@ -98,6 +118,16 @@ const afterChangeHook: GlobalAfterChangeHook = async ({
 }
 ```
 
+The following arguments are passed to the `afterChange` hook:
+
+| Option                   | Description                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
+| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
+| **`doc`**               | The resulting Document after changes are applied. |
+| **`previousDoc`**        | The Document before changes were applied. |
+| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+
 ### beforeRead
 
 Runs before `findOne` global operation is transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
@@ -110,6 +140,15 @@ const beforeReadHook: GlobalBeforeReadHook = async ({
   req, // full Request object
 }) => {...}
 ```
+
+The following arguments are passed to the `beforeRead` hook:
+
+| Option                   | Description                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
+| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
+| **`doc`**               | The resulting Document after changes are applied. |
+| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
 
 ### afterRead
 
@@ -124,6 +163,17 @@ const afterReadHook: GlobalAfterReadHook = async ({
   findMany, // boolean to denote if this hook is running against finding one, or finding many (useful in versions)
 }) => {...}
 ```
+
+The following arguments are passed to the `beforeRead` hook:
+
+| Option                   | Description                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
+| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
+| **`findMany`**            | Boolean to denote if this hook is running against finding one, or finding many (useful in versions).                                                                                                                              |
+| **`doc`**               | The resulting Document after changes are applied. |
+| **`query`**          | The [Query](../queries/overview) of the request.
+| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
 
 ## TypeScript
 
