@@ -40,6 +40,8 @@ type Args = {
   validRelationships: null | string[]
 }
 
+export const protectedFieldNames = ['__v', 'salt', 'hash', 'file']
+
 export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
@@ -48,8 +50,6 @@ export const sanitizeFields = async ({
   richTextSanitizationPromises,
   validRelationships,
 }: Args): Promise<Field[]> => {
-  const protectedFieldNames = ['__v', 'salt', 'hash', 'file']
-
   if (!fields) return []
 
   for (let i = 0; i < fields.length; i++) {
