@@ -728,11 +728,13 @@ export type RadioField = {
 export type Block = {
   admin?: {
     components?: {
-      Label?: CustomComponent<LabelProps>
+      Label?: CustomComponent<{
+        formData: Record<string, any>
+      }>
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
-  } & Admin
+  }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   /**
