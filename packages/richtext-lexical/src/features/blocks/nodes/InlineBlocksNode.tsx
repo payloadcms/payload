@@ -2,7 +2,6 @@ import type {
   DOMConversionMap,
   DOMExportOutput,
   EditorConfig,
-  ElementFormatType,
   LexicalEditor,
   LexicalNode,
   NodeKey,
@@ -14,10 +13,10 @@ import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
 import React, { type JSX } from 'react'
 
-export type BlockFields = {
+export type InlineBlockFields = {
   /** Block form data */
   [key: string]: any
-  blockName: string
+  //blockName: string
   blockType: string
   id: string
 }
@@ -31,24 +30,16 @@ const InlineBlockComponent = React.lazy(() =>
 export type SerializedInlineBlockNode = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    fields: BlockFields
+    fields: InlineBlockFields
     type: 'inlineBlock'
   },
   SerializedLexicalNode
 >
 
 export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
-  __fields: BlockFields
+  __fields: InlineBlockFields
 
-  constructor({
-    fields,
-    format,
-    key,
-  }: {
-    fields: BlockFields
-    format?: ElementFormatType
-    key?: NodeKey
-  }) {
+  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
     super(key)
     this.__fields = fields
   }
@@ -108,7 +99,7 @@ export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
     }
   }
 
-  getFields(): BlockFields {
+  getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
 
@@ -120,8 +111,8 @@ export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
     return true
   }
 
-  setFields(fields: BlockFields): void {
-    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
+  setFields(fields: InlineBlockFields): void {
+    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as InlineBlockFields
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy
@@ -132,7 +123,7 @@ export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
   }
 }
 
-export function $createInlineBlockNode(fields: Exclude<BlockFields, 'id'>): InlineBlockNode {
+export function $createInlineBlockNode(fields: Exclude<InlineBlockFields, 'id'>): InlineBlockNode {
   return new InlineBlockNode({
     fields: {
       ...fields,

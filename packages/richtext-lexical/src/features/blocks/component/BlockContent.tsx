@@ -1,5 +1,5 @@
 import type { FormFieldBase } from '@payloadcms/ui'
-import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { CollapsedPreferences, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -20,6 +20,7 @@ import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'
+import type { ClientBlock } from '../feature.client.js'
 import type { BlockFields, BlockNode } from '../nodes/BlocksNode.js'
 
 import { FormSavePlugin } from './FormSavePlugin.js'
@@ -35,7 +36,7 @@ type Props = {
   formSchema: FieldMap
   nodeKey: string
   path: string
-  reducedBlock: ReducedBlock
+  reducedBlock: ClientBlock
   schemaPath: string
 }
 

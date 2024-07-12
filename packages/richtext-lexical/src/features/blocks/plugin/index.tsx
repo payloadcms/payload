@@ -38,6 +38,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
   const { closeModal, toggleModal } = useModal()
   const [blockFields, setBlockFields] = useState<BlockFields>({} as any)
+  const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
 
   useEffect(() => {
@@ -115,6 +116,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         ({ fields, nodeKey }) => {
           setBlockFields((fields as BlockFields) ?? ({} as BlockFields))
           setTargetNodeKey(nodeKey ?? null)
+          setBlockType((fields as BlockFields).blockType ?? ('' as any))
 
           if (nodeKey) {
             toggleModal(drawerSlug)
@@ -152,6 +154,8 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         if (!data) {
           return
         }
+
+        data.blockType = blockType
 
         editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
       }}

@@ -17,7 +17,9 @@ import {
   KEY_DELETE_COMMAND,
 } from 'lexical'
 
-import type { BlockFields } from '../nodes/BlocksNode.js'
+import type { ClientComponentProps } from '../../typesClient.js'
+import type { BlocksFeatureClientProps, ClientBlock } from '../feature.client.js'
+import type { InlineBlockFields } from '../nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
@@ -25,17 +27,22 @@ import { OPEN_INLINE_BLOCK_DRAWER_COMMAND } from '../plugin/commands.js'
 import './index.scss'
 
 type Props = {
-  formData: BlockFields
-  nodeKey?: string
+  readonly formData: InlineBlockFields
+  readonly nodeKey?: string
 }
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
-  const { t } = useTranslation<{}, string>()
-  const { field } = useEditorConfigContext()
+  const { t } = useTranslation<object, string>()
+  const { editorConfig, field } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
+
+  const reducedBlock: ClientBlock = (
+    editorConfig?.resolvedFeatureMap?.get('blocks')
+      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+  )?.reducedInlineBlocks?.find((block) => block.slug === formData?.blockType)
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -44,9 +51,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   }, [editor, nodeKey])
 
   const $onDelete = useCallback(
-    (payload: KeyboardEvent) => {
+    (event: KeyboardEvent) => {
       if (isSelected && $isNodeSelection($getSelection())) {
-        const event: KeyboardEvent = payload
         event.preventDefault()
         const node = $getNodeByKey(nodeKey)
         if ($isInlineBlockNode(node)) {
@@ -91,6 +97,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     )
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
+  const LabelComponent: React.FC<any> = reducedBlock?.LabelComponent as React.FC<any>
+
   return (
     <div
       className={[
@@ -102,7 +110,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {formData?._internal_text_output}
+      {LabelComponent && <LabelComponent formData={formData} />}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button
@@ -114,7 +122,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             onClick={() => {
               editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                 fields: formData,
-
                 nodeKey,
               })
             }}

@@ -12,9 +12,13 @@ import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
+export type ClientBlock = {
+  LabelComponent?: React.ComponentType<{}>
+} & ReducedBlock
+
 export type BlocksFeatureClientProps = {
-  reducedBlocks: ReducedBlock[]
-  reducedInlineBlocks: ReducedBlock[]
+  reducedBlocks: ClientBlock[]
+  reducedInlineBlocks: ClientBlock[]
 }
 
 export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(({ props }) => ({

@@ -19,6 +19,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
+import { LabelComponent } from './LabelComponent.js'
 import {
   ConditionalLayoutBlock,
   RadioButtonsBlock,
@@ -83,7 +84,12 @@ const editorConfig: ServerEditorConfig = {
       ],
       inlineBlocks: [
         {
-          slug: 'translationKey',
+          slug: 'myInlineBlock',
+          admin: {
+            components: {
+              Label: LabelComponent,
+            },
+          },
           fields: [
             {
               name: 'key',

@@ -65,6 +65,7 @@ export const BlocksFeature = createServerFeature<
       for (const block of props.blocks) {
         clientProps.reducedBlocks.push({
           slug: block.slug,
+          LabelComponent: block?.admin?.components?.Label,
           fieldMap: [],
           imageAltText: block.imageAltText,
           imageURL: block.imageURL,
@@ -76,6 +77,7 @@ export const BlocksFeature = createServerFeature<
       for (const block of props.inlineBlocks) {
         clientProps.reducedInlineBlocks.push({
           slug: block.slug,
+          LabelComponent: block?.admin?.components?.Label,
           fieldMap: [],
           imageAltText: block.imageAltText,
           imageURL: block.imageURL,
