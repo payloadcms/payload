@@ -18,11 +18,11 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean

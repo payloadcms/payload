@@ -27,10 +27,10 @@ export type RelationshipData = {
   value: number | string
 }
 
-export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode> & {
+export type SerializedRelationshipNode = {
   children?: never // required so that our typed editor state doesn't automatically add children
   type: 'relationship'
-}
+} & Spread<RelationshipData, SerializedDecoratorBlockNode>
 
 function $relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')

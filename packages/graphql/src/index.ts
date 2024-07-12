@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { OperationArgs } from 'graphql-http'
 import type { GraphQLInfo, SanitizedConfig } from 'payload'
 

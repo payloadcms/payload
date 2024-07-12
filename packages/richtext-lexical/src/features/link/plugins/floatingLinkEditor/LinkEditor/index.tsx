@@ -42,7 +42,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { i18n, t } = useTranslation()
 
-  const [stateData, setStateData] = useState<{} | (LinkFields & { id?: string; text: string })>({})
+  const [stateData, setStateData] = useState<({ id?: string; text: string } & LinkFields) | {}>({})
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
@@ -102,7 +102,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     // Initial state:
-    const data: LinkFields & { text: string } = {
+    const data: { text: string } & LinkFields = {
       doc: undefined,
       linkType: undefined,
       newTab: undefined,
@@ -321,7 +321,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         handleDrawerSubmit={(fields: FormState, data: Data) => {
           closeModal(drawerSlug)
 
-          const newLinkPayload = data as LinkFields & { text: string }
+          const newLinkPayload = data as { text: string } & LinkFields
 
           const bareLinkFields: LinkFields = {
             ...newLinkPayload,

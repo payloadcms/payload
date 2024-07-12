@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
@@ -23,7 +22,7 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
 
     // Run migration if not found in database
     if (existingMigration) {
-      continue // eslint-disable-line no-continue
+      continue
     }
 
     const start = Date.now()

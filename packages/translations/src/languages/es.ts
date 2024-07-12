@@ -321,6 +321,7 @@ export const esTranslations: DefaultTranslationsObject = {
     within: 'dentro de',
   },
   upload: {
+    addImage: 'Añadir imagen',
     crop: 'Cultivo',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
@@ -335,6 +336,7 @@ export const esTranslations: DefaultTranslationsObject = {
     height: 'Alto',
     lessInfo: 'Menos info',
     moreInfo: 'Más info',
+    pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
     selectCollectionToBrowse: 'Selecciona una Colección',
     selectFile: 'Selecciona un archivo',

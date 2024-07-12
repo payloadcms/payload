@@ -2,31 +2,29 @@ import type { CollectionConfig } from 'payload'
 
 export const collectionEndpoints: CollectionConfig['endpoints'] = [
   {
-    path: '/say-hello/joe-bloggs',
-    method: 'get',
     handler: () => {
       return Response.json({ message: 'Hey Joey!' })
     },
+    method: 'get',
+    path: '/say-hello/joe-bloggs',
   },
   {
-    path: '/say-hello/:group/:name',
-    method: 'get',
     handler: (req) => {
       return Response.json({
         message: `Hello ${req.routeParams.name as string} @ ${req.routeParams.group as string}`,
       })
     },
+    method: 'get',
+    path: '/say-hello/:group/:name',
   },
   {
-    path: '/say-hello/:name',
-    method: 'get',
     handler: (req) => {
       return Response.json({ message: `Hello ${req.routeParams.name as string}!` })
     },
+    method: 'get',
+    path: '/say-hello/:name',
   },
   {
-    path: '/whoami',
-    method: 'post',
     handler: async (req) => {
       let data
 
@@ -43,5 +41,7 @@ export const collectionEndpoints: CollectionConfig['endpoints'] = [
         age: req.data.age,
       })
     },
+    method: 'post',
+    path: '/whoami',
   },
 ]

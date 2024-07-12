@@ -30,12 +30,12 @@ export type ListQueryProps = {
   preferenceKey?: string
 } & Handlers
 
-export type ListQueryContext = Handlers & {
+export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
   refineListData: (args: RefineOverrides) => void
-}
+} & Handlers
 
 const Context = createContext({} as ListQueryContext)
 

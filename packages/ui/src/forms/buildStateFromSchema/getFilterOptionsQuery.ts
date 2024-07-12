@@ -2,7 +2,7 @@ import type { FilterOptions, FilterOptionsProps, Where } from 'payload'
 
 export const getFilterOptionsQuery = async (
   filterOptions: FilterOptions,
-  options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] },
+  options: { relationTo: string | string[] } & Omit<FilterOptionsProps, 'relationTo'>,
 ): Promise<{ [collection: string]: Where }> => {
   const { relationTo } = options
 

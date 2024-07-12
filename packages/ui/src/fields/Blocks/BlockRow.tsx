@@ -18,7 +18,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = UseDraggableSortableReturn & {
+type BlockFieldProps = {
   addRow: (rowIndex: number, blockType: string) => void
   block: ReducedBlock
   blocks: ReducedBlock[]
@@ -39,7 +39,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
-}
+} & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlockFieldProps> = ({
   addRow,

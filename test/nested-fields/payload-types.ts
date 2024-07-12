@@ -7,157 +7,181 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
-    'nested-fields': NestedField
-    users: User
-    'payload-preferences': PayloadPreference
-    'payload-migrations': PayloadMigration
-  }
-  globals: {}
-  locale: null
+    'nested-fields': NestedField;
+    users: User;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  globals: {};
+  locale: null;
   user: User & {
-    collection: 'users'
-  }
+    collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested-fields".
  */
 export interface NestedField {
-  id: string
+  id: string;
   array?:
     | {
         group?: {
           namedTab?: {
             blocks?:
               | {
-                  text?: string | null
+                  text?: string | null;
                   blockArray?:
                     | {
-                        arrayText?: string | null
-                        id?: string | null
+                        arrayText?: string | null;
+                        id?: string | null;
                       }[]
-                    | null
-                  id?: string | null
-                  blockName?: string | null
-                  blockType: 'blockWithFields'
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'blockWithFields';
                 }[]
-              | null
-          }
-        }
-        id?: string | null
+              | null;
+          };
+        };
+        id?: string | null;
       }[]
-    | null
+    | null;
   tab1?: {
     layout?:
       | (
           | {
               items?:
                 | {
-                    title: string
-                    id?: string | null
+                    title: string;
+                    id?: string | null;
                   }[]
-                | null
-              id?: string | null
-              blockName?: string | null
-              blockType: 'block-1'
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'block-1';
             }
           | {
               items?:
                 | {
-                    title2: string
-                    id?: string | null
+                    title2: string;
+                    id?: string | null;
                   }[]
-                | null
-              id?: string | null
-              blockName?: string | null
-              blockType: 'block-2'
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'block-2';
             }
         )[]
-      | null
-  }
+      | null;
+  };
   blocksWithSimilarConfigs?:
     | (
         | {
             items?:
               | {
-                  title: string
-                  id?: string | null
+                  title: string;
+                  id?: string | null;
                 }[]
-              | null
-            id?: string | null
-            blockName?: string | null
-            blockType: 'block-1'
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-1';
           }
         | {
             items?:
               | {
-                  title2: string
-                  id?: string | null
+                  title2: string;
+                  id?: string | null;
                 }[]
-              | null
-            id?: string | null
-            blockName?: string | null
-            blockType: 'block-2'
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-2';
           }
       )[]
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string
-  updatedAt: string
-  createdAt: string
-  email: string
-  resetPasswordToken?: string | null
-  resetPasswordExpiration?: string | null
-  salt?: string | null
-  hash?: string | null
-  loginAttempts?: number | null
-  lockUntil?: string | null
-  password?: string | null
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string
+  id: string;
   user: {
-    relationTo: 'users'
-    value: string | User
-  }
-  key?: string | null
+    relationTo: 'users';
+    value: string | User;
+  };
+  key?: string | null;
   value?:
     | {
-        [k: string]: unknown
+        [k: string]: unknown;
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string
-  name?: string | null
-  batch?: number | null
-  updatedAt: string
-  createdAt: string
+  id: string;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
+
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

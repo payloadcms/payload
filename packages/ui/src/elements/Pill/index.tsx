@@ -14,9 +14,9 @@ export type PillProps = {
   children?: React.ReactNode
   className?: string
   draggable?: boolean
-  elementProps?: HTMLAttributes<HTMLElement> & {
+  elementProps?: {
     ref: React.RefCallback<HTMLElement>
-  }
+  } & HTMLAttributes<HTMLElement>
   icon?: React.ReactNode
   id?: string
   onClick?: () => void

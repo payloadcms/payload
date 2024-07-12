@@ -14,7 +14,6 @@ import { InitTheme } from '../providers/Theme/InitTheme'
 import { mergeOpenGraph } from '../utilities/mergeOpenGraph'
 import './globals.css'
 
-// eslint-disable-next-line no-restricted-exports, @typescript-eslint/require-await
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>

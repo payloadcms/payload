@@ -21,11 +21,11 @@ export interface EditorConfigContextType {
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  field: FormFieldBase & {
+  field: {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void
   focusedEditor: EditorConfigContextType | null
@@ -51,11 +51,11 @@ export const EditorConfigProvider = ({
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
   const [editor] = useLexicalComposerContext()
