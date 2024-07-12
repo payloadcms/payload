@@ -64,7 +64,7 @@ To specify depth in the [REST API](../rest-api/overview), you can use the `depth
 
 ```ts
 fetch('https://localhost:3000/api/posts?depth=2') // highlight-line
-  .then((response) => response.json())
+  .then((res) => res.json())
   .then((data) => console.log(data))
 ```
 

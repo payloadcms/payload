@@ -6,19 +6,13 @@ desc: Hooks allow you to add your own logic to Payload, including integrating wi
 keywords: hooks, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner type="info">
-  Hooks are powerful ways to tie into existing Payload actions in order to add your own logic like
-  integrating with third-party APIs, adding auto-generated data, or modifing Payload's base
-  functionality.
-</Banner>
+Hooks allow you to execute your own logic during specific events of the Document lifecycle, such as read or update. With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework. They allow you to perform complex business tasks and third-party integrations at precise moments within the data lifecycle.
 
-**With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework.**
-
-Example uses:
+There are many use cases for Hooks, including:
 
 - Integrate user profiles with a third-party CRM such as Salesforce or Hubspot
 - Send a copy of uploaded files to Amazon S3 or similar
-- Automatically add `lastModifiedBy` data to a document to track who changed what over time
+- Automatically add `lastModifiedBy` data to a document to track who has changed what over time
 - Encrypt a field's data when it's saved and decrypt it when it's read
 - Send emails when `ContactSubmission`s are created from a public website
 - Integrate with a payment provider like Stripe to automatically process payments when an `Order` is created
@@ -26,7 +20,11 @@ Example uses:
 - Generate and store a `lastLoggedIn` date on a user by adding an `afterLogin` hook
 - Add extra data to documents before they are read such as "average scores" or similar data that needs to be calculated on the fly
 
-There are many more use cases for Hooks and the sky is the limit.
+There are three main types of Hooks in Payload:
+
+- [Collection Hooks](/docs/hooks/collections)
+- [Global Hooks](/docs/hooks/globals)
+- [Field Hooks](/docs/hooks/fields)
 
 ## Async vs. synchronous
 
@@ -36,12 +34,4 @@ If your Hook simply performs a side-effect, such as updating a CRM, it might be 
 
 ## Server-only execution
 
-Payload Hooks are only triggered on the server and are automatically excluded from the Payload Admin bundle.
-
-## Hook Types
-
-You can specify hooks in the following contexts:
-
-- [Collection Hooks](/docs/hooks/collections)
-- [Field Hooks](/docs/hooks/fields)
-- [Global Hooks](/docs/hooks/globals)
+Payload Hooks are only triggered on the server and are automatically excluded from the client-side bundle. This means that you can safely use sensitive business logic in your Hooks without worrying about exposing it to the client.
