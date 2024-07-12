@@ -6,16 +6,7 @@ desc: Hooks can be added to any fields, and optionally modify the return value o
 keywords: hooks, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Field Hooks offer incredible potential for encapsulating your logic. They help to isolate concerns and package up
-functionalities to be easily reusable across your projects.
-
-There are many use cases for Field Hooks, including:
-
-- Automatically add an `owner` relationship to a Document based on the `req.user.id`
-- Encrypt / decrypt a sensitive field using `beforeValidate` and `afterRead` hooks
-- Auto-generate field data using a `beforeValidate` hook
-- Format incoming data such as kebab-casing a document `slug` with `beforeValidate`
-- Restrict updating a document to only once every X hours using the `beforeChange` hook
+Field Hooks are [Hooks](./overview) that run on Documents on a per-field basis. They allow you to execute your own logic during specific events of the Document lifecycle. Field Hooks offer incredible potential for isolating your logic from the rest of your [Collection Hooks](./collections) and [Global Hooks](./globals).
 
 To add hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
 

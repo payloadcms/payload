@@ -10,15 +10,13 @@ Hooks allow you to execute your own logic during specific events of the Document
 
 There are many use cases for Hooks, including:
 
-- Integrate user profiles with a third-party CRM such as Salesforce or Hubspot
+- Modify data before it is read or updated
+- Encrypt and decrypt sensitive data
+- Integrate with a third-party CRM like HubSpot or Salesforce
 - Send a copy of uploaded files to Amazon S3 or similar
-- Automatically add `lastModifiedBy` data to a document to track who has changed what over time
-- Encrypt a field's data when it's saved and decrypt it when it's read
-- Send emails when `ContactSubmission`s are created from a public website
-- Integrate with a payment provider like Stripe to automatically process payments when an `Order` is created
-- Securely recalculate order prices on the backend to ensure that the total price for `Order`s that users submit is accurate and valid
-- Generate and store a `lastLoggedIn` date on a user by adding an `afterLogin` hook
-- Add extra data to documents before they are read such as "average scores" or similar data that needs to be calculated on the fly
+- Process orders through a payment provider like Stripe
+- Send emails when contact forms are submitted
+- Track data ownership or changes over time
 
 There are three main types of Hooks in Payload:
 
