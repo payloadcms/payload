@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "3.0.0-beta.61",
+  "version": "3.0.0-beta.62",
   "description": "Redirects plugin for Payload",
   "keywords": [
     "payload",
