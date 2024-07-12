@@ -12,33 +12,37 @@ Payload is based around a small and intuitive set of concepts. Before starting t
 
 The Payload Config is allows for the deep configuration of your application through a simple and intuitive API. The Payload Config is a fully-typed JavaScript object that can be infinitely extended upon. [More details](../configuration/overview).
 
-## Admin Panel
-
-Payload dynamically generates a beautiful, fully type-safe interface to manage your users and data. The Admin Panel is a React application built using the Next.js App Router. [More details](../admin/overview).
-
-## Database
+### Database
 
 Payload is database agnostic, meaning you can use any type of database behind Payload's familiar APIs through a Database Adapter. [More details](../database/overview).
 
-## Collections
+### Collections
 
 A Collection is a group of records, called Documents, that share a common schema. Each Collection saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/collections).
 
-## Globals
+### Globals
 
 Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. Each Global saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/globals).
 
-## Fields
+### Fields
 
 Fields are the building blocks of Payload. They define the schema of the Documents that will be stored in the [Database](../database/overview), as well as automatically generate the corresponding UI within the Admin Panel. [More details](../fields/overview).
 
-## Hooks
+### Hooks
 
 Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. [More details](../hooks/overview).
 
-## Access Control
+### Access Control
 
 Access Control determines what a user can and cannot do with a Document. [More details](../access-control/overview).
+
+### Admin Panel
+
+Payload dynamically generates a beautiful, fully type-safe interface to manage your users and data. The Admin Panel is a React application built using the Next.js App Router. [More details](../admin/overview).
+
+### Plugins
+
+Plugins allow for developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. [More details](../plugins/overview).
 
 ## Retrieving Data
 
@@ -127,13 +131,9 @@ If you don't use GraphQL, you can delete those files! But if you do, you'll find
   For more information about the GraphQL API, [click here](../graphql/overview).
 </Banner>
 
-## Depth
+### Depth
 
 Documents can be related to other Documents through a concept called "relationships". When you query a Document, you can specify these relationships are populated. [More details](../queries/depth).
-
-## Plugins
-
-Plugins allow for developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. [More details](../plugins/overview).
 
 ## Package Structure
 
@@ -147,7 +147,7 @@ Payload is abstracted into a set of dedicated packages to keep the core `payload
 
 `payload`
 
-The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers - it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete`. It executes access control, hooks, validation, and more.
+The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers—it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete` and exposes a [Local API](../local-api/overview). It executes [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Validation](../fields/overview#validation), and more.
 
 Payload itself is extremely compact, and can be used in any Node environment. As long as you have `payload` installed and you have access to your Payload Config, you can query and mutate your database directly without going through an unnecessary HTTP layer.
 
@@ -156,12 +156,12 @@ Payload also contains all TypeScript definitions, which can be imported from `pa
 Here's how to import some common Payload types:
 
 ```ts
-import { CollectionConfig, Field, GlobalConfig, Config } from 'payload'
+import { Config, CollectionConfig, GlobalConfig, Field } from 'payload'
 ```
 
 `@payloadcms/next`
 
-Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the Admin Panel and the entire HTTP layer (REST, GraphQL) that Payload exposes.
+Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the Admin Panel and the entire HTTP layer that Payload exposes, including the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview).
 
 `@payloadcms/graphql`
 
