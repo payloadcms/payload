@@ -232,7 +232,7 @@ export interface FieldBase {
   /**
    * The name of the field. Must be alphanumeric and cannot contain ' . '
    *
-   * Must not be one of protected field names: ['__v', 'salt', 'hash', 'file']
+   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
   name: string
