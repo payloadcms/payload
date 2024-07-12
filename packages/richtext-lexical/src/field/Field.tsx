@@ -88,6 +88,7 @@ const _RichText: React.FC<
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
@@ -95,7 +96,6 @@ const _RichText: React.FC<
         {...(labelProps || {})}
       />
       <div className={`${baseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

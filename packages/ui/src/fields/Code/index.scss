@@ -10,27 +10,9 @@
     .code-editor {
       border-color: var(--theme-error-500);
     }
-  }
-}
-
-html[data-theme='light'] {
-  .code-field {
-    &.error {
-      .monaco-editor-background,
-      .margin {
-        background-color: var(--theme-error-50);
-      }
-    }
-  }
-}
-
-html[data-theme='dark'] {
-  .code-field {
-    &.error {
-      .monaco-editor-background,
-      .margin {
-        background-color: var(--theme-error-100);
-      }
+    .monaco-editor-background,
+    .margin {
+      background-color: var(--theme-error-50);
     }
   }
 }

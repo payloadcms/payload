@@ -105,7 +105,6 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         required={required}
         {...(labelProps || {})}
       />
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}

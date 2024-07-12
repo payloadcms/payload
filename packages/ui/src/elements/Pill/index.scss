@@ -111,12 +111,18 @@
   }
 
   &--style-warning {
-    background: var(--theme-warning-500);
+    background: var(--theme-warning-150);
+    color: var(--theme-warning-800);
   }
 
   &--style-success {
-    background: var(--theme-success-500);
-    color: var(--color-base-800);
+    background: var(--theme-success-150);
+    color: var(--theme-success-800);
+  }
+
+  &--style-error {
+    background: var(--theme-error-150);
+    color: var(--theme-error-800);
   }
 
   &--style-dark {
@@ -135,24 +141,6 @@
       &:active {
         background: var(--theme-elevation-700);
       }
-    }
-  }
-}
-
-html[data-theme='dark'] {
-  .pill {
-    &--style-error {
-      background: var(--theme-error-500);
-      color: var(--color-base-1000);
-    }
-  }
-}
-
-html[data-theme='light'] {
-  .pill {
-    &--style-error {
-      background: var(--theme-error-250);
-      color: var(--theme-error-750);
     }
   }
 }
