@@ -62,7 +62,7 @@ export const sanitizeFields = async ({
       throw new InvalidFieldName(field, field.name)
     }
 
-    // assert that field names are not one of protected names
+    // assert that field names are not one of reserved names
     if (fieldAffectsData(field) && reservedFieldNames.includes(field.name)) {
       throw new ReservedFieldName(field, field.name)
     }
