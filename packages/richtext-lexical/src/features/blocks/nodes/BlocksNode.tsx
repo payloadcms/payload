@@ -14,13 +14,12 @@ import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-export type BlockFields = {
+export type BlockFields<TBlockFields extends object = Record<string, unknown>> = {
   /** Block form data */
-  [key: string]: any
   blockName: string
   blockType: string
   id: string
-}
+} & TBlockFields
 
 const BlockComponent = React.lazy(() =>
   import('../component/index.js').then((module) => ({
@@ -28,10 +27,10 @@ const BlockComponent = React.lazy(() =>
   })),
 )
 
-export type SerializedBlockNode = Spread<
+export type SerializedBlockNode<TBlockFields extends object = Record<string, unknown>> = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    fields: BlockFields
+    fields: BlockFields<TBlockFields>
     type: 'block'
   },
   SerializedDecoratorBlockNode
