@@ -7,7 +7,7 @@ import {
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
-  ProtectedFieldName,
+  ReservedFieldName,
 } from '../../errors/index.js'
 import { deepMerge } from '../../utilities/deepMerge.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
@@ -40,7 +40,7 @@ type Args = {
   validRelationships: null | string[]
 }
 
-export const protectedFieldNames = ['__v', 'salt', 'hash', 'file']
+export const reservedFieldNames = ['__v', 'salt', 'hash', 'file']
 
 export const sanitizeFields = async ({
   config,
@@ -63,8 +63,8 @@ export const sanitizeFields = async ({
     }
 
     // assert that field names are not one of protected names
-    if (fieldAffectsData(field) && protectedFieldNames.includes(field.name)) {
-      throw new ProtectedFieldName(field, field.name)
+    if (fieldAffectsData(field) && reservedFieldNames.includes(field.name)) {
+      throw new ReservedFieldName(field, field.name)
     }
 
     // Auto-label

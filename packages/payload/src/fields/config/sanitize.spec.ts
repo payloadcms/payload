@@ -13,7 +13,7 @@ import {
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
-  ProtectedFieldName,
+  ReservedFieldName,
 } from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
 
@@ -52,7 +52,7 @@ describe('sanitizeFields', () => {
     }).rejects.toThrow(InvalidFieldName)
   })
 
-  it('should throw on a protected field name', async () => {
+  it('should throw on a reserved field name', async () => {
     const fields: Field[] = [
       {
         name: 'hash',
@@ -66,7 +66,7 @@ describe('sanitizeFields', () => {
         fields,
         validRelationships: [],
       })
-    }).rejects.toThrow(ProtectedFieldName)
+    }).rejects.toThrow(ReservedFieldName)
   })
 
   describe('auto-labeling', () => {
