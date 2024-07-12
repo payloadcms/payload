@@ -283,6 +283,7 @@
     "near": "yaxın"
   },
   "upload": {
+    "addImage": "Şəkil əlavə et",
     "crop": "Məhsul",
     "cropToolDescription": "Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.",
     "dragAndDrop": "Faylı buraya sürükləyin və buraxın",
@@ -295,6 +296,7 @@
     "height": "Hündürlük",
     "lessInfo": "Daha az məlumat",
     "moreInfo": "Daha çox məlumat",
+    "pasteURL": "URL yapışdır",
     "previewSizes": "Öncədən baxış ölçüləri",
     "selectCollectionToBrowse": "Gözdən keçirmək üçün bir Kolleksiya seçin",
     "selectFile": "Fayl seçin",

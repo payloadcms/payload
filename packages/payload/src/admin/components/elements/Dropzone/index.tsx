@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import Button from '../Button'
 
+import Button from '../Button'
 import './index.scss'
 
 const handleDragOver = (e: DragEvent) => {
@@ -12,12 +12,13 @@ const handleDragOver = (e: DragEvent) => {
 const baseClass = 'dropzone'
 
 type Props = {
-  onChange: (e: FileList) => void
   className?: string
   mimeTypes?: string[]
+  onChange: (e: FileList) => void
+  onPasteUrlClick?: () => void
 }
 
-export const Dropzone: React.FC<Props> = ({ onChange, className, mimeTypes }) => {
+export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPasteUrlClick }) => {
   const dropRef = React.useRef<HTMLDivElement>(null)
   const [dragging, setDragging] = React.useState(false)
   const inputRef = React.useRef(null)
@@ -98,24 +99,31 @@ export const Dropzone: React.FC<Props> = ({ onChange, className, mimeTypes }) =>
   const classes = [baseClass, className, dragging ? 'dragging' : ''].filter(Boolean).join(' ')
 
   return (
-    <div ref={dropRef} className={classes}>
+    <div className={classes} ref={dropRef}>
       <Button
-        size="small"
         buttonStyle="secondary"
+        className={`${baseClass}__file-button`}
         onClick={() => {
           inputRef.current.click()
         }}
-        className={`${baseClass}__file-button`}
+        size="small"
       >
-        {t('selectFile')}
+        {t('upload:selectFile')}
       </Button>
-
+      <Button
+        buttonStyle="secondary"
+        className={`${baseClass}__file-button`}
+        onClick={onPasteUrlClick}
+        size="small"
+      >
+        {t('upload:pasteURL')}
+      </Button>
       <input
+        accept={mimeTypes?.join(',')}
+        className={`${baseClass}__hidden-input`}
+        onChange={handleFileSelection}
         ref={inputRef}
         type="file"
-        accept={mimeTypes?.join(',')}
-        onChange={handleFileSelection}
-        className={`${baseClass}__hidden-input`}
       />
 
       <p className={`${baseClass}__label`}>

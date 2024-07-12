@@ -283,6 +283,7 @@
     "near": "yakın"
   },
   "upload": {
+    "addImage": "Resim ekle",
     "crop": "Kırp",
     "cropToolDescription": "Seçili alanın köşelerini sürükleyin, yeni bir alan çizin veya aşağıdaki değerleri ayarlayın.",
     "dragAndDrop": "Bir dosyayı sürükleyip bırakın",
@@ -295,6 +296,7 @@
     "height": "Yükseklik",
     "lessInfo": "Daha az bilgi",
     "moreInfo": "Daha fazla bilgi",
+    "pasteURL": "URL yapıştır",
     "previewSizes": "Önizleme Boyutları",
     "selectCollectionToBrowse": "Gözatmak için bir Koleksiyon seçin",
     "selectFile": "Bir dosya seçin",

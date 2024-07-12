@@ -37,6 +37,11 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
   )
 })
 
+type FocalPosition = {
+  x: number
+  y: number
+}
+
 export const EditUpload: React.FC<{
   doc?: Data
   fileName: string
@@ -49,7 +54,7 @@ export const EditUpload: React.FC<{
   const { t } = useTranslation(['general', 'upload'])
   const { updateUploadEdits, uploadEdits } = useUploadEdits()
 
-  const [focalPosition, setFocalPosition] = useState<{ x: number; y: number }>({
+  const [focalPosition, setFocalPosition] = useState<FocalPosition>({
     x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
     y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
   })

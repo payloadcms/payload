@@ -283,6 +283,7 @@
     "near": "blizu"
   },
   "upload": {
+    "addImage": "Dodaj sliku",
     "crop": "Isecite sliku",
     "cropToolDescription": "Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.",
     "dragAndDrop": "Prevucite i ispustite datoteku",
@@ -295,6 +296,7 @@
     "height": "Visina",
     "lessInfo": "Manje informacija",
     "moreInfo": "Više informacija",
+    "pasteURL": "Nalepi URL",
     "previewSizes": "Veličine pregleda",
     "selectCollectionToBrowse": "Odaberite kolekciju za pregled",
     "selectFile": "Odaberite datoteku",
