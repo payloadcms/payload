@@ -120,11 +120,11 @@ const MyCollection: CollectionConfig = {
 }
 ```
 
-## Typing context
+## TypeScript
 
-The default typescript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare` syntax.
+The default TypeScript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare` syntax.
 
-This is known as "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
+This is known as "type augmentation", a TypeScript feature which allows us to add types to existing objects. Simply put this in any `.ts` or `.d.ts` file:
 
 ```ts
 import { RequestContext as OriginalRequestContext } from 'payload'
