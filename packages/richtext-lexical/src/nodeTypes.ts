@@ -1,9 +1,10 @@
 import type {
+  SerializedLineBreakNode as _SerializedLineBreakNode,
+  SerializedTextNode as _SerializedTextNode,
   SerializedEditorState,
   SerializedElementNode,
   SerializedLexicalNode,
   Spread,
-  TextModeType,
 } from 'lexical'
 
 import type { SerializedQuoteNode } from './features/blockquote/feature.server.js'
@@ -39,14 +40,17 @@ export type SerializedParagraphNode<T extends SerializedLexicalNode = Serialized
 export type SerializedTextNode = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    detail: number
-    format: number
-    mode: TextModeType
-    style: string
-    text: string
     type: 'text'
   },
-  SerializedLexicalNode
+  _SerializedTextNode
+>
+
+export type SerializedLineBreakNode = Spread<
+  {
+    children?: never // required so that our typed editor state doesn't automatically add children
+    type: 'linebreak'
+  },
+  _SerializedLineBreakNode
 >
 
 type RecursiveNodes<T extends SerializedLexicalNode, Depth extends number = 4> = Depth extends 0
@@ -60,9 +64,10 @@ export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexical
 
 export type DefaultNodeTypes =
   | SerializedAutoLinkNode
-  | SerializedBlockNode
+  //| SerializedBlockNode // Not included by default
   | SerializedHeadingNode
   | SerializedHorizontalRuleNode
+  | SerializedLineBreakNode
   | SerializedLinkNode
   | SerializedListItemNode
   | SerializedListNode
