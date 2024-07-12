@@ -8,7 +8,7 @@ keywords: overview, fields, config, configuration, documentation, Content Manage
 
 Fields are the building blocks of Payload. They define the schema of the Documents that will be stored in the [Database](../database/overview), as well as automatically generate the corresponding UI within the [Admin Panel](../admin/overview).
 
-There are many [Field Types](#field-types) to choose from, ranging anywhere from simple text strings to nested arrays and blocks. Most fields save data to the database, while others are strictly presentational. Fields can have [Custom Validations](#validations), [Conditional Logic](../admin/fields#conditional-logic), [Access Control](#field-level-access-control), [Hooks](#field-level-hooks), and so much more.
+There are many [Field Types](#field-types) to choose from, ranging anywhere from simple text strings to nested arrays and blocks. Most fields save data to the database, while others are strictly presentational. Fields can have [Custom Validations](#validation), [Conditional Logic](../admin/fields#conditional-logic), [Access Control](#field-level-access-control), [Hooks](#field-level-hooks), and so much more.
 
 To configure fields, use the `fields` property in your [Collection](../configuration/collections) or [Global](../configuration/globals) config:
 
@@ -234,7 +234,7 @@ export const myField: Field = {
   You can use async `defaultValue` functions to fill fields with data from API requests.
 </Banner>
 
-### Validations
+### Validation
 
 Fields are automatically validated based on their [Field Type](#field-types) and other [Field Options](#field-options) such as `required` or `min` and `max` value constraints. If needed, however, field validations can be customized or entirely replaced by providing your own custom validation functions.
 
