@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { NextFunction, Request, Response } from 'express'
 import type express from 'express'
 import type { Payload } from 'payload'
@@ -50,7 +49,7 @@ export const startSentry = (pluginOptions: PluginOptions, payload: Payload): voi
     app.use(function onError(
       _err: unknown,
       _req: Request,
-      res: Response & { sentry?: string },
+      res: { sentry?: string } & Response,
       _next: NextFunction,
     ) {
       res.statusCode = 500

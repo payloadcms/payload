@@ -9,10 +9,10 @@ import { Media } from '../../_components/Media/index.js'
 import RichText from '../../_components/RichText/index.js'
 import classes from './index.module.scss'
 
-type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'mediaBlock' }> & {
+type Props = {
   id?: string
   staticImage?: StaticImageData
-}
+} & Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'mediaBlock' }>
 
 export const MediaBlock: React.FC<Props> = (props) => {
   const { media, position = 'default', staticImage } = props

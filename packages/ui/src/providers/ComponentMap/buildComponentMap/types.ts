@@ -94,13 +94,13 @@ export type ActionMap = {
   List: React.ReactNode[]
 }
 
-export type CollectionComponentMap = ConfigComponentMapBase & {
+export type CollectionComponentMap = {
   AfterList: React.ReactNode
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode
   BeforeListTable: React.ReactNode
   List: React.ReactNode
-}
+} & ConfigComponentMapBase
 
 export type GlobalComponentMap = ConfigComponentMapBase
 

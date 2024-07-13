@@ -7,14 +7,14 @@ import React from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 
-type FieldsWithDoc = FormState & {
+type FieldsWithDoc = {
   doc: {
     value: {
       relationTo: string
       value: string
     }
   }
-}
+} & FormState
 
 export const LinkToDocClient: React.FC = () => {
   const form = useWatchForm()

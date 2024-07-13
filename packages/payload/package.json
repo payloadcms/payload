@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.58",
+  "version": "3.0.0-beta.63",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -119,22 +119,22 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express-fileupload": "1.4.1",
     "@types/joi": "14.3.4",
-    "@types/json-schema": "7.0.12",
+    "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "^0.21.4",
+    "esbuild": "0.23.0",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.6.1",
+    "@swc/core": "^1.6.13",
     "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {

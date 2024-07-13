@@ -29,10 +29,10 @@ import { uploadFieldsSchemaPath } from '../../shared.js'
 export const UploadDrawer: React.FC<{
   drawerSlug: string
   element: UploadElementType
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   relatedCollection: ClientCollectionConfig
   schemaPath: string
 }> = (props) => {

@@ -1,7 +1,7 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'

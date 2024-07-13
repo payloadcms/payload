@@ -17,7 +17,7 @@ Just import the `migrateSlateToLexical` function we provide, pass it the `payloa
 IMPORTANT: This will overwrite all slate data. We recommend doing the following first:
 1. Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
 2. Make every richText field a lexical editor. This script will only convert lexical richText fields with old Slate data
-3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the admin panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
+3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the Admin Panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
 
 ```ts
 import { migrateSlateToLexical } from '@payloadcms/richtext-lexical'
@@ -55,7 +55,7 @@ and done! Now, everytime this lexical editor is initialized, it converts the sla
 This is by far the easiest way to migrate from Slate to Lexical, although it does come with a few caveats:
 
 - There is a performance hit when initializing the lexical editor
-- The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the admin panel
+- The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the Admin Panel
 
 The easy way to solve this: Edit the richText field and save the document! This overrides the slate data with the lexical data, and the next time the document is loaded, the lexical data will be used. This solves both the performance and the output issue for that specific document. This, however, is a slow and gradual migration process, thus you will have to support both API formats. Especially for a large number of documents, we recommend running the migration script, as explained above.
 
@@ -134,7 +134,7 @@ Each lexical node has a `version` property which is saved in the database. Every
 
 The problem is, this migration only happens when you open the editor, modify the richText field (so that the field's `setValue` function is called) and save the document. Until you do that for all documents, some documents will still have the old data.
 
-To solve this, we export an `upgradeLexicalData` function which goes through every single document in your payload app and re-saves it, if it has a lexical editor. This way, the data is automatically converted to the new format, and that automatic conversion gets applied to every single document in your app.
+To solve this, we export an `upgradeLexicalData` function which goes through every single document in your Payload app and re-saves it, if it has a lexical editor. This way, the data is automatically converted to the new format, and that automatic conversion gets applied to every single document in your app.
 
 IMPORTANT: Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
 

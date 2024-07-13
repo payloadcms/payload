@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
@@ -67,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -267,8 +267,8 @@ describe('admin2', () => {
         const tableRows = page.locator(tableRowLocator)
 
         await expect(tableRows).toHaveCount(1)
-        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
-        expect(firstId).toEqual(`ID: ${id}`)
+        const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
+        await expect(firstId).toHaveText(`ID: ${id}`)
 
         // Remove filter
         await page.locator('.condition__actions-remove').click()
@@ -738,7 +738,8 @@ describe('admin2', () => {
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await expect(options.locator('text=Title')).toHaveText('Title')
+
+        await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
 
         // list columns
         await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')

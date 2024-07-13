@@ -72,9 +72,9 @@ describe('Auth', () => {
     it('should prevent registering a new first user', async () => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
+          'confirm-password': password,
           email,
           password,
-          'confirm-password': password,
         }),
       })
 
@@ -742,11 +742,11 @@ describe('Auth', () => {
 
       const reset = await payload.resetPassword({
         collection: 'users',
-        overrideAccess: true,
         data: {
           password: 'test',
           token: forgot,
         },
+        overrideAccess: true,
       })
 
       expect(reset.user.email).toStrictEqual('dev@payloadcms.com')

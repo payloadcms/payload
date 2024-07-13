@@ -15,7 +15,6 @@ export const generatePageMetadata = async ({
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: { [key: string]: string | string[] }
-  //eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<Metadata> => {
   const config = await configPromise
 

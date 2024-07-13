@@ -28,7 +28,7 @@ export const getViewsFromConfig = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+
   docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]

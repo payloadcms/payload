@@ -4,29 +4,29 @@ import path from 'path'
 
 const Uploads: CollectionConfig = {
   slug: 'uploads',
-  upload: {
-    staticDir: path.resolve(process.cwd(), 'test/field-error-states/collections/Upload/uploads'),
-  },
   fields: [
     {
-      type: 'text',
       name: 'text',
+      type: 'text',
     },
     {
-      type: 'upload',
       name: 'media',
-      relationTo: 'uploads',
+      type: 'upload',
       filterOptions: {
         mimeType: {
           equals: 'image/png',
         },
       },
+      relationTo: 'uploads',
     },
     {
-      type: 'richText',
       name: 'richText',
+      type: 'richText',
     },
   ],
+  upload: {
+    staticDir: path.resolve(process.cwd(), 'test/field-error-states/collections/Upload/uploads'),
+  },
 }
 
 export const uploadsDoc = {

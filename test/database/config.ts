@@ -9,21 +9,6 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'posts',
-      hooks: {
-        beforeOperation: [
-          ({ req, operation, args }) => {
-            if (operation === 'update') {
-              const defaultIDType = req.payload.db.defaultIDType
-
-              if (defaultIDType === 'number' && typeof args.id === 'string') {
-                throw new Error('ID was not sanitized to a number properly')
-              }
-            }
-
-            return args
-          },
-        ],
-      },
       fields: [
         {
           name: 'title',
@@ -45,6 +30,21 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      hooks: {
+        beforeOperation: [
+          ({ args, operation, req }) => {
+            if (operation === 'update') {
+              const defaultIDType = req.payload.db.defaultIDType
+
+              if (defaultIDType === 'number' && typeof args.id === 'string') {
+                throw new Error('ID was not sanitized to a number properly')
+              }
+            }
+
+            return args
+          },
+        ],
+      },
     },
     {
       slug: 'relation-a',
@@ -92,7 +92,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'pg-migrations',
-      versions: true,
       fields: [
         {
           name: 'relation1',
@@ -115,8 +114,8 @@ export default buildConfigWithDefaults({
                 {
                   name: 'relation3',
                   type: 'relationship',
-                  relationTo: 'relation-b',
                   localized: true,
+                  relationTo: 'relation-b',
                 },
               ],
             },
@@ -129,8 +128,8 @@ export default buildConfigWithDefaults({
             {
               name: 'relation4',
               type: 'relationship',
-              relationTo: 'relation-b',
               localized: true,
+              relationTo: 'relation-b',
             },
           ],
         },
@@ -149,14 +148,15 @@ export default buildConfigWithDefaults({
                 {
                   name: 'relation6',
                   type: 'relationship',
-                  relationTo: 'relation-b',
                   localized: true,
+                  relationTo: 'relation-b',
                 },
               ],
             },
           ],
         },
       ],
+      versions: true,
     },
     {
       slug: 'custom-schema',

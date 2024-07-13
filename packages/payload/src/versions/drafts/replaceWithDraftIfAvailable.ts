@@ -60,7 +60,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
-  const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
+  const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
     limit: 1,

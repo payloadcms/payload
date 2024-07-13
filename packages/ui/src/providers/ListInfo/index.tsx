@@ -28,9 +28,9 @@ const Context = createContext({} as ListInfoContext)
 export const useListInfo = (): ListInfoContext => useContext(Context)
 
 export const ListInfoProvider: React.FC<
-  ListInfoProps & {
+  {
     children: React.ReactNode
-  }
+  } & ListInfoProps
 > = ({ children, ...props }) => {
   return <Context.Provider value={props}>{children}</Context.Provider>
 }

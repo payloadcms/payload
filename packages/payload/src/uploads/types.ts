@@ -48,7 +48,7 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
-export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
+export type ImageSize = {
   /**
    * @deprecated prefer position
    */
@@ -66,7 +66,7 @@ export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
    * 3. `true`: if the image is smaller than the image size, return the original image
    */
   withoutEnlargement?: ResizeOptions['withoutEnlargement']
-}
+} & Omit<ResizeOptions, 'withoutEnlargement'>
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
@@ -155,9 +155,9 @@ export type UploadConfig = {
   trimOptions?: ImageUploadTrimOptions
 }
 
-export type SanitizedUploadConfig = UploadConfig & {
+export type SanitizedUploadConfig = {
   staticDir: UploadConfig['staticDir']
-}
+} & UploadConfig
 
 export type File = {
   /**

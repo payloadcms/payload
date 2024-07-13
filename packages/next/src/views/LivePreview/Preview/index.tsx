@@ -3,7 +3,7 @@
 import type { EditViewProps } from 'payload'
 
 import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui'
-import { reduceFieldsToValues } from '@payloadcms/ui/shared'
+import { reduceFieldsToValues } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'

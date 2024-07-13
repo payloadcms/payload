@@ -51,10 +51,8 @@ export async function validateSearchParam({
   const { slug } = collectionConfig || globalConfig
 
   if (globalConfig && !policies.globals[slug]) {
-    // eslint-disable-next-line no-param-reassign
     globalConfig.fields = fields
 
-    // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
       type: 'global',
       entity: globalConfig,
@@ -85,7 +83,6 @@ export async function validateSearchParam({
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections[collectionSlug]) {
-            // eslint-disable-next-line no-param-reassign
             policies.collections[collectionSlug] = await getEntityPolicies({
               type: 'collection',
               entity: req.payload.collections[collectionSlug].config,

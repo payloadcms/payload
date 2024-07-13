@@ -15,11 +15,11 @@ import React, { useEffect, useState } from 'react'
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateURL } from '../../types.js'
 
-type PreviewProps = UIField & {
+type PreviewProps = {
   descriptionPath?: string
   hasGenerateURLFn: boolean
   titlePath?: string
-}
+} & UIField
 
 export const PreviewComponent: React.FC<PreviewProps> = ({
   descriptionPath: descriptionPathFromContext,
