@@ -229,7 +229,6 @@ export const seed = async ({
       data: {
         relatedPosts: [post2Doc.id, post3Doc.id],
       },
-      req,
     }),
     await payload.update({
       id: post2Doc.id,
@@ -237,7 +236,6 @@ export const seed = async ({
       data: {
         relatedPosts: [post1Doc.id, post3Doc.id],
       },
-      req,
     }),
     await payload.update({
       id: post3Doc.id,
@@ -245,7 +243,6 @@ export const seed = async ({
       data: {
         relatedPosts: [post1Doc.id, post2Doc.id],
       },
-      req,
     }),
   ])
 
