@@ -100,6 +100,7 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
@@ -107,8 +108,6 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''

@@ -99,7 +99,7 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}

@@ -164,7 +164,7 @@ For a working demonstration of this, check out the official [Live Preview Exampl
 
 ## Troubleshooting
 
-### Updates do not appear as fast as client-side Live Preview
+#### Updates do not appear as fast as client-side Live Preview
 
 If you are noticing that updates feel less snappy than client-side Live Preview (i.e. the `useLivePreview` hook), this is because of how the two differ in how they work—instead of emitting events against _form state_, server-side Live Preview refreshes the route after a new document is _saved_.
 
@@ -183,7 +183,7 @@ Use [Autosave](../versions/autosave) to mimic this effect server-side. Try decre
 }
 ```
 
-### Iframe refuses to connect
+#### Iframe refuses to connect
 
 If your front-end application has set a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) that blocks the Admin Panel from loading your front-end application, the iframe will not be able to load your site. To resolve this, you can whitelist the Admin Panel's domain in your CSP by setting the `frame-ancestors` directive:
 
