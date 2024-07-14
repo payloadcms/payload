@@ -23,8 +23,8 @@
     "graphql": "^16.8.1",
     "next": "15.0.0-canary.53",
     "payload": "beta",
-    "react": "^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0-rc-6230622a1a-20240610"
+    "react": "19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "19.0.0-rc-6230622a1a-20240610"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",

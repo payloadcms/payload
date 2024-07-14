@@ -16,7 +16,6 @@ import {
 } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import { UnderlineFeature } from '@payloadcms/richtext-lexical'
-import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -39,10 +38,6 @@ const dirname = path.dirname(filename)
 const generateTitle = () => {
   return 'My Website'
 }
-
-dotenv.config({
-  path: path.resolve(dirname, '../../.env'),
-})
 
 export default buildConfig({
   admin: {
