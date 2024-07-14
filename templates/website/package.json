@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbo",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm serve",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
