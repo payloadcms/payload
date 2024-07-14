@@ -51,7 +51,6 @@ export const seed = async ({
     ...collections.map((collection) =>
       payload.delete({
         collection: collection as 'media',
-        req,
         where: {},
       }),
     ),
@@ -59,7 +58,6 @@ export const seed = async ({
       payload.updateGlobal({
         slug: global as 'header',
         data: {},
-        req,
       }),
     ),
   ])
@@ -70,7 +68,6 @@ export const seed = async ({
     ['demo-author@payloadcms.com'].map(async (email) => {
       await payload.delete({
         collection: 'users',
-        req,
         where: {
           email: {
             equals: email,
@@ -88,7 +85,6 @@ export const seed = async ({
         email: 'demo-author@payloadcms.com',
         password: 'password',
       },
-      req,
     }),
   ])
 
@@ -101,25 +97,21 @@ export const seed = async ({
       collection: 'media',
       data: image1,
       filePath: path.resolve(dirname, 'image-post1.webp'),
-      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-post2.webp'),
-      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-post3.webp'),
-      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-hero1.webp'),
-      req,
     }),
   ])
 
@@ -131,42 +123,36 @@ export const seed = async ({
       data: {
         title: 'Technology',
       },
-      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'News',
       },
-      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Finance',
       },
-      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Design',
       },
-      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Software',
       },
-      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Engineering',
       },
-      req,
     }),
   ])
 
