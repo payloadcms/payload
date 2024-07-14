@@ -47,7 +47,6 @@
     "react": "19.0.0-rc-6230622a1a-20240610",
     "react-dom": "19.0.0-rc-6230622a1a-20240610",
     "react-hook-form": "7.45.4",
-    "react-router-dom": "5.3.4",
     "sharp": "0.32.6",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
