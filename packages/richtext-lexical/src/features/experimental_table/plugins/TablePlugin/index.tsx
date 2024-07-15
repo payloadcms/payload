@@ -117,7 +117,6 @@ export const TablePlugin: PluginComponent = () => {
   return (
     <React.Fragment>
       <FieldsDrawer
-        data={{}}
         drawerSlug={drawerSlug}
         drawerTitle="Create Table"
         featureKey="experimental_table"
