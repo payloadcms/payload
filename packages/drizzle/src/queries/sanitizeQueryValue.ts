@@ -77,7 +77,7 @@ export const sanitizeQueryValue = ({
   if (field.type === 'relationship' || field.type === 'upload') {
     if (val === 'null') {
       formattedValue = null
-    } else {
+    } else if (!(formattedValue === null || typeof formattedValue === 'boolean')) {
       // convert the value to the idType of the relationship
       let idType: 'number' | 'text'
       if (typeof field.relationTo === 'string') {
@@ -101,6 +101,9 @@ export const sanitizeQueryValue = ({
         formattedValue = formattedValue.map((value) => {
           if (idType === 'number') {
             return Number(value)
+          }
+          if (idType === 'text') {
+            return String(val)
           }
           return value
         })
