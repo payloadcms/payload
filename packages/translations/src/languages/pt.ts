@@ -400,6 +400,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publicar alterações',
     published: 'Publicado',
     publishing: 'Publicação',
+    restoreAsDraft: 'Restaurar como rascunho',
     restoreThisVersion: 'Restaurar essa versão',
     restoredSuccessfully: 'Restaurado com sucesso.',
     restoring: 'Restaurando...',

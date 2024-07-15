@@ -100,7 +100,7 @@ const Restore: React.FC<Props> = ({
             render={() => (
               <PopupList.ButtonGroup>
                 <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
-                  Restore as draft
+                  {t('version:restoreAsDraft')}
                 </PopupList.Button>
               </PopupList.ButtonGroup>
             )}

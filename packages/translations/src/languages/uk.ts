@@ -398,6 +398,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     publishChanges: 'Опублікувати зміни',
     published: 'Опубліковано',
     publishing: 'Публікація',
+    restoreAsDraft: 'Відновити як чернетку',
     restoreThisVersion: 'Відновити цю версію',
     restoredSuccessfully: 'Відновлено успішно.',
     restoring: 'Відновлення...',

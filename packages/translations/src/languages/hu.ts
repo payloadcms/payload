@@ -403,6 +403,7 @@ export const huTranslations: DefaultTranslationsObject = {
     publishChanges: 'Módosítások közzététele',
     published: 'Közzétett',
     publishing: 'Közzététel',
+    restoreAsDraft: 'Visszaállítás piszkozatként',
     restoreThisVersion: 'A verzió visszaállítása',
     restoredSuccessfully: 'Sikeresen visszaállítva.',
     restoring: 'Visszaállítás...',

@@ -399,6 +399,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publiser endringer',
     published: 'Publisert',
     publishing: 'Publisering',
+    restoreAsDraft: 'Gjenopprett som utkast',
     restoreThisVersion: 'Gjenopprett denne versjonen',
     restoredSuccessfully: 'Gjenopprettet.',
     restoring: 'Gjenoppretter...',

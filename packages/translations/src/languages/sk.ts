@@ -399,6 +399,7 @@ export const skTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publikovať zmeny',
     published: 'Publikované',
     publishing: 'Publikovanie',
+    restoreAsDraft: 'Obnoviť ako koncept',
     restoreThisVersion: 'Obnoviť túto verziu',
     restoredSuccessfully: 'Úspešne obnovené.',
     restoring: 'Obnovovanie...',

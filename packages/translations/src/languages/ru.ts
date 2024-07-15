@@ -401,6 +401,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     publishChanges: 'Опубликовать изменения',
     published: 'Опубликовано',
     publishing: 'Публикация',
+    restoreAsDraft: 'Восстановить как черновик',
     restoreThisVersion: 'Восстановить эту версию',
     restoredSuccessfully: 'Восстановлен успешно.',
     restoring: 'Восстановление...',

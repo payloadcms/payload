@@ -402,6 +402,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publiceer wijzigingen',
     published: 'Gepubliceerd',
     publishing: 'Publicatie',
+    restoreAsDraft: 'Herstellen als concept',
     restoreThisVersion: 'Herstel deze versie',
     restoredSuccessfully: 'Herstelling succesvol.',
     restoring: 'Herstellen...',

@@ -171,6 +171,7 @@ function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         type: graphqlResult.globals.graphQL[slug].type,
         args: {
           id: { type: idType },
+          draft: { type: GraphQLBoolean },
         },
         resolve: restoreVersionResolver(global),
       }

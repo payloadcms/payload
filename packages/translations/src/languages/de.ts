@@ -403,6 +403,7 @@ export const deTranslations: DefaultTranslationsObject = {
     publishChanges: 'Änderungen veröffentlichen',
     published: 'Veröffentlicht',
     publishing: 'Veröffentlichung',
+    restoreAsDraft: 'Als Entwurf wiederherstellen',
     restoreThisVersion: 'Diese Version wiederherstellen',
     restoredSuccessfully: 'Erfolgreich wiederhergestellt.',
     restoring: 'Wiederherstellen...',

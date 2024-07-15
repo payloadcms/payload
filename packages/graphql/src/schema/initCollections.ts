@@ -342,6 +342,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: versionIDType },
+          draft: { type: GraphQLBoolean },
         },
         resolve: restoreVersionResolver(collection),
       }

@@ -396,6 +396,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     publishChanges: 'Objavi promjene',
     published: 'Objavljeno',
     publishing: 'Objavljivanje',
+    restoreAsDraft: 'Vrati kao skicu',
     restoreThisVersion: 'Vrati ovu verziju',
     restoredSuccessfully: 'Uspješno vraćeno.',
     restoring: 'Vraćanje...',
