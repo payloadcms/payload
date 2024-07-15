@@ -1,9 +1,9 @@
 import type { Field } from 'payload'
 
-import { isSuperAdmin } from '../../access/isSuperAdmin'
-import { tenantFieldUpdate } from './access/update'
-import { TenantFieldComponent } from './components/Field'
-import { autofillTenant } from './hooks/autofillTenant'
+import { isSuperAdmin } from '../../access/isSuperAdmin.js'
+import { tenantFieldUpdate } from './access/update.js'
+import { TenantFieldComponent } from './components/Field.js'
+import { autofillTenant } from './hooks/autofillTenant.js'
 
 export const tenantField: Field = {
   name: 'tenant',
