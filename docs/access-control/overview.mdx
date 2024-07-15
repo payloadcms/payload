@@ -10,7 +10,7 @@ keywords: overview, access control, permissions, documentation, Content Manageme
 
 Access Control determines what a user can and cannot do with any given Document, as well as what they can and cannot see within the [Admin Panel](../admin/overview). By implementing Access Control, you can define granular restrictions based on the user, their roles (RBAC), Document data, or any other criteria your application requires.
 
-Access Control functions are scoped to the _operation_, meaning you can have different rules for `create`, `read`, `update`, `delete`, etc. Access Control can either be defined on the Document itself, or on a field-by-field basis.
+Access Control functions are scoped to the _operation_, meaning you can have different rules for `create`, `read`, `update`, `delete`, etc. Access Control functions are executed _before_ any changes are made and _before_ any operations are completed. This allows you to determine if the user has the necessary permissions before fulfilling the request.
 
 There are many use cases for Access Control, including:
 
@@ -46,28 +46,15 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, you can set the `overrideAccess` option to `false` in your requests.
 </Banner>
 
-## When Access Control is Executed
+## The Admin Panel
 
-Access control functions are utilized in both the Admin UI and the API. Here is a breakdown of when they are executed:
+The Admin Panel responds dynamically to your changes to Access Control. For example, if you restrict editing `ExampleCollection` to only users that feature an "admin" role, Payload will **hide** that Collection from the Admin Panel entirely. This is super powerful and allows you to control who can do what within your Admin Panel using the same functions that secure your APIs.
 
-### As you execute operations
-
-When you perform Payload operations like `create`, `read`, `update`, and `delete`, your Access Control functions will be executed _before_ any changes are made or operations are completed.
-
-### Within the Admin UI
-
-The Payload Admin UI responds dynamically to the Access Control that you define. For example, if you restrict editing a `ExampleCollection` to only users that feature a `role` of `admin`, the Payload Admin UI will **hide** the `ExampleCollection` from the Admin UI entirely. This is super powerful and allows you to control who can do what with your Admin UI.
-
-To accomplish this, Payload ships with an `Access` operation, which is executed when a user logs into the Admin UI. Payload will execute each one of your Access Control functions, across all collections, globals, and fields, at the top level and return a response that contains a reflection of what the currently authenticated user can do with your application.
-
-## Argument Availability
+To accomplish this, Payload exposes the [Access Operation](../authentication/operations#access). Upon login, Payload executes each Access Control function at the top level, across all Collections, Globals, and Fields, and returns a response that contains a reflection of what the currently authenticated user can do within your application.
 
 <Banner type="warning">
   <strong>Important:</strong>
-  <br />
-  When your access control functions are executed via the <strong>access</strong> operation, the{' '}
-  <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>,
-  because Payload is executing your functions without referencing a specific document.
+  When your access control functions are executed via the [Access Operation](../authentication/operations#access),  the `id` and `data` arguments will be `undefined`. This is because Payload is executing your functions without referencing a specific Document.
 </Banner>
 
-If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed via the `access` operation, to determine solely what the user can do within the Admin UI.
+If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
