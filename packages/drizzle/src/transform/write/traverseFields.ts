@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Field } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
@@ -542,11 +541,15 @@ export const traverseFields = ({
         if (typeof value !== 'undefined') {
           let formattedValue = value
 
-          if (field.type === 'date' && value instanceof Date) {
-            formattedValue = value.toISOString()
-          } else if (field.type === 'date' && fieldName === 'updatedAt') {
-            // let the db handle this
-            formattedValue = new Date().toISOString()
+          if (field.type === 'date') {
+            if (typeof value === 'number' && !Number.isNaN(value)) {
+              formattedValue = new Date(value).toISOString()
+            } else if (value instanceof Date) {
+              formattedValue = value.toISOString()
+            } else if (fieldName === 'updatedAt') {
+              // let the db handle this
+              formattedValue = new Date().toISOString()
+            }
           }
 
           if (localeKey) {
