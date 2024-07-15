@@ -25,26 +25,24 @@ export const migrateDocumentFieldsRecursively = ({
   for (const field of fields) {
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
-        migrateDocumentFieldsRecursively({
+        found += migrateDocumentFieldsRecursively({
           data: data[field.name],
           fields: field.fields,
           found,
         })
       } else {
-        migrateDocumentFieldsRecursively({
+        found += migrateDocumentFieldsRecursively({
           data,
-          found,
-
           fields: field.fields,
+          found,
         })
       }
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
-        migrateDocumentFieldsRecursively({
+        found += migrateDocumentFieldsRecursively({
           data,
-          found,
-
           fields: tab.fields,
+          found,
         })
       })
     } else if (Array.isArray(data[field.name])) {
@@ -52,11 +50,10 @@ export const migrateDocumentFieldsRecursively = ({
         data[field.name].forEach((row, i) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
-            migrateDocumentFieldsRecursively({
+            found += migrateDocumentFieldsRecursively({
               data: data[field.name][i],
-              found,
-
               fields: block.fields,
+              found,
             })
           }
         })
@@ -64,11 +61,10 @@ export const migrateDocumentFieldsRecursively = ({
 
       if (field.type === 'array') {
         data[field.name].forEach((_, i) => {
-          migrateDocumentFieldsRecursively({
+          found += migrateDocumentFieldsRecursively({
             data: data[field.name][i],
-            found,
-
             fields: field.fields,
+            found,
           })
         })
       }

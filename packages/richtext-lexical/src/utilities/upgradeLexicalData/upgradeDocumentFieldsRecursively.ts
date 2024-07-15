@@ -23,26 +23,24 @@ export const upgradeDocumentFieldsRecursively = ({
   for (const field of fields) {
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
-        upgradeDocumentFieldsRecursively({
+        found += upgradeDocumentFieldsRecursively({
           data: data[field.name],
           fields: field.fields,
           found,
         })
       } else {
-        upgradeDocumentFieldsRecursively({
+        found += upgradeDocumentFieldsRecursively({
           data,
-          found,
-
           fields: field.fields,
+          found,
         })
       }
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
-        upgradeDocumentFieldsRecursively({
+        found += upgradeDocumentFieldsRecursively({
           data,
-          found,
-
           fields: tab.fields,
+          found,
         })
       })
     } else if (Array.isArray(data[field.name])) {
@@ -50,11 +48,10 @@ export const upgradeDocumentFieldsRecursively = ({
         data[field.name].forEach((row, i) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
-            upgradeDocumentFieldsRecursively({
+            found += upgradeDocumentFieldsRecursively({
               data: data[field.name][i],
-              found,
-
               fields: block.fields,
+              found,
             })
           }
         })
@@ -62,11 +59,10 @@ export const upgradeDocumentFieldsRecursively = ({
 
       if (field.type === 'array') {
         data[field.name].forEach((_, i) => {
-          upgradeDocumentFieldsRecursively({
+          found += upgradeDocumentFieldsRecursively({
             data: data[field.name][i],
-            found,
-
             fields: field.fields,
+            found,
           })
         })
       }
