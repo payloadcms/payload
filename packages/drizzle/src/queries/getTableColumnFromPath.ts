@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
@@ -516,10 +515,18 @@ export const getTableColumnFromPath = ({
 
               return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
             })
+
+            let column: string
+            if (tableColumnsNames.length === 1) {
+              column = tableColumnsNames[0]
+            } else {
+              column = `COALESCE(${tableColumnsNames.join(', ')})`
+            }
+
             return {
               constraints,
               field,
-              rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
+              rawColumn: sql.raw(`${column}`),
               table: aliasRelationshipTable,
             }
           } else if (newCollectionPath === 'relationTo') {
