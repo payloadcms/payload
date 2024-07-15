@@ -1,28 +1,34 @@
 import type { CollectionConfig } from 'payload'
 
+import type { User } from '../../../payload-types'
+
 import { isSuperAdmin } from '../../access/isSuperAdmin'
-import { isSuperAdminOrSelf } from './access/isSuperAdminOrSelf'
+import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs'
+import { createAccess } from './access/create'
+import { updateAndDeleteAccess } from './access/updateAndDelete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
 
 const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    create: isSuperAdmin,
-    delete: isSuperAdmin,
+    create: createAccess,
+    delete: updateAndDeleteAccess,
     read: (args) => {
       const { req } = args
       if (!req?.user) return false
 
       if (isSuperAdmin(args)) return true
 
+      const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
+
       return {
-        id: {
-          equals: req.user.id,
+        'tenants.tenant': {
+          in: adminTenantAccessIDs,
         },
       }
     },
-    update: isSuperAdminOrSelf,
+    update: updateAndDeleteAccess,
   },
   admin: {
     useAsTitle: 'email',
@@ -40,20 +46,24 @@ const Users: CollectionConfig = {
     {
       name: 'tenants',
       type: 'array',
-      access: {
-        create: ({ req }) => {
-          if (isSuperAdmin({ req })) return true
-          return false
-        },
-        update: ({ req }) => {
-          if (isSuperAdmin({ req })) return true
-          return false
-        },
-      },
       fields: [
         {
           name: 'tenant',
           type: 'relationship',
+          filterOptions: ({ user }) => {
+            if (user?.roles?.includes('super-admin'))
+              return {
+                id: {
+                  exists: true,
+                },
+              }
+            const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(user as User)
+            return {
+              id: {
+                in: adminTenantAccessIDs,
+              },
+            }
+          },
           index: true,
           relationTo: 'tenants',
           required: true,
