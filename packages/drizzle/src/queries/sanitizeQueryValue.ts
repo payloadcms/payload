@@ -103,7 +103,7 @@ export const sanitizeQueryValue = ({
             return Number(value)
           }
           if (idType === 'text') {
-            return String(val)
+            return String(value)
           }
           return value
         })
