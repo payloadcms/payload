@@ -274,9 +274,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
       try {
         let res
-        const actionEndpoint = typeof actionArg === 'string' ? actionArg : null
 
-        if (actionEndpoint) {
+        if (typeof actionArg === 'string') {
           res = await requests[methodToUse.toLowerCase()](actionArg, {
             body: formData,
             headers: {
