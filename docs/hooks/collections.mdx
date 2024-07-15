@@ -8,7 +8,7 @@ keywords: hooks, collections, config, configuration, documentation, Content Mana
 
 Collection Hooks are [Hooks](./overview) that run on Documents within a specific [Collection](../configuration/collections). They allow you to execute your own logic during specific events of the Document lifecycle.
 
-To add hooks to a Collection, use the `hooks` property in your [Collection Config](../configuration/collections):
+To add Hooks to a Collection, use the `hooks` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload';
@@ -97,7 +97,7 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeOperation` hook:
+The following arguments are provided to the `beforeOperation` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -126,7 +126,7 @@ const beforeValidateHook: CollectionBeforeValidateHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeValidate` hook:
+The following arguments are provided to the `beforeValidate` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -151,7 +151,7 @@ const beforeChangeHook: CollectionBeforeChangeHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeChange` hook:
+The following arguments are provided to the `beforeChange` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -176,7 +176,7 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
 }
 ```
 
-The following arguments are passed to the `afterChange` hook:
+The following arguments are provided to the `afterChange` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -201,7 +201,7 @@ const beforeReadHook: CollectionBeforeReadHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeRead` hook:
+The following arguments are provided to the `beforeRead` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -225,7 +225,7 @@ const afterReadHook: CollectionAfterReadHook = async ({
 }
 ```
 
-The following arguments are passed to the `afterRead` hook:
+The following arguments are provided to the `afterRead` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -248,7 +248,7 @@ const beforeDeleteHook: CollectionBeforeDeleteHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `beforeDelete` hook:
+The following arguments are provided to the `beforeDelete` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -271,7 +271,7 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterDelete` hook:
+The following arguments are provided to the `afterDelete` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -297,7 +297,7 @@ const afterOperationHook: CollectionAfterOperationHook = async ({
 }
 ```
 
-The following arguments are passed to the `afterOperation` hook:
+The following arguments are provided to the `afterOperation` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -321,7 +321,7 @@ const beforeLoginHook: CollectionBeforeLoginHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeLogin` hook:
+The following arguments are provided to the `beforeLogin` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -343,7 +343,7 @@ const afterLoginHook: CollectionAfterLoginHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterLogin` hook:
+The following arguments are provided to the `afterLogin` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -365,7 +365,7 @@ const afterLogoutHook: CollectionAfterLogoutHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterLogout` hook:
+The following arguments are provided to the `afterLogout` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -386,7 +386,7 @@ const afterMeHook: CollectionAfterMeHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterMe` hook:
+The following arguments are provided to the `afterMe` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -407,7 +407,7 @@ const afterRefreshHook: CollectionAfterRefreshHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterRefresh` hook:
+The following arguments are provided to the `afterRefresh` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -431,7 +431,7 @@ const afterForgotPasswordHook: CollectionAfterForgotPasswordHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterForgotPassword` hook:
+The following arguments are provided to the `afterForgotPassword` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -452,7 +452,7 @@ const myRefreshHook: CollectionRefreshHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `afterRefresh` hook:
+The following arguments are provided to the `afterRefresh` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -472,7 +472,7 @@ const meHook: CollectionMeHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `me` hook:
+The following arguments are provided to the `me` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
