@@ -59,8 +59,8 @@ const useClientPlugin = {
 }
 
 // Bundle only the .scss files into a single css file
-await esbuild
-  .build({
+esbuild
+  .buildSync({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
@@ -84,19 +84,18 @@ await esbuild
   })
 
 // Bundle `client.ts`
-const resultClient = await esbuild
-  .build({
-    entryPoints: ['src/exports/client/index.ts'],
-    bundle: true,
-    platform: 'browser',
-    format: 'esm',
-    outdir: 'dist/exports/client',
-    //outfile: 'index.js',
-    // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: true,
-    write: true, // required for useClientPlugin
-    banner: {
-      js: `// Workaround for react-datepicker and other cjs dependencies potentially inserting require("react") statements
+const resultClient = await esbuild.build({
+  entryPoints: ['src/exports/client/index.ts'],
+  bundle: true,
+  platform: 'browser',
+  format: 'esm',
+  outdir: 'dist/exports/client',
+  //outfile: 'index.js',
+  // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
+  splitting: true,
+  write: true, // required for useClientPlugin
+  banner: {
+    js: `// Workaround for react-datepicker and other cjs dependencies potentially inserting require("react") statements
 import * as requireReact from 'react';
 import * as requireReactDom from 'react-dom';
 
@@ -107,94 +106,81 @@ function require(m) {
 }
 // Workaround end
 `, // react-datepicker fails due to require("react") statements making it to the browser, which is not supported.
-      // This is a workaround to get it to work, without having to mark react-dateopicker as external
-      // See https://stackoverflow.com/questions/68423950/when-using-esbuild-with-external-react-i-get-dynamic-require-of-react-is-not-s
-    },
-    external: [
-      '*.scss',
-      '*.css',
-      'qs-esm',
-      '@dnd-kit/core',
-      '@payloadcms/graphql',
-      '@payloadcms/translations',
-      'dequal',
+    // This is a workaround to get it to work, without having to mark react-dateopicker as external
+    // See https://stackoverflow.com/questions/68423950/when-using-esbuild-with-external-react-i-get-dynamic-require-of-react-is-not-s
+  },
+  external: [
+    '*.scss',
+    '*.css',
+    'qs-esm',
+    '@dnd-kit/core',
+    '@payloadcms/graphql',
+    '@payloadcms/translations',
+    'dequal',
 
-      //'side-channel',
-      'payload',
-      'payload/*',
-      'react',
-      'react-dom',
-      'next',
-      'react-animate-height',
-      'crypto',
-    ],
-    //packages: 'external',
-    minify: true,
-    metafile: true,
-    treeShaking: true,
+    //'side-channel',
+    'payload',
+    'payload/*',
+    'react',
+    'react-dom',
+    'next',
+    'react-animate-height',
+    'crypto',
+  ],
+  //packages: 'external',
+  minify: true,
+  metafile: true,
+  treeShaking: true,
 
-    tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [
-      removeCSSImports,
-      useClientPlugin, // required for banner to work
-      /*commonjs({
+  tsconfig: path.resolve(dirname, './tsconfig.json'),
+  plugins: [
+    removeCSSImports,
+    useClientPlugin, // required for banner to work
+    /*commonjs({
         ignore: ['date-fns', '@floating-ui/react'],
       }),*/
-    ],
-    sourcemap: true,
-  })
-  .then((res, err) => {
-    console.log('client.ts bundled successfully')
-    return res
-  })
-  .catch((e) => {
-    throw e
-  })
+  ],
+  sourcemap: true,
+})
+console.log('client.ts bundled successfully')
 
-const resultShared = await esbuild
-  .build({
-    entryPoints: ['src/exports/shared/index.ts'],
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    outdir: 'dist/exports/shared',
-    //outfile: 'index.js',
-    // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: false,
-    treeShaking: true,
-    external: [
-      '*.scss',
-      '*.css',
-      'qs-esm',
-      '@dnd-kit/core',
-      '@payloadcms/graphql',
-      '@payloadcms/translations',
-      'dequal',
-      'payload',
-      'payload/*',
-      'react',
-      'react-dom',
-      'next',
-      'react-animate-height',
-      'crypto',
-      '@floating-ui/react',
-      'date-fns',
-      'react-datepicker',
-    ],
-    //packages: 'external',
-    minify: true,
-    metafile: true,
-    tsconfig: path.resolve(dirname, './tsconfig.json'),
-    plugins: [removeCSSImports, commonjs()],
-    sourcemap: true,
-  })
-  .then((res, err) => {
-    console.log('shared.ts bundled successfully')
-    return res
-  })
-  .catch((e) => {
-    throw e
-  })
+const resultShared = esbuild.buildSync({
+  entryPoints: ['src/exports/shared/index.ts'],
+  bundle: true,
+  platform: 'node',
+  format: 'esm',
+  outdir: 'dist/exports/shared',
+  //outfile: 'index.js',
+  // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
+  splitting: false,
+  treeShaking: true,
+  external: [
+    '*.scss',
+    '*.css',
+    'qs-esm',
+    '@dnd-kit/core',
+    '@payloadcms/graphql',
+    '@payloadcms/translations',
+    'dequal',
+    'payload',
+    'payload/*',
+    'react',
+    'react-dom',
+    'next',
+    'react-animate-height',
+    'crypto',
+    '@floating-ui/react',
+    'date-fns',
+    'react-datepicker',
+  ],
+  //packages: 'external',
+  minify: true,
+  metafile: true,
+  tsconfig: path.resolve(dirname, './tsconfig.json'),
+  plugins: [removeCSSImports, commonjs()],
+  sourcemap: true,
+})
+console.log('shared.ts bundled successfully')
 
 fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
 fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
