@@ -35,6 +35,7 @@ import {
 } from '../../shared.js'
 import {
   customFieldsSlug,
+  customGlobalViews2GlobalSlug,
   customIdCollectionId,
   customViews2CollectionSlug,
   disableDuplicateSlug,
@@ -481,6 +482,28 @@ describe('admin1', () => {
       const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
+    })
+
+    test('global — should render custom tab label', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
+
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+
+      await expect(docTab).toBeVisible()
+      await expect(title).toContainText('Custom Tab Label View')
+    })
+
+    test('global — should render custom tab component', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.custom-doc-tab').first()
+
+      await expect(docTab).toBeVisible()
+      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(title).toContainText('Custom View With Tab Component')
     })
   })
 
