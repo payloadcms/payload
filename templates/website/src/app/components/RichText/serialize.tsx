@@ -1,17 +1,11 @@
-import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
-import type { SerializedHeadingNode } from '@lexical/rich-text'
-import type { LinkFields, SerializedLinkNode } from '@payloadcms/richtext-lexical'
-import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode } from 'lexical'
-
-import { ArchiveBlock } from '@/blocks/ArchiveBlock'
 import { BannerBlock } from '@/blocks/Banner'
 import { CallToActionBlock } from '@/blocks/CallToAction'
-import { CodeBlock } from '@/blocks/Code'
-import { ContentBlock } from '@/blocks/Content'
+import { CodeBlock, CodeBlockProps } from '@/blocks/Code'
 import { MediaBlock } from '@/blocks/MediaBlock'
-import { cn } from '@/utilities/cn'
-import React, { Fragment } from 'react'
+import React, { Fragment, JSX } from 'react'
 import { CMSLink } from 'src/app/components/Link'
+import { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
+import type { BannerBlock as BannerBlockProps } from 'src/payload-types'
 
 import {
   IS_BOLD,
@@ -22,17 +16,30 @@ import {
   IS_SUPERSCRIPT,
   IS_UNDERLINE,
 } from './nodeFormat'
+import type { Page } from '../../../payload-types'
 
-interface Props {
-  nodes: SerializedLexicalNode[]
+export type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<
+      | Extract<Page['layout'][0], { blockType: 'cta' }>
+      | Extract<Page['layout'][0], { blockType: 'mediaBlock' }>
+      | BannerBlockProps
+      | CodeBlockProps
+    >
+
+type Props = {
+  nodes: NodeTypes[]
 }
 
 export function serializeLexical({ nodes }: Props): JSX.Element {
   return (
     <Fragment>
-      {nodes?.map((_node, index): JSX.Element | null => {
-        if (_node.type === 'text') {
-          const node = _node as SerializedTextNode
+      {nodes?.map((node, index): JSX.Element | null => {
+        if (node == null) {
+          return null
+        }
+
+        if (node.type === 'text') {
           let text = <React.Fragment key={index}>{node.text}</React.Fragment>
           if (node.format & IS_BOLD) {
             text = <strong key={index}>{text}</strong>
@@ -67,18 +74,14 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
           return text
         }
 
-        if (_node == null) {
-          return null
-        }
-
         // NOTE: Hacky fix for
         // https://github.com/facebook/lexical/blob/d10c4e6e55261b2fdd7d1845aed46151d0f06a8c/packages/lexical-list/src/LexicalListItemNode.ts#L133
         // which does not return checked: false (only true - i.e. there is no prop for false)
-        const serializedChildrenFn = (node: SerializedElementNode): JSX.Element | null => {
+        const serializedChildrenFn = (node: NodeTypes): JSX.Element | null => {
           if (node.children == null) {
             return null
           } else {
-            if (node?.type === 'list' && (node as SerializedListNode)?.listType === 'check') {
+            if (node?.type === 'list' && node?.listType === 'check') {
               for (const item of node.children) {
                 if ('checked' in item) {
                   if (!item?.checked) {
@@ -86,24 +89,17 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
                   }
                 }
               }
-              return serializeLexical({ nodes: node.children })
-            } else {
-              return serializeLexical({ nodes: node.children })
             }
+            return serializeLexical({ nodes: node.children as NodeTypes[] })
           }
         }
 
-        const serializedChildren =
-          'children' in _node ? serializedChildrenFn(_node as SerializedElementNode) : ''
+        const serializedChildren = 'children' in node ? serializedChildrenFn(node) : ''
 
-        if (_node.type === 'block') {
-          // todo: fix types
+        if (node.type === 'block') {
+          const block = node.fields
 
-          //@ts-expect-error
-          const block = _node.fields
-
-          //@ts-expect-error
-          const blockType = _node.fields?.blockType
+          const blockType = block?.blockType
 
           if (!block || !blockType) {
             return null
@@ -131,7 +127,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               return null
           }
         } else {
-          switch (_node.type) {
+          switch (node.type) {
             case 'linebreak': {
               return <br className="col-start-2" key={index} />
             }
@@ -143,10 +139,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               )
             }
             case 'heading': {
-              const node = _node as SerializedHeadingNode
-
-              type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
-              const Tag = node?.tag as Heading
+              const Tag = node?.tag
               return (
                 <Tag className="col-start-2" key={index}>
                   {serializedChildren}
@@ -154,10 +147,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               )
             }
             case 'list': {
-              const node = _node as SerializedListNode
-
-              type List = Extract<keyof JSX.IntrinsicElements, 'ol' | 'ul'>
-              const Tag = node?.tag as List
+              const Tag = node?.tag
               return (
                 <Tag className="list col-start-2" key={index}>
                   {serializedChildren}
@@ -165,8 +155,6 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               )
             }
             case 'listitem': {
-              const node = _node as SerializedListItemNode
-
               if (node?.checked != null) {
                 return (
                   <li
@@ -197,9 +185,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               )
             }
             case 'link': {
-              const node = _node as SerializedLinkNode
-
-              const fields: LinkFields = node.fields
+              const fields = node.fields
 
               return (
                 <CMSLink

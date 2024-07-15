@@ -5,7 +5,7 @@ import { serializeLexical } from './serialize'
 
 type Props = {
   className?: string
-  content: any
+  content: Record<string, any>
   enableGutter?: boolean
   enableProse?: boolean
 }
