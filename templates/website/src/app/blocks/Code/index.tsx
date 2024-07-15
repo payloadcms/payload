@@ -1,10 +1,15 @@
 import React from 'react'
 
 import { Code } from './Code.client'
-type Props = {
-  className?: string
+
+export type CodeBlockProps = {
   code: string
   language?: string
+  blockType: 'code'
+}
+
+type Props = CodeBlockProps & {
+  className?: string
 }
 
 export const CodeBlock: React.FC<Props> = ({ className, code, language }) => {

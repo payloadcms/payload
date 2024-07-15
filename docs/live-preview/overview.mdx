@@ -10,12 +10,6 @@ With Live Preview you can render your front-end application directly within the 
 
 Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin Panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
 
-{/* IMAGE OF LIVE PREVIEW HERE */}
-
-## Setup
-
-Setting up Live Preview is easy. This can be done either globally through the [Root Config](../configuration/overview), or on individual [Collection](../configuration/collections) and [Global](../configuration/globals) configs. Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
-
 To add Live Preview, use the `admin.livePreview` property in your [Payload Config](../configuration/overview):
 
 ```ts
@@ -27,13 +21,19 @@ const config = buildConfig({
     // ...
     // highlight-start
     livePreview: {
-      url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
-      collections: ['pages'], // The Collection(s) to enable Live Preview on (Globals are also possible)
+      url: 'http://localhost:3000',
+      collections: ['pages']
     },
     // highlight-end
   }
 })
 ```
+
+{/* IMAGE OF LIVE PREVIEW HERE */}
+
+## Options
+
+Setting up Live Preview is easy. This can be done either globally through the [Root Config](../configuration/overview), or on individual [Collection](../configuration/collections) and [Global](../configuration/globals) configs. Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
 
 The following options are available:
 
