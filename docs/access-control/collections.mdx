@@ -6,27 +6,55 @@ desc: With Collection-level Access Control you can define which users can create
 keywords: collections, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-You can define Collection-level Access Control within each Collection's `access` property. All Access Control functions accept one `args` argument.
+Collection Access Control is [Access Control](../access-control) used to restrict access to Documents within a [Collection](../collections/overview), as well as what they can and cannot see within the [Admin Panel](../admin/overview) as it relates to that Collection.
 
-## Available Controls
+To add Access Control to a Collection, use the `access` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload';
+
+export const CollectionWithAccessControl: CollectionConfig = {
+  // ...
+  access: { // highlight-line
+    // ...
+  },
+}
+```
+
+## Config Options
+
+Access Control is specific to the operation of the request.
+
+To add Access Control to a Collection, use the `access` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload';
+
+export const CollectionWithAccessControl: CollectionConfig = {
+  // ...
+  // highlight-start
+  access: {
+    create: () => {...},
+    read: () => {...},
+    update: () => {...},
+    delete: () => {...},
+  },
+  // highlight-end
+}
+```
+
+The following options are available:
 
 | Function                | Allows/Denies Access                         |
 | ----------------------- | -------------------------------------------- |
-| **[`create`](#create)** | Used in the `create` operation               |
-| **[`read`](#read)**     | Used in the `find` and `findByID` operations |
-| **[`update`](#update)** | Used in the `update` operation               |
-| **[`delete`](#delete)** | Used in the `delete` operation               |
+| **`create`** | Used in the `create` operation. [More details](#create). |
+| **`read`**     | Used in the `find` and `findByID` operations. [More details](#read). |
+| **`update`** | Used in the `update` operation. [More details](#update). |
+| **`delete`** | Used in the `delete` operation. [More details](#delete). |
 
 #### Auth-enabled Controls
 
 If a Collection supports [`Authentication`](/docs/authentication/overview), the following Access Controls become available:
-
-| Function                | Allows/Denies Access                                           |
-| ----------------------- | -------------------------------------------------------------- |
-| **[`admin`](#admin)**   | Used to restrict access to the [Admin Panel](../admin/overview)             |
-| **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
-
-**Example Collection config:**
 
 ```ts
 import type { CollectionConfig } from 'payload';
@@ -35,28 +63,23 @@ export const Posts: CollectionConfig = {
   slug: "posts",
   // highlight-start
   access: {
-    create: ({ req: { user } }) => { ... },
-    read: ({ req: { user } }) => { ... },
-    update: ({ req: { user } }) => { ... },
-    delete: ({ req: { user } }) => { ... },
     admin: ({ req: { user } }) => { ... },
+    unlock: ({ req: { user } }) => { ... },
   },
   // highlight-end
 };
 ```
 
+The following options are pro
+
+| Function                | Allows/Denies Access                                           |
+| ----------------------- | -------------------------------------------------------------- |
+| **`admin`**   | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin). |
+| **`unlock`** | Used to restrict which users can access the `unlock` operation. [More details](#unlock). |
+
 ### Create
 
 Returns a boolean which allows/denies access to the `create` request.
-
-**Available argument properties:**
-
-| Option     | Description                                                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`data`** | The data passed to create the document with.                                                                                 |
-
-**Example:**
 
 ```ts
 const PublicUsers = {
@@ -72,18 +95,16 @@ const PublicUsers = {
 }
 ```
 
+Thw following arguments are provided to the `create` function:
+
+| Option     | Description                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`data`** | The data passed to create the document with.                                                                                 |
+
 ### Read
 
 Read access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) which limits the documents that are returned to only those that match the constraint you provide. This can be helpful to restrict users' access to only certain documents however you specify.
-
-**Available argument properties:**
-
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**  | `id` of document requested, if within `findByID`                           |
-
-**Example:**
 
 ```ts
 import type { Access } from 'payload'
@@ -103,19 +124,16 @@ const canReadPage: Access = ({ req: { user } }) => {
 }
 ```
 
+The following arguments are provided to the `read` function:
+
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`id`**  | `id` of document requested, if within `findByID`                           |
+
 ### Update
 
 Update access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) to limit the document(s) that can be updated by the currently authenticated user. For example, returning a `query` from the `update` Access Control is helpful in cases where you would like to restrict a user to only being able to update the documents containing a `createdBy` relationship field equal to the user's ID.
-
-**Available argument properties:**
-
-| Option     | Description                                                                |
-| ---------- | -------------------------------------------------------------------------- |
-| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**   | `id` of document requested to update                                       |
-| **`data`** | The data passed to update the document with                                |
-
-**Example:**
 
 ```ts
 import type { Access } from 'payload'
@@ -130,18 +148,17 @@ const canUpdateUser: Access = ({ req: { user }, id }) => {
 }
 ```
 
+The following arguments are provided to the `update` function:
+
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`id`**   | `id` of document requested to update                                       |
+| **`data`** | The data passed to update the document with                                |
+
 ### Delete
 
 Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
-
-**Available argument properties:**
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of document requested to delete                                                                |
-
-**Example:**
 
 ```ts
 import type { Access } from 'payload'
@@ -165,11 +182,18 @@ const canDeleteCustomer: Access = async ({ req, id }) => {
 }
 ```
 
+The following arguments are provided to the `delete` function:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of document requested to delete
+
 ### Admin
 
 If the Collection is use to access the [Admin Panel](../admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
 
-**Available argument properties:**
+The following arguments are provided to the `admin` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
@@ -179,7 +203,7 @@ If the Collection is use to access the [Admin Panel](../admin/overview#the-admin
 
 Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/config#options).
 
-**Available argument properties:**
+The following arguments are provided to the `unlock` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
