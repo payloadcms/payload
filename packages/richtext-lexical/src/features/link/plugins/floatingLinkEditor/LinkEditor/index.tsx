@@ -42,7 +42,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { i18n, t } = useTranslation()
 
-  const [stateData, setStateData] = useState<({ id?: string; text: string } & LinkFields) | {}>({})
+  const [stateData, setStateData] = useState<{ id?: string; text: string } & LinkFields>(null)
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
@@ -66,7 +66,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setLinkUrl(null)
     setLinkLabel(null)
     setSelectedNodes([])
-    setStateData({})
+    setStateData(null)
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {

@@ -8,7 +8,7 @@ keywords: hooks, fields, config, configuration, documentation, Content Managemen
 
 Field Hooks are [Hooks](./overview) that run on Documents on a per-field basis. They allow you to execute your own logic during specific events of the Document lifecycle. Field Hooks offer incredible potential for isolating your logic from the rest of your [Collection Hooks](./collections) and [Global Hooks](./globals).
 
-To add hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
+To add Hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload';
@@ -58,7 +58,7 @@ const FieldWithHooks: Field = {
 }
 ```
 
-The following arguments are available to all Field Hooks:
+The following arguments are provided to all Field Hooks:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

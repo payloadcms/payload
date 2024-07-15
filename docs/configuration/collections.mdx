@@ -60,7 +60,7 @@ The following options are available:
 | Option                 | Description                                                                                                                                                                                                              |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`admin`**            | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                               |
-| **`access`**           | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/overview/#collections).                                                   |
+| **`access`**           | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                   |
 | **`auth`**             | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](../authentication/config) documentation.                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                          |
 | **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                      |
@@ -85,11 +85,11 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 
 ### Access Control
 
-Access Control determines what a user can and cannot do with any given Document. To learn more, go to the [Access Control](../access-control/overview) docs.
+[Collection Access Control](../access-control/overview) determines what a user can and cannot do with any given Document within a Collection. To learn more, go to the [Access Control](../access-control/overview) documentation.
 
 ### Hooks
 
-Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
+[Collection Hooks](../hooks/collections) allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
 ### Admin Options
 

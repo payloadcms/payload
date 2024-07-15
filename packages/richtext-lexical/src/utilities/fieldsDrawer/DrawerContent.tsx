@@ -45,7 +45,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         apiRoute: config.routes.api,
         body: {
           id,
-          data,
+          data: data ?? {},
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -55,9 +55,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       setInitialState(state)
     }
 
-    if (data) {
-      void awaitInitialState()
-    }
+    void awaitInitialState()
   }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
 
   const onChange: FormProps['onChange'][0] = useCallback(
