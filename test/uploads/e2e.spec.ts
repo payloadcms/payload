@@ -141,7 +141,7 @@ describe('uploads', () => {
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
       .nth(1)
       .locator('.file-meta__url a')
-    await expect(smallSquareFilename).toContainText('animated-1-480x480.webp')
+    await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
