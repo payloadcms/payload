@@ -39,11 +39,11 @@ export const CollectionWithAccessControl: CollectionConfig = {
     update: () => {...},
     delete: () => {...},
 
-    // auth-enabled collections only
+    // Auth-enabled Collections only
     admin: () => {...},
     unlock: () => {...},
 
-    // version-enabled collections only
+    // Version-enabled Collections only
     readVersion: () => {...},
   },
   // highlight-end
@@ -59,14 +59,14 @@ The following options are available:
 | **`update`** | Used in the `update` operation. [More details](#update). |
 | **`delete`** | Used in the `delete` operation. [More details](#delete). |
 
-If a Collection supports [`Authentication`](/docs/authentication/overview), the following additional options are available:
+If a Collection supports [`Authentication`](../authentication/overview), the following additional options are available:
 
 | Function                | Allows/Denies Access                                           |
 | ----------------------- | -------------------------------------------------------------- |
 | **`admin`**   | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin). |
 | **`unlock`** | Used to restrict which users can access the `unlock` operation. [More details](#unlock). |
 
-If a Collection supports [Versions](/docs/versioning/overview), the following additional options are available:
+If a Collection supports [Versions](../versions/overview), the following additional options are available:
 
 | Function           | Allows/Denies Access                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ The following arguments are provided to the `create` function:
 
 | Option     | Description                                                                                                                  |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 | **`data`** | The data passed to create the document with.                                                                                 |
 
 ### Read
@@ -151,8 +151,8 @@ The following arguments are provided to the `read` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**  | `id` of document requested, if within `findByID`                           |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`id`**  | `id` of document requested, if within `findByID`.                           |
 
 ### Update
 
@@ -200,9 +200,9 @@ The following arguments are provided to the `update` function:
 
 | Option     | Description                                                                |
 | ---------- | -------------------------------------------------------------------------- |
-| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**   | `id` of document requested to update                                       |
-| **`data`** | The data passed to update the document with                                |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`id`**   | `id` of document requested to update.                                       |
+| **`data`** | The data passed to update the document with.                                |
 
 ### Delete
 
@@ -232,10 +232,11 @@ import type { Access } from 'payload'
 
 export const canDeleteCustomer: Access = async ({ req, id }) => {
   if (!id) {
-    // allow the admin UI to show controls to delete since it is indeterminate without the id
+    // allow the admin UI to show controls to delete since it is indeterminate without the `id`
     return true
   }
-  // query another collection using the id
+
+  // Query another Collection using the `id`
   const result = await req.payload.find({
     collection: 'contracts',
     limit: 0,
@@ -253,8 +254,8 @@ The following arguments are provided to the `delete` function:
 
 | Option    | Description                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of document requested to delete
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
+| **`id`**  | `id` of document requested to delete.
 
 ### Admin
 
@@ -281,7 +282,7 @@ The following arguments are provided to the `admin` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 
 ### Unlock
 
@@ -308,18 +309,18 @@ The following arguments are provided to the `unlock` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 
 ### Read Versions
 
-If the Collection has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a document.
+If the Collection has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
 
 To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Collection Config](../collections/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const CollectionWithReadVersionsAccess: CollectionConfig = {
+export const CollectionWithVersionsAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
@@ -335,4 +336,4 @@ The following arguments are provided to the `readVersions` function:
 
 | Option    | Description                                                                |
 | --------- | -------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
