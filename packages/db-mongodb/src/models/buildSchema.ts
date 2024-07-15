@@ -158,10 +158,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           disableUnique: buildSchemaOptions.disableUnique,
           draftsEnabled: buildSchemaOptions.draftsEnabled,
           options: {
+            minimize: false,
+            ...(buildSchemaOptions.options || {}),
             _id: false,
             id: false,
-            minimize: false,
-            strict: adapter.strict,
           },
         }),
       ],
@@ -179,7 +179,16 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
     const fieldSchema = {
-      type: [new Schema({}, { _id: false, discriminatorKey: 'blockType', strict: adapter.strict })],
+      type: [
+        new Schema(
+          {},
+          {
+            _id: false,
+            discriminatorKey: 'blockType',
+            ...(buildSchemaOptions.options || {}),
+          },
+        ),
+      ],
       default: undefined,
     }
 
@@ -188,7 +197,14 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     })
 
     field.blocks.forEach((blockItem: Block) => {
-      const blockSchema = new Schema({}, { _id: false, id: false, strict: adapter.strict })
+      const blockSchema = new Schema(
+        {},
+        {
+          ...(buildSchemaOptions.options || {}),
+          _id: false,
+          id: false,
+        },
+      )
 
       blockItem.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
@@ -293,10 +309,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         draftsEnabled: buildSchemaOptions.draftsEnabled,
         indexSortableFields,
         options: {
+          minimize: false,
+          ...(buildSchemaOptions.options || {}),
           _id: false,
           id: false,
-          minimize: false,
-          strict: adapter.strict,
         },
       }),
     }
@@ -534,10 +550,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             disableUnique: buildSchemaOptions.disableUnique,
             draftsEnabled: buildSchemaOptions.draftsEnabled,
             options: {
+              minimize: false,
+              ...(buildSchemaOptions.options || {}),
               _id: false,
               id: false,
-              minimize: false,
-              strict: adapter.strict,
             },
           }),
         }

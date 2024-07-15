@@ -10,7 +10,13 @@ export const buildGlobalModel = (adapter: MongooseAdapter): GlobalModel | null =
   if (adapter.payload.config.globals && adapter.payload.config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema(
       {},
-      { discriminatorKey: 'globalType', minimize: false, strict: adapter.strict, timestamps: true },
+      {
+        discriminatorKey: 'globalType',
+        minimize: false,
+        ...adapter.schemaOptions,
+        ...(adapter.globalsOptions.schemaOptions || {}),
+        timestamps: true,
+      },
     )
 
     globalsSchema.plugin(getBuildQueryPlugin())
@@ -21,7 +27,8 @@ export const buildGlobalModel = (adapter: MongooseAdapter): GlobalModel | null =
       const globalSchema = buildSchema(adapter, globalConfig.fields, {
         options: {
           minimize: false,
-          strict: adapter.strict,
+          ...adapter.schemaOptions,
+          ...(adapter.globalsOptions.schemaOptions || {}),
         },
       })
       Globals.discriminator(globalConfig.slug, globalSchema)

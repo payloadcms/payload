@@ -11,16 +11,16 @@ import buildSchema from './buildSchema'
 const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
   adapter: MongooseAdapter,
-  schemaOptions = {},
 ): Schema => {
   const schema = buildSchema(adapter, collection.fields, {
     draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
     indexSortableFields: adapter.payload.config.indexSortableFields,
     options: {
       minimize: false,
-      strict: adapter.strict,
+      strict: true,
       timestamps: collection.timestamps !== false,
-      ...schemaOptions,
+      ...adapter.schemaOptions,
+      ...(adapter.collectionOptions[collection.slug]?.schemaOptions || {}),
     },
   })
 

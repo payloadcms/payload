@@ -188,7 +188,9 @@ const createDatabaseTestConfig = async () => {
       migrationDir,
       url: 'mongodb://127.0.0.1/payloadtests',
       // Disable strict mode for Mongoose
-      strict: false,
+      schemaOptions: {
+        strict: false,
+      },
     })
   }
 

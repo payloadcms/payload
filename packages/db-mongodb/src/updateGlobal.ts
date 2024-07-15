@@ -1,10 +1,9 @@
 import type { UpdateGlobal } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { flatten } from 'flatley'
-
 import type { MongooseAdapter } from '.'
 
+import { flattenIfNecessary } from './utilities/flattenIfNecessary'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
@@ -21,12 +20,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   let result
 
-  let dataToUse = data
-
-  if (!this.strict) {
-    dataToUse = flatten(data)
-  }
-
+  const dataToUse = flattenIfNecessary({ adapter: this, data, global: true })
   result = await Model.findOneAndUpdate({ globalType: slug }, dataToUse, options)
 
   result = JSON.parse(JSON.stringify(result))

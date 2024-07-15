@@ -1,5 +1,5 @@
 import type { TransactionOptions } from 'mongodb'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
+import type { ClientSession, ConnectOptions, Connection, SchemaOptions } from 'mongoose'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
 
@@ -42,6 +42,15 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types'
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /** Define Mongoose options on a collection-by-collection basis.
+   */
+  collections?: {
+    [slug: string]: {
+      /** Define Mongoose schema options for a given collection.
+       */
+      schemaOptions?: SchemaOptions
+    }
+  }
   /** Extra configuration options */
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
@@ -49,11 +58,15 @@ export interface Args {
   }
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
-  migrationDir?: string
-  /** Disable Strict mode in Mongoose to preserve external data within your database.
-   * See: https://mongoosejs.com/docs/guide.html#strict
+  /** Define Mongoose options for the globals collection.
    */
-  strict?: boolean
+  globals?: {
+    schemaOptions?: SchemaOptions
+  }
+  migrationDir?: string
+  /** Define default Mongoose schema options for all schemas created.
+   */
+  schemaOptions?: SchemaOptions
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -61,12 +74,21 @@ export interface Args {
 
 export type MongooseAdapter = BaseDatabaseAdapter &
   Args & {
+    collectionOptions: {
+      [slug: string]: {
+        schemaOptions?: SchemaOptions
+      }
+    }
     collections: {
       [slug: string]: CollectionModel
     }
     connection: Connection
     globals: GlobalModel
+    globalsOptions: {
+      schemaOptions?: SchemaOptions
+    }
     mongoMemoryServer: any
+    schemaOptions?: SchemaOptions
     sessions: Record<number | string, ClientSession>
     versions: {
       [slug: string]: CollectionModel
@@ -79,12 +101,22 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
       Omit<Args, 'migrationDir'> {
+    collectionOptions: {
+      [slug: string]: {
+        schemaOptions?: SchemaOptions
+      }
+    }
     collections: {
       [slug: string]: CollectionModel
     }
     connection: Connection
     globals: GlobalModel
+    globalsOptions: {
+      schemaOptions?: SchemaOptions
+    }
     mongoMemoryServer: any
+    schemaOptions?: SchemaOptions
+
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
     versions: {
@@ -95,10 +127,12 @@ declare module 'payload' {
 
 export function mongooseAdapter({
   autoPluralization = true,
+  collections,
   connectOptions,
   disableIndexHints = false,
+  globals,
   migrationDir: migrationDirArg,
-  strict = true,
+  schemaOptions,
   transactionOptions = {},
   url,
 }: Args): MongooseAdapterResult {
@@ -111,15 +145,17 @@ export function mongooseAdapter({
 
       // Mongoose-specific
       autoPluralization,
+      collectionOptions: collections || {},
       collections: {},
       connectOptions: connectOptions || {},
       connection: undefined,
       count,
       disableIndexHints,
       globals: undefined,
+      globalsOptions: globals || {},
       mongoMemoryServer: undefined,
+      schemaOptions: schemaOptions || {},
       sessions: {},
-      strict,
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},

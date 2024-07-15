@@ -8,6 +8,7 @@ import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { GroupField, RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { NotFound } from '../../packages/payload/src/errors'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
@@ -37,7 +38,6 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs'
-import { NotFound } from '../../packages/payload/src/errors'
 
 let client: RESTClient
 let graphQLClient: GraphQLClient
