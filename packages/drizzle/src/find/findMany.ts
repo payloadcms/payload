@@ -10,16 +10,16 @@ import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
-type Args = Omit<FindArgs, 'collection'> & {
+type Args = {
   adapter: DrizzleAdapter
   fields: Field[]
   tableName: string
-}
+} & Omit<FindArgs, 'collection'>
 
 export const findMany = async function find({
   adapter,
   fields,
-  limit: limitArg = 10,
+  limit: limitArg,
   locale,
   page = 1,
   pagination,
@@ -36,9 +36,10 @@ export const findMany = async function find({
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
+  const offset = skip || (page - 1) * limit
 
-  if (adapter.name === 'sqlite' && limit === 0) {
-    limit = -1
+  if (limit === 0) {
+    limit = undefined
   }
 
   const { joins, orderBy, selectFields, where } = await buildQuery({
@@ -69,8 +70,8 @@ export const findMany = async function find({
     tableName,
   })
 
-  selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
-  selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
+  selectDistinctMethods.push({ args: [offset], method: 'offset' })
+  selectDistinctMethods.push({ args: [limit], method: 'limit' })
 
   const selectDistinctResult = await selectDistinct({
     adapter,
@@ -106,15 +107,12 @@ export const findMany = async function find({
     }
   } else {
     findManyArgs.limit = limit
-
-    const offset = skip || (page - 1) * limitArg
-
-    if (!Number.isNaN(offset)) findManyArgs.offset = offset
+    findManyArgs.offset = offset
+    findManyArgs.orderBy = orderBy.order(orderBy.column)
 
     if (where) {
       findManyArgs.where = where
     }
-    findManyArgs.orderBy = orderBy.order(orderBy.column)
   }
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
