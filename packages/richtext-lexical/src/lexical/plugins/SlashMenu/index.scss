@@ -10,7 +10,7 @@ html[data-theme='light'] {
   background: var(--color-base-0);
   width: 200px;
   color: var(--color-base-800);
-  border-radius: 4px;
+  border-radius: $style-radius-m;
   list-style: none;
   font-family: var(--font-body);
   max-height: 300px;

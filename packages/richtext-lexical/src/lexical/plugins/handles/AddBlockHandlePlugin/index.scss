@@ -1,6 +1,8 @@
+@import '../../../../scss/styles.scss';
+
 .add-block-menu {
   all: unset; // reset all default button styles
-  border-radius: 4px;
+  border-radius: $style-radius-m;
   padding: 0;
   cursor: pointer;
   opacity: 0;
