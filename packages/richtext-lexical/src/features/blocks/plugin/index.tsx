@@ -37,7 +37,7 @@ const drawerSlug = 'lexical-inlineBlocks-create'
 export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
   const { closeModal, toggleModal } = useModal()
-  const [blockFields, setBlockFields] = useState<BlockFields>({} as any)
+  const [blockFields, setBlockFields] = useState<BlockFields>(null)
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
 
@@ -83,25 +83,19 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
       editor.registerCommand(
         INSERT_INLINE_BLOCK_COMMAND,
         (fields) => {
-          console.log('INSERT_INLINE_BLOCK_COMMAND', fields)
           if (targetNodeKey) {
-            console.log('targetNodeKey', targetNodeKey)
             const node: InlineBlockNode = $getNodeByKey(targetNodeKey)
-            console.log('node', node)
 
             if (!node) {
               return false
             }
             node.setFields(fields as BlockFields)
-            console.log('setf')
 
             setTargetNodeKey(null)
             return true
           }
-          console.log('creating')
 
           const inlineBlockNode = $createInlineBlockNode(fields as BlockFields)
-          console.log('inserting', inlineBlockNode)
           $insertNodes([inlineBlockNode])
           if ($isRootOrShadowRoot(inlineBlockNode.getParentOrThrow())) {
             $wrapNodeInElement(inlineBlockNode, $createParagraphNode).selectEnd()
