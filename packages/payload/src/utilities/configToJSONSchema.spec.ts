@@ -1,8 +1,9 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
 import { configToJSONSchema } from './configToJSONSchema.js'
-import { JSONSchema4 } from 'json-schema'
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', async () => {
@@ -10,6 +11,7 @@ describe('configToJSONSchema', () => {
     const config: Config = {
       collections: [
         {
+          slug: 'test',
           fields: [
             {
               name: 'someRequiredField',
@@ -17,13 +19,12 @@ describe('configToJSONSchema', () => {
               fields: [
                 {
                   name: 'someRequiredField',
-                  required: true,
                   type: 'text',
+                  required: true,
                 },
               ],
             },
           ],
-          slug: 'test',
           timestamps: false,
         },
       ],
@@ -33,13 +34,16 @@ describe('configToJSONSchema', () => {
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
       additionalProperties: false,
       properties: {
         id: {
           type: 'string',
         },
         someRequiredField: {
+          type: ['array', 'null'],
           items: {
+            type: 'object',
             additionalProperties: false,
             properties: {
               id: {
@@ -50,14 +54,11 @@ describe('configToJSONSchema', () => {
               },
             },
             required: ['someRequiredField'],
-            type: 'object',
           },
-          type: ['array', 'null'],
         },
       },
       required: ['id'],
       title: 'Test',
-      type: 'object',
     })
   })
 
@@ -66,44 +67,44 @@ describe('configToJSONSchema', () => {
     const config: Config = {
       collections: [
         {
+          slug: 'test',
           fields: [
             {
               type: 'tabs',
               tabs: [
                 {
-                  label: 'unnamedTab',
                   fields: [
                     {
-                      type: 'text',
                       name: 'fieldInUnnamedTab',
+                      type: 'text',
                     },
                   ],
+                  label: 'unnamedTab',
                 },
                 {
-                  label: 'namedTab',
                   name: 'namedTab',
                   fields: [
                     {
-                      type: 'text',
                       name: 'fieldInNamedTab',
+                      type: 'text',
                     },
                   ],
+                  label: 'namedTab',
                 },
                 {
-                  label: 'namedTabWithRequired',
                   name: 'namedTabWithRequired',
                   fields: [
                     {
-                      type: 'text',
                       name: 'fieldInNamedTab',
+                      type: 'text',
                       required: true,
                     },
                   ],
+                  label: 'namedTabWithRequired',
                 },
               ],
             },
           ],
-          slug: 'test',
           timestamps: false,
         },
       ],
@@ -113,6 +114,7 @@ describe('configToJSONSchema', () => {
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
       additionalProperties: false,
       properties: {
         id: {
@@ -122,8 +124,8 @@ describe('configToJSONSchema', () => {
           type: ['string', 'null'],
         },
         namedTab: {
-          additionalProperties: false,
           type: 'object',
+          additionalProperties: false,
           properties: {
             fieldInNamedTab: {
               type: ['string', 'null'],
@@ -132,8 +134,8 @@ describe('configToJSONSchema', () => {
           required: [],
         },
         namedTabWithRequired: {
-          additionalProperties: false,
           type: 'object',
+          additionalProperties: false,
           properties: {
             fieldInNamedTab: {
               type: 'string',
@@ -144,7 +146,6 @@ describe('configToJSONSchema', () => {
       },
       required: ['id', 'namedTabWithRequired'],
       title: 'Test',
-      type: 'object',
     })
   })
 
@@ -162,23 +163,23 @@ describe('configToJSONSchema', () => {
     const config: Partial<Config> = {
       collections: [
         {
+          slug: 'test',
           fields: [
             {
-              type: 'text',
               name: 'withCustom',
+              type: 'text',
               typescriptSchema: [() => customSchema],
             },
             {
-              type: 'json',
               name: 'jsonWithSchema',
+              type: 'json',
               jsonSchema: {
-                uri: 'a://b/foo.json',
                 fileMatch: ['a://b/foo.json'],
                 schema: customSchema,
+                uri: 'a://b/foo.json',
               },
             },
           ],
-          slug: 'test',
           timestamps: false,
         },
       ],
@@ -188,17 +189,17 @@ describe('configToJSONSchema', () => {
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
       additionalProperties: false,
       properties: {
         id: {
           type: 'string',
         },
-        withCustom: customSchema,
         jsonWithSchema: customSchema,
+        withCustom: customSchema,
       },
       required: ['id'],
       title: 'Test',
-      type: 'object',
     })
   })
 })

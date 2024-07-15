@@ -31,7 +31,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export type ArrayFieldProps = FormFieldBase & {
+export type ArrayFieldProps = {
   CustomRowLabel?: React.ReactNode
   fieldMap: FieldMap
   forceRender?: boolean
@@ -41,7 +41,7 @@ export type ArrayFieldProps = FormFieldBase & {
   minRows?: ArrayFieldType['minRows']
   name?: string
   width?: string
-}
+} & FormFieldBase
 
 export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const {

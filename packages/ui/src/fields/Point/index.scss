@@ -3,6 +3,10 @@
 .point {
   position: relative;
 
+  & .input-wrapper {
+    position: relative;
+  }
+
   &__wrap {
     display: flex;
     width: calc(100% + #{base(1)});

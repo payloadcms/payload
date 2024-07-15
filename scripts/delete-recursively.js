@@ -1,7 +1,7 @@
 import { promises as fs, existsSync } from 'fs'
 import path, { join } from 'path'
-import glob from 'glob'
-import process from 'process'
+import globby from 'globby'
+import process from 'node:process'
 import chalk from 'chalk'
 
 // Helper function to format size appropriately in KB or MB
@@ -73,35 +73,18 @@ async function cleanDirectories(patterns) {
     if (pattern === '@node_modules') {
       pattern = '**/node_modules'
       fulleDelete = true
-      files = await new Promise((resolve, reject) => {
-        glob(pattern, { nodir: false }, (err, files) => {
-          if (err) {
-            reject(err)
-          } else {
-            // Filter out node_modules within other node_modules
-            const topNodeModules = files.filter((file) => {
-              const parentDir = path.dirname(file)
-              return !parentDir.includes('node_modules')
-            })
-            resolve(topNodeModules)
-          }
-        })
+      files = await globby(pattern, {
+        onlyDirectories: true,
+        ignore: ['**/node_modules/**/node_modules'],
       })
     } else {
       const options = {
         ignore: ignoreNodeModules ? '**/node_modules/**' : '',
-        nodir: false,
+        onlyDirectories: pattern.endsWith('/') ? true : false,
       }
+      fulleDelete = options.onlyDirectories
 
-      files = await new Promise((resolve, reject) => {
-        glob(pattern, options, (err, files) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(files)
-          }
-        })
-      })
+      files = await globby(pattern, options)
     }
 
     let count = 0

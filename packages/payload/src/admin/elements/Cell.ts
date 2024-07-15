@@ -35,11 +35,11 @@ export type CellComponentProps = {
   schemaPath: string
 }
 
-export type DefaultCellComponentProps<T = any> = CellComponentProps & {
+export type DefaultCellComponentProps<T = any> = {
   cellData: T
   customCellContext?: {
     collectionSlug?: SanitizedCollectionConfig['slug']
     uploadConfig?: SanitizedCollectionConfig['upload']
   }
   rowData: RowData
-}
+} & CellComponentProps

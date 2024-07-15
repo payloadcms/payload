@@ -27,7 +27,7 @@ export type Options<TSlug extends CollectionSlug> = {
 async function localLogin<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<Result & { user: DataFromCollectionSlug<TSlug> }> {
+): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> {
   const {
     collection: collectionSlug,
     data,

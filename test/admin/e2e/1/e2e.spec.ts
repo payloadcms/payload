@@ -102,7 +102,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
 
@@ -114,7 +114,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('metadata', () => {

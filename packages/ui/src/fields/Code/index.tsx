@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { CodeField as CodeFieldType } from 'payload'
 
@@ -16,13 +15,13 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type CodeFieldProps = FormFieldBase & {
+export type CodeFieldProps = {
   editorOptions?: CodeFieldType['admin']['editorOptions']
   language?: CodeFieldType['admin']['language']
   name?: string
   path?: string
   width: string
-}
+} & FormFieldBase
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',

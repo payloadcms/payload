@@ -47,7 +47,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin and pass in your Sentry DSN as an option.
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { sentryPlugin } from '@payloadcms/plugin-sentry'
 import { Pages, Media } from './collections'
 
@@ -96,7 +96,7 @@ To see all options available, visit the [Sentry Docs](https://docs.sentry.io/pla
 Configure any of these options by passing them to the plugin:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { sentry } from '@payloadcms/plugin-sentry'
 import { Pages, Media } from './collections'
 

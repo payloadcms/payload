@@ -16,13 +16,13 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type EmailFieldProps = FormFieldBase & {
+export type EmailFieldProps = {
   autoComplete?: string
   name?: string
   path?: string
   placeholder?: EmailFieldType['admin']['placeholder']
   width?: string
-}
+} & FormFieldBase
 
 const _EmailField: React.FC<EmailFieldProps> = (props) => {
   const {

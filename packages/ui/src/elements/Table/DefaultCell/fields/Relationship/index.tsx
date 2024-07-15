@@ -74,7 +74,6 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     if (hasRequested) {
       setHasRequested(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellData])
 
   return (

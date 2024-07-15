@@ -26,6 +26,18 @@ export default buildConfigWithDefaults({
   collections: [],
   globals: [],
   graphQL: {
+    mutations: (GraphQL) => {
+      return {
+        MutateTransactionID1: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+        MutateTransactionID2: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+      }
+    },
     queries: (GraphQL) => {
       return {
         TransactionID1: {
@@ -40,18 +52,6 @@ export default buildConfigWithDefaults({
           type: GraphQLJSON,
           args: {},
           resolve: () => 'json test',
-        },
-      }
-    },
-    mutations: (GraphQL) => {
-      return {
-        MutateTransactionID1: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        MutateTransactionID2: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
         },
       }
     },

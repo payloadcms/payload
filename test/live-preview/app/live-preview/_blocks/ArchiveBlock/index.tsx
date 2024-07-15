@@ -8,9 +8,9 @@ import RichText from '../../_components/RichText/index.js'
 import classes from './index.module.scss'
 
 export const ArchiveBlock: React.FC<
-  ArchiveBlockProps & {
+  {
     id?: string
-  }
+  } & ArchiveBlockProps
 > = (props) => {
   const {
     id,

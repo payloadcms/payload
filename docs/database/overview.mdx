@@ -6,21 +6,43 @@ keywords: database, mongodb, postgres, documentation, Content Management System,
 desc: With Payload, you bring your own database and own your data. You have full control.
 ---
 
-Payload interacts with your database via the Database Adapter that you choose. Currently, Payload officially supports the following Database Adapters:
+Payload is database agnostic, meaning you can use any type of database behind Payload's familiar APIs. Payload is designed to interact with your database through a Database Adapter, which is a thin layer that translates Payload's internal data structures into your database's native data structures.
+
+Currently, Payload officially supports the following Database Adapters:
 
 - [MongoDB](/docs/database/mongodb) with [Mongoose](https://mongoosejs.com/)
 - [Postgres](/docs/database/postgres) with [Drizzle](https://drizzle.team/)
+- Coming soon: SQLite and MySQL using Drizzle.
 
-To use a specific database adapter, you need to install it and configure it according to its own specifications. Visit the documentation for your applicable database adapter to learn more.
+To configure a Database Adapter, use the `db` property in your [Payload Config](../configuration/overview):
 
-<Banner type="success">
-  <strong>Note:</strong>
-  In the future, we will be adding support for SQLite and MySQL using Drizzle.
+```ts
+import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  The Database Adapter is an external dependency and must be installed in your project separately from Payload. You can find the installation instructions for each Database Adapter in their respective documentation.
 </Banner>
 
 ## Selecting a Database
 
 There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
+
+There are two main categories of databases to choose from:
+
+- [Non-Relational Databases](#non-relational-databases)
+- [Relational Databases](#relational-databases)
 
 ### Non-Relational Databases
 
@@ -43,34 +65,8 @@ You should prefer a relational DB like Postgres if:
 - You require enforced data consistency at the database level
 - You have a lot of relationships between collections and require relationships to be enforced
 
-### Payload Differences
+## Payload Differences
 
-It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc.
-
-The only thing that is not supported in Postgres yet is the [Point Field](/docs/fields/point), but that should be added soon.
+It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc. The only thing that is not supported in Postgres yet is the [Point Field](/docs/fields/point), but that should be added soon.
 
 It's up to you to choose which database you would like to use based on the requirements of your project. Payload has no opinion on which database you should ultimately choose.
-
-## Configuration
-
-To add a Database Adapter, use the `db` property in your [Payload Config](../configuration/overview):
-
-```ts
-import { postgresAdapter } from '@payloadcms/db-postgres'
-
-export default buildConfig({
-  // Your config goes here
-  collections: [
-    // Collections go here
-  ],
-  // Here is where you pass your database adapter
-  // and the adapter will require options specific to itself
-  // highlight-start
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI,
-    },
-  }),
-  // highlight-end
-})
-```

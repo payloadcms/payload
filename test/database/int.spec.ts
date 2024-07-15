@@ -18,7 +18,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
-let user: TypeWithID & Record<string, unknown>
+let user: Record<string, unknown> & TypeWithID
 let token: string
 let restClient: NextRESTClient
 const collection = 'posts'
