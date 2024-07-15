@@ -108,9 +108,9 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
       editor.registerCommand(
         OPEN_INLINE_BLOCK_DRAWER_COMMAND,
         ({ fields, nodeKey }) => {
-          setBlockFields((fields as BlockFields) ?? ({} as BlockFields))
+          setBlockFields((fields as BlockFields) ?? null)
           setTargetNodeKey(nodeKey ?? null)
-          setBlockType((fields as BlockFields).blockType ?? ('' as any))
+          setBlockType((fields as BlockFields)?.blockType ?? ('' as any))
 
           if (nodeKey) {
             toggleModal(drawerSlug)
@@ -153,7 +153,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
 
         editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
       }}
-      schemaPathSuffix={blockFields.blockType}
+      schemaPathSuffix={blockFields?.blockType}
     />
   )
 }
