@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { Data, FormState } from 'payload'
 
 import { Drawer } from '@payloadcms/ui'
 import React from 'react'
@@ -8,7 +8,7 @@ import { DrawerContent } from './DrawerContent.js'
 
 export type FieldsDrawerProps = {
   className?: string
-  data: any
+  data?: Data
   drawerSlug: string
   drawerTitle?: string
   featureKey: string
