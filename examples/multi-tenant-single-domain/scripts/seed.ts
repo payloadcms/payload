@@ -3,7 +3,9 @@
  * and uses the Payload Local API to query the database.
  */
 
-import type { Payload } from 'payload';
+process.env.PAYLOAD_DROP_DATABASE = 'true'
+
+import type { Payload } from 'payload'
 
 import { getPayload } from 'payload'
 import { importConfig } from 'payload/node'
@@ -106,7 +108,7 @@ async function run() {
       password: 'test',
       tenants: [
         {
-          roles: ['super-admin'],
+          roles: ['tenant-admin'],
           tenant: tenant1.id,
         },
       ],
@@ -121,7 +123,7 @@ async function run() {
       password: 'test',
       tenants: [
         {
-          roles: ['super-admin'],
+          roles: ['tenant-admin'],
           tenant: tenant2.id,
         },
       ],
@@ -136,11 +138,11 @@ async function run() {
       password: 'test',
       tenants: [
         {
-          roles: ['super-admin'],
+          roles: ['tenant-admin'],
           tenant: tenant1.id,
         },
         {
-          roles: ['super-admin'],
+          roles: ['tenant-admin'],
           tenant: tenant2.id,
         },
       ],

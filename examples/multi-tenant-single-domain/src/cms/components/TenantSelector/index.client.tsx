@@ -1,12 +1,11 @@
 'use client'
-
 import type { Option } from '@payloadcms/ui/elements/ReactSelect'
 import type { OptionObject } from 'payload'
 
 import { SelectInput, useAuth } from '@payloadcms/ui'
 import React from 'react'
 
-import type { Tenant, User } from '../../../payload-types'
+import type { Tenant, User } from '../../../payload-types.js'
 
 import './index.scss'
 

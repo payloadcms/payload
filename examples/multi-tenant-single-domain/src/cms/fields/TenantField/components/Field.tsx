@@ -1,8 +1,8 @@
 'use client'
-import type { User } from 'payload/generated-types'
-
 import { RelationshipField, useAuth, useFieldProps } from '@payloadcms/ui'
 import React from 'react'
+
+import type { User } from '../../../../payload-types.js'
 
 export const TenantFieldComponent = () => {
   const { user } = useAuth<User>()
