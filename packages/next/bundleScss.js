@@ -21,39 +21,26 @@ async function build() {
     }
   })
 
-  await fs.unlink('dist/esbuildEntry.js', (err) => {
-    if (err) {
-      console.error(`Error while deleting dist/esbuildEntry.js: ${err}`)
-      throw err
-    }
-  })
-
-  await fs.unlink('dist/prod/esbuildEntry.js', (err) => {
-    if (err) {
-      console.error(`Error while deleting dist/prod/esbuildEntry.js: ${err}`)
-      throw err
-    }
-  })
-
-  await fs.unlink('dist/esbuildEntry.d.ts', (err) => {
-    if (err) {
-      console.error(`Error while deleting dist/esbuildEntry.d.ts: ${err}`)
-      throw err
-    }
-  })
-  await fs.unlink('dist/esbuildEntry.d.ts.map', (err) => {
-    if (err) {
-      console.error(`Error while deleting dist/esbuildEntry.d.ts.map: ${err}`)
-      throw err
-    }
-  })
-  await fs.unlink('dist/esbuildEntry.js.map', (err) => {
-    if (err) {
-      console.error(`Error while deleting dist/esbuildEntry.js.map: ${err}`)
-      throw err
-    }
-  })
   console.log('styles.css bundled successfully')
+
+  const filesToDelete = [
+    'dist/esbuildEntry.js',
+    'dist/prod/esbuildEntry.js',
+    'dist/esbuildEntry.d.ts',
+    'dist/esbuildEntry.d.ts.map',
+    'dist/esbuildEntry.js.map',
+  ]
+
+  for (const file of filesToDelete) {
+    await fs.unlink(file, (err) => {
+      if (err) {
+        console.error(`Error while deleting ${file}: ${err}`)
+        throw err
+      }
+    })
+  }
+
+  console.log('Files renamed and deleted successfully')
 }
 
 await build()
