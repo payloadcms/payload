@@ -185,7 +185,6 @@ export const getViewsFromConfig = ({
     }
 
     if (!EditOverride) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
       if (!docPermissions?.read?.permission) {
@@ -228,7 +227,19 @@ export const getViewsFromConfig = ({
 
               default: {
                 if (docPermissions?.read?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Default')
+                  const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
+                    .filter(Boolean)
+                    .join('/')
+
+                  const currentRoute = [baseRoute, segment3, ...remainingSegments]
+                    .filter(Boolean)
+                    .join('/')
+
+                  CustomView = getCustomViewByRoute({
+                    baseRoute,
+                    currentRoute,
+                    views,
+                  })
                   DefaultView = DefaultEditView
                 } else {
                   ErrorView = UnauthorizedView
