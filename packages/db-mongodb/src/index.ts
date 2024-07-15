@@ -100,7 +100,7 @@ type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
 declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
-      Omit<Args, 'migrationDir'> {
+      Omit<Args, 'collections' | 'globals' | 'migrationDir'> {
     collectionOptions: {
       [slug: string]: {
         schemaOptions?: SchemaOptions
