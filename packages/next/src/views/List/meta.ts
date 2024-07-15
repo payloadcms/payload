@@ -8,9 +8,9 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 import { meta } from '../../utilities/meta.js'
 
 export const generateListMetadata = async (
-  args: Parameters<GenerateViewMetadata>[0] & {
+  args: {
     collectionConfig: SanitizedCollectionConfig
-  },
+  } & Parameters<GenerateViewMetadata>[0],
 ): Promise<Metadata> => {
   const { collectionConfig, config, i18n } = args
 

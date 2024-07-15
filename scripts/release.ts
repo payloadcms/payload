@@ -73,7 +73,7 @@ async function main() {
 
   console.log({ args })
 
-  const fromVersion = execSync('git describe --tags --abbrev=0').toString().trim()
+  const fromVersion = execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
 
   const config = await loadChangelogConfig(process.cwd(), {
     repo: 'payloadcms/payload',

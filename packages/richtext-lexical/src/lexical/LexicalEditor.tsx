@@ -22,9 +22,9 @@ import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/ind
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
-  Pick<LexicalProviderProps, 'editorConfig' | 'onChange'> & {
+  {
     editorContainerRef: React.RefObject<HTMLDivElement>
-  }
+  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
   const { editorConfig, editorContainerRef, onChange } = props
   const editorConfigContext = useEditorConfigContext()

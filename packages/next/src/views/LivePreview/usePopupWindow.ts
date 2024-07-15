@@ -14,7 +14,7 @@ export interface PopupMessage {
 
 export const usePopupWindow = (props: {
   eventType?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onMessage?: (searchParams: PopupMessage['searchParams']) => Promise<void>
   url: string
 }): {

@@ -1,6 +1,6 @@
 'use client'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Post } from '../../../../../payload-types.js'
@@ -24,12 +24,12 @@ type Result = {
   totalPages: number
 }
 
-export type Props = Omit<ArchiveBlockProps, 'blockType'> & {
+export type Props = {
   className?: string
-  onResultChange?: (result: Result) => void // eslint-disable-line no-unused-vars
+  onResultChange?: (result: Result) => void
   showPageRange?: boolean
   sort?: string
-}
+} & Omit<ArchiveBlockProps, 'blockType'>
 
 export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
   const {

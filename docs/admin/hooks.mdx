@@ -136,7 +136,8 @@ You can do lots of powerful stuff by retrieving the full form state, like using 
 
 ```tsx
 'use client'
-import { useAllFormFields, reduceFieldsToValues, getSiblingData } from '@payloadcms/ui'
+import { useAllFormFields } from '@payloadcms/ui'
+import { reduceFieldsToValues, getSiblingData } from 'payload/shared'
 
 const ExampleComponent: React.FC = () => {
   // the `fields` const will be equal to all fields' state,

@@ -27,13 +27,13 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export type GroupFieldProps = FormFieldBase & {
+export type GroupFieldProps = {
   fieldMap: FieldMap
   forceRender?: boolean
   hideGutter?: boolean
   name?: string
   width?: string
-}
+} & FormFieldBase
 
 export const _GroupField: React.FC<GroupFieldProps> = (props) => {
   const {

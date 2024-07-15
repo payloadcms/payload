@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import type { GlobalConfig } from 'payload'
 
 export const dataHooksGlobalSlug = 'data-hooks-global'

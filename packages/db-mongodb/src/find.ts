@@ -15,7 +15,7 @@ export const find: Find = async function find(
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint = false
 
@@ -86,7 +86,6 @@ export const find: Find = async function find(
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

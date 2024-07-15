@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { NumberField as NumberFieldType } from 'payload'
 
@@ -20,7 +19,7 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type NumberFieldProps = FormFieldBase & {
+export type NumberFieldProps = {
   hasMany?: boolean
   max?: number
   maxRows?: number
@@ -31,7 +30,7 @@ export type NumberFieldProps = FormFieldBase & {
   placeholder?: NumberFieldType['admin']['placeholder']
   step?: number
   width?: string
-}
+} & FormFieldBase
 
 const _NumberField: React.FC<NumberFieldProps> = (props) => {
   const {
@@ -171,7 +170,6 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
             className={`field-${path.replace(/\./g, '__')}`}
             disabled={disabled}
             filterOption={(_, rawInput) => {
-              // eslint-disable-next-line no-restricted-globals
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
             }}
@@ -204,7 +202,6 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
               name={path}
               onChange={handleChange}
               onWheel={(e) => {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
                 e.target.blur()
               }}

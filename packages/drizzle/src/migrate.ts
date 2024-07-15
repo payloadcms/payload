@@ -82,7 +82,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
 
   try {
     await initTransaction(req)
-    const db = adapter?.sessions[req.transactionID]?.db || adapter.drizzle
+    const db = adapter?.sessions[await req.transactionID]?.db || adapter.drizzle
     await migration.up({ db, payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({

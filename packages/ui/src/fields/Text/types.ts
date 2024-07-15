@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react'
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
-export type TextFieldProps = FormFieldBase & {
+export type TextFieldProps = {
   hasMany?: boolean
   inputRef?: React.MutableRefObject<HTMLInputElement>
   maxLength?: number
@@ -16,7 +16,7 @@ export type TextFieldProps = FormFieldBase & {
   path?: string
   placeholder?: TextField['admin']['placeholder']
   width?: string
-}
+} & FormFieldBase
 
 export type SharedTextFieldProps =
   | {
@@ -28,13 +28,13 @@ export type SharedTextFieldProps =
       onChange?: ReactSelectAdapterProps['onChange']
     }
 
-export type TextInputProps = Omit<TextFieldProps, 'type'> &
-  SharedTextFieldProps & {
-    inputRef?: React.MutableRefObject<HTMLInputElement>
-    maxRows?: number
-    minRows?: number
-    onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-    showError?: boolean
-    value?: string
-    valueToRender?: Option[]
-  }
+export type TextInputProps = {
+  inputRef?: React.MutableRefObject<HTMLInputElement>
+  maxRows?: number
+  minRows?: number
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  showError?: boolean
+  value?: string
+  valueToRender?: Option[]
+} & Omit<TextFieldProps, 'type'> &
+  SharedTextFieldProps

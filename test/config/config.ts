@@ -10,19 +10,22 @@ export default buildConfigWithDefaults({
     {
       slug: 'pages',
       access: {
-        read: () => true,
         create: () => true,
         delete: () => true,
+        read: () => true,
         update: () => true,
+      },
+      custom: {
+        externalLink: 'https://foo.bar',
       },
       endpoints: [
         {
-          path: '/hello',
-          method: 'get',
+          custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
           handler: () => {
             return Response.json({ message: 'hi' })
           },
-          custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
+          method: 'get',
+          path: '/hello',
         },
       ],
       fields: [
@@ -39,6 +42,9 @@ export default buildConfigWithDefaults({
           blocks: [
             {
               slug: 'blockOne',
+              custom: {
+                description: 'The blockOne of this page',
+              },
               fields: [
                 {
                   name: 'blockOneField',
@@ -49,9 +55,6 @@ export default buildConfigWithDefaults({
                   type: 'text',
                 },
               ],
-              custom: {
-                description: 'The blockOne of this page',
-              },
             },
           ],
           custom: {
@@ -59,23 +62,32 @@ export default buildConfigWithDefaults({
           },
         },
       ],
-      custom: {
-        externalLink: 'https://foo.bar',
+    },
+  ],
+  custom: { name: 'Customer portal' },
+  endpoints: [
+    {
+      custom: { description: 'Get the sanitized payload config' },
+      handler: (req) => {
+        return Response.json(req.payload.config)
       },
+      method: 'get',
+      path: '/config',
     },
   ],
   globals: [
     {
       slug: 'my-global',
+      custom: { foo: 'bar' },
       endpoints: [
         {
-          path: '/greet',
-          method: 'get',
+          custom: { params: [{ name: 'name', type: 'string', in: 'query' }] },
           handler: (req) => {
             const sp = new URL(req.url).searchParams
             return Response.json({ message: `Hi ${sp.get('name')}!` })
           },
-          custom: { params: [{ in: 'query', name: 'name', type: 'string' }] },
+          method: 'get',
+          path: '/greet',
         },
       ],
       fields: [
@@ -87,20 +99,8 @@ export default buildConfigWithDefaults({
           },
         },
       ],
-      custom: { foo: 'bar' },
     },
   ],
-  endpoints: [
-    {
-      path: '/config',
-      method: 'get',
-      handler: (req) => {
-        return Response.json(req.payload.config)
-      },
-      custom: { description: 'Get the sanitized payload config' },
-    },
-  ],
-  custom: { name: 'Customer portal' },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

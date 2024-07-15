@@ -27,11 +27,11 @@ export const populate = async ({
   overrideAccess,
   req,
   showHiddenFields,
-}: Omit<Arguments, 'field'> & {
+}: {
   collection: Collection
   field: Field
   id: string
-}): Promise<void> => {
+} & Omit<Arguments, 'field'>): Promise<void> => {
   const dataRef = data as Record<string, unknown>
 
   const doc = await req.payloadDataLoader.load(

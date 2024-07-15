@@ -18,12 +18,12 @@ const RichTextEditor = lazy(() =>
 )
 
 export const RichTextField: React.FC<
-  FormFieldBase & {
+  {
     admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
 > = (props) => {
   const { admin, lexicalEditorConfig, richTextComponentMap } = props
   const { schemaPath } = useFieldProps()

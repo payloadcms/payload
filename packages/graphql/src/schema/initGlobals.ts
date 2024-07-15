@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graphql'
 import pluralize from 'pluralize'
 const { singular } = pluralize

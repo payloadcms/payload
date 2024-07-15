@@ -28,14 +28,14 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
   if (!user) return { user: null }
 
   return {
+    responseHeaders: new Headers({
+      'Smile-For-Me': 'please',
+    }),
     user: {
       ...user,
       _strategy: `${usersSlug}-${strategyName}`,
       collection: usersSlug,
     },
-    responseHeaders: new Headers({
-      'Smile-For-Me': 'please',
-    }),
   }
 }
 

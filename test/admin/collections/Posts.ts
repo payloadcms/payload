@@ -16,15 +16,15 @@ export const Posts: CollectionConfig = {
     description: 'Description',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
-    preview: () => 'https://payloadcms.com',
-    useAsTitle: 'title',
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {
-        title: 'This is a custom OG title for posts',
         description: 'This is a custom OG description for posts',
+        title: 'This is a custom OG title for posts',
       },
     },
+    preview: () => 'https://payloadcms.com',
+    useAsTitle: 'title',
   },
   fields: [
     {

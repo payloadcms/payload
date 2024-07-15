@@ -6,7 +6,7 @@ desc: Manage your data and customize the Payload Admin Panel by swapping in your
 keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) admin panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
+Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) Admin Panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), preview drafts, [diff versions](../versions/overview), and so much more.
 
 The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
 
@@ -147,7 +147,7 @@ You have full control over the routes that Payload binds itself to. This include
 
 Root-level routes are those that are not behind the `/admin` path, such as the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), or the root path of the Admin Panel itself.
 
-To customize root-level routes, use the `routes` property of your [Payload Config](../configuration/overview):
+To customize root-level routes, use the `routes` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -183,7 +183,7 @@ The following options are available:
 
 Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
 
-To customize admin-level routes, use the `admin.routes` property of your [Payload Config](../configuration/overview):
+To customize admin-level routes, use the `admin.routes` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -219,12 +219,6 @@ The following options are available:
 ## I18n
 
 The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
-
-<Banner>
-  <strong>Note:</strong>
-  If there is a language that Payload does not yet support, we accept code
-  [contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
-</Banner>
 
 ## Light and Dark Modes
 

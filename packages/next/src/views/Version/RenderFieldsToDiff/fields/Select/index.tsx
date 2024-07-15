@@ -47,9 +47,9 @@ const getTranslatedOptions = (
 }
 
 const Select: React.FC<
-  Omit<Props, 'field'> & {
+  {
     field: MappedField & SelectFieldProps
-  }
+  } & Omit<Props, 'field'>
 > = ({ comparison, diffMethod, field, i18n, locale, version }) => {
   let placeholder = ''
 

@@ -19,18 +19,15 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
   'components' | 'hidden' | 'preview'
 >
 
-export type ClientGlobalConfig = Omit<
-  SanitizedGlobalConfig,
-  'admin' | 'fields' | ServerOnlyGlobalProperties
-> & {
-  admin: Omit<
-    SanitizedGlobalConfig['admin'],
-    ServerOnlyGlobalAdminProperties & 'fields' & 'livePreview'
-  > & {
+export type ClientGlobalConfig = {
+  admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  }
+  } & Omit<
+    SanitizedGlobalConfig['admin'],
+    'fields' & 'livePreview' & ServerOnlyGlobalAdminProperties
+  >
   fields: ClientFieldConfig[]
-}
+} & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>
 
 export const createClientGlobalConfig = ({
   global,

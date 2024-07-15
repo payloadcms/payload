@@ -4,6 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { FieldAccess } from 'payload'
 
+import type { Config, User } from './payload-types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { TestButton } from './TestButton.js'
@@ -34,9 +36,9 @@ import {
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
@@ -51,83 +53,20 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
+function isUser(user: Config['user']): user is {
+  collection: 'users'
+} & User {
+  return user?.collection === 'users'
+}
+
 export default buildConfigWithDefaults({
   admin: {
-    user: 'users',
     autoLogin: false,
+    user: 'users',
   },
-  globals: [
-    {
-      slug: 'settings',
-      fields: [
-        {
-          type: 'checkbox',
-          name: 'test',
-          label: 'Allow access to test global',
-        },
-      ],
-      admin: {
-        components: {
-          elements: {
-            SaveButton: TestButton,
-          },
-        },
-      },
-    },
-    {
-      slug: 'test',
-      fields: [],
-      access: {
-        read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
-          return Boolean(access.test)
-        },
-      },
-    },
-    {
-      slug: readOnlyGlobalSlug,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      access: {
-        read: () => true,
-        update: () => false,
-      },
-    },
-    {
-      slug: userRestrictedGlobalSlug,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      access: {
-        read: () => true,
-        update: ({ req, data }) => data?.name === req.user?.email,
-      },
-    },
-    {
-      slug: readNotUpdateGlobalSlug,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      access: {
-        read: () => true,
-        update: () => false,
-      },
-    },
-  ],
   collections: [
     {
       slug: 'users',
-      auth: true,
       access: {
         // admin:  () => true,
         admin: async ({ req }) => {
@@ -141,20 +80,21 @@ export default buildConfigWithDefaults({
           })
         },
       },
+      auth: true,
       fields: [
         {
           name: 'roles',
           type: 'select',
-          hasMany: true,
-          options: ['admin', 'user'],
-          defaultValue: ['user'],
           access: {
-            create: ({ req }) => req.user?.roles?.includes('admin'),
+            create: ({ req }) => isUser(req.user) && req.user?.roles?.includes('admin'),
             read: () => false,
             update: ({ req }) => {
-              return req.user?.roles?.includes('admin')
+              return isUser(req.user) && req.user?.roles?.includes('admin')
             },
           },
+          defaultValue: ['user'],
+          hasMany: true,
+          options: ['admin', 'user'],
         },
       ],
     },
@@ -179,16 +119,16 @@ export default buildConfigWithDefaults({
           },
         },
         {
-          type: 'group',
           name: 'group',
+          type: 'group',
           fields: [
             {
               name: 'restrictedGroupText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
@@ -200,27 +140,27 @@ export default buildConfigWithDefaults({
               name: 'restrictedRowText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
         },
         {
           type: 'collapsible',
-          label: 'Access',
           fields: [
             {
               name: 'restrictedCollapsibleText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
+          label: 'Access',
         },
       ],
     },
@@ -234,71 +174,59 @@ export default buildConfigWithDefaults({
         {
           name: 'userRestrictedDocs',
           type: 'relationship',
-          relationTo: userRestrictedCollectionSlug,
           hasMany: true,
+          relationTo: userRestrictedCollectionSlug,
         },
         {
           name: 'createNotUpdateDocs',
           type: 'relationship',
-          relationTo: createNotUpdateCollectionSlug,
           hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
         },
       ],
     },
     {
       slug: fullyRestrictedSlug,
+      access: {
+        create: () => false,
+        delete: () => false,
+        read: () => false,
+        update: () => false,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      access: {
-        create: () => false,
-        read: () => false,
-        update: () => false,
-        delete: () => false,
-      },
     },
     {
       slug: readOnlySlug,
+      access: {
+        create: () => false,
+        delete: () => false,
+        read: () => true,
+        update: () => false,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      access: {
-        create: () => false,
-        read: () => true,
-        update: () => false,
-        delete: () => false,
-      },
     },
     {
       slug: userRestrictedCollectionSlug,
-      admin: {
-        useAsTitle: 'name',
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
       access: {
         create: () => true,
+        delete: () => false,
         read: () => true,
         update: ({ req }) => ({
           name: {
             equals: req.user?.email,
           },
         }),
-        delete: () => false,
       },
-    },
-    {
-      slug: createNotUpdateCollectionSlug,
       admin: {
         useAsTitle: 'name',
       },
@@ -308,27 +236,27 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      access: {
-        create: () => true,
-        read: () => true,
-        update: () => false,
-        delete: () => false,
-      },
     },
     {
-      slug: restrictedVersionsSlug,
-      versions: true,
+      slug: createNotUpdateCollectionSlug,
+      access: {
+        create: () => true,
+        delete: () => false,
+        read: () => true,
+        update: () => false,
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
-        {
-          name: 'hidden',
-          type: 'checkbox',
-          hidden: true,
-        },
       ],
+    },
+    {
+      slug: restrictedVersionsSlug,
       access: {
         read: ({ req: { user } }) => {
           if (user) return true
@@ -349,6 +277,18 @@ export default buildConfigWithDefaults({
           }
         },
       },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+      versions: true,
     },
     {
       slug: siblingDataSlug,
@@ -363,8 +303,8 @@ export default buildConfigWithDefaults({
               fields: [
                 {
                   name: 'allowPublicReadability',
-                  label: 'Allow Public Readability',
                   type: 'checkbox',
+                  label: 'Allow Public Readability',
                 },
                 {
                   name: 'text',
@@ -383,9 +323,9 @@ export default buildConfigWithDefaults({
       slug: relyOnRequestHeadersSlug,
       access: {
         create: UseRequestHeadersAccess,
+        delete: UseRequestHeadersAccess,
         read: UseRequestHeadersAccess,
         update: UseRequestHeadersAccess,
-        delete: UseRequestHeadersAccess,
       },
       fields: [
         {
@@ -396,10 +336,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: docLevelAccessSlug,
-      labels: {
-        singular: 'Doc Level Access',
-        plural: 'Doc Level Access',
-      },
       access: {
         delete: () => ({
           and: [
@@ -420,7 +356,6 @@ export default buildConfigWithDefaults({
         {
           name: 'approvedTitle',
           type: 'text',
-          localized: true,
           access: {
             update: (args) => {
               if (args?.doc?.lockTitle) {
@@ -429,6 +364,7 @@ export default buildConfigWithDefaults({
               return true
             },
           },
+          localized: true,
         },
         {
           name: 'lockTitle',
@@ -436,6 +372,10 @@ export default buildConfigWithDefaults({
           defaultValue: false,
         },
       ],
+      labels: {
+        plural: 'Doc Level Access',
+        singular: 'Doc Level Access',
+      },
     },
     {
       slug: hiddenFieldsSlug,
@@ -536,6 +476,74 @@ export default buildConfigWithDefaults({
     },
     Disabled,
   ],
+  globals: [
+    {
+      slug: 'settings',
+      admin: {
+        components: {
+          elements: {
+            SaveButton: TestButton,
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'test',
+          type: 'checkbox',
+          label: 'Allow access to test global',
+        },
+      ],
+    },
+    {
+      slug: 'test',
+      access: {
+        read: async ({ req: { payload } }) => {
+          const access = await payload.findGlobal({ slug: 'settings' })
+          return Boolean(access.test)
+        },
+      },
+      fields: [],
+    },
+    {
+      slug: readOnlyGlobalSlug,
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: userRestrictedGlobalSlug,
+      access: {
+        read: () => true,
+        update: ({ data, req }) => data?.name === req.user?.email,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: readNotUpdateGlobalSlug,
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -587,12 +595,12 @@ export default buildConfigWithDefaults({
       data: {
         array: [
           {
-            text: firstArrayText,
             allowPublicReadability: true,
+            text: firstArrayText,
           },
           {
-            text: secondArrayText,
             allowPublicReadability: false,
+            text: secondArrayText,
           },
         ],
       },

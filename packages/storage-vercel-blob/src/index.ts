@@ -132,7 +132,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
   }
 
 function vercelBlobStorageInternal(
-  options: VercelBlobStorageOptions & { baseUrl: string },
+  options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options

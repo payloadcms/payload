@@ -263,8 +263,8 @@ describe('versions', () => {
       const pathname = new URL(docURL).pathname
 
       expect(versionsTab).toBeTruthy()
-      const href = await versionsTab.locator('a').first().getAttribute('href')
-      expect(href).toBe(`${pathname}/versions`)
+      const href = versionsTab.locator('a').first()
+      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
     })
 
     test('collection — tab displays proper number of versions', async () => {
@@ -282,8 +282,8 @@ describe('versions', () => {
       await versionsTab.waitFor({ state: 'visible' })
       const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
       await versionsPill.waitFor({ state: 'visible' })
-      const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount).toBe('11')
+      const versionCount = versionsTab.locator('.doc-tab__count').first()
+      await expect(versionCount).toHaveText('11')
     })
 
     test('collection — has versions route', async () => {
@@ -350,8 +350,8 @@ describe('versions', () => {
       await versionsTab.waitFor({ state: 'visible' })
 
       expect(versionsTab).toBeTruthy()
-      const href = await versionsTab.locator('a').first().getAttribute('href')
-      expect(href).toBe(`${pathname}/versions`)
+      const href = versionsTab.locator('a').first()
+      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
     })
 
     test('global — respects max number of versions', async () => {

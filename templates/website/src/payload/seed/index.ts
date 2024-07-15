@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -23,7 +23,13 @@ const globals = ['header', 'footer']
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
 // The app is not running to revalidate the pages and so the API routes are not available
 // These error messages can be ignored: `Error hitting revalidate route for...`
-export const seed = async (payload: Payload): Promise<void> => {
+export const seed = async ({
+  payload,
+  req,
+}: {
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> => {
   payload.logger.info('Seeding database...')
 
   // we need to clear the media directory before seeding
@@ -45,6 +51,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     ...collections.map((collection) =>
       payload.delete({
         collection: collection as 'media',
+        req,
         where: {},
       }),
     ),
@@ -52,6 +59,7 @@ export const seed = async (payload: Payload): Promise<void> => {
       payload.updateGlobal({
         slug: global as 'header',
         data: {},
+        req,
       }),
     ),
   ])
@@ -59,9 +67,10 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding demo author and user...`)
 
   await Promise.all(
-    ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async (email) => {
+    ['demo-author@payloadcms.com'].map(async (email) => {
       await payload.delete({
         collection: 'users',
+        req,
         where: {
           email: {
             equals: email,
@@ -78,17 +87,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         name: 'Demo Author',
         email: 'demo-author@payloadcms.com',
         password: 'password',
-        roles: ['admin'],
       },
-    }),
-    await payload.create({
-      collection: 'users',
-      data: {
-        name: 'Demo User',
-        email: 'demo-user@payloadcms.com',
-        password: 'password',
-        roles: ['user'],
-      },
+      req,
     }),
   ])
 
@@ -101,21 +101,25 @@ export const seed = async (payload: Payload): Promise<void> => {
       collection: 'media',
       data: image1,
       filePath: path.resolve(dirname, 'image-post1.webp'),
+      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-post2.webp'),
+      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-post3.webp'),
+      req,
     }),
     await payload.create({
       collection: 'media',
       data: image2,
       filePath: path.resolve(dirname, 'image-hero1.webp'),
+      req,
     }),
   ])
 
@@ -127,36 +131,42 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: {
         title: 'Technology',
       },
+      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'News',
       },
+      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Finance',
       },
+      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Design',
       },
+      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Software',
       },
+      req,
     }),
     await payload.create({
       collection: 'categories',
       data: {
         title: 'Engineering',
       },
+      req,
     }),
   ])
 
@@ -185,6 +195,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         .replace(/"\{\{IMAGE_2\}\}"/g, image2ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
+    req,
   })
 
   const post2Doc = await payload.create({
@@ -195,6 +206,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         .replace(/"\{\{IMAGE_2\}\}"/g, image3ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
+    req,
   })
 
   const post3Doc = await payload.create({
@@ -205,6 +217,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         .replace(/"\{\{IMAGE_2\}\}"/g, image1ID)
         .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
     ),
+    req,
   })
 
   // update each post with related posts
@@ -216,6 +229,7 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: {
         relatedPosts: [post2Doc.id, post3Doc.id],
       },
+      req,
     }),
     await payload.update({
       id: post2Doc.id,
@@ -223,6 +237,7 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: {
         relatedPosts: [post1Doc.id, post3Doc.id],
       },
+      req,
     }),
     await payload.update({
       id: post3Doc.id,
@@ -230,6 +245,7 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: {
         relatedPosts: [post1Doc.id, post2Doc.id],
       },
+      req,
     }),
   ])
 
@@ -242,13 +258,15 @@ export const seed = async (payload: Payload): Promise<void> => {
         .replace(/"\{\{IMAGE_1\}\}"/g, imageHomeID)
         .replace(/"\{\{IMAGE_2\}\}"/g, image2ID),
     ),
+    req,
   })
 
   payload.logger.info(`— Seeding contact form...`)
 
   const contactForm = await payload.create({
     collection: 'forms',
-    data: contactFormData,
+    data: JSON.parse(JSON.stringify(contactFormData)),
+    req,
   })
 
   let contactFormID = contactForm.id
@@ -264,6 +282,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: JSON.parse(
       JSON.stringify(contactPageData).replace(/"\{\{CONTACT_FORM_ID\}\}"/g, contactFormID),
     ),
+    req,
   })
 
   payload.logger.info(`— Seeding header...`)
@@ -291,6 +310,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         },
       ],
     },
+    req,
   })
 
   payload.logger.info(`— Seeding footer...`)
@@ -311,7 +331,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'custom',
             label: 'Source Code',
             newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+            url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
           },
         },
         {
@@ -324,6 +344,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         },
       ],
     },
+    req,
   })
 
   payload.logger.info('Seeded database successfully!')

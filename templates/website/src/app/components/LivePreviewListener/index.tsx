@@ -6,10 +6,6 @@ import React from 'react'
 export const LivePreviewListener: React.FC = () => {
   const router = useRouter()
   return (
-    <PayloadLivePreview
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      refresh={router.refresh}
-      serverURL={process.env.NEXT_PUBLIC_SERVER_URL}
-    />
+    <PayloadLivePreview refresh={router.refresh} serverURL={process.env.NEXT_PUBLIC_SERVER_URL} />
   )
 }

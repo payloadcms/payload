@@ -216,7 +216,6 @@ export function DropDown({
       const handle = (event: MouseEvent): void => {
         const { target } = event
         if (stopCloseOnClickSelf != null) {
-          // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
           if (dropDownRef.current != null && dropDownRef.current.contains(target as Node)) {
             return
           }

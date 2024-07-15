@@ -11,9 +11,9 @@ import classes from './index.module.scss'
 type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'cta' }>
 
 export const CallToActionBlock: React.FC<
-  Props & {
+  {
     id?: string
-  }
+  } & Props
 > = ({ invertBackground, links, richText }) => {
   return (
     <Gutter>

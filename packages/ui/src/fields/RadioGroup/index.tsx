@@ -1,5 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import type { Option } from 'payload'
 
@@ -22,7 +20,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type RadioFieldProps = FormFieldBase & {
+export type RadioFieldProps = {
   layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
@@ -30,7 +28,7 @@ export type RadioFieldProps = FormFieldBase & {
   path?: string
   value?: string
   width?: string
-}
+} & FormFieldBase
 
 export type OnChange<T = string> = (value: T) => void
 
@@ -102,6 +100,7 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
@@ -109,8 +108,6 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
