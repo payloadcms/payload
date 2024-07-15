@@ -54,5 +54,9 @@ describe('Custom GraphQL', () => {
         ).toBe(true)
       })
     })
+  } else {
+    it('should not run isolated transaction ID tests for sqlite', () => {
+      expect(true).toBe(true)
+    })
   }
 })
