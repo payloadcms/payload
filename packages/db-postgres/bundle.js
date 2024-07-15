@@ -6,8 +6,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
-const resultServer = await esbuild
-  .build({
+async function build() {
+  const resultServer = await esbuild.build({
     entryPoints: ['src/index.ts'],
     bundle: true,
     platform: 'node',
@@ -30,10 +30,8 @@ const resultServer = await esbuild
     plugins: [commonjs()],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('db-postgres bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
+  console.log('db-postgres bundled successfully')
 
-fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))
+  fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))
+}
+await build()
