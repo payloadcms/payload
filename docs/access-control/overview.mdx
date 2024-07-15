@@ -29,7 +29,7 @@ There are three main types of Access Control in Payload:
 
 ## Default Access Control
 
-By default, all [Collections](../configuration/collections) and [Globals](../configuration/globals) require that a user is at least logged in before they can interact with your data. To do this, Payload sets a default Access Control function that checks if a user is present on the request. To override this default behavior, you can define your own Access Control functions as needed.
+Payload provides default Access Control so that your data is secured behind [Authentication](../authentication) without additional configuration. To do this, Payload sets a default function that simply checks if a user is present on the request. You can override this default behavior by defining your own Access Control functions as needed.
 
 Here is the default Access Control that Payload provides:
 
@@ -43,7 +43,7 @@ const defaultPayloadAccess = ({ req: { user } }) => {
 
 <Banner type="warning">
   <strong>Important:</strong>
-  In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, set the `overrideAccess` option to `false` in your request.
+  In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, you can set the `overrideAccess` option to `false` in your requests.
 </Banner>
 
 ## When Access Control is Executed
