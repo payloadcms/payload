@@ -7,7 +7,7 @@
 .inline-block {
   @extend %body;
   @include shadow-sm;
-  padding: calc(var(--base) * 0.15);
+  padding: calc(var(--base) * 0.125);
   display: flex;
   align-items: center;
   background: var(--theme-input-bg);
