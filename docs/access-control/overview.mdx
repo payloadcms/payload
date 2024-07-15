@@ -46,7 +46,7 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, you can set the `overrideAccess` option to `false` in your requests.
 </Banner>
 
-## The Admin Panel
+## The Access Operation
 
 The Admin Panel responds dynamically to your changes to Access Control. For example, if you restrict editing `ExampleCollection` to only users that feature an "admin" role, Payload will **hide** that Collection from the Admin Panel entirely. This is super powerful and allows you to control who can do what within your Admin Panel using the same functions that secure your APIs.
 
