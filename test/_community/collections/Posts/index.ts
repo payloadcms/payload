@@ -54,6 +54,26 @@ export const PostsCollection: CollectionConfig = {
     //   relationTo: mediaSlug,
     // },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation === 'update') {
+          return doc
+        }
+        // After created...
+        // Expect this to be found
+        const results = await req.payload.findByID({
+          id: doc.id,
+          collection: postsSlug,
+        })
+
+        // But instead get a NotFound Error
+        console.log(results)
+
+        return doc
+      },
+    ],
+  },
   versions: {
     drafts: true,
   },

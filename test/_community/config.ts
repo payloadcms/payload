@@ -1,3 +1,4 @@
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -16,6 +17,11 @@ export default buildConfigWithDefaults({
     // MediaCollection
   ],
   cors: ['http://localhost:3000', 'http://localhost:3001'],
+  db: postgresAdapter({
+    pool: {
+      connectionString: 'postgresql://postgres:password123@127.0.0.1:5432/next-payload-3',
+    },
+  }),
   globals: [
     MenuGlobal,
     {
