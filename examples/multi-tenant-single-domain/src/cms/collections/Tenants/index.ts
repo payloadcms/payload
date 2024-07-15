@@ -1,15 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { isSuperAdmin } from '../../access/isSuperAdmin'
-import { tenantRead } from './access/read'
+import { isSuperAdmin } from '@/cms/access/isSuperAdmin'
+
+import { canMutateTenant, filterByTenantRead } from './access/byTenant'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   access: {
     create: isSuperAdmin,
-    delete: isSuperAdmin,
-    read: tenantRead,
-    update: isSuperAdmin,
+    delete: canMutateTenant,
+    read: filterByTenantRead,
+    update: canMutateTenant,
   },
   admin: {
     useAsTitle: 'name',

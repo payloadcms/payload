@@ -69,8 +69,8 @@ export interface User {
   roles?: ('super-admin' | 'user')[] | null;
   tenants?:
     | {
-        tenant?: (string | null) | Tenant;
-        roles?: ('super-admin' | 'viewer')[] | null;
+        tenant: string | Tenant;
+        roles: ('tenant-admin' | 'tenant-viewer')[];
         id?: string | null;
       }[]
     | null;
