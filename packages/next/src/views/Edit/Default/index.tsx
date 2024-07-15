@@ -148,6 +148,7 @@ export const DefaultEditView: React.FC = () => {
       adminRoute,
       router,
       locale,
+      resetUploadEdits,
     ],
   )
 
