@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
 import type {
   SlateNodeConverter,
@@ -40,7 +40,7 @@ export const migrateDocumentFieldsRecursively = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         found += migrateDocumentFieldsRecursively({
-          data,
+          data: tabHasName(tab) ? data[tab.name] : data,
           fields: tab.fields,
           found,
         })
