@@ -147,6 +147,7 @@ export const DefaultEditView: React.FC = () => {
       refreshCookieAsync,
       adminRoute,
       router,
+      locale,
     ],
   )
 
