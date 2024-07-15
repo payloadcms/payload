@@ -92,10 +92,10 @@ const localizeSchema = (
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
       type: localization.localeCodes.reduce(
-        (localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: schema,
-        }),
+        (localeSchema, locale) => {
+          localeSchema[locale] = schema
+          return localeSchema
+        },
         {
           _id: false,
         },
@@ -162,6 +162,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             ...(buildSchemaOptions.options || {}),
             _id: false,
             id: false,
+            timestamps: false,
           },
         }),
       ],
@@ -186,6 +187,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             _id: false,
             discriminatorKey: 'blockType',
             ...(buildSchemaOptions.options || {}),
+            timestamps: false,
           },
         ),
       ],
@@ -203,6 +205,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           ...(buildSchemaOptions.options || {}),
           _id: false,
           id: false,
+          timestamps: false,
         },
       )
 
@@ -313,6 +316,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           ...(buildSchemaOptions.options || {}),
           _id: false,
           id: false,
+          timestamps: false,
         },
       }),
     }
@@ -554,6 +558,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
               ...(buildSchemaOptions.options || {}),
               _id: false,
               id: false,
+              timestamps: false,
             },
           }),
         }

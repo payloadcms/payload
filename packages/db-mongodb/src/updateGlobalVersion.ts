@@ -3,7 +3,6 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
-import { flattenIfNecessary } from './utilities/flattenIfNecessary'
 import { withSession } from './withSession'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
@@ -31,8 +30,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
-  const dataToUse = flattenIfNecessary({ adapter: this, data: versionData, global: true })
-  const doc = await VersionModel.findOneAndUpdate(query, dataToUse, options)
+  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
   const result = JSON.parse(JSON.stringify(doc))
 

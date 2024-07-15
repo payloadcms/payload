@@ -26,7 +26,6 @@
   "dependencies": {
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
-    "flatley": "^5.2.0",
     "get-port": "5.1.1",
     "http-status": "1.6.2",
     "mongoose": "6.12.3",

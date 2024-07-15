@@ -3,7 +3,6 @@ import type { PayloadRequest } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
-import { flattenIfNecessary } from './utilities/flattenIfNecessary'
 import handleError from './utilities/handleError'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
@@ -28,8 +27,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
   try {
-    const dataToUse = flattenIfNecessary({ adapter: this, collectionSlug: collection, data })
-    result = await Model.findOneAndUpdate(query, dataToUse, options)
+    result = await Model.findOneAndUpdate(query, data, options)
   } catch (error) {
     handleError(error, req)
   }

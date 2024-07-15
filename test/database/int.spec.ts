@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import { GraphQLClient } from 'graphql-request'
 import path from 'path'
+import { v4 as uuid } from 'uuid'
 
 import type { MongooseAdapter } from '../../packages/db-mongodb/src'
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
@@ -361,6 +362,7 @@ describe('database', () => {
             noFieldDefined: 'hi',
             array: [
               {
+                id: uuid(),
                 noFieldDefined: 'hi',
                 text: 'hello',
                 localizedText: {
@@ -370,6 +372,7 @@ describe('database', () => {
             ],
             blocks: [
               {
+                id: uuid(),
                 blockType: 'block',
                 noFieldDefined: 'hi',
                 text: 'hello',
@@ -446,10 +449,5 @@ describe('database', () => {
         expect(result.blocks[0].noFieldDefined).toStrictEqual('hi')
       }
     })
-
-    // it('should send existing data out of APIs', async () => {
-    //   if (payload.db.name === 'mongoose') {
-    //   }
-    // })
   })
 })
