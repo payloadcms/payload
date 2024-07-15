@@ -440,6 +440,11 @@ export type SharpDependency = (
   options?: sharp.SharpOptions,
 ) => sharp.Sharp
 
+export type CORSConfig = {
+  headers?: string[]
+  origins: '*' | string[]
+}
+
 /**
  * This is the central configuration
  *
@@ -592,7 +597,7 @@ export type Config = {
    */
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
-  cors?: '*' | string[]
+  cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 

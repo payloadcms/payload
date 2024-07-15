@@ -104,7 +104,14 @@ export default joi.object({
   ),
   collections: joi.array(),
   cookiePrefix: joi.string(),
-  cors: [joi.string().valid('*'), joi.array().items(joi.string())],
+  cors: [
+    joi.string().valid('*'),
+    joi.array().items(joi.string()),
+    joi.object().keys({
+      headers: joi.array().items(joi.string()),
+      origins: [joi.string().valid('*'), joi.array().items(joi.string())],
+    }),
+  ],
   csrf: joi.array().items(joi.string().allow('')).sparse(),
   custom: joi.object().pattern(joi.string(), joi.any()),
   db: joi.any(),
