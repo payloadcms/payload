@@ -9,6 +9,7 @@ import type {
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
+import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 
 export const VersionView: EditViewComponent = async (props) => {
@@ -34,8 +35,8 @@ export const VersionView: EditViewComponent = async (props) => {
   let slug: string
 
   let doc: Document
-  let publishedDoc: Document
-  let mostRecentDoc: Document
+  let latestPublishedVersion = null
+  let latestDraftVersion = null
 
   if (collectionSlug) {
     // /collections/:slug/:id/versions/:versionID
@@ -53,27 +54,10 @@ export const VersionView: EditViewComponent = async (props) => {
         user,
       })
 
-      publishedDoc = await payload.findByID({
-        id,
-        collection: slug,
-        depth: 1,
-        draft: false,
-        locale: '*',
-        overrideAccess: false,
-        req,
-        user,
-      })
-
-      mostRecentDoc = await payload.findByID({
-        id,
-        collection: slug,
-        depth: 1,
-        draft: true,
-        locale: '*',
-        overrideAccess: false,
-        req,
-        user,
-      })
+      if (collectionConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
+        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
+      }
     } catch (error) {
       return notFound()
     }
@@ -95,27 +79,21 @@ export const VersionView: EditViewComponent = async (props) => {
         user,
       })
 
-      publishedDoc = await payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: false,
-        locale: '*',
-        overrideAccess: false,
-        req,
-        user,
-      })
-
-      mostRecentDoc = await payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: true,
-        locale: '*',
-        overrideAccess: false,
-        req,
-        user,
-      })
+      if (globalConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
+        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
+      }
     } catch (error) {
       return notFound()
+    }
+  }
+
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+
+  if (publishedNewerThanDraft) {
+    latestDraftVersion = {
+      id: '',
+      updatedAt: '',
     }
   }
 
@@ -127,6 +105,11 @@ export const VersionView: EditViewComponent = async (props) => {
       value: code,
     }))
 
+  const latestVersion =
+    latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+      ? latestPublishedVersion
+      : latestDraftVersion
+
   if (!doc) {
     return notFound()
   }
@@ -135,10 +118,10 @@ export const VersionView: EditViewComponent = async (props) => {
     <DefaultVersionView
       doc={doc}
       docPermissions={docPermissions}
-      initialComparisonDoc={mostRecentDoc}
+      initialComparisonDoc={latestVersion}
+      latestDraftVersion={latestDraftVersion.id}
+      latestPublishedVersion={latestPublishedVersion.id}
       localeOptions={localeOptions}
-      mostRecentDoc={mostRecentDoc}
-      publishedDoc={publishedDoc}
       versionID={versionID}
     />
   )

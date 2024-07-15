@@ -26,7 +26,7 @@ const injectInlineSourceMap = ({
 export async function compile(
   sourcecode: string,
   filename: string,
-  options: ts.CompilerOptions & { fallbackToTs?: (filename: string) => boolean },
+  options: { fallbackToTs?: (filename: string) => boolean } & ts.CompilerOptions,
 ): Promise<string> {
   if (filename.endsWith('.d.ts')) {
     return ''

@@ -10,18 +10,15 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
   'components' | 'hidden' | 'preview'
 >
 
-export type ClientCollectionConfig = Omit<
-  SanitizedCollectionConfig,
-  'admin' | 'fields' | ServerOnlyCollectionProperties
-> & {
-  admin: Omit<
+export type ClientCollectionConfig = {
+  admin: {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  } & Omit<
     SanitizedCollectionConfig['admin'],
     'fields' | 'livePreview' | ServerOnlyCollectionAdminProperties
-  > & {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  }
+  >
   fields: ClientFieldConfig[]
-}
+} & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
 
 import type { TFunction } from '@payloadcms/translations'
 

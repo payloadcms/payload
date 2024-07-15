@@ -41,6 +41,15 @@ export const sanitizeGlobals = async (
     if (!global.hooks.beforeRead) global.hooks.beforeRead = []
     if (!global.hooks.afterRead) global.hooks.afterRead = []
 
+    // Sanitize fields
+    const validRelationships = collections.map((c) => c.slug) || []
+    global.fields = await sanitizeFields({
+      config,
+      fields: global.fields,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
+
     if (global.versions) {
       if (global.versions === true) global.versions = { drafts: false }
 
@@ -102,14 +111,6 @@ export const sanitizeGlobals = async (
         label: ({ t }) => t('general:createdAt'),
       })
     }
-
-    const validRelationships = collections.map((c) => c.slug) || []
-    global.fields = await sanitizeFields({
-      config,
-      fields: global.fields,
-      richTextSanitizationPromises,
-      validRelationships,
-    })
 
     globals[i] = global
   }

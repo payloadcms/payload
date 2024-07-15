@@ -22,7 +22,7 @@ const validateWhereQuery = (whereQuery): whereQuery is Where => {
           if (andKeys.length === 0) {
             return false
           }
-          // eslint-disable-next-line no-restricted-syntax
+
           for (const key of andKeys) {
             const operator = Object.keys(andQuery[key])[0]
             // Check if the key is a valid Operator.

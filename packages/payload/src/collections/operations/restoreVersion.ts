@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'

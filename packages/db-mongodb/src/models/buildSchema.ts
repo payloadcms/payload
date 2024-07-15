@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
 import type {
   ArrayField,
@@ -196,12 +193,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
       if (field.localized && config.localization) {
         config.localization.localeCodes.forEach((localeCode) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error Possible incorrect typing in mongoose types, this works
           schema.path(`${field.name}.${localeCode}`).discriminator(blockItem.slug, blockSchema)
         })
       } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error Possible incorrect typing in mongoose types, this works
         schema.path(field.name).discriminator(blockItem.slug, blockSchema)
       }

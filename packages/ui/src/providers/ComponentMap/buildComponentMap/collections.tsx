@@ -111,7 +111,7 @@ export const mapCollections = (args: {
     const BeforeList =
       (beforeList &&
         Array.isArray(beforeList) &&
-        beforeList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        beforeList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
       null
 
     const beforeListTable = collectionConfig?.admin?.components?.beforeListTable
@@ -119,7 +119,9 @@ export const mapCollections = (args: {
     const BeforeListTable =
       (beforeListTable &&
         Array.isArray(beforeListTable) &&
-        beforeListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        beforeListTable?.map((Component, i) => (
+          <WithServerSideProps Component={Component} key={i} />
+        ))) ||
       null
 
     const afterList = collectionConfig?.admin?.components?.afterList
@@ -127,7 +129,7 @@ export const mapCollections = (args: {
     const AfterList =
       (afterList &&
         Array.isArray(afterList) &&
-        afterList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        afterList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
       null
 
     const afterListTable = collectionConfig?.admin?.components?.afterListTable
@@ -135,7 +137,9 @@ export const mapCollections = (args: {
     const AfterListTable =
       (afterListTable &&
         Array.isArray(afterListTable) &&
-        afterListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        afterListTable?.map((Component, i) => (
+          <WithServerSideProps Component={Component} key={i} />
+        ))) ||
       null
 
     let description = undefined

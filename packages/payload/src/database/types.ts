@@ -222,17 +222,17 @@ type BaseVersionArgs = {
   where?: Where
 }
 
-export type FindVersionsArgs = BaseVersionArgs & {
+export type FindVersionsArgs = {
   collection: string
-}
+} & BaseVersionArgs
 
 export type FindVersions = <T = TypeWithID>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
-export type FindGlobalVersionsArgs = BaseVersionArgs & {
+export type FindGlobalVersionsArgs = {
   global: string
-}
+} & BaseVersionArgs
 
 export type FindGlobalArgs = {
   locale?: string
@@ -395,10 +395,10 @@ export type DeleteManyArgs = {
 
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
-export type Migration = MigrationData & {
+export type Migration = {
   down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
   up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
-}
+} & MigrationData
 
 export type MigrationData = {
   batch?: number

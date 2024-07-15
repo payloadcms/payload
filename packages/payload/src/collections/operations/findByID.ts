@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'

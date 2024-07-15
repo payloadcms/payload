@@ -12,7 +12,7 @@ import cssVariables from '../../../cssVariables'
 
 const { breakpoints } = cssVariables
 
-export const Image: React.FC<MediaProps> = (props) => {
+export const ImageMedia: React.FC<MediaProps> = (props) => {
   const {
     alt: altFromProps,
     fill,

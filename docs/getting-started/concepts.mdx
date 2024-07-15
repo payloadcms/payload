@@ -6,15 +6,11 @@ desc: Payload is based around a small and intuitive set of concepts. Key concept
 keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload is based around a small and intuitive set of concepts. Before starting to work with Payload, it's a good idea to familiarize yourself with the following:
+Payload is based around a small and intuitive set of high-level concepts. Before starting to work with Payload, it's a good idea to familiarize yourself with these concepts in order to establish a common language and understanding when discussing Payload.
 
 ## Config
 
-The Payload Config is allows for the deep configuration of your application through a simple and intuitive API. The Payload Config is a fully-typed JavaScript object that can be infinitely extended upon. [More details](../configuration/overview).
-
-## Admin Panel
-
-Payload dynamically generates a beautiful, fully type-safe interface to manage your users and data. The Admin Panel is a React application built using the Next.js App Router. [More details](../admin/overview).
+The Payload Config is central to everything that Payload does. It allows for the deep configuration of your application through a simple and intuitive API. The Payload Config is a fully-typed JavaScript object that can be infinitely extended upon. [More details](../configuration/overview).
 
 ## Database
 
@@ -22,7 +18,7 @@ Payload is database agnostic, meaning you can use any type of database behind Pa
 
 ## Collections
 
-A Collection is a group of records, called Documents, that share a common schema. Each Collection saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/collections).
+A Collection is a group of records, called Documents, that all share a common schema. Each Collection saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/collections).
 
 ## Globals
 
@@ -34,11 +30,19 @@ Fields are the building blocks of Payload. They define the schema of the Documen
 
 ## Hooks
 
-Hooks allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. [More details](../hooks/overview).
+Hooks allow you to execute your own logic during specific events of the Document lifecycle, such as read or update. [More details](../hooks/overview).
 
 ## Access Control
 
-Access Control determines what a user can and cannot do with a Document. [More details](../access-control/overview).
+Access Control determines what a user can and cannot do with any given Document. [More details](../access-control/overview).
+
+## Admin Panel
+
+Payload dynamically generates a beautiful, fully type-safe interface to manage your users and data. The Admin Panel is a React application built using the Next.js App Router. [More details](../admin/overview).
+
+## Plugins
+
+Plugins allow for developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. [More details](../plugins/overview).
 
 ## Retrieving Data
 
@@ -48,11 +52,16 @@ Everything Payload does (create, read, update, delete, login, logout, etc) is ex
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
 - [GraphQL](#graphql) - A full GraphQL API with a GraphQL Playground
 
+<Banner type="success">
+  <strong>Note:</strong>
+  All of these APIs share the exact same query language. [More details](../queries/overview).
+</Banner>
+
 ### Local API
 
-By far one of the most powerful aspects of Payload is the fact that it gives you direct-to-database access to your data through the [Local API](../local-api/overview). It's _extremely_ fast and does not incur any typical REST API / GraphQL / HTTP overhead - you query your database directly in Node.js / TypeScript.
+By far one of the most powerful aspects of Payload is the fact that it gives you direct-to-database access to your data through the [Local API](../local-api/overview). It's _extremely_ fast and does not incur any typical REST API / GraphQL / HTTP overhead—you query your database directly in Node.js.
 
-Everything is strongly typed and it's extremely nice to use. It works anywhere on the server, including custom Next.js route handlers, Payload hooks, Payload access control, and React Server Components.
+The Local API is written in TypeScript, and so it is strongly typed and extremely nice to use. It works anywhere on the server, including custom Next.js Routes, Payload Hooks, Payload Access Control, and React Server Components.
 
 Here's a quick example of a React Server Component fetching page data with Payload's Local API:
 
@@ -93,15 +102,12 @@ const MyServerComponent: React.FC = () => {
 
 By default, the Payload [REST API](../rest-api/overview) will be mounted automatically for you at the `/api` path of your app.
 
-For example, if you have a collection with the `slug` as `pages`, you'd fetch pages via `http://localhost:3000/api/pages`.
-
-Here's an example:
+For example, if you have a [Collection](../configuration/collections) called `pages`:
 
 ```ts
-const pages = await fetch('http://localhost:3000/api/pages', {
-  // Include cookies, like the Payload auth token
-  credentials: 'include',
-}).then((res) => res.json())
+fetch('https://localhost:3000/api/pages') // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
 ```
 
 <Banner type="info">
@@ -127,145 +133,22 @@ If you don't use GraphQL, you can delete those files! But if you do, you'll find
   For more information about the GraphQL API, [click here](../graphql/overview).
 </Banner>
 
-## Depth
+### Depth
 
-<Banner type="info">
-  "Depth" gives you control over how many levels down related documents should be automatically
-  populated when retrieved.
-</Banner>
-
-You can specify population `depth` via query parameter in the REST API and by an option in the local API. _Depth has no effect in the GraphQL API, because there, depth is based on the shape of your queries._
-It is also possible to limit the depth for specific `relation` and `upload` fields using the `maxDepth` property in your configuration.
-**For example, let's look at the following Collections:** `departments`, `users`, `posts`
-
-```
-// type: 'relationship' fields are equal to 1 depth level
-
-{
-	slug: 'posts',
-	fields: [
-		{
-			name: 'title',
-			type: 'text',
-		},
-		{
-			name: 'author',
-			label: 'Post Author',
-			type: 'relationship',
-			relationTo: 'users',
-		}
-	]
-}
-
-{
-	slug: 'users',
-	fields: [
-		{
-			name: 'email',
-			type: 'email',
-		},
-		{
-			name: 'department'
-			type: 'relationship',
-			relationTo: 'departments'
-		}
-	]
-}
-
-{
-	slug: 'departments',
-	fields: [
-		{
-			name: 'name'
-			type: 'text',
-		}
-	]
-}
-```
-
-If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. This depth parameter can be thought of as N, where N is the number of levels you want to populate. To populate one level further, you would simply specify N+1 as the depth. A returned result may look like the following:
-
-```
-// ?depth=1
-
-{
-  id: '5ae8f9bde69e394e717c8832',
-  title: 'This post sucks',
-  author: {
-    id: '5f7dd05cd50d4005f8bcab17',
-    email: 'spiderman@superheroes.gov',
-    department: '5e3ca05cd50d4005f8bdab15'
-  }
-}
-```
-
-Notice how the `user.author` is fully populated, but `user.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
-
-To populate `user.author.department` in it's entirety you could specify `?depth=2` or _higher_.
-
-```
-// ?depth=2
-
-{
-  id: '5ae8f9bde69e394e717c8832',
-  title: 'This post sucks',
-  author: {
-    id: '5f7dd05cd50d4005f8bcab17',
-    email: 'spiderman@superheroes.gov',
-    department: {
-      id: '5e3ca05cd50d4005f8bdab15',
-      name: 'Marvel'
-    }
-  }
-}
-```
-
-### Field-level max depth
-
-Fields like relationships or uploads can have a `maxDepth` property that limits the depth of the population for that field. Here are some examples:
-
-Depth: 10
-Current depth when field is accessed: 1
-`maxDepth`: undefined
-
-In this case, the field would be populated to 9 levels of population.
-
-Depth: 10
-Current depth when field is accessed: 0
-`maxDepth`: 2
-
-In this case, the field would be populated to 2 levels of population, despite there being a remaining depth of 8.
-
-Depth: 10
-Current depth when field is accessed: 2
-`maxDepth`: 1
-
-In this case, the field would not be populated, as the current depth (2) has exceeded the `maxDepth` for this field (1).
-
-<Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  When access control on collections prevents relationship fields from populating, the API response
-  will contain the relationship id instead of the full document.
-</Banner>
-
-## Plugins
-
-Plugins allow for developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. [More details](../plugins/overview).
+Documents can be related to other Documents through a concept called "relationships". When you query a Document, you can specify these relationships are populated. [More details](../queries/depth).
 
 ## Package Structure
 
 Payload is abstracted into a set of dedicated packages to keep the core `payload` package as lightweight as possible. This allows you to only install the parts of Payload based on your unique project requirements.
 
-<Banner type="success">
-  <strong>Note:</strong>
-  <br/>
-  Version numbers of all official Payload packages are kept in sync - and you should always make sure that you use matching versions for all official Payload packages.
+<Banner type="warning">
+  <strong>Important:</strong>
+  Version numbers of all official Payload packages are always published in sync. You should make sure that you always use matching versions for all official Payload packages.
 </Banner>
 
 `payload`
 
-The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers - it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete`. It executes access control, hooks, validation, and more.
+The `payload` package is where core business logic for Payload lives. You can think of Payload as an ORM with superpowers—it contains the logic for all Payload "operations" like `find`, `create`, `update`, and `delete` and exposes a [Local API](../local-api/overview). It executes [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Validation](../fields/overview#validation), and more.
 
 Payload itself is extremely compact, and can be used in any Node environment. As long as you have `payload` installed and you have access to your Payload Config, you can query and mutate your database directly without going through an unnecessary HTTP layer.
 
@@ -274,12 +157,12 @@ Payload also contains all TypeScript definitions, which can be imported from `pa
 Here's how to import some common Payload types:
 
 ```ts
-import { CollectionConfig, Field, GlobalConfig, Config } from 'payload'
+import { Config, CollectionConfig, GlobalConfig, Field } from 'payload'
 ```
 
 `@payloadcms/next`
 
-Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the Admin Panel and the entire HTTP layer (REST, GraphQL) that Payload exposes.
+Whereas Payload itself is responsible for direct database access, and control over Payload business logic, the `@payloadcms/next` package is responsible for the Admin Panel and the entire HTTP layer that Payload exposes, including the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview).
 
 `@payloadcms/graphql`
 

@@ -11,18 +11,15 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 // api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-type HookArgsWithCustomCollection = Omit<
-  Parameters<CollectionBeforeValidateHook>[0],
-  'collection'
-> & {
+type HookArgsWithCustomCollection = {
   collection: CollectionConfig
-}
+} & Omit<Parameters<CollectionBeforeValidateHook>[0], 'collection'>
 
 export type CollectionBeforeValidateHookWithArgs = (
-  args: HookArgsWithCustomCollection & {
+  args: {
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
-  },
+  } & HookArgsWithCustomCollection,
 ) => void
 
 export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (args) => {

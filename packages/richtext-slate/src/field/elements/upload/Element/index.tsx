@@ -33,12 +33,12 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = FormFieldBase & {
+type Props = {
   name: string
   richTextComponentMap: Map<string, React.ReactNode>
-}
+} & FormFieldBase
 
-const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
+const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = ({
   enabledCollectionSlugs,
 }) => {
   const {

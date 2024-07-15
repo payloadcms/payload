@@ -20,7 +20,6 @@ import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import { SelectLocales } from '../SelectLocales/index.js'
-import { mostRecentVersionOption } from '../shared.js'
 import { SetStepNav } from './SetStepNav.js'
 import './index.scss'
 
@@ -30,9 +29,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   docPermissions,
   initialComparisonDoc,
+  latestDraftVersion,
+  latestPublishedVersion,
   localeOptions,
-  mostRecentDoc,
-  publishedDoc,
   versionID,
 }) => {
   const config = useConfig()
@@ -53,7 +52,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const [globalConfig] = useState(() => config.globals.find((global) => global.slug === globalSlug))
 
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
-  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption)
+
+  const [compareValue, setCompareValue] = useState<CompareOption>()
 
   const {
     admin: { dateFormat },
@@ -62,34 +62,22 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     serverURL,
   } = config
 
-  const formattedCreatedAt = doc?.createdAt
-    ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
+  const versionCreatedAt = doc?.updatedAt
+    ? formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })
     : ''
-
-  const originalDocFetchURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
-    collectionSlug || globalSlug
-  }${collectionSlug ? `/${id}` : ''}`
 
   const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
     collectionSlug || globalSlug
   }/versions`
 
-  const compareFetchURL =
-    compareValue?.value === 'mostRecent' || compareValue?.value === 'published'
-      ? originalDocFetchURL
-      : `${compareBaseURL}/${compareValue.value}`
+  const compareFetchURL = compareValue?.value && `${compareBaseURL}/${compareValue.value}`
 
   const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
     initialData: initialComparisonDoc,
     initialParams: { depth: 1, draft: 'true', locale: '*' },
   })
 
-  const comparison =
-    compareValue?.value === 'mostRecent'
-      ? mostRecentDoc
-      : compareValue?.value === 'published'
-        ? publishedDoc
-        : currentComparisonDoc?.version // the `version` key is only present on `versions` documents
+  const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
   const canUpdate = docPermissions?.update?.permission
 
@@ -104,7 +92,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         globalConfig={globalConfig}
         globalSlug={globalSlug}
         id={id}
-        mostRecentDoc={mostRecentDoc}
       />
       <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__header-wrap`}>
@@ -114,7 +101,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             })}
           </p>
           <header className={`${baseClass}__header`}>
-            <h2>{formattedCreatedAt}</h2>
+            <h2>{versionCreatedAt}</h2>
             {canUpdate && (
               <Restore
                 className={`${baseClass}__restore`}
@@ -122,7 +109,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 globalSlug={globalSlug}
                 label={collectionConfig?.labels.singular || globalConfig?.label}
                 originalDocID={id}
-                versionDate={formattedCreatedAt}
+                versionDate={versionCreatedAt}
                 versionID={versionID}
               />
             )}
@@ -131,9 +118,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         <div className={`${baseClass}__controls`}>
           <SelectComparison
             baseURL={compareBaseURL}
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
             onChange={setCompareValue}
             parentID={id}
-            publishedDoc={publishedDoc}
             value={compareValue}
             versionID={versionID}
           />

@@ -2,11 +2,11 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
-import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintConfigPrettier from 'eslint-config-prettier'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
 import jestExtends from './configs/jest/index.mjs'
-import globals from 'globals';
+import globals from 'globals'
 import importX from 'eslint-plugin-import-x'
 import typescriptParser from '@typescript-eslint/parser'
 import { deepMerge } from './deepMerge.js'
@@ -52,12 +52,7 @@ const baseRules = {
   'payload/no-jsx-import-statements': 'error',
 }
 
-const reactRules = {
-  'react/no-unused-prop-types': 'off',
-  'react/prop-types': 'off',
-  'react/require-default-props': 'off',
-  'react/destructuring-assignment': 'warn',
-  'react/no-unescaped-entities': 'warn',
+const reactA11yRules = {
   'jsx-a11y/anchor-is-valid': 'warn',
   'jsx-a11y/control-has-associated-label': 'warn',
   'jsx-a11y/no-static-element-interactions': 'warn',
@@ -107,9 +102,11 @@ const typescriptRules = {
 let FlatConfig
 
 /** @type {FlatConfig} */
-const baseExtends = deepMerge(js.configs.recommended, perfectionistNatural , regexpPluginConfigs['flat/recommended'])
-
-
+const baseExtends = deepMerge(
+  js.configs.recommended,
+  perfectionistNatural,
+  regexpPluginConfigs['flat/recommended'],
+)
 
 /** @type {FlatConfig[]} */
 export const rootEslintConfig = [
@@ -149,7 +146,7 @@ export const rootEslintConfig = [
           ...baseRules,
           ...typescriptRules,
         },
-      }
+      },
     ),
     files: ['**/*.ts'],
   },
@@ -169,33 +166,30 @@ export const rootEslintConfig = [
         rules: {
           ...baseRules,
           ...typescriptRules,
-          ...reactRules,
+          ...reactA11yRules,
         },
-      }
+      },
     ),
     files: ['**/*.tsx'],
   },
   {
     name: 'Unit Tests',
-    ...deepMerge(
-      jestExtends,
-      {
-        plugins: {
-          payload: payloadPlugin
-        },
-        rules: {
-          ...baseRules,
-          ...typescriptRules,
-          '@typescript-eslint/unbound-method': 'off',
-        },
-      }
-    ),
+    ...deepMerge(jestExtends, {
+      plugins: {
+        payload: payloadPlugin,
+      },
+      rules: {
+        ...baseRules,
+        ...typescriptRules,
+        '@typescript-eslint/unbound-method': 'off',
+      },
+    }),
     files: ['**/*.spec.ts'],
   },
   {
     name: 'Payload Config',
     plugins: {
-      payload: payloadPlugin
+      payload: payloadPlugin,
     },
     rules: {
       ...baseRules,

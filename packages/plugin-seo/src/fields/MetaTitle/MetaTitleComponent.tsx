@@ -23,10 +23,9 @@ import '../index.scss'
 
 const { maxLength, minLength } = defaults.title
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaTitleProps = FormFieldBase & {
+type MetaTitleProps = {
   hasGenerateTitleFn: boolean
-}
+} & FormFieldBase
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}

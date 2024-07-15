@@ -34,17 +34,14 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-export type ClientConfig = Omit<
-  SanitizedConfig,
-  'admin' | 'collections' | 'globals' | ServerOnlyRootProperties
-> & {
-  admin: Omit<SanitizedConfig['admin'], ServerOnlyRootAdminProperties & 'livePreview'> & {
+export type ClientConfig = {
+  admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  }
+  } & Omit<SanitizedConfig['admin'], 'livePreview' & ServerOnlyRootAdminProperties>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
-}
+} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
 export const createClientConfig = async ({
   config,

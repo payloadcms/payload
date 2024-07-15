@@ -211,11 +211,11 @@ export type AfterChangeNodeHook<T extends SerializedLexicalNode> = (
 ) => Promise<T> | T
 
 export type BeforeChangeNodeHook<T extends SerializedLexicalNode> = (
-  args: BeforeChangeNodeHookArgs<T> & BaseNodeHookArgs<T>,
+  args: BaseNodeHookArgs<T> & BeforeChangeNodeHookArgs<T>,
 ) => Promise<T> | T
 
 export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
-  args: BeforeValidateNodeHookArgs<T> & BaseNodeHookArgs<T>,
+  args: BaseNodeHookArgs<T> & BeforeValidateNodeHookArgs<T>,
 ) => Promise<T> | T
 
 // Define the node with hooks that use the node's exportJSON return type
@@ -343,26 +343,21 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   sanitizedServerFeatureProps?: ServerProps
 }
 
-export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeature<
-  ServerProps,
-  ClientFeatureProps
+export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = {
+  order: number
+} & Required<
+  Pick<
+    FeatureProviderServer<ServerProps, ClientFeatureProps>,
+    'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
+  >
 > &
-  Required<
-    Pick<
-      FeatureProviderServer<ServerProps, ClientFeatureProps>,
-      'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
-    >
-  > & {
-    order: number
-  }
+  ServerFeature<ServerProps, ClientFeatureProps>
 
 export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<any, any>>
 
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, any, any>>
 
-export type SanitizedServerFeatures = Required<
-  Pick<ResolvedServerFeature<any, any>, 'i18n' | 'markdownTransformers' | 'nodes'>
-> & {
+export type SanitizedServerFeatures = {
   /**  The node types mapped to their converters */
   converters: {
     html: HTMLConverter[]
@@ -413,4 +408,4 @@ export type SanitizedServerFeatures = Required<
   } /**  The node types mapped to their populationPromises */
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
-}
+} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'markdownTransformers' | 'nodes'>>
