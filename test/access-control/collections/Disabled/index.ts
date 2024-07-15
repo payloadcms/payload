@@ -3,8 +3,8 @@ import type { CollectionConfig, Field } from 'payload/types'
 import { disabledSlug } from '../../shared.js'
 
 const disabledFromUpdateAccessControl = (fieldName = 'text'): Field => ({
-  type: 'text',
   name: fieldName,
+  type: 'text',
   access: {
     update: () => {
       return false
@@ -16,8 +16,8 @@ export const Disabled: CollectionConfig = {
   slug: disabledSlug,
   fields: [
     {
-      type: 'group',
       name: 'group',
+      type: 'group',
       fields: [disabledFromUpdateAccessControl()],
     },
     {
@@ -28,14 +28,14 @@ export const Disabled: CollectionConfig = {
           fields: [disabledFromUpdateAccessControl()],
         },
         {
-          label: 'unnamedTab',
           fields: [disabledFromUpdateAccessControl('unnamedTab')],
+          label: 'unnamedTab',
         },
       ],
     },
     {
-      type: 'array',
       name: 'array',
+      type: 'array',
       fields: [disabledFromUpdateAccessControl()],
     },
   ],

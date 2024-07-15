@@ -16,7 +16,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
 }) => {
   try {
     const token = extractJWT({ headers, payload })
-    const decodedPayload = jwt.verify(token, payload.secret) as jwt.JwtPayload & JWTToken
+    const decodedPayload = jwt.verify(token, payload.secret) as JWTToken & jwt.JwtPayload
 
     const collection = payload.collections[decodedPayload.collection]
 

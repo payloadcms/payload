@@ -30,7 +30,10 @@ export const mapActions = (args: {
         view.actions.forEach((action) => {
           const Action = action
           if (typeof Action === 'function') {
-            result.Edit[key] = [...(result[key] || []), <WithServerSideProps Component={Action} />]
+            result.Edit[key] = [
+              ...(result[key] || []),
+              <WithServerSideProps Component={Action} key={key} />,
+            ]
           }
         })
       }
@@ -38,11 +41,11 @@ export const mapActions = (args: {
   }
 
   if (listActions) {
-    listActions.forEach((action) => {
+    listActions.forEach((action, i) => {
       const Action = action
       if (typeof Action === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        result.List = [...result.List, <WithServerSideProps Component={Action} />]
+        result.List = [...result.List, <WithServerSideProps Component={Action} key={i} />]
       }
     })
   }

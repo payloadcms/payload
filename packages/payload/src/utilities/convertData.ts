@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 const convertArrayToObject = (arr, key) =>
   arr.reduce((obj, item) => {
     if (key) {

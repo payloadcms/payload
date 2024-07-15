@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'

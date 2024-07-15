@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../../../types/index.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
-  doc: TypeWithID & Record<string, unknown>
+  doc: Record<string, unknown> & TypeWithID
   payload: Payload
   req: PayloadRequest
 }

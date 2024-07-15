@@ -9,7 +9,6 @@ import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.j
 export const linkValidation = (
   props: LinkFeatureServerProps,
   sanitizedFieldsWithoutText: Field[],
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
 ): NodeValidation<SerializedAutoLinkNode | SerializedLinkNode> => {
   return async ({
     node,

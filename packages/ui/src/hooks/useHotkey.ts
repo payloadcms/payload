@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-shadow */
+
 import { useModal } from '@faceless-ui/modal'
 import { setsAreEqual } from 'payload/shared'
 import { useCallback, useEffect } from 'react'

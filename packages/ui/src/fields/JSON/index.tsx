@@ -18,13 +18,13 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type JSONFieldProps = FormFieldBase & {
+export type JSONFieldProps = {
   editorOptions?: JSONFieldType['admin']['editorOptions']
   jsonSchema?: Record<string, unknown>
   name?: string
   path?: string
   width?: string
-}
+} & FormFieldBase
 
 const _JSONField: React.FC<JSONFieldProps> = (props) => {
   const {
@@ -138,7 +138,6 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
         required={required}
         {...(labelProps || {})}
       />
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}

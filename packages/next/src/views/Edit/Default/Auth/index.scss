@@ -48,11 +48,26 @@
 
 @keyframes highlight {
   0% {
-    background: var(--theme-success-500);
+    background: var(--theme-success-250);
+    border: 1px solid var(--theme-success-500);
+  }
+
+  20% {
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-elevation-250);
+    color: var(--theme-text);
+  }
+
+  80% {
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-elevation-250);
+    color: var(--theme-text);
   }
 
   100% {
-    background: none;
+    background: var(--theme-elevation-200);
+    border: 1px solid transparent;
+    color: var(--theme-elevation-400);
   }
 }
 

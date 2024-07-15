@@ -1,6 +1,6 @@
 import type { FormFieldBase } from '../shared/index.js'
 
-export type CheckboxFieldProps = FormFieldBase & {
+export type CheckboxFieldProps = {
   checked?: boolean
   disableFormData?: boolean
   id?: string
@@ -9,4 +9,4 @@ export type CheckboxFieldProps = FormFieldBase & {
   partialChecked?: boolean
   path?: string
   width?: string
-}
+} & FormFieldBase

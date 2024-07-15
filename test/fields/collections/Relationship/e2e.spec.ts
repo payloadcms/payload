@@ -409,8 +409,8 @@ describe('relationship', () => {
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
-    const firstOptionLabel = await firstTextDocOption.textContent()
-    expect(firstOptionLabel).toBe('Seeded text document')
+    const firstOptionLabel = firstTextDocOption
+    await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
 
   test('should allow filtering by relationship field / equals', async () => {

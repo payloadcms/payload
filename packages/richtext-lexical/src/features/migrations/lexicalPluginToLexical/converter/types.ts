@@ -10,7 +10,7 @@ export type LexicalPluginNodeConverter<T extends SerializedLexicalNode = Seriali
   }: {
     childIndex: number
     converters: LexicalPluginNodeConverter[]
-    lexicalPluginNode: SerializedLexicalNode & { children?: SerializedLexicalNode[] }
+    lexicalPluginNode: { children?: SerializedLexicalNode[] } & SerializedLexicalNode
     parentNodeType: string
   }) => T
   nodeTypes: string[]

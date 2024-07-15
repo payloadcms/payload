@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 import type { FilterQuery } from 'mongoose'
 import type { Field, Operator, Payload, Where } from 'payload'
 

@@ -79,7 +79,7 @@ describe('Config', () => {
       const [global] = payload.config.globals
       const [endpoint] = global.endpoints || []
 
-      expect(endpoint.custom).toEqual({ params: [{ in: 'query', name: 'name', type: 'string' }] })
+      expect(endpoint.custom).toEqual({ params: [{ name: 'name', type: 'string', in: 'query' }] })
     })
 
     it('allows a custom field in global fields', () => {

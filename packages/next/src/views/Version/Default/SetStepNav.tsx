@@ -16,17 +16,7 @@ export const SetStepNav: React.FC<{
   globalConfig?: ClientGlobalConfig
   globalSlug?: string
   id?: number | string
-  mostRecentDoc: any
-}> = ({
-  id,
-  collectionConfig,
-  collectionSlug,
-  doc,
-  fieldMap,
-  globalConfig,
-  globalSlug,
-  mostRecentDoc,
-}) => {
+}> = ({ id, collectionConfig, collectionSlug, doc, fieldMap, globalConfig, globalSlug }) => {
   const config = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
@@ -45,8 +35,9 @@ export const SetStepNav: React.FC<{
 
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
       const pluralLabel = collectionConfig?.labels?.plural
+      const formattedDoc = doc.version ? doc.version : doc
 
-      if (mostRecentDoc) {
+      if (formattedDoc) {
         if (useAsTitle !== 'id') {
           const titleField = fieldMap.find((f) => {
             const { isFieldAffectingData } = f
@@ -54,17 +45,17 @@ export const SetStepNav: React.FC<{
             return Boolean(isFieldAffectingData && fieldName === useAsTitle)
           })
 
-          if (titleField && mostRecentDoc[useAsTitle]) {
+          if (titleField && formattedDoc[useAsTitle]) {
             if (titleField.localized) {
-              docLabel = mostRecentDoc[useAsTitle]?.[locale.code]
+              docLabel = formattedDoc[useAsTitle]?.[locale.code]
             } else {
-              docLabel = mostRecentDoc[useAsTitle]
+              docLabel = formattedDoc[useAsTitle]
             }
           } else {
             docLabel = `[${t('general:untitled')}]`
           }
         } else {
-          docLabel = mostRecentDoc.id
+          docLabel = doc.id
         }
       }
 
@@ -114,7 +105,6 @@ export const SetStepNav: React.FC<{
     collectionSlug,
     globalSlug,
     doc,
-    mostRecentDoc,
     id,
     locale,
     t,

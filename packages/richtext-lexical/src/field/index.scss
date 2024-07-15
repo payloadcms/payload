@@ -1,6 +1,13 @@
 @import '../scss/styles.scss';
 
 .rich-text-lexical {
+  & > .field-error.tooltip {
+    right: auto;
+    position: static;
+    margin-bottom: 0.2em;
+    max-width: fit-content;
+  }
+
   .errorBoundary {
     pre {
       text-wrap: unset;
