@@ -17,7 +17,6 @@ const buildCollectionSchema = (
     indexSortableFields: adapter.payload.config.indexSortableFields,
     options: {
       minimize: false,
-      strict: true,
       timestamps: collection.timestamps !== false,
       ...adapter.schemaOptions,
       ...(adapter.collectionOptions[collection.slug]?.schemaOptions || {}),

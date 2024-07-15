@@ -32,7 +32,6 @@ export const init: Init = async function init(this: MongooseAdapter) {
         indexSortableFields: this.payload.config.indexSortableFields,
         options: {
           minimize: false,
-          strict: true,
           timestamps: false,
           ...this.schemaOptions,
           ...(this.collectionOptions[collection.slug]?.schemaOptions || {}),
