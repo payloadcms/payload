@@ -41,7 +41,6 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-// eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
 
 export type LivePreviewConfig = {
@@ -347,7 +346,7 @@ export const serverProps: (keyof ServerProps)[] = [
 ]
 
 export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
-  TAdditionalProps & Partial<ServerProps>
+  Partial<ServerProps> & TAdditionalProps
 >
 
 export type Locale = {
@@ -382,17 +381,17 @@ export type BaseLocalizationConfig = {
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
-  BaseLocalizationConfig & {
+  {
     /**
      * List of supported locales
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     locales: string[]
-  }
+  } & BaseLocalizationConfig
 >
 
 export type LocalizationConfigWithLabels = Prettify<
-  BaseLocalizationConfig & {
+  {
     /**
      * List of supported locales with labels
      * @example {
@@ -402,17 +401,17 @@ export type LocalizationConfigWithLabels = Prettify<
      * }
      */
     locales: Locale[]
-  }
+  } & BaseLocalizationConfig
 >
 
 export type SanitizedLocalizationConfig = Prettify<
-  LocalizationConfigWithLabels & {
+  {
     /**
      * List of supported locales
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  }
+  } & LocalizationConfigWithLabels
 >
 
 /**
@@ -547,10 +546,10 @@ export type Config = {
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
-    livePreview?: LivePreviewConfig & {
+    livePreview?: {
       collections?: string[]
       globals?: string[]
-    }
+    } & LivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
@@ -758,10 +757,7 @@ export type Config = {
   upload?: ExpressFileUploadOptions
 }
 
-export type SanitizedConfig = Omit<
-  DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
-> & {
+export type SanitizedConfig = {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -774,13 +770,16 @@ export type SanitizedConfig = Omit<
     configDir: string
     rawConfig: string
   }
-  upload: ExpressFileUploadOptions & {
+  upload: {
     /**
      * Deduped list of adapters used in the project
      */
     adapters: string[]
-  }
-}
+  } & ExpressFileUploadOptions
+} & Omit<
+  DeepRequired<Config>,
+  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+>
 
 export type EditConfig =
   | (

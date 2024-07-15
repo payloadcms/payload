@@ -7,13 +7,13 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
-export type HiddenInputFieldProps = FormFieldBase & {
+export type HiddenInputFieldProps = {
   disableModifyingForm?: false
   forceUsePathFromProps?: boolean
   name?: string
   path?: string
   value?: unknown
-}
+} & FormFieldBase
 
 /**
  * This is mainly used to save a value on the form that is not visible to the user.

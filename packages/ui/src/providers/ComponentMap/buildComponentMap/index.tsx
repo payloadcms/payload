@@ -92,8 +92,8 @@ export const buildComponentMap = (args: {
     componentMap: {
       Icon,
       LogoutButton,
-      actions: config.admin?.components?.actions?.map((Component) => (
-        <WithServerSideProps Component={Component} />
+      actions: config.admin?.components?.actions?.map((Component, i) => (
+        <WithServerSideProps Component={Component} key={i} />
       )),
       collections,
       globals,

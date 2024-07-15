@@ -11,14 +11,13 @@
     margin: 30px 0;
 
     ::selection {
-      background: rgba(172,206,247);
+      background: rgba(172, 206, 247);
     }
 
     br::selection {
       background: unset;
     }
   }
-
 
   &__tableSelected {
     outline: 2px solid rgb(60, 132, 244);
@@ -34,7 +33,6 @@
     cursor: default;
     outline: none;
   }
-
 
   &__tableCellSortedIndicator {
     display: block;
@@ -158,7 +156,6 @@
     background-color: #ddd;
   }
 }
-
 
 html[data-theme='dark'] {
   .LexicalEditorTheme {

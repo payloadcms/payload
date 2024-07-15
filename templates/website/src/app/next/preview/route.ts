@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 
 const payloadToken = 'payload-token'
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function GET(
   req: Request & {
     cookies: {

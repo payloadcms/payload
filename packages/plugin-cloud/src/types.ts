@@ -21,7 +21,7 @@ export interface TypeWithPrefix {
 
 export type HandleDelete = (args: {
   collection: CollectionConfig
-  doc: TypeWithID & FileData & TypeWithPrefix
+  doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
 }) => Promise<void> | void

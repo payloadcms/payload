@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import * as p from '@clack/prompts'
 import chalk from 'chalk'
 

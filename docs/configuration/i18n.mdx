@@ -6,9 +6,22 @@ desc: Manage and customize internationalization support in your CMS editor exper
 keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The [Admin Panel](../admin/overview) is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). With i18n, editors can navigate the interface and read API error messages in their preferred language. Users can easily select a language from the Account View and have their preference saved for future visits.
+The [Admin Panel](../admin/overview) is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). With I18n, editors can navigate the interface and read API error messages in their preferred language. This is similar to [Localization](./localization), but instead of managing translations for the data itself, you are managing translations for your application's interface.
 
-By default, Payload comes with preinstalled with English, but you can easily load other languages into your own application. Languages are automatically detected based on the user's browser. If no language was detected, or if the user's language is not yet supported by your application, English will be chosen.
+By default, Payload comes with preinstalled with English, but you can easily load other languages into your own application. Languages are automatically detected based on the request. If no language was detected, or if the user's language is not yet supported by your application, English will be chosen.
+
+To configure I18n, use the `i18n` key in your [Payload Config](./overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  i18n: { // highlight-line
+    // ...
+  },
+})
+```
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -19,19 +32,44 @@ By default, Payload comes with preinstalled with English, but you can easily loa
 
 You can easily customize and override any of the i18n settings that Payload provides by default. Payload will use your custom options and merge them in with its own.
 
-To add a new language, use the `i18n` key in your [Payload Config](./overview):
-
 ```ts
 import { buildConfig } from 'payload'
-import { en } from 'payload/i18n/en'
-import { de } from 'payload/i18n/de'
 
 export default buildConfig({
   // ...
   // highlight-start
   i18n: {
-    // Payload will support either English or German,
-    // able to be specified in preferences on a user-by-user basis
+    fallbackLanguage: 'en', // default
+    debug: false, // default
+  }
+  // highlight-end
+})
+```
+
+The following options are available:
+
+| Option                | Description                                                                                                                                                                                                                   |
+| --------------------- | --------------------------------|
+| **`fallbackLanguage`**     | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                                                                                                                           |
+| **`debug`**           | Whether to log debug information to the console. Default is `false`.                                                                                                                                                         |
+| **`translations`**    | An object containing the translations. The keys are the language codes and the values are the translations.                                                                                                                |
+| **`supportedLanguages`** | An object containing the supported languages. The keys are the language codes and the values are the translations.                                                                                                         |
+
+## Adding Languages
+
+You can easily add new languages to your Payload app by providing the translations for the new language. Payload maintains a number of built-in translations that can be imported from `@payloadcms/translations`, but you can also provide your own [Custom Translations](#custom-translations) to support any language.
+
+To add a new language, use the `i18n.supportedLanguages` key in your [Payload Config](./overview):
+
+```ts
+import { buildConfig } from 'payload'
+import { en } from '@payloadcms/translations/languages/en'
+import { de } from '@payloadcms/translations/languages/de'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  i18n: {
     supportedLanguages: { en, de },
   },
   // highlight-end
@@ -43,27 +81,18 @@ export default buildConfig({
  It's best to only support the languages that you need so that the bundled JavaScript is kept to a minimum for your project.
 </Banner>
 
-The following options are available:
+### Custom Translations
 
-| Option                | Description                                                                                                                                                                                                                   |
-| --------------------- | --------------------------------|
-| **`fallbackLanguage`**     | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                                                                                                                           |
-| **`debug`**           | Whether to log debug information to the console. Default is `false`.                                                                                                                                                         |
-| **`translations`**    | An object containing the translations. The keys are the language codes and the values are the translations.                                                                                                                |
-| **`supportedLanguages`** | An object containing the supported languages. The keys are the language codes and the values are the translations.                                                                                                         |
+You can customize Payload's built-in translations either by extending existing languages or by adding new languages entirely. This can be done by injecting new translation strings into existing languages, or by providing an entirely new language keys altogether.
 
-## Custom Translations
-
-Here is an example of how you can add custom translations to your project:
+To add Custom Translations, use the `i18n.translations` key in your [Payload Config](./overview):
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   //...
   i18n: {
-    fallbackLanguage: 'en', // default
-    debug: false, // default
     // highlight-start
     translations: {
       en: {
@@ -83,9 +112,11 @@ export default buildConfig({
 })
 ```
 
-While Payload's built-in features come translated, you may want to also translate parts of your project's configuration too. This is possible in places like Collections and Globals labels and groups, field labels, descriptions and input placeholder text. The admin UI will display all the correct translations you provide based on the user's language.
+### Project Translations
 
-Here is an example of a simple collection supporting both English and Spanish editors:
+While Payload's built-in features come fully translated, you may also want to translate parts of your own project. This is possible in places like [Collections](./collections) and [Globals](./globals), such as on their labels and groups, field labels, descriptions or input placeholder text.
+
+To do this, provide the translations wherever applicable, keyed to the language code:
 
 ```ts
 import { CollectionConfig } from 'payload'
@@ -94,38 +125,44 @@ export const Articles: CollectionConfig = {
   slug: 'articles',
   labels: {
     singular: {
+      // highlight-start
       en: 'Article',
       es: 'Artículo',
+      // highlight-end
     },
     plural: {
+      // highlight-start
       en: 'Articles',
       es: 'Artículos',
+      // highlight-end
     },
   },
   admin: {
-    group: { en: 'Content', es: 'Contenido' },
+    group: {
+      // highlight-start
+      en: 'Content',
+      es: 'Contenido',
+      // highlight-end
+    },
   },
   fields: [
     {
       name: 'title',
       type: 'text',
       label: {
+        // highlight-start
         en: 'Title',
         es: 'Título',
+        // highlight-end
       },
       admin: {
-        placeholder: { en: 'Enter title', es: 'Introduce el título' },
+        placeholder: {
+          // highlight-start
+          en: 'Enter title',
+          es: 'Introduce el título'
+          // highlight-end
+        },
       },
-    },
-    {
-      name: 'type',
-      type: 'radio',
-      options: [
-        {
-          value: 'news',
-          label: { en: 'News', es: 'Noticias' },
-        }, // etc...
-      ],
     },
   ],
 }
@@ -177,7 +214,7 @@ import type {
   NestedKeysStripped,
   TFunction,
 } from '@payloadcms/translations'
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 const customTranslations = {
   en: {

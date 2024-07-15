@@ -19,7 +19,7 @@ npm install --save @payloadcms/richtext-slate
 After installation, you can pass it to your top-level Payload Config:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export default buildConfig({
@@ -34,7 +34,7 @@ export default buildConfig({
 And here's an example for how to install the Slate editor on a field-by-field basis, while customizing its options:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const Pages: CollectionConfig = {
@@ -167,7 +167,7 @@ Specifying custom `Type`s let you extend your custom elements by adding addition
 `collections/ExampleCollection.ts`
 
 ```ts
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 

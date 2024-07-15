@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { tenantField } from '../../fields/TenantField'
-import { isPayloadAdminPanel } from '../../utilities/isPayloadAdminPanel'
-import { canMutatePage, filterByTenantRead } from './access/byTenant'
-import { externalReadAccess } from './access/externalReadAccess'
-import { ensureUniqueSlug } from './hooks/ensureUniqueSlug'
+import { tenantField } from '../../fields/TenantField/index.js'
+import { isPayloadAdminPanel } from '../../utilities/isPayloadAdminPanel.js'
+import { canMutatePage, filterByTenantRead } from './access/byTenant.js'
+import { externalReadAccess } from './access/externalReadAccess.js'
+import { ensureUniqueSlug } from './hooks/ensureUniqueSlug.js'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',

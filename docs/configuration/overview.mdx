@@ -6,7 +6,7 @@ desc: The Payload Config is central to everything that Payload does, from adding
 keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload is a _config-based_, code-first CMS and application framework. The Payload Config is central to everything that Payload does, allowing for deep configuration of your application through a simple and intuitive API.
+Payload is a _config-based_, code-first CMS and application framework. The Payload Config is central to everything that Payload does, allowing for deep configuration of your application through a simple and intuitive API. The Payload Config is a fully-typed JavaScript object that can be infinitely extended upon.
 
 Everything from your [Database](../database/overview) choice, to the appearance of the [Admin Panel](../admin/overview), is fully controlled through the Payload Config. From here you can define [Fields](../fields/overview), add [Localization](./localization), enable [Authentication](../authentication/overview), configure [Access Control](../access-control/overview), and so much more.
 
@@ -78,7 +78,7 @@ The following options are available:
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options). |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets. |
 | **`csrf`**                 | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More details](../authentication/overview#csrf-protection). |
-| **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../getting-started/concepts#depth). |
+| **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../queries/depth). |
 | **`defaultMaxTextLength`** | The maximum allowed string length to be permitted application-wide. Helps to prevent malicious public document creation. |
 | **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
 | **`indexSortableFields`**  | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. |

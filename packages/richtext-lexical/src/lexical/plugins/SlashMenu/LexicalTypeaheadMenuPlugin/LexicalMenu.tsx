@@ -92,9 +92,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | null {
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
-  // eslint-disable-next-line react/destructuring-assignment
   const characterOffset = match.replaceableString.length
-  // eslint-disable-next-line react/destructuring-assignment
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {

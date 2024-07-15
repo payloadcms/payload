@@ -40,7 +40,7 @@ export type ExclusiveLinkCollectionsProps =
       enabledCollections?: CollectionSlug[]
     }
 
-export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
+export type LinkFeatureServerProps = {
   /**
    * A function or array defining additional fields for the link feature. These will be
    * displayed in the link editor drawer.
@@ -58,7 +58,7 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-}
+} & ExclusiveLinkCollectionsProps
 
 export const LinkFeature = createServerFeature<
   LinkFeatureServerProps,

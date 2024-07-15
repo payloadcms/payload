@@ -22,11 +22,10 @@ import { LengthIndicator } from '../../ui/LengthIndicator.js'
 
 const { maxLength, minLength } = defaults.description
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaDescriptionProps = FormFieldBase & {
+type MetaDescriptionProps = {
   hasGenerateDescriptionFn: boolean
   path: string
-}
+} & FormFieldBase
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
   const { CustomLabel, hasGenerateDescriptionFn, label, labelProps, required } = props

@@ -10,12 +10,12 @@ import './index.scss'
 
 const baseClass = 'dashboard'
 
-export type DashboardProps = ServerProps & {
+export type DashboardProps = {
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
   visibleEntities: VisibleEntities
-}
+} & ServerProps
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {

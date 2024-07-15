@@ -1,0 +1,94 @@
+---
+title: Depth
+label: Depth
+order: 30
+desc: Payload depth determines how many levels down related documents should be automatically populated when retrieved.
+keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Documents in Payload can have relationships to other Documents. This is true for both [Collections](../configuration/collections) as well as [Globals](../configuration/globals). When you query a Document, you can specify the depth at which to populate any of its related Documents either as full objects, or only their IDs.
+
+Depth will optimize the performance of your application by limiting the amount of processing made in the database and significantly reducing the amount of data returned. Since Documents can be infinitely nested or recursively related, it's important to be able to control how deep your API populates.
+
+For example, when you specify a `depth` of `0`, the API response might look like this:
+
+```json
+{
+  "id": "5ae8f9bde69e394e717c8832",
+  "title": "This is a great post",
+  "author": "5f7dd05cd50d4005f8bcab17"
+}
+```
+
+But with a `depth` of `1`, the response might look like this:
+
+```json
+{
+  "id": "5ae8f9bde69e394e717c8832",
+  "title": "This is a great post",
+  "author": {
+    "id": "5f7dd05cd50d4005f8bcab17",
+    "name": "John Doe"
+  }
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  Depth has no effect in the [GraphQL API](../graphql/overview), because there, depth is based on the shape of your queries.
+</Banner>
+
+## Local API
+
+To specify depth in the [Local API](../local-api/overview), you can use the `depth` option in your query:
+
+```ts
+const getPosts = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+    depth: 2, // highlight-line
+  })
+
+  return posts
+}
+```
+
+<Banner type="info">
+  <strong>Reminder:</strong>
+  This is the same for [Globals](../configuration/globals) using the `findGlobal` operation.
+</Banner>
+
+## REST API
+
+To specify depth in the [REST API](../rest-api/overview), you can use the `depth` parameter in your query:
+
+```ts
+fetch('https://localhost:3000/api/posts?depth=2') // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```
+
+<Banner type="info">
+  <strong>Reminder:</strong>
+  This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
+</Banner>
+
+## Max Depth
+
+Fields like the [Relationship Field](../fields/relationship) or the [Upload Field](../fields/upload) can also set a maximum depth. If exceeded, this will limit the population depth regardless of what the depth might be on the request.
+
+To set a max depth for a field, use the `maxDepth` property in your field configuration:
+
+```js
+{
+  slug: 'posts',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      maxDepth: 2, // highlight-line
+    }
+  ]
+}
+```

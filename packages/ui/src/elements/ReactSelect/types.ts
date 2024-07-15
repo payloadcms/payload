@@ -29,7 +29,7 @@ declare module 'react-select/dist/declarations/src' {
     IsMulti extends boolean,
     Group extends GroupBase<Option>,
   > extends CommonProps<Option, IsMulti, Group> {
-    customProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & CustomSelectProps
+    customProps?: CustomSelectProps & ReactSelectStateManagerProps<Option, IsMulti, Group>
   }
 }
 
@@ -77,7 +77,7 @@ export type ReactSelectAdapterProps = {
   isSortable?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
-  onChange?: (value: Option | Option[]) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  onChange?: (value: Option | Option[]) => void
   onInputChange?: (val: string) => void
   onMenuClose?: () => void
   onMenuOpen?: () => void
