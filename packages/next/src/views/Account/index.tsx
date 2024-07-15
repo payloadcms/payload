@@ -1,6 +1,6 @@
 import type { AdminViewProps, ServerSideEditViewProps } from 'payload'
 
-import { DocumentInfoProvider, FormQueryParamsProvider, HydrateClientUser } from '@payloadcms/ui'
+import { DocumentInfoProvider, HydrateClientUser } from '@payloadcms/ui'
 import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -65,7 +65,6 @@ export const Account: React.FC<AdminViewProps> = async ({
     return (
       <DocumentInfoProvider
         AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} />}
-        action={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}
         docPermissions={docPermissions}
@@ -84,31 +83,22 @@ export const Account: React.FC<AdminViewProps> = async ({
           permissions={permissions}
         />
         <HydrateClientUser permissions={permissions} user={user} />
-        <FormQueryParamsProvider
-          initialParams={{
-            depth: 0,
-            'fallback-locale': 'null',
-            locale: locale?.code,
-            uploadEdits: undefined,
+        <RenderCustomComponent
+          CustomComponent={
+            typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
+          }
+          DefaultComponent={EditView}
+          componentProps={viewComponentProps}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
           }}
-        >
-          <RenderCustomComponent
-            CustomComponent={
-              typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
-            }
-            DefaultComponent={EditView}
-            componentProps={viewComponentProps}
-            serverOnlyProps={{
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            }}
-          />
-        </FormQueryParamsProvider>
+        />
       </DocumentInfoProvider>
     )
   }

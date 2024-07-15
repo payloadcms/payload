@@ -1,6 +1,5 @@
 import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
@@ -14,7 +13,6 @@ import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 let cached = global._payload_fieldSchemaMap
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_fieldSchemaMap = null
 }
 
@@ -32,7 +30,7 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
-  const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
+  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 
   const incomingUserSlug = req.user?.collection
@@ -69,7 +67,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   const fieldSchemaMap = getFieldSchemaMap(req)
 
   const id = collectionSlug ? reqData.id : undefined
-  const schemaPathSegments = schemaPath.split('.')
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fieldSchema: Field[]
 

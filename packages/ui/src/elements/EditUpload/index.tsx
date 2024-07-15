@@ -48,7 +48,7 @@ export type EditUploadProps = {
   imageCacheTag?: string
   initialCrop?: CropType
   initialFocalPoint?: FocalPosition
-  onSave?: ({ crop, focalPosition }: { crop: CropType; focalPosition: FocalPosition }) => void
+  onSave?: ({ crop, focalPoint }: { crop: CropType; focalPoint: FocalPosition }) => void
   showCrop?: boolean
   showFocalPoint?: boolean
 }
@@ -90,6 +90,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     ...defaultFocalPosition,
     ...initialFocalPoint,
   }))
+
   const [checkBounds, setCheckBounds] = useState<boolean>(false)
   const [originalHeight, setOriginalHeight] = useState<number>(0)
   const [originalWidth, setOriginalWidth] = useState<number>(0)
@@ -147,7 +148,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
               widthPixels: Number(widthRef.current?.value ?? crop.widthPixels),
             }
           : undefined,
-        focalPosition,
+        focalPoint: focalPosition,
       })
     closeModal(editDrawerSlug)
   }

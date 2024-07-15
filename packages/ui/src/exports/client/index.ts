@@ -202,10 +202,7 @@ export {
   FieldComponentsProvider,
   useFieldComponents,
 } from '../../providers/FieldComponents/index.js'
-export {
-  FormQueryParamsProvider,
-  useFormQueryParams,
-} from '../../providers/FormQueryParams/index.js'
+export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
 export {
   type ColumnPreferences,
   ListInfoProvider,
