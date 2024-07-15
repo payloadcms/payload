@@ -72,7 +72,12 @@ const createImageName = (
   outputImageName: string,
   { height, width }: OutputInfo,
   extension: string,
-) => `${outputImageName}-${width}x${height}.${extension}`
+  metadata: sharp.Metadata,
+) => {
+  // Adjust height if the file is animated
+  const adjustedHeight = metadata.pages ? height / metadata.pages : height
+  return `${outputImageName}-${width}x${adjustedHeight}.${extension}`
+}
 
 type CreateResultArgs = {
   filename?: FileSize['filename']
@@ -361,6 +366,7 @@ export default async function resizeAndTransformImageSizes({
         sanitizedImage.name,
         bufferInfo,
         mimeInfo?.ext || sanitizedImage.ext,
+        metadata,
       )
 
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
