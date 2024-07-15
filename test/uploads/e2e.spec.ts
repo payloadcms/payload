@@ -125,6 +125,25 @@ describe('uploads', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should show proper file names for resized animated file', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const smallSquareFilename = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__url a')
+    await expect(smallSquareFilename).toContainText('animated-1-480x480.webp')
+  })
+
   test('should show resized images', async () => {
     await page.goto(mediaURL.edit(pngDoc.id))
 
