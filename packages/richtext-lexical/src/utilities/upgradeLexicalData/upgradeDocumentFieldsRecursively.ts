@@ -2,7 +2,7 @@ import type { SerializedEditorState } from 'lexical'
 import type { Field } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
 import type { LexicalRichTextAdapter } from '../../types.js'
 
@@ -38,7 +38,7 @@ export const upgradeDocumentFieldsRecursively = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         found += upgradeDocumentFieldsRecursively({
-          data,
+          data: tabHasName(tab) ? data[tab.name] : data,
           fields: tab.fields,
           found,
         })
