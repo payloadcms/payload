@@ -72,7 +72,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
     const operators = {
       ...operatorMap,
-      contains: ilike,
+      contains: like,
       like,
     } as unknown as Operators
 
