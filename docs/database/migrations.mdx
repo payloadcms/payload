@@ -34,7 +34,7 @@ that will be called if for some reason the migration fails to complete successfu
 all changes that you attempt to make within the migration, and the `down` should ideally revert any changes you make.
 
 For an added level of safety, migrations should leverage Payload [transactions](/docs/database/transactions). Migration
-functions should make use of the `req` by adding it to the arguments of your payload local API calls such
+functions should make use of the `req` by adding it to the arguments of your Payload Local API calls such
 as `payload.create` and database adapter methods like `payload.db.create`.
 
 Here is an example migration file:
@@ -139,7 +139,7 @@ In this case, you can create a migration by running `pnpm payload migrate:create
 
 #### Postgres
 
-In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload config (otherwise you'll see errors upon trying to read / write your data).
+In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see errors upon trying to read / write your data).
 
 That means that Postgres users of Payload should become familiar with the entire migration workflow from top to bottom.
 
@@ -167,14 +167,14 @@ But importantly, you do not need to run migrations against your development data
 
 **2 - create a migration**
 
-Once you're done with working in your Payload config, you can create a migration. It's best practice to try and complete a specific task or fully build out a feature before you create a migration.
+Once you're done with working in your Payload Config, you can create a migration. It's best practice to try and complete a specific task or fully build out a feature before you create a migration.
 
 But once you're ready, you can run `pnpm payload migrate:create`, which will perform the following steps for you:
 
-- We will look for any existing migrations, and automatically generate SQL changes necessary to convert your schema from its prior state to the new state of your Payload config
+- We will look for any existing migrations, and automatically generate SQL changes necessary to convert your schema from its prior state to the new state of your Payload Config
 - We will then create a new migration file in your `/migrations` folder that contains all the SQL necessary to be run
 
-We won't immediately run this migration for you, however. 
+We won't immediately run this migration for you, however.
 
 <Banner type="success">
   Tip: migrations created by Payload are relatively programmatic in nature, so there should not be any surprises, but before you check in the created migration it's a good idea to always double-check the contents of the migration files.
@@ -210,4 +210,4 @@ In the example above, we've specified a `ci` script which we can use as our "bui
 
 This will require that your build pipeline can connect to your database, and it will simply run the `payload migrate` command prior to starting the build process. By calling `payload migrate`, Payload will automatically execute any migrations in your `/migrations` folder that have not yet been executed against your production database, in the order that they were created.
 
-If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload config requires.
+If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload Config requires.

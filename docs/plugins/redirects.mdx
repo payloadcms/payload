@@ -8,7 +8,7 @@ keywords: plugins, redirects, redirect, plugin, payload, cms, seo, indexing, sea
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)](https://www.npmjs.com/package/@payloadcms/plugin-redirects)
 
-This plugin allows you to easily manage redirects for your application from within your admin panel. It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
+This plugin allows you to easily manage redirects for your application from within your [Admin Panel](../admin/overview). It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
 
 For example, if you have a page at `/about` and you want to change it to `/about-us`, you can create a redirect from the old page to the new one, then you can use this data to write HTTP redirects into your front-end application. This will ensure that users are redirected to the correct page without penalty because search engines are notified of the change at the request level. This is a very lightweight plugin that will allow you to integrate managed redirects for any front-end framework.
 
@@ -37,7 +37,7 @@ Install the plugin using any JavaScript package manager like [Yarn](https://yarn
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
 import { buildConfig } from 'payload/config'

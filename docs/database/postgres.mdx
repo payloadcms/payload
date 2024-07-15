@@ -10,7 +10,7 @@ To use Payload with Postgres, install the package `@payloadcms/db-postgres`. It 
 
 It automatically manages changes to your database for you in development mode, and exposes a full suite of migration controls for you to leverage in order to keep other database environments in sync with your schema. DDL transformations are automatically generated.
 
-To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload config as follows:
+To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload Config as follows:
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -68,11 +68,11 @@ In addition to exposing Drizzle directly, all of the tables, Drizzle relations, 
 
 Drizzle exposes two ways to work locally in development mode.
 
-The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands.
+The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload Config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload Config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands.
 
 You will be warned if any changes that you make will entail data loss while in development mode. Push is enabled by default, but you can opt out if you'd like.
 
-Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload config.
+Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload Config.
 
 ## Migration workflows
 
