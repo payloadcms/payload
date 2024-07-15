@@ -1,7 +1,7 @@
 import { cookies as getCookies } from 'next/headers'
 import React from 'react'
 
-import { TenantSelector } from './index.client'
+import { TenantSelector } from './index.client.js'
 
 export const TenantSelectorRSC = () => {
   const cookies = getCookies()

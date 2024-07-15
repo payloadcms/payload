@@ -1,7 +1,7 @@
 import type { Access } from 'payload'
 
-import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { isSuperAdmin } from '../../../access/isSuperAdmin.js'
+import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
 
 export const updateAndDeleteAccess: Access = (args) => {
   const { req } = args

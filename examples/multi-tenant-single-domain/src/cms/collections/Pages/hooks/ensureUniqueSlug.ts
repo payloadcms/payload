@@ -2,7 +2,7 @@ import type { FieldHook } from 'payload'
 
 import { ValidationError } from 'payload'
 
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
 
 export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation

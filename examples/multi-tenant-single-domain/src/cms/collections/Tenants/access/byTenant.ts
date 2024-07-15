@@ -2,8 +2,8 @@ import type { Access } from 'payload'
 
 import { parseCookies } from 'payload'
 
-import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { isSuperAdmin } from '../../../access/isSuperAdmin.js'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
 
 export const filterByTenantRead: Access = (args) => {
   const req = args.req
@@ -59,7 +59,7 @@ export const canMutateTenant: Access = (args) => {
             roles?.includes('tenant-admin')
               ? tenant && (typeof tenant === 'string' ? tenant : tenant.id)
               : null,
-          )  
+          )
           .filter(Boolean) || [],
     },
   }
