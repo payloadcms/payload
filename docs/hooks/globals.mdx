@@ -8,7 +8,7 @@ keywords: hooks, globals, config, configuration, documentation, Content Manageme
 
 Global Hooks are [Hooks](./overview) that run on [Global](../configuration/globals) Documents. They allow you to execute your own logic during specific events of the Document lifecycle.
 
-To add hooks to a Global, use the `hooks` property in your [Global Config](../configuration/globals):
+To add Hooks to a Global, use the `hooks` property in your [Global Config](../configuration/globals):
 
 ```ts
 import type { GlobalConfig } from 'payload';
@@ -66,7 +66,7 @@ const beforeValidateHook: GlobalBeforeValidateHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeValidate` hook:
+The following arguments are provided to the `beforeValidate` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -92,7 +92,7 @@ const beforeChangeHook: GlobalBeforeChangeHook = async ({
 }
 ```
 
-The following arguments are passed to the `beforeChange` hook:
+The following arguments are provided to the `beforeChange` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -118,7 +118,7 @@ const afterChangeHook: GlobalAfterChangeHook = async ({
 }
 ```
 
-The following arguments are passed to the `afterChange` hook:
+The following arguments are provided to the `afterChange` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -141,7 +141,7 @@ const beforeReadHook: GlobalBeforeReadHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `beforeRead` hook:
+The following arguments are provided to the `beforeRead` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -164,7 +164,7 @@ const afterReadHook: GlobalAfterReadHook = async ({
 }) => {...}
 ```
 
-The following arguments are passed to the `beforeRead` hook:
+The following arguments are provided to the `beforeRead` hook:
 
 | Option                   | Description                                                                                                                                                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
