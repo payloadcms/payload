@@ -97,7 +97,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     )
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
-  const LabelComponent: React.FC<any> = reducedBlock?.LabelComponent as React.FC<any>
+  const LabelComponent = reducedBlock?.LabelComponent
 
   return (
     <div
@@ -110,7 +110,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {LabelComponent && <LabelComponent formData={formData} />}
+      {LabelComponent ? (
+        <LabelComponent blockKind={'lexicalInlineBlock'} formData={formData} />
+      ) : null}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button

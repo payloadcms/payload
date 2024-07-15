@@ -121,6 +121,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
+  const LabelComponent = reducedBlock?.LabelComponent
+
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return reducedBlock && initialState !== false ? (
@@ -149,19 +151,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          <div className={`${baseClass}__block-header`}>
-            <div>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                pillStyle="white"
-              >
-                {typeof reducedBlock.labels.singular === 'string'
-                  ? getTranslation(reducedBlock.labels.singular, i18n)
-                  : '[Singular Label]'}
-              </Pill>
-              <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+          LabelComponent ? (
+            <LabelComponent blockKind={'lexicalBlock'} formData={formData} />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <div>
+                <Pill
+                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                  pillStyle="white"
+                >
+                  {reducedBlock && typeof reducedBlock.labels.singular === 'string'
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : '[Singular Label]'}
+                </Pill>
+                <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+              </div>
             </div>
-          </div>
+          )
         }
         key={0}
       >

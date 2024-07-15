@@ -52,7 +52,7 @@ export const BlockContent: React.FC<Props> = (props) => {
     formData,
     formSchema,
     nodeKey,
-    reducedBlock: { labels },
+    reducedBlock: { LabelComponent, labels },
     schemaPath,
   } = props
 
@@ -199,34 +199,38 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          <div className={`${baseClass}__block-header`}>
-            <div>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                pillStyle="white"
-              >
-                {typeof labels.singular === 'string'
-                  ? getTranslation(labels.singular, i18n)
-                  : '[Singular Label]'}
-              </Pill>
-              <SectionTitle path="blockName" readOnly={field?.readOnly} />
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+          LabelComponent ? (
+            <LabelComponent blockKind={'lexicalBlock'} formData={formData} />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <div>
+                <Pill
+                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                  pillStyle="white"
+                >
+                  {typeof labels.singular === 'string'
+                    ? getTranslation(labels.singular, i18n)
+                    : '[Singular Label]'}
+                </Pill>
+                <SectionTitle path="blockName" readOnly={field?.readOnly} />
+                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+              </div>
+              {editor.isEditable() && (
+                <Button
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__removeButton`}
+                  disabled={field?.readOnly}
+                  icon="x"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    removeBlock()
+                  }}
+                  round
+                  tooltip="Remove Block"
+                />
+              )}
             </div>
-            {editor.isEditable() && (
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
-                disabled={field?.readOnly}
-                icon="x"
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeBlock()
-                }}
-                round
-                tooltip="Remove Block"
-              />
-            )}
-          </div>
+          )
         }
         isCollapsed={isCollapsed}
         key={0}
