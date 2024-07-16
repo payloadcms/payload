@@ -151,6 +151,22 @@ describe('admin2', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
+      test('search should not persist between navigation', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=test`
+        await page.goto(url)
+        await page.waitForURL(url)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('test')
+
+        await page.locator('.nav-toggler.template-default__nav-toggler').click()
+        await expect(page.locator('#nav-uploads')).toContainText('Uploads')
+
+        await page.locator('#nav-uploads').click()
+        await page.waitForURL(/uploads/)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('')
+      })
+
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
