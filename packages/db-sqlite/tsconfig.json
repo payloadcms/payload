@@ -17,7 +17,7 @@
     "tests",
     "test",
     "node_modules",
-    ".eslintrc.js",
+    "eslint.config.js",
     "src/**/*.spec.js",
     "src/**/*.spec.jsx",
     "src/**/*.spec.ts",
@@ -25,7 +25,7 @@
   ],
   "include": [
     "src",
-    "../drizzle/src/createTableName.ts",
+    "src/**/*.ts"
   ],
   "references": [
     {

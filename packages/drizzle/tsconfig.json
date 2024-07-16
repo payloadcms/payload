@@ -1,11 +1,15 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true, // Make sure typescript knows that this module depends on their references
-    "noEmit": false /* Do not emit outputs. */,
+    // Make sure typescript knows that this module depends on their references
+    "composite": true,
+    /* Do not emit outputs. */
+    "noEmit": false,
     "emitDeclarationOnly": true,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */
+    /* Specify an output folder for all emitted files. */
+    "outDir": "./dist",
+    /* Specify the root folder within your source files. */
+    "rootDir": "./src"
   },
   "exclude": [
     "dist",
@@ -13,7 +17,7 @@
     "tests",
     "test",
     "node_modules",
-    ".eslintrc.js",
+    "eslint.config.js",
     "src/**/*.spec.js",
     "src/**/*.spec.jsx",
     "src/**/*.spec.ts",
