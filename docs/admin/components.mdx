@@ -38,11 +38,11 @@ import { MyCustomLogo } from './MyCustomLogo'
 export default buildConfig({
   // ...
   admin: {
+    // highlight-start
     components: {
-      graphics: {
-        Logo: MyCustomLogo, // highlight-line
-      },
+      // ...
     },
+    // highlight-end
   },
 })
 ```
