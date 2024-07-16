@@ -101,18 +101,12 @@ You can customize the way that the [Admin Panel](../admin/overview) behaves on a
 
 ## TypeScript
 
-You can import Global types as follows:
+You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizeGlobalConfig`.
+
+The `GlobalConfig` type represents an incoming Global Config, where only the bare minimum properties are marked as required.
+
+The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
 ```ts
-import { GlobalConfig } from 'payload'
-
-// This is the type used for incoming Global configs.
-// Only the bare minimum properties are marked as required.
-```
-
-```ts
-import { SanitizedGlobalConfig } from 'payload'
-
-// This is the type used after an incoming Global config is fully sanitized.
-// Generally, this is only used internally by Payload.
+import { GlobalConfig, SanitizedGlobalConfig } from 'payload'
 ```
