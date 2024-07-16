@@ -1,7 +1,7 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
-import { useModal } from '@payloadcms/ui'
+import { useModal, useTranslation } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -40,6 +40,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [blockFields, setBlockFields] = useState<BlockFields>(null)
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
+  const { t } = useTranslation<string, any>()
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -135,13 +136,15 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [editor])
+  }, [editor, targetNodeKey, toggleModal])
 
   return (
     <FieldsDrawer
       data={blockFields}
       drawerSlug={drawerSlug}
-      drawerTitle="Create Inline Block"
+      drawerTitle={t(`lexical:blocks:inlineBlocks:${blockFields?.id ? 'edit' : 'create'}`, {
+        label: blockFields?.blockType ?? t('lexical:blocks:inlineBlocks:label'),
+      })}
       featureKey="blocks"
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)

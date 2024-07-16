@@ -129,7 +129,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             }}
             round
             size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:edit')}
+            tooltip={t('lexical:blocks:inlineBlocks:edit', { label: formData?.blockType })}
           />
           <Button
             buttonStyle="icon-label"
@@ -142,7 +142,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             }}
             round
             size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:remove')}
+            tooltip={t('lexical:blocks:inlineBlocks:remove', { label: formData?.blockType })}
           />
         </div>
       )}
