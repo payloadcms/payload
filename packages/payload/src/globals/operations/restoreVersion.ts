@@ -12,6 +12,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   depth?: number
+  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
@@ -25,6 +26,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
   const {
     id,
     depth,
+    draft,
     globalConfig,
     overrideAccess,
     req: { fallbackLocale, locale, payload },
@@ -63,6 +65,11 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
 
+    // Overwrite draft status if draft is true
+
+    if (draft) {
+      rawVersion.version._status = 'draft'
+    }
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -77,26 +84,28 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
-    const global = await payload.db.findGlobal({
+    let result = rawVersion.version
+
+    result = await payload.db.updateGlobal({
       slug: globalConfig.slug,
+      data: result,
       req,
     })
 
-    let result = rawVersion.version
+    // /////////////////////////////////////
+    // Create version
+    // /////////////////////////////////////
+    const now = new Date().toISOString()
 
-    if (global) {
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
-    } else {
-      result = await payload.db.createGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
-    }
+    result = await payload.db.createGlobalVersion({
+      autosave: false,
+      createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+      globalSlug: globalConfig.slug,
+      parent: id,
+      req,
+      updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+      versionData: result,
+    })
 
     // /////////////////////////////////////
     // afterRead - Fields
