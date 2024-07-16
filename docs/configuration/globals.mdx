@@ -103,9 +103,7 @@ You can customize the way that the [Admin Panel](../admin/overview) behaves on a
 
 You can import types from Payload to help make writing your Global configs easier and type-safe. There are two main types that represent the Global Config, `GlobalConfig` and `SanitizeGlobalConfig`.
 
-The `GlobalConfig` type represents a raw Global Config in its full form, where only the bare minimum properties are marked as required.
-
-The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
+The `GlobalConfig` type represents a raw Global Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedGlobalConfig` type represents a Global Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
 ```ts
 import { GlobalConfig, SanitizedGlobalConfig } from 'payload'
