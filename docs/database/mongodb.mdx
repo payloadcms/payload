@@ -33,6 +33,9 @@ export default buildConfig({
 | Option               | Description |
 | -------------------- | ----------- |
 | `autoPluralization`  | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s. |
+| `schemaOptions`      | Customize schema options for all Mongoose schemas created internally.   |
+| `collections`        | Options on a collection-by-collection basis. [More](#collections-options)  |
+| `globals`            | Options for the Globals collection created by Payload. [More](#globals-options) |
 | `connectOptions`     | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose. |
 | `disableIndexHints`  | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false |
 | `migrationDir`       | Customize the directory that migrations are stored. |
@@ -49,3 +52,27 @@ You can access Mongoose models as follows:
 - Collection models - `payload.db.collections[myCollectionSlug]`
 - Globals model - `payload.db.globals`
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
+
+### Collections Options
+
+You can configure the way the MongoDB adapter works on a collection-by-collection basis, including customizing Mongoose `schemaOptions` for each collection schema created.
+
+Example:
+
+```ts
+const db = mongooseAdapter({
+  url: 'your-url-here',
+  collections: {
+    users: {
+      // 
+      schemaOptions: {
+        strict: false,
+      }
+    }
+  }
+})
+```
+
+### Global Options
+
+Payload automatically creates a single `globals` collection that correspond with any Payload globals that you define. When you initialize the `mongooseAdapter`, you can specify settings here for your globals in a similar manner to how you can for collections above. Right now, the only property available is `schemaOptions` but more may be added in the future.
