@@ -52,7 +52,7 @@ describe('sanitizeFields', () => {
     }).rejects.toThrow(InvalidFieldName)
   })
 
-  it('should throw on a reserved field name', async () => {
+  it('should throw on a reserved field name - auth', async () => {
     const fields: Field[] = [
       {
         name: 'hash',
@@ -62,6 +62,43 @@ describe('sanitizeFields', () => {
     ]
     await expect(async () => {
       await sanitizeFields({
+        collectionConfig: { slug: 'test', auth: true, fields: [] },
+        config,
+        fields,
+        validRelationships: [],
+      })
+    }).rejects.toThrow(ReservedFieldName)
+  })
+
+  it('should throw on a reserved field name - upload', async () => {
+    const fields: Field[] = [
+      {
+        name: 'file',
+        type: 'text',
+        label: 'File',
+      },
+    ]
+    await expect(async () => {
+      await sanitizeFields({
+        collectionConfig: { slug: 'test', fields: [], upload: true },
+        config,
+        fields,
+        validRelationships: [],
+      })
+    }).rejects.toThrow(ReservedFieldName)
+  })
+
+  it('should throw on a reserved field name - versions', async () => {
+    const fields: Field[] = [
+      {
+        name: '__v',
+        type: 'text',
+        label: 'Version ID',
+      },
+    ]
+    await expect(async () => {
+      await sanitizeFields({
+        collectionConfig: { slug: 'test', fields: [], versions: true },
         config,
         fields,
         validRelationships: [],

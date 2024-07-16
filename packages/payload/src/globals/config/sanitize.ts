@@ -46,6 +46,7 @@ export const sanitizeGlobals = async (
     global.fields = await sanitizeFields({
       config,
       fields: global.fields,
+      globalConfig: global,
       richTextSanitizationPromises,
       validRelationships,
     })

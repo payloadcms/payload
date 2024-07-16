@@ -1,4 +1,6 @@
+import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { GlobalConfig } from '../../globals/config/types.js'
 import type { Field } from './types.js'
 
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
@@ -18,15 +20,26 @@ import validations from '../validations.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
+  collectionConfig?: CollectionConfig
   config: Config
+
+  /**
+   * If set, will be used to determine the depth of the field sanitization.
+   * This is used to check top-level fields only.
+   */
+  depth?: number
+
   existingFieldNames?: Set<string>
   fields: Field[]
+  globalConfig?: GlobalConfig
+
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
+
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
@@ -40,12 +53,17 @@ type Args = {
   validRelationships: null | string[]
 }
 
-export const reservedFieldNames = ['__v', 'salt', 'hash', 'file']
+const reservedVersionsFieldNames = ['__v']
+const reservedAuthFieldNames = ['salt', 'hash']
+const reservedUploadFieldNames = ['file']
 
 export const sanitizeFields = async ({
+  collectionConfig,
   config,
+  depth = 0,
   existingFieldNames = new Set(),
   fields,
+  globalConfig,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
@@ -62,12 +80,36 @@ export const sanitizeFields = async ({
       throw new InvalidFieldName(field, field.name)
     }
 
-    // assert that field names are not one of reserved names
-    if (fieldAffectsData(field) && reservedFieldNames.includes(field.name)) {
+    // Reserved field names for auth on the top level only
+    if (
+      fieldAffectsData(field) &&
+      collectionConfig?.auth &&
+      depth === 0 &&
+      reservedAuthFieldNames.includes(field.name)
+    ) {
       throw new ReservedFieldName(field, field.name)
     }
 
-    // Auto-label
+    // Reserved field names for upload on the top level only
+    if (
+      fieldAffectsData(field) &&
+      collectionConfig?.upload &&
+      depth === 0 &&
+      reservedUploadFieldNames.includes(field.name)
+    ) {
+      throw new ReservedFieldName(field, field.name)
+    }
+
+    // Reserved field names for versioning on the top level only
+    if (
+      fieldAffectsData(field) &&
+      (collectionConfig?.versions || globalConfig?.versions) &&
+      depth === 0 &&
+      reservedVersionsFieldNames.includes(field.name)
+    ) {
+      throw new ReservedFieldName(field, field.name)
+    }
+
     if (
       'name' in field &&
       field.name &&
@@ -76,6 +118,7 @@ export const sanitizeFields = async ({
       typeof field.label !== 'function' &&
       field.label !== false
     ) {
+      // Auto-label
       field.label = toWords(field.name)
     }
 
@@ -190,9 +233,12 @@ export const sanitizeFields = async ({
 
     if ('fields' in field && field.fields) {
       field.fields = await sanitizeFields({
+        collectionConfig,
         config,
+        depth: depth + 1,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        globalConfig,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -207,9 +253,12 @@ export const sanitizeFields = async ({
         }
 
         tab.fields = await sanitizeFields({
+          collectionConfig,
           config,
+          depth: depth + 1,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          globalConfig,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -224,9 +273,12 @@ export const sanitizeFields = async ({
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
         block.fields = await sanitizeFields({
+          collectionConfig,
           config,
+          depth: depth + 1,
           existingFieldNames: new Set(),
           fields: block.fields,
+          globalConfig,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
