@@ -100,6 +100,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const LabelComponent = reducedBlock?.LabelComponent
 
+  const blockDisplayName = reducedBlock.labels.singular
+    ? getTranslation(reducedBlock.labels.singular, i18n)
+    : reducedBlock.slug
+
   return (
     <div
       className={[
@@ -132,7 +136,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             }}
             round
             size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:edit', { label: formData?.blockType })}
+            tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
           />
           <Button
             buttonStyle="icon-label"
@@ -145,7 +149,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             }}
             round
             size="small"
-            tooltip={t('lexical:blocks:inlineBlocks:remove', { label: formData?.blockType })}
+            tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
           />
         </div>
       )}

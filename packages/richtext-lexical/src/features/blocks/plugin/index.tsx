@@ -1,6 +1,7 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
+import { getTranslation } from '@payloadcms/translations'
 import { useModal, useTranslation } from '@payloadcms/ui'
 import {
   $createParagraphNode,
@@ -16,11 +17,12 @@ import {
 } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { PluginComponent } from '../../typesClient.js'
-import type { BlocksFeatureClientProps } from '../feature.client.js'
+import type { ClientComponentProps, PluginComponent } from '../../typesClient.js'
+import type { BlocksFeatureClientProps, ClientBlock } from '../feature.client.js'
 import type { BlockFields } from '../nodes/BlocksNode.js'
 import type { InlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../utilities/fieldsDrawer/Drawer.js'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
 import { $createInlineBlockNode } from '../nodes/InlineBlocksNode.js'
@@ -40,7 +42,14 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [blockFields, setBlockFields] = useState<BlockFields>(null)
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
-  const { t } = useTranslation<string, any>()
+  const { i18n, t } = useTranslation<string, any>()
+
+  const { editorConfig } = useEditorConfigContext()
+
+  const reducedBlock: ClientBlock = (
+    editorConfig?.resolvedFeatureMap?.get('blocks')
+      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+  )?.reducedInlineBlocks?.find((block) => block.slug === blockFields?.blockType)
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -138,12 +147,16 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
     )
   }, [editor, targetNodeKey, toggleModal])
 
+  const blockDisplayName = reducedBlock?.labels?.singular
+    ? getTranslation(reducedBlock?.labels?.singular, i18n)
+    : reducedBlock?.slug
+
   return (
     <FieldsDrawer
       data={blockFields}
       drawerSlug={drawerSlug}
       drawerTitle={t(`lexical:blocks:inlineBlocks:${blockFields?.id ? 'edit' : 'create'}`, {
-        label: blockFields?.blockType ?? t('lexical:blocks:inlineBlocks:label'),
+        label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
       })}
       featureKey="blocks"
       handleDrawerSubmit={(_fields, data) => {
