@@ -1,0 +1,71 @@
+---
+title: Global Admin Config
+label: Globals
+order: 30
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+To configure Admin Options for Globals, use the `admin` property in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+const MyGlobal: GlobalConfig = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+## Admin Options
+
+The following options are available:
+
+| Option        | Description                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **`group`**       | Text used as a label for grouping Collection and Global links together in the navigation.                                         |
+| **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
+| **`components`**  | Swap in your own React components to be used within this Global. [More details](../admin/components#globals).                           |
+| **`preview`**     | Function to generate a preview URL within the [Admin Panel](../admin/overview) for this Global that can point to your app. [More details](#preview).           |
+| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
+| **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
+| **`meta`**        | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.       |
+
+### Preview
+
+It is possible to display a Preview Button in the Admin Panel within the Edit View. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
+
+To configure the Preview Button, set the `admin.preview` property to a function in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+export const MainMenu: GlobalConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    preview: (doc, { locale }) => {
+      if (doc?.slug) {
+        return `/${doc.slug}?locale=${locale}`
+      }
+
+      return null
+    },
+    // highlight-end
+  },
+}
+```
+
+The preview function receives two arguments:
+
+| Argument | Description |
+| --- | --- |
+| **`doc`** | The document being edited |
+| **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
+
+<Banner type="success">
+  <strong>Reminder:</strong>
+  For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
+</Banner>
