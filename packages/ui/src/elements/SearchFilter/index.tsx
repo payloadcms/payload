@@ -1,58 +1,62 @@
 'use client'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
+
 import { getTranslation } from '@payloadcms/translations'
-// TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation.js'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export type SearchFilterProps = {
   fieldLabel?: string
   fieldName?: string
   handleChange?: (search: string) => void
+  i18n?: I18nClient
+  initialParams?: ParsedQs
   listSearchableFields?: MappedField[]
+  setValue?: (arg: string) => void
+  t?: TFunction
+  value?: string
 }
+
+import type { ParsedQs } from 'qs-esm'
 
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { SearchIcon } from '../../icons/Search/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
 
 export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
-  const { fieldLabel = 'ID', fieldName = 'id', handleChange, listSearchableFields } = props
+  const {
+    fieldLabel = 'ID',
+    handleChange,
+    i18n,
+    initialParams,
+    listSearchableFields,
+    setValue,
+    t,
+    value,
+  } = props
 
-  const { searchParams } = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const { i18n, t } = useTranslation()
-
-  const [search, setSearch] = useState(
-    typeof searchParams?.search === 'string' ? searchParams?.search : '',
+  const previousSearch = useRef(
+    typeof initialParams?.search === 'string' ? initialParams?.search : '',
   )
-  const [previousSearch, setPreviousSearch] = useState('')
 
   const placeholder = useRef(t('general:searchBy', { label: getTranslation(fieldLabel, i18n) }))
 
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(value, 300)
 
   useEffect(() => {
-    if (debouncedSearch !== previousSearch) {
+    if (debouncedSearch !== previousSearch.current) {
       if (handleChange) handleChange(debouncedSearch)
-      setPreviousSearch(debouncedSearch)
+
+      previousSearch.current = debouncedSearch
     }
-  }, [
-    debouncedSearch,
-    previousSearch,
-    router,
-    fieldName,
-    searchParams,
-    handleChange,
-    listSearchableFields,
-    pathname,
-  ])
+  }, [debouncedSearch, previousSearch, handleChange])
+
+  // Cleans up the search input when the component is unmounted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => setValue(''), [])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
@@ -87,11 +91,13 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
   return (
     <div className={baseClass}>
       <input
+        aria-label={placeholder.current}
         className={`${baseClass}__input`}
-        onChange={(e) => setSearch(e.target.value)}
+        id="search-filter-input"
+        onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder.current}
         type="text"
-        value={search || ''}
+        value={value || ''}
       />
       <SearchIcon />
     </div>

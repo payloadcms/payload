@@ -9,6 +9,8 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
+import { useListInfo } from '@payloadcms/ui'
+
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
@@ -49,12 +51,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
 
   const { handleSearchChange } = useListQuery()
+  const { collectionSlug } = useListInfo()
   const { searchParams } = useSearchParams()
   const titleField = useUseTitleField(collectionConfig, fieldMap)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+  const [search, setSearch] = useState(
+    typeof searchParams?.search === 'string' ? searchParams?.search : '',
+  )
 
   const hasWhereParam = useRef(Boolean(searchParams?.where))
 
@@ -89,10 +95,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           }
           fieldName={titleField?.name}
           handleChange={handleSearchChange}
+          i18n={i18n}
+          initialParams={searchParams}
+          key={collectionSlug}
           listSearchableFields={getTextFieldsToBeSearched(
             collectionConfig.admin.listSearchableFields,
             fieldMap,
           )}
+          setValue={setSearch}
+          t={t}
+          value={search}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
