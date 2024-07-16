@@ -177,7 +177,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
         focalPoint,
       })
     },
-    [setModified],
+    [setModified, updateUploadEdits],
   )
 
   const handlePasteUrlClick = () => {
