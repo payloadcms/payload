@@ -189,7 +189,9 @@ $cal-icon-width: 18px;
       border-right: 1px solid var(--theme-elevation-150);
     }
 
-    &__time {
+    &__time,
+    &__time-container,
+    .react-datepicker__time-container .react-datepicker__time {
       background: none;
     }
 
