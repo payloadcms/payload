@@ -440,18 +440,12 @@ importers:
 
   packages/db-mongodb:
     dependencies:
-      '@types/flat':
-        specifier: ^5.0.5
-        version: 5.0.5
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
-      flat:
-        specifier: 5.0.2
-        version: 5.0.2
       get-port:
         specifier: 5.1.1
         version: 5.1.1
@@ -5737,10 +5731,6 @@ packages:
   /@types/find-node-modules@2.1.2:
     resolution: {integrity: sha512-5hRcqDclY6MTkHXJBc5q79z5luG+IJRlGR01wluMVMM9lYogYc2sfclXTVU5Edp0Ja4viIOCDI1lXhFRlsNTKA==}
     dev: true
-
-  /@types/flat@5.0.5:
-    resolution: {integrity: sha512-nPLljZQKSnac53KDUDzuzdRfGI0TDb5qPrb+SrQyN3MtdQrOnGsKniHN1iYZsJEBIVQve94Y6gNz22sgISZq+Q==}
-    dev: false
 
   /@types/fs-extra@11.0.4:
     resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
