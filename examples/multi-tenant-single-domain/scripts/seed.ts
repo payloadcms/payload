@@ -5,7 +5,7 @@
 
 process.env.PAYLOAD_DROP_DATABASE = 'true'
 
-import type { Payload } from 'payload'
+import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
 
 import { getPayload } from 'payload'
 import { importConfig } from 'payload/node'
@@ -28,7 +28,13 @@ async function findOrCreateTenant({ data, payload }: { data: any; payload: Paylo
   })
 }
 
-async function findOrCreateUser({ data, payload }: { data: any; payload: Payload }) {
+async function findOrCreateUser({
+  data,
+  payload,
+}: {
+  data: RequiredDataFromCollectionSlug<'users'>
+  payload: Payload
+}) {
   const usersQuery = await payload.find({
     collection: 'users',
     where: {
@@ -134,6 +140,21 @@ async function run() {
 
   await findOrCreateUser({
     data: {
+      email: 'tenant3@payloadcms.com',
+      password: 'test',
+      tenants: [
+        {
+          roles: ['tenant-admin'],
+          tenant: tenant3.id,
+        },
+      ],
+      username: 'tenant3',
+    },
+    payload,
+  })
+
+  await findOrCreateUser({
+    data: {
       email: 'multi-admin@payloadcms.com',
       password: 'test',
       tenants: [
@@ -144,6 +165,10 @@ async function run() {
         {
           roles: ['tenant-admin'],
           tenant: tenant2.id,
+        },
+        {
+          roles: ['tenant-admin'],
+          tenant: tenant3.id,
         },
       ],
       username: 'tenant3',
