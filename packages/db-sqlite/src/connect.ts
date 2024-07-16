@@ -3,11 +3,10 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Connect } from 'payload'
 
 import { createClient } from '@libsql/client'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'
-
-import { pushDevSchema } from '../../drizzle/src/utilities/pushDevSchema.js'
 
 export const connect: Connect = async function connect(
   this: SQLiteAdapter,
