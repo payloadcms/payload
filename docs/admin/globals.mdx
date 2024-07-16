@@ -30,10 +30,10 @@ The following options are available:
 | **`group`**       | Text used as a label for grouping Collection and Global links together in the navigation.                                         |
 | **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
 | **`components`**  | Swap in your own React components to be used within this Global. [More details](#components).                           |
-| **`preview`**     | Function to generate a preview URL within the [Admin Panel](./overview) for this Global that can point to your app. [More details](#preview).           |
+| **`preview`**     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](#preview).           |
 | **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
 | **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
-| **`meta`**        | Metadata overrides to apply to the [Admin Panel](./overview). Included properties are `description` and `openGraph`.       |
+| **`meta`**        | Metadata overrides to apply to the Admin Panel. Included properties are `description` and `openGraph`.       |
 
 ### Components
 
@@ -59,11 +59,11 @@ The following options are available:
 
 | Path                           | Description                                                                                                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **`elements.SaveButton`**      | Replace the default `Save` button with a Custom Component. Drafts must be disabled.                                    |
-| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
-| **`elements.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |
-| **`elements.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
-| **`views`**                    | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
+| **`elements.SaveButton`**      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled.                                    |
+| **`elements.SaveDraftButton`** | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. |
+| **`elements.PublishButton`**   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default Preview Button with a Custom Component. [Preview](#preview) must be enabled.                                         |
+| **`views`**                    | Override or create new views within the Admin Panel. [More details](./views).                                     |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -99,7 +99,7 @@ The preview function receives two arguments:
 
 | Argument | Description |
 | --- | --- |
-| **`doc`** | The document being edited |
+| **`doc`** | The Document being edited. |
 | **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
 
 <Banner type="success">

@@ -89,9 +89,9 @@ Available Collection operations include `create`, `read`, `update`, `delete`, `l
 import type { CollectionBeforeOperationHook } from 'payload'
 
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
-  args, // original arguments passed into the operation
-  operation, // name of the operation
-  req, // full Request object
+  args,
+  operation,
+  req,
 }) => {
   return args // return modified operation arguments as necessary
 }
