@@ -32,12 +32,10 @@ const checkValueType = (key: string, value: unknown): void => {
   }
 }
 
-const INTERNAL_KEY = '__internal__'
-
 export class Conf<T extends Record<string, any> = Record<string, unknown>>
   implements Iterable<[keyof T, T[keyof T]]>
 {
-  readonly #options: Readonly<Partial<Options<T>>>
+  readonly #options: Readonly<Partial<Options>>
   private readonly _deserialize: Deserialize<T> = (value) => JSON.parse(value)
   private readonly _serialize: Serialize<T> = (value) => JSON.stringify(value, undefined, '\t')
 
@@ -46,7 +44,7 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
   readonly path: string
 
   constructor() {
-    const options: Partial<Options<T>> = {
+    const options: Partial<Options> = {
       configFileMode: 0o666,
       configName: 'config',
       fileExtension: 'json',
@@ -71,22 +69,6 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
       this.store = store
     }
   }
-  // This overload is used for dot-notation access.
-  private _containsReservedKey(key: Partial<T> | string): boolean {
-    if (typeof key === 'object') {
-      const firsKey = Object.keys(key)[0]
-
-      if (firsKey === INTERNAL_KEY) {
-        return true
-      }
-    }
-
-    if (typeof key !== 'string') {
-      return false
-    }
-
-    return false
-  }
 
   private _ensureDirectory(): void {
     // Ensure the directory exists as it could have been deleted in the meantime.
@@ -110,8 +92,6 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
 
    @param key - The key of the item to delete.
    */
-  delete<Key extends keyof T>(key: Key): void
-
   delete(key: string): void {
     const { store } = this
     delete store[key]
@@ -123,32 +103,19 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
    Get an item.
 
    @param key - The key of the item to get.
-   @param defaultValue - The default value if the item does not exist.
    */
-  get<Key extends keyof T>(key: Key): T[Key]
-
-  get<Key extends keyof T>(key: Key, defaultValue: Required<T>[Key]): Required<T>[Key]
-  // We exclude `keyof T` as an incorrect type for the default value should not fall through to this overload.
-  get<Key extends string, Value = unknown>(key: Exclude<Key, keyof T>, defaultValue?: Value): Value
-
-  get(key: string, defaultValue?: unknown): unknown {
+  get<Key extends keyof T>(key: Key): T[Key] {
     const { store } = this
-    return key in store ? store[key] : defaultValue
+    return store[key]
   }
 
   /**
    Set an item or multiple items at once.
 
-   @param {key|object} - You can use [dot-notation](https://github.com/sindresorhus/dot-prop) in a key to access nested properties. Or a hashmap of items to set at once.
+   @param key - You can use [dot-notation](https://github.com/sindresorhus/dot-prop) in a key to access nested properties. Or a hashmap of items to set at once.
    @param value - Must be JSON serializable. Trying to set the type `undefined`, `function`, or `symbol` will result in a `TypeError`.
    */
-  set<Key extends keyof T>(key: Key, value?: T[Key]): void
-
-  set(key: string, value: unknown): void
-
-  set(object: Partial<T>): void
-
-  set<Key extends keyof T>(key: Key | Partial<T> | string, value?: T[Key] | unknown): void {
+  set<Key extends keyof T>(key: string, value?: T[Key] | unknown): void {
     if (typeof key !== 'string' && typeof key !== 'object') {
       throw new TypeError(
         `Expected \`key\` to be of type \`string\` or \`object\`, got ${typeof key}`,
@@ -157,12 +124,6 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
 
     if (typeof key !== 'object' && value === undefined) {
       throw new TypeError('Use `delete()` to clear values')
-    }
-
-    if (this._containsReservedKey(key)) {
-      throw new TypeError(
-        `Please don't use the ${INTERNAL_KEY} key, as it's used to manage this module internal operations.`,
-      )
     }
 
     const { store } = this
@@ -210,7 +171,7 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
   }
 }
 
-export type Options<T extends Record<string, any>> = {
+export type Options = {
   /**
    The config is cleared if reading the config file causes a `SyntaxError`. This is a good behavior for unimportant data, as the config file is not intended to be hand-edited, so it usually means the config is corrupt and there's nothing the user can do about it anyway. However, if you let the user edit the config file directly, mistakes might happen and it could be more useful to throw an error when the config is invalid instead of clearing.
 
