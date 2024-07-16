@@ -291,11 +291,26 @@ export default async function resizeAndTransformImageSizes({
           resizeHeight = Math.round(resizeWidth / originalAspectRatio)
         }
 
+        const resizeAspectRatio = resizeWidth / resizeHeight
+        let scaleDownWidth, scaleDownHeight
+
+        if(resizeAspectRatio > originalAspectRatio) {
+          // target has a wider ratio than orig
+          // -> use resizeWidth and scale height using orig aspect ratio
+          scaleDownHeight = Math.round(resizeWidth / originalAspectRatio);
+          scaleDownWidth = resizeWidth
+        }else{
+          // target has a taller ratio than orig
+          // -> use resizeHeight and scale width using orig aspect ratio
+          scaleDownHeight = resizeHeight
+          scaleDownWidth = Math.round(resizeHeight * originalAspectRatio);
+        }
+
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
-          height: resizeHeight,
-          width: resizeWidth,
-        })
+          height: scaleDownHeight,
+          width: scaleDownWidth
+        });
 
         const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
