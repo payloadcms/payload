@@ -28,12 +28,16 @@ const config = buildConfig({
   }
 })
 ```
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  Alternatively, you can define the <code>admin.livePreview</code> property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
+</Banner>
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
 
 ## Options
 
-Setting up Live Preview is easy. This can be done either globally through the [Root Config](../configuration/overview), or on individual [Collection](../configuration/collections) and [Global](../configuration/globals) configs. Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
+Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
 
 The following options are available:
 
@@ -45,11 +49,6 @@ The following options are available:
 | **`globals`**     | Array of global slugs to enable Live Preview on.                                                                                                      |
 
 _\* An asterisk denotes that a property is required._
-
-<Banner type="warning">
-  <strong>Reminder:</strong>
-  Alternatively, you can define the <code>admin.livePreview</code> property on individual [Collection](../configuration/collections) and [Global](../configuration/globals) configs. Settings defined here will be merged into the top-level as overrides.
-</Banner>
 
 ### URL
 
