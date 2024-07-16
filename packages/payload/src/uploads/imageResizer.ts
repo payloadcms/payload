@@ -1,4 +1,4 @@
-import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
+import type { OutputInfo, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
@@ -68,11 +68,20 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  * @param extension - the extension to use
  * @returns the new image name that is not taken
  */
-const createImageName = (
-  outputImageName: string,
-  { height, width }: OutputInfo,
-  extension: string,
-) => `${outputImageName}-${width}x${height}.${extension}`
+type CreateImageNameArgs = {
+  extension: string
+  height: number
+  outputImageName: string
+  width: number
+}
+const createImageName = ({
+  extension,
+  height,
+  outputImageName,
+  width,
+}: CreateImageNameArgs): string => {
+  return `${outputImageName}-${width}x${height}.${extension}`
+}
 
 type CreateResultArgs = {
   filename?: FileSize['filename']
@@ -210,6 +219,19 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
 }
 
 /**
+ * Used to extract height from images, animated or not.
+ *
+ * @param sharpMetadata - the sharp metadata
+ * @returns the height of the image
+ */
+function extractHeightFromImage(sharpMetadata: SharpMetadata): number {
+  if (sharpMetadata?.pages) {
+    return sharpMetadata.height / sharpMetadata.pages
+  }
+  return sharpMetadata.height
+}
+
+/**
  * For the provided image sizes, handle the resizing and the transforms
  * (format, trim, etc.) of each requested image size and return the result object.
  * This only handles the image sizes. The transforms of the original image
@@ -261,6 +283,12 @@ export async function resizeAndTransformImageSizes({
   if (fileIsAnimatedType) sharpOptions.animated = true
 
   const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  const originalImageMeta = await sharpBase.metadata()
+
+  const resizeImageMeta = {
+    height: extractHeightFromImage(originalImageMeta),
+    width: originalImageMeta.width,
+  }
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
@@ -275,8 +303,6 @@ export async function resizeAndTransformImageSizes({
 
       const imageToResize = sharpBase.clone()
       let resized = imageToResize
-
-      const metadata = await sharpBase.metadata()
 
       if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
         let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
@@ -293,44 +319,60 @@ export async function resizeAndTransformImageSizes({
           resizeHeight = Math.round(resizeWidth / originalAspectRatio)
         }
 
-        // Scale the image up or down to fit the resize dimensions
-        const scaledImage = imageToResize.resize({
-          height: resizeHeight,
-          width: resizeWidth,
-        })
+        if (!resizeHeight) resizeHeight = resizeImageMeta.height
+        if (!resizeWidth) resizeWidth = resizeImageMeta.width
 
-        const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
+        // if requested image is larger than the incoming size, then resize using sharp and then extract with focal point
+        if (resizeHeight > resizeImageMeta.height || resizeWidth > resizeImageMeta.width) {
+          resized = imageToResize.resize({
+            height: resizeHeight,
+            width: resizeWidth,
+          })
 
-        const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
-        const maxOffsetX = scaledImageInfo.width - safeResizeWidth
-        const leftFocalEdge = Math.round(
-          scaledImageInfo.width * (incomingFocalPoint.x / 100) - safeResizeWidth / 2,
-        )
-        const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
-
-        const isAnimated = fileIsAnimatedType && metadata.pages
-
-        let safeResizeHeight = resizeHeight ?? scaledImageInfo.height
-
-        if (isAnimated && resizeHeight === undefined) {
-          safeResizeHeight = scaledImageInfo.height / metadata.pages
+          // must read from buffer, resize.metadata will return the original image metadata
+          const { info } = await resized.toBuffer({ resolveWithObject: true })
+          resizeImageMeta.height = extractHeightFromImage({
+            ...originalImageMeta,
+            height: info.height,
+          })
+          resizeImageMeta.width = info.width
         }
 
-        const maxOffsetY = isAnimated
-          ? safeResizeHeight - (resizeHeight ?? safeResizeHeight)
-          : scaledImageInfo.height - safeResizeHeight
+        const halfResizeX = resizeWidth / 2
+        const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
+        const calculatedRightPixelBound = xFocalCenter + halfResizeX
+        let leftBound = xFocalCenter - halfResizeX
 
-        const topFocalEdge = Math.round(
-          scaledImageInfo.height * (incomingFocalPoint.y / 100) - safeResizeHeight / 2,
-        )
-        const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
+        // if the right bound is greater than the image width, adjust the left bound
+        // keeping focus on the right
+        if (calculatedRightPixelBound > resizeImageMeta.width) {
+          leftBound = resizeImageMeta.width - resizeWidth
+        }
 
-        // extract the focal area from the scaled image
-        resized = (fileIsAnimatedType ? imageToResize : scaledImage).extract({
-          height: safeResizeHeight,
-          left: safeOffsetX,
-          top: safeOffsetY,
-          width: safeResizeWidth,
+        // if the left bound is less than 0, adjust the left bound to 0
+        // keeping the focus on the left
+        if (leftBound < 0) leftBound = 0
+
+        const halfResizeY = resizeHeight / 2
+        const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint.y / 100)
+        const calculatedBottomPixelBound = yFocalCenter + halfResizeY
+        let topBound = yFocalCenter - halfResizeY
+
+        // if the bottom bound is greater than the image height, adjust the top bound
+        // keeping the image as far right as possible
+        if (calculatedBottomPixelBound > resizeImageMeta.height) {
+          topBound = resizeImageMeta.height - resizeHeight
+        }
+
+        // if the top bound is less than 0, adjust the top bound to 0
+        // keeping the image focus near the top
+        if (topBound < 0) topBound = 0
+
+        resized = resized.extract({
+          height: resizeHeight,
+          left: Math.floor(leftBound),
+          top: Math.floor(topBound),
+          width: resizeWidth,
         })
       } else {
         resized = imageToResize.resize(imageResizeConfig)
@@ -359,11 +401,15 @@ export async function resizeAndTransformImageSizes({
 
       const mimeInfo = await fileTypeFromBuffer(bufferData)
 
-      const imageNameWithDimensions = createImageName(
-        sanitizedImage.name,
-        bufferInfo,
-        mimeInfo?.ext || sanitizedImage.ext,
-      )
+      const imageNameWithDimensions = createImageName({
+        extension: mimeInfo?.ext || sanitizedImage.ext,
+        height: extractHeightFromImage({
+          ...originalImageMeta,
+          height: bufferInfo.height,
+        }),
+        outputImageName: sanitizedImage.name,
+        width: bufferInfo.width,
+      })
 
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
 
@@ -380,7 +426,8 @@ export async function resizeAndTransformImageSizes({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
-        height: fileIsAnimatedType && metadata.pages ? height / metadata.pages : height,
+        height:
+          fileIsAnimatedType && originalImageMeta.pages ? height / originalImageMeta.pages : height,
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,

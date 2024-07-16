@@ -1,17 +1,6 @@
-import React from 'react'
+import type { UploadEdits } from 'payload'
 
-type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
-}
+import React from 'react'
 
 export type UploadEditsContext = {
   resetUploadEdits: () => void

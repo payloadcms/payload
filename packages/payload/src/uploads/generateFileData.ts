@@ -203,7 +203,14 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData && sharp) {
-      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
+      const { data: croppedImage, info } = await cropImage({
+        cropData,
+        dimensions,
+        file,
+        heightInPixels: uploadEdits.heightInPixels,
+        sharp,
+        widthInPixels: uploadEdits.widthInPixels,
+      })
 
       filesToSave.push({
         buffer: croppedImage,

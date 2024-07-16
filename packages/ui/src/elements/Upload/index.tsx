@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload'
+import type { FormState, SanitizedCollectionConfig , UploadEdits } from 'payload'
 
 import { useForm, useUploadEdits } from '@payloadcms/ui'
 import { isImage, reduceFieldsToValues } from 'payload/shared'
@@ -170,12 +170,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }, [handleFileChange, resetUploadEdits])
 
   const onEditsSave = useCallback(
-    ({ crop, focalPoint }) => {
+    (args: UploadEdits) => {
       setModified(true)
-      updateUploadEdits({
-        crop,
-        focalPoint,
-      })
+      updateUploadEdits(args)
     },
     [setModified, updateUploadEdits],
   )
@@ -328,7 +325,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
             fileName={value?.name || doc?.filename}
             fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
-            initialCrop={uploadEdits?.crop ?? {}}
+            initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
               y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
