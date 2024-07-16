@@ -8,7 +8,7 @@ keywords: live preview, preview, live, iframe, iframe preview, visual editing, d
 
 With Live Preview you can render your front-end application directly within the [Admin Panel](../admin/overview). As you type, your changes take effect in real-time. No need to save a draft or publish your changes. This works in both [Server-side](./server) as well as [Client-side](./client) environments.
 
-Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin Panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin Panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the Document. Your app then listens for these events and re-renders itself with the data it receives.
 
 To add Live Preview, use the `admin.livePreview` property in your [Payload Config](../configuration/overview):
 
@@ -37,7 +37,7 @@ const config = buildConfig({
 
 ## Options
 
-Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
+Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Once configured, a new "Live Preview" tab will appear at the top of enabled Documents. Navigating to this tab opens the preview window and loads your front-end application.
 
 The following options are available:
 
@@ -73,7 +73,7 @@ const config = buildConfig({
 
 #### Dynamic URLs
 
-You can also pass a function in order to dynamically format URLs. This is useful for multi-tenant applications, localization, or any other scenario where the URL needs to be generated based on the document being edited.
+You can also pass a function in order to dynamically format URLs. This is useful for multi-tenant applications, localization, or any other scenario where the URL needs to be generated based on the Document being edited.
 
 To set dynamic URLs, set the `admin.livePreview.url` property in your [Payload Config](../configuration/overview) to a function:
 
@@ -104,8 +104,8 @@ The following arguments are provided to the `url` function:
 
 | Path               | Description                                                                                                       |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **`data`**         | The data of the document being edited. This includes changes that have not yet been saved.                        |
-| **`documentInfo`** | Information about the document being edited like collection slug. [More details](../admin/hooks#usedocumentinfo). |
+| **`data`**         | The data of the Document being edited. This includes changes that have not yet been saved.                        |
+| **`documentInfo`** | Information about the Document being edited like collection slug. [More details](../admin/hooks#usedocumentinfo). |
 | **`locale`**       | The locale currently being edited (if applicable). [More details](../configuration/localization).                 |
 
 ### Breakpoints
