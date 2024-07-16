@@ -15,6 +15,7 @@
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
+    "build:db-sqlite": "turbo build --filter db-sqlite",
     "build:drizzle": "turbo build --filter drizzle",
     "build:email-nodemailer": "turbo build --filter email-nodemailer",
     "build:email-resend": "turbo build --filter email-resend",

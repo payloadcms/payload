@@ -1,6 +1,6 @@
 # Payload Postgres Adapter
 
-Official Postgres adapter for [Payload](https://payloadcms.com).
+Official SQLite adapter for [Payload](https://payloadcms.com).
 
 - [Main Repository](https://github.com/payloadcms/payload)
 - [Payload Docs](https://payloadcms.com/docs)
@@ -8,19 +8,19 @@ Official Postgres adapter for [Payload](https://payloadcms.com).
 ## Installation
 
 ```bash
-npm install @payloadcms/db-postgres
+npm install @payloadcms/db-sqlite
 ```
 
 ## Usage
 
 ```ts
 import { buildConfig } from 'payload/config'
-import { postgresAdapter } from '@payloadcms/db-postgres'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 export default buildConfig({
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI,
+  db: sqliteAdapter({
+    client: {
+      url: process.env.DATABASE_URI,
     },
   }),
   // ...rest of config

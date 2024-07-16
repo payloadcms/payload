@@ -1,30 +1,3 @@
-# Payload Postgres Adapter
+# Payload Drizzle Adapter
 
-Official Postgres adapter for [Payload](https://payloadcms.com).
-
-- [Main Repository](https://github.com/payloadcms/payload)
-- [Payload Docs](https://payloadcms.com/docs)
-
-## Installation
-
-```bash
-npm install @payloadcms/db-postgres
-```
-
-## Usage
-
-```ts
-import { buildConfig } from 'payload/config'
-import { postgresAdapter } from '@payloadcms/db-postgres'
-
-export default buildConfig({
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI,
-    },
-  }),
-  // ...rest of config
-})
-```
-
-More detailed usage can be found in the [Payload Docs](https://payloadcms.com/docs/configuration/overview).
+The Drizzle package is used by db-postgres and db-sqlite for shared functionality of SQL databases. It is not meant to be used directly in Payload projects.
