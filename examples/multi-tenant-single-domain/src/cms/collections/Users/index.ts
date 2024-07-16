@@ -2,9 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 import type { User } from '../../../payload-types'
 
-import { isSuperAdmin } from '../../access/isSuperAdmin.js'
 import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs.js'
 import { createAccess } from './access/create.js'
+import { readAccess } from './access/read'
 import { updateAndDeleteAccess } from './access/updateAndDelete.js'
 import { externalUsersLogin } from './endpoints/externalUsersLogin.js'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername.js'
@@ -14,20 +14,7 @@ const Users: CollectionConfig = {
   access: {
     create: createAccess,
     delete: updateAndDeleteAccess,
-    read: (args) => {
-      const { req } = args
-      if (!req?.user) return false
-
-      if (isSuperAdmin(args)) return true
-
-      const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
-
-      return {
-        'tenants.tenant': {
-          in: adminTenantAccessIDs,
-        },
-      }
-    },
+    read: readAccess,
     update: updateAndDeleteAccess,
   },
   admin: {
@@ -51,12 +38,24 @@ const Users: CollectionConfig = {
           name: 'tenant',
           type: 'relationship',
           filterOptions: ({ user }) => {
-            if (user?.roles?.includes('super-admin'))
+            if (!user) {
+              // Would like to query where exists true on id
+              // but that is not working
               return {
                 id: {
-                  exists: true,
+                  like: '',
                 },
               }
+            }
+            if (user?.roles?.includes('super-admin')) {
+              // Would like to query where exists true on id
+              // but that is not working
+              return {
+                id: {
+                  like: '',
+                },
+              }
+            }
             const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(user as User)
             return {
               id: {
