@@ -161,8 +161,9 @@ describe('admin2', () => {
         await page.locator('.nav-toggler.template-default__nav-toggler').click()
         await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
-        await page.locator('#nav-uploads').click()
-        await page.waitForURL(/uploads/)
+        const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
+        await page.goto(serverURL + uploadsUrl)
+        await page.waitForURL(serverURL + uploadsUrl)
 
         await expect(page.locator('#search-filter-input')).toHaveValue('')
       })
