@@ -6,6 +6,7 @@ const baseClass = 'inline-block'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
+import { getTranslation } from '@payloadcms/translations'
 import { Button, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
@@ -34,7 +35,7 @@ type Props = {
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
-  const { t } = useTranslation<object, string>()
+  const { i18n, t } = useTranslation<object, string>()
   const { editorConfig, field } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
@@ -112,7 +113,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     >
       {LabelComponent ? (
         <LabelComponent blockKind={'lexicalInlineBlock'} formData={formData} />
-      ) : null}
+      ) : (
+        <div>{getTranslation(reducedBlock.labels.singular, i18n)}</div>
+      )}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button
