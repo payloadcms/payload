@@ -5,7 +5,9 @@ import type { Field, FieldBase } from '../../fields/config/types.js'
 export type ClientFieldConfig = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
 
 export type ServerOnlyFieldProperties =
+  | 'dbName' // can be a function
   | 'editor' // This is a `richText` only property
+  | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'label'
   | 'typescriptSchema'
@@ -35,6 +37,8 @@ export const createClientFieldConfig = ({
     'editor', // This is a `richText` only property
     'custom',
     'typescriptSchema',
+    'dbName', // can be a function
+    'enumName', // can be a function
     // `fields`
     // `blocks`
     // `tabs`
