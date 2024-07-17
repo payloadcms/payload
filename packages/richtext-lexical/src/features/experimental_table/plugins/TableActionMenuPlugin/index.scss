@@ -15,7 +15,7 @@
   border: 0;
   padding: 2px;
   position: relative;
-  border-radius: 4px;
+  border-radius: $style-radius-m;
   color: var(--theme-elevation-800);
   display: inline-block;
   cursor: pointer;
@@ -38,7 +38,7 @@ html[data-theme='light'] {
   background: var(--color-base-0);
   min-width: 160px;
   color: var(--color-base-800);
-  border-radius: 4px;
+  border-radius: $style-radius-m;
   min-height: 40px;
   overflow-y: auto;
 

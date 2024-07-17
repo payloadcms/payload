@@ -1,4 +1,5 @@
 import type {
+  Block,
   BlockField,
   CellComponentProps,
   FieldTypes,
@@ -35,6 +36,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
+  LabelComponent: Block['admin']['components']['Label']
   custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string
