@@ -71,6 +71,11 @@ export const Admins: CollectionConfig = {
   For default auth behavior, set `auth: true`. This is a good starting point for most applications.
 </Banner>
 
+<Banner type="warning">
+  <strong>Note:</strong>
+  Auth-enabled Collections with be automatically injected with the `hash`, `salt`, and `email` fields. [More details](../fields/overview#field-names).
+</Banner>
+
 The following options are available:
 
 | Option                     | Description                                                                                                                                                                                                                         |
@@ -85,19 +90,6 @@ The following options are available:
 | **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
 | **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                       |
 | **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                  |
-
-#### Auth Fields
-
-Auth-enabled Collections with be automatically injected with the following [Fields](../fields/overview) which are used internally by Payload to manage the authentication flow:
-
-- `email`
-- `hash`
-- `salt`
-
-<Banner type="info">
-  <strong>Tip:</strong>
-  If you provide your own `email` field, Payload will use that instead.
-</Banner>
 
 ## Admin Auto-Login
 
