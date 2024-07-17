@@ -272,7 +272,7 @@ export interface Media {
  */
 export interface Category {
   id: string;
-  title?: string | null;
+  title: string;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
