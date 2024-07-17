@@ -1,6 +1,6 @@
 'use client'
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
-import type { JSX, MutableRefObject, ReactPortal } from 'react'
+import type { JSX, ReactPortal, RefObject } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
@@ -28,7 +28,7 @@ export type MenuResolution = {
 const baseClass = 'slash-menu-popup'
 
 export type MenuRenderFn = (
-  anchorElementRef: MutableRefObject<HTMLElement | null>,
+  anchorElementRef: RefObject<HTMLElement | null>,
   itemProps: {
     groups: Array<SlashMenuGroupInternal>
     selectItemAndCleanUp: (selectedItem: SlashMenuItem) => void
@@ -206,7 +206,7 @@ export function LexicalMenu({
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
-  anchorElementRef: MutableRefObject<HTMLElement>
+  anchorElementRef: RefObject<HTMLElement>
   close: () => void
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
@@ -434,7 +434,7 @@ export function useMenuAnchorRef(
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-): MutableRefObject<HTMLElement> {
+): RefObject<HTMLElement> {
   const [editor] = useLexicalComposerContext()
   const anchorElementRef = useRef<HTMLElement>(document.createElement('div'))
   const positionMenu = useCallback(() => {

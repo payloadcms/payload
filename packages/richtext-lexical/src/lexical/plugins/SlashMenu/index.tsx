@@ -57,7 +57,9 @@ function SlashMenuItem({
       key={item.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={item.ref}
+      ref={(element) => {
+        item.ref = { current: element }
+      }}
       role="option"
       tabIndex={-1}
       type="button"
@@ -178,57 +180,55 @@ export function SlashMenuPlugin({
   )
 
   return (
-    <React.Fragment>
-      <LexicalTypeaheadMenuPlugin
-        anchorElem={anchorElem}
-        groups={groups as SlashMenuGroupInternal[]}
-        menuRenderFn={(
-          anchorElementRef,
-          { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
-        ) =>
-          anchorElementRef.current && groups.length
-            ? ReactDOM.createPortal(
-                <div className={baseClass}>
-                  {groups.map((group) => {
-                    let groupTitle = group.key
-                    if (group.label) {
-                      groupTitle =
-                        typeof group.label === 'function' ? group.label({ i18n }) : group.label
-                    }
+    <LexicalTypeaheadMenuPlugin
+      anchorElem={anchorElem}
+      groups={groups as SlashMenuGroupInternal[]}
+      menuRenderFn={(
+        anchorElementRef,
+        { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
+      ) =>
+        anchorElementRef.current && groups.length
+          ? ReactDOM.createPortal(
+              <div className={baseClass}>
+                {groups.map((group) => {
+                  let groupTitle = group.key
+                  if (group.label) {
+                    groupTitle =
+                      typeof group.label === 'function' ? group.label({ i18n }) : group.label
+                  }
 
-                    return (
-                      <div
-                        className={`${baseClass}__group ${baseClass}__group-${group.key}`}
-                        key={group.key}
-                      >
-                        <div className={`${baseClass}__group-title`}>{groupTitle}</div>
-                        {group.items.map((item, oi: number) => (
-                          <SlashMenuItem
-                            index={oi}
-                            isSelected={selectedItemKey === item.key}
-                            item={item as SlashMenuItemInternal}
-                            key={item.key}
-                            onClick={() => {
-                              setSelectedItemKey(item.key)
-                              selectItemAndCleanUp(item)
-                            }}
-                            onMouseEnter={() => {
-                              setSelectedItemKey(item.key)
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )
-                  })}
-                </div>,
-                anchorElementRef.current,
-              )
-            : null
-        }
-        onQueryChange={setQueryString}
-        onSelectItem={onSelectItem}
-        triggerFn={checkForTriggerMatch}
-      />
-    </React.Fragment>
+                  return (
+                    <div
+                      className={`${baseClass}__group ${baseClass}__group-${group.key}`}
+                      key={group.key}
+                    >
+                      <div className={`${baseClass}__group-title`}>{groupTitle}</div>
+                      {group.items.map((item, oi: number) => (
+                        <SlashMenuItem
+                          index={oi}
+                          isSelected={selectedItemKey === item.key}
+                          item={item as SlashMenuItemInternal}
+                          key={item.key}
+                          onClick={() => {
+                            setSelectedItemKey(item.key)
+                            selectItemAndCleanUp(item)
+                          }}
+                          onMouseEnter={() => {
+                            setSelectedItemKey(item.key)
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>,
+              anchorElementRef.current,
+            )
+          : null
+      }
+      onQueryChange={setQueryString}
+      onSelectItem={onSelectItem}
+      triggerFn={checkForTriggerMatch}
+    />
   )
 }
