@@ -1,4 +1,4 @@
-import type { IndexOptions, Mongoose, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
+import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
 import type {
   ArrayField,
   Block,
@@ -19,7 +19,6 @@ import type {
   RelationshipField,
   RichTextField,
   RowField,
-  SanitizedConfig,
   SanitizedLocalizationConfig,
   SelectField,
   Tab,
