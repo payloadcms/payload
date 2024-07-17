@@ -31,12 +31,20 @@ import { seed } from './payload/endpoints/seed'
 import { Footer } from './payload/globals/Footer/Footer'
 import { Header } from './payload/globals/Header/Header'
 import { revalidateRedirects } from './payload/hooks/revalidateRedirects'
+import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import { Page, Post } from 'src/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const generateTitle = () => {
-  return 'My Website'
+const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
+  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+}
+
+const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
+  return doc?.slug
+    ? `${process.env.NEXT_PUBLIC_SERVER_URL}/${doc.slug}`
+    : process.env.NEXT_PUBLIC_SERVER_URL
 }
 
 export default buildConfig({
@@ -128,10 +136,8 @@ export default buildConfig({
       collections: ['categories'],
     }),
     seoPlugin({
-      collections: ['pages', 'posts'],
       generateTitle,
-      tabbedUI: true,
-      uploadsCollection: 'media',
+      generateURL,
     }),
     formBuilderPlugin({
       fields: {
