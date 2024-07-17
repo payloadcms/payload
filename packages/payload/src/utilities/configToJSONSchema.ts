@@ -117,16 +117,16 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
  * @example { db: idType: string }
  */
 function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
-  const idType: JSONSchema4 =
+  const defaultIDType: JSONSchema4 =
     config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
 
   return {
     type: 'object',
     additionalProperties: false,
     properties: {
-      idType,
+      defaultIDType,
     },
-    required: ['idType'],
+    required: ['defaultIDType'],
   }
 }
 
