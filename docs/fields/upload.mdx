@@ -28,8 +28,10 @@ import type { Field } from 'payload/types'
 
 export const MyUploadField: Field = {
   // ...
-  type: 'upload', // highlight-line
-  relationTo: 'media', // highlight-line
+  // highlight-start
+  type: 'upload',
+  relationTo: 'media',
+  // highlight-end
 }
 ```
 
