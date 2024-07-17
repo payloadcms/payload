@@ -16,20 +16,22 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, this.payload.config)
+    const schema = buildCollectionSchema(collection, this)
 
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
 
       const versionCollectionFields = buildVersionCollectionFields(collection)
 
-      const versionSchema = buildSchema(this.payload.config, versionCollectionFields, {
+      const versionSchema = buildSchema(this, versionCollectionFields, {
         disableUnique: true,
         draftsEnabled: true,
         indexSortableFields: this.payload.config.indexSortableFields,
         options: {
           minimize: false,
           timestamps: false,
+          ...this.schemaOptions,
+          ...(this.collectionOptions[collection.slug]?.schemaOptions || {}),
         },
       })
 
@@ -57,7 +59,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     this.collections[collection.slug] = model
   })
 
-  const model = buildGlobalModel(this.payload.config)
+  const model = buildGlobalModel(this)
   this.globals = model
 
   this.payload.config.globals.forEach((global) => {
@@ -66,13 +68,15 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionGlobalFields = buildVersionGlobalFields(global)
 
-      const versionSchema = buildSchema(this.payload.config, versionGlobalFields, {
+      const versionSchema = buildSchema(this, versionGlobalFields, {
         disableUnique: true,
         draftsEnabled: true,
         indexSortableFields: this.payload.config.indexSortableFields,
         options: {
           minimize: false,
           timestamps: false,
+          ...this.schemaOptions,
+          ...(this.globalsOptions.schemaOptions || {}),
         },
       })
 
