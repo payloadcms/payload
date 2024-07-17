@@ -1,5 +1,5 @@
 import type { FormFieldBase } from '@payloadcms/ui'
-import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { CollapsedPreferences, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -20,6 +20,7 @@ import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'
+import type { ClientBlock } from '../feature.client.js'
 import type { BlockFields, BlockNode } from '../nodes/BlocksNode.js'
 
 import { FormSavePlugin } from './FormSavePlugin.js'
@@ -35,7 +36,7 @@ type Props = {
   formSchema: FieldMap
   nodeKey: string
   path: string
-  reducedBlock: ReducedBlock
+  reducedBlock: ClientBlock
   schemaPath: string
 }
 
@@ -51,7 +52,7 @@ export const BlockContent: React.FC<Props> = (props) => {
     formData,
     formSchema,
     nodeKey,
-    reducedBlock: { labels },
+    reducedBlock: { LabelComponent, labels },
     schemaPath,
   } = props
 
@@ -198,34 +199,38 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          <div className={`${baseClass}__block-header`}>
-            <div>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                pillStyle="white"
-              >
-                {typeof labels.singular === 'string'
-                  ? getTranslation(labels.singular, i18n)
-                  : '[Singular Label]'}
-              </Pill>
-              <SectionTitle path="blockName" readOnly={field?.readOnly} />
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+          LabelComponent ? (
+            <LabelComponent blockKind={'lexicalBlock'} formData={formData} />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <div>
+                <Pill
+                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                  pillStyle="white"
+                >
+                  {typeof labels.singular === 'string'
+                    ? getTranslation(labels.singular, i18n)
+                    : '[Singular Label]'}
+                </Pill>
+                <SectionTitle path="blockName" readOnly={field?.readOnly} />
+                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+              </div>
+              {editor.isEditable() && (
+                <Button
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__removeButton`}
+                  disabled={field?.readOnly}
+                  icon="x"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    removeBlock()
+                  }}
+                  round
+                  tooltip="Remove Block"
+                />
+              )}
             </div>
-            {editor.isEditable() && (
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
-                disabled={field?.readOnly}
-                icon="x"
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeBlock()
-                }}
-                round
-                tooltip="Remove Block"
-              />
-            )}
-          </div>
+          )
         }
         isCollapsed={isCollapsed}
         key={0}

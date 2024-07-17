@@ -1,3 +1,5 @@
+@import '../../../../scss/styles.scss';
+
 .test-recorder-output {
   margin: 20px auto 20px auto;
   width: 100%;
@@ -11,7 +13,7 @@
   display: block;
   font-size: 10px;
   padding: 6px 6px;
-  border-radius: 4px;
+  border-radius: $style-radius-m;
   border: none;
   cursor: pointer;
   outline: none;
