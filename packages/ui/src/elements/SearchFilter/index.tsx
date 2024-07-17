@@ -1,97 +1,53 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
-// TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation.js'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export type SearchFilterProps = {
-  fieldLabel?: string
   fieldName?: string
   handleChange?: (search: string) => void
-  listSearchableFields?: MappedField[]
+  initialParams?: ParsedQs
+  label: string
+  setValue?: (arg: string) => void
+  value?: string
 }
 
-import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ParsedQs } from 'qs-esm'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { SearchIcon } from '../../icons/Search/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
 
 export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
-  const { fieldLabel = 'ID', fieldName = 'id', handleChange, listSearchableFields } = props
+  const { handleChange, initialParams, label, setValue, value } = props
 
-  const { searchParams } = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const { i18n, t } = useTranslation()
-
-  const [search, setSearch] = useState(
-    typeof searchParams?.search === 'string' ? searchParams?.search : '',
+  const previousSearch = useRef(
+    typeof initialParams?.search === 'string' ? initialParams?.search : '',
   )
-  const [previousSearch, setPreviousSearch] = useState('')
 
-  const placeholder = useRef(t('general:searchBy', { label: getTranslation(fieldLabel, i18n) }))
-
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(value, 300)
 
   useEffect(() => {
-    if (debouncedSearch !== previousSearch) {
+    if (debouncedSearch !== previousSearch.current) {
       if (handleChange) handleChange(debouncedSearch)
-      setPreviousSearch(debouncedSearch)
+
+      previousSearch.current = debouncedSearch
     }
-  }, [
-    debouncedSearch,
-    previousSearch,
-    router,
-    fieldName,
-    searchParams,
-    handleChange,
-    listSearchableFields,
-    pathname,
-  ])
+  }, [debouncedSearch, previousSearch, handleChange])
 
-  useEffect(() => {
-    if (listSearchableFields?.length > 0) {
-      placeholder.current = listSearchableFields.reduce(
-        (placeholderText: string, field, i: number) => {
-          const label =
-            'fieldComponentProps' in field &&
-            'label' in field.fieldComponentProps &&
-            field.fieldComponentProps.label
-              ? field.fieldComponentProps.label
-              : field.name
-
-          if (i === 0) {
-            return `${t('general:searchBy', {
-              label: getTranslation(label, i18n),
-            })}`
-          }
-
-          if (i === listSearchableFields.length - 1) {
-            return `${placeholderText} ${t('general:or')} ${getTranslation(label, i18n)}`
-          }
-
-          return `${placeholderText}, ${getTranslation(label, i18n)}`
-        },
-        '',
-      )
-    } else {
-      placeholder.current = t('general:searchBy', { label: getTranslation(fieldLabel, i18n) })
-    }
-  }, [t, listSearchableFields, i18n, fieldLabel])
+  // Cleans up the search input when the component is unmounted
+  useEffect(() => () => setValue(''), [])
 
   return (
     <div className={baseClass}>
       <input
+        aria-label={label}
         className={`${baseClass}__input`}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={placeholder.current}
+        id="search-filter-input"
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={label}
         type="text"
-        value={search || ''}
+        value={value || ''}
       />
       <SearchIcon />
     </div>
