@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
@@ -349,7 +348,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
-    // TODO: error handle for sqlite
     throw error.code === '23505'
       ? new ValidationError(
           {
