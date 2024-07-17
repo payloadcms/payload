@@ -11,24 +11,37 @@ keywords: authentication, config, configuration, overview, documentation, Conten
   title="Simplified Authentication for Headless CMS: Unlocking Reusability in One Line"
 />
 
-<Banner>
-  Payload provides for highly secure and customizable user Authentication out of the box, which
-  allows for users to identify themselves to Payload.
-</Banner>
+Authentication is a critical part of any application, and Payload provides a secure, portable way to manage user accounts through a single line of code. Payload Authentication is designed to be shared between the [Admin Panel](../admin/overview) and your own external applications, completely eliminating the need for paid, third-party platforms and services.
 
-Authentication is used within the [Admin Panel](../admin/overview) itself as well as throughout your app(s) themselves however you determine necessary.
+Here are some common use cases of Authentication outside of the Admin Panel:
+
+- Customer accounts for an e-commerce app
+- User accounts for a SaaS product
+- P2P apps or social sites where users need to log in and manage their profiles
+- Online games where players need to track their progress over time
+
+When Authentication is enabled on a [Collection](../configuration/collections), Payload injects all necessary [Fields](../fields/overview), [Operations](./operations), and [Endpoints](../rest-api/overview) into your application to support the entire user flow. This includes creating accounts, logging in and out, verifying accounts, resetting passwords, and more.
+
+To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collection#auth):
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  // ...
+  auth: true, // highlight-line
+}
+```
+
+_There are additional options available for the `auth` property. [More details](#config-options)._
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  By default, Payload provides an auth-enabled `User` Collection which is used to access the [Admin Panel](../admin/overview). You can customize, override, or remove this behavior. [More details](/docs/admin/overview#the-admin-user-collection).
+</Banner>
 
 ![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
 _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
-
-**Here are some common use cases of Authentication outside of Payload's dashboard itself:**
-
-- Customer accounts for an ecommerce app
-- Customer accounts for a SaaS product
-- P2P app or social site where users need to log in and manage their profiles
-- Online game where players need to track their progress over time
-
-By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the [Admin Panel](../admin/overview). But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin/overview#the-admin-user-collection).
 
 ## Enabling Auth on a collection
 
