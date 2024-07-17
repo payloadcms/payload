@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -12,12 +12,20 @@ import { image2 } from './image-2'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
+import { exists } from 'fs-extra'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const collections = ['categories', 'media', 'pages', 'posts', 'forms', 'form-submissions']
-const globals = ['header', 'footer']
+const collections: CollectionSlug[] = [
+  'categories',
+  'media',
+  'pages',
+  'posts',
+  'forms',
+  'form-submissions',
+]
+const globals: GlobalSlug[] = ['header', 'footer']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -47,21 +55,36 @@ export const seed = async ({
   payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
-  for (const collection of collections) {
-    await payload.delete({
-      collection: collection as 'media',
-      where: {},
+  for (const global of globals) {
+    await payload.updateGlobal({
+      slug: global,
+      data: {
+        navItems: [],
+      },
       req,
     })
   }
 
-  for (const global of globals) {
-    await payload.updateGlobal({
-      slug: global as 'header',
-      data: {},
+  for (const collection of collections) {
+    console.log('delete', collection)
+    await payload.delete({
+      collection: collection,
+      where: {
+        id: {
+          exists: true,
+        },
+      },
       req,
     })
   }
+
+  const pages = await payload.delete({
+    collection: 'pages',
+    where: {},
+    req,
+  })
+
+  console.log({ pages })
 
   payload.logger.info(`— Seeding demo author and user...`)
 
@@ -85,7 +108,7 @@ export const seed = async ({
     req,
   })
 
-  let demoAuthorID = demoAuthor.id
+  let demoAuthorID: number | string = demoAuthor.id
 
   payload.logger.info(`— Seeding media...`)
   const image1Doc = await payload.create({
@@ -162,10 +185,10 @@ export const seed = async ({
     req,
   })
 
-  let image1ID = image1Doc.id
-  let image2ID = image2Doc.id
-  let image3ID = image3Doc.id
-  let imageHomeID = imageHomeDoc.id
+  let image1ID: number | string = image1Doc.id
+  let image2ID: number | string = image2Doc.id
+  let image3ID: number | string = image3Doc.id
+  let imageHomeID: number | string = imageHomeDoc.id
 
   if (payload.db.defaultIDType === 'text') {
     image1ID = `"${image1Doc.id}"`
@@ -183,9 +206,9 @@ export const seed = async ({
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post1, categories: [technologyCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, image1ID)
-        .replace(/"\{\{IMAGE_2\}\}"/g, image2ID)
-        .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
+        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
     req,
   })
@@ -194,9 +217,9 @@ export const seed = async ({
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post2, categories: [newsCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, image2ID)
-        .replace(/"\{\{IMAGE_2\}\}"/g, image3ID)
-        .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image2ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image3ID))
+        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
     req,
   })
@@ -205,9 +228,9 @@ export const seed = async ({
     collection: 'posts',
     data: JSON.parse(
       JSON.stringify({ ...post3, categories: [financeCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, image3ID)
-        .replace(/"\{\{IMAGE_2\}\}"/g, image1ID)
-        .replace(/"\{\{AUTHOR\}\}"/g, demoAuthorID),
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image3ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image1ID))
+        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
     req,
   })
@@ -239,12 +262,13 @@ export const seed = async ({
   })
 
   payload.logger.info(`— Seeding home page...`)
+
   await payload.create({
     collection: 'pages',
     data: JSON.parse(
       JSON.stringify(home)
-        .replace(/"\{\{IMAGE_1\}\}"/g, imageHomeID)
-        .replace(/"\{\{IMAGE_2\}\}"/g, image2ID),
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(imageHomeID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
     ),
     req,
   })
@@ -257,7 +281,7 @@ export const seed = async ({
     req,
   })
 
-  let contactFormID = contactForm.id
+  let contactFormID: number | string = contactForm.id
 
   if (payload.db.defaultIDType === 'text') {
     contactFormID = `"${contactFormID}"`
@@ -268,7 +292,7 @@ export const seed = async ({
   const contactPage = await payload.create({
     collection: 'pages',
     data: JSON.parse(
-      JSON.stringify(contactPageData).replace(/"\{\{CONTACT_FORM_ID\}\}"/g, contactFormID),
+      JSON.stringify(contactPageData).replace(/"\{\{CONTACT_FORM_ID\}\}"/g, String(contactFormID)),
     ),
     req,
   })
