@@ -21,29 +21,6 @@ export const CollectionWithHooks: CollectionConfig = {
 }
 ```
 
-The following Collection Hooks are available:
-
-- [`beforeOperation`](#beforeoperation)
-- [`beforeValidate`](#beforevalidate)
-- [`beforeChange`](#beforechange)
-- [`afterChange`](#afterchange)
-- [`beforeRead`](#beforeread)
-- [`afterRead`](#afterread)
-- [`beforeDelete`](#beforedelete)
-- [`afterDelete`](#afterdelete)
-- [`afterOperation`](#afteroperation)
-
-Additionally, all [Auth-enabled Collections](../authentication/overview) feature the following auth-related Hooks:
-
-- [`beforeLogin`](#beforelogin)
-- [`afterLogin`](#afterlogin)
-- [`afterLogout`](#afterlogout)
-- [`afterRefresh`](#afterrefresh)
-- [`afterMe`](#afterme)
-- [`afterForgotPassword`](#afterforgotpassword)
-- [`refresh`](#refresh)
-- [`me`](#me)
-
 ## Config Options
 
 All Collection Hooks accept an array of [synchronous or asynchronous functions](./overview#async-vs-synchronous). Each Collection Hook receives specific arguments based on its own type, and has the ability to modify specific outputs.
