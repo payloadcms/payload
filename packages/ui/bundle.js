@@ -40,7 +40,7 @@ const useClientPlugin = {
           contents = directive + '\n' + contents // Prepend our use client directive
 
           if (originalWrite) {
-            const filePath = path.join(build.initialOptions.outdir, file.path.split('/').pop())
+            const filePath = path.join(build.initialOptions.outdir, path.basename(file.path))
 
             const dirPath = path.dirname(filePath)
             if (!fs.existsSync(dirPath)) {
