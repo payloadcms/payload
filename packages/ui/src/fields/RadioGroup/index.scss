@@ -1,6 +1,13 @@
 @import '../../scss/styles.scss';
 
 .radio-group {
+  .tooltip:not([aria-hidden='true']) {
+    right: auto;
+    position: static;
+    margin-bottom: 0.2em;
+    max-width: fit-content;
+  }
+
   &--layout-horizontal {
     ul {
       display: flex;

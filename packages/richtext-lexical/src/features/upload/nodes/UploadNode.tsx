@@ -67,10 +67,10 @@ function $convertUploadElement(domNode: HTMLImageElement): DOMConversionOutput |
   return null
 }
 
-export type SerializedUploadNode = Spread<UploadData, SerializedDecoratorBlockNode> & {
+export type SerializedUploadNode = {
   children?: never // required so that our typed editor state doesn't automatically add children
   type: 'upload'
-}
+} & Spread<UploadData, SerializedDecoratorBlockNode>
 
 export class UploadNode extends DecoratorBlockNode {
   __data: UploadData
@@ -166,7 +166,6 @@ export class UploadNode extends DecoratorBlockNode {
     writable.__data = data
   }
 
-  // eslint-disable-next-line class-methods-use-this
   updateDOM(): false {
     return false
   }

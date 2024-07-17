@@ -14,7 +14,6 @@ export type Resolver = (
   context: {
     req: PayloadRequest
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<{ totalDocs: number }>
 
 export function countResolver(collection: Collection): Resolver {

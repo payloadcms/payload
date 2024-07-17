@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
 import type {
   ArrayField,

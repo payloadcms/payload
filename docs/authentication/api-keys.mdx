@@ -48,7 +48,7 @@ your API keys will not be.
 
 ### HTTP Authentication
 
-To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control. By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
+To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper [Access Control](../access-control/overview). By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
 
 **For example, using Fetch:**
 
@@ -62,7 +62,7 @@ const response = await fetch('http://localhost:3000/api/pages', {
 })
 ```
 
-Payload ensures that the same, uniform access control is used across all authentication strategies. This enables you to utilize your existing access control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
+Payload ensures that the same, uniform [Access Control](../access-control/overview) is used across all authentication strategies. This enables you to utilize your existing Access Control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
 
 ### API Key Only Auth
 

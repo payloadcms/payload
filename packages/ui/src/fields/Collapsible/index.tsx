@@ -24,11 +24,11 @@ import type { FormFieldBase } from '../shared/index.js'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 
-export type CollapsibleFieldProps = FormFieldBase & {
+export type CollapsibleFieldProps = {
   fieldMap: FieldMap
   initCollapsed?: boolean
   width?: string
-}
+} & FormFieldBase
 
 const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const {

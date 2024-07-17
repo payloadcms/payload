@@ -1,14 +1,14 @@
 ---
 title: Customizing Views
 label: Customizing Views
-order: 30
+order: 50
 desc:
 keywords:
 ---
 
 Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in views or can be entirely new.
 
-Within the Admin Panel, there are four types of views:
+There are four types of views within the Admin Panel:
 
 - [Root Views](#root-views)
 - [Collection Views](#collection-views)
@@ -278,7 +278,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | **`user`**                    | The currently logged in user.                                                                                                          |
 | **`locale`**                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
 | **`navGroups`**               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |

@@ -1,4 +1,5 @@
 import type {
+  Block,
   BlockField,
   CellComponentProps,
   FieldTypes,
@@ -35,6 +36,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
+  LabelComponent: Block['admin']['components']['Label']
   custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string
@@ -94,13 +96,13 @@ export type ActionMap = {
   List: React.ReactNode[]
 }
 
-export type CollectionComponentMap = ConfigComponentMapBase & {
+export type CollectionComponentMap = {
   AfterList: React.ReactNode
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode
   BeforeListTable: React.ReactNode
   List: React.ReactNode
-}
+} & ConfigComponentMapBase
 
 export type GlobalComponentMap = ConfigComponentMapBase
 

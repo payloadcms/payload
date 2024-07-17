@@ -275,7 +275,6 @@ export const date: Validate<Date, unknown, unknown, DateField> = (
   { req: { t }, required },
 ) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
-     
     return true
   }
 

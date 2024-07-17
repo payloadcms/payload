@@ -18,6 +18,14 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
 
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
+
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
@@ -41,6 +49,11 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
     {
       type: 'tabs',
       tabs: [
@@ -97,15 +110,34 @@ export const Posts: CollectionConfig = {
           ],
           label: 'Meta',
         },
+        {
+          name: 'meta',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
+
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
+        },
       ],
-    },
-    {
-      name: 'title',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-      },
-      required: true,
     },
     {
       name: 'publishedAt',
@@ -168,7 +200,9 @@ export const Posts: CollectionConfig = {
   },
   versions: {
     drafts: {
-      autosave: true,
+      autosave: {
+        interval: 100, // We set this interval for optimal live preview
+      },
     },
     maxPerDoc: 50,
   },

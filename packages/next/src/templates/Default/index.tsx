@@ -11,11 +11,11 @@ import './index.scss'
 
 const baseClass = 'template-default'
 
-export type DefaultTemplateProps = ServerProps & {
+export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
   visibleEntities: VisibleEntities
-}
+} & ServerProps
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,

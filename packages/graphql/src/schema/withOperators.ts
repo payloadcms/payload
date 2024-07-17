@@ -45,17 +45,17 @@ const GeoJSONObject = new GraphQLInputObjectType({
 })
 
 type DefaultsType = {
-  [key in staticTypes]: {
-    operators: {
-      name: string
-      type: ((field: FieldAffectingData, parentName: string) => GraphQLType) | GraphQLType
-    }[]
-  }
-} & {
   [key in dynamicTypes]: {
     operators: {
       name: string
       type: (field: FieldAffectingData, parentName: string) => GraphQLType
+    }[]
+  }
+} & {
+  [key in staticTypes]: {
+    operators: {
+      name: string
+      type: ((field: FieldAffectingData, parentName: string) => GraphQLType) | GraphQLType
     }[]
   }
 }

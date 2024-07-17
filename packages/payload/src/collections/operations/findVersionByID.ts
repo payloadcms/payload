@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
 import type { PayloadRequest } from '../../types/index.js'

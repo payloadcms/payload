@@ -1,11 +1,12 @@
 import type { Config } from 'payload'
+
 import { defaults } from 'payload'
 
 import { sentryPlugin } from './plugin'
 
 describe('plugin', () => {
   it('should run the plugin', () => {
-    const plugin = sentryPlugin({ enabled: true, dsn: 'asdf' })
+    const plugin = sentryPlugin({ dsn: 'asdf', enabled: true })
     const config = plugin(createConfig())
 
     assertPluginRan(config)
@@ -19,14 +20,14 @@ describe('plugin', () => {
   })
 
   it('should not run if dsn is not provided', () => {
-    const plugin = sentryPlugin({ enabled: true, dsn: null })
+    const plugin = sentryPlugin({ dsn: null, enabled: true })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)
   })
 
   it('should respect enabled: false', () => {
-    const plugin = sentryPlugin({ enabled: false, dsn: null })
+    const plugin = sentryPlugin({ dsn: null, enabled: false })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)

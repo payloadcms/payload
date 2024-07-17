@@ -38,15 +38,12 @@ export interface UserAuthOperations {
     email: string;
   };
   login: {
-    email: string;
     password: string;
+    email: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
-  };
-  unlock: {
-    email: string;
   };
 }
 export interface ApiKeyAuthOperations {
@@ -54,15 +51,12 @@ export interface ApiKeyAuthOperations {
     email: string;
   };
   login: {
-    email: string;
     password: string;
+    email: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
-  };
-  unlock: {
-    email: string;
   };
 }
 export interface PublicUserAuthOperations {
@@ -70,15 +64,12 @@ export interface PublicUserAuthOperations {
     email: string;
   };
   login: {
-    email: string;
     password: string;
+    email: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
-  };
-  unlock: {
-    email: string;
   };
 }
 /**
@@ -109,7 +100,16 @@ export interface User {
   custom?: string | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
   password?: string | null;
 }
 /**
@@ -120,6 +120,9 @@ export interface ApiKey {
   id: string;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -130,6 +133,14 @@ export interface PublicUser {
   updatedAt: string;
   createdAt: string;
   email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
   password?: string | null;
 }
 /**
@@ -196,6 +207,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

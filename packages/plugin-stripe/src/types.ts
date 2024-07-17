@@ -37,9 +37,9 @@ export type StripePluginConfig = {
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
 }
 
-export type SanitizedStripePluginConfig = StripePluginConfig & {
+export type SanitizedStripePluginConfig = {
   sync: SyncConfig[] // convert to required
-}
+} & StripePluginConfig
 
 export type StripeProxy = (args: {
   stripeArgs: any[]

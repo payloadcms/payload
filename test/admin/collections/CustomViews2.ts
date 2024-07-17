@@ -23,6 +23,14 @@ export const CustomViews2: CollectionConfig = {
       views: {
         Edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
+          CustomViewWithParam: {
+            Component: CustomTabWithParamView,
+            Tab: {
+              href: `${customCollectionParamViewPathBase}/123`,
+              label: 'Custom Param View',
+            },
+            path: customCollectionParamViewPath,
+          },
           Default: {
             Tab: {
               label: customEditLabel,
@@ -43,21 +51,13 @@ export const CustomViews2: CollectionConfig = {
           },
           MyCustomViewWithNestedPath: {
             Component: CustomNestedTabView,
-            path: customNestedTabViewPath,
             Tab: {
-              label: 'Custom Nested Tab View',
               href: customNestedTabViewPath,
+              label: 'Custom Nested Tab View',
             },
+            path: customNestedTabViewPath,
           },
           Versions: CustomVersionsView,
-          CustomViewWithParam: {
-            Component: CustomTabWithParamView,
-            path: customCollectionParamViewPath,
-            Tab: {
-              label: 'Custom Param View',
-              href: `${customCollectionParamViewPathBase}/123`,
-            },
-          },
         },
       },
     },

@@ -15,7 +15,7 @@ keywords: json, jsonSchema, schema, validation, fields, config, configuration, d
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/json.png"
   srcDark="https://payloadcms.com/images/docs/fields/json-dark.png"
-  alt="Shows a JSON field in the Payload admin panel"
+  alt="Shows a JSON field in the Payload Admin Panel"
   caption="Admin Panel screenshot of a JSON field"
 />
 
@@ -32,8 +32,8 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
 | **`jsonSchema`**       | Provide a JSON schema that will be used for validation. [JSON schemas](https://json-schema.org/learn/getting-started-step-by-step)                                          |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
-| **`hooks`**            | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
-| **`access`**           | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                         |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                  |
 | **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
@@ -57,7 +57,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -82,7 +82,7 @@ If you only provide a URL to a schema, Payload will fetch the desired schema if 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -115,7 +115,7 @@ export const ExampleCollection: CollectionConfig = {
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

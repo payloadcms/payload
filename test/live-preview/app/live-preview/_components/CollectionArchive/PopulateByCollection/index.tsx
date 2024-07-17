@@ -26,7 +26,7 @@ type Result = {
 
 export type Props = {
   className?: string
-  onResultChange?: (result: Result) => void  
+  onResultChange?: (result: Result) => void
   showPageRange?: boolean
   sort?: string
 } & Omit<ArchiveBlockProps, 'blockType'>

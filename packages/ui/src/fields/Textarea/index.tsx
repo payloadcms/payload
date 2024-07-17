@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { ClientValidate } from 'payload'
 

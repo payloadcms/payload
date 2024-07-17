@@ -1,11 +1,16 @@
-import { parseAndModifyConfigContent, withPayloadStatement } from './wrap-next-config.js'
 import * as p from '@clack/prompts'
 import { jest } from '@jest/globals'
+
+import { parseAndModifyConfigContent, withPayloadStatement } from './wrap-next-config.js'
 
 const esmConfigs = {
   defaultNextConfig: `/** @type {import('next').NextConfig} */
 const nextConfig = {};
 export default nextConfig;
+`,
+  nextConfigExportNamedDefault: `const nextConfig = {};
+const wrapped = someFunc(asdf);
+export { wrapped as default };
 `,
   nextConfigWithFunc: `const nextConfig = {};
 export default someFunc(nextConfig);
@@ -15,10 +20,6 @@ export default someFunc(
   nextConfig
 );
 `,
-  nextConfigExportNamedDefault: `const nextConfig = {};
-const wrapped = someFunc(asdf);
-export { wrapped as default };
-`,
   nextConfigWithSpread: `const nextConfig = {
   ...someConfig,
 };
@@ -27,12 +28,16 @@ export default nextConfig;
 }
 
 const cjsConfigs = {
+  anonConfig: `module.exports = {};`,
   defaultNextConfig: `
   /** @type {import('next').NextConfig} */
 const nextConfig = {};
 module.exports = nextConfig;
 `,
-  anonConfig: `module.exports = {};`,
+  nextConfigExportNamedDefault: `const nextConfig = {};
+const wrapped = someFunc(asdf);
+module.exports = wrapped;
+`,
   nextConfigWithFunc: `const nextConfig = {};
 module.exports = someFunc(nextConfig);
 `,
@@ -40,10 +45,6 @@ module.exports = someFunc(nextConfig);
 module.exports = someFunc(
   nextConfig
 );
-`,
-  nextConfigExportNamedDefault: `const nextConfig = {};
-const wrapped = someFunc(asdf);
-module.exports = wrapped;
 `,
   nextConfigWithSpread: `const nextConfig = { ...someConfig };
 module.exports = nextConfig;
@@ -76,7 +77,7 @@ describe('parseAndInsertWithPayload', () => {
         configType,
       )
       expect(modifiedConfigContent).toContain(importStatement)
-      expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
+      expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n {2}nextConfig\n\)\)/)
     })
 
     it('should parse the config with a spread', () => {
@@ -137,7 +138,7 @@ describe('parseAndInsertWithPayload', () => {
         configType,
       )
       expect(modifiedConfigContent).toContain(requireStatement)
-      expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
+      expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n {2}nextConfig\n\)\)/)
     })
     it('should parse the config with a named export as default', () => {
       const { modifiedConfigContent } = parseAndModifyConfigContent(

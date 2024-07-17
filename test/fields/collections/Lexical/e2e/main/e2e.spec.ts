@@ -436,6 +436,87 @@ describe('lexicalMain', () => {
     )
   })
 
+  // This reproduces https://github.com/payloadcms/payload/issues/7128
+  test('ensure newly created upload node has fields, saves them, and loads them correctly', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    /**
+     * Create new upload node
+     */
+    // type / to open the slash menu
+    await lastParagraph.click()
+    await page.keyboard.press('/')
+    await page.keyboard.type('Upload')
+
+    // Create Upload node
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const uploadSelectButton = slashMenuPopover.locator('button').nth(1)
+    await expect(uploadSelectButton).toBeVisible()
+    await expect(uploadSelectButton).toContainText('Upload')
+    await uploadSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    await wait(500) // wait for drawer form state to initialize (it's a flake)
+    const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await expect(uploadListDrawer).toBeVisible()
+    await wait(500)
+
+    await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
+    await expect(uploadListDrawer).toBeHidden()
+
+    const newUploadNode = richTextField.locator('.lexical-upload').nth(1)
+    await newUploadNode.scrollIntoViewIfNeeded()
+    await expect(newUploadNode).toBeVisible()
+
+    await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.jpg')
+
+    // Click on button with class lexical-upload__upload-drawer-toggler
+    await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+
+    const uploadExtraFieldsDrawer = page.locator('dialog[id^=drawer_1_upload-drawer-]').first()
+    await expect(uploadExtraFieldsDrawer).toBeVisible()
+    await wait(500)
+
+    // Expect ContentEditable__root to be visible in the drawer
+    await expect(uploadExtraFieldsDrawer.locator('.ContentEditable__root')).toBeVisible()
+    // Type "Hello" in the content editable
+    await uploadExtraFieldsDrawer.locator('.ContentEditable__root').first().click()
+    await page.keyboard.type('Hello')
+    // Save
+    await uploadExtraFieldsDrawer.locator('button').getByText('Save').first().click()
+    await expect(uploadExtraFieldsDrawer).toBeHidden()
+    await wait(500)
+    await saveDocAndAssert(page)
+    // Reload page, open the extra fields drawer again and check if the text is still there
+    await page.reload()
+    await wait(300)
+    const reloadedUploadNode = page
+      .locator('.rich-text-lexical')
+      .nth(1)
+      .locator('.lexical-upload')
+      .nth(1)
+    await reloadedUploadNode.scrollIntoViewIfNeeded()
+    await expect(reloadedUploadNode).toBeVisible()
+    await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
+    const reloadedUploadExtraFieldsDrawer = page
+      .locator('dialog[id^=drawer_1_upload-drawer-]')
+      .first()
+    await expect(reloadedUploadExtraFieldsDrawer).toBeVisible()
+    await wait(500)
+    await expect(reloadedUploadExtraFieldsDrawer.locator('.ContentEditable__root')).toHaveText(
+      'Hello',
+    )
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)

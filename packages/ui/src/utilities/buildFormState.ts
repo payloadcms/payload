@@ -1,6 +1,5 @@
 import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
@@ -14,7 +13,6 @@ import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 let cached = global._payload_fieldSchemaMap
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_fieldSchemaMap = null
 }
 

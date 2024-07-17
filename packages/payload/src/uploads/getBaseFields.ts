@@ -130,7 +130,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hooks: {
         afterRead: [
           ({ data, value }) => {
-            if (value) return value
+            if (value && !data.filename) return value
 
             return generateURL({
               collectionSlug: collection.slug,
@@ -192,7 +192,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               hooks: {
                 afterRead: [
                   ({ data, value }) => {
-                    if (value && size.height && size.width) return value
+                    if (value && size.height && size.width && !data.filename) return value
 
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 

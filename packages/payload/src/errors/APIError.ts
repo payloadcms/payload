@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import httpStatus from 'http-status'
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {

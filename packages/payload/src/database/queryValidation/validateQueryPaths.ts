@@ -1,8 +1,6 @@
-/* eslint-disable no-restricted-syntax */
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Field, FieldAffectingData } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-/* eslint-disable no-await-in-loop */
 import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 

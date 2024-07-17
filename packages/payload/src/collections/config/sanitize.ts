@@ -32,6 +32,18 @@ export const sanitizeCollection = async (
     isMergeableObject: isPlainObject,
   })
 
+  // /////////////////////////////////
+  // Sanitize fields
+  // /////////////////////////////////
+
+  const validRelationships = config.collections.map((c) => c.slug) || []
+  sanitized.fields = await sanitizeFields({
+    config,
+    fields: sanitized.fields,
+    richTextSanitizationPromises,
+    validRelationships,
+  })
+
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
     let hasUpdatedAt = null
@@ -147,18 +159,6 @@ export const sanitizeCollection = async (
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
-
-  // /////////////////////////////////
-  // Sanitize fields
-  // /////////////////////////////////
-
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  sanitized.fields = await sanitizeFields({
-    config,
-    fields: sanitized.fields,
-    richTextSanitizationPromises,
-    validRelationships,
-  })
 
   return sanitized as SanitizedCollectionConfig
 }

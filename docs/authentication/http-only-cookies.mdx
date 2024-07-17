@@ -11,7 +11,7 @@ Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookie
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  You can access the logged-in user from access control functions and hooks from the `req.user` property.
+  You can access the logged-in user from [Access Control](../access-control/overview) functions and hooks from the `req.user` property.
   <br />
   [Learn more about token data](/docs/authentication/token-data).
 </Banner>
@@ -65,7 +65,7 @@ In this scenario, if your cookie was still valid, malicious-intent.com would be 
 
 ### CSRF Prevention
 
-Define domains that your trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload config to do this:
+Define domains that your trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
 
 ```ts
 // payload.config.ts

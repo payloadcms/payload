@@ -16,9 +16,9 @@ export type DocumentViewKey = (typeof documentViewKeys)[number]
 
 export const tabs: Record<
   DocumentViewKey,
-  DocumentTabConfig & {
+  {
     order?: number // TODO: expose this to the globalConfig config
-  }
+  } & DocumentTabConfig
 > = {
   API: {
     condition: ({ collectionConfig, globalConfig }) =>

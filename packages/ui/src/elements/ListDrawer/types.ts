@@ -11,12 +11,12 @@ export type ListDrawerProps = {
   selectedCollection?: string
 }
 
-export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
+export type ListTogglerProps = {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
   drawerSlug?: string
-}
+} & HTMLAttributes<HTMLButtonElement>
 
 export type UseListDrawer = (args: {
   collectionSlugs?: string[]

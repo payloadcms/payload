@@ -37,7 +37,12 @@ export const rootParserOptions = {
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
-    ignores: [...defaultESLintIgnores, 'test/live-preview/next-app', 'packages/**/*.spec.ts'],
+    ignores: [
+      ...defaultESLintIgnores,
+      'test/live-preview/next-app',
+      'packages/**/*.spec.ts',
+      'templates/**',
+    ],
   },
   {
     languageOptions: {

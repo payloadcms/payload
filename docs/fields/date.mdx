@@ -14,7 +14,7 @@ keywords: date, fields, config, configuration, documentation, Content Management
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/date.png"
   srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
-  alt="Shows a Date field in the Payload admin panel"
+  alt="Shows a Date field in the Payload Admin Panel"
   caption="Admin Panel screenshot of a Date field"
 />
 
@@ -29,8 +29,8 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
-| **`hooks`**            | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
-| **`access`**           | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                         |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                  |
 | **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
@@ -43,7 +43,7 @@ _\* An asterisk denotes that a property is required._
 
 ## Admin Config
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the admin panel via the `date` property.
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the Admin Panel via the `date` property.
 
 | Property                       | Description                                                                                                                            |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,7 +77,7 @@ When only `pickerAppearance` is set, an equivalent format will be rendered in th
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

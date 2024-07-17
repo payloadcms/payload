@@ -10,7 +10,6 @@ let cached: {
 } = global._payload
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload = { payload: null, promise: null, reload: false }
 }
 

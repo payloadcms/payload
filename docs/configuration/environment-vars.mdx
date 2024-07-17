@@ -7,9 +7,11 @@ desc: Learn how to use Environment Variables in your Payload project
 
 Environment Variables are a way to store sensitive information that your application needs to function. This could be anything from API keys to [Database](../database/overview) credentials. Payload allows you to easily use Environment Variables within your config and throughout your application.
 
-If you are using Next.js, no additional setup is required other than creating your `.env` file. Otherwise, you can use the `dotenv` package to load your Environment Variables into `process.env`. [More details](#outside-of-nextjs).
+## Next.js Applications
 
-Environment Variables are typically stored in an `.env` file at the root of your project:
+If you are using Next.js, no additional setup is required other than creating your `.env` file.
+
+To use Environment Variables, add a `.env` file to the root of your project:
 
 ```plaintext
 project-name/
@@ -25,7 +27,7 @@ SERVER_URL=localhost:3000
 DATABASE_URI=mongodb://localhost:27017/my-database
 ```
 
-To use Environment Variables in your Payload config, you can access them directly from `process.env`:
+To use Environment Variables in your Payload Config, you can access them directly from `process.env`:
 
 ```ts
 import { buildConfig } from 'payload'
