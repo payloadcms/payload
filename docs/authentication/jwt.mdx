@@ -6,14 +6,11 @@ desc: Enable JSON Web Token based authentication to interface with Payload.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload offers the ability to authenticate via `JWT` (JSON web token). These can be read from the responses of `login`, `refresh`, and `me` auth operations.
+Payload offers the ability to [Authenticate](./overview) via JSON Web Tokens (JWT). These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />
-  You can access the logged-in user from [Access Control](../access-control/overview) functions and hooks from the `req.user` property.
-  <br />
-  [Learn more about token data](/docs/authentication/token-data).
+  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
 </Banner>
 
 ### Identifying Users Via The Authorization Header

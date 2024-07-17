@@ -21,14 +21,6 @@ export const FieldWithHooks: Field = {
 }
 ```
 
-The following Field Hooks are available:
-
-- [`beforeValidate`](#beforevalidate)
-- [`beforeChange`](#beforechange)
-- [`beforeDuplicate`](#beforeduplicate)
-- [`afterChange`](#afterchange)
-- [`afterRead`](#afterread)
-
 ## Config Options
 
 All Field Hooks accept an array of synchronous or asynchronous functions. These functions can optionally modify the return value of the field before the operation continues. All Field Hooks are formatted to accept the same arguments, although some arguments may be `undefined` based the specific hook type.
