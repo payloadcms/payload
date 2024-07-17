@@ -1,6 +1,6 @@
-import type { Page } from '../../payload-types'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
-export const home: Partial<Page> = {
+export const home: RequiredDataFromCollectionSlug<'pages'> = {
   slug: 'home',
   _status: 'published',
   hero: {
@@ -23,6 +23,7 @@ export const home: Partial<Page> = {
         },
       },
     ],
+    // @ts-ignore
     media: '{{IMAGE_1}}',
     richText: {
       root: {
@@ -501,6 +502,7 @@ export const home: Partial<Page> = {
     {
       blockName: 'Media Block',
       blockType: 'mediaBlock',
+      // @ts-ignore
       media: '{{IMAGE_2}}',
       position: 'default',
     },
@@ -658,6 +660,7 @@ export const home: Partial<Page> = {
   ],
   meta: {
     description: 'An open-source website built with Payload and Next.js.',
+    // @ts-ignore
     image: '{{IMAGE_1}}',
     title: 'Payload Website Template',
   },

@@ -5,24 +5,19 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev --turbo",
-    "dev:prod": "rm -rf .next && pnpm build && pnpm serve",
-    "generate:types": "payload generate:types",
-    "ii": "pnpm --ignore-workspace install",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "payload": "payload",
-    "reinstall": "rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
-    "start": "next start"
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm serve",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@lexical/list": "0.16.1",
-    "@lexical/react": "0.16.1",
-    "@lexical/rich-text": "0.16.1",
-    "@lexical/utils": "0.16.1",
     "@payloadcms/db-mongodb": "3.0.0-beta.63",
-    "@payloadcms/db-postgres": "3.0.0-beta.63",
     "@payloadcms/live-preview-react": "3.0.0-beta.63",
     "@payloadcms/next": "3.0.0-beta.63",
     "@payloadcms/plugin-cloud": "3.0.0-beta.63",
@@ -39,8 +34,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
-    "dotenv": "^8.2.0",
-    "escape-html": "^1.0.3",
     "geist": "^1.3.0",
     "graphql": "^16.8.1",
     "jsonwebtoken": "9.0.1",
@@ -50,11 +43,9 @@
     "payload": "3.0.0-beta.63",
     "payload-admin-bar": "^1.0.6",
     "prism-react-renderer": "^2.3.1",
-    "qs": "6.11.2",
-    "react": "beta",
-    "react-dom": "beta",
+    "react": "19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "19.0.0-rc-6230622a1a-20240610",
     "react-hook-form": "7.45.4",
-    "react-router-dom": "5.3.4",
     "sharp": "0.32.6",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
@@ -65,8 +56,8 @@
     "@tailwindcss/typography": "^0.5.13",
     "@types/escape-html": "^1.0.2",
     "@types/node": "18.11.3",
-    "@types/qs": "^6.9.8",
-    "@types/react": "^18.3.0",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "autoprefixer": "^10.4.19",
     "copyfiles": "^2.4.1",
     "eslint": "^8",
@@ -79,7 +70,14 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.0",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    }
+  },
   "overrides": {
-    "@types/react": "18.2.74"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }
