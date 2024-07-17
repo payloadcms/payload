@@ -112,6 +112,25 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
 }
 
 /**
+ * Generates the JSON Schema for database configuration
+ *
+ * @example { db: idType: string }
+ */
+function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
+  const defaultIDType: JSONSchema4 =
+    config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      defaultIDType,
+    },
+    required: ['defaultIDType'],
+  }
+}
+
+/**
  * Returns a JSON Schema Type with 'null' added if the field is not required.
  */
 export function withNullableJSONSchemaType(
@@ -713,11 +732,12 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
   }
 
