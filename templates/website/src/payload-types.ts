@@ -223,8 +223,8 @@ export interface Page {
   )[];
   meta?: {
     title?: string | null;
-    description?: string | null;
     image?: string | Media | null;
+    description?: string | null;
   };
   publishedAt?: string | null;
   slug?: string | null;
@@ -272,7 +272,7 @@ export interface Media {
  */
 export interface Category {
   id: string;
-  title?: string | null;
+  title: string;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -291,6 +291,7 @@ export interface Category {
  */
 export interface Post {
   id: string;
+  title: string;
   content: {
     root: {
       type: string;
@@ -310,10 +311,9 @@ export interface Post {
   categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
-    description?: string | null;
     image?: string | Media | null;
+    description?: string | null;
   };
-  title: string;
   publishedAt?: string | null;
   authors?: (string | User)[] | null;
   populatedAuthors?:

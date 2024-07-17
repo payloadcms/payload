@@ -13,6 +13,13 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidatePage } from './hooks/revalidatePage'
 
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
@@ -37,17 +44,15 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
       type: 'tabs',
       tabs: [
         {
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              required: true,
-            },
-            hero,
-          ],
+          fields: [hero],
           label: 'Hero',
         },
         {
@@ -60,6 +65,33 @@ export const Pages: CollectionConfig = {
             },
           ],
           label: 'Content',
+        },
+        {
+          name: 'meta',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
+
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
         },
       ],
     },
@@ -79,7 +111,7 @@ export const Pages: CollectionConfig = {
   versions: {
     drafts: {
       autosave: {
-        interval: 350, // We set this interval for optimal live preview
+        interval: 100, // We set this interval for optimal live preview
       },
     },
     maxPerDoc: 50,

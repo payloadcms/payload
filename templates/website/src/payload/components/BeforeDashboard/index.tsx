@@ -17,7 +17,9 @@ const BeforeDashboard: React.FC = () => {
         <li>
           <SeedButton />
           {' with a few pages, posts, and projects to jump-start your new site, then '}
-          <a href="/">visit your website</a>
+          <a href="/" target="_blank">
+            visit your website
+          </a>
           {' to see the results.'}
         </li>
         <li>
