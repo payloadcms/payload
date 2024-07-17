@@ -1,12 +1,14 @@
+import type { Block } from 'payload'
+
 import type { PopulationPromise } from '../typesServer.js'
-import type { BlocksFeatureProps } from './feature.server.js'
 import type { SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 
 export const blockPopulationPromiseHOC = (
-  props: BlocksFeatureProps,
-): PopulationPromise<SerializedBlockNode> => {
+  blocks: Block[],
+): PopulationPromise<SerializedBlockNode | SerializedInlineBlockNode> => {
   const blockPopulationPromise: PopulationPromise<SerializedBlockNode> = ({
     context,
     currentDepth,
@@ -25,7 +27,7 @@ export const blockPopulationPromiseHOC = (
     const blockFieldData = node.fields
 
     // find block used in this node
-    const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
+    const block = blocks.find((block) => block.slug === blockFieldData.blockType)
     if (!block || !block?.fields?.length || !blockFieldData) {
       return
     }

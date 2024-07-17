@@ -17,7 +17,7 @@ html[data-theme='light'] {
   left: 0;
   z-index: 2;
   opacity: 0;
-  border-radius: 6.25px;
+  border-radius: $style-radius-m;
   transition: opacity 0.2s;
   height: 37.5px;
   will-change: transform;
