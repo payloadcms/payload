@@ -1,4 +1,4 @@
-import type { OutputInfo, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
+import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
