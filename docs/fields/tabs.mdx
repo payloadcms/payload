@@ -15,7 +15,7 @@ The Tabs Field is presentational-only and only affects the [Admin Panel](../admi
   caption="Tabs field type used to separate Hero fields from Page Layout"
 />
 
-To create a Tabs Field, set the `type` to `tabs` in your [Field Config](./overview):
+To add a Tabs Field, set the `type` to `tabs` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -36,7 +36,7 @@ export const MyTabsField: Field = {
 | Option        | Description                                                                                                              |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **`tabs`** \* | Array of tabs to render within this Tabs field.                                                                          |
-| **`admin`**   | Admin-specific configuration. [More details](./overview#admin-config). |
+| **`admin`**   | Admin-specific configuration. [More details](../admin/fields#admin-options). |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                |
 
 ### Tab-specific Config

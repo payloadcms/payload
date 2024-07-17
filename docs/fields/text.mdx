@@ -15,7 +15,7 @@ The Text Field is one of the most commonly used fields. It saves a string to the
   caption="Admin Panel screenshot of a Text field and read-only Text field"
 />
 
-To create a Text Field, set the `type` to `text` in your [Field Config](./overview):
+To add a Text Field, set the `type` to `text` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -44,7 +44,7 @@ export const MyTextField: Field = {
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-config).                                                                                                   |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                   |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`hasMany`**          | Makes this field an ordered array of text instead of just a single text.                                                                                                    |
 | **`minRows`**          | Minimum number of texts in the array, if `hasMany` is set to true.                                                                                                          |
@@ -68,7 +68,7 @@ export const MyTextField: Field = {
 }
 ```
 
-The Text Field inherits all of the default options from the base [Field Admin Config](./overview#admin-config), plus the following additional options:
+The Text Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Option         | Description                                                                                                      |
 | -------------- | ---------------------------------------------------------------------------------------------------------------- |

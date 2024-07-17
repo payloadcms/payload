@@ -15,7 +15,7 @@ The Select Field provides a dropdown-style interface for choosing options from a
   caption="Admin Panel screenshot of a Select field"
 />
 
-To create a Select Field, set the `type` to `select` in your [Field Config](./overview):
+To add a Select Field, set the `type` to `select` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -49,7 +49,7 @@ export const MySelectField: Field = {
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                          |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                               |
 | **`required`**         | Require this field to have a value.                                                                                                                                           |
-| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                      |
+| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-options) for more details.                                                      |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                     |
 | **`enumName`**         | Custom enum name for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                               |
 | **`dbName`**           | Custom table name (if `hasMany` set to `true`) for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined. |
@@ -80,7 +80,7 @@ export const MySelectField: Field = {
 }
 ```
 
-The Select Field inherits all of the default options from the base [Field Admin Config](./overview#admin-config), plus the following additional options:
+The Select Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Property                       | Description                                                                                                                              |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |

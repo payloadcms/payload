@@ -15,7 +15,7 @@ The Checkbox Field type saves a boolean in the database.
   caption="Admin Panel screenshot of Checkbox field with Text field below"
 />
 
-To create a Checkbox Field, set the `type` to `checkbox` in your [Field Config](./overview):
+To add a Checkbox Field, set the `type` to `checkbox` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -41,7 +41,7 @@ export const MyCheckboxField: Field = {
 | **`defaultValue`**     | Provide data to be used for this field's default value, will default to false if field is also `required`. [More](/docs/fields/overview#default-values)                     |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [More details](./overview#admin-options).                                                    |
+| **`admin`**            | Admin-specific configuration. [More details](../admin/fields#admin-options).                                                    |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 

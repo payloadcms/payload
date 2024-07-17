@@ -21,7 +21,7 @@ The Relationship field is used in a variety of ways, including:
 - To allow for an `Order` to feature a `placedBy` relationship to either an `Organization` or `User` collection
 - To assign `Category` documents to `Post` documents
 
-To create a Relationship Field, set the `type` to `relationship` in your [Field Config](./overview):
+To add a Relationship Field, set the `type` to `relationship` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -57,7 +57,7 @@ export const MyRelationshipField: Field = {
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                            |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                 |
 | **`required`**         | Require this field to have a value.                                                                                                                                             |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-config).                                                        |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                        |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                       |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                     |
 
@@ -83,7 +83,7 @@ export const MyRelationshipField: Field = {
 }
 ```
 
-The Relationship Field inherits all of the default options from the base [Field Admin Config](./overview#admin-config), plus the following additional options:
+The Relationship Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Property                       | Description                                                                                                                              |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |

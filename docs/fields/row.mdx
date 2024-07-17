@@ -15,7 +15,7 @@ The Row Field is presentational-only and only affects the [Admin Panel](../admin
   caption="Admin Panel screenshot of a Row field"
 />
 
-To create a Row Field, set the `type` to `row` in your [Field Config](./overview):
+To add a Row Field, set the `type` to `row` in your [Field Config](./overview):
 
 ```ts
 import type { Field } from 'payload/types'
@@ -36,7 +36,7 @@ export const MyRowField: Field = {
 | Option          | Description                                                                                                                                                                |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`fields`** \* | Array of field types to nest within this Row.                                                                                                                              |
-| **`admin`**     | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. [More details](./overview#admin-config). |
+| **`admin`**     | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. [More details](../admin/fields#admin-options). |
 | **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                                                                  |
 
 _\* An asterisk denotes that a property is required._
