@@ -14,6 +14,13 @@ Blocks are a great way to create a flexible content model that can be used to bu
 - A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
 - Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
+  srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
+  alt="Admin Panel screenshot of add Blocks drawer view"
+  caption="Admin Panel screenshot of add Blocks drawer view"
+/>
+
 To create a Blocks Field, set the `type` to `blocks` in your [Field Config](./overview):
 
 ```ts
@@ -21,19 +28,14 @@ import type { Field } from 'payload/types'
 
 export const MyBlocksField: Field = {
   // ...
-  type: 'blocks', // highlight-line
+  // highlight-start
+  type: 'blocks',
   blocks: [
     // ...
   ],
+  // highlight-end
 }
 ```
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
-  srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
-  alt="Admin Panel screenshot of add Blocks drawer view"
-  caption="Admin Panel screenshot of add Blocks drawer view"
-/>
 
 ## Config Options
 

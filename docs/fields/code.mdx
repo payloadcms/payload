@@ -9,6 +9,13 @@ keywords: code, fields, config, configuration, documentation, Content Management
 
 The Code Field saves a string in the database, but provides the [Admin Panel](../admin/overview) with a code editor styled interface.
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/code.png"
+  srcDark="https://payloadcms.com/images/docs/fields/code-dark.png"
+  alt="Shows a Code field in the Payload Admin Panel"
+  caption="This field is using the `monaco-react` editor syntax highlighting."
+/>
+
 To create a Code Field, set the `type` to `code` in your [Field Config](./overview):
 
 ```ts
@@ -19,15 +26,6 @@ export const MyBlocksField: Field = {
   type: 'code', // highlight-line
 }
 ```
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/code.png"
-  srcDark="https://payloadcms.com/images/docs/fields/code-dark.png"
-  alt="Shows a Code field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of a Code field"
-/>
-
-_This field uses the `monaco-react` editor syntax highlighting._
 
 ## Config Options
 

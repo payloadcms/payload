@@ -8,6 +8,13 @@ keywords: date, fields, config, configuration, documentation, Content Management
 
 The Date Field saves a Date in the database and provides the [Admin Panel](../admin/overview) with a customizable time picker interface.
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/date.png"
+  srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
+  alt="Shows a Date field in the Payload Admin Panel"
+  caption="This field is using the `react-datepicker` component for UI."
+/>
+
 To create a Date Field, set the `type` to `date` in your [Field Config](./overview):
 
 ```ts
@@ -18,15 +25,6 @@ export const MyDateField: Field = {
   type: 'date', // highlight-line
 }
 ```
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/date.png"
-  srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
-  alt="Shows a Date field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of a Date field"
-/>
-
-This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin Panel component.
 
 ## Config Options
 

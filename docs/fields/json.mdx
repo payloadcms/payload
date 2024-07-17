@@ -9,6 +9,13 @@ keywords: json, jsonSchema, schema, validation, fields, config, configuration, d
 
 The JSON Field saves actual JSON in the database, which differs from the Code field that saves the value as a string in the database.
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/json.png"
+  srcDark="https://payloadcms.com/images/docs/fields/json-dark.png"
+  alt="Shows a JSON field in the Payload Admin Panel"
+  caption="This field is using the `monaco-react` editor syntax highlighting."
+/>
+
 To create a JSON Field, set the `type` to `json` in your [Field Config](./overview):
 
 ```ts
@@ -19,15 +26,6 @@ export const MyJSONField: Field = {
   type: 'json', // highlight-line
 }
 ```
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/json.png"
-  srcDark="https://payloadcms.com/images/docs/fields/json-dark.png"
-  alt="Shows a JSON field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of a JSON field"
-/>
-
-This field uses the `monaco-react` editor syntax highlighting.
 
 ## Config Options
 

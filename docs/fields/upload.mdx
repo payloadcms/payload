@@ -14,6 +14,13 @@ Upload fields are useful for a variety of use cases, such as:
 - To allow for a `Product` to deliver a downloadable asset like PDF or MP3
 - To give a layout building block the ability to feature a background image
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+  alt="Shows an upload field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of an Upload field"
+/>
+
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
 
 ```ts
@@ -30,13 +37,6 @@ export const MyUploadField: Field = {
   <strong>Important:</strong>
   To use the Upload Field, you must have a [Collection](../configuration/collections) configured to allow [Uploads](../upload/overview).
 </Banner>
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-  alt="Shows an upload field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of an Upload field"
-/>
 
 ## Config Options
 

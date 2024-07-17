@@ -8,6 +8,13 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 
 The Relationship field is one of the most powerful fields Payload features. It provides for the ability to easily relate documents together.
 
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
+  srcDark="https://payloadcms.com/images/docs/fields/relationship-dark.png"
+  alt="Shows a relationship field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of a Relationship field"
+/>
+
 The Relationship field is used in a variety of ways, including:
 
 - To add `Product` documents to an `Order` document
@@ -21,17 +28,12 @@ import type { Field } from 'payload/types'
 
 export const MyRelationshipField: Field = {
   // ...
-  type: 'relationship', // highlight-line
-  relationTo: 'products', // highlight-line
+  // highlight-start
+  type: 'relationship',
+  relationTo: 'products',
+  // highlight-end
 }
 ```
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
-  srcDark="https://payloadcms.com/images/docs/fields/relationship-dark.png"
-  alt="Shows a relationship field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of a Relationship field"
-/>
 
 ## Config Options
 
