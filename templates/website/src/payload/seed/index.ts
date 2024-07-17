@@ -47,114 +47,120 @@ export const seed = async ({
   payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
-  await Promise.all([
-    ...collections.map((collection) =>
-      payload.delete({
-        collection: collection as 'media',
-        where: {},
-      }),
-    ),
-    ...globals.map((global) =>
-      payload.updateGlobal({
-        slug: global as 'header',
-        data: {},
-      }),
-    ),
-  ])
+  for (const collection of collections) {
+    await payload.delete({
+      collection: collection as 'media',
+      where: {},
+      req,
+    })
+  }
+
+  for (const global of globals) {
+    await payload.updateGlobal({
+      slug: global as 'header',
+      data: {},
+      req,
+    })
+  }
 
   payload.logger.info(`— Seeding demo author and user...`)
 
-  await Promise.all(
-    ['demo-author@payloadcms.com'].map(async (email) => {
-      await payload.delete({
-        collection: 'users',
-        where: {
-          email: {
-            equals: email,
-          },
-        },
-      })
-    }),
-  )
-
-  const [demoAuthor] = await Promise.all([
-    await payload.create({
-      collection: 'users',
-      data: {
-        name: 'Demo Author',
-        email: 'demo-author@payloadcms.com',
-        password: 'password',
+  await payload.delete({
+    collection: 'users',
+    where: {
+      email: {
+        equals: 'demo-author@payloadcms.com',
       },
-    }),
-  ])
+    },
+    req,
+  })
+
+  const demoAuthor = await payload.create({
+    collection: 'users',
+    data: {
+      name: 'Demo Author',
+      email: 'demo-author@payloadcms.com',
+      password: 'password',
+    },
+    req,
+  })
 
   let demoAuthorID = demoAuthor.id
 
   payload.logger.info(`— Seeding media...`)
-
-  const [image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
-    await payload.create({
-      collection: 'media',
-      data: image1,
-      filePath: path.resolve(dirname, 'image-post1.webp'),
-    }),
-    await payload.create({
-      collection: 'media',
-      data: image2,
-      filePath: path.resolve(dirname, 'image-post2.webp'),
-    }),
-    await payload.create({
-      collection: 'media',
-      data: image2,
-      filePath: path.resolve(dirname, 'image-post3.webp'),
-    }),
-    await payload.create({
-      collection: 'media',
-      data: image2,
-      filePath: path.resolve(dirname, 'image-hero1.webp'),
-    }),
-  ])
+  const image1Doc = await payload.create({
+    collection: 'media',
+    data: image1,
+    filePath: path.resolve(dirname, 'image-post1.webp'),
+    req,
+  })
+  const image2Doc = await payload.create({
+    collection: 'media',
+    data: image2,
+    filePath: path.resolve(dirname, 'image-post2.webp'),
+    req,
+  })
+  const image3Doc = await payload.create({
+    collection: 'media',
+    data: image2,
+    filePath: path.resolve(dirname, 'image-post3.webp'),
+    req,
+  })
+  const imageHomeDoc = await payload.create({
+    collection: 'media',
+    data: image2,
+    filePath: path.resolve(dirname, 'image-hero1.webp'),
+    req,
+  })
 
   payload.logger.info(`— Seeding categories...`)
+  const technologyCategory = await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'Technology',
+    },
+    req,
+  })
 
-  const [technologyCategory, newsCategory, financeCategory] = await Promise.all([
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Technology',
-      },
-    }),
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'News',
-      },
-    }),
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Finance',
-      },
-    }),
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Design',
-      },
-    }),
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Software',
-      },
-    }),
-    await payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Engineering',
-      },
-    }),
-  ])
+  const newsCategory = await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'News',
+    },
+    req,
+  })
+
+  const financeCategory = await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'Finance',
+    },
+    req,
+  })
+
+  await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'Design',
+    },
+    req,
+  })
+
+  await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'Software',
+    },
+    req,
+  })
+
+  await payload.create({
+    collection: 'categories',
+    data: {
+      title: 'Engineering',
+    },
+    req,
+  })
 
   let image1ID = image1Doc.id
   let image2ID = image2Doc.id
@@ -207,33 +213,32 @@ export const seed = async ({
   })
 
   // update each post with related posts
-
-  await Promise.all([
-    await payload.update({
-      id: post1Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post2Doc.id, post3Doc.id],
-      },
-    }),
-    await payload.update({
-      id: post2Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post3Doc.id],
-      },
-    }),
-    await payload.update({
-      id: post3Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post2Doc.id],
-      },
-    }),
-  ])
+  await payload.update({
+    id: post1Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post2Doc.id, post3Doc.id],
+    },
+    req,
+  })
+  await payload.update({
+    id: post2Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post3Doc.id],
+    },
+    req,
+  })
+  await payload.update({
+    id: post3Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post2Doc.id],
+    },
+    req,
+  })
 
   payload.logger.info(`— Seeding home page...`)
-
   await payload.create({
     collection: 'pages',
     data: JSON.parse(
