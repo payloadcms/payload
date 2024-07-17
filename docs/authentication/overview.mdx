@@ -20,7 +20,7 @@ Here are some common use cases of Authentication in your own applications:
 - P2P apps or social sites where users need to log in and manage their profiles
 - Online games where players need to track their progress over time
 
-When Authentication is enabled on a [Collection](../configuration/collections), Payload injects all necessary functionality to support the entire user flow. This includes admin UI, all [auth-related operations](./operations) like account creation, logging in and out, and resetting passwords, as well as all [auth-related emails](./email) like email verification and password reset.
+When Authentication is enabled on a [Collection](../configuration/collections), Payload injects all necessary functionality to support the entire user flow. This includes all [auth-related operations](./operations) like account creation, logging in and out, and resetting passwords, all [auth-related emails](./email) like email verification and password reset, as well as any necessary UI to manage users from the Admin Panel.
 
 To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collection#auth):
 
@@ -32,8 +32,6 @@ export const Users: CollectionConfig = {
   auth: true, // highlight-line
 }
 ```
-
-_There are additional options available for the `auth` property. [More details](#config-options)._
 
 ![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
 _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
