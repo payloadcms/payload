@@ -7,10 +7,11 @@ let cached: {
   payload: Payload | null
   promise: Promise<Payload> | null
   reload: Promise<void> | boolean
+  ws: WebSocket | null
 } = global._payload
 
 if (!cached) {
-  cached = global._payload = { payload: null, promise: null, reload: false }
+  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
 export const reload = async (config: SanitizedConfig, payload: Payload): Promise<void> => {
@@ -85,17 +86,18 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     cached.payload = await cached.promise
 
     if (
+      !cached.ws &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
         const port = process.env.PORT || '3000'
-        const ws = new WebSocket(
+        cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )
 
-        ws.onmessage = (event) => {
+        cached.ws.onmessage = (event) => {
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
