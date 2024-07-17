@@ -24,6 +24,7 @@ import {
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
+  focalOnlySlug,
   mediaSlug,
   relationSlug,
 } from './shared.js'
@@ -41,6 +42,7 @@ let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let focalOnlyURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -59,6 +61,7 @@ describe('uploads', () => {
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -417,6 +420,49 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+
+    test('should update image alignment based on focal point correctly', async () => {
+      const updateFocalPosition = async (page: Page) => {
+        await page.goto(focalOnlyURL.create)
+        await page.waitForURL(focalOnlyURL.create)
+        // select and upload file
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByText('Select a file').click()
+        const fileChooser = await fileChooserPromise
+        await wait(1000)
+        await fileChooser.setFiles(path.join(dirname, 'another-test-image.jpg'))
+
+        await page.locator('.file-field__edit').click()
+
+        // set focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // init left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
+
+        // apply crop
+        await page.locator('button:has-text("Apply Changes")').click()
+        await page.waitForSelector('button#action-save')
+        await page.locator('button#action-save').click()
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await wait(1000) // Wait for the save
+      }
+
+      await updateFocalPosition(page) // red square
+      const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
+
+      const { doc: redDoc } = await client.findByID({
+        id: redSquareMediaID,
+        slug: mediaSlug,
+        auth: true,
+      })
+
+      const redFocalTest = redDoc.sizes.find((size) => size.name === 'focalTest')
+      const redFocalTest2 = redDoc.sizes.find((size) => size.name === 'focalTest2')
+      const redFocalTest3 = redDoc.sizes.find((size) => size.name === 'focalTest3')
+
+      expect(redFocalTest.focalPoint).toEqual({ x: 100, y: 75 }) // Example expected value
+      expect(redFocalTest2.focalPoint).toEqual({ x: 150, y: 75 }) // Example expected value
+      expect(redFocalTest3.focalPoint).toEqual({ x: 225, y: 75 }) // Example expected value
     })
   })
 })
