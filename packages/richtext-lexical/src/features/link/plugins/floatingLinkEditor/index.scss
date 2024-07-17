@@ -17,7 +17,7 @@ html[data-theme='light'] {
   top: 0;
   left: 0;
   opacity: 0;
-  border-radius: 6.25px;
+  border-radius: $style-radius-m;
   transition: opacity 0.2s;
   height: 37.5px;
   will-change: transform;
@@ -69,7 +69,7 @@ html[data-theme='light'] {
     height: 30px;
     cursor: pointer;
     color: var(--color-base-600);
-    border-radius: 4px;
+    border-radius: $style-radius-m;
 
     &:hover:not([disabled]) {
       background-color: var(--color-base-100);

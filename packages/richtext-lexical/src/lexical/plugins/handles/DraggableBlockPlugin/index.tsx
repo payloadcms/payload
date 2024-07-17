@@ -220,7 +220,7 @@ function useDraggableBlockMenu(
           blockHandleHorizontalOffset +
             (editorConfig?.admin?.hideGutter
               ? menuRef?.current?.getBoundingClientRect()?.width ?? 0
-              : -menuRef?.current?.getBoundingClientRect()?.width ?? 0),
+              : -(menuRef?.current?.getBoundingClientRect()?.width ?? 0)),
           targetLineElem,
           targetBlockElem,
           lastTargetBlock,

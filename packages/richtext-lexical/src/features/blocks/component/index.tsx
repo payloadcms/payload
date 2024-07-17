@@ -18,7 +18,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
-import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -26,7 +25,7 @@ import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { ClientComponentProps } from '../../typesClient.js'
-import type { BlocksFeatureClientProps } from '../feature.client.js'
+import type { BlocksFeatureClientProps, ClientBlock } from '../feature.client.js'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { BlockContent } from './BlockContent.js'
@@ -34,13 +33,8 @@ import './index.scss'
 
 type Props = {
   children?: React.ReactNode
-
   formData: BlockFields
   nodeKey?: string
-  /**
-   * This transformedFormData already comes wrapped in blockFieldWrapperName
-   */
-  transformedFormData: BlockFields
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
@@ -59,7 +53,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const componentMapRenderedFieldsPath = `lexical_internal_feature.blocks.fields.${formData?.blockType}`
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.${formData?.blockType}`
 
-  const reducedBlock: ReducedBlock = (
+  const reducedBlock: ClientBlock = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
       ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
   )?.reducedBlocks?.find((block) => block.slug === formData?.blockType)
@@ -127,6 +121,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
+  const LabelComponent = reducedBlock?.LabelComponent
+
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return reducedBlock && initialState !== false ? (
@@ -155,19 +151,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          <div className={`${baseClass}__block-header`}>
-            <div>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                pillStyle="white"
-              >
-                {typeof reducedBlock.labels.singular === 'string'
-                  ? getTranslation(reducedBlock.labels.singular, i18n)
-                  : '[Singular Label]'}
-              </Pill>
-              <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+          LabelComponent ? (
+            <LabelComponent blockKind={'lexicalBlock'} formData={formData} />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <div>
+                <Pill
+                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                  pillStyle="white"
+                >
+                  {reducedBlock && typeof reducedBlock.labels.singular === 'string'
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : '[Singular Label]'}
+                </Pill>
+                <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+              </div>
             </div>
-          </div>
+          )
         }
         key={0}
       >
