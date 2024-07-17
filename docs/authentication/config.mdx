@@ -18,12 +18,13 @@ To enable Authentication on a collection, define an `auth` property and set it t
 | **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
 | **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
 | **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
-| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
+| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance.         |
 | **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
 | **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More](/docs/authentication/config#forgot-password)                                                                                                                |
 | **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More](/docs/authentication/config#email-verification)                                  |
+| **`loginWithUsername`**    | Ability to allow users to login with username/password. [More](/docs/authentication/config#login-with-username)                                                                                                                     |
 | **`disableLocalStrategy`** | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                                     |
-| **`strategies`**           | Advanced - an array of custom authentification strategies to extend this collection's authentication with. [More](/docs/authentication/custom-strategies)                                                                         |
+| **`strategies`**           | Advanced - an array of custom authentification strategies to extend this collection's authentication with. [More](/docs/authentication/custom-strategies)                                                                           |
 
 ### Forgot Password
 
@@ -165,6 +166,43 @@ Example:
   }
 }
 ```
+
+### Login With Username
+
+You can allow users to login with their username instead of their email address by setting the `loginWithUsername` property to `true`.
+
+Example:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    loginWithUsername: true,
+  },
+}
+```
+
+Or, you can pass an object with additional options:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    loginWithUsername: {
+      allowEmailLogin: true, // default: false
+      requireEmail: false, // default: false
+    },
+  },
+}
+```
+
+**`allowEmailLogin`**
+
+If set to `true`, users can log in with either their username or email address. If set to `false`, users can only log in with their username.
+
+**`requireEmail`**
+
+If set to `true`, an email address is required when creating a new user. If set to `false`, email is not required upon creation.
 
 ### Admin autologin
 
