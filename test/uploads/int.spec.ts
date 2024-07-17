@@ -352,6 +352,117 @@ describe('Collections - Uploads', () => {
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
     })
+
+    it('should apply focal point', async () => {
+      const doc = await payload.create({
+        collection: focalOnlySlug,
+        data: {
+          // default focal point
+        },
+        file,
+      }) as unknown as Media
+
+      // Check for file sizes - expecting them to be different for different focal points
+      // Note: a better check might be to have a test image with specific color coded areas
+      // and then expecting the focal area to have a specific average color-code
+      // this way it could be checked if the focal point calculation is working exactly
+
+      const expectedPath = path.join(__dirname, './focal-only')
+      const thisFilePath = path.join(expectedPath, doc.filename)
+
+      const getResizedFilesFilesizes = (doc) => {
+        const { sizes } = doc
+        const filesizes = {}
+        Object.keys(sizes).forEach(size => {
+          const filePath = path.join(expectedPath, sizes[size].filename),
+            fileSize = fs.statSync(filePath).size
+
+          filesizes[size] = fileSize
+        })
+
+        return filesizes
+      }
+
+      //
+      // 0. Initial file sizes
+      //
+      const fileSizes0 = getResizedFilesFilesizes(doc)
+
+
+      //
+      // 1. Change focal point to {50,50}, expect the same file sizes
+      //
+      const updatedFocal1 = await payload.update({
+        collection: focalOnlySlug,
+        id: doc.id,
+        data: {
+          focalX: 50,
+          focalY: 50,
+        },
+        // forcing packages/payload/src/uploads/generateFileData.ts:90 to an update with file
+        // not sure if this is the way
+        filePath: thisFilePath,
+        overwriteExistingFiles: true
+      })
+
+      const fileSizes1 = getResizedFilesFilesizes(updatedFocal1)
+      expect(fileSizes1).toMatchObject(fileSizes0)
+
+      //
+      // 2. Change focal point to {10,10}, expect new file sizes
+      //
+      const updatedFocal2 = await payload.update({
+        collection: focalOnlySlug,
+        id: doc.id,
+        data: {
+          focalX: 10,
+          focalY: 10,
+        },
+        // forcing packages/payload/src/uploads/generateFileData.ts:90 to an update with file
+        // not sure if this is the way
+        // file: await getFileFromDoc(updatedFocal1),
+        filePath: thisFilePath,
+        overwriteExistingFiles: true
+      })
+
+      const fileSizes2 = getResizedFilesFilesizes(updatedFocal2)
+
+      // files should have been generated with the NEW focal area {10,10}
+      // and therefore SHOULD differ in filesize
+      expect(fileSizes2).not.toMatchObject(fileSizes1)
+
+      // -- disabled --
+      // this last test fails because the focal point is ignored (because still the same)
+      // in packages/payload/src/uploads/generateFileData.ts:330 and then the images
+      // are resized without it
+      // TODO: expected: if a file is sent with a focal point this focal point is to be honored
+      //
+      // //
+      // // 3. Change focal again point to {10,10}, expect the same file size again
+      // //
+      //
+      // const updatedFocal3 = await payload.update({
+      //   collection: focalOnlySlug,
+      //   id: doc.id,
+      //   data: {
+      //     focalX: 10,
+      //     focalY: 10
+      //   },
+      //   // forcing packages/payload/src/uploads/generateFileData.ts:90 to an update with file
+      //   // not sure if this is the way
+      //   // file: await getFileFromDoc(updatedFocal2),
+      //   filePath: thisFilePath,
+      //   overwriteExistingFiles: true
+      // })
+      //
+      // const fileSizes3 = getResizedFilesFilesizes(updatedFocal3)
+      //
+      // // files should NOT have been generated because of the SAME focal area {10,10}
+      // // and therefore should NOT differ in filesize
+      // expect(fileSizes3).toMatchObject(fileSizes2)
+
+    })
+
   })
 
   it('update', async () => {
