@@ -1,19 +1,16 @@
 ---
 title: Cookie Strategy
 label: Cookie Strategy
-order: 30
+order: 40
 desc: Enable HTTP Cookie based authentication to interface with Payload.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookies for authentication purposes.
+Payload offers the ability to [Authenticate](./overview) via HTTP-only cookies. These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />
-  You can access the logged-in user from [Access Control](../access-control/overview) functions and hooks from the `req.user` property.
-  <br />
-  [Learn more about token data](/docs/authentication/token-data).
+  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
 </Banner>
 
 ### Automatic browser inclusion
@@ -38,7 +35,6 @@ For more about including cookies in requests from your app to your Payload API, 
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />
   To make sure you have a Payload cookie set properly in your browser after logging in, you can use
   the browsers Developer Tools > Application > Cookies > [your-domain-here]. The Developer tools
   will still show HTTP-only cookies.
