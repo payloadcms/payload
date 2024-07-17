@@ -122,24 +122,28 @@ export const BlocksFeature = createServerFeature<
             return currentSchema
           }
 
-          const blocksField: BlockField = {
-            name: field?.name + '_lexical_blocks',
-            type: 'blocks',
-            blocks: props.blocks,
+          const fields: BlockField[] = []
+
+          if (props?.blocks?.length) {
+            fields.push({
+              name: field?.name + '_lexical_blocks',
+              type: 'blocks',
+              blocks: props.blocks,
+            })
           }
-          const inlineBlocksField: BlockField = {
-            name: field?.name + '_lexical_inline_blocks',
-            type: 'blocks',
-            blocks: props.inlineBlocks,
+          if (props?.inlineBlocks?.length) {
+            fields.push({
+              name: field?.name + '_lexical_inline_blocks',
+              type: 'blocks',
+              blocks: props.inlineBlocks,
+            })
           }
-          // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
-          // we don't actually use the JSON Schema itself in the generated types yet.
-          fieldsToJSONSchema(
-            collectionIDFieldTypes,
-            [blocksField, inlineBlocksField],
-            interfaceNameDefinitions,
-            config,
-          )
+
+          if (fields.length) {
+            // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
+            // we don't actually use the JSON Schema itself in the generated types yet.
+            fieldsToJSONSchema(collectionIDFieldTypes, fields, interfaceNameDefinitions, config)
+          }
 
           return currentSchema
         },
