@@ -26,6 +26,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  siblingDocKeys: Set<string>
 }
 
 export const traverseFields = async <T>({
@@ -43,6 +44,7 @@ export const traverseFields = async <T>({
   schemaPath,
   siblingData,
   siblingDoc,
+  siblingDocKeys,
 }: Args<T>): Promise<void> => {
   const promises = []
   fields.forEach((field) => {
@@ -62,6 +64,7 @@ export const traverseFields = async <T>({
         req,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       }),
     )
   })
