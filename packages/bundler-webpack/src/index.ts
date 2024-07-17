@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-import type { PayloadBundler } from '../../payload/dist/bundlers/types'
+import type { PayloadBundler } from 'payload/dist/bundlers/types'
 
 import { buildAdmin } from './scripts/build'
 import { devAdmin } from './scripts/dev'
