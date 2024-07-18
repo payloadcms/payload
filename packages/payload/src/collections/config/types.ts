@@ -195,8 +195,6 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   response: unknown
 }) => any
 
-export type CollectionAfterMeHook = AfterMeHook
-
 export type RefreshHook<T extends TypeWithID = any> = (args: {
   args: RefreshArguments
   user: T
