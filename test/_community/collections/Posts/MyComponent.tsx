@@ -1,16 +1,32 @@
 import React from 'react'
 
-import type { Post } from '../../payload-types.js'
+import { SelectInput } from '@payloadcms/ui'
 
 export const MyComponent: React.FC = () => {
-  const test: Post = {
-    id: 'string',
-    createdAt: 'string',
-    text: 'string',
-    updatedAt: 'string',
-  }
-
-  console.log({ test })
-
-  return <p>hi</p>
+  return (
+    <SelectInput
+      options={[
+        {
+          label: 'group1',
+          options: [
+            {
+              label: 'Group-1 Item-1',
+              value: 'group1Item1',
+            },
+          ],
+        },
+        {
+          label: 'group2',
+          options: [
+            {
+              label: 'Group-2 Item-1',
+              value: 'group2Item1',
+            },
+          ],
+        },
+      ]}
+      path="customSelect"
+      name="customSelect"
+    />
+  )
 }

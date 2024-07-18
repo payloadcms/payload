@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload'
+import type { ClientValidate, Option, OptionObject, OptionGroup } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -24,17 +24,25 @@ export type SelectFieldProps = {
   width?: string
 } & FormFieldBase
 
-const formatOptions = (options: Option[]): OptionObject[] =>
-  options.map((option) => {
-    if (typeof option === 'object' && (option.value || option.value === '')) {
-      return option
+const formatOptions = (options: Option[]): (OptionObject | OptionGroup)[] => {
+  return options.map((option) => {
+    if (typeof option === 'string') {
+      return {
+        label: option,
+        value: option,
+      } as OptionObject
     }
 
-    return {
-      label: option,
-      value: option,
-    } as OptionObject
+    if ('options' in option) {
+      return {
+        label: option.label,
+        options: formatOptions(option.options),
+      } as OptionGroup
+    }
+
+    return option as OptionObject
   })
+}
 
 const _SelectField: React.FC<SelectFieldProps> = (props) => {
   const {

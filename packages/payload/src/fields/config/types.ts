@@ -203,7 +203,12 @@ export type OptionObject = {
   value: string
 }
 
-export type Option = OptionObject | string
+export type OptionGroup = {
+  label: LabelFunction | Record<string, string> | string
+  options: OptionObject[]
+}
+export type Option = OptionObject | string | OptionGroup
+export type RadioOption = OptionObject | string
 
 export interface FieldBase {
   access?: {
@@ -721,7 +726,7 @@ export type RadioField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
-  options: Option[]
+  options: RadioOption[]
   type: 'radio'
 } & FieldBase
 

@@ -616,25 +616,26 @@ export const select: Validate<unknown, unknown, unknown, SelectField> = (
   value,
   { hasMany, options, req: { t }, required },
 ) => {
-  if (
-    Array.isArray(value) &&
-    value.some(
-      (input) =>
-        !options.some(
-          (option) => option === input || (typeof option !== 'string' && option?.value === input),
-        ),
+  function isInvalidSelection(values: string[], optionsToMatch: SelectField['options'] = options) {
+    // if any of the values are not found in options, the selection is invalid
+    return values.some(
+      (valueToValidate: string) =>
+        !optionsToMatch.some((option) => {
+          if (typeof option === 'string') {
+            return option === valueToValidate
+          } else if ('options' in option) {
+            return !isInvalidSelection([valueToValidate], option.options)
+          } else {
+            return option.value === valueToValidate
+          }
+        }),
     )
-  ) {
-    return t('validation:invalidSelection')
   }
 
-  if (
-    typeof value === 'string' &&
-    !options.some(
-      (option) => option === value || (typeof option !== 'string' && option.value === value),
-    )
-  ) {
-    return t('validation:invalidSelection')
+  if (Array.isArray(value) || typeof value === 'string') {
+    if (isInvalidSelection(Array.isArray(value) ? value : [value])) {
+      return t('validation:invalidSelection')
+    }
   }
 
   if (

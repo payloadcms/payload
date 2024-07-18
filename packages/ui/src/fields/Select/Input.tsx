@@ -1,7 +1,7 @@
 'use client'
-import type { OptionObject } from 'payload'
+import type { OptionGroup, OptionObject } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation, I18nClient } from '@payloadcms/translations'
 import React from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -15,9 +15,47 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
+type ExtractOptionObjectArgs = {
+  options: SelectInputProps['options']
+  value: string
+}
+function extractOptionObject({ options, value }: ExtractOptionObjectArgs) {
+  return options.reduce<OptionObject>((acc, option) => {
+    if (acc) return acc
+    if ('value' in option && option.value === value) {
+      acc = option
+    } else if ('options' in option) {
+      return option.options.find((groupOption) => {
+        acc = groupOption
+      })
+    }
+    return acc
+  }, undefined)
+}
+
+type GenerateOptionsArgs = {
+  options: SelectInputProps['options']
+  i18n: I18nClient
+}
+function generateOptions({ options, i18n }: GenerateOptionsArgs) {
+  return options.map((option: OptionObject | OptionGroup) => {
+    if ('options' in option) {
+      return {
+        label: getTranslation(option.label, i18n),
+        options: generateOptions({ options: option.options, i18n }),
+      }
+    }
+
+    return {
+      label: getTranslation(option.label, i18n),
+      value: option.value,
+    }
+  })
+}
+
 export type SelectInputProps = {
   onChange?: ReactSelectAdapterProps['onChange']
-  options?: OptionObject[]
+  options?: (OptionObject | OptionGroup)[]
   showError?: boolean
   value?: string | string[]
 } & Omit<
@@ -68,20 +106,23 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => {
-      const matchingOption = options.find((option) => option.value === val)
+      const matchingOption = extractOptionObject({ options, value: val })
+
       return {
         label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
         value: matchingOption?.value ?? val,
       }
     })
-  } else if (value) {
-    const matchingOption = options.find((option) => option.value === value)
+  } else if (typeof value === 'string') {
+    const matchingOption = extractOptionObject({ options, value })
+
     valueToRender = {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
   }
 
+  console.log({ valueToRender })
   return (
     <div
       className={[
@@ -114,10 +155,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={onChange}
-          options={options.map((option) => ({
-            ...option,
-            label: getTranslation(option.label, i18n),
-          }))}
+          options={generateOptions({ options, i18n })}
           showError={showError}
           value={valueToRender as OptionObject}
         />

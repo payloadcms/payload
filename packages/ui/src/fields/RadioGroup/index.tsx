@@ -1,5 +1,5 @@
 'use client'
-import type { Option } from 'payload'
+import type { RadioOption } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
@@ -24,7 +24,7 @@ export type RadioFieldProps = {
   layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
-  options?: Option[]
+  options?: RadioOption[]
   path?: string
   value?: string
   width?: string
