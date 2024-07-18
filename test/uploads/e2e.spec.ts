@@ -422,7 +422,7 @@ describe('uploads', () => {
       expect(redDoc.filesize).toEqual(1207)
     })
 
-    test('should update image alignment based on focal point correctly', async () => {
+    test('should update image alignment based on focal point', async () => {
       const updateFocalPosition = async (page: Page) => {
         await page.goto(focalOnlyURL.create)
         await page.waitForURL(focalOnlyURL.create)
@@ -436,10 +436,10 @@ describe('uploads', () => {
         await page.locator('.file-field__edit').click()
 
         // set focal point
-        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // init left focal point
-        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // top focal point
 
-        // apply crop
+        // apply focal point
         await page.locator('button:has-text("Apply Changes")').click()
         await page.waitForSelector('button#action-save')
         await page.locator('button#action-save').click()
@@ -452,17 +452,12 @@ describe('uploads', () => {
 
       const { doc: redDoc } = await client.findByID({
         id: redSquareMediaID,
-        slug: mediaSlug,
+        slug: focalOnlySlug,
         auth: true,
       })
 
-      const redFocalTest = redDoc.sizes.find((size) => size.name === 'focalTest')
-      const redFocalTest2 = redDoc.sizes.find((size) => size.name === 'focalTest2')
-      const redFocalTest3 = redDoc.sizes.find((size) => size.name === 'focalTest3')
-
-      expect(redFocalTest.focalPoint).toEqual({ x: 100, y: 75 }) // Example expected value
-      expect(redFocalTest2.focalPoint).toEqual({ x: 150, y: 75 }) // Example expected value
-      expect(redFocalTest3.focalPoint).toEqual({ x: 225, y: 75 }) // Example expected value
+      // without focal point update this generated size was equal to 1736
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
   })
 })
