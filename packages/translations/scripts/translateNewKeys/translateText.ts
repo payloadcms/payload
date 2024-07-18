@@ -30,8 +30,12 @@ export async function translateText(text: string, targetLang: string) {
   })
   try {
     const data = await response.json()
-    console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
-    return data.choices[0].message.content.trim()
+    if (data?.choices?.[0]) {
+      console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
+      return data.choices[0].message.content.trim()
+    } else {
+      console.log(`Could not translate: ${text} in lang: ${targetLang}`)
+    }
   } catch (e) {
     console.error('Error translating:', text, 'to', targetLang, 'response', response, '. Error:', e)
     throw e
