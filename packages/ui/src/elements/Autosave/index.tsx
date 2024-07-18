@@ -217,6 +217,7 @@ export const Autosave: React.FC<Props> = ({
     reportUpdate,
     serverURL,
     setSubmitted,
+    setModified,
     versionsConfig?.drafts,
     debouncedFields,
     submitted,
