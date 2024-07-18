@@ -68,19 +68,20 @@ async function build() {
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
-  await fs.rename('dist/index.css', 'dist/styles.css', (err) => {
-    if (err) {
-      console.error(`Error while renaming index.css: ${err}`)
-      throw err
-    }
-  })
 
-  await fs.unlink('dist/index.js', (err) => {
-    if (err) {
-      console.error(`Error while deleting index.js: ${err}`)
-      throw err
-    }
-  })
+  try {
+    fs.renameSync('dist/index.css', 'dist/styles.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
+
+  try {
+    fs.unlinkSync('dist/index.js')
+  } catch (err) {
+    console.error(`Error while deleting index.js: ${err}`)
+    throw err
+  }
 
   console.log('styles.css bundled successfully')
   // Bundle `client.ts`

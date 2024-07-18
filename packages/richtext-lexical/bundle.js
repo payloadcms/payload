@@ -30,9 +30,13 @@ async function build() {
     //external: ['*.svg'],
     plugins: [sassPlugin({ css: 'external' })],
   })
-  await fs.rename('dist/field/index.css', 'dist/exports/client/bundled.css', (err) => {
-    if (err) console.error(`Error while renaming index.css: ${err}`)
-  })
+
+  try {
+    fs.renameSync('dist/field/index.css', 'dist/exports/client/bundled.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
 
   console.log('dist/field/bundled.css bundled successfully')
 
