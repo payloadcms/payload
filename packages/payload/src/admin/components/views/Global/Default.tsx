@@ -18,6 +18,7 @@ import './index.scss'
 const baseClass = 'global-edit'
 
 export type DefaultGlobalViewProps = GlobalEditViewProps & {
+  customHeader?: React.ReactNode
   disableRoutes?: boolean
   fieldTypes: FieldTypes
 }
@@ -28,6 +29,7 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   const {
     action,
     apiURL,
+    customHeader,
     data,
     disableRoutes,
     fieldTypes,
@@ -83,7 +85,12 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
           />
           {!isLoading && (
             <React.Fragment>
-              <DocumentHeader apiURL={apiURL} data={data} global={global} />
+              <DocumentHeader
+                apiURL={apiURL}
+                customHeader={customHeader}
+                data={data}
+                global={global}
+              />
               {disableRoutes ? (
                 <CustomGlobalComponent view="Default" {...props} />
               ) : (
