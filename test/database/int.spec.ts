@@ -1,3 +1,4 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
@@ -6,6 +7,9 @@ import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload'
 import { fileURLToPath } from 'url'
+import { v4 as uuid } from 'uuid'
+
+import type { CustomSchema } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -459,6 +463,111 @@ describe('database', () => {
           }),
         ).rejects.toThrow('Not Found')
       })
+    })
+  })
+
+  describe('existing data', () => {
+    let existingDataDoc: CustomSchema
+
+    beforeAll(async () => {
+      if (payload.db.name === 'mongoose') {
+        const Model = payload.db.collections['custom-schema']
+
+        const [doc] = await Model.create([
+          {
+            array: [
+              {
+                id: uuid(),
+                localizedText: {
+                  en: 'goodbye',
+                },
+                noFieldDefined: 'hi',
+                text: 'hello',
+              },
+            ],
+            blocks: [
+              {
+                id: uuid(),
+                blockType: 'block',
+                localizedText: {
+                  en: 'goodbye',
+                },
+                noFieldDefined: 'hi',
+                text: 'hello',
+              },
+            ],
+            localizedText: {
+              en: 'goodbye',
+            },
+            noFieldDefined: 'hi',
+            text: 'hello',
+          },
+        ])
+
+        const result = JSON.parse(JSON.stringify(doc))
+        result.id = result._id
+        existingDataDoc = result
+      }
+    })
+
+    it('should allow storage of existing data', async () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'mongoose') {
+        expect(existingDataDoc.noFieldDefined).toStrictEqual('hi')
+        expect(existingDataDoc.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(existingDataDoc.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        const docWithExistingData = await payload.findByID({
+          id: existingDataDoc.id,
+          collection: 'custom-schema',
+        })
+
+        expect(docWithExistingData.noFieldDefined).toStrictEqual('hi')
+        expect(docWithExistingData.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(docWithExistingData.blocks[0].noFieldDefined).toStrictEqual('hi')
+      }
+    })
+
+    it('should maintain existing data while updating', async () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'mongoose') {
+        const result = await payload.update({
+          id: existingDataDoc.id,
+          collection: 'custom-schema',
+          data: {
+            array: [
+              {
+                id: existingDataDoc.array[0].id,
+                localizedText: 'adios',
+                text: 'hola',
+              },
+            ],
+            blocks: [
+              {
+                id: existingDataDoc.blocks[0].id,
+                blockType: 'block',
+                localizedText: 'adios',
+                text: 'hola',
+              },
+            ],
+            localizedText: 'adios',
+            text: 'hola',
+          },
+        })
+
+        expect(result.text).toStrictEqual('hola')
+        expect(result.array[0].text).toStrictEqual('hola')
+        expect(result.blocks[0].text).toStrictEqual('hola')
+        expect(result.localizedText).toStrictEqual('adios')
+        expect(result.array[0].localizedText).toStrictEqual('adios')
+        expect(result.blocks[0].localizedText).toStrictEqual('adios')
+
+        expect(result.noFieldDefined).toStrictEqual('hi')
+        expect(result.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(result.blocks[0].noFieldDefined).toStrictEqual('hi')
+      }
     })
   })
 })
