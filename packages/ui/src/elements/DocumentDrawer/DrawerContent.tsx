@@ -1,7 +1,6 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,7 +11,6 @@ import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -40,8 +38,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = qs.stringify(formQueryParams)
 
   const { componentMap } = useComponentMap()
 
@@ -50,9 +46,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const apiURL = docID
     ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
     : null
-  const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${docID}` : ''
-  }?${formattedQueryParams}`
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -104,7 +97,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      action={action}
       apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
       disableActions
