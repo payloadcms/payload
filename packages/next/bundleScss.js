@@ -14,12 +14,12 @@ async function build() {
     plugins: [sassPlugin({ css: 'external' })],
   })
 
-  await fs.rename('dist/prod/esbuildEntry.css', 'dist/prod/styles.css', (err) => {
-    if (err) {
-      console.error(`Error while renaming index.css: ${err}`)
-      throw err
-    }
-  })
+  try {
+    fs.renameSync('dist/prod/esbuildEntry.css', 'dist/prod/styles.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
 
   console.log('styles.css bundled successfully')
 
@@ -32,12 +32,12 @@ async function build() {
   ]
 
   for (const file of filesToDelete) {
-    await fs.unlink(file, (err) => {
-      if (err) {
-        console.error(`Error while deleting ${file}: ${err}`)
-        throw err
-      }
-    })
+    try {
+      fs.unlinkSync(file)
+    } catch (err) {
+      console.error(`Error while deleting ${file}: ${err}`)
+      throw err
+    }
   }
 
   console.log('Files renamed and deleted successfully')

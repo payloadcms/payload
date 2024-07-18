@@ -27,6 +27,7 @@ import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -34,7 +35,7 @@ export type * from './types.js'
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<
+const DocumentInfo: React.FC<
   {
     children: React.ReactNode
   } & DocumentInfoProps
@@ -65,6 +66,8 @@ export const DocumentInfoProvider: React.FC<
   const docConfig = collectionConfig || globalConfig
 
   const { i18n } = useTranslation()
+
+  const { uploadEdits } = useUploadEdits()
 
   const [documentTitle, setDocumentTitle] = useState(() => {
     if (!initialDataFromProps) return ''
@@ -104,15 +107,18 @@ export const DocumentInfoProvider: React.FC<
 
   const baseURL = `${serverURL}${api}`
   let slug: string
+  let pluralType: 'collections' | 'globals'
   let preferencesKey: string
 
   if (globalSlug) {
     slug = globalSlug
+    pluralType = 'globals'
     preferencesKey = `global-${slug}`
   }
 
   if (collectionSlug) {
     slug = collectionSlug
+    pluralType = 'collections'
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`
@@ -510,10 +516,25 @@ export const DocumentInfoProvider: React.FC<
     data,
   ])
 
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${qs.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
+
   if (isError) notFound()
 
   const value: DocumentInfoContext = {
     ...props,
+    action,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -535,4 +556,16 @@ export const DocumentInfoProvider: React.FC<
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<
+  {
+    children: React.ReactNode
+  } & DocumentInfoProps
+> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

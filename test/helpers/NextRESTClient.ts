@@ -98,21 +98,21 @@ export class NextRESTClient {
     const url = `${this.serverURL}${this.config.routes.api}/${slugs}`
 
     return {
-      url,
       slug: slugs.split('/'),
       params: params ? qs.parse(params) : undefined,
+      url,
     }
   }
 
   async DELETE(path: ValidPath, options: RequestInit & RequestOptions = {}): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'DELETE',
       headers: this.buildHeaders(options),
+      method: 'DELETE',
     })
     return this._DELETE(request, { params: { slug } })
   }
@@ -121,14 +121,14 @@ export class NextRESTClient {
     path: ValidPath,
     options: Omit<RequestInit, 'body'> & RequestOptions = {},
   ): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'GET',
       headers: this.buildHeaders(options),
+      method: 'GET',
     })
     return this._GET(request, { params: { slug } })
   }
@@ -140,22 +140,22 @@ export class NextRESTClient {
       `${this.serverURL}${this.config.routes.api}${this.config.routes.graphQL}${queryParams}`,
       {
         ...rest,
-        method: 'POST',
         headers: this.buildHeaders(options),
+        method: 'POST',
       },
     )
     return this._GRAPHQL_POST(request)
   }
 
   async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'PATCH',
       headers: this.buildHeaders(options),
+      method: 'PATCH',
     })
     return this._PATCH(request, { params: { slug } })
   }
@@ -164,12 +164,12 @@ export class NextRESTClient {
     path: ValidPath,
     options: FileArg & RequestInit & RequestOptions = {},
   ): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)
     const request = new Request(`${url}${queryParams}`, {
       ...options,
-      method: 'POST',
       headers: this.buildHeaders(options),
+      method: 'POST',
     })
     return this._POST(request, { params: { slug } })
   }

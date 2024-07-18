@@ -460,17 +460,50 @@ describe('Auth', () => {
           await tryLogin()
           await tryLogin()
 
-          await payload.update({
+          const loginAfterLimit = await restClient
+            .POST(`/${slug}/login`, {
+              body: JSON.stringify({
+                email: userEmail,
+                password,
+              }),
+              headers: {
+                Authorization: `JWT ${token}`,
+                'Content-Type': 'application/json',
+              },
+              method: 'post',
+            })
+            .then((res) => res.json())
+
+          expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
+
+          const lockedUser = await payload.find({
             collection: slug,
-            data: {
-              lockUntil: Date.now() - 605 * 1000,
-            },
+            showHiddenFields: true,
             where: {
               email: {
                 equals: userEmail,
               },
             },
           })
+
+          expect(lockedUser.docs[0].loginAttempts).toBe(2)
+          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+
+          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000)
+          const userLockElapsed = await payload.update({
+            collection: slug,
+            data: {
+              lockUntil: manuallyReleaseLock,
+            },
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock.toISOString())
 
           // login
           await restClient.POST(`/${slug}/login`, {

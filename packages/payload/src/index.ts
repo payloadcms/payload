@@ -74,11 +74,13 @@ export interface GeneratedTypes {
       login: {
         email: string
         password: string
-        username?: string
       }
       registerFirstUser: {
         email: string
         password: string
+      }
+      unlock: {
+        email: string
       }
     }
   }
@@ -349,7 +351,7 @@ export class BasePayload {
     options: UnlockOptions<TSlug>,
   ): Promise<boolean> => {
     const { unlock } = localOperations.auth
-    return unlock(this, options)
+    return unlock<TSlug>(this, options)
   }
 
   updateGlobal = async <TSlug extends GlobalSlug>(
@@ -708,11 +710,11 @@ export type {
   AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
-  AfterLogoutHook,
-  AfterMeHook,
+  AfterLogoutHook as CollectionAfterLogoutHook,
+  AfterMeHook as CollectionAfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
-  AfterRefreshHook,
+  AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
   BeforeChangeHook as CollectionBeforeChangeHook,
