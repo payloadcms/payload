@@ -13,7 +13,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
-  useFormQueryParams,
+  useUploadEdits,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
@@ -58,11 +58,13 @@ export const DefaultEditView: React.FC = () => {
   const { refreshCookieAsync, user } = useAuth()
   const config = useConfig()
   const router = useRouter()
-  const { dispatchFormQueryParams } = useFormQueryParams()
   const { getComponentMap, getFieldMap } = useComponentMap()
-  const params = useSearchParams()
   const depth = useEditDepth()
+  const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
+  const { resetUploadEdits } = useUploadEdits()
+
+  const locale = params.get('locale')
 
   const {
     admin: { user: userSlug },
@@ -71,8 +73,6 @@ export const DefaultEditView: React.FC = () => {
     routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = config
-
-  const locale = params.get('locale')
 
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
@@ -130,12 +130,7 @@ export const DefaultEditView: React.FC = () => {
         const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
         router.push(redirectRoute)
       } else {
-        dispatchFormQueryParams({
-          type: 'SET',
-          params: {
-            uploadEdits: null,
-          },
-        })
+        resetUploadEdits()
       }
     },
     [
@@ -151,9 +146,9 @@ export const DefaultEditView: React.FC = () => {
       isEditing,
       refreshCookieAsync,
       adminRoute,
-      locale,
       router,
-      dispatchFormQueryParams,
+      locale,
+      resetUploadEdits,
     ],
   )
 
