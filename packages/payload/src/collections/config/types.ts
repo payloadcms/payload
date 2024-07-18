@@ -204,6 +204,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   args: MeArguments
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
