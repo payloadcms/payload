@@ -189,15 +189,22 @@ export type FileToSave = {
   path: string
 }
 
+type Crop = {
+  height: number
+  unit: '%' | 'px'
+  width: number
+  x: number
+  y: number
+}
+
+type FocalPoint = {
+  x: number
+  y: number
+}
+
 export type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
+  crop?: Crop
+  focalPoint?: FocalPoint
+  heightInPixels?: number
+  widthInPixels?: number
 }
