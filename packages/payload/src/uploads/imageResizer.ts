@@ -289,7 +289,6 @@ export async function resizeAndTransformImageSizes({
         hasFocalPoint: Boolean(incomingFocalPoint),
         imageResizeConfig,
       })
-      console.log({ resizeAction })
       if (resizeAction === 'omit') return createResult({ name: imageResizeConfig.name })
 
       const imageToResize = sharpBase.clone()
