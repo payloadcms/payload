@@ -1,5 +1,5 @@
 import { promises as fs, existsSync } from 'fs'
-import path, { join } from 'path'
+import { join } from 'path'
 import globby from 'globby'
 import process from 'node:process'
 import chalk from 'chalk'
