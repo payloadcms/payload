@@ -8,7 +8,7 @@ function unlockResolver(collection: Collection) {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
-      data: { email: args.email },
+      data: { email: args.email, username: args.username },
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

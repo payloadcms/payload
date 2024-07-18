@@ -429,12 +429,24 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       }
 
       if (!collectionConfig.auth.disableLocalStrategy) {
+        const authArgs = {}
+
+        const canLoginWithEmail =
+          !collectionConfig.auth.loginWithUsername ||
+          collectionConfig.auth.loginWithUsername?.allowEmailLogin
+        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+
+        if (canLoginWithEmail) {
+          authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+        if (canLoginWithUsername) {
+          authArgs['username'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+
         if (collectionConfig.auth.maxLoginAttempts > 0) {
           graphqlResult.Mutation.fields[`unlock${singularName}`] = {
             type: new GraphQLNonNull(GraphQLBoolean),
-            args: {
-              email: { type: new GraphQLNonNull(GraphQLString) },
-            },
+            args: authArgs,
             resolve: unlock(collection),
           }
         }
@@ -455,9 +467,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
           }),
           args: {
-            email: { type: GraphQLString },
+            ...authArgs,
             password: { type: GraphQLString },
-            username: { type: GraphQLString },
           },
           resolve: login(collection),
         }
@@ -466,8 +477,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           type: new GraphQLNonNull(GraphQLBoolean),
           args: {
             disableEmail: { type: GraphQLBoolean },
-            email: { type: new GraphQLNonNull(GraphQLString) },
             expiration: { type: GraphQLInt },
+            ...authArgs,
           },
           resolve: forgotPassword(collection),
         }
