@@ -18,6 +18,7 @@ export const arTranslations: DefaultTranslationsObject = {
     confirmPassword: 'تأكيد كلمة المرور',
     createFirstUser: 'إنشاء المستخدم الأوّل',
     emailNotValid: 'البريد الإلكتروني غير صالح',
+    emailOrUsername: 'البريد الإلكتروني أو اسم المستخدم',
     emailSent: 'تمّ ارسال البريد الإلكتروني',
     emailVerified: 'تم التحقق من البريد الإلكتروني بنجاح.',
     enableAPIKey: 'تفعيل مفتاح API',
@@ -294,6 +295,7 @@ export const arTranslations: DefaultTranslationsObject = {
     updating: 'جار التحديث',
     uploading: 'جار الرفع',
     user: 'المستخدم',
+    username: 'اسم المستخدم',
     users: 'المستخدمين',
     value: 'القيمة',
     welcome: 'مرحبًا',
@@ -356,6 +358,8 @@ export const arTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'هذا الحقل يتطلب رقمين.',
     shorterThanMax: 'يجب أن تكون هذه القيمة أقصر من الحد الأقصى للطول الذي هو {{maxLength}} أحرف.',
     trueOrFalse: 'يمكن أن يكون هذا الحقل مساويًا فقط للقيمتين صحيح أو خطأ.',
+    username:
+      'يرجى إدخال اسم مستخدم صالح. يمكن أن يحتوي على أحرف، أرقام، شرطات، فواصل وشرطات سفلية.',
     validUploadID: 'هذا الحقل ليس معرّف تحميل صالح.',
   },
   version: {

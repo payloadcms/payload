@@ -15,7 +15,7 @@ const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, 
   return value
 }
 
-export default [
+export const verificationFields: Field[] = [
   {
     name: '_verified',
     type: 'checkbox',

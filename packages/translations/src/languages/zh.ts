@@ -17,6 +17,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     confirmPassword: '确认密码',
     createFirstUser: '创建第一个用户',
     emailNotValid: '所提供的电子邮件时无效的',
+    emailOrUsername: '电子邮件或用户名',
     emailSent: '电子邮件已发送',
     emailVerified: '电子邮件验证成功。',
     enableAPIKey: '启用API密钥',
@@ -288,6 +289,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     updating: '更新中',
     uploading: '上传中',
     user: '用户',
+    username: '用户名',
     users: '用户',
     value: '值',
     welcome: '欢迎',
@@ -350,6 +352,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: '该字段需要两个数字。',
     shorterThanMax: '该值必须小于{{maxLength}}字符的最大长度',
     trueOrFalse: '该字段只能等于真或伪。',
+    username: '请输入一个有效的用户名。可包含字母，数字，连字符，句点和下划线。',
     validUploadID: '该字段不是有效的上传ID。',
   },
   version: {

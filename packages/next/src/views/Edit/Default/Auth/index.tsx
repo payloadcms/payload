@@ -98,14 +98,16 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          {!loginWithUsername && (
+          {(!loginWithUsername ||
+            loginWithUsername?.allowEmailLogin ||
+            loginWithUsername?.requireEmail) && (
             <EmailField
               autoComplete="email"
               disabled={disabled}
               label={t('general:email')}
               name="email"
               readOnly={readOnly}
-              required
+              required={!loginWithUsername || loginWithUsername?.requireEmail}
             />
           )}
           {loginWithUsername && (
