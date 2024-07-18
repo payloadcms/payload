@@ -26,7 +26,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
-  siblingDocKeys: Set<string>
+  siblingDocKeys?: Set<string>
 }
 
 export const traverseFields = async <T>({
