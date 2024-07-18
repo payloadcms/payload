@@ -320,7 +320,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     within: 'dentro',
   },
   upload: {
-    addImage: 'Adicionar imagem',
+    addFile: 'Adicionar arquivo',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',

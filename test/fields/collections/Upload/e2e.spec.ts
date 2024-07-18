@@ -100,8 +100,8 @@ describe('Upload', () => {
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
 
-    const addImageButton = page.locator('.file-field__add-file')
-    await addImageButton.click()
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
 
     await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
 

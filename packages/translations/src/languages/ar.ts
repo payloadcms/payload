@@ -317,7 +317,7 @@ export const arTranslations: DefaultTranslationsObject = {
     within: 'في غضون',
   },
   upload: {
-    addImage: 'إضافة صورة',
+    addFile: 'إضافة ملف',
     crop: 'محصول',
     cropToolDescription: 'اسحب الزوايا المحددة للمنطقة، رسم منطقة جديدة أو قم بضبط القيم أدناه.',
     dragAndDrop: 'قم بسحب وإسقاط ملفّ',

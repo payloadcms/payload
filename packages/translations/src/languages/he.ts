@@ -313,7 +313,7 @@ export const heTranslations: DefaultTranslationsObject = {
     within: 'בתוך',
   },
   upload: {
-    addImage: 'הוסף תמונה',
+    addFile: 'הוסף קובץ',
     crop: 'חתוך',
     cropToolDescription: 'גרור את הפינות של האזור שנבחר, צייר אזור חדש או התאם את הערכים למטה.',
     dragAndDrop: 'גרור ושחרר קובץ',

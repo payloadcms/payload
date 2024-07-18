@@ -322,7 +322,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     within: 'в пределах',
   },
   upload: {
-    addImage: 'Добавить изображение',
+    addFile: 'Добавить файл',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',

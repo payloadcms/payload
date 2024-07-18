@@ -319,7 +319,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     within: 'unutar',
   },
   upload: {
-    addImage: 'Dodaj sliku',
+    addFile: 'Dodaj datoteku',
     crop: 'Usjev',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
