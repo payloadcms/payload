@@ -37,18 +37,20 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
   The `pages` collection is draft-enabled and has access control that restricts public users from viewing pages with a `_status` of `draft`. To fetch draft documents on your front-end, simply include the `draft=true` query param along with the `Authorization` header once you have entered [Preview Mode](#preview-mode).
 
   ```ts
-    const preview = true; // set this based on your own front-end environment (see `Preview Mode` below)
-    const pageSlug = 'example-page'; // same here
-    const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&draft=true` : ''}`
+  const preview = true // set this based on your own front-end environment (see `Preview Mode` below)
+  const pageSlug = 'example-page' // same here
+  const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&draft=true` : ''}`
 
-    // when previewing, send the payload token to bypass draft access control
-    const pageReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages${searchParams}`, {
-      headers: {
-        ...preview ? {
-          Authorization: `JWT ${payloadToken}`,
-        } : {},
-      },
-    })
+  // when previewing, send the payload token to bypass draft access control
+  const pageReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages${searchParams}`, {
+    headers: {
+      ...(preview
+        ? {
+            Authorization: `JWT ${payloadToken}`,
+          }
+        : {}),
+    },
+  })
   ```
 
   For more details on how to extend this functionality, see the [Authentication](https://payloadcms.com/docs/authentication) docs.
@@ -71,7 +73,7 @@ You might also want to render an admin bar on your front-end so that logged-in u
 
 ### CORS
 
-The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are configured to ensure that the admin panel and front-end can communicate with each other securely. If you are combining your front-end and admin panel into a single application that runs of a shared port and domain, you can simplify your config by removing these settings.
+The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/overview#options) settings are configured to ensure that the admin panel and front-end can communicate with each other securely. If you are combining your front-end and admin panel into a single application that runs of a shared port and domain, you can simplify your config by removing these settings.
 
 For more details on this, see the [CORS](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors) docs.
 
