@@ -18,6 +18,7 @@ export const enTranslations = {
     confirmPassword: 'Confirm Password',
     createFirstUser: 'Create first user',
     emailNotValid: 'The email provided is not valid',
+    emailOrUsername: 'Email or Username',
     emailSent: 'Email Sent',
     emailVerified: 'Email verified successfully.',
     enableAPIKey: 'Enable API Key',
@@ -298,6 +299,7 @@ export const enTranslations = {
     updating: 'Updating',
     uploading: 'Uploading',
     user: 'User',
+    username: 'Username',
     users: 'Users',
     value: 'Value',
     welcome: 'Welcome',
@@ -362,6 +364,8 @@ export const enTranslations = {
     requiresTwoNumbers: 'This field requires two numbers.',
     shorterThanMax: 'This value must be shorter than the max length of {{maxLength}} characters.',
     trueOrFalse: 'This field can only be equal to true or false.',
+    username:
+      'Please enter a valid username. Can contain letters, numbers, hyphens, periods and underscores.',
     validUploadID: 'This field is not a valid upload ID.',
   },
   version: {

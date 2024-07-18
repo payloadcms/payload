@@ -17,6 +17,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Kreiraj prvog korisnika',
     emailNotValid: 'Adresa e-pošte nije validna',
+    emailOrUsername: 'Email ili Korisničko ime',
     emailSent: 'Poruka e-pošte prosleđena',
     emailVerified: 'E-pošta je uspešno verifikovana.',
     enableAPIKey: 'Omogući API ključ',
@@ -295,6 +296,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     updating: 'Ažuriranje',
     uploading: 'Prenos',
     user: 'Korisnik',
+    username: 'Korisničko ime',
     users: 'Korisnici',
     value: 'Vrednost',
     welcome: 'Dobrodošli',
@@ -359,6 +361,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Ovo polje zahteva dva broja.',
     shorterThanMax: 'Ova vrednost mora biti kraća od maksimalne dužine od {{maxLength}} karaktera',
     trueOrFalse: 'Ovo polje može biti samo tačno ili netačno',
+    username:
+      'Molimo unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, tačke i donje crte.',
     validUploadID: 'Ovo polje ne sadrži validan ID prenosa.',
   },
   version: {

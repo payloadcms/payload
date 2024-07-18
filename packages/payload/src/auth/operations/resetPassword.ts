@@ -120,5 +120,3 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     throw error
   }
 }
-
-export default resetPasswordOperation
