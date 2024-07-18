@@ -267,9 +267,9 @@ const afterLogoutHook: CollectionAfterLogoutHook = async ({
 For auth-enabled Collections, this hook runs after `refresh` operations.
 
 ```ts
-import { CollectionRefreshHook } from 'payload/types';
+import { CollectionAfterRefreshHook } from 'payload/types';
 
-const afterRefreshHook: CollectionRefreshHook = async ({
+const afterRefreshHook: CollectionAfterRefreshHook = async ({
   req, // full express request
   res, // full express response
   token, // newly refreshed user token
@@ -281,9 +281,9 @@ const afterRefreshHook: CollectionRefreshHook = async ({
 For auth-enabled Collections, this hook runs after `me` operations.
 
 ```ts
-import { CollectionMeHook } from 'payload/types';
+import { CollectionAfterMeHook } from 'payload/types';
 
-const afterMeHook: CollectionMeHook = async ({
+const afterMeHook: CollectionAfterMeHook = async ({
   req, // full express request
   response, // response to return
 }) => {...}
@@ -346,8 +346,8 @@ import type {
   CollectionBeforeLoginHook,
   CollectionAfterLoginHook,
   CollectionAfterLogoutHook,
-  CollectionRefreshHook,
-  CollectionMeHook,
+  CollectionAfterRefreshHook,
+  CollectionAfterMeHook,
   CollectionAfterForgotPasswordHook,
   CollectionRefreshHook,
   CollectionMeHook,
