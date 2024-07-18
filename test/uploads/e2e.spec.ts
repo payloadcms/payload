@@ -431,7 +431,7 @@ describe('uploads', () => {
         await page.getByText('Select a file').click()
         const fileChooser = await fileChooserPromise
         await wait(1000)
-        await fileChooser.setFiles(path.join(dirname, 'another-test-image.jpg'))
+        await fileChooser.setFiles(path.join(dirname, 'horizontal-squares.jpg'))
 
         await page.locator('.file-field__edit').click()
 
