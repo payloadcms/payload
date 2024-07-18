@@ -4,7 +4,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
-import React from 'react'
+import React, { cache } from 'react'
 import { homeStatic } from 'src/payload/seed/home-static'
 
 import type { Page as PageType } from '../../../payload-types'
@@ -68,20 +68,16 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
   return generateMeta({ doc: page })
 }
 
-const queryPageBySlug = async ({ slug }: { slug: string }) => {
+const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
-  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
-
-  const user = authResult?.user
 
   const result = await payload.find({
     collection: 'pages',
     draft,
     limit: 1,
-    overrideAccess: false,
-    user,
+    overrideAccess: true,
     where: {
       slug: {
         equals: slug,
@@ -90,4 +86,4 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
-}
+})
