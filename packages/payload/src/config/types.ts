@@ -30,11 +30,16 @@ import type { Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
+/**
+ * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
+ */
 export type PayloadComponent<
   TComponentServerProps extends object = Record<string, any>,
   TComponentClientProps extends object = Record<string, any>,
 > = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
 
+// We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
+// We also NEED to actually use those generics for this to work, thus they are part of the props.
 export type RawPayloadComponent<
   TComponentServerProps extends object = Record<string, any>,
   TComponentClientProps extends object = Record<string, any>,
@@ -67,13 +72,22 @@ export type PayloadReactComponent<TPayloadComponent> = React.FC<
   PayloadComponentProps<TPayloadComponent>
 >
 
-export type PayloadClientReactComponent<TPayloadComponent> = React.FC<
-  PayloadClientComponentProps<TPayloadComponent>
->
+// This also ensures that if never is passed to TComponentClientProps, this entire type will be never.
+// => TypeScript will now ensure that users cannot even define the typed Server Components if the PayloadComponent is marked as
+// Client-Only (marked as Client-Only = TComponentServerProps is never)
+export type PayloadClientReactComponent<TPayloadComponent> =
+  TPayloadComponent extends RawPayloadComponent<infer _, infer TComponentClientProps>
+    ? TComponentClientProps extends never
+      ? never
+      : React.FC<TComponentClientProps>
+    : never
 
-export type PayloadServerReactComponent<TPayloadComponent> = React.FC<
-  PayloadServerComponentProps<TPayloadComponent>
->
+export type PayloadServerReactComponent<TPayloadComponent> =
+  TPayloadComponent extends RawPayloadComponent<infer TComponentServerProps, infer _>
+    ? TComponentServerProps extends never
+      ? never
+      : React.FC<TComponentServerProps>
+    : never
 
 export type BinScriptConfig = {
   key: string
