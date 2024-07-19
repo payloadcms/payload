@@ -1,4 +1,10 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { SanitizedCollectionConfig } from './types.js'
+
+import { createClientFieldConfigs } from '../../fields/config/client.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
@@ -20,20 +26,13 @@ export type ClientCollectionConfig = {
   fields: ClientFieldConfig[]
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
 
-import type { TFunction } from '@payloadcms/translations'
-
-import type { ClientFieldConfig } from '../../fields/config/client.js'
-import type { SanitizedCollectionConfig } from './types.js'
-
-import { createClientFieldConfigs } from '../../fields/config/client.js'
-
 export const createClientCollectionConfig = ({
   collection,
   t,
 }: {
   collection: SanitizedCollectionConfig
   t: TFunction
-}) => {
+}): SanitizedCollectionConfig => {
   const sanitized = { ...collection }
   sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
 

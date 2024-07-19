@@ -1,10 +1,10 @@
 import type React from 'react'
 
-import type { PayloadComponent, ServerProps } from '../../config/types.js'
+import type { ServerProps } from '../../config/types.js'
 
 export type WithServerSidePropsComponentProps = {
   [key: string]: any
-  Component: PayloadComponent
+  Component: React.ComponentType<any>
   serverOnlyProps: ServerProps
 }
 
