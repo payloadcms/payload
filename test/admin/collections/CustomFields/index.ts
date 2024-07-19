@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { customFieldsSlug } from '../../slugs.js'
-import { CustomSelect } from './components/CustomSelect.js'
 
 export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
@@ -11,7 +10,7 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: CustomSelect,
+          Field: './components/CustomSelect.js',
         },
       },
     },

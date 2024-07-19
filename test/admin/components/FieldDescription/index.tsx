@@ -1,10 +1,10 @@
 'use client'
-import type { DescriptionComponent } from 'payload'
+import type { DescriptionComponent, PayloadClientReactComponent } from 'payload'
 
 import { useFieldProps, useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
-export const FieldDescriptionComponent: DescriptionComponent = () => {
+export const FieldDescriptionComponent: PayloadClientReactComponent<DescriptionComponent> = () => {
   const { path } = useFieldProps()
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
   const { value } = field || {}

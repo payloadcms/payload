@@ -30,12 +30,50 @@ import type { Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
-export type PayloadComponent<TComponentProps extends object = Record<string, any>> =
-  | {
-      path: string
-      props?: Record<string, any> & TComponentProps
-    }
-  | string
+export type PayloadComponent<
+  TComponentServerProps extends object = Record<string, any>,
+  TComponentClientProps extends object = Record<string, any>,
+> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
+
+export type RawPayloadComponent<
+  TComponentServerProps extends object = Record<string, any>,
+  TComponentClientProps extends object = Record<string, any>,
+> = {
+  clientProps?: TComponentClientProps
+  exportName?: string
+  path: string
+  serverProps?: TComponentServerProps
+}
+
+export type PayloadComponentProps<TPayloadComponent> =
+  TPayloadComponent extends RawPayloadComponent<
+    infer TComponentServerProps,
+    infer TComponentClientProps
+  >
+    ? TComponentClientProps | TComponentServerProps
+    : never
+
+export type PayloadClientComponentProps<TPayloadComponent> =
+  TPayloadComponent extends RawPayloadComponent<infer _, infer TComponentClientProps>
+    ? TComponentClientProps
+    : never
+
+export type PayloadServerComponentProps<TPayloadComponent> =
+  TPayloadComponent extends RawPayloadComponent<infer TComponentServerProps, infer _>
+    ? TComponentServerProps
+    : never
+
+export type PayloadReactComponent<TPayloadComponent> = React.FC<
+  PayloadComponentProps<TPayloadComponent>
+>
+
+export type PayloadClientReactComponent<TPayloadComponent> = React.FC<
+  PayloadClientComponentProps<TPayloadComponent>
+>
+
+export type PayloadServerReactComponent<TPayloadComponent> = React.FC<
+  PayloadServerComponentProps<TPayloadComponent>
+>
 
 export type BinScriptConfig = {
   key: string

@@ -756,16 +756,8 @@ export type { ClientConfig } from './config/client.js'
 export { createClientConfig } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
-export type {
-  Access,
-  AccessArgs,
-  EditViewComponent,
-  EntityDescription,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
-  SanitizedConfig,
-} from './config/types.js'
-export * from './config/types.js'
+
+export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'

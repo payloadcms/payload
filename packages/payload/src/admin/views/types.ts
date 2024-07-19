@@ -2,7 +2,7 @@ import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Locale } from '../../config/types.js'
+import type { Locale, PayloadComponent } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
@@ -22,7 +22,7 @@ export type AdminViewProps = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export type AdminViewComponent = React.ComponentType<AdminViewProps>
+export type AdminViewComponent = PayloadComponent<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 

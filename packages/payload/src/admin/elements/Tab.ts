@@ -40,7 +40,7 @@ export type DocumentTabConfig = {
   newTab?: boolean
 }
 
-export type DocumentTabComponent = React.ComponentType<{
+export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>
 
