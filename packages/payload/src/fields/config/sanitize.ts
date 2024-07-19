@@ -1,3 +1,4 @@
+import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -7,7 +8,6 @@ import {
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
-  ReservedFieldName,
 } from '../../errors/index.js'
 import { deepMerge } from '../../utilities/deepMerge.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
@@ -18,6 +18,7 @@ import validations from '../validations.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
+  collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
@@ -40,9 +41,8 @@ type Args = {
   validRelationships: null | string[]
 }
 
-export const reservedFieldNames = ['__v', 'salt', 'hash', 'file']
-
 export const sanitizeFields = async ({
+  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
@@ -60,11 +60,6 @@ export const sanitizeFields = async ({
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name)
-    }
-
-    // assert that field names are not one of reserved names
-    if (fieldAffectsData(field) && reservedFieldNames.includes(field.name)) {
-      throw new ReservedFieldName(field, field.name)
     }
 
     // Auto-label
@@ -116,10 +111,12 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      field.blocks = field.blocks.map((block) => ({
-        ...block,
-        fields: block.fields.concat(baseBlockFields),
-      }))
+      field.blocks = field.blocks.map((block) => {
+        return {
+          ...block,
+          fields: block.fields.concat(baseBlockFields),
+        }
+      })
     }
 
     if (field.type === 'array' && field.fields) {
