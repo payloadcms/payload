@@ -259,7 +259,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:crop',
   'upload:cropToolDescription',
   'upload:dragAndDrop',
-  'upload:addImage',
+  'upload:addFile',
   'upload:editImage',
   'upload:focalPoint',
   'upload:focalPointDescription',

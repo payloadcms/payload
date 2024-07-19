@@ -318,7 +318,7 @@ export const koTranslations: DefaultTranslationsObject = {
     within: '내에서',
   },
   upload: {
-    addImage: '이미지 추가',
+    addFile: '파일 추가',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',

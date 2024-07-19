@@ -7,7 +7,6 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
-import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -19,8 +18,6 @@ import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packagePublishList } from './lib/publishList.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
-
-const npmPublishLimit = pLimit(6)
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +34,7 @@ const {
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
   'git-commit': gitCommit = true, // Whether to run git commit operations
+  versionOverride = undefined,
   tag = 'latest',
 } = args
 
@@ -117,7 +115,7 @@ async function main() {
   //   )
   // }
 
-  const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag)
+  const nextReleaseVersion = versionOverride || semver.inc(monorepoVersion, bump, undefined, tag)
 
   if (!nextReleaseVersion) {
     abort(`Invalid nextReleaseVersion: ${nextReleaseVersion}`)
@@ -213,26 +211,21 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results = await Promise.allSettled(
-    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
-  )
+  const results: PublishResult[] = []
+  for (const pkg of packageDetails) {
+    const res = await publishSinglePackage(pkg, { dryRun })
+    results.push(res)
+  }
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
-  // New results format
   console.log(
     results
       .map((result) => {
-        if (result.status === 'rejected') {
-          console.error(result.reason)
-          return `  ❌ ${String(result.reason)}`
+        if (!result.success) {
+          console.error(result.details)
         }
-        const { name, success, details } = result.value
-        let summary = `  ${success ? '✅' : '❌'} ${name}`
-        if (details) {
-          summary += `\n    ${details}\n`
-        }
-        return summary
+        return `  ${result.success ? '✅' : '❌'} ${result.name}`
       })
       .join('\n') + '\n',
   )
@@ -253,12 +246,6 @@ main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
-
-/** Publish with promise concurrency throttling */
-async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
-  const { dryRun = false } = opts ?? {}
-  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
-}
 
 async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
   const { dryRun = false } = opts ?? {}
@@ -360,4 +347,10 @@ function header(message: string, opts?: { enable?: boolean }) {
   if (!enable) return
 
   console.log(chalk.bold.green(`${message}\n`))
+}
+
+type PublishResult = {
+  name: string
+  success: boolean
+  details?: string
 }

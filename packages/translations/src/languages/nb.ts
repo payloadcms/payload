@@ -319,7 +319,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     within: 'innen',
   },
   upload: {
-    addImage: 'Legg til bilde',
+    addFile: 'Legg til fil',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',

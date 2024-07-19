@@ -841,6 +841,7 @@ export type {
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
   APIError,
+  APIErrorName,
   AuthenticationError,
   DuplicateCollection,
   DuplicateFieldName,
@@ -861,6 +862,7 @@ export {
   NotFound,
   QueryError,
   ValidationError,
+  ValidationErrorName,
 } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'

@@ -1,4 +1,4 @@
-# Payload Multi-Tenant Example
+# Payload Multi-Tenant Example (Single Domain)
 
 This example demonstrates how to achieve a multi-tenancy in [Payload](https://github.com/payloadcms/payload) on a single domain. Tenants are separated by a `Tenants` collection.
 
@@ -6,12 +6,16 @@ This example demonstrates how to achieve a multi-tenancy in [Payload](https://gi
 
 To spin up this example locally, follow these steps:
 
-1. First clone the repo
-2. `cd YOUR_PROJECT_REPO && cp .env.example .env`
-3. `pnpm i && pnpm dev`
-4. run `yarn seed` to seed the database
-5. open `http://localhost:3000/admin` to access the admin panel
-6. Login with email `demo@payloadcms.com` and password `demo`
+1. Clone this repo
+1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+
+   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+
+1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+   - Press `y` when prompted to seed the database
+1. `open http://localhost:3000` to access the home page
+1. `open http://localhost:3000/admin` to access the admin panel
+   - Login with email `demo@payloadcms.com` and password `demo`
 
 ## How it works
 

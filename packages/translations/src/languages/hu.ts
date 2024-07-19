@@ -321,7 +321,7 @@ export const huTranslations: DefaultTranslationsObject = {
     within: 'belül',
   },
   upload: {
-    addImage: 'Kép hozzáadása',
+    addFile: 'Fájl hozzáadása',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',

@@ -323,7 +323,7 @@ export const esTranslations: DefaultTranslationsObject = {
     within: 'dentro de',
   },
   upload: {
-    addImage: 'Añadir imagen',
+    addFile: 'Añadir archivo',
     crop: 'Cultivo',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',

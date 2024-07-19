@@ -318,7 +318,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     within: 'в рамките на',
   },
   upload: {
-    addImage: 'Добавяне на изображение',
+    addFile: 'Добавяне на файл',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',

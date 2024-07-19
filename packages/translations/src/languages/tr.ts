@@ -323,7 +323,7 @@ export const trTranslations: DefaultTranslationsObject = {
     within: 'içinde',
   },
   upload: {
-    addImage: 'Resim ekle',
+    addFile: 'Dosya ekle',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',

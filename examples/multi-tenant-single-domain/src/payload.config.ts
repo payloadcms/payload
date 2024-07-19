@@ -4,10 +4,10 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Pages } from './cms/collections/Pages/index.js'
-import { Tenants } from './cms/collections/Tenants/index.js'
-import Users from './cms/collections/Users/index.js'
-import { TenantSelectorRSC } from './cms/components/TenantSelector/index.js'
+import { Pages } from './collections/Pages'
+import { Tenants } from './collections/Tenants'
+import Users from './collections/Users'
+import { TenantSelectorRSC } from './components/TenantSelector'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

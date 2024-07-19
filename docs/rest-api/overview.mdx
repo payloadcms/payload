@@ -599,7 +599,7 @@ export const Orders: CollectionConfig = {
     {
       path: '/:id/tracking',
       method: 'get',
-      handler: (req) => {
+      handler: async (req) => {
         const tracking = await getTrackingInfo(req.params.id)
 
         if (!tracking) {
@@ -614,7 +614,7 @@ export const Orders: CollectionConfig = {
     {
       path: '/:id/tracking',
       method: 'post',
-      handler: (req) => {
+      handler: async (req) => {
         // `data` is not automatically appended to the request
         // if you would like to read the body of the request
         // you can use `data = await req.json()`
@@ -654,7 +654,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 {
   path: '/:id/tracking',
   method: 'post',
-  handler: (req) => {
+  handler: async (req) => {
     await addDataAndFileToRequest(req)
     await req.payload.update({
       collection: 'tracking',
@@ -680,7 +680,7 @@ import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
 {
   path: '/:id/tracking',
   method: 'post',
-  handler: (req) => {
+  handler: async (req) => {
     await addLocalesToRequestFromData(req)
     // you now can access req.locale & req.fallbackLocale
     return Response.json({ message: 'success' })
