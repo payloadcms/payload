@@ -30,6 +30,13 @@ import type { Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
+export type PayloadComponent<TComponentProps extends object = Record<string, any>> =
+  | {
+      path: string
+      props?: Record<string, any> & TComponentProps
+    }
+  | string
+
 export type BinScriptConfig = {
   key: string
   scriptPath: string
@@ -294,7 +301,7 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = React.ComponentType<ServerSideEditViewProps>
+export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
 
 export type EditViewConfig =
   | {
@@ -345,9 +352,8 @@ export const serverProps: (keyof ServerProps)[] = [
   'permissions',
 ]
 
-export type CustomComponent<TAdditionalProps extends any = any> = React.ComponentType<
-  Partial<ServerProps> & TAdditionalProps
->
+export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
+  PayloadComponent<Partial<ServerProps> & TAdditionalProps>
 
 export type Locale = {
   /**
@@ -474,7 +480,12 @@ export type Config = {
         }
       | false
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
-    avatar?: 'default' | 'gravatar' | React.ComponentType<any>
+    avatar?:
+      | 'default'
+      | 'gravatar'
+      | {
+          Component: PayloadComponent
+        }
 
     /**
      * Add extra and/or replace built-in components with custom components
@@ -529,7 +540,7 @@ export type Config = {
       /**
        * Wrap the admin dashboard in custom context providers
        */
-      providers?: React.ComponentType<{ children?: React.ReactNode }>[]
+      providers?: PayloadComponent<{ children?: React.ReactNode }>[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`

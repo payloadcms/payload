@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest, RequestContext } from '../types/index.js'
@@ -186,7 +186,9 @@ type RichTextAdapterBase<
   ExtraFieldProperties = {},
 > = {
   generateComponentMap: (args: {
-    WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
+    WithServerSideProps: PayloadComponent<
+      Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>
+    >
     config: SanitizedConfig
     i18n: I18nClient
     schemaPath: string
@@ -249,8 +251,8 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  CellComponent: React.FC<any>
-  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+  CellComponent: PayloadComponent<any>
+  FieldComponent: PayloadComponent<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

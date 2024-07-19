@@ -1,26 +1,28 @@
+import type { PayloadComponent } from '../../config/types.js'
+
 export type FieldTypes = {
-  array: React.ComponentType<any>
-  blocks: React.ComponentType<any>
-  checkbox: React.ComponentType<any>
-  code: React.ComponentType<any>
-  collapsible: React.ComponentType<any>
-  confirmPassword: React.ComponentType<any>
-  date: React.ComponentType<any>
-  email: React.ComponentType<any>
-  group: React.ComponentType<any>
-  hidden: React.ComponentType<any>
-  json: React.ComponentType<any>
-  number: React.ComponentType<any>
-  password: React.ComponentType<any>
-  point: React.ComponentType<any>
-  radio: React.ComponentType<any>
-  relationship: React.ComponentType<any>
-  richText: React.ComponentType<any>
-  row: React.ComponentType<any>
-  select: React.ComponentType<any>
-  tabs: React.ComponentType<any>
-  text: React.ComponentType<any>
-  textarea: React.ComponentType<any>
-  ui: React.ComponentType<any>
-  upload: React.ComponentType<any>
+  array: PayloadComponent
+  blocks: PayloadComponent
+  checkbox: PayloadComponent
+  code: PayloadComponent
+  collapsible: PayloadComponent
+  confirmPassword: PayloadComponent
+  date: PayloadComponent
+  email: PayloadComponent
+  group: PayloadComponent
+  hidden: PayloadComponent
+  json: PayloadComponent
+  number: PayloadComponent
+  password: PayloadComponent
+  point: PayloadComponent
+  radio: PayloadComponent
+  relationship: PayloadComponent
+  richText: PayloadComponent
+  row: PayloadComponent
+  select: PayloadComponent
+  tabs: PayloadComponent
+  text: PayloadComponent
+  textarea: PayloadComponent
+  ui: PayloadComponent
+  upload: PayloadComponent
 }

@@ -25,6 +25,7 @@ import type {
   LabelFunction,
   LivePreviewConfig,
   OpenGraphConfig,
+  PayloadComponent,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -286,10 +287,10 @@ export type CollectionAdminOptions = {
       Edit?: EditConfig
       List?:
         | {
-            Component?: React.ComponentType<any>
+            Component?: PayloadComponent
             actions?: CustomComponent[]
           }
-        | React.ComponentType<any>
+        | PayloadComponent
     }
   }
   /** Extension point to add your custom data. Available in server and client. */

@@ -18,7 +18,7 @@ import type {
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { CustomComponent, LabelFunction } from '../../config/types.js'
+import type { CustomComponent, LabelFunction, PayloadComponent } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'
@@ -137,7 +137,7 @@ type Admin = {
     /**
      * The Filter component has to be a client component
      */
-    Filter?: React.ComponentType<any>
+    Filter?: PayloadComponent
   }
   /**
    * You can programmatically show / hide fields based on what other fields are doing.
@@ -480,7 +480,7 @@ export type UIField = {
       /**
        * The Filter component has to be a client component
        */
-      Filter?: React.ComponentType<any>
+      Filter?: PayloadComponent
     }
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
@@ -728,7 +728,7 @@ export type RadioField = {
 export type Block = {
   admin?: {
     components?: {
-      Label?: React.FC<{
+      Label?: PayloadComponent<{
         blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
         /**
          * May contain the formData
