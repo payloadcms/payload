@@ -1,7 +1,6 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type { SelectFieldProps } from '@payloadcms/ui'
 import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { Option, OptionObject, SelectField } from 'payload'
+import { getSelectedOptionLabels } from '@payloadcms/ui'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -14,41 +13,6 @@ import { DiffViewer } from './DiffViewer/index.js'
 import './index.scss'
 
 const baseClass = 'select-diff'
-
-function getSelectedOptionValues(
-  selectedOptions: string[],
-  options: Option[],
-  i18n: I18nClient,
-): string[] {
-  const uniqueSelectOptions = selectedOptions.reduce((acc: Set<string>, selectedOption) => {
-    options.forEach((option) => {
-      if (typeof option === 'string') {
-        if (option === selectedOption) acc.add(getTranslation(option, i18n))
-      } else if ('options' in option) {
-        acc = new Set([...acc, ...getSelectedOptionValues(selectedOptions, option.options, i18n)])
-      } else if (option.value === selectedOption) {
-        acc.add(getTranslation(option.label, i18n))
-      }
-    })
-
-    return acc
-  }, new Set<string>())
-
-  return [...uniqueSelectOptions]
-}
-
-const getTranslatedOptions = (
-  options: (OptionObject | string)[] | OptionObject | string,
-  i18n: I18nClient,
-): string => {
-  if (Array.isArray(options)) {
-    return options
-      .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
-      .join(', ')
-  }
-
-  return typeof options === 'string' ? options : getTranslation(options.label, i18n)
-}
 
 const Select: React.FC<
   {
@@ -63,18 +27,20 @@ const Select: React.FC<
 
   const comparisonToRender =
     typeof comparison !== 'undefined'
-      ? getSelectedOptionValues(
-          Array.isArray(comparison) ? comparison : [comparison],
+      ? getSelectedOptionLabels({
+          selectedOptions: Array.isArray(comparison) ? comparison : [comparison],
           options,
           i18n,
-        ).join(', ')
+        }).join(', ')
       : placeholder
 
   const versionToRender =
     typeof version !== 'undefined'
-      ? getSelectedOptionValues(Array.isArray(version) ? version : [version], options, i18n).join(
-          ', ',
-        )
+      ? getSelectedOptionLabels({
+          selectedOptions: Array.isArray(version) ? version : [version],
+          options,
+          i18n,
+        }).join(', ')
       : placeholder
 
   return (

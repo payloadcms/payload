@@ -1,39 +1,24 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps, Option, OptionObject } from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
+import { getSelectedOptionLabels } from '../../../../../fields/Select/utils.js'
 
 export interface SelectCellProps extends DefaultCellComponentProps<any> {
   options: CellComponentProps['options']
 }
 
-export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options: allOptions }) => {
+export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options }) => {
   const { i18n } = useTranslation()
 
-  function getSelectedOptionLabels(
-    selectedOptions: string[],
-    options: Option[] = allOptions,
-  ): Set<string> {
-    return selectedOptions.reduce((acc: Set<string>, selectedOption) => {
-      options.forEach((option) => {
-        if (typeof option === 'string') {
-          if (option === selectedOption) acc.add(getTranslation(option, i18n))
-        } else if ('options' in option) {
-          acc = new Set([...acc, ...getSelectedOptionLabels(selectedOptions, option.options)])
-        } else if (option.value === selectedOption) {
-          acc.add(getTranslation(option.label, i18n))
-        }
-      })
-
-      return acc
-    }, new Set<string>())
-  }
-
   const content = [
-    ...getSelectedOptionLabels(Array.isArray(cellData) ? cellData : [cellData]),
+    ...getSelectedOptionLabels({
+      selectedOptions: Array.isArray(cellData) ? cellData : [cellData],
+      options,
+      i18n,
+    }),
   ].join(', ')
 
   return <span>{content}</span>

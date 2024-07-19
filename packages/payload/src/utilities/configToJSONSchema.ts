@@ -14,6 +14,7 @@ import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { flattenOptionValues } from '../fields/flattenOptionValues.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -38,19 +39,6 @@ const fieldIsRequired = (field: Field) => {
   }
 
   return false
-}
-
-function buildOptionEnums(options: Option[]): string[] {
-  return options.reduce((acc, option) => {
-    if (typeof option === 'string') {
-      acc.push(option)
-    } else if ('options' in option) {
-      acc.push(...buildOptionEnums(option.options))
-    } else {
-      acc.push(option.value)
-    }
-    return acc
-  }, [])
 }
 
 function generateEntitySchemas(
@@ -250,14 +238,14 @@ export function fieldsToJSONSchema(
           case 'radio': {
             fieldSchema = {
               type: withNullableJSONSchemaType('string', isRequired),
-              enum: buildOptionEnums(field.options),
+              enum: flattenOptionValues(field.options),
             }
 
             break
           }
 
           case 'select': {
-            const optionEnums = buildOptionEnums(field.options)
+            const optionEnums = flattenOptionValues(field.options)
 
             if (field.hasMany) {
               fieldSchema = {

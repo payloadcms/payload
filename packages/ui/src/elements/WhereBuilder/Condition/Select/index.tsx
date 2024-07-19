@@ -1,30 +1,11 @@
 'use client'
-import type { Option, OptionObject } from 'payload'
-
-import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-
-const formatOptions = (options: Option[]): OptionObject[] =>
-  options.reduce((acc, option) => {
-    if (typeof option === 'string') {
-      return [
-        ...acc,
-        {
-          label: option,
-          value: option,
-        },
-      ]
-    } else if ('options' in option) {
-      return [...acc, ...formatOptions(option.options)]
-    } else {
-      return acc
-    }
-  }, [])
+import { buildReactSelectOptions, buildReactSelectValues } from '../../../../fields/Select/utils.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
@@ -34,26 +15,21 @@ export const Select: React.FC<Props> = ({
   value,
 }) => {
   const { i18n } = useTranslation()
-  const [options, setOptions] = React.useState(formatOptions(optionsFromProps))
+  const options = React.useMemo(
+    () =>
+      buildReactSelectOptions({
+        options: optionsFromProps,
+        i18n,
+      }),
+    [optionsFromProps],
+  )
 
   const isMulti = ['in', 'not_in'].includes(operator)
-  let valueToRender
-
-  if (isMulti && Array.isArray(value)) {
-    valueToRender = value.map((val) => {
-      const matchingOption = options.find((option) => option.value === val)
-      return {
-        label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
-        value: matchingOption?.value ?? val,
-      }
-    })
-  } else if (value) {
-    const matchingOption = options.find((option) => option.value === value)
-    valueToRender = {
-      label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
-      value: matchingOption?.value ?? value,
-    }
-  }
+  const values = buildReactSelectValues({
+    options: optionsFromProps,
+    values: typeof value === 'string' ? [value] : value,
+    i18n,
+  })
 
   const onSelect = React.useCallback(
     (selectedOption) => {
@@ -76,10 +52,6 @@ export const Select: React.FC<Props> = ({
   )
 
   React.useEffect(() => {
-    setOptions(formatOptions(optionsFromProps))
-  }, [optionsFromProps])
-
-  React.useEffect(() => {
     if (!isMulti && Array.isArray(value)) {
       onChange(value[0])
     }
@@ -90,8 +62,8 @@ export const Select: React.FC<Props> = ({
       disabled={disabled}
       isMulti={isMulti}
       onChange={onSelect}
-      options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
-      value={valueToRender}
+      options={options}
+      value={values}
     />
   )
 }

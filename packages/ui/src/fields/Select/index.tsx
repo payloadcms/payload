@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Option, OptionObject, OptionGroup } from 'payload'
+import type { ClientValidate, Option, OptionObject } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -11,6 +11,8 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
+import { buildReactSelectOptions, buildReactSelectValues } from './utils.js'
+import { useTranslation } from '@payloadcms/ui'
 
 export type SelectFieldProps = {
   hasMany?: boolean
@@ -23,24 +25,6 @@ export type SelectFieldProps = {
   value?: string
   width?: string
 } & FormFieldBase
-
-const formatOptions = (options: Option[]): (OptionObject | OptionGroup)[] => {
-  return options.map((option) => {
-    if (typeof option === 'string') {
-      return {
-        label: option,
-        value: option,
-      }
-    } else if ('options' in option) {
-      return {
-        label: option.label,
-        options: formatOptions(option.options),
-      } as OptionGroup
-    } else {
-      return option
-    }
-  })
-}
 
 const _SelectField: React.FC<SelectFieldProps> = (props) => {
   const {
@@ -68,7 +52,16 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
     width,
   } = props
 
-  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
+  const { i18n } = useTranslation()
+
+  const options = React.useMemo(
+    () =>
+      buildReactSelectOptions({
+        options: optionsFromProps,
+        i18n,
+      }),
+    [optionsFromProps],
+  )
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
@@ -111,6 +104,12 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
     [disabled, hasMany, setValue, onChangeFromProps],
   )
 
+  const values = buildReactSelectValues({
+    options: optionsFromProps,
+    i18n,
+    values: Array.isArray(value) ? value : [value],
+  })
+
   return (
     <SelectInput
       AfterInput={AfterInput}
@@ -134,7 +133,7 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
       required={required}
       showError={showError}
       style={style}
-      value={value as string | string[]}
+      value={values}
       width={width}
     />
   )

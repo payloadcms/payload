@@ -48,6 +48,7 @@ import type {
 import { FieldDescription } from '../../../exports/client/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { HiddenField } from '../../../exports/client/index.js'
+import { sanitizeServerSideOptions } from '../../../fields/Select/utils.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -737,35 +738,7 @@ export const mapFields = (args: {
             break
           }
           case 'select': {
-            function createOptionLabel(option: Option) {
-              if (typeof option === 'object' && typeof option.label === 'function') {
-                return option.label({ t })
-              }
-              return typeof option === 'string' ? option : option.label
-            }
-
-            function generateOptions(options: Option[]) {
-              return options.map((option) => {
-                if (typeof option === 'string') {
-                  return {
-                    label: option,
-                    value: option,
-                  }
-                } else if ('options' in option) {
-                  return {
-                    label: createOptionLabel(option),
-                    options: generateOptions(option.options),
-                  }
-                } else {
-                  return {
-                    label: createOptionLabel(option),
-                    value: option.value,
-                  }
-                }
-              })
-            }
-
-            const selectOptions = generateOptions(field.options)
+            const selectOptions = sanitizeServerSideOptions({ options: field.options, t })
 
             const selectField: SelectFieldProps = {
               ...baseFieldProps,

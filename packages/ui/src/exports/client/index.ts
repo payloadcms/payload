@@ -105,6 +105,12 @@ export { RelationshipField } from '../../fields/Relationship/index.js'
 export { RichTextField } from '../../fields/RichText/index.js'
 export { RowField } from '../../fields/Row/index.js'
 export { SelectField, type SelectFieldProps, SelectInput } from '../../fields/Select/index.js'
+export {
+  getSelectedOptionLabels,
+  buildReactSelectOptions,
+  buildReactSelectValues,
+  sanitizeServerSideOptions,
+} from '../../fields/Select/utils.js'
 export { TabsField, type TabsFieldProps } from '../../fields/Tabs/index.js'
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export type { TextFieldProps, TextInputProps } from '../../fields/Text/index.js'

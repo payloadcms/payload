@@ -18,6 +18,8 @@ export {
   valueIsValueWithRelation,
 } from '../fields/config/types.js'
 
+export { flattenOptionValues } from '../fields/flattenOptionValues.js'
+
 export * from '../fields/validations.js'
 
 export { validOperators } from '../types/constants.js'

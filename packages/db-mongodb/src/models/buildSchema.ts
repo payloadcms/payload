@@ -34,6 +34,7 @@ import {
   fieldAffectsData,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
+  flattenOptionValues,
   tabHasName,
 } from 'payload/shared'
 
@@ -497,21 +498,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const generateEnumOptions = (options: SelectField['options']): string[] => {
-      return options.reduce((acc, option) => {
-        if (typeof option === 'string') {
-          return [...acc, option]
-        } else if ('options' in option) {
-          return [...acc, ...generateEnumOptions(option.options)]
-        }
-        return [...acc, option.value]
-      }, [])
-    }
-
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
-      enum: generateEnumOptions(field.options),
+      enum: flattenOptionValues(field.options),
     }
 
     if (buildSchemaOptions.draftsEnabled || !field.required) {

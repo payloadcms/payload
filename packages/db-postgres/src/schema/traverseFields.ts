@@ -1,4 +1,3 @@
- 
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, Option, TabAsField } from 'payload'
@@ -20,7 +19,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, flattenOptionValues } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
@@ -232,22 +231,9 @@ export const traverseFields = ({
           throwValidationError,
         })
 
-        function buildOptionEnums(options: Option[]): string[] {
-          return options.reduce((acc, option) => {
-            if (typeof option === 'string') {
-              acc.push(option)
-            } else if ('options' in option) {
-              acc.push(...buildOptionEnums(option.options))
-            } else {
-              acc.push(option.value)
-            }
-            return acc
-          }, [])
-        }
-
         adapter.enums[enumName] = pgEnum(
           enumName,
-          buildOptionEnums(field.options) as [string, ...string[]],
+          flattenOptionValues(field.options) as [string, ...string[]],
         )
 
         if (field.type === 'select' && field.hasMany) {
