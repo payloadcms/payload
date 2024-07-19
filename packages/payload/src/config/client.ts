@@ -15,7 +15,6 @@ import { createClientGlobalConfigs } from '../globals/config/client.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
-  | 'autoLogin'
   | 'bin'
   | 'cors'
   | 'csrf'
@@ -45,7 +44,6 @@ export type ClientConfig = {
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
 const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
-  'autoLogin',
   'endpoints',
   'db',
   'editor',

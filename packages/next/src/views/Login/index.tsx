@@ -70,16 +70,23 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
 
-  const prefillAutoLogin = typeof config.autoLogin === 'object' && config.autoLogin.prefillOnly
+  const prefillAutoLogin =
+    typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
 
   const prefillUsername =
-    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.username : undefined
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.username
+      : undefined
 
   const prefillEmail =
-    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.email : undefined
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.email
+      : undefined
 
   const prefillPassword =
-    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.password : undefined
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.password
+      : undefined
 
   return (
     <Fragment>

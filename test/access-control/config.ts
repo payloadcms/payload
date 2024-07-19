@@ -61,9 +61,9 @@ function isUser(user: Config['user']): user is {
 
 export default buildConfigWithDefaults({
   admin: {
+    autoLogin: false,
     user: 'users',
   },
-  autoLogin: false,
   collections: [
     {
       slug: 'users',

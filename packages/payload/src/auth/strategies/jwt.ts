@@ -20,24 +20,24 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
 
     if (
       !token &&
-      typeof payload?.config?.autoLogin === 'object' &&
-      !payload.config.autoLogin.prefillOnly
+      typeof payload?.config?.admin?.autoLogin === 'object' &&
+      !payload.config.admin?.autoLogin.prefillOnly
     ) {
       const collection = payload.collections[payload.config.admin.user]
 
       const where: Where = {
         or: [],
       }
-      if (payload.config.autoLogin.email) {
+      if (payload.config.admin?.autoLogin.email) {
         where.or.push({
           email: {
-            equals: payload.config.autoLogin.email,
+            equals: payload.config.admin?.autoLogin.email,
           },
         })
-      } else if (payload.config.autoLogin.username) {
+      } else if (payload.config.admin?.autoLogin.username) {
         where.or.push({
           username: {
-            equals: payload.config.autoLogin.username,
+            equals: payload.config.admin?.autoLogin.username,
           },
         })
       }

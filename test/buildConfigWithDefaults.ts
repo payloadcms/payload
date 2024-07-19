@@ -179,7 +179,10 @@ export async function buildConfigWithDefaults(
     },
   }
 
-  config.autoLogin =
+  if (!config.admin) {
+    config.admin = {}
+  }
+  config.admin.autoLogin =
     process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
       ? false
       : {
