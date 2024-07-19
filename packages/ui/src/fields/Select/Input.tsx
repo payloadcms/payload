@@ -24,17 +24,20 @@ function extractOptionObject({ options, value }: ExtractOptionObjectArgs): Optio
   return options.reduce<OptionObject>((acc, option) => {
     if (acc) return acc
     if (typeof option === 'string') {
-      acc[option] = {
-        label: option,
-        value: option,
+      if (option === value) {
+        acc = {
+          label: option,
+          value: option,
+        }
       }
     } else if ('value' in option && option.value === value) {
       acc = option
     } else if ('options' in option) {
-      acc = extractOptionObject({ options: option.options, value })
+      const foundMatch = extractOptionObject({ options: option.options, value })
+      if (foundMatch) acc = foundMatch
     }
     return acc
-  }, {} as OptionObject)
+  }, undefined)
 }
 
 type GenerateOptionsArgs = {
@@ -116,7 +119,6 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => {
       const matchingOption = extractOptionObject({ options, value: val })
-
       return {
         label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
         value: matchingOption?.value ?? val,
@@ -124,14 +126,12 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     })
   } else if (typeof value === 'string') {
     const matchingOption = extractOptionObject({ options, value })
-
     valueToRender = {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
   }
 
-  console.log({ valueToRender })
   return (
     <div
       className={[

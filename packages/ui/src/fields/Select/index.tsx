@@ -30,17 +30,15 @@ const formatOptions = (options: Option[]): (OptionObject | OptionGroup)[] => {
       return {
         label: option,
         value: option,
-      } as OptionObject
-    }
-
-    if ('options' in option) {
+      }
+    } else if ('options' in option) {
       return {
         label: option.label,
         options: formatOptions(option.options),
       } as OptionGroup
+    } else {
+      return option
     }
-
-    return option as OptionObject
   })
 }
 

@@ -738,12 +738,9 @@ export const mapFields = (args: {
             break
           }
           case 'select': {
-            function createOptionLabel(option) {
+            function createOptionLabel(option: Option) {
               if (typeof option === 'object' && typeof option.label === 'function') {
-                return {
-                  label: option.label({ t }),
-                  value: option.value,
-                }
+                return option.label({ t })
               }
               return typeof option === 'string' ? option : option.label
             }
@@ -757,12 +754,12 @@ export const mapFields = (args: {
                   }
                 } else if ('options' in option) {
                   return {
-                    label: createOptionLabel(option.label),
+                    label: createOptionLabel(option),
                     options: generateOptions(option.options),
                   }
                 } else {
                   return {
-                    label: createOptionLabel(option.label),
+                    label: createOptionLabel(option),
                     value: option.value,
                   }
                 }

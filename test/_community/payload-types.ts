@@ -81,9 +81,7 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  customSelect?: {
-    [k: string]: unknown;
-  } | null;
+  presidents?: ('1' | '2' | '3' | '4' | 'James Monroe')[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;

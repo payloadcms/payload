@@ -43,22 +43,37 @@ export const PostsCollection: CollectionConfig = {
       }),
     },
     {
-      name: 'customSelect',
+      name: 'presidents',
       type: 'select',
-      // admin: {
-      //   components: {
-      //     Field: MyComponent,
-      //   },
-      // },
+      hasMany: true,
       options: [
         {
-          label: 'group1',
+          label: '1700s',
           options: [
             {
-              label: 'Group-1 Item-1',
-              value: 'group1Item1',
+              label: 'George Washington',
+              value: '1',
             },
-            '123',
+            {
+              label: 'John Adams',
+              value: '2',
+            },
+          ],
+        },
+        {
+          label: '1800s',
+          options: [
+            {
+              label: 'Thomas Jefferson',
+              value: '3',
+            },
+            {
+              label: {
+                en: 'James Madison',
+              },
+              value: '4',
+            },
+            'James Monroe',
           ],
         },
       ],
