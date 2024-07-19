@@ -13,13 +13,16 @@ export interface SelectCellProps extends DefaultCellComponentProps<any> {
 export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options: allOptions }) => {
   const { i18n } = useTranslation()
 
-  function createCellText(selectedOptions: string[], options: Option[] = allOptions): Set<string> {
+  function getSelectedOptionLabels(
+    selectedOptions: string[],
+    options: Option[] = allOptions,
+  ): Set<string> {
     return selectedOptions.reduce((acc: Set<string>, selectedOption) => {
       options.forEach((option) => {
         if (typeof option === 'string') {
           if (option === selectedOption) acc.add(getTranslation(option, i18n))
         } else if ('options' in option) {
-          acc = new Set([...acc, ...createCellText(selectedOptions, option.options)])
+          acc = new Set([...acc, ...getSelectedOptionLabels(selectedOptions, option.options)])
         } else if (option.value === selectedOption) {
           acc.add(getTranslation(option.label, i18n))
         }
@@ -29,7 +32,9 @@ export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options: allOp
     }, new Set<string>())
   }
 
-  const content = [...createCellText(Array.isArray(cellData) ? cellData : [cellData])].join(', ')
+  const content = [
+    ...getSelectedOptionLabels(Array.isArray(cellData) ? cellData : [cellData]),
+  ].join(', ')
 
   return <span>{content}</span>
 }

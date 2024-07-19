@@ -497,13 +497,21 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
+    const generateEnumOptions = (options: SelectField['options']): string[] => {
+      return options.reduce((acc, option) => {
+        if (typeof option === 'string') {
+          return [...acc, option]
+        } else if ('options' in option) {
+          return [...acc, ...generateEnumOptions(option.options)]
+        }
+        return [...acc, option.value]
+      }, [])
+    }
+
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
-      enum: field.options.map((option) => {
-        if (typeof option === 'object') return option.value
-        return option
-      }),
+      enum: generateEnumOptions(field.options),
     }
 
     if (buildSchemaOptions.draftsEnabled || !field.required) {

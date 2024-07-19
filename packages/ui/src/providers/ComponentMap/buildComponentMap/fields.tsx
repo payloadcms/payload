@@ -7,7 +7,6 @@ import type {
   FieldWithPath,
   LabelProps,
   Option,
-  RadioOption,
   SanitizedConfig,
 } from 'payload'
 

@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { SelectFieldProps } from '@payloadcms/ui'
 import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { OptionObject, SelectField } from 'payload'
+import type { Option, OptionObject, SelectField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -15,22 +15,26 @@ import './index.scss'
 
 const baseClass = 'select-diff'
 
-const getOptionsToRender = (
-  value: string,
-  options: SelectField['options'],
-  hasMany: boolean,
-): (OptionObject | string)[] | OptionObject | string => {
-  if (hasMany && Array.isArray(value)) {
-    return value.map(
-      (val) =>
-        options.find((option) => (typeof option === 'string' ? option : option.value) === val) ||
-        String(val),
-    )
-  }
-  return (
-    options.find((option) => (typeof option === 'string' ? option : option.value) === value) ||
-    String(value)
-  )
+function getSelectedOptionValues(
+  selectedOptions: string[],
+  options: Option[],
+  i18n: I18nClient,
+): string[] {
+  const uniqueSelectOptions = selectedOptions.reduce((acc: Set<string>, selectedOption) => {
+    options.forEach((option) => {
+      if (typeof option === 'string') {
+        if (option === selectedOption) acc.add(getTranslation(option, i18n))
+      } else if ('options' in option) {
+        acc = new Set([...acc, ...getSelectedOptionValues(selectedOptions, option.options, i18n)])
+      } else if (option.value === selectedOption) {
+        acc.add(getTranslation(option.label, i18n))
+      }
+    })
+
+    return acc
+  }, new Set<string>())
+
+  return [...uniqueSelectOptions]
 }
 
 const getTranslatedOptions = (
@@ -59,12 +63,18 @@ const Select: React.FC<
 
   const comparisonToRender =
     typeof comparison !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(comparison, options, field.hasMany), i18n)
+      ? getSelectedOptionValues(
+          Array.isArray(comparison) ? comparison : [comparison],
+          options,
+          i18n,
+        ).join(', ')
       : placeholder
 
   const versionToRender =
     typeof version !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(version, options, field.hasMany), i18n)
+      ? getSelectedOptionValues(Array.isArray(version) ? version : [version], options, i18n).join(
+          ', ',
+        )
       : placeholder
 
   return (

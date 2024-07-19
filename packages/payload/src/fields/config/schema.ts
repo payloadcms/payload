@@ -1,4 +1,4 @@
-import joi, { alternatives } from 'joi'
+import joi from 'joi'
 
 import { componentSchema } from '../../config/shared/componentSchema.js'
 

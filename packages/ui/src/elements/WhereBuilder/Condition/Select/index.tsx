@@ -10,16 +10,21 @@ import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
-  options.map((option) => {
-    if (typeof option === 'object' && (option.value || option.value === '')) {
-      return option
+  options.reduce((acc, option) => {
+    if (typeof option === 'string') {
+      return [
+        ...acc,
+        {
+          label: option,
+          value: option,
+        },
+      ]
+    } else if ('options' in option) {
+      return [...acc, ...formatOptions(option.options)]
+    } else {
+      return acc
     }
-
-    return {
-      label: option,
-      value: option,
-    } as OptionObject
-  })
+  }, [])
 
 export const Select: React.FC<Props> = ({
   disabled,

@@ -1,25 +1,33 @@
-import type { RadioField, SelectField } from 'payload'
+import type { Option, RadioField, SelectField } from 'payload'
 
 import formatName from './formatName.js'
 
 const formatOptions = (field: RadioField | SelectField) => {
-  return field.options.reduce((values, option) => {
-    if (typeof option === 'object') {
+  const buildOptions = (options: Option[]) =>
+    options.reduce((values, option) => {
+      if (typeof option === 'string') {
+        return {
+          ...values,
+          [formatName(option)]: {
+            value: option,
+          },
+        }
+      } else if ('options' in option) {
+        return {
+          ...values,
+          ...buildOptions(option.options),
+        }
+      }
+
       return {
         ...values,
         [formatName(option.value)]: {
           value: option.value,
         },
       }
-    }
+    }, {})
 
-    return {
-      ...values,
-      [formatName(option)]: {
-        value: option,
-      },
-    }
-  }, {})
+  return buildOptions(field.options)
 }
 
 export default formatOptions
