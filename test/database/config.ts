@@ -284,7 +284,10 @@ const createDatabaseTestConfig = async () => {
   if (process.env.PAYLOAD_DATABASE === 'mongoose' || !process.env.PAYLOAD_DATABASE) {
     configWithDefaults.db = mongooseAdapter({
       migrationDir,
-      url: 'mongodb://127.0.0.1/payloadtests',
+      url:
+        process.env.MONGODB_MEMORY_SERVER_URI ||
+        process.env.DATABASE_URI ||
+        'mongodb://127.0.0.1/payloadtests',
       // Disable strict mode for Mongoose
       schemaOptions: {
         strict: false,
