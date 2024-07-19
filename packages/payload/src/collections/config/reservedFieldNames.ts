@@ -4,31 +4,37 @@ import type { CollectionConfig } from '../../index.js'
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 
+// Note for future reference: We've slimmed down the reserved field names but left them in here for reference in case it's needed in the future.
+
 /**
  * Reserved field names for collections with auth config enabled
  */
 const reservedBaseAuthFieldNames = [
-  'email',
+  /* 'email',
   'resetPasswordToken',
-  'resetPasswordExpiration',
+  'resetPasswordExpiration', */
   'salt',
   'hash',
 ]
 /**
  * Reserved field names for auth collections with verify: true
  */
-const reservedVerifyFieldNames = ['_verified', '_verificationToken']
+const reservedVerifyFieldNames = [
+  /* '_verified', '_verificationToken' */
+]
 /**
  * Reserved field names for auth collections with useApiKey: true
  */
-const reservedAPIKeyFieldNames = ['enableAPIKey', 'apiKeyIndex', 'apiKey']
+const reservedAPIKeyFieldNames = [
+  /* 'enableAPIKey', 'apiKeyIndex', 'apiKey' */
+]
 
 /**
  * Reserved field names for collections with upload config enabled
  */
 const reservedBaseUploadFieldNames = [
   'file',
-  'mimeType',
+  /* 'mimeType',
   'thumbnailURL',
   'width',
   'height',
@@ -37,13 +43,15 @@ const reservedBaseUploadFieldNames = [
   'url',
   'focalX',
   'focalY',
-  'sizes',
+  'sizes', */
 ]
 
 /**
  * Reserved field names for collections with versions enabled
  */
-const reservedVersionsFieldNames = ['__v', '_status']
+const reservedVersionsFieldNames = [
+  /* '__v', '_status' */
+]
 
 /**
  * Sanitize fields for collections with auth config enabled.
@@ -68,17 +76,17 @@ export const sanitizeAuthFields = (fields: Field[], config: CollectionConfig) =>
           }
         }
 
-        if (auth.maxLoginAttempts) {
+        /* if (auth.maxLoginAttempts) {
           if (field.name === 'loginAttempts' || field.name === 'lockUntil') {
             throw new ReservedFieldName(field, field.name)
           }
-        }
+        } */
 
-        if (auth.loginWithUsername) {
+        /* if (auth.loginWithUsername) {
           if (field.name === 'username') {
             throw new ReservedFieldName(field, field.name)
           }
-        }
+        } */
 
         if (auth.verify) {
           if (reservedVerifyFieldNames.includes(field.name)) {
@@ -136,41 +144,6 @@ export const sanitizeUploadFields = (fields: Field[], config: CollectionConfig) 
       // Handle presentational fields like rows and collapsibles
       if (!fieldAffectsData(field) && 'fields' in field && field.fields) {
         sanitizeUploadFields(field.fields, config)
-      }
-    }
-  }
-}
-
-/**
- * Sanitize fields for collections with versions enabled.
- *
- * Should run on top level fields only.
- */
-export const sanitizeVersionsFields = (fields: Field[], config: CollectionConfig) => {
-  if (config.versions) {
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i]
-
-      if (fieldAffectsData(field) && field.name) {
-        if (reservedVersionsFieldNames.includes(field.name)) {
-          throw new ReservedFieldName(field, field.name)
-        }
-      }
-
-      // Handle tabs without a name
-      if (field.type === 'tabs') {
-        for (let j = 0; j < field.tabs.length; j++) {
-          const tab = field.tabs[j]
-
-          if (!('name' in tab)) {
-            sanitizeVersionsFields(tab.fields, config)
-          }
-        }
-      }
-
-      // Handle presentational fields like rows and collapsibles
-      if (!fieldAffectsData(field) && 'fields' in field && field.fields) {
-        sanitizeVersionsFields(field.fields, config)
       }
     }
   }

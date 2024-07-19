@@ -8,7 +8,6 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { sanitizeVersionsFields } from './reservedFieldNames.js'
 
 export const sanitizeGlobals = async (
   config: Config,
@@ -52,8 +51,6 @@ export const sanitizeGlobals = async (
     })
 
     if (global.versions) {
-      sanitizeVersionsFields(global.fields, global)
-
       if (global.versions === true) global.versions = { drafts: false }
 
       if (global.versions.drafts) {

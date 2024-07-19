@@ -15,7 +15,6 @@ import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
-import { sanitizeArrayFields, sanitizeBlockFields } from './reservedFieldNames.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
@@ -113,8 +112,6 @@ export const sanitizeFields = async ({
 
     if (field.type === 'blocks' && field.blocks) {
       field.blocks = field.blocks.map((block) => {
-        if (collectionConfig) sanitizeBlockFields(block.fields)
-
         return {
           ...block,
           fields: block.fields.concat(baseBlockFields),
@@ -123,7 +120,6 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'array' && field.fields) {
-      if (collectionConfig) sanitizeArrayFields(field.fields)
       field.fields.push(baseIDField)
     }
 
