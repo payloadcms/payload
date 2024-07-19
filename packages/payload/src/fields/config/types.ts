@@ -6,7 +6,6 @@ import type { CSSProperties } from 'react'
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { JSONSchema4 } from 'json-schema'
-import type React from 'react'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
@@ -21,7 +20,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { CustomComponent, LabelFunction, PayloadComponent } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -728,13 +727,16 @@ export type RadioField = {
 export type Block = {
   admin?: {
     components?: {
-      Label?: PayloadComponent<{
-        blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
-        /**
-         * May contain the formData
-         */
-        formData: Record<string, any>
-      }>
+      Label?: PayloadComponent<
+        never,
+        {
+          blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
+          /**
+           * May contain the formData
+           */
+          formData: Record<string, any>
+        }
+      >
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>

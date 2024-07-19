@@ -187,6 +187,7 @@ type RichTextAdapterBase<
 > = {
   generateComponentMap: (args: {
     WithServerSideProps: PayloadComponent<
+      Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>,
       Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>
     >
     config: SanitizedConfig
@@ -251,8 +252,11 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  CellComponent: PayloadComponent<any>
-  FieldComponent: PayloadComponent<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+  CellComponent: PayloadComponent<never>
+  FieldComponent: PayloadComponent<
+    never,
+    RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>
+  >
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

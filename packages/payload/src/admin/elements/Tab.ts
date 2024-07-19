@@ -40,8 +40,13 @@ export type DocumentTabConfig = {
   newTab?: boolean
 }
 
-export type DocumentTabComponent = PayloadComponent<{
-  path: string
-}>
+export type DocumentTabComponent = PayloadComponent<
+  {
+    path: string
+  },
+  {
+    path: string
+  }
+>
 
 export type DocumentTab = DocumentTabComponent | DocumentTabConfig

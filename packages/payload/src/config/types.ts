@@ -405,7 +405,7 @@ export const serverProps: (keyof ServerProps)[] = [
 ]
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
-  PayloadComponent<Partial<ServerProps> & TAdditionalProps>
+  PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
 
 export type Locale = {
   /**
@@ -592,7 +592,7 @@ export type Config = {
       /**
        * Wrap the admin dashboard in custom context providers
        */
-      providers?: PayloadComponent<{ children?: React.ReactNode }>[]
+      providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
