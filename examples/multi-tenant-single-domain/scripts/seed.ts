@@ -56,9 +56,17 @@ async function findOrCreatePage({ data, payload }: { data: any; payload: Payload
   const pagesQuery = await payload.find({
     collection: 'pages',
     where: {
-      slug: {
-        equals: data.slug,
-      },
+      and: [
+        {
+          slug: {
+            equals: data.slug
+          },
+        },
+        {
+          tenant: {
+            equals: data.tenant
+          },
+        }]
     },
   })
 
