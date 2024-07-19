@@ -70,6 +70,17 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
 
+  const prefillAutoLogin = typeof config.autoLogin === 'object' && config.autoLogin.prefillOnly
+
+  const prefillUsername =
+    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.username : undefined
+
+  const prefillEmail =
+    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.email : undefined
+
+  const prefillPassword =
+    prefillAutoLogin && typeof config.autoLogin === 'object' ? config.autoLogin.password : undefined
+
   return (
     <Fragment>
       <div className={`${loginBaseClass}__brand`}>
@@ -84,7 +95,14 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
         />
       </div>
       {Array.isArray(BeforeLogins) && BeforeLogins.map((Component) => Component)}
-      {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
+      {!collectionConfig?.auth?.disableLocalStrategy && (
+        <LoginForm
+          prefillEmail={prefillEmail}
+          prefillPassword={prefillPassword}
+          prefillUsername={prefillUsername}
+          searchParams={searchParams}
+        />
+      )}
       {Array.isArray(AfterLogins) && AfterLogins.map((Component) => Component)}
     </Fragment>
   )

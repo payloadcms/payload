@@ -8,7 +8,7 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -103,7 +103,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
 
@@ -115,7 +115,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('metadata', () => {

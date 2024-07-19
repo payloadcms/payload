@@ -16,7 +16,7 @@ import type {
 } from './payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   openCreateDocDrawer,
   openDocControls,
@@ -67,7 +67,7 @@ describe('fields - relationship', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -137,7 +137,7 @@ describe('fields - relationship', () => {
       },
     })) as any
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should create relationship', async () => {

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 
+import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction, User } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
@@ -15,6 +16,40 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
   payload,
 }) => {
   try {
+    if (typeof payload?.config?.autoLogin === 'object' && !payload.config.autoLogin.prefillOnly) {
+      const collection = payload.collections[payload.config.admin.user]
+
+      const where: Where = {
+        or: [],
+      }
+      if (payload.config.autoLogin.email) {
+        where.or.push({
+          email: {
+            equals: payload.config.autoLogin.email,
+          },
+        })
+      } else if (payload.config.autoLogin.username) {
+        where.or.push({
+          username: {
+            equals: payload.config.autoLogin.username,
+          },
+        })
+      }
+
+      const user = (
+        await payload.find({
+          collection: collection.config.slug,
+          depth: isGraphQL ? 0 : collection.config.auth.depth,
+          where,
+        })
+      ).docs[0]
+      user.collection = collection.config.slug
+      user._strategy = 'local-jwt'
+      return {
+        user: user as User,
+      }
+    }
+
     const token = extractJWT({ headers, payload })
     const decodedPayload = jwt.verify(token, payload.secret) as JWTToken & jwt.JwtPayload
 

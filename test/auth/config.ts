@@ -11,12 +11,12 @@ import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.j
 
 export default buildConfigWithDefaults({
   admin: {
-    autoLogin: {
-      email: devUser.email,
-      password: devUser.password,
-      prefillOnly: true,
-    },
     user: 'users',
+  },
+  autoLogin: {
+    email: devUser.email,
+    password: devUser.password,
+    prefillOnly: true,
   },
   collections: [
     {

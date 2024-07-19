@@ -23,15 +23,6 @@ export const endpointsSchema = joi.alternatives().try(
 
 export default joi.object({
   admin: joi.object({
-    autoLogin: joi.alternatives().try(
-      joi.object().keys({
-        email: joi.string(),
-        password: joi.string(),
-        prefillOnly: joi.boolean(),
-        username: joi.string(),
-      }),
-      joi.boolean(),
-    ),
     avatar: joi.alternatives().try(joi.string(), component),
     buildPath: joi.string(),
     components: joi.object().keys({
@@ -96,6 +87,15 @@ export default joi.object({
     }),
     user: joi.string(),
   }),
+  autoLogin: joi.alternatives().try(
+    joi.object().keys({
+      email: joi.string(),
+      password: joi.string(),
+      prefillOnly: joi.boolean(),
+      username: joi.string(),
+    }),
+    joi.boolean(),
+  ),
   bin: joi.array().items(
     joi.object().keys({
       key: joi.string(),

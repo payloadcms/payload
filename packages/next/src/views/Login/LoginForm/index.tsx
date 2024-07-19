@@ -17,13 +17,15 @@ import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
 export const LoginForm: React.FC<{
+  prefillEmail?: string
+  prefillPassword?: string
+  prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
+}> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
   const config = useConfig()
 
   const {
     admin: {
-      autoLogin,
       routes: { forgot: forgotRoute },
       user: userSlug,
     },
@@ -45,27 +47,25 @@ export const LoginForm: React.FC<{
 
   const { t } = useTranslation()
 
-  const prefillForm = autoLogin && autoLogin.prefillOnly
-
   const initialState: FormState = {
     password: {
-      initialValue: prefillForm ? autoLogin.password : undefined,
+      initialValue: prefillPassword ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.password : undefined,
+      value: prefillPassword ?? undefined,
     },
   }
 
   if (loginWithUsername) {
     initialState.username = {
-      initialValue: prefillForm ? autoLogin.username : undefined,
+      initialValue: prefillUsername ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.username : undefined,
+      value: prefillUsername ?? undefined,
     }
   } else {
     initialState.email = {
-      initialValue: prefillForm ? autoLogin.email : undefined,
+      initialValue: prefillEmail ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.email : undefined,
+      value: prefillEmail ?? undefined,
     }
   }
 
