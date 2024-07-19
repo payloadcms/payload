@@ -285,8 +285,8 @@ const createDatabaseTestConfig = async () => {
     configWithDefaults.db = mongooseAdapter({
       migrationDir,
       url:
-        process.env.MONGODB_MEMORY_SERVER_URI ||
         process.env.DATABASE_URI ||
+        process.env.MONGODB_MEMORY_SERVER_URI ||
         'mongodb://127.0.0.1/payloadtests',
       // Disable strict mode for Mongoose
       schemaOptions: {
