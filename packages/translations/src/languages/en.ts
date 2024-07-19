@@ -321,7 +321,7 @@ export const enTranslations = {
     within: 'within',
   },
   upload: {
-    addImage: 'Add Image',
+    addFile: 'Add File',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',

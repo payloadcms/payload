@@ -319,7 +319,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     within: '内で',
   },
   upload: {
-    addImage: '画像を追加',
+    addFile: 'ファイルを追加',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',

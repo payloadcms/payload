@@ -321,7 +321,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     within: 'binnen',
   },
   upload: {
-    addImage: 'Afbeelding toevoegen',
+    addFile: 'Bestand toevoegen',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
