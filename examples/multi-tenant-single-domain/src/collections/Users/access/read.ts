@@ -1,9 +1,10 @@
 import type { User } from '@/payload-types'
 import type { Access, Where } from 'payload'
 
-import { isSuperAdmin } from '@/cms/access/isSuperAdmin'
-import { getTenantAdminTenantAccessIDs } from '@/cms/utilities/getTenantAccessIDs'
 import { parseCookies } from 'payload'
+
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const readAccess: Access<User> = (args) => {
   const { req } = args
