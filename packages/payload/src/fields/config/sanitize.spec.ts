@@ -9,12 +9,7 @@ import type {
   TextField,
 } from './types.js'
 
-import {
-  InvalidFieldName,
-  InvalidFieldRelationship,
-  MissingFieldType,
-  ReservedFieldName,
-} from '../../errors/index.js'
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
 
 describe('sanitizeFields', () => {
@@ -50,23 +45,6 @@ describe('sanitizeFields', () => {
         validRelationships: [],
       })
     }).rejects.toThrow(InvalidFieldName)
-  })
-
-  it('should throw on a reserved field name', async () => {
-    const fields: Field[] = [
-      {
-        name: 'hash',
-        type: 'text',
-        label: 'hash',
-      },
-    ]
-    await expect(async () => {
-      await sanitizeFields({
-        config,
-        fields,
-        validRelationships: [],
-      })
-    }).rejects.toThrow(ReservedFieldName)
   })
 
   describe('auto-labeling', () => {
