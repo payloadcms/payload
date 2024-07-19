@@ -11,11 +11,10 @@ import {
   GraphQLString,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { optionIsObject } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
+import { buildOptionEnums } from '../utilities/buildOptionEnums.js'
 import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
 import operators from './operators.js'
 
 type staticTypes =
@@ -147,23 +146,7 @@ const defaults: DefaultsType = {
         type: (field: RadioField, parentName): GraphQLType =>
           new GraphQLEnumType({
             name: `${combineParentName(parentName, field.name)}_Input`,
-            values: field.options.reduce((values, option) => {
-              if (optionIsObject(option)) {
-                return {
-                  ...values,
-                  [formatName(option.value)]: {
-                    value: option.value,
-                  },
-                }
-              }
-
-              return {
-                ...values,
-                [formatName(option)]: {
-                  value: option,
-                },
-              }
-            }, {}),
+            values: buildOptionEnums(field.options),
           }),
       })),
     ],
@@ -191,23 +174,7 @@ const defaults: DefaultsType = {
         type: (field: SelectField, parentName): GraphQLType =>
           new GraphQLEnumType({
             name: `${combineParentName(parentName, field.name)}_Input`,
-            values: field.options.reduce((values, option) => {
-              if (optionIsObject(option)) {
-                return {
-                  ...values,
-                  [formatName(option.value)]: {
-                    value: option.value,
-                  },
-                }
-              }
-
-              return {
-                ...values,
-                [formatName(option)]: {
-                  value: option,
-                },
-              }
-            }, {}),
+            values: buildOptionEnums(field.options),
           }),
       })),
     ],

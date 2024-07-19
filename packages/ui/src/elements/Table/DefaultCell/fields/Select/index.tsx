@@ -1,8 +1,7 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload'
+import type { CellComponentProps, DefaultCellComponentProps, Option, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { optionsAreObjects } from 'payload/shared'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
@@ -11,28 +10,25 @@ export interface SelectCellProps extends DefaultCellComponentProps<any> {
   options: CellComponentProps['options']
 }
 
-export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options }) => {
+export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options: allOptions }) => {
   const { i18n } = useTranslation()
 
-  const findLabel = (items: string[]) =>
-    items
-      .map((i) => {
-        const found = (options as OptionObject[]).filter((f: OptionObject) => f.value === i)?.[0]
-          ?.label
-        return getTranslation(found, i18n)
+  function createCellText(selectedOptions: string[], options: Option[] = allOptions) {
+    return selectedOptions.reduce((acc: string[], selectedOption) => {
+      options.forEach((option) => {
+        if (typeof option === 'string') {
+          if (option === selectedOption) acc.push(getTranslation(option, i18n))
+        } else if ('options' in option) {
+          acc.push(...createCellText(selectedOptions, option.options))
+        } else {
+          acc.push(getTranslation(option.label, i18n))
+        }
       })
-      .join(', ')
-
-  let content = ''
-  if (optionsAreObjects(options)) {
-    content = Array.isArray(cellData)
-      ? findLabel(cellData) // hasMany
-      : findLabel([cellData])
-  } else {
-    content = Array.isArray(cellData)
-      ? cellData.join(', ') // hasMany
-      : cellData
+      return acc
+    }, [])
   }
+
+  const content = createCellText(Array.isArray(cellData) ? cellData : [cellData]).join(', ')
 
   return <span>{content}</span>
 }

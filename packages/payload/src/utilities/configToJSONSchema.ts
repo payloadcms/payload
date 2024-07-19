@@ -41,13 +41,16 @@ const fieldIsRequired = (field: Field) => {
 }
 
 function buildOptionEnums(options: Option[]): string[] {
-  return options.map((option) => {
-    if (typeof option === 'object' && 'value' in option) {
-      return option.value
+  return options.reduce((acc, option) => {
+    if (typeof option === 'string') {
+      acc.push(option)
+    } else if ('options' in option) {
+      acc.push(...buildOptionEnums(option.options))
+    } else {
+      acc.push(option.value)
     }
-
-    return option
-  })
+    return acc
+  }, [])
 }
 
 function generateEntitySchemas(
