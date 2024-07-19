@@ -1,7 +1,8 @@
 'use client'
+import type { I18nClient } from '@payloadcms/translations';
 import type { OptionGroup, OptionObject } from 'payload'
 
-import { getTranslation, I18nClient } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -19,30 +20,38 @@ type ExtractOptionObjectArgs = {
   options: SelectInputProps['options']
   value: string
 }
-function extractOptionObject({ options, value }: ExtractOptionObjectArgs) {
+function extractOptionObject({ options, value }: ExtractOptionObjectArgs): OptionObject {
   return options.reduce<OptionObject>((acc, option) => {
     if (acc) return acc
-    if ('value' in option && option.value === value) {
+    if (typeof option === 'string') {
+      acc[option] = {
+        label: option,
+        value: option,
+      }
+    } else if ('value' in option && option.value === value) {
       acc = option
     } else if ('options' in option) {
-      return option.options.find((groupOption) => {
-        acc = groupOption
-      })
+      acc = extractOptionObject({ options: option.options, value })
     }
     return acc
-  }, undefined)
+  }, {} as OptionObject)
 }
 
 type GenerateOptionsArgs = {
-  options: SelectInputProps['options']
   i18n: I18nClient
+  options: SelectInputProps['options']
 }
-function generateOptions({ options, i18n }: GenerateOptionsArgs) {
-  return options.map((option: OptionObject | OptionGroup) => {
-    if ('options' in option) {
+function generateOptions({ i18n, options }: GenerateOptionsArgs) {
+  return options.map((option: OptionGroup | OptionObject) => {
+    if (typeof option === 'string') {
+      return {
+        label: getTranslation(option, i18n),
+        value: option,
+      }
+    } else if ('options' in option) {
       return {
         label: getTranslation(option.label, i18n),
-        options: generateOptions({ options: option.options, i18n }),
+        options: generateOptions({ i18n, options: option.options }),
       }
     }
 
@@ -55,7 +64,7 @@ function generateOptions({ options, i18n }: GenerateOptionsArgs) {
 
 export type SelectInputProps = {
   onChange?: ReactSelectAdapterProps['onChange']
-  options?: (OptionObject | OptionGroup)[]
+  options?: (OptionGroup | OptionObject | string)[]
   showError?: boolean
   value?: string | string[]
 } & Omit<
@@ -155,7 +164,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={onChange}
-          options={generateOptions({ options, i18n })}
+          options={generateOptions({ i18n, options })}
           showError={showError}
           value={valueToRender as OptionObject}
         />

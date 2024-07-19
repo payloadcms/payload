@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+
 import { MyComponent } from './MyComponent.js'
 
 export const postsSlug = 'posts'
@@ -42,8 +43,8 @@ export const PostsCollection: CollectionConfig = {
       }),
     },
     {
-      type: 'select',
       name: 'customSelect',
+      type: 'select',
       // admin: {
       //   components: {
       //     Field: MyComponent,
@@ -57,6 +58,7 @@ export const PostsCollection: CollectionConfig = {
               label: 'Group-1 Item-1',
               value: 'group1Item1',
             },
+            '123',
           ],
         },
       ],

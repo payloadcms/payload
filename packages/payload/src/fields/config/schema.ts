@@ -1,4 +1,4 @@
-import joi from 'joi'
+import joi, { alternatives } from 'joi'
 
 import { componentSchema } from '../../config/shared/componentSchema.js'
 
@@ -229,6 +229,29 @@ export const select = baseField.keys({
             .alternatives()
             .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
           value: joi.string().required().allow(''),
+        }),
+        joi.object({
+          label: joi
+            .alternatives()
+            .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+          options: joi
+            .array()
+            .min(1)
+            .items(
+              joi.alternatives().try(
+                joi.string(),
+                joi.object({
+                  label: joi
+                    .alternatives()
+                    .try(
+                      joi.func(),
+                      joi.string(),
+                      joi.object().pattern(joi.string(), [joi.string()]),
+                    ),
+                  value: joi.string().required().allow(''),
+                }),
+              ),
+            ),
         }),
       ),
     )

@@ -748,18 +748,23 @@ export const mapFields = (args: {
               return typeof option === 'string' ? option : option.label
             }
 
-            function generateOptions(options) {
+            function generateOptions(options: Option[]) {
               return options.map((option) => {
-                if ('options' in option) {
+                if (typeof option === 'string') {
+                  return {
+                    label: option,
+                    value: option,
+                  }
+                } else if ('options' in option) {
                   return {
                     label: createOptionLabel(option.label),
                     options: generateOptions(option.options),
                   }
-                }
-
-                return {
-                  label: createOptionLabel(option.label),
-                  value: option.value,
+                } else {
+                  return {
+                    label: createOptionLabel(option.label),
+                    value: option.value,
+                  }
                 }
               })
             }

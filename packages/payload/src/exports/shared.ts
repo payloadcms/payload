@@ -12,6 +12,7 @@ export {
   fieldSupportsMany,
   optionIsObject,
   optionIsValue,
+  optionsAreGrouped,
   optionsAreObjects,
   tabHasName,
   valueIsValueWithRelation,
