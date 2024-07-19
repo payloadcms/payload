@@ -283,7 +283,7 @@
     "near": "yaxın"
   },
   "upload": {
-    "addImage": "Şəkil əlavə et",
+    "addFile": "Fayl əlavə et",
     "crop": "Məhsul",
     "cropToolDescription": "Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.",
     "dragAndDrop": "Faylı buraya sürükləyin və buraxın",

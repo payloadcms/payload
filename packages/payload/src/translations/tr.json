@@ -283,7 +283,7 @@
     "near": "yakın"
   },
   "upload": {
-    "addImage": "Resim ekle",
+    "addFile": "Dosya ekle",
     "crop": "Kırp",
     "cropToolDescription": "Seçili alanın köşelerini sürükleyin, yeni bir alan çizin veya aşağıdaki değerleri ayarlayın.",
     "dragAndDrop": "Bir dosyayı sürükleyip bırakın",

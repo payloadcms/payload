@@ -2090,8 +2090,8 @@ describe('fields', () => {
       const inputField = page.locator('.file-field__upload .file-field__remote-file')
       await inputField.fill(remoteImage)
 
-      const addImageButton = page.locator('.file-field__add-file')
-      await addImageButton.click()
+      const addFileButton = page.locator('.file-field__add-file')
+      await addFileButton.click()
 
       await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
 
@@ -2137,6 +2137,46 @@ describe('fields', () => {
       await page.locator('#action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should upload after editing image inside a document drawer', async () => {
+      await uploadImage()
+      await wait(1000)
+      // Open the media drawer and create a png upload
+
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+
+      await page
+        .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+      await expect(
+        page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      ).toHaveValue('payload.png')
+      await page.locator('[id^=doc-drawer_uploads_1_] .file-field__edit').click()
+      await page
+        .locator('[id^=edit-upload] .edit-upload__input input[name="Width (px)"]')
+        .nth(1)
+        .fill('200')
+      await page
+        .locator('[id^=edit-upload] .edit-upload__input input[name="Height (px)"]')
+        .nth(1)
+        .fill('200')
+      await page.locator('[id^=edit-upload] button:has-text("Apply Changes")').nth(1).click()
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+
+      // Assert that the media field has the png upload
+      await expect(
+        page.locator('.field-type.upload .file-details .file-meta__url a'),
+      ).toHaveAttribute('href', '/uploads/payload-1.png')
+      await expect(
+        page.locator('.field-type.upload .file-details .file-meta__url a'),
+      ).toContainText('payload-1.png')
+      await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
+        'src',
+        '/uploads/payload-1.png',
+      )
+      await saveDocAndAssert(page)
     })
 
     test('should clear selected upload', async () => {

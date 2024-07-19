@@ -283,7 +283,7 @@
     "near": "közel"
   },
   "upload": {
-    "addImage": "Kép hozzáadása",
+    "addFile": "Fájl hozzáadása",
     "crop": "Termés",
     "cropToolDescription": "Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.",
     "dragAndDrop": "Húzzon ide egy fájlt",
