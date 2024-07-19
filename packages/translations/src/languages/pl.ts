@@ -319,7 +319,7 @@ export const plTranslations: DefaultTranslationsObject = {
     within: 'w ciągu',
   },
   upload: {
-    addImage: 'Dodaj obraz',
+    addFile: 'Dodaj plik',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',

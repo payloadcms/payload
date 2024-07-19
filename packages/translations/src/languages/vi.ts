@@ -317,7 +317,7 @@ export const viTranslations: DefaultTranslationsObject = {
     within: 'trong',
   },
   upload: {
-    addImage: 'Thêm hình ảnh',
+    addFile: 'Thêm tập tin',
     crop: 'Mùa vụ',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',

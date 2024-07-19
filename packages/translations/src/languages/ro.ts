@@ -323,7 +323,7 @@ export const roTranslations: DefaultTranslationsObject = {
     within: 'înăuntru',
   },
   upload: {
-    addImage: 'Adaugă imagine',
+    addFile: 'Adaugă fișier',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',

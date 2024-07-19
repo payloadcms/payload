@@ -319,7 +319,7 @@ export const svTranslations: DefaultTranslationsObject = {
     within: 'inom',
   },
   upload: {
-    addImage: 'Lägg till bild',
+    addFile: 'Lägg till fil',
     crop: 'Skörd',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',

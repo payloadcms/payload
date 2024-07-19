@@ -311,7 +311,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     within: '在...之内',
   },
   upload: {
-    addImage: '添加图片',
+    addFile: '添加文件',
     crop: '作物',
     cropToolDescription: '拖动所选区域的角落，绘制一个新区域或调整以下的值。',
     dragAndDrop: '拖放一个文件',

@@ -320,7 +320,7 @@ export const azTranslations: DefaultTranslationsObject = {
     within: 'daxilinde',
   },
   upload: {
-    addImage: 'Şəkil əlavə et',
+    addFile: 'Fayl əlavə et',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
