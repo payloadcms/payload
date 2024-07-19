@@ -72,13 +72,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
     if (processedValue && Array.isArray(processedValue) && !('root' in processedValue)) {
       throw new Error(
-        'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
+        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/beta/lexical/migration#migration-via-migration-script-recommended',
       )
     }
 
     if (processedValue && 'jsonContent' in processedValue) {
       throw new Error(
-        'You have tried to pass in data from payload-plugin-lexical. This is not supported. The data structure has changed in this editor, compared to the plugin, and there is no automatic conversion available yet (coming soon). Please remove the data from the field and start again.',
+        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/beta/lexical/migration#migrating-from-payload-plugin-lexical',
       )
     }
 

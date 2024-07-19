@@ -47,7 +47,7 @@ deploying to Production, it's a good idea to double-check that you are making pr
 ### The Secret Key
 
 When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and
-extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. 
+extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string.
 
 ### Double-check and thoroughly test all Access Control
 
@@ -78,7 +78,7 @@ Note that this is different than running `next dev`. Generally, Next.js apps com
 ### Secure Cookie Settings
 
 You should be using an SSL certificate for production Payload instances, which means you
-can [enable secure cookies](/docs/authentication/config) in your Authentication-enabled Collection configs.
+can [enable secure cookies](/docs/authentication/overview) in your Authentication-enabled Collection configs.
 
 ### Preventing API Abuse
 
@@ -88,7 +88,7 @@ more. [Click here to learn more](/docs/production/preventing-abuse).
 
 ## Database
 
-Payload can be used with any Postgres database or MongoDB-compatible database including AWS DocumentDB or Azure Cosmos DB. Make sure your production environment has access to the database that Payload uses. 
+Payload can be used with any Postgres database or MongoDB-compatible database including AWS DocumentDB or Azure Cosmos DB. Make sure your production environment has access to the database that Payload uses.
 
 Out of the box, Payload templates pass the `process.env.DATABASE_URI` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
 

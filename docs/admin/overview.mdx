@@ -55,6 +55,11 @@ As shown above, all Payload routes are nested within the `(payload)` route group
 
 The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
+<Banner type="warning">
+  <strong>Note:</strong>
+  If you don't use the [REST API](../rest/overview) or [GraphQL API](../graphql/overview), you can delete the [Next.js files corresponding to those routes](../admin/overview#project-structure), however, the overhead of this API is completely constrained to these endpoints, and will not slow down or affect Payload outside of the endpoints.
+</Banner>
+
 Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
 All auto-generated files will contain the following comments at the top of each file:
@@ -83,21 +88,21 @@ The following options are available:
 
 | Option            | Description                                                                                                                                                                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user`            | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                                                                                                                                        |
-| `buildPath`       | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                                                  |
-| `meta`            | Base metadata to use for the Admin Panel. Included properties are `titleSuffix`, `icons`, and `openGraph`. Can be overridden on a per Collection or per Global basis.                                                                                                       |
-| `disable`         | If set to `true`, the entire Admin Panel will be disabled.                                                                                                                                                                                                                  |
-| `dateFormat`      | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                                             |
+| `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                                                                                                                                      |
 | `avatar`          | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                                                                                                                    |
-| `autoLogin`       | Used to automate admin log-in for dev and demonstration convenience. [More details](../authentication/config).                                                                                                                                                                      |
-| `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                                                                       |
+| `buildPath`       | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                                                  |
 | `components`      | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                                                                                                                                      |
-| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                                                                                                                               |
 | `custom`          | Any custom properties you wish to pass to the Admin Panel.                                                                                                                                                                                                                  |
+| `dateFormat`      | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                                             |
+| `disable`         | If set to `true`, the entire Admin Panel will be disabled.                                                                                                                                                                                                                  |
+| `livePreview`     | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                                                                       |
+| `meta`            | Base metadata to use for the Admin Panel. Included properties are `titleSuffix`, `icons`, and `openGraph`. Can be overridden on a per Collection or per Global basis.                                                                                                       |
+| `routes`          | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                                                                                                                               |
+| `user`            | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                                                                                                                                        |
 
 <Banner type="success">
   <strong>Reminder:</strong>
-  These are the _root-level_ options for the Admin Panel. You can also customize the admin options for _Collections and Globals_ through their respective `admin` keys.
+  These are the _root-level_ options for the Admin Panel. You can also customize [Collection Admin Options](./collections) and [Global Admin Options](./globals) through their respective `admin` keys.
 </Banner>
 
 ### The Admin User Collection
@@ -132,7 +137,7 @@ To do this, specify `admin: { user: 'admins' }` in your config. This will provid
 
 ### Role-based Access Control
 
-It is also possible to allow multiple user types into the Admin Panel with limited permissions. For example, you may wish to have two roles within the `admins` Collection:
+It is also possible to allow multiple user types into the Admin Panel with limited permissions, known as role-based access control (RBAC). For example, you may wish to have two roles within the `admins` Collection:
 
 - `super-admin` - full access to the Admin Panel to perform any action
 - `editor` - limited access to the Admin Panel to only manage content

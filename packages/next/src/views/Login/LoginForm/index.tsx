@@ -8,17 +8,12 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { FormState, PayloadRequest } from 'payload'
 
-import {
-  EmailField,
-  Form,
-  FormSubmit,
-  PasswordField,
-  TextField,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
-import { email, password, text } from 'payload/shared'
+import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
+import { password } from 'payload/shared'
 
+import type { LoginFieldProps } from '../LoginField/index.js'
+
+import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
 export const LoginForm: React.FC<{
@@ -36,7 +31,17 @@ export const LoginForm: React.FC<{
   } = config
 
   const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
-  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+  const { auth: authOptions } = collectionConfig
+  const loginWithUsername = authOptions.loginWithUsername
+  const canLoginWithEmail =
+    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
+  const canLoginWithUsername = authOptions.loginWithUsername
+
+  const [loginType] = React.useState<LoginFieldProps['type']>(() => {
+    if (canLoginWithEmail && canLoginWithUsername) return 'emailOrUsername'
+    if (canLoginWithUsername) return 'username'
+    return 'email'
+  })
 
   const { t } = useTranslation()
 
@@ -75,47 +80,7 @@ export const LoginForm: React.FC<{
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
-        {loginWithUsername ? (
-          <TextField
-            label={t('authentication:username')}
-            name="username"
-            required
-            validate={(value) =>
-              text(value, {
-                name: 'username',
-                type: 'text',
-                data: {},
-                preferences: { fields: {} },
-                req: {
-                  payload: {
-                    config,
-                  },
-                  t,
-                } as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        ) : (
-          <EmailField
-            autoComplete="email"
-            label={t('general:email')}
-            name="email"
-            required
-            validate={(value) =>
-              email(value, {
-                name: 'email',
-                type: 'email',
-                data: {},
-                preferences: { fields: {} },
-                req: { t } as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        )}
+        <LoginField type={loginType} />
         <PasswordField
           autoComplete="off"
           label={t('general:password')}

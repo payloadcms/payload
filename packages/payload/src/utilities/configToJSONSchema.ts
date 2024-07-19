@@ -3,6 +3,7 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
+import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
@@ -108,6 +109,25 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
 
   return {
     oneOf: properties,
+  }
+}
+
+/**
+ * Generates the JSON Schema for database configuration
+ *
+ * @example { db: idType: string }
+ */
+function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
+  const defaultIDType: JSONSchema4 =
+    config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      defaultIDType,
+    },
+    required: ['defaultIDType'],
   }
 }
 
@@ -588,60 +608,69 @@ export function entityToJSONSchema(
   }
 }
 
-function generateOperationJSONSchema(
-  config: SanitizedCollectionConfig,
-  operation: 'forgotPassword' | 'login' | 'registerFirstUser',
-): JSONSchema4 {
-  const usernameLogin = config.auth?.loginWithUsername
-  const fieldType: JSONSchema4 = {
-    type: 'string',
+const fieldType: JSONSchema4 = {
+  type: 'string',
+  required: false,
+}
+const generateAuthFieldTypes = (
+  loginWithUsername: Auth['loginWithUsername'],
+  withPassword = false,
+): JSONSchema4 => {
+  const passwordField = {
+    password: fieldType,
   }
 
-  let properties: JSONSchema4['properties'] = {}
-  switch (operation) {
-    case 'login': {
-      properties = {
-        password: fieldType,
-        [usernameLogin ? 'username' : 'email']: fieldType,
+  if (loginWithUsername) {
+    if (loginWithUsername.allowEmailLogin) {
+      return {
+        additionalProperties: false,
+        oneOf: [
+          {
+            additionalProperties: false,
+            properties: { email: fieldType, ...(withPassword ? { password: fieldType } : {}) },
+            required: ['email', ...(withPassword ? ['password'] : [])],
+          },
+          {
+            additionalProperties: false,
+            properties: { username: fieldType, ...(withPassword ? { password: fieldType } : {}) },
+            required: ['username', ...(withPassword ? ['password'] : [])],
+          },
+        ],
       }
-      break
     }
-    case 'forgotPassword': {
-      properties = {
-        [usernameLogin ? 'username' : 'email']: fieldType,
-      }
-      break
-    }
-    case 'registerFirstUser': {
-      properties = {
-        email: fieldType,
-        password: fieldType,
-      }
-      if (usernameLogin) properties.username = fieldType
-      break
+
+    return {
+      additionalProperties: false,
+      properties: {
+        username: fieldType,
+        ...(withPassword ? { password: fieldType } : {}),
+      },
+      required: ['username', ...(withPassword ? ['password'] : [])],
     }
   }
 
   return {
     additionalProperties: false,
-    properties,
-    required: Object.keys(properties),
+    properties: {
+      email: fieldType,
+      ...(withPassword ? { password: fieldType } : {}),
+    },
+    required: ['email', ...(withPassword ? ['password'] : [])],
   }
 }
 
 export function authCollectionToOperationsJSONSchema(
   config: SanitizedCollectionConfig,
 ): JSONSchema4 {
-  const properties = {
-    forgotPassword: {
-      ...generateOperationJSONSchema(config, 'forgotPassword'),
-    },
-    login: {
-      ...generateOperationJSONSchema(config, 'login'),
-    },
-    registerFirstUser: {
-      ...generateOperationJSONSchema(config, 'registerFirstUser'),
-    },
+  const loginWithUsername = config.auth?.loginWithUsername
+  const generatedFields: JSONSchema4 = generateAuthFieldTypes(loginWithUsername)
+  const generatedFieldsWithPassword: JSONSchema4 = generateAuthFieldTypes(loginWithUsername, true)
+
+  const properties: JSONSchema4['properties'] = {
+    forgotPassword: generatedFields,
+    login: generatedFieldsWithPassword,
+    registerFirstUser: generatedFieldsWithPassword,
+    unlock: generatedFields,
   }
 
   return {
@@ -713,11 +742,12 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
   }
 

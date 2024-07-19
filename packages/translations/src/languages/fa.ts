@@ -18,6 +18,7 @@ export const faTranslations: DefaultTranslationsObject = {
     confirmPassword: 'تأیید گذرواژه',
     createFirstUser: 'ایجاد کاربر نخست',
     emailNotValid: 'رایانامه ارائه‌شده درست نیست',
+    emailOrUsername: 'ایمیل یا نام کاربری',
     emailSent: 'رایانامه فرستاده شد',
     emailVerified: 'ایمیل با موفقیت تایید شد.',
     enableAPIKey: 'فعال‌سازی کلید اِی‌پی‌آی',
@@ -295,6 +296,7 @@ export const faTranslations: DefaultTranslationsObject = {
     updating: 'در حال به‌روزرسانی',
     uploading: 'در حال بارگذاری',
     user: 'کاربر',
+    username: 'نام کاربری',
     users: 'کاربران',
     value: 'مقدار',
     welcome: 'خوش‌آمدید',
@@ -316,7 +318,7 @@ export const faTranslations: DefaultTranslationsObject = {
     within: 'در داخل',
   },
   upload: {
-    addImage: 'اضافه کردن تصویر',
+    addFile: 'اضافه کردن فایل',
     crop: 'محصول',
     cropToolDescription:
       'گوشه‌های منطقه انتخاب شده را بکشید، یک منطقه جدید رسم کنید یا مقادیر زیر را تنظیم کنید.',
@@ -359,6 +361,8 @@ export const faTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'این کادر به دو عدد نیاز دارد.',
     shorterThanMax: 'ورودی باید کمتر از {{maxLength}} واژه باشد.',
     trueOrFalse: 'این کادر فقط می تواند به صورت true یا false باشد.',
+    username:
+      'لطفاً یک نام کاربری معتبر وارد کنید. می تواند شامل حروف، اعداد، خط فاصله، نقاط و خط زیر باشد.',
     validUploadID: 'این فیلد یک شناسه بارگذاری معتبر نیست.',
   },
   version: {

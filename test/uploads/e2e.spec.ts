@@ -24,6 +24,7 @@ import {
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
+  focalOnlySlug,
   mediaSlug,
   relationSlug,
 } from './shared.js'
@@ -41,6 +42,7 @@ let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let focalOnlyURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -59,6 +61,7 @@ describe('uploads', () => {
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -141,6 +144,25 @@ describe('uploads', () => {
     await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should show proper file names for resized animated file', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const smallSquareFilename = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__url a')
+    await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -398,6 +420,44 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+
+    test('should update image alignment based on focal point', async () => {
+      const updateFocalPosition = async (page: Page) => {
+        await page.goto(focalOnlyURL.create)
+        await page.waitForURL(focalOnlyURL.create)
+        // select and upload file
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByText('Select a file').click()
+        const fileChooser = await fileChooserPromise
+        await wait(1000)
+        await fileChooser.setFiles(path.join(dirname, 'horizontal-squares.jpg'))
+
+        await page.locator('.file-field__edit').click()
+
+        // set focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // top focal point
+
+        // apply focal point
+        await page.locator('button:has-text("Apply Changes")').click()
+        await page.waitForSelector('button#action-save')
+        await page.locator('button#action-save').click()
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await wait(1000) // Wait for the save
+      }
+
+      await updateFocalPosition(page) // red square
+      const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
+
+      const { doc: redDoc } = await client.findByID({
+        id: redSquareMediaID,
+        slug: focalOnlySlug,
+        auth: true,
+      })
+
+      // without focal point update this generated size was equal to 1736
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
   })
 })

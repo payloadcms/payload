@@ -17,6 +17,7 @@ export const heTranslations: DefaultTranslationsObject = {
     confirmPassword: 'אישור סיסמה',
     createFirstUser: 'יצירת משתמש ראשון',
     emailNotValid: 'הדוא"ל שסופק אינו תקין',
+    emailOrUsername: 'דוא"ל או שם משתמש',
     emailSent: 'הודעת דואר נשלחה',
     emailVerified: 'דוא"ל אומת בהצלחה.',
     enableAPIKey: 'הפעלת מפתח API',
@@ -290,6 +291,7 @@ export const heTranslations: DefaultTranslationsObject = {
     updating: 'מעדכן',
     uploading: 'מעלה',
     user: 'משתמש',
+    username: 'שם משתמש',
     users: 'משתמשים',
     value: 'ערך',
     welcome: 'ברוך הבא',
@@ -311,7 +313,7 @@ export const heTranslations: DefaultTranslationsObject = {
     within: 'בתוך',
   },
   upload: {
-    addImage: 'הוסף תמונה',
+    addFile: 'הוסף קובץ',
     crop: 'חתוך',
     cropToolDescription: 'גרור את הפינות של האזור שנבחר, צייר אזור חדש או התאם את הערכים למטה.',
     dragAndDrop: 'גרור ושחרר קובץ',
@@ -352,6 +354,7 @@ export const heTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'שדה זה דורש שני מספרים.',
     shorterThanMax: 'ערך זה חייב להיות קצר מ-{{maxLength}} תווים.',
     trueOrFalse: 'שדה זה יכול להיות רק true או false.',
+    username: 'אנא הזן שם משתמש חוקי. יכול להכיל אותיות, מספרים, מקפים, נקודות וקווים תחתונים.',
     validUploadID: 'שדה זה אינו מזהה העלאה תקני.',
   },
   version: {

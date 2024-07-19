@@ -18,6 +18,7 @@ export const csTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potvrdit heslo',
     createFirstUser: 'Vytvořit prvního uživatele',
     emailNotValid: 'Zadaný email není platný',
+    emailOrUsername: 'E-mail nebo Uživatelské jméno',
     emailSent: 'Email odeslán',
     emailVerified: 'E-mail úspěšně ověřen.',
     enableAPIKey: 'Povolit API klíč',
@@ -295,6 +296,7 @@ export const csTranslations: DefaultTranslationsObject = {
     updating: 'Aktualizace',
     uploading: 'Nahrávání',
     user: 'Uživatel',
+    username: 'Uživatelské jméno',
     users: 'Uživatelé',
     value: 'Hodnota',
     welcome: 'Vítejte',
@@ -316,7 +318,7 @@ export const csTranslations: DefaultTranslationsObject = {
     within: 'uvnitř',
   },
   upload: {
-    addImage: 'Přidat obrázek',
+    addFile: 'Přidat soubor',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',
@@ -359,6 +361,8 @@ export const csTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Toto pole vyžaduje dvě čísla.',
     shorterThanMax: 'Tato hodnota musí být kratší než maximální délka {{maxLength}} znaků.',
     trueOrFalse: 'Toto pole může být rovno pouze true nebo false.',
+    username:
+      'Prosím, zadejte platné uživatelské jméno. Může obsahovat písmena, čísla, pomlčky, tečky a podtržítka.',
     validUploadID: 'Toto pole není platné ID pro odeslání.',
   },
   version: {

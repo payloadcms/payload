@@ -18,6 +18,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Підтвердження паролю',
     createFirstUser: 'Створення першого користувача',
     emailNotValid: 'Вказана адреса електронної пошти недійсна',
+    emailOrUsername: "Електронна пошта або Ім'я користувача",
     emailSent: 'Лист відправлено',
     emailVerified: 'Електронну пошту успішно підтверджено.',
     enableAPIKey: 'Активувати API ключ',
@@ -296,6 +297,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     updating: 'оновлення',
     uploading: 'завантаження',
     user: 'Користувач',
+    username: "Ім'я користувача",
     users: 'Користувачі',
     value: 'Значення',
     welcome: 'Вітаю',
@@ -317,7 +319,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     within: 'в межах',
   },
   upload: {
-    addImage: 'Додати зображення',
+    addFile: 'Додати файл',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',
@@ -360,6 +362,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'У цьому полі потрібно ввести два числа.',
     shorterThanMax: 'Це значення має дорівнювати або бути коротшим, ніж {{maxLength}} символів.',
     trueOrFalse: 'Це поле може мати значення тільки true або false.',
+    username:
+      "Будь ласка, введіть дійсне ім'я користувача. Може містити літери, цифри, дефіси, крапки та підкреслення.",
     validUploadID: 'Це поле не є дійсним ID завантаження.',
   },
   version: {

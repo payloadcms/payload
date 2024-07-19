@@ -7,8 +7,7 @@ const encryptKey: FieldHook = ({ req, value }) =>
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
 
-// eslint-disable-next-line no-restricted-exports
-export default [
+export const apiKeyFields = [
   {
     name: 'enableAPIKey',
     type: 'checkbox',

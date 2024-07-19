@@ -18,6 +18,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Kreiraj prvog korisnika',
     emailNotValid: 'Email nije ispravan',
+    emailOrUsername: 'E-mail ili Korisničko ime',
     emailSent: 'Email poslan',
     emailVerified: 'Email uspješno provjeren.',
     enableAPIKey: 'Omogući API ključ',
@@ -296,6 +297,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     updating: 'Ažuriranje',
     uploading: 'Prijenos',
     user: 'Korisnik',
+    username: 'Korisničko ime',
     users: 'Korisnici',
     value: 'Attribute',
     welcome: 'Dobrodošli',
@@ -317,7 +319,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     within: 'unutar',
   },
   upload: {
-    addImage: 'Dodaj sliku',
+    addFile: 'Dodaj datoteku',
     crop: 'Usjev',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
@@ -360,6 +362,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Ovo polje zahtjeva dva broja.',
     shorterThanMax: 'Ova vrijednost mora biti kraća od maksimalne dužine od {{maxLength}} znakova',
     trueOrFalse: 'Ovo polje može biti samo točno ili netočno',
+    username:
+      'Unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, točke i donje crte.',
     validUploadID: 'Ovo polje nije valjani ID prijenosa.',
   },
   version: {

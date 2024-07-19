@@ -727,6 +727,15 @@ export type RadioField = {
 
 export type Block = {
   admin?: {
+    components?: {
+      Label?: React.FC<{
+        blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
+        /**
+         * May contain the formData
+         */
+        formData: Record<string, any>
+      }>
+    }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
   }

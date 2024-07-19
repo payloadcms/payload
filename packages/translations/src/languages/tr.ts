@@ -18,6 +18,7 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',
     emailNotValid: 'Girilen e-posta geçersiz',
+    emailOrUsername: 'E-posta veya Kullanıcı Adı',
     emailSent: 'E-posta gönderildi',
     emailVerified: 'E-posta başarıyla doğrulandı.',
     enableAPIKey: 'Api anahtarını etkinleştir',
@@ -300,6 +301,7 @@ export const trTranslations: DefaultTranslationsObject = {
     updating: 'Güncelleniyor',
     uploading: 'Yükleniyor',
     user: 'kullanıcı',
+    username: 'Kullanıcı Adı',
     users: 'kullanıcı',
     value: 'Değer',
     welcome: 'Hoşgeldiniz',
@@ -321,7 +323,7 @@ export const trTranslations: DefaultTranslationsObject = {
     within: 'içinde',
   },
   upload: {
-    addImage: 'Resim ekle',
+    addFile: 'Dosya ekle',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -364,6 +366,8 @@ export const trTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Bu alana en az iki rakam girilmesi zorunludur.',
     shorterThanMax: 'Bu alan {{maxLength}} karakterden daha kısa olmalıdır.',
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
+    username:
+      'Lütfen geçerli bir kullanıcı adı girin. Harfler, numaralar, kısa çizgiler, noktalar ve alt çizgiler içerebilir.',
     validUploadID: "'Bu alan geçerli bir karşıya yükleme ID'sine sahip değil.'",
   },
   version: {

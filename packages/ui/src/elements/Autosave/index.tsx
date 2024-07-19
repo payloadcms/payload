@@ -43,7 +43,7 @@ export const Autosave: React.FC<Props> = ({
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, setSubmitted } = useForm()
+  const { dispatchFields, setModified, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
   const versionsConfig = docConfig?.versions
 
@@ -80,7 +80,7 @@ export const Autosave: React.FC<Props> = ({
   // Store locale in ref so the autosave func
   // can always retrieve the most to date locale
   localeRef.current = locale
-
+  console.log(modifiedRef.current, modified)
   // When debounced fields change, autosave
   useEffect(() => {
     const abortController = new AbortController()
@@ -131,6 +131,7 @@ export const Autosave: React.FC<Props> = ({
                 if (res.status === 200) {
                   const newDate = new Date()
                   setLastSaved(newDate.getTime())
+                  setModified(false)
                   reportUpdate({
                     id,
                     entitySlug,
@@ -216,6 +217,7 @@ export const Autosave: React.FC<Props> = ({
     reportUpdate,
     serverURL,
     setSubmitted,
+    setModified,
     versionsConfig?.drafts,
     debouncedFields,
     submitted,

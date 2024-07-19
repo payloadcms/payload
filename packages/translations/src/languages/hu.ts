@@ -18,6 +18,7 @@ export const huTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Jelszó megerősítése',
     createFirstUser: 'Első felhasználó létrehozása',
     emailNotValid: 'A megadott e-mail cím érvénytelen',
+    emailOrUsername: 'E-mail vagy Felhasználónév',
     emailSent: 'E-mail elküldve',
     emailVerified: 'Az email sikeresen megerősítve.',
     enableAPIKey: 'API-kulcs engedélyezése',
@@ -298,6 +299,7 @@ export const huTranslations: DefaultTranslationsObject = {
     updating: 'Frissítés',
     uploading: 'Feltöltés',
     user: 'Felhasználó',
+    username: 'Felhasználónév',
     users: 'Felhasználók',
     value: 'Érték',
     welcome: 'Üdvözöljük',
@@ -319,7 +321,7 @@ export const huTranslations: DefaultTranslationsObject = {
     within: 'belül',
   },
   upload: {
-    addImage: 'Kép hozzáadása',
+    addFile: 'Fájl hozzáadása',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
@@ -364,6 +366,8 @@ export const huTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Ennek az értéknek rövidebbnek kell lennie, mint a maximálisan megengedett {{maxLength}} karakter.',
     trueOrFalse: 'Ez a mező csak igaz vagy hamis lehet.',
+    username:
+      'Adjon meg egy érvényes felhasználónevet. Tartalmazhat betűket, számokat, kötőjeleket, pontokat és aláhúzásokat.',
     validUploadID: 'Ez a mező nem érvényes feltöltési azonosító.',
   },
   version: {

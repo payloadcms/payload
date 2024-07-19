@@ -11,38 +11,47 @@ keywords: authentication, config, configuration, overview, documentation, Conten
   title="Simplified Authentication for Headless CMS: Unlocking Reusability in One Line"
 />
 
-<Banner>
-  Payload provides for highly secure and customizable user Authentication out of the box, which
-  allows for users to identify themselves to Payload.
-</Banner>
+Authentication is a critical part of any application. Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the [Admin Panel](../admin/overview), all well as your own external applications, completely eliminating the need for paid, third-party platforms and services.
 
-Authentication is used within the [Admin Panel](../admin/overview) itself as well as throughout your app(s) themselves however you determine necessary.
+Here are some common use cases of Authentication in your own applications:
+
+- Customer accounts for an e-commerce app
+- User accounts for a SaaS product
+- P2P apps or social sites where users need to log in and manage their profiles
+- Online games where players need to track their progress over time
+
+When Authentication is enabled on a [Collection](../configuration/collections), Payload injects all necessary functionality to support the entire user flow. This includes all [auth-related operations](./operations) like account creation, logging in and out, and resetting passwords, all [auth-related emails](./email) like email verification and password reset, as well as any necessary UI to manage users from the Admin Panel.
+
+To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collection#auth):
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  // ...
+  auth: true, // highlight-line
+}
+```
 
 ![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
 _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 
-**Here are some common use cases of Authentication outside of Payload's dashboard itself:**
+## Config Options
 
-- Customer accounts for an ecommerce app
-- Customer accounts for a SaaS product
-- P2P app or social site where users need to log in and manage their profiles
-- Online game where players need to track their progress over time
+Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
-By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the [Admin Panel](../admin/overview). But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin/overview#the-admin-user-collection).
+<Banner type="warning">
+  <strong>Note:</strong>
+  By default, Payload provides an auth-enabled `User` Collection which is used to access the Admin Panel. [More details](../admin/overview#the-admin-user-collection).
+</Banner>
 
-## Enabling Auth on a collection
-
-Every Payload Collection can opt-in to supporting Authentication by specifying the `auth` property on the Collection's config to either `true` or to an object containing `auth` options.
-
-**For a full list of all `auth` options, [click here](/docs/authentication/config).**
-
-Simple example collection:
+To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import { CollectionConfig } from 'payload'
 
 export const Admins: CollectionConfig = {
-  slug: 'admins',
+  // ...
   // highlight-start
   auth: {
     tokenExpiration: 7200, // How many seconds to keep the user logged in
@@ -52,53 +61,138 @@ export const Admins: CollectionConfig = {
     // More options are available
   },
   // highlight-end
-  fields: [
-    {
-      name: 'role',
-      type: 'select',
-      required: true,
-      options: ['user', 'admin', 'editor', 'developer'],
-    },
-  ],
 }
 ```
 
-**By enabling Authentication on a config, the following modifications will automatically be made to your Collection:**
+<Banner type="info">
+  <strong>Tip:</strong>
+  For default auth behavior, set `auth: true`. This is a good starting point for most applications.
+</Banner>
 
-1. `email` as well as password `salt` & `hash` fields will be added to your Collection's schema
-1. The [Admin Panel](../admin/overview) will feature a new set of corresponding UI to allow for changing password and editing email
-1. [A new set of `operations`](/docs/authentication/operations) will be exposed via Payload's REST, Local, and GraphQL APIs
+<Banner type="warning">
+  <strong>Note:</strong>
+  Auth-enabled Collections with be automatically injected with the `hash`, `salt`, and `email` fields. [More details](../fields/overview#field-names).
+</Banner>
 
-Once enabled, each document that is created within the Collection can be thought of as a `user` - who can make use of commonly required authentication functions such as logging in / out, resetting their password, and more.
+The following options are available:
 
-## Authentication Strategies
+| Option                     | Description                                                                                                                                                                                                                         |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
+| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
+| **`disableLocalStrategy`** | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                                     |
+| **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                             |
+| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
+| **`loginWithUsername`**    | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                                     |
+| **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
+| **`strategies`**           | Advanced - an array of custom authentification strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                         |
+| **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
+| **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                       |
+| **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                  |
 
-Out of the box Payload ships with a few powerful authentication strategies. HTTP-Only Cookies, JWT's and API-Keys, they can work together or individually. You can also have multiple collections that have auth enabled, but only 1 of them can be used to log into the Admin Panel.
+### Login With Username
+
+You can allow users to login with their username instead of their email address by setting the `loginWithUsername` property to `true`.
+
+Example:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    loginWithUsername: true,
+  },
+}
+```
+
+Or, you can pass an object with additional options:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    loginWithUsername: {
+      allowEmailLogin: true, // default: false
+      requireEmail: false, // default: false
+    },
+  },
+}
+```
+
+**`allowEmailLogin`**
+
+If set to `true`, users can log in with either their username or email address. If set to `false`, users can only log in with their username.
+
+**`requireEmail`**
+
+If set to `true`, an email address is required when creating a new user. If set to `false`, email is not required upon creation.
+
+## Admin Auto-Login
+
+For testing and demo purposes you may want to skip forcing the admin user to login in order to access the [Admin Panel](../admin/overview). Typically, all users should be required to login to access the Admin Panel, however, you can speed up local development time by enabling auto-login.
+
+To enable auto-login, set the `autoLogin` property in the [Admin Config](../configuration/admin):
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // ...
+    // highlight-start
+    autoLogin:
+      process.env.NEXT_PUBLIC_ENABLE_AUTOLOGIN === 'true'
+        ? {
+            email: 'test@example.com',
+            password: 'test',
+            prefillOnly: true,
+          }
+        : false,
+    // highlight-end
+  },
+})
+```
+
+<Banner type="warning">
+  <strong>Warning:</strong>
+  The recommended way to use this feature is behind an [Environment Variable](../configuration/environment-vars). This will ensure it is _disabled_ in production.
+</Banner>
+
+The following options are available:
+
+| Option            | Description                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| **`email`**       | The email address of the user to login as                                                                       |
+| **`password`**    | The password of the user to login as                                                                            |
+| **`prefillOnly`** | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
+
+## Operations
+
+All auth-related operations are available via Payload's REST, Local, and GraphQL APIs. These operations are automatically added to your Collection when you enable Authentication. [More details](./operations).
+
+## Strategies
+
+Out of the box Payload ships with a three powerful Authentication strategies:
+
+- [HTTP-Only Cookies](./cookies)
+- [JSON Web Tokens (JWT)](./jwt)
+- [API-Keys](./api-keys)
+
+Each of these strategies can work together or independently. You can also create your own custom strategies to fit your specific needs. [More details](./custom-strategies).
 
 ### HTTP-Only Cookies
 
-HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and <strong>cannot be read by JavaScript in the browser</strong>, unlike JWT's.
-
-You can learn more about this strategy from the [HTTP-Only Cookies](/docs/authentication/http-only-cookies) docs.
+[HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and <strong>cannot be read by JavaScript in the browser</strong>, unlike JWT's. [More details](./cookies).
 
 ### JSON Web Tokens
 
-JWT (JSON Web Tokens) can also be utilized to perform authentication. Tokens are generated on `login`, `refresh` and `me` operations and can be attached to future requests to authenticate users.
-
-You can learn more about this strategy from the [JWT](/docs/authentication/jwt) docs.
+JWT (JSON Web Tokens) can also be utilized to perform authentication. Tokens are generated on `login`, `refresh` and `me` operations and can be attached to future requests to authenticate users. [More details](./jwt).
 
 ### API Keys
 
-API Keys can be enabled on auth collections. These are particularly useful when you want to authenticate against Payload from a third party service.
-
-You can learn more about this strategy from the [API Keys](/docs/authentication/api-keys) docs.
+API Keys can be enabled on auth collections. These are particularly useful when you want to authenticate against Payload from a third party service. [More details](./api-keys).
 
 ### Custom Strategies
 
-There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to.
-
-You can learn more about custom strategies from the [Custom Strategies](/docs/authentication/custom-strategies) docs.
-
-## Logging in / out, resetting password, etc.
-
-[Click here](/docs/authentication/operations) for a list of all automatically-enabled Auth operations, including `login`, `logout`, `refresh`, and others.
+There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to. [More details](./custom-strategies).

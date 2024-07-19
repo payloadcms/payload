@@ -1,16 +1,6 @@
-import type {
-  AdminViewComponent,
-  AdminViewProps,
-  EditViewComponent,
-  ServerSideEditViewProps,
-} from 'payload'
+import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
 
-import {
-  DocumentInfoProvider,
-  EditDepthProvider,
-  FormQueryParamsProvider,
-  HydrateClientUser,
-} from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
 import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
@@ -65,7 +55,6 @@ export const Document: React.FC<AdminViewProps> = async ({
   let ErrorView: AdminViewComponent
 
   let apiURL: string
-  let action: string
 
   const { data, formState } = await getDocumentData({
     id,
@@ -87,8 +76,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
       notFound()
     }
-
-    action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
     const params = new URLSearchParams()
     if (collectionConfig.versions?.drafts) {
@@ -127,8 +114,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
       notFound()
     }
-
-    action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
     const params = new URLSearchParams({
       locale: locale?.code,
@@ -198,7 +183,6 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   return (
     <DocumentInfoProvider
-      action={action}
       apiURL={apiURL}
       collectionSlug={collectionConfig?.slug}
       disableActions={false}
@@ -225,34 +209,25 @@ export const Document: React.FC<AdminViewProps> = async ({
         depth={1}
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
-        <FormQueryParamsProvider
-          initialParams={{
-            depth: 0,
-            'fallback-locale': 'null',
-            locale: locale?.code,
-            uploadEdits: undefined,
-          }}
-        >
-          {ErrorView ? (
-            <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
-          ) : (
-            <RenderCustomComponent
-              CustomComponent={ViewOverride || CustomView}
-              DefaultComponent={DefaultView}
-              serverOnlyProps={{
-                i18n,
-                initPageResult,
-                locale,
-                params,
-                payload,
-                permissions,
-                routeSegments: segments,
-                searchParams,
-                user,
-              }}
-            />
-          )}
-        </FormQueryParamsProvider>
+        {ErrorView ? (
+          <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+        ) : (
+          <RenderCustomComponent
+            CustomComponent={ViewOverride || CustomView}
+            DefaultComponent={DefaultView}
+            serverOnlyProps={{
+              i18n,
+              initPageResult,
+              locale,
+              params,
+              payload,
+              permissions,
+              routeSegments: segments,
+              searchParams,
+              user,
+            }}
+          />
+        )}
       </EditDepthProvider>
     </DocumentInfoProvider>
   )

@@ -17,6 +17,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     confirmPassword: '確認密碼',
     createFirstUser: '建立第一個使用者',
     emailNotValid: '提供的電子郵件無效',
+    emailOrUsername: '電子郵件或使用者名稱',
     emailSent: '電子郵件已寄出',
     emailVerified: '電子郵件驗證成功。',
     enableAPIKey: '啟用API金鑰',
@@ -288,6 +289,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     updating: '更新中',
     uploading: '上傳中',
     user: '使用者',
+    username: '使用者名稱',
     users: '使用者',
     value: '值',
     welcome: '歡迎',
@@ -309,7 +311,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     within: '在...之內',
   },
   upload: {
-    addImage: '添加圖片',
+    addFile: '添加文件',
     crop: '裁剪',
     cropToolDescription: '拖動所選區域的角落，繪製一個新區域或調整以下的值。',
     dragAndDrop: '拖放一個檔案',
@@ -350,6 +352,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: '該字串需要兩個數字。',
     shorterThanMax: '該值長度必須小於{{maxLength}}個字元',
     trueOrFalse: '該字串只能等於是或否。',
+    username: '請輸入有效的使用者名稱。可以包含字母、數字、連字號、句點和底線。',
     validUploadID: '該字串不是有效的上傳ID。',
   },
   version: {

@@ -449,6 +449,9 @@ export const blocks = baseField.keys({
       joi.object({
         slug: joi.string().required(),
         admin: joi.object().keys({
+          components: joi.object().keys({
+            Label: componentSchema,
+          }),
           custom: joi.object().pattern(joi.string(), joi.any()),
         }),
         custom: joi.object().pattern(joi.string(), joi.any()),

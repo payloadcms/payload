@@ -74,11 +74,13 @@ export interface GeneratedTypes {
       login: {
         email: string
         password: string
-        username?: string
       }
       registerFirstUser: {
         email: string
         password: string
+      }
+      unlock: {
+        email: string
       }
     }
   }
@@ -349,7 +351,7 @@ export class BasePayload {
     options: UnlockOptions<TSlug>,
   ): Promise<boolean> => {
     const { unlock } = localOperations.auth
-    return unlock(this, options)
+    return unlock<TSlug>(this, options)
   }
 
   updateGlobal = async <TSlug extends GlobalSlug>(
@@ -708,11 +710,11 @@ export type {
   AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
-  AfterLogoutHook,
-  AfterMeHook,
+  AfterLogoutHook as CollectionAfterLogoutHook,
+  AfterMeHook as CollectionAfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
-  AfterRefreshHook,
+  AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
   BeforeChangeHook as CollectionBeforeChangeHook,
@@ -839,6 +841,7 @@ export type {
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
   APIError,
+  APIErrorName,
   AuthenticationError,
   DuplicateCollection,
   DuplicateFieldName,
@@ -859,6 +862,7 @@ export {
   NotFound,
   QueryError,
   ValidationError,
+  ValidationErrorName,
 } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'

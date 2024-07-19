@@ -58,7 +58,7 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Reminder:</strong>
+  <strong>Note:</strong>
   For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub, or the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
 </Banner>
 
@@ -67,30 +67,30 @@ The following options are available:
 | Option                 | Description                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`admin`**                | The configuration options for the Admin Panel, including Custom Components, Live Preview, etc. [More details](../admin/overview#admin-options). |
-| **`bin`**                  | Register custom bin scripts with the `payload` bin function. |
+| **`bin`**                  | Register custom bin scripts for Payload to execute. |
 | **`editor`**               | The Rich Text Editor which will be used by `richText` fields. [More details](../rich-text/overview). |
 | **`db`** \*                | The Database Adapter which will be used by Payload. [More details](../database/overview). |
-| **`serverURL`**            | A string used to define the absolute URL of your app including the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port |
+| **`serverURL`**            | A string used to define the absolute URL of your app. This includes the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port. |
 | **`collections`**          | An array of Collections for Payload to manage. [More details](./collections). |
 | **`globals`**              | An array of Globals for Payload to manage. [More details](./globals). |
-| **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More](#cors) |
-| **`localization`**         | Opt-in and control how Payload handles the translation of your content into multiple locales. [More details](./localization). |
+| **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cors). |
+| **`localization`**         | Opt-in to translate your content into multiple locales. [More details](./localization). |
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options). |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets. |
-| **`csrf`**                 | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More details](../authentication/overview#csrf-protection). |
+| **`csrf`**                 | A whitelist array of URLs to allow Payload to accept cookies from. [More details](../authentication/overview#csrf-protection). |
 | **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../queries/depth). |
 | **`defaultMaxTextLength`** | The maximum allowed string length to be permitted application-wide. Helps to prevent malicious public document creation. |
-| **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
+| **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. [More details](../queries/depth). |
 | **`indexSortableFields`**  | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. |
 | **`upload`**               | Base Payload upload configuration. [More details](../upload/overview#payload-wide-upload-options). |
-| **`routes`**               | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. [More details](../admin/overview#root-level-routes). |
+| **`routes`**               | Control the routing structure that Payload binds itself to. [More details](../admin/overview#root-level-routes). |
 | **`email`**                | Configure the Email Adapter for Payload to use. [More details](../email/overview). |
 | **`debug`**                | Enable to expose more detailed error information. |
 | **`telemetry`**            | Disable Payload telemetry by passing `false`. [More details](#telemetry). |
 | **`rateLimit`**            | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks, etc. [More details](../production/preventing-abuse#rate-limiting-requests). |
-| **`hooks`**                | Tap into Payload-wide hooks. [More details](../hooks/overview). |
-| **`plugins`**              | An array of Payload plugins. [More details](../plugins/overview). |
-| **`endpoints`**            | An array of custom API endpoints added to the Payload router. [More details](../rest-api/overview#custom-endpoints). |
+| **`hooks`**                | An array of Root Hooks. [More details](../hooks/overview). |
+| **`plugins`**              | An array of Plugins. [More details](../plugins/overview). |
+| **`endpoints`**            | An array of Custom Endpoints added to the Payload router. [More details](../rest-api/overview#custom-endpoints). |
 | **`custom`**               | Extension point for adding custom data (e.g. for plugins). |
 | **`i18n`**                 | Internationalization configuration. Pass all i18n languages you'd like the admin UI to support. Defaults to English-only. [More details](./i18n). |
 | **`secret`** \*            | A secure, unguessable string that Payload will use for any encryption workflows - for example, password salt / hashing. |
@@ -100,14 +100,14 @@ The following options are available:
 _\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  <strong>Note:</strong>
   Some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
 </Banner>
 
 
-### TypeScript
+### Typescript Config
 
-Payload exposes a variety of TypeScript settings that you can leverage. These settings are used to auto-generate TypeScript interfaces for your Collections and Globals, and to ensure that Payload uses your [Generated Types](../typescript/overview) for all Local API methods.
+Payload exposes a variety of TypeScript settings that you can leverage. These settings are used to auto-generate TypeScript interfaces for your [Collections](../configuration/collections) and [Globals](../configuration/globals), and to ensure that Payload uses your [Generated Types](../typescript/overview) for all [Local API](../local-api/overview) methods.
 
 To customize the TypeScript settings, use the `typescript` property in your Payload Config:
 
@@ -130,39 +130,59 @@ The following options are available:
 | **`declare`**     | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`. |
 | **`outputFile`**  | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path. |
 
-#### Importing Payload Config types
-
-You can import config types as follows:
-
-```ts
-import { Config } from 'payload'
-
-// This is the type used for an incoming Payload Config.
-// Only the bare minimum properties are marked as required.
-```
-
-```ts
-import { SanitizedConfig } from 'payload'
-
-// This is the type used after an incoming Payload Config is fully sanitized.
-// Generally, this is only used internally by Payload.
-```
-
 ## Config Location
 
-For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including the root current working directory, your `tsconfig`'s `rootDir`, and your `tsconfig`'s `outDir`.
+For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including:
 
-In development mode, if the configuration file is not found at the root, Payload will attempt to read your `tsconfig.json`, and search in the directory specified in `compilerOptions.rootDir` (typically "src").
+1. The root current working directory
+1. The `compilerOptions` in your `tsconfig`*
+1. The `dist` directory*
 
-In production mode, Payload will first attempt to find the config file in the output directory specified in `compilerOptions.outDir` of your `tsconfig.json`, then fallback to the source directory (`compilerOptions.rootDir`), and finally will check the 'dist' directory.
+_\* Config location detection is different between development and production environments. See below for more details._
 
-Please ensure your `tsconfig.json` is properly configured if you want Payload to accurately auto-detect your configuration file location. If `tsconfig.json` does not exist or doesn't specify `rootDir` or `outDir`, Payload will default to the current working directory.
+<Banner type="warning">
+  <strong>Important:</strong>
+  Ensure your `tsconfig.json` is properly configured for Payload to auto-detect your config location. If if does not exist, or does not specify the proper `compilerOptions`, Payload will default to the current working directory.
+</Banner>
+
+**Development Mode**
+
+In development mode, if the configuration file is not found at the root, Payload will attempt to read your `tsconfig.json`, and attempt to find the config file specified in the `rootDir`:
+
+```json
+{
+  // ...
+  // highlight-start
+  "compilerOptions": {
+    "rootDir": "src"
+  }
+  // highlight-end
+}
+```
+
+**Production Mode**
+
+In production mode, Payload will first attempt to find the config file in the `outDir` of your `tsconfig.json`, and if not found, will fallback to the `rootDor` directory:
+
+```json
+{
+  // ...
+  // highlight-start
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  }
+  // highlight-end
+}
+```
+
+If none was in either location, Payload will finally check the `dist` directory.
 
 ### Customizing the Config Location
 
-In addition to the above automated detection, you can specify your own location for the Payload Config. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload Config is not in a standard location, or you wish to switch between multiple configurations.
+In addition to the above automated detection, you can specify your own location for the Payload Config. This can be useful in situations where your config is not in a standard location, or you wish to switch between multiple configurations. To do this, Payload exposes an [Environment Variable](..environment-variables) to bypass all automatic config detection.
 
-**Example in package.json:**
+To use a custom config location, set the `PAYLOAD_CONFIG_PATH` environment variable:
 
 ```json
 {
@@ -172,7 +192,10 @@ In addition to the above automated detection, you can specify your own location 
 }
 ```
 
-When `PAYLOAD_CONFIG_PATH` is set, Payload will use this path to load the configuration, bypassing all automated detection.
+<Banner type="info">
+  <strong>Tip:</strong>
+  `PAYLOAD_CONFIG_PATH` can be either an absolute path, or path relative to your current working directory.
+</Banner>
 
 ## Telemetry
 
@@ -186,8 +209,8 @@ Cross-origin resource sharing (CORS) can be configured with either a whitelist a
 
 | Option    | Description                                                                                                                                                                        |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `origins` | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
-| `headers  | A list of allowed headers that will be appended in `Access-Control-Allow-Headers`. |
+| **`origins`** | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
+| **`headers`**  | A list of allowed headers that will be appended in `Access-Control-Allow-Headers`. |
 
 Here's an example showing how to allow incoming requests from any domain:
 
@@ -196,7 +219,7 @@ import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   // ...
-  cors: '*'
+  cors: '*' // highlight-line
 })
 ```
 
@@ -207,9 +230,21 @@ import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   // ...
+  // highlight-start
   cors: {
     origins: ['http://localhost:3000']
     headers: ['x-custom-header']
   }
+  // highlight-end
 })
+```
+
+## TypeScript
+
+You can import types from Payload to help make writing your config easier and type-safe. There are two main types that represent the Payload Config, `Config` and `SanitizedConfig`.
+
+The `Config` type represents a raw Payload Config in its full form. Only the bare minimum properties are marked as required. The `SanitizedConfig` type represents a Payload Config after it has been fully sanitized. Generally, this is only used internally by Payload.
+
+```ts
+import { Config, SanitizedConfig } from 'payload'
 ```
