@@ -248,9 +248,9 @@ type RichTextAdapterBase<
 }
 
 export type RichTextAdapter<
-  Value extends object = object,
+  Value extends object = any,
   AdapterProps = any,
-  ExtraFieldProperties = {},
+  ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
   FieldComponent: PayloadComponent<

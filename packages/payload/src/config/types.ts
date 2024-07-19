@@ -32,6 +32,8 @@ import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
  * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
+ *
+ * If the path is an empty string, it will be treated as () => null
  */
 export type PayloadComponent<
   TComponentServerProps extends object = Record<string, any>,
@@ -225,7 +227,7 @@ export type GraphQLInfo = {
     name: string
   }
   collections: {
-    [slug: number | string | symbol]: Collection
+    [slug: string]: Collection
   }
   globals: Globals
   types: {

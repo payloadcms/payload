@@ -147,7 +147,7 @@ export class BasePayload {
   authStrategies: AuthStrategy[]
 
   collections: {
-    [slug: number | string | symbol]: Collection
+    [slug: string]: Collection
   } = {}
 
   config: SanitizedConfig
