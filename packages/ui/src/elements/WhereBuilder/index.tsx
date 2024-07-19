@@ -2,6 +2,8 @@
 import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
+import * as qs from 'qs-esm'
 import React, { useEffect, useState } from 'react'
 
 import type { WhereBuilderProps } from './types.js'
@@ -39,6 +41,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
+  const router = useRouter()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
@@ -144,9 +147,21 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   React.useEffect(() => {
     if (shouldUpdateQuery) {
       handleWhereChange({ or: conditions })
+
+      // Reset the page param when updating the where query
+      if (searchParams?.page && searchParams?.page !== '1') {
+        const query = {
+          ...searchParams,
+          page: '1',
+          where: { or: conditions },
+        }
+
+        router.replace(`${qs.stringify(query, { addQueryPrefix: true })}`)
+      }
+
       setShouldUpdateQuery(false)
     }
-  }, [conditions, handleWhereChange, shouldUpdateQuery])
+  }, [conditions, handleWhereChange, shouldUpdateQuery, searchParams, router])
 
   return (
     <div className={baseClass}>
