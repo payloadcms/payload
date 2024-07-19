@@ -14,6 +14,11 @@ import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
+import {
+  sanitizeAuthFields,
+  sanitizeUploadFields,
+  sanitizeVersionsFields,
+} from './reservedFieldNames.js'
 
 export const sanitizeCollection = async (
   config: Config,
@@ -38,6 +43,7 @@ export const sanitizeCollection = async (
 
   const validRelationships = config.collections.map((c) => c.slug) || []
   sanitized.fields = await sanitizeFields({
+    collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
     richTextSanitizationPromises,
@@ -84,6 +90,7 @@ export const sanitizeCollection = async (
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
 
   if (sanitized.versions) {
+    sanitizeVersionsFields(sanitized.fields, sanitized)
     if (sanitized.versions === true) sanitized.versions = { drafts: false }
 
     if (sanitized.timestamps === false) {
@@ -115,6 +122,9 @@ export const sanitizeCollection = async (
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {}
 
+    // sanitize fields for reserved names
+    sanitizeUploadFields(sanitized.fields, sanitized)
+
     // disable duplicate for uploads by default
     sanitized.disableDuplicate = sanitized.disableDuplicate || true
 
@@ -133,6 +143,9 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.auth) {
+    // sanitize fields for reserved names
+    sanitizeAuthFields(sanitized.fields, sanitized)
+
     sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {}, {
       isMergeableObject: isPlainObject,
     })
