@@ -46,10 +46,10 @@ export type RawPayloadComponent<
   TComponentServerProps extends object = Record<string, any>,
   TComponentClientProps extends object = Record<string, any>,
 > = {
-  clientProps?: TComponentClientProps
+  clientProps?: TComponentClientProps | object
   exportName?: string
   path: string
-  serverProps?: TComponentServerProps
+  serverProps?: TComponentServerProps | object
 }
 
 export type PayloadComponentProps<TPayloadComponent> =
