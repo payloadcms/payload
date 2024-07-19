@@ -16,7 +16,13 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
   payload,
 }) => {
   try {
-    if (typeof payload?.config?.autoLogin === 'object' && !payload.config.autoLogin.prefillOnly) {
+    const token = extractJWT({ headers, payload })
+
+    if (
+      !token &&
+      typeof payload?.config?.autoLogin === 'object' &&
+      !payload.config.autoLogin.prefillOnly
+    ) {
       const collection = payload.collections[payload.config.admin.user]
 
       const where: Where = {
@@ -50,7 +56,6 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       }
     }
 
-    const token = extractJWT({ headers, payload })
     const decodedPayload = jwt.verify(token, payload.secret) as JWTToken & jwt.JwtPayload
 
     const collection = payload.collections[decodedPayload.collection]
