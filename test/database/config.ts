@@ -281,7 +281,11 @@ const createDatabaseTestConfig = async () => {
 
   const configWithDefaults = await buildConfigWithDefaults(config)
 
-  if (process.env.PAYLOAD_DATABASE === 'mongoose' || !process.env.PAYLOAD_DATABASE) {
+  if (
+    process.env.PAYLOAD_DATABASE === 'mongoose' ||
+    process.env.PAYLOAD_DATABASE === 'mongodb' ||
+    !process.env.PAYLOAD_DATABASE
+  ) {
     configWithDefaults.db = mongooseAdapter({
       migrationDir,
       url:
