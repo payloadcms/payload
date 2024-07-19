@@ -283,7 +283,7 @@
     "near": "near"
   },
   "upload": {
-    "addImage": "Add Image",
+    "addFile": "Add File",
     "crop": "Crop",
     "cropToolDescription": "Drag the corners of the selected area, draw a new area or adjust the values below.",
     "dragAndDrop": "Drag and drop a file",

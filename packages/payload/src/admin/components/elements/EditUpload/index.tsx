@@ -1,13 +1,12 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { forwardRef, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactCrop, { type Crop as CropType } from 'react-image-crop'
+import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-import type { Data } from '../../forms/Form/types'
+import type { UploadEdits } from '../../../../uploads/types'
 
 import Plus from '../../icons/Plus'
-import { useUploadEdits } from '../../utilities/UploadEdits'
 import { editDrawerSlug } from '../../views/collections/Edit/Upload'
 import Button from '../Button'
 import './index.scss'
@@ -42,58 +41,80 @@ type FocalPosition = {
   y: number
 }
 
-export const EditUpload: React.FC<{
-  doc?: Data
+export type EditUploadProps = {
   fileName: string
   fileSrc: string
   imageCacheTag?: string
+  initialCrop?: UploadEdits['crop']
+  initialFocalPoint?: FocalPosition
+  onSave?: (uploadEdits: UploadEdits) => void
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ doc, fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
+}
+
+const defaultCrop: UploadEdits['crop'] = {
+  height: 100,
+  unit: '%',
+  width: 100,
+  x: 0,
+  y: 0,
+}
+
+export const EditUpload: React.FC<EditUploadProps> = ({
+  fileName,
+  fileSrc,
+  imageCacheTag,
+  initialCrop,
+  initialFocalPoint,
+  onSave,
+  showCrop,
+  showFocalPoint,
+}) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
-  const { updateUploadEdits, uploadEdits } = useUploadEdits()
 
-  const [focalPosition, setFocalPosition] = useState<FocalPosition>({
-    x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
-    y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
-  })
+  const [crop, setCrop] = useState<UploadEdits['crop']>(() => ({
+    ...defaultCrop,
+    ...(initialCrop || {}),
+  }))
+
+  const defaultFocalPosition: FocalPosition = {
+    x: 50,
+    y: 50,
+  }
+
+  const [focalPosition, setFocalPosition] = useState<FocalPosition>(() => ({
+    ...defaultFocalPosition,
+    ...initialFocalPoint,
+  }))
 
   const [checkBounds, setCheckBounds] = useState<boolean>(false)
-  const [originalHeight, setOriginalHeight] = useState<number>(0)
-  const [originalWidth, setOriginalWidth] = useState<number>(0)
+  const [uncroppedPixelHeight, setUncroppedPixelHeight] = useState<number>(0)
+  const [uncroppedPixelWidth, setUncroppedPixelWidth] = useState<number>(0)
 
   const focalWrapRef = useRef<HTMLDivElement | undefined>()
   const imageRef = useRef<HTMLImageElement | undefined>()
   const cropRef = useRef<HTMLDivElement | undefined>()
 
-  const heightRef = useRef<HTMLInputElement | null>(null)
-  const widthRef = useRef<HTMLInputElement | null>(null)
-
-  const [crop, setCrop] = useState<CropType>({
-    height: 100,
-    heightPixels: 0,
-    unit: '%',
-    width: 100,
-    widthPixels: 0,
-    x: 0,
-    y: 0,
-  })
+  const heightInputRef = useRef<HTMLInputElement | null>(null)
+  const widthInputRef = useRef<HTMLInputElement | null>(null)
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(false)
 
   const onImageLoad = (e) => {
-    setOriginalHeight(e.currentTarget.naturalHeight)
-    setOriginalWidth(e.currentTarget.naturalWidth)
+    // set the default image height/width on load
+    setUncroppedPixelHeight(e.currentTarget.naturalHeight)
+    setUncroppedPixelWidth(e.currentTarget.naturalWidth)
     setImageLoaded(true)
   }
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
-    if (dimension === 'width' && intValue >= originalWidth) return null
-    if (dimension === 'height' && intValue >= originalHeight) return null
+    if (dimension === 'width' && intValue >= uncroppedPixelWidth) return null
+    if (dimension === 'height' && intValue >= uncroppedPixelHeight) return null
 
-    const percentage = 100 * (intValue / (dimension === 'width' ? originalWidth : originalHeight))
+    const percentage =
+      100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
 
     if (percentage === 100 || percentage === 0) return null
 
@@ -117,16 +138,13 @@ export const EditUpload: React.FC<{
   }
 
   const saveEdits = () => {
-    updateUploadEdits({
-      crop: crop
-        ? {
-            ...crop,
-            heightPixels: Number(heightRef.current?.value ?? crop.heightPixels),
-            widthPixels: Number(widthRef.current?.value ?? crop.widthPixels),
-          }
-        : undefined,
-      focalPoint: focalPosition ? focalPosition : undefined,
-    })
+    if (typeof onSave === 'function')
+      onSave({
+        crop: crop ? crop : undefined,
+        focalPoint: focalPosition,
+        heightInPixels: Number(heightInputRef?.current?.value ?? uncroppedPixelHeight),
+        widthInPixels: Number(widthInputRef?.current?.value ?? uncroppedPixelWidth),
+      })
     closeModal(editDrawerSlug)
   }
 
@@ -181,7 +199,7 @@ export const EditUpload: React.FC<{
             className={`${baseClass}__focal-wrapper`}
             ref={focalWrapRef}
             style={{
-              aspectRatio: `${originalWidth / originalHeight}`,
+              aspectRatio: `${uncroppedPixelWidth / uncroppedPixelHeight}`,
             }}
           >
             {showCrop ? (
@@ -237,10 +255,8 @@ export const EditUpload: React.FC<{
                       onClick={() =>
                         setCrop({
                           height: 100,
-                          heightPixels: originalHeight,
                           unit: '%',
                           width: 100,
-                          widthPixels: originalWidth,
                           x: 0,
                           y: 0,
                         })
@@ -257,14 +273,14 @@ export const EditUpload: React.FC<{
                   <Input
                     name={`${t('upload:width')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
-                    ref={widthRef}
-                    value={((crop.width / 100) * originalWidth).toFixed(0)}
+                    ref={widthInputRef}
+                    value={((crop.width / 100) * uncroppedPixelWidth).toFixed(0)}
                   />
                   <Input
                     name={`${t('upload:height')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
-                    ref={heightRef}
-                    value={((crop.height / 100) * originalHeight).toFixed(0)}
+                    ref={heightInputRef}
+                    value={((crop.height / 100) * uncroppedPixelHeight).toFixed(0)}
                   />
                 </div>
               </div>

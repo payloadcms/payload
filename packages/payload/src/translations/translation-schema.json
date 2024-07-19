@@ -1108,7 +1108,7 @@
     "upload": {
       "additionalProperties": false,
       "properties": {
-        "addImage": {
+        "addFile": {
           "type": "string"
         },
         "crop": {

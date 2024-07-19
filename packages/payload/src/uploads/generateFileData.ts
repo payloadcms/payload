@@ -16,7 +16,7 @@ import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types
 import { FileUploadError, MissingFile } from '../errors'
 import FileRetrievalError from '../errors/FileRetrievalError'
 import canResizeImage from './canResizeImage'
-import cropImage from './cropImage'
+import { cropImage } from './cropImage'
 import { getExternalFile } from './getExternalFile'
 import getFileByPath from './getFileByPath'
 import getImageSize from './getImageSize'
@@ -211,7 +211,13 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData) {
-      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
+      const { data: croppedImage, info } = await cropImage({
+        cropData,
+        dimensions,
+        file,
+        heightInPixels: uploadEdits.heightInPixels,
+        widthInPixels: uploadEdits.widthInPixels,
+      })
 
       filesToSave.push({
         buffer: croppedImage,

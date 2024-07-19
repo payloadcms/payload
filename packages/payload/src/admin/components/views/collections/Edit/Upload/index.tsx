@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 
+import type { UploadEdits } from '../../../../../../uploads/types'
 import type { Props } from './types'
 
 import isImage from '../../../../../../uploads/isImage'
@@ -13,6 +14,7 @@ import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
+import { useForm } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
@@ -55,7 +57,8 @@ export const Upload: React.FC<Props> = (props) => {
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
-  const { resetUploadEdits } = useUploadEdits()
+  const { setModified } = useForm()
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
@@ -132,6 +135,14 @@ export const Upload: React.FC<Props> = (props) => {
     resetUploadEdits()
     setShowUrlInput(false)
   }, [handleFileChange, resetUploadEdits])
+
+  const onEditsSave = useCallback(
+    (args: UploadEdits) => {
+      setModified(true)
+      updateUploadEdits(args)
+    },
+    [setModified, updateUploadEdits],
+  )
 
   const handlePasteUrlClick = () => {
     setShowUrlInput((prev) => !prev)
@@ -222,7 +233,7 @@ export const Upload: React.FC<Props> = (props) => {
                     onClick={handleUrlSubmit}
                     type="button"
                   >
-                    {t('upload:addImage')}
+                    {t('upload:addFile')}
                   </button>
                 </div>
               </div>
@@ -274,10 +285,15 @@ export const Upload: React.FC<Props> = (props) => {
       {(value || doc.filename) && (
         <Drawer header={null} slug={editDrawerSlug}>
           <EditUpload
-            doc={doc || undefined}
             fileName={value?.name || doc?.filename}
             fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
+            initialCrop={uploadEdits?.crop ?? undefined}
+            initialFocalPoint={{
+              x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
+              y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
+            }}
+            onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />

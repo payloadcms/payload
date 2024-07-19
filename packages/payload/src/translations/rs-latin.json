@@ -283,7 +283,7 @@
     "near": "blizu"
   },
   "upload": {
-    "addImage": "Dodaj sliku",
+    "addFile": "Dodaj datoteku",
     "crop": "Isecite sliku",
     "cropToolDescription": "Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.",
     "dragAndDrop": "Prevucite i ispustite datoteku",
