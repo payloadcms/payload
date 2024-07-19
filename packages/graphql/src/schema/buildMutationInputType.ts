@@ -1,10 +1,4 @@
-import type {
-  GraphQLEnumValueConfig,
-  GraphQLInputFieldConfig,
-  GraphQLScalarType,
-  GraphQLType,
-  ThunkObjMap,
-} from 'graphql'
+import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
 import type {
   ArrayField,
   BlockField,
@@ -47,6 +41,7 @@ import { flattenTopLevelFields, toWords } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
+import { buildOptionEnums } from '../utilities/buildOptionEnums.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
@@ -238,21 +233,6 @@ export function buildMutationInputType({
         return acc
       }, inputObjectTypeConfig),
     select: (inputObjectTypeConfig: InputObjectTypeConfig, field: SelectField) => {
-      function buildOptionEnums(options: Option[]): ThunkObjMap<GraphQLEnumValueConfig> {
-        return options.reduce((acc, option) => {
-          if (typeof option === 'string') {
-            acc[formatName(option)] = option
-          } else if ('options' in option) {
-            acc = {
-              ...acc,
-              ...buildOptionEnums(option.options),
-            }
-          } else {
-            acc[formatName(option.value)] = option.value
-          }
-          return acc
-        }, {})
-      }
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`
       let type: GraphQLType = new GraphQLEnumType({
         name: formattedName,

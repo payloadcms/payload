@@ -4,21 +4,26 @@ import type { Option } from 'payload'
 import formatName from './formatName.js'
 
 export function buildOptionEnums(options: Option[]): ThunkObjMap<GraphQLEnumValueConfig> {
-  return options.reduce((acc, option) => {
+  return options.reduce((values, option) => {
     if (typeof option === 'string') {
-      acc[formatName(option)] = {
-        value: option,
+      return {
+        ...values,
+        [formatName(option)]: {
+          value: option,
+        },
       }
     } else if ('options' in option) {
-      acc = {
-        ...acc,
+      return {
+        ...values,
         ...buildOptionEnums(option.options),
       }
     } else {
-      acc[formatName(option.value)] = {
-        value: option.value,
+      return {
+        ...values,
+        [formatName(option.value)]: {
+          value: option.value,
+        },
       }
     }
-    return acc
   }, {})
 }
