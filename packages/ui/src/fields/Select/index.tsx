@@ -81,7 +81,7 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
-    (selectedOption: OptionObject | OptionObject[]) => {
+    (selectedOption: { value: string; label: string }) => {
       if (!disabled) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {

@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { MyComponent } from './MyComponent.js'
+// import { MyComponent } from './MyComponent.js'
 
 export const postsSlug = 'posts'
 
@@ -45,7 +45,12 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'presidents',
       type: 'select',
-      hasMany: true,
+      hasMany: false,
+      // admin: {
+      //   components: {
+      //     Field: MyComponent,
+      //   },
+      // },
       options: [
         {
           label: '1700s',
@@ -68,12 +73,9 @@ export const PostsCollection: CollectionConfig = {
               value: '3',
             },
             {
-              label: {
-                en: 'James Madison',
-              },
+              label: 'James Madison',
               value: '4',
             },
-            'James Monroe',
           ],
         },
       ],

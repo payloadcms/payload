@@ -102,6 +102,88 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
+## Option types
+
+A Select field config accepts three different types of options:
+
+### String options
+
+```ts
+{
+  name: 'example',
+  type: 'select',
+  options: ['Option 1', 'Option 2'],
+}
+```
+
+### Object options
+
+```ts
+{
+  name: 'example',
+  type: 'select',
+  options: [
+    {
+      label: 'Option 1',
+      value: 'option_1',
+    },
+    {
+      label: 'Option 2',
+      value: 'option_2',
+    },
+  ],
+}
+```
+
+### Grouped options
+
+```ts
+{
+  name: 'example',
+  type: 'select',
+  options: [
+    {
+      label: 'Group 1',
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option_1',
+        },
+      ],
+    },
+    {
+      label: 'Group 2',
+      options: [
+        {
+          label: 'Option 2',
+          value: 'option_2',
+        },
+      ],
+    },
+  ],
+}
+```
+
+### Option labels
+
+If your payload config has [localization](/docs/configuration/localization) enabled, option labels can also be localized by providing an object with keys for each language:
+
+```ts
+{
+  name: 'example',
+  type: 'select',
+  options: [
+    {
+      label: {
+        en: 'Option 1',
+        es: 'Opción 1',
+      },
+      value: 'option_1',
+    },
+  ],
+}
+```
+
 ## Customization
 
 The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config.
@@ -109,21 +191,12 @@ The Select field UI component can be customized by providing a custom React comp
 ```ts
 export const CustomSelectField: Field = {
   name: 'customSelectField',
-  type: 'select', // or 'text' if you have dynamic options
+  // use 'type: text' if you have options
+  // that will be populated and therefore are dynamic
+  type: 'text',
   admin: {
     components: {
-      Field: CustomSelectComponent({
-        options: [
-          {
-            label: 'Option 1',
-            value: '1',
-          },
-          {
-            label: 'Option 2',
-            value: '2',
-          },
-        ],
-      }),
+      Field: CustomSelectComponent,
     },
   },
 }
@@ -132,43 +205,29 @@ export const CustomSelectField: Field = {
 You can import the existing Select component directly from Payload, then extend and customize it as needed.
 
 ```ts
-import * as React from 'react';
-import { SelectInput, useField } from 'payload/components/forms';
-import { useAuth } from 'payload/components/utilities';
+import * as React from 'react'
+import { SelectField } from '@payloadcms/ui'
 
-type CustomSelectProps = {
-  path: string;
-  options: {
-    label: string;
-    value: string;
-  }[];
-}
+export const presidentOptions = [
+  {
+    label: 'George Washington',
+    value: '1',
+  },
+  {
+    label: 'John Adams',
+    value: '2',
+  },
+]
 
-export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
-  const { value, setValue } = useField<string>({ path })
-  const { user } = useAuth()
-
-  const adjustedOptions = options.filter((option) => {
-    /*
-      A common use case for a custom select
-      is to show different options based on
-      the current user's role.
-    */
-    return option;
-  });
+export const CustomSelectComponent = async (args) => {
+  // you would likely want to fetch this data from an API
+  // this is just an example of async data "fetching"
+  const fetchedPresidents = await Promise.resolve(presidentOptions)
 
   return (
     <div>
-      <label className="field-label">
-        Custom Select
-      </label>
-      <SelectInput
-        path={path}
-        name={path}
-        options={adjustedOptions}
-        value={value}
-        onChange={(e) => setValue(e.value)}
-      />
+      <label className="field-label">Custom Select</label>
+      <SelectField path={args.path} options={fetchedPresidents} />
     </div>
   )
 }
