@@ -6,7 +6,8 @@ import {
   HeadingFeature,
   HorizontalRuleFeature,
   InlineToolbarFeature,
- lexicalEditor } from '@payloadcms/richtext-lexical'
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
