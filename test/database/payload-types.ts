@@ -11,18 +11,30 @@ export interface Config {
     posts: Post
     'relation-a': RelationA
     'relation-b': RelationB
+    'custom-schema': CustomSchema
     users: User
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
-  globals: {}
+  globals: {
+    global: Global
+  }
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
 export interface Post {
   id: string
   title: string
+  throwAfterChange?: boolean | null
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-a".
+ */
 export interface RelationA {
   id: string
   relationship?: (string | null) | RelationB
@@ -34,6 +46,10 @@ export interface RelationA {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-b".
+ */
 export interface RelationB {
   id: string
   relationship?: (string | null) | RelationA
@@ -45,6 +61,41 @@ export interface RelationB {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-schema".
+ */
+export interface CustomSchema {
+  id: string
+  text?: string | null
+  localizedText?: string | null
+  relationship?: (string | RelationA)[] | null
+  select?: ('a' | 'b' | 'c')[] | null
+  radio?: ('a' | 'b' | 'c') | null
+  array?:
+    | {
+        text?: string | null
+        localizedText?: string | null
+        id?: string | null
+      }[]
+    | null
+  blocks?:
+    | {
+        text?: string | null
+        localizedText?: string | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
@@ -58,6 +109,10 @@ export interface User {
   lockUntil?: string | null
   password: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -77,12 +132,26 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null
   batch?: number | null
   updatedAt: string
   createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global".
+ */
+export interface Global {
+  id: string
+  text?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
 declare module 'payload' {

@@ -18,6 +18,7 @@ type Args<T> = {
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
+  siblingDocKeys?: Set<string>
 }
 
 export const traverseFields = async <T>({
@@ -33,8 +34,11 @@ export const traverseFields = async <T>({
   req,
   siblingData,
   siblingDoc,
+  siblingDocKeys: incomingSiblingDocKeys,
 }: Args<T>): Promise<void> => {
   const promises = []
+  const siblingDocKeys = incomingSiblingDocKeys || new Set(Object.keys(siblingDoc))
+
   fields.forEach((field) => {
     promises.push(
       promise({
@@ -50,8 +54,19 @@ export const traverseFields = async <T>({
         req,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       }),
     )
   })
+
   await Promise.all(promises)
+
+  // For any siblingDocKeys that have not been deleted,
+  // we will move the data to the siblingData object
+  // to preserve it
+  siblingDocKeys.forEach((key) => {
+    if (!['createdAt', 'globalType', 'id', 'updatedAt'].includes(key)) {
+      siblingData[key] = siblingDoc[key]
+    }
+  })
 }

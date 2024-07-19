@@ -18,6 +18,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   }
 
   let result
+
   result = await Model.findOneAndUpdate({ globalType: slug }, data, options)
 
   result = JSON.parse(JSON.stringify(result))

@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid'
 import type { User } from '../../packages/payload/src/auth'
 
 import payload from '../../packages/payload/src'
-import configPromise from '../collections-graphql/config'
+import configPromise from '../auth/config'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
