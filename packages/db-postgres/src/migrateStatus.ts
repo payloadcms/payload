@@ -14,7 +14,7 @@ export async function migrateStatus(this: PostgresAdapter): Promise<void> {
   })
 
   let existingMigrations = []
-  const hasMigrationTable = await migrationTableExists(this.drizzle)
+  const hasMigrationTable = await migrationTableExists(this)
 
   if (hasMigrationTable) {
     ;({ existingMigrations } = await getMigrations({ payload }))
