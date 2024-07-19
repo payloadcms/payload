@@ -2,12 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 import type { User } from '../../../payload-types'
 
-import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs.js'
-import { createAccess } from './access/create.js'
+import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs'
+import { createAccess } from './access/create'
 import { readAccess } from './access/read'
-import { updateAndDeleteAccess } from './access/updateAndDelete.js'
-import { externalUsersLogin } from './endpoints/externalUsersLogin.js'
-import { ensureUniqueUsername } from './hooks/ensureUniqueUsername.js'
+import { updateAndDeleteAccess } from './access/updateAndDelete'
+import { externalUsersLogin } from './endpoints/externalUsersLogin'
+import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
 
 const Users: CollectionConfig = {
   slug: 'users',

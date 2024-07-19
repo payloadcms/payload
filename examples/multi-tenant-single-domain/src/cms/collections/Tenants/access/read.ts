@@ -1,7 +1,7 @@
 import type { Access } from 'payload'
 
-import { isSuperAdmin } from '../../../access/isSuperAdmin.js'
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const tenantRead: Access = (args) => {
   const req = args.req

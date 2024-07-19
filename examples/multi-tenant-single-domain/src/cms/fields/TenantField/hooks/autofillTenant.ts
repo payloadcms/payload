@@ -1,6 +1,6 @@
 import type { FieldHook } from 'payload'
 
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
+import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const autofillTenant: FieldHook = ({ req, value }) => {
   // If there is no value,

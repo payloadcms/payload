@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { isSuperAdmin } from '../../access/isSuperAdmin.js'
-import { canMutateTenant, filterByTenantRead } from './access/byTenant.js'
+import { isSuperAdmin } from '../../access/isSuperAdmin'
+import { canMutateTenant, filterByTenantRead } from './access/byTenant'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',

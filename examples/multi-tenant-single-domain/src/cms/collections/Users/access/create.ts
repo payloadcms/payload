@@ -2,8 +2,8 @@ import type { Access } from 'payload'
 
 import type { User } from '../../../../payload-types'
 
-import { isSuperAdmin } from '../../../access/isSuperAdmin.js'
-import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs.js'
+import { isSuperAdmin } from '../../../access/isSuperAdmin'
+import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const createAccess: Access<User> = (args) => {
   const { req } = args
