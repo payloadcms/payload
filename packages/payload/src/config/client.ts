@@ -43,6 +43,27 @@ export type ClientConfig = {
   globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
 
+const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
+  'endpoints',
+  'db',
+  'editor',
+  'plugins',
+  'sharp',
+  'onInit',
+  'secret',
+  'hooks',
+  'bin',
+  'typescript',
+  'cors',
+  'csrf',
+  'email',
+  'custom',
+  'graphQL',
+  // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
+]
+
+const serverOnlyAdminProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = ['components']
+
 export const createClientConfig = async ({
   config,
   t,
@@ -53,49 +74,28 @@ export const createClientConfig = async ({
 }): Promise<ClientConfig> => {
   const clientConfig: ClientConfig = { ...config }
 
-  const serverOnlyConfigProperties: Partial<ServerOnlyRootProperties>[] = [
-    'endpoints',
-    'db',
-    'editor',
-    'plugins',
-    'sharp',
-    'onInit',
-    'secret',
-    'hooks',
-    'bin',
-    'typescript',
-    'cors',
-    'csrf',
-    'email',
-    'custom',
-    'graphQL',
-    // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
-  ]
-
-  serverOnlyConfigProperties.forEach((key) => {
+  for (const key of serverOnlyConfigProperties) {
     if (key in clientConfig) {
       delete clientConfig[key]
     }
-  })
+  }
 
   if ('localization' in clientConfig && clientConfig.localization) {
     clientConfig.localization = { ...clientConfig.localization }
 
-    clientConfig.localization.locales.forEach((locale) => {
+    for (const locale of clientConfig.localization.locales) {
       delete locale.toString
-    })
+    }
   }
 
   if ('admin' in clientConfig) {
     clientConfig.admin = { ...clientConfig.admin }
 
-    const serverOnlyAdminProperties: Partial<ServerOnlyRootAdminProperties>[] = ['components']
-
-    serverOnlyAdminProperties.forEach((key) => {
+    for (const key of serverOnlyAdminProperties) {
       if (key in clientConfig.admin) {
         delete clientConfig.admin[key]
       }
-    })
+    }
 
     if ('livePreview' in clientConfig.admin) {
       clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }

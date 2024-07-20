@@ -179,15 +179,16 @@ export async function buildConfigWithDefaults(
     },
   }
 
-  config.admin = {
-    autoLogin:
+  if (!config.admin) {
+    config.admin = {}
+  }
+  if (config.admin.autoLogin === undefined) {
+    config.admin.autoLogin =
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
         ? false
         : {
             email: 'dev@payloadcms.com',
-            password: 'test',
-          },
-    ...(config.admin || {}),
+          }
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
