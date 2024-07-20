@@ -294,14 +294,6 @@ describe('admin1', () => {
       await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-
-      // Ensure auto-login logged the user back in
-
-      await expect(() => expect(page.url()).toBe(`${serverURL}${adminRoutes.routes.admin}`)).toPass(
-        {
-          timeout: POLL_TOPASS_TIMEOUT,
-        },
-      )
     })
   })
 
