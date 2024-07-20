@@ -21,7 +21,8 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     if (
       !token &&
       typeof payload?.config?.admin?.autoLogin === 'object' &&
-      !payload.config.admin?.autoLogin.prefillOnly
+      !payload.config.admin?.autoLogin.prefillOnly &&
+      headers.get('DisableAutologin') !== 'true'
     ) {
       const collection = payload.collections[payload.config.admin.user]
 
