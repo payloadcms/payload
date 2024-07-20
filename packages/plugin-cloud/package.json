@@ -30,6 +30,16 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "jest"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
+  },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.525.0",
     "@aws-sdk/client-s3": "^3.525.0",

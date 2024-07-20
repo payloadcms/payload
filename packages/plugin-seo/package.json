@@ -51,6 +51,16 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
+  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",

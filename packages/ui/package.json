@@ -70,6 +70,16 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
+  },
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
