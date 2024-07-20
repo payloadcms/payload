@@ -85,6 +85,9 @@ export class NextRESTClient {
     if (options.auth !== false && this.token) {
       headers.set('Authorization', `JWT ${this.token}`)
     }
+    if (options.auth === false) {
+      headers.set('DisableAutologin', 'true')
+    }
 
     return headers
   }

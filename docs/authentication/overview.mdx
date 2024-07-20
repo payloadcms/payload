@@ -127,30 +127,27 @@ If set to `true`, users can log in with either their username or email address. 
 
 If set to `true`, an email address is required when creating a new user. If set to `false`, email is not required upon creation.
 
-## Admin Auto-Login
+## Auto-Login
 
-For testing and demo purposes you may want to skip forcing the admin user to login in order to access the [Admin Panel](../admin/overview). Typically, all users should be required to login to access the Admin Panel, however, you can speed up local development time by enabling auto-login.
+For testing and demo purposes you may want to skip forcing the user to login in order to access your application. Typically, all users should be required to login, however, you can speed up local development time by enabling auto-login.
 
 To enable auto-login, set the `autoLogin` property in the [Admin Config](../configuration/admin):
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  admin: {
-    // ...
-    // highlight-start
-    autoLogin:
-      process.env.NEXT_PUBLIC_ENABLE_AUTOLOGIN === 'true'
-        ? {
-            email: 'test@example.com',
-            password: 'test',
-            prefillOnly: true,
-          }
-        : false,
-    // highlight-end
-  },
+  // highlight-start
+  autoLogin:
+    process.env.NEXT_PUBLIC_ENABLE_AUTOLOGIN === 'true'
+      ? {
+          email: 'test@example.com',
+          password: 'test',
+          prefillOnly: true,
+        }
+      : false,
+  // highlight-end
 })
 ```
 
@@ -162,9 +159,10 @@ export default buildConfig({
 The following options are available:
 
 | Option            | Description                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+|-------------------|-----------------------------------------------------------------------------------------------------------------|
+| **`username`**    | The username of the user to login as                                                                            |
 | **`email`**       | The email address of the user to login as                                                                       |
-| **`password`**    | The password of the user to login as                                                                            |
+| **`password`**    | The password of the user to login as. This is only needed if `prefillOnly` is set to true                       |
 | **`prefillOnly`** | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
 
 ## Operations
