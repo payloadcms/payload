@@ -182,12 +182,14 @@ export async function buildConfigWithDefaults(
   if (!config.admin) {
     config.admin = {}
   }
-  config.admin.autoLogin =
-    process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
-      ? false
-      : {
-          email: 'dev@payloadcms.com',
-        }
+  if (!config.admin.autoLogin) {
+    config.admin.autoLogin =
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+        ? false
+        : {
+            email: 'dev@payloadcms.com',
+          }
+  }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
     if (typeof config.admin !== 'object') config.admin = {}
