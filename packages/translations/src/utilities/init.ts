@@ -8,7 +8,7 @@ import type {
 } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
-import { deepMerge } from './deepMerge.js'
+import { deepMergeSimple } from './deepMergeSimple.js'
 import { getTranslationsByContext } from './getTranslationsByContext.js'
 
 /**
@@ -143,7 +143,10 @@ export function t<
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMerge(translations, config?.translations?.[language] ?? {})
+  const mergedTranslations = deepMergeSimple<DefaultTranslationsObject>(
+    translations,
+    config?.translations?.[language] ?? {},
+  )
 
   return {
     t: (key, vars) => {

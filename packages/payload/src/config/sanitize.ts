@@ -1,5 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
+import { deepMergeSimple } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 
 import type {
@@ -17,7 +18,6 @@ import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
-import { deepMergeSimple } from '../utilities/deepMergeSimple.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
@@ -47,10 +47,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults: Config = deepMergeWithReactComponents(
-    defaults,
-    incomingConfig,
-  )
+  const configWithDefaults: Config = deepMergeWithReactComponents(defaults, incomingConfig)
 
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''

@@ -980,7 +980,6 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
-export { deepMergeSimple } from './utilities/deepMergeSimple.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
@@ -1000,6 +999,7 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { getDependencies }
 export { saveVersion } from './versions/saveVersion.js'
+export { getDependencies }
 export type { TypeWithVersion } from './versions/types.js'
+export { deepMergeSimple } from '@payloadcms/translations'

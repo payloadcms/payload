@@ -1,3 +1,5 @@
+import { deepMergeSimple } from '@payloadcms/translations'
+
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
@@ -9,7 +11,6 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
-import { deepMergeSimple } from '../../utilities/deepMergeSimple.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'

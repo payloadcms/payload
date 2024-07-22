@@ -8,7 +8,7 @@
  * @param obj1 base object
  * @param obj2 object to merge "into" obj1
  */
-export function deepMergeSimple(obj1: object, obj2: object) {
+export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
   const output = { ...obj1 }
 
   for (const key in obj2) {
@@ -21,5 +21,5 @@ export function deepMergeSimple(obj1: object, obj2: object) {
     }
   }
 
-  return output
+  return output as T
 }

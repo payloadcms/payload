@@ -32,8 +32,6 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
-export { deepMergeSimple } from '../utilities/deepMergeSimple.js'
-
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
@@ -61,3 +59,5 @@ export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
+
+export { deepMergeSimple } from '@payloadcms/translations'
