@@ -1,6 +1,6 @@
 import joi from 'joi'
 
-export const componentSchema = joi.alternatives().try(joi.object().unknown(), joi.func())
+export const componentSchema = joi.any()
 
 export const documentTabSchema = {
   condition: joi.func(),

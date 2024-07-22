@@ -4,7 +4,7 @@ import { adminViewSchema } from './shared/adminViewSchema.js'
 import { componentSchema, livePreviewSchema } from './shared/componentSchema.js'
 import { openGraphSchema } from './shared/openGraphSchema.js'
 
-const component = joi.alternatives().try(joi.object().unknown(), joi.func())
+const component = joi.any()
 
 export const endpointsSchema = joi.alternatives().try(
   joi.array().items(

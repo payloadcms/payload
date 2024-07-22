@@ -3,6 +3,7 @@ function isObject(o: unknown): boolean {
 }
 
 export function isPlainObject(o: unknown): boolean {
+  if (!o) return false
   // Is this a React component?
   if (typeof o === 'object' && '$$typeof' in o && typeof o.$$typeof === 'symbol') {
     return false
