@@ -7,6 +7,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 
@@ -84,7 +85,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     return doc
   }
 
-  draft = JSON.parse(JSON.stringify(draft))
+  draft = deepCopyObjectSimple(draft)
   draft = sanitizeInternalFields(draft)
 
   // Patch globalType onto version doc

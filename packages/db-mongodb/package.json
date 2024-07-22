@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "bson-objectid": "2.0.4",
-    "deepmerge": "4.3.1",
     "http-status": "1.6.2",
     "mongoose": "6.12.3",
     "mongoose-paginate-v2": "1.7.22",

@@ -8,6 +8,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
@@ -78,7 +79,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     }
 
     // Clone the result - it may have come back memoized
-    let result = JSON.parse(JSON.stringify(results[0]))
+    let result: any = deepCopyObjectSimple(results[0])
 
     // Patch globalType onto version doc
     result.version.globalType = globalConfig.slug

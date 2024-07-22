@@ -87,7 +87,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       docs: await Promise.all(
         paginatedDocs.docs.map(async (data) => ({
           ...data,
-          version: await afterRead({
+          version: await afterRead<T>({
             collection: null,
             context: req.context,
             depth,

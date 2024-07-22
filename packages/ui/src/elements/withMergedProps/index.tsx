@@ -1,4 +1,4 @@
-import { deepMerge, isReactServerComponentOrFunction, serverProps } from 'payload/shared'
+import { isReactServerComponentOrFunction, serverProps } from 'payload/shared'
 import React from 'react'
 
 /**
@@ -37,7 +37,7 @@ export function withMergedProps<ToMergeIntoProps, CompleteReturnProps>({
   }
   // A wrapper around the args.Component to inject the args.toMergeArgs as props, which are merged with the passed props
   const MergedPropsComponent: React.FC<CompleteReturnProps> = (passedProps) => {
-    const mergedProps = deepMerge(passedProps, toMergeIntoProps)
+    const mergedProps = simpleMergeProps(passedProps, toMergeIntoProps) as CompleteReturnProps
 
     if (sanitizeServerOnlyProps) {
       serverProps.forEach((prop) => {
@@ -49,4 +49,8 @@ export function withMergedProps<ToMergeIntoProps, CompleteReturnProps>({
   }
 
   return MergedPropsComponent
+}
+
+function simpleMergeProps(props, toMerge) {
+  return { ...props, ...toMerge }
 }

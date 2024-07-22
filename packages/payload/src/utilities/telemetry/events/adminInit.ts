@@ -1,4 +1,3 @@
-import type { User } from '../../../auth/types.js'
 import type { Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 

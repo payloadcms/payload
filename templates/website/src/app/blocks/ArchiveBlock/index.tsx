@@ -22,8 +22,8 @@ export const ArchiveBlock: React.FC<
     const payload = await getPayloadHMR({ config: configPromise })
 
     const flattenedCategories = categories.map((category) => {
-      if (typeof category === 'string') return category
-      else return category.id
+      if (typeof category === 'object') return category.id
+      else return category
     })
 
     const fetchedPosts = await payload.find({
@@ -44,7 +44,7 @@ export const ArchiveBlock: React.FC<
     posts = fetchedPosts.docs
   } else {
     posts = selectedDocs.map((post) => {
-      if (typeof post.value !== 'string') return post.value
+      if (typeof post.value === 'object') return post.value
     })
   }
 
