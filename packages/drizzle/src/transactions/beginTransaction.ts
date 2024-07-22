@@ -27,8 +27,6 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     // over many files and we don't want to pass the `tx` around like that,
     // so instead, we "lift" up the `resolve` and `reject` methods
     // and will call them in our respective transaction methods
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     const done = this.drizzle
       .transaction(async (tx) => {
         transaction = tx
@@ -43,7 +41,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
           }
           transactionReady()
         })
-      })
+      }, this.transactionOptions)
       .catch(() => {
         // swallow
       })

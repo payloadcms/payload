@@ -37,7 +37,7 @@ export { ChainedMethods }
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
 export type SQLiteDB = LibSQLDatabase<
-  Record<string, unknown> & Record<string, GenericRelation | GenericTable>
+  Record<string, GenericRelation | GenericTable> & Record<string, unknown>
 >
 
 export type GenericPgColumn = PgColumn<
@@ -124,7 +124,7 @@ export type RequireDrizzleKit = (adapter: DrizzleAdapter) => {
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 
-export type Migration = MigrationData & {
+export type Migration = {
   down: ({
     db,
     payload,
@@ -143,7 +143,7 @@ export type Migration = MigrationData & {
     payload: Payload
     req: PayloadRequest
   }) => Promise<boolean>
-}
+} & MigrationData
 
 export type CreateJSONQueryArgs = {
   operator: string
@@ -197,5 +197,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, any>
+  transactionOptions: unknown
   versionsSuffix?: string
 }
