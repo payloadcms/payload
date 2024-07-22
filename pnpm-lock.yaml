@@ -644,7 +644,7 @@ importers:
   packages/payload:
     dependencies:
       '@next/env':
-        specifier: 15.0.0-canary.53
+        specifier: ^15.0.0-canary.53
         version: 15.0.0-canary.53
       '@payloadcms/translations':
         specifier: workspace:*
