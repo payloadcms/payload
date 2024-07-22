@@ -154,6 +154,7 @@ const field: Field = {
 Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
 Users are then required to provide a custom ID value when creating a record through the Admin UI or API.
 Valid ID types are `number` and `text`.
+When using the text value, remember that it shouldn't contain the / (slash) sign, as the API will read it separately and this can result in unexpected behavior.
 
 Example:
 
