@@ -18,6 +18,9 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -29,12 +32,15 @@ export interface UserAuthOperations {
     email: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -74,6 +80,7 @@ export interface Post {
   id: string;
   title: string;
   excerpt?: string | null;
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -96,6 +103,7 @@ export interface Search {
         value: string | Post;
       };
   excerpt?: string | null;
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
 }
