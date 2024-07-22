@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JsonObject } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
@@ -184,7 +184,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<Record<string, unknown>>({
+    const resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,

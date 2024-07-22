@@ -1,8 +1,9 @@
-import type { LoginWithUsernameOptions } from '../../auth/types.js'
+import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { CollectionConfig } from './types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
 
-export const defaults = {
+export const defaults: Partial<CollectionConfig> = {
   access: {
     create: defaultAccess,
     delete: defaultAccess,
@@ -49,7 +50,7 @@ export const defaults = {
   versions: false,
 }
 
-export const authDefaults = {
+export const authDefaults: IncomingAuthType = {
   cookies: {
     sameSite: 'Lax',
     secure: false,

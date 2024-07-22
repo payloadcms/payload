@@ -258,9 +258,6 @@ importers:
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
-      deepmerge:
-        specifier: 4.3.1
-        version: 4.3.1
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -868,9 +865,6 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
-      deepmerge:
-        specifier: ^4.2.2
-        version: 4.3.1
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -951,9 +945,6 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
-      deepmerge:
-        specifier: 4.3.1
-        version: 4.3.1
       react:
         specifier: ^19.0.0-rc-6230622a1a-20240610
         version: 19.0.0-rc-fb9a90fa48-20240614

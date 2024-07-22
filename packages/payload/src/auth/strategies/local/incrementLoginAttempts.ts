@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
-import type { Payload } from '../../../index.js'
+import type { JsonObject, Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 type Args = {
@@ -39,13 +39,13 @@ export const incrementLoginAttempts = async ({
     return
   }
 
-  const data: Record<string, unknown> = {
+  const data: JsonObject = {
     loginAttempts: Number(doc.loginAttempts) + 1,
   }
 
   // Lock the account if at max attempts and not already locked
   if (typeof doc.loginAttempts === 'number' && doc.loginAttempts + 1 >= maxLoginAttempts) {
-    const lockUntil = new Date(Date.now() + lockTime)
+    const lockUntil = new Date(Date.now() + lockTime).toISOString()
     data.lockUntil = lockUntil
   }
 

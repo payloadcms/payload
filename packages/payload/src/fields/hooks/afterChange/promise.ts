@@ -1,7 +1,7 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -12,8 +12,8 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+  data: JsonObject
+  doc: JsonObject
   field: Field | TabAsField
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
@@ -25,11 +25,11 @@ type Args = {
    * The parent's schemaPath (path without indexes).
    */
   parentSchemaPath: string[]
-  previousDoc: Record<string, unknown>
-  previousSiblingDoc: Record<string, unknown>
+  previousDoc: JsonObject
+  previousSiblingDoc: JsonObject
   req: PayloadRequest
-  siblingData: Record<string, unknown>
-  siblingDoc: Record<string, unknown>
+  siblingData: JsonObject
+  siblingDoc: JsonObject
 }
 
 // This function is responsible for the following actions, in order:
@@ -101,11 +101,11 @@ export const promise = async ({
         operation,
         path: fieldPath,
         previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
+        previousSiblingDoc: previousDoc[field.name] as JsonObject,
         req,
         schemaPath: fieldSchemaPath,
-        siblingData: (siblingData?.[field.name] as Record<string, unknown>) || {},
-        siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
+        siblingData: (siblingData?.[field.name] as JsonObject) || {},
+        siblingDoc: siblingDoc[field.name] as JsonObject,
       })
 
       break
@@ -128,11 +128,11 @@ export const promise = async ({
               operation,
               path: [...fieldPath, i],
               previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+              previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
               req,
               schemaPath: fieldSchemaPath,
               siblingData: siblingData?.[field.name]?.[i] || {},
-              siblingDoc: { ...row } || {},
+              siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
             }),
           )
         })
@@ -147,7 +147,9 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+          const block = field.blocks.find(
+            (blockType) => blockType.slug === (row as JsonObject).blockType,
+          )
 
           if (block) {
             promises.push(
@@ -161,12 +163,11 @@ export const promise = async ({
                 operation,
                 path: [...fieldPath, i],
                 previousDoc,
-                previousSiblingDoc:
-                  previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+                previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
                 req,
                 schemaPath: fieldSchemaPath,
                 siblingData: siblingData?.[field.name]?.[i] || {},
-                siblingDoc: { ...row } || {},
+                siblingDoc: ({ ...(row as JsonObject) } as JsonObject) || {},
               }),
             )
           }
@@ -205,9 +206,9 @@ export const promise = async ({
       let tabPreviousSiblingDoc = siblingDoc
 
       if (tabHasName(field)) {
-        tabSiblingData = siblingData[field.name] as Record<string, unknown>
-        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
-        tabPreviousSiblingDoc = previousDoc[field.name] as Record<string, unknown>
+        tabSiblingData = siblingData[field.name] as JsonObject
+        tabSiblingDoc = siblingDoc[field.name] as JsonObject
+        tabPreviousSiblingDoc = previousDoc[field.name] as JsonObject
       }
 
       await traverseFields({

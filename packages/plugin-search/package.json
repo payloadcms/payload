@@ -44,8 +44,7 @@
     "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {
-    "@payloadcms/ui": "workspace:*",
-    "deepmerge": "4.3.1"
+    "@payloadcms/ui": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

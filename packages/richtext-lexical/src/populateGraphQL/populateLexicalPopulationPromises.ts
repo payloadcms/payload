@@ -59,6 +59,7 @@ export const populateLexicalPopulationPromises = ({
         }
       }
     },
-    nodes: (siblingDoc[field?.name] as SerializedEditorState)?.root?.children ?? [],
+     
+    nodes: (siblingDoc[field?.name] as unknown as SerializedEditorState)?.root?.children ?? [],
   })
 }
