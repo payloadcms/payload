@@ -25,7 +25,14 @@ test.describe('Admin Panel', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+
+    await ensureCompilationIsDone({
+      customRoutes: {
+        admin: '/',
+      },
+      page,
+      serverURL,
+    })
   })
 
   test('example test', async () => {

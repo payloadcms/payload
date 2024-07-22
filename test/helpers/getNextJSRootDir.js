@@ -17,9 +17,23 @@ export const getNextJSRootDir = (testSuite) => {
     // Swallow err - no config found
   }
 
-  if (hasNextConfig) return testSuiteDir
+  let adminRoute = '/admin'
+
+  if (testSuite === 'admin-root') {
+    adminRoute = '/'
+  }
+
+  if (hasNextConfig) {
+    return {
+      rootDir: testSuiteDir,
+      adminRoute,
+    }
+  }
 
   // If no next config found in test suite,
   // return monorepo root dir
-  return resolve(_dirname, '../../')
+  return {
+    rootDir: resolve(_dirname, '../../'),
+    adminRoute,
+  }
 }
