@@ -336,9 +336,9 @@ export default async function resizeAndTransformImageSizes({
         if (!resizeHeight) resizeHeight = resizeImageMeta.height
         if (!resizeWidth) resizeWidth = resizeImageMeta.width
 
-        // Scales image while respecting aspect ratio to extract from
         const resizeAspectRatio = resizeWidth / resizeHeight
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+        // Scales the image before extracting from it
         resized = imageToResize.resize({
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
