@@ -13,7 +13,7 @@ let restClient: NextRESTClient
 
 const { email, password } = devUser
 
-describe('_Community Tests', () => {
+describe('Admin (Root) Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
