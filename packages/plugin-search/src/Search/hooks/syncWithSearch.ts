@@ -23,8 +23,20 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
   }
 
   if (typeof beforeSync === 'function') {
+    let docToSyncWith = doc
+    if (payload.config?.localization) {
+      docToSyncWith = await payload.findByID({
+        id,
+        collection,
+        context: {
+          pluginSearchRead: true,
+        },
+        locale: 'all',
+        req,
+      })
+    }
     dataToSave = await beforeSync({
-      originalDoc: doc,
+      originalDoc: docToSyncWith,
       payload,
       req,
       searchDoc: dataToSave,

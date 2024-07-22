@@ -13,10 +13,10 @@ export const searchPlugin =
 
     if (collections) {
       const pluginConfig: SearchPluginConfig = {
-        ...incomingPluginConfig,
+        // write any config defaults here
         deleteDrafts: true,
         syncDrafts: false,
-        // write any config defaults here
+        ...incomingPluginConfig,
       }
 
       // add afterChange and afterDelete hooks to every search-enabled collection
