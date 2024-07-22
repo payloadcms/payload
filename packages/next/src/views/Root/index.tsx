@@ -48,6 +48,8 @@ export const RootPage = async ({
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
   })
 
+  console.log('currentRoute', currentRoute, adminRoute)
+
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const { DefaultView, initPageOptions, templateClassName, templateType } = getViewFromConfig({

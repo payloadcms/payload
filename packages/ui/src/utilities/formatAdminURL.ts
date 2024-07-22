@@ -8,8 +8,14 @@ export const formatAdminURL = (args: {
 }): string => {
   const { adminRoute, path, serverURL } = args
 
-  if (adminRoute && adminRoute !== '/') {
-    return `${serverURL || ''}${adminRoute}${path}`
+  if (adminRoute) {
+    if (adminRoute === '/') {
+      if (!path) {
+        return `${serverURL || ''}${adminRoute}`
+      }
+    } else {
+      return `${serverURL || ''}${adminRoute}${path}`
+    }
   }
 
   return `${serverURL || ''}${path}`
