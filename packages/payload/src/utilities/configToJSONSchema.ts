@@ -621,7 +621,7 @@ const generateAuthFieldTypes = (
   }
 
   if (loginWithUsername) {
-    if (loginWithUsername.allowEmailLogin) {
+    if (loginWithUsername.allowEmailLogin || loginWithUsername.requireEmail) {
       return {
         additionalProperties: false,
         oneOf: [

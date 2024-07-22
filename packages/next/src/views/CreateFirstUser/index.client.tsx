@@ -3,7 +3,6 @@ import type { FormState } from 'payload'
 
 import {
   ConfirmPasswordField,
-  EmailField,
   Form,
   type FormProps,
   FormSubmit,
@@ -16,10 +15,13 @@ import {
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { LoginField } from '../Login/LoginField/index.js'
+
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
+  loginType: 'email' | 'emailOrUsername' | 'username'
   userSlug: string
-}> = ({ initialState, userSlug }) => {
+}> = ({ initialState, loginType, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -56,7 +58,7 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <EmailField autoComplete="email" label={t('general:email')} name="email" required />
+      {loginType && <LoginField type={loginType} />}
       <PasswordField
         autoComplete="off"
         label={t('authentication:newPassword')}
