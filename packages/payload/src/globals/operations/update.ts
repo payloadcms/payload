@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug } from '../../index.js';
+import type { GlobalSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
@@ -82,7 +82,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       where: query,
     })
 
-    let globalJSON: Record<string, unknown> = {}
+    let globalJSON: JsonObject = {}
 
     if (global) {
       globalJSON = deepCopyObjectSimple(global)

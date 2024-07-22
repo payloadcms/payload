@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -8,15 +8,15 @@ import { promise } from './promise.js'
 type Args = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown>
+  data: JsonObject
   /**
    * The original data (not modified by any hooks)
    */
-  doc: Record<string, unknown>
+  doc: JsonObject
   /**
    * The original data with locales (not modified by any hooks)
    */
-  docWithLocales: Record<string, unknown>
+  docWithLocales: JsonObject
   duplicate: boolean
   errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
@@ -27,15 +27,15 @@ type Args = {
   path: (number | string)[]
   req: PayloadRequest
   schemaPath: string[]
-  siblingData: Record<string, unknown>
+  siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
    */
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
   /**
    * The original siblingData with locales (not modified by any hooks)
    */
-  siblingDocWithLocales: Record<string, unknown>
+  siblingDocWithLocales: JsonObject
   skipValidation?: boolean
 }
 

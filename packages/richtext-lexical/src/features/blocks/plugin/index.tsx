@@ -99,12 +99,14 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
             if (!node) {
               return false
             }
+             
             node.setFields(fields as BlockFields)
 
             setTargetNodeKey(null)
             return true
           }
 
+           
           const inlineBlockNode = $createInlineBlockNode(fields as BlockFields)
           $insertNodes([inlineBlockNode])
           if ($isRootOrShadowRoot(inlineBlockNode.getParentOrThrow())) {
@@ -118,9 +120,10 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
       editor.registerCommand(
         OPEN_INLINE_BLOCK_DRAWER_COMMAND,
         ({ fields, nodeKey }) => {
+           
           setBlockFields((fields as BlockFields) ?? null)
           setTargetNodeKey(nodeKey ?? null)
-          setBlockType((fields as BlockFields)?.blockType ?? ('' as any))
+          setBlockType(fields?.blockType ?? ('' as any))
 
           if (nodeKey) {
             toggleModal(drawerSlug)

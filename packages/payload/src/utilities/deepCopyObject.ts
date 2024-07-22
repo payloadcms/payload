@@ -1,3 +1,5 @@
+import type { JsonArray, JsonObject } from '../types/index.js'
+
 export const deepCopyObject = (inObject) => {
   if (inObject instanceof Date) return inObject
 
@@ -23,17 +25,19 @@ export const deepCopyObject = (inObject) => {
 }
 
 /**
- * A deepCopyObject implementation which only works for objects and arrays, and is faster than
+ * A deepCopyObject implementation which only works for JSON objects and arrays, and is faster than
  * JSON.parse(JSON.stringify(inObject)): https://www.measurethat.net/Benchmarks/Show/31442/0/jsonstringify-vs-structuredclone-vs-simple-deepcopyobje
  *
  * This is not recursive and should thus be more memory efficient, due to less stack frames
  */
-export const deepCopyObjectSimple = (inObject) => {
+export const deepCopyObjectSimple = <T extends JsonObject>(inObject: T): T => {
   if (typeof inObject !== 'object' || inObject === null) {
     return inObject
   }
 
-  const stack = [{ source: inObject, target: Array.isArray(inObject) ? [] : {} }]
+  const stack: { source: JsonArray | JsonObject; target }[] = [
+    { source: inObject, target: Array.isArray(inObject) ? [] : {} },
+  ]
   const root = stack[0].target
 
   while (stack.length > 0) {

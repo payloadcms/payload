@@ -6,12 +6,12 @@ import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args<T> = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown> | T
-  doc: Record<string, unknown> | T
-  docWithLocales: Record<string, unknown>
+  data: T
+  doc: T
+  docWithLocales: JsonObject
   duplicate?: boolean
   global: SanitizedGlobalConfig | null
   id?: number | string
