@@ -68,7 +68,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
     dev: !prebuild,
     hostname: 'localhost',
     port,
-    dir,
+    dir: rootDir,
   })
 
   const handle = app.getRequestHandler()
