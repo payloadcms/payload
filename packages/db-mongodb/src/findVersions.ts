@@ -69,6 +69,10 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
+  if (locale && locale !== 'all' && locale !== '*') {
+    paginationOptions.collation = { locale, strength: 1 }
+  }
+
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
     // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
