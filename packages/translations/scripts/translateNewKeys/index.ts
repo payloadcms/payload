@@ -10,8 +10,7 @@ import type {
   GenericTranslationsObject,
 } from '../../src/types.js'
 
-import { cloneDeep } from '../../src/utilities/cloneDeep.js'
-import { deepMerge } from '../../src/utilities/deepMerge.js'
+import { deepMergeSimple } from '../../src/utilities/deepMergeSimple.js'
 import { acceptedLanguages } from '../../src/utilities/languages.js'
 import { applyEslintFixes } from './applyEslintFixes.js'
 import { findMissingKeys } from './findMissingKeys.js'
@@ -83,7 +82,7 @@ export async function translateObject(props: {
       dateFNSKey: string
       translations: GenericTranslationsObject
     }
-  } = cloneDeep(allTranslationsObject)
+  } = JSON.parse(JSON.stringify(allTranslationsObject))
   const allOnlyNewTranslatedTranslationsObject: GenericLanguages = {}
 
   const translationPromises: Promise<void>[] = []
@@ -160,7 +159,7 @@ export async function translateObject(props: {
           targetObj[keys[keys.length - 1]] = translated
 
           allTranslatedTranslationsObject[targetLang].translations = sortKeys(
-            deepMerge(
+            deepMergeSimple(
               allTranslatedTranslationsObject[targetLang].translations,
               allOnlyNewTranslatedTranslationsObject[targetLang],
             ),

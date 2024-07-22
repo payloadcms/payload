@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
 import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
@@ -82,7 +82,7 @@ export type BeforeChangeRichTextHookArgs<
   /**
    * The original data with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
-  docWithLocales?: Record<string, unknown>
+  docWithLocales?: JsonObject
 
   duplicate?: boolean
 
@@ -98,7 +98,7 @@ export type BeforeChangeRichTextHookArgs<
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
-  siblingDocWithLocales?: Record<string, unknown>
+  siblingDocWithLocales?: JsonObject
 
   skipValidation?: boolean
 }
@@ -216,7 +216,7 @@ type RichTextAdapterBase<
     populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
-    siblingDoc: Record<string, unknown>
+    siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>

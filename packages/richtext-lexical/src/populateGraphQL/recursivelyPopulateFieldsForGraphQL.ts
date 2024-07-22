@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, RequestContext } from 'payload'
+import type { Field, JsonObject, PayloadRequest, RequestContext } from 'payload'
 
 import { afterReadTraverseFields } from 'payload'
 
@@ -25,7 +25,7 @@ type NestedRichTextFieldsArgs = {
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
 }
 
 export const recursivelyPopulateFieldsForGraphQL = ({

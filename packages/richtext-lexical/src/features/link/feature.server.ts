@@ -91,7 +91,7 @@ export const LinkFeature = createServerFeature<
     // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
     // Otherwise, it will cause a validation error (field is required).
     const sanitizedFieldsWithoutText = deepCopyObject(sanitizedFields).filter(
-      (field) => field.name !== 'text',
+      (field) => !('name' in field) || field.name !== 'text',
     )
 
     return {

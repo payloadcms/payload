@@ -1,14 +1,14 @@
 import type { SerializedElementNode, SerializedLexicalNode, Spread } from 'lexical'
+import type { JsonValue } from 'payload'
 
 export type LinkFields = {
-  // unknown, custom fields:
-  [key: string]: unknown
+  [key: string]: JsonValue
   doc: {
     relationTo: string
     value:
       | {
           // Actual doc data, populated in afterRead hook
-          [key: string]: unknown
+          [key: string]: JsonValue
           id: string
         }
       | string

@@ -1,16 +1,16 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth?: number
   depth: number
-  doc: Record<string, unknown>
+  doc: T
   draft: boolean
   fallbackLocale: null | string
   findMany?: boolean
@@ -32,7 +32,7 @@ type Args = {
  * - Populate relationships
  */
 
-export async function afterRead<T = any>(args: Args): Promise<T> {
+export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T> {
   const {
     collection,
     context,
@@ -50,7 +50,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     showHiddenFields,
   } = args
 
-  const doc = deepCopyObject(incomingDoc)
+  const doc = deepCopyObjectSimple(incomingDoc)
   const fieldPromises = []
   const populationPromises = []
 

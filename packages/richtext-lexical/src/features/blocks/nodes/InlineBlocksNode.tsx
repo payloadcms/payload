@@ -11,6 +11,7 @@ import type {
 
 import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
+import { deepCopyObjectSimple } from 'payload/shared'
 import React, { type JSX } from 'react'
 
 export type InlineBlockFields = {
@@ -112,7 +113,7 @@ export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
   }
 
   setFields(fields: InlineBlockFields): void {
-    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as InlineBlockFields
+    const fieldsCopy = deepCopyObjectSimple(fields) as InlineBlockFields
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy

@@ -2,7 +2,7 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObject } from 'payload/shared'
+import { deepCopyObject, deepCopyObjectSimple } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
@@ -249,11 +249,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { remainingFields, rows } = separateRows(path, state)
       const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
+      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
       if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
 
       const duplicateRowState = deepCopyObject(rows[rowIndex])
-      if (duplicateRowState.id) duplicateRowState.id = new ObjectId().toHexString()
+      if (duplicateRowState.id) {
+        duplicateRowState.id.value = new ObjectId().toHexString()
+        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      }
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
