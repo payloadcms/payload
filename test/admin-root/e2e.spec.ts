@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
@@ -12,15 +13,17 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Admin Panel', () => {
+test.describe('Admin Panel (Root)', () => {
   let page: Page
   let url: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
-    url = new AdminUrlUtil(serverURL, 'posts')
+    const { serverURL } = await initPayloadE2ENoConfig({ dirname })
+    url = new AdminUrlUtil(serverURL, 'posts', {
+      admin: adminRoute,
+    })
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -35,10 +38,24 @@ test.describe('Admin Panel', () => {
     })
   })
 
-  test('example test', async () => {
-    await page.goto(url.list)
+  test('renders admin panel at root', async () => {
+    await page.goto(url.admin)
+    const pageURL = page.url()
+    expect(pageURL).toBe(url.admin)
+    expect(pageURL).not.toContain('/admin')
+  })
 
-    const textCell = page.locator('.row-1 .cell-text')
-    await expect(textCell).toHaveText('example post')
+  test('collection — navigates to list view', async () => {
+    await page.goto(url.list)
+    const pageURL = page.url()
+    expect(pageURL).toBe(url.list)
+    expect(pageURL).not.toContain('/admin')
+  })
+
+  test('global — navigates to edit view', async () => {
+    await page.goto(url.global('menu'))
+    const pageURL = page.url()
+    expect(pageURL).toBe(url.global('menu'))
+    expect(pageURL).not.toContain('/admin')
   })
 })

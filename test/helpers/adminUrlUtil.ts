@@ -1,3 +1,5 @@
+import type { Config } from 'payload'
+
 export class AdminUrlUtil {
   account: string
 
@@ -7,9 +9,11 @@ export class AdminUrlUtil {
 
   list: string
 
-  constructor(serverURL: string, slug: string) {
-    this.account = `${serverURL}/admin/account`
-    this.admin = `${serverURL}/admin`
+  constructor(serverURL: string, slug: string, routes?: Config['routes']) {
+    const adminRoute = routes?.admin || '/admin'
+
+    this.account = `${serverURL}${adminRoute}/account`
+    this.admin = `${serverURL}${adminRoute}`
     this.list = `${this.admin}/collections/${slug}`
     this.create = `${this.list}/create`
   }

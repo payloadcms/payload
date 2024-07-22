@@ -5,6 +5,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+import { adminRoute } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -13,7 +15,7 @@ export default buildConfigWithDefaults({
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [MenuGlobal],
   routes: {
-    admin: '/',
+    admin: adminRoute,
   },
   onInit: async (payload) => {
     await payload.create({
