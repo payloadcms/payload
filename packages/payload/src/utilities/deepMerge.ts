@@ -1,15 +1,49 @@
-export function deepMerge(obj1, obj2) {
-  const output = { ...obj1 }
+import deepmerge from 'deepmerge'
 
-  for (const key in obj2) {
-    if (Object.prototype.hasOwnProperty.call(obj2, key)) {
-      if (typeof obj2[key] === 'object' && !Array.isArray(obj2[key]) && obj1[key]) {
-        output[key] = deepMerge(obj1[key], obj2[key])
-      } else {
-        output[key] = obj2[key]
-      }
-    }
-  }
+import { isPlainObject } from './isPlainObject.js'
 
-  return output
+export function deepMerge(obj1: object, obj2: object): object {
+  return deepmerge(obj1, obj2)
+}
+
+/**
+ * Fully-featured deepMerge.
+ *
+ * Array handling: Arrays in the target object are combined with the source object's arrays.
+ */
+export function deepMergeWithCombinedArrays<T = object>(obj1: object, obj2: object): T {
+  return deepmerge<T>(obj1, obj2, {
+    arrayMerge: (target, source, options) => {
+      const destination = target.slice()
+
+      source.forEach((item, index) => {
+        if (typeof destination[index] === 'undefined') {
+          destination[index] = options.cloneUnlessOtherwiseSpecified(item, options)
+        } else if (options.isMergeableObject(item)) {
+          destination[index] = deepmerge(target[index], item, options)
+        } else if (target.indexOf(item) === -1) {
+          destination.push(item)
+        }
+      })
+      return destination
+    },
+  })
+}
+
+/**
+ * Fully-featured deepMerge.
+ *
+ * Array handling: Arrays in the target object are replaced by the source object's arrays.
+ */
+export function deepMergeWithSourceArrays<T = object>(obj1: object, obj2: object): T {
+  return deepmerge<T>(obj1, obj2, { arrayMerge: (_, source) => source })
+}
+
+/**
+ * Fully-featured deepMerge. Does not clone React components by default.
+ */
+export function deepMergeWithReactComponents<T = object>(obj1: object, obj2: object): T {
+  return deepmerge<T>(obj1, obj2, {
+    isMergeableObject: isPlainObject,
+  })
 }

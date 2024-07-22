@@ -26,7 +26,13 @@ export { isImage } from '../uploads/isImage.js'
 
 export { deepCopyObject } from '../utilities/deepCopyObject.js'
 
-export { deepMerge } from '../utilities/deepMerge.js'
+export {
+  deepMerge,
+  deepMergeWithCombinedArrays,
+  deepMergeWithReactComponents,
+  deepMergeWithSourceArrays,
+} from '../utilities/deepMerge.js'
+export { deepMergeSimple } from '../utilities/deepMergeSimple.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 

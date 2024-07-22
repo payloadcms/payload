@@ -964,7 +964,6 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-export { combineMerge } from './utilities/combineMerge.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -975,7 +974,13 @@ export {
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
 export { deepCopyObject } from './utilities/deepCopyObject.js'
-export { deepMerge } from './utilities/deepMerge.js'
+export {
+  deepMerge,
+  deepMergeWithCombinedArrays,
+  deepMergeWithReactComponents,
+  deepMergeWithSourceArrays,
+} from './utilities/deepMerge.js'
+export { deepMergeSimple } from './utilities/deepMergeSimple.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
