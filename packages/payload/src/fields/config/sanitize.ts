@@ -1,4 +1,4 @@
-import { deepMergeSimple } from '@payloadcms/translations'
+import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'

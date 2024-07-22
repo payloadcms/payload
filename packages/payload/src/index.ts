@@ -1006,4 +1006,4 @@ export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export { getDependencies }
 export type { TypeWithVersion } from './versions/types.js'
-export { deepMergeSimple } from '@payloadcms/translations'
+export { deepMergeSimple } from '@payloadcms/translations/utilities'

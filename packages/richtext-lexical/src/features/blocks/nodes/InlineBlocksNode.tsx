@@ -11,7 +11,7 @@ import type {
 
 import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
-import { deepCopyObjectSimple } from 'payload'
+import { deepCopyObjectSimple } from 'payload/shared'
 import React, { type JSX } from 'react'
 
 export type InlineBlockFields = {

@@ -19,6 +19,11 @@
       "types": "./src/exports/all.ts",
       "default": "./src/exports/all.ts"
     },
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
+    },
     "./languages/*": {
       "import": "./src/languages/*.ts",
       "types": "./src/languages/*.ts",
@@ -60,6 +65,11 @@
         "import": "./dist/exports/all.js",
         "types": "./dist/exports/all.d.ts",
         "default": "./dist/exports/all.js"
+      },
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts",
+        "default": "./dist/exports/utilities.js"
       },
       "./languages/*": {
         "import": "./dist/languages/*.js",

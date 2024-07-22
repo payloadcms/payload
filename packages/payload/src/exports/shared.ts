@@ -64,4 +64,4 @@ export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex
 
 export { versionDefaults } from '../versions/defaults.js'
 
-export { deepMergeSimple } from '@payloadcms/translations'
+export { deepMergeSimple } from '@payloadcms/translations/utilities'

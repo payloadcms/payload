@@ -12,7 +12,7 @@ import type {
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
-import { deepCopyObjectSimple } from 'payload'
+import { deepCopyObjectSimple } from 'payload/shared'
 import React, { type JSX } from 'react'
 
 export type BlockFields<TBlockFields extends object = Record<string, unknown>> = {
