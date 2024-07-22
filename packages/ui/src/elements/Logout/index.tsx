@@ -1,11 +1,11 @@
 'use client'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 
 const baseClass = 'nav'
 

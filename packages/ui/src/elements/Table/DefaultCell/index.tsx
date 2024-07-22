@@ -5,10 +5,10 @@ import React from 'react' // TODO: abstract this out to support all routers
 import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useTableCell } from '../TableCellProvider/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
@@ -57,10 +57,10 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   if (isLink) {
     WrapElement = Link
     wrapElementProps.href = customCellContext?.collectionSlug
-      ? formatAdminURL(
+      ? formatAdminURL({
           adminRoute,
-          `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
-        )
+          path: `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
+        })
       : ''
   }
 

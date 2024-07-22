@@ -200,10 +200,10 @@ export const DocumentControls: React.FC<{
                 {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
-                      href={formatAdminURL(
+                      href={formatAdminURL({
                         adminRoute,
-                        `/collections/${collectionConfig?.slug}/create`,
-                      )}
+                        path: `/collections/${collectionConfig?.slug}/create`,
+                      })}
                       id="action-create"
                     >
                       {i18n.t('general:createNew')}

@@ -1,6 +1,5 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
@@ -9,6 +8,7 @@ import { Button } from '../../elements/Button/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import './index.scss'
 
 const baseClass = 'stay-logged-in'

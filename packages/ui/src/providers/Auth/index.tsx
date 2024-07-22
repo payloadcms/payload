@@ -2,7 +2,6 @@
 import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { usePathname, useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
@@ -12,6 +11,7 @@ import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
 
 export type AuthContext<T = ClientUser> = {

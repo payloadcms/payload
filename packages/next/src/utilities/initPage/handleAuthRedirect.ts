@@ -31,7 +31,7 @@ export const handleAuthRedirect = ({
         : undefined,
     )
 
-    const adminLoginRoute = formatAdminURL(adminRoute, loginRouteFromConfig)
+    const adminLoginRoute = formatAdminURL({ adminRoute, path: loginRouteFromConfig })
 
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined

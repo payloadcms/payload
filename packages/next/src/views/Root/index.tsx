@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
-import { WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
+import { WithServerSideProps , formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -43,10 +43,10 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = formatAdminURL(
+  const currentRoute = formatAdminURL({
     adminRoute,
-    `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
-  )
+    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+  })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 

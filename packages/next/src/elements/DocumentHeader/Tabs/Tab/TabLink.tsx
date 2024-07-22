@@ -39,10 +39,12 @@ export const DocumentTabLink: React.FC<{
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
-  let docPath = formatAdminURL(
+
+  let docPath = formatAdminURL({
     adminRoute,
-    `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
-  )
+    path: `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
+  })
+
   if (isCollection && segmentThree) {
     // doc ID
     docPath += `/${segmentThree}`
