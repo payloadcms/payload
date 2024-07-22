@@ -28,9 +28,6 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
       docToSyncWith = await payload.findByID({
         id,
         collection,
-        context: {
-          pluginSearchRead: true,
-        },
         locale: 'all',
         req,
       })
