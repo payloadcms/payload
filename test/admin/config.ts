@@ -109,9 +109,9 @@ export default buildConfigWithDefaults({
     },
     routes: customAdminRoutes,
   },
-  // routes: {
-  //   admin: '/',
-  // },
+  routes: {
+    admin: '/',
+  },
   collections: [
     UploadCollection,
     Posts,
