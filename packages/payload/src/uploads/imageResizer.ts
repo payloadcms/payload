@@ -336,23 +336,21 @@ export default async function resizeAndTransformImageSizes({
         if (!resizeHeight) resizeHeight = resizeImageMeta.height
         if (!resizeWidth) resizeWidth = resizeImageMeta.width
 
-        // if requested image is larger than the incoming size, then resize using sharp and then extract with focal point
-        if (resizeHeight > resizeImageMeta.height || resizeWidth > resizeImageMeta.width) {
-          const resizeAspectRatio = resizeWidth / resizeHeight
-          const prioritizeHeight = resizeAspectRatio < originalAspectRatio
-          resized = imageToResize.resize({
-            height: prioritizeHeight ? resizeHeight : undefined,
-            width: prioritizeHeight ? undefined : resizeWidth,
-          })
+        // Scales image while respecting aspect ratio to extract from
+        const resizeAspectRatio = resizeWidth / resizeHeight
+        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+        resized = imageToResize.resize({
+          height: prioritizeHeight ? resizeHeight : undefined,
+          width: prioritizeHeight ? undefined : resizeWidth,
+        })
 
-          // must read from buffer, resize.metadata will return the original image metadata
-          const { info } = await resized.toBuffer({ resolveWithObject: true })
-          resizeImageMeta.height = extractHeightFromImage({
-            ...originalImageMeta,
-            height: info.height,
-          })
-          resizeImageMeta.width = info.width
-        }
+        // must read from buffer, resize.metadata will return the original image metadata
+        const { info } = await resized.toBuffer({ resolveWithObject: true })
+        resizeImageMeta.height = extractHeightFromImage({
+          ...originalImageMeta,
+          height: info.height,
+        })
+        resizeImageMeta.width = info.width
 
         const halfResizeX = resizeWidth / 2
         const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
