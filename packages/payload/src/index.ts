@@ -50,6 +50,7 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
+import type { JsonObject } from './types/index.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -85,10 +86,10 @@ export interface GeneratedTypes {
     }
   }
   collectionsUntyped: {
-    [slug: string]: Record<string, unknown> & TypeWithID
+    [slug: string]: JsonObject & TypeWithID
   }
   globalsUntyped: {
-    [slug: string]: Record<string, unknown>
+    [slug: string]: JsonObject
   }
   localeUntyped: null | string
   userUntyped: User

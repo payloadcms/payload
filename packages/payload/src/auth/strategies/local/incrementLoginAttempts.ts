@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
-import type { Payload } from '../../../index.js'
+import type { JsonObject, Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 type Args = {
@@ -39,7 +39,7 @@ export const incrementLoginAttempts = async ({
     return
   }
 
-  const data: Record<string, unknown> = {
+  const data: JsonObject = {
     loginAttempts: Number(doc.loginAttempts) + 1,
   }
 

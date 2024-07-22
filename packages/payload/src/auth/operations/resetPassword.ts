@@ -59,7 +59,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: new Date() },
+        resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
     })
