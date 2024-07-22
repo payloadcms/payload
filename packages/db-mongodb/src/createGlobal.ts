@@ -1,5 +1,7 @@
 import type { CreateGlobal, PayloadRequest } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
@@ -18,7 +20,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 
   let [result] = (await Model.create([global], options)) as any
 
-  result = JSON.parse(JSON.stringify(result))
+  result = deepCopyObjectSimple(result)
 
   // custom id type reset
   result.id = result._id

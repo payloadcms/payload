@@ -1,5 +1,7 @@
 import type { PayloadRequest, UpdateVersion } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { withSession } from './withSession.js'
@@ -24,7 +26,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
-  const result = JSON.parse(JSON.stringify(doc))
+  const result = deepCopyObjectSimple(doc)
 
   const verificationToken = doc._verificationToken
 

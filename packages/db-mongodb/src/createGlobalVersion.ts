@@ -1,5 +1,7 @@
 import type { CreateGlobalVersion, Document, PayloadRequest } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { withSession } from './withSession.js'
@@ -50,7 +52,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
+  const result: Document = deepCopyObjectSimple(doc)
   const verificationToken = doc._verificationToken
 
   // custom id type reset

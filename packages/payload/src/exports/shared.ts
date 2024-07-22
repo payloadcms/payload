@@ -24,7 +24,7 @@ export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
 
-export { deepCopyObject } from '../utilities/deepCopyObject.js'
+export { deepCopyObject, deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
 export {
   deepMerge,

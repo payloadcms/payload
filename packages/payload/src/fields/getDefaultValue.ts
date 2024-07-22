@@ -1,6 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
 type Args = {
   defaultValue: unknown
@@ -19,7 +19,7 @@ const getValueWithDefault = ({ defaultValue, locale, user, value }: Args): unkno
   }
 
   if (typeof defaultValue === 'object') {
-    return deepCopyObject(defaultValue)
+    return deepCopyObjectSimple(defaultValue)
   }
 
   return defaultValue

@@ -1,5 +1,7 @@
 import type { PayloadRequest, UpdateGlobal } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
@@ -19,7 +21,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   let result
   result = await Model.findOneAndUpdate({ globalType: slug }, data, options)
 
-  result = JSON.parse(JSON.stringify(result))
+  result = deepCopyObjectSimple(result)
 
   // custom id type reset
   result.id = result._id

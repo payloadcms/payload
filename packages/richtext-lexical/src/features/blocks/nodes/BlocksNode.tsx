@@ -12,6 +12,7 @@ import type {
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
+import { deepCopyObjectSimple } from 'payload'
 import React, { type JSX } from 'react'
 
 export type BlockFields<TBlockFields extends object = Record<string, unknown>> = {
@@ -117,7 +118,7 @@ export class BlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
+    const fieldsCopy = deepCopyObjectSimple(fields) as BlockFields
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy

@@ -1,7 +1,7 @@
 import type { PaginateOptions } from 'mongoose'
 import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
-import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
+import { buildVersionGlobalFields, deepCopyObjectSimple, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -99,7 +99,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  const docs = deepCopyObjectSimple(result.docs)
 
   return {
     ...result,

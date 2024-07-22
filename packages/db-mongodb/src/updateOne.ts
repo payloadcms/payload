@@ -1,5 +1,7 @@
 import type { PayloadRequest, UpdateOne } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { handleError } from './utilities/handleError.js'
@@ -32,7 +34,7 @@ export const updateOne: UpdateOne = async function updateOne(
     handleError({ collection, error, req })
   }
 
-  result = JSON.parse(JSON.stringify(result))
+  result = deepCopyObjectSimple(result)
   result.id = result._id
   result = sanitizeInternalFields(result)
 

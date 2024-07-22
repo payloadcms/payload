@@ -1,6 +1,6 @@
 import type { FindGlobal, PayloadRequest } from 'payload'
 
-import { combineQueries } from 'payload'
+import { combineQueries, deepCopyObjectSimple } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -34,7 +34,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     delete doc._id
   }
 
-  doc = JSON.parse(JSON.stringify(doc))
+  doc = deepCopyObjectSimple(doc)
   doc = sanitizeInternalFields(doc)
 
   return doc
