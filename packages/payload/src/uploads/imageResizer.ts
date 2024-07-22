@@ -312,9 +312,9 @@ export async function resizeAndTransformImageSizes({
         if (!resizeHeight) resizeHeight = resizeImageMeta.height
         if (!resizeWidth) resizeWidth = resizeImageMeta.width
 
-        // Resize the image using sharp and only then extract with focal point
         const resizeAspectRatio = resizeWidth / resizeHeight
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+        // Scales the image before extracting from it
         resized = imageToResize.resize({
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
