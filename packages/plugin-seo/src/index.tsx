@@ -2,7 +2,7 @@ import type { Config, Field, GroupField, TabsField, TextField } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { withMergedProps } from '@payloadcms/ui/shared'
-import { deepMerge } from 'payload/shared'
+import { deepMergeSimple } from 'payload/shared'
 
 import type {
   GenerateDescription,
@@ -298,7 +298,7 @@ export const seoPlugin =
       i18n: {
         ...config.i18n,
         translations: {
-          ...deepMerge(translations, config.i18n?.translations),
+          ...deepMergeSimple(translations, config.i18n?.translations),
         },
       },
     }

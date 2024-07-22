@@ -54,7 +54,6 @@ export {
   sanitizeClientFeatures,
 } from '../../lexical/config/client/sanitize.js'
 export { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
-export { cloneDeep } from '../../lexical/utils/cloneDeep.js'
 export { getDOMRangeRect } from '../../lexical/utils/getDOMRangeRect.js'
 export { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
 export { isHTMLElement } from '../../lexical/utils/guard.js'

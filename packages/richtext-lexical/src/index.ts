@@ -13,6 +13,7 @@ import {
   afterReadTraverseFields,
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
+  deepCopyObject,
   getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
@@ -35,7 +36,6 @@ import {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
-import { cloneDeep } from './lexical/utils/cloneDeep.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { getGenerateComponentMap } from './utilities/generateComponentMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
@@ -93,10 +93,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           defaultEditorConfig,
           config,
         )
-        features = cloneDeep(defaultEditorFeatures)
+        features = deepCopyObject(defaultEditorFeatures)
       }
 
-      finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
+      finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
@@ -109,12 +109,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       features =
         props.features && typeof props.features === 'function'
           ? props.features({
-              defaultFeatures: cloneDeep(defaultEditorFeatures),
+              defaultFeatures: deepCopyObject(defaultEditorFeatures),
               rootFeatures: rootEditorFeatures,
             })
           : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
-        features = cloneDeep(defaultEditorFeatures)
+        features = deepCopyObject(defaultEditorFeatures)
       }
 
       const lexical: LexicalEditorConfig = props.lexical
@@ -463,8 +463,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
-                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
-                  [],
+                   
+                  (siblingDocWithLocales[field.name] as unknown as SerializedEditorState)?.root
+                    ?.children ?? [],
               })
             }
 

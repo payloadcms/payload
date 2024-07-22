@@ -24,10 +24,18 @@ export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
 
-export { deepCopyObject } from '../utilities/deepCopyObject.js'
+export {
+  deepCopyObject,
+  deepCopyObjectComplex,
+  deepCopyObjectSimple,
+} from '../utilities/deepCopyObject.js'
 
-export { deepMerge } from '../utilities/deepMerge.js'
-
+export {
+  deepMerge,
+  deepMergeWithCombinedArrays,
+  deepMergeWithReactComponents,
+  deepMergeWithSourceArrays,
+} from '../utilities/deepMerge.js'
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
@@ -55,3 +63,5 @@ export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
+
+export { deepMergeSimple } from '@payloadcms/translations/utilities'
