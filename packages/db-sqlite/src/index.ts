@@ -2,6 +2,8 @@ import type { Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
+  beginTransaction,
+  commitTransaction,
   count,
   create,
   createGlobal,
@@ -31,7 +33,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { ilike, like } from 'drizzle-orm'
+import { like } from 'drizzle-orm'
 import { createDatabaseAdapter } from 'payload'
 
 import type { Args, SQLiteAdapter } from './types.js'
@@ -100,12 +102,12 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      // TODO: revisit if we can use transactions
-      // beginTransaction,
-      // commitTransaction,
+      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      commitTransaction,
       connect,
       convertPathToJSONTraversal,
       count,

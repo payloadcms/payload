@@ -311,6 +311,7 @@ describe('database', () => {
 
   describe('transactions', () => {
     describe('local api', () => {
+      // sqlite cannot handle concurrent write transactions
       if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
@@ -361,103 +362,103 @@ describe('database', () => {
           expect(firstResult.id).toStrictEqual(first.id)
           expect(secondResult.id).toStrictEqual(second.id)
         })
+      }
 
-        it('should commit multiple operations async', async () => {
-          const req = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
+      it('should commit multiple operations async', async () => {
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
 
-          let first
-          let second
+        let first
+        let second
 
-          const firstReq = payload
-            .create({
-              collection,
-              data: {
-                title,
-              },
-              req,
-            })
-            .then((res) => {
-              first = res
-            })
-
-          const secondReq = payload
-            .create({
-              collection,
-              data: {
-                title,
-              },
-              req,
-            })
-            .then((res) => {
-              second = res
-            })
-
-          await Promise.all([firstReq, secondReq])
-
-          await commitTransaction(req)
-          expect(req.transactionID).toBeUndefined()
-
-          const firstResult = await payload.findByID({
-            id: first.id,
-            collection,
-            req,
-          })
-          const secondResult = await payload.findByID({
-            id: second.id,
-            collection,
-            req,
-          })
-
-          expect(firstResult.id).toStrictEqual(first.id)
-          expect(secondResult.id).toStrictEqual(second.id)
-        })
-
-        it('should rollback operations on failure', async () => {
-          const req = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
-
-          await initTransaction(req)
-
-          const first = await payload.create({
+        const firstReq = payload
+          .create({
             collection,
             data: {
               title,
             },
             req,
           })
+          .then((res) => {
+            first = res
+          })
 
-          try {
-            await payload.create({
-              collection,
-              data: {
-                throwAfterChange: true,
-                title,
-              },
-              req,
-            })
-          } catch (error: unknown) {
-            // catch error and carry on
-          }
+        const secondReq = payload
+          .create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+          .then((res) => {
+            second = res
+          })
 
-          expect(req.transactionID).toBeFalsy()
+        await Promise.all([firstReq, secondReq])
 
-          // this should not do anything but is needed to be certain about the next assertion
-          await commitTransaction(req)
+        await commitTransaction(req)
+        expect(req.transactionID).toBeUndefined()
 
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              req,
-            }),
-          ).rejects.toThrow('Not Found')
+        const firstResult = await payload.findByID({
+          id: first.id,
+          collection,
+          req,
         })
-      }
+        const secondResult = await payload.findByID({
+          id: second.id,
+          collection,
+          req,
+        })
+
+        expect(firstResult.id).toStrictEqual(first.id)
+        expect(secondResult.id).toStrictEqual(second.id)
+      })
+
+      it('should rollback operations on failure', async () => {
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
+
+        await initTransaction(req)
+
+        const first = await payload.create({
+          collection,
+          data: {
+            title,
+          },
+          req,
+        })
+
+        try {
+          await payload.create({
+            collection,
+            data: {
+              throwAfterChange: true,
+              title,
+            },
+            req,
+          })
+        } catch (error: unknown) {
+          // catch error and carry on
+        }
+
+        expect(req.transactionID).toBeFalsy()
+
+        // this should not do anything but is needed to be certain about the next assertion
+        await commitTransaction(req)
+
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            req,
+          }),
+        ).rejects.toThrow('Not Found')
+      })
     })
   })
 })

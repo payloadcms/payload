@@ -7,6 +7,7 @@ import type {
   SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
+  SQLiteTransactionConfig,
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
@@ -20,6 +21,7 @@ export type Args = {
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
+  transactionOptions?: SQLiteTransactionConfig | false
   versionsSuffix?: string
 }
 
@@ -98,7 +100,7 @@ type SQLiteDrizzleAdapter = Omit<
   | 'relations'
 >
 
-export type SQLiteAdapter = SQLiteDrizzleAdapter & {
+export type SQLiteAdapter = {
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
@@ -128,8 +130,9 @@ export type SQLiteAdapter = SQLiteDrizzleAdapter & {
   schemaName?: Args['schemaName']
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
+  transactionOptions: SQLiteTransactionConfig
   versionsSuffix?: string
-}
+} & SQLiteDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
@@ -163,6 +166,7 @@ declare module 'payload' {
     resolveInitializing: () => void
     schema: Record<string, GenericRelation | GenericTable>
     tableNameMap: Map<string, string>
+    transactionOptions: SQLiteTransactionConfig
     versionsSuffix?: string
   }
 }

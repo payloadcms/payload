@@ -55,7 +55,6 @@ export async function buildConfigWithDefaults(
       pool: {
         connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
       },
-      // transactionOptions: false,
     }),
     'postgres-custom-schema': postgresAdapter({
       pool: {
