@@ -1,7 +1,5 @@
 import { ListItemNode, ListNode } from '@lexical/list'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { OrderedListFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
@@ -11,7 +9,7 @@ import { ORDERED_LIST } from './markdownTransformer.js'
 export const OrderedListFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
     return {
-      ClientFeature: OrderedListFeatureClient,
+      ClientFeature: '../../../exports/client/index.js#OrderedListFeatureClient',
       i18n,
       markdownTransformers: [ORDERED_LIST],
       nodes: featureProviderMap.has('unorderedList')

@@ -12,8 +12,6 @@ import { sanitizeFields } from 'payload'
 
 import type { UploadFeaturePropsClient } from './feature.client.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { UploadFeatureClient } from '../../exports/client/index.js'
 import { populate } from '../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { createNode } from '../typeUtilities.js'
@@ -79,7 +77,7 @@ export const UploadFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: UploadFeatureClient,
+      ClientFeature: '../../exports/client/index.js#UploadFeatureClient',
       clientFeatureProps: clientProps,
       generateSchemaMap: ({ props }) => {
         if (!props?.collections) return null

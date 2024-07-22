@@ -2,8 +2,6 @@ import type React from 'react'
 
 import type { LexicalPluginNodeConverterProvider } from './converter/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { LexicalPluginToLexicalFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { defaultConverters } from './converter/defaultConverters.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
@@ -38,7 +36,7 @@ export const LexicalPluginToLexicalFeature =
       props.converters = converters
 
       return {
-        ClientFeature: LexicalPluginToLexicalFeatureClient,
+        ClientFeature: '../../../exports/client/index.js#LexicalPluginToLexicalFeatureClient',
         generateComponentMap: () => {
           const map: {
             [key: string]: React.FC

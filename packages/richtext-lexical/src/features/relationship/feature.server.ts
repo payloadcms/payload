@@ -1,7 +1,5 @@
 import type { CollectionSlug } from 'payload'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { RelationshipFeatureClient } from '../../exports/client/index.js'
 import { populate } from '../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { createNode } from '../typeUtilities.js'
@@ -46,7 +44,7 @@ export const RelationshipFeature = createServerFeature<
   RelationshipFeatureProps
 >({
   feature: ({ props }) => ({
-    ClientFeature: RelationshipFeatureClient,
+    ClientFeature: '../../exports/client/index.js#RelationshipFeatureClient',
     i18n,
     nodes: [
       createNode({

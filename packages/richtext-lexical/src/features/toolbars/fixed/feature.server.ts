@@ -1,5 +1,3 @@
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { FixedToolbarFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
 export type FixedToolbarFeatureProps = {
@@ -35,7 +33,7 @@ export const FixedToolbarFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: FixedToolbarFeatureClient,
+      ClientFeature: '../../../exports/client/index.js#FixedToolbarFeatureClient',
       clientFeatureProps: sanitizedProps,
       sanitizedServerFeatureProps: sanitizedProps,
     }

@@ -2,8 +2,6 @@ import type React from 'react'
 
 import type { SlateNodeConverterProvider } from './converter/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { SlateToLexicalFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { defaultSlateConverters } from './converter/defaultConverters.js'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
@@ -41,7 +39,7 @@ export const SlateToLexicalFeature = createServerFeature<
     props.converters = converters
 
     return {
-      ClientFeature: SlateToLexicalFeatureClient,
+      ClientFeature: '../../../exports/client/index.js#SlateToLexicalFeatureClient',
       generateComponentMap: () => {
         const map: {
           [key: string]: React.FC

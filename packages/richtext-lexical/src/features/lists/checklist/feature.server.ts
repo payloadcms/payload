@@ -1,7 +1,5 @@
 import { ListItemNode, ListNode } from '@lexical/list'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { ChecklistFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
@@ -11,7 +9,7 @@ import { CHECK_LIST } from './markdownTransformers.js'
 export const ChecklistFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
     return {
-      ClientFeature: ChecklistFeatureClient,
+      ClientFeature: '../../../exports/client/index.js#ChecklistFeatureClient',
       i18n,
       markdownTransformers: [CHECK_LIST],
       nodes:
