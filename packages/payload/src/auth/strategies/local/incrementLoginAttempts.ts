@@ -45,7 +45,7 @@ export const incrementLoginAttempts = async ({
 
   // Lock the account if at max attempts and not already locked
   if (typeof doc.loginAttempts === 'number' && doc.loginAttempts + 1 >= maxLoginAttempts) {
-    const lockUntil = new Date(Date.now() + lockTime)
+    const lockUntil = new Date(Date.now() + lockTime).toISOString()
     data.lockUntil = lockUntil
   }
 
