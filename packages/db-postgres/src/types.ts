@@ -33,6 +33,10 @@ export type Args = {
   pool: PoolConfig
   push?: boolean
   relationshipsSuffix?: string
+  /**
+   * The schema name to use for the database
+   * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
+   */
   schemaName?: string
   versionsSuffix?: string
 }
@@ -104,7 +108,7 @@ type PostgresDrizzleAdapter = Omit<
   | 'relations'
 >
 
-export type PostgresAdapter = PostgresDrizzleAdapter & {
+export type PostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
@@ -144,7 +148,7 @@ export type PostgresAdapter = PostgresDrizzleAdapter & {
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
   versionsSuffix?: string
-}
+} & PostgresDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
