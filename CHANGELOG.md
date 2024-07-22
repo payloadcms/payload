@@ -1,3 +1,13 @@
+## [2.24.1](https://github.com/payloadcms/payload/compare/v2.24.0...v2.24.1) (2024-07-22)
+
+
+### Bug Fixes
+
+* aliases AfterMe, AfterLogout, and AfterRefresh hook types ([#7146](https://github.com/payloadcms/payload/issues/7146)) ([20377bb](https://github.com/payloadcms/payload/commit/20377bb22c867552e412c1cafd16869399aadd68))
+* exports fallback hook types to ensure backwards compatibility ([#7217](https://github.com/payloadcms/payload/issues/7217)) ([1864577](https://github.com/payloadcms/payload/commit/18645771c86664f1246f0fb599c8265a4cd1d6c0))
+* resizes images first before applying focal point ([#7278](https://github.com/payloadcms/payload/issues/7278)) ([1b208c7](https://github.com/payloadcms/payload/commit/1b208c7addf56ae8a1af5e408b001b3e5f080a38))
+* uploads from drawer and focal point positioning ([#7244](https://github.com/payloadcms/payload/issues/7244)) ([0841d5a](https://github.com/payloadcms/payload/commit/0841d5a35ee00650c703231a08fc9a361861ba67))
+
 ## [2.24.0](https://github.com/payloadcms/payload/compare/v2.23.1...v2.24.0) (2024-07-16)
 
 
