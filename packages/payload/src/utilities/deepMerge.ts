@@ -8,7 +8,7 @@ export { deepMerge }
  *
  * Array handling: Arrays in the target object are combined with the source object's arrays.
  */
-export function deepMergeWithCombinedArrays<T = object>(obj1: object, obj2: object): T {
+export function deepMergeWithCombinedArrays<T extends object>(obj1: object, obj2: object): T {
   return deepMerge<T>(obj1, obj2, {
     arrayMerge: (target, source, options) => {
       const destination = target.slice()
@@ -32,14 +32,14 @@ export function deepMergeWithCombinedArrays<T = object>(obj1: object, obj2: obje
  *
  * Array handling: Arrays in the target object are replaced by the source object's arrays.
  */
-export function deepMergeWithSourceArrays<T = object>(obj1: object, obj2: object): T {
+export function deepMergeWithSourceArrays<T extends object>(obj1: object, obj2: object): T {
   return deepMerge<T>(obj1, obj2, { arrayMerge: (_, source) => source })
 }
 
 /**
  * Fully-featured deepMerge. Does not clone React components by default.
  */
-export function deepMergeWithReactComponents<T = object>(obj1: object, obj2: object): T {
+export function deepMergeWithReactComponents<T extends object>(obj1: object, obj2: object): T {
   return deepMerge<T>(obj1, obj2, {
     isMergeableObject: isPlainObject,
   })

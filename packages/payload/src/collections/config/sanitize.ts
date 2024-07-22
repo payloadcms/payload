@@ -1,4 +1,3 @@
-import type { IncomingAuthType } from '../../auth/index.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
@@ -10,7 +9,6 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
@@ -139,7 +137,7 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeAuthFields(sanitized.fields, sanitized)
 
-    sanitized.auth = deepMergeWithReactComponents<IncomingAuthType>(
+    sanitized.auth = deepMergeWithReactComponents(
       authDefaults,
       typeof sanitized.auth === 'object' ? sanitized.auth : {},
     )

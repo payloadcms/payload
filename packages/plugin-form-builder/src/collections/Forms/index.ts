@@ -84,7 +84,7 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'object' && typeof fieldConfig === 'object') {
-              return deepMergeWithSourceArrays<FieldConfig>(block, fieldConfig)
+              return deepMergeWithSourceArrays(block, fieldConfig)
             }
 
             if (typeof block === 'function') {
