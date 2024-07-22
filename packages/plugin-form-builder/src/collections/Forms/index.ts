@@ -1,6 +1,6 @@
 import type { Block, CollectionConfig, Field } from 'payload'
 
-import merge from 'deepmerge'
+import { deepMergeWithSourceArrays } from 'payload'
 
 import type { FieldConfig, FormBuilderPluginConfig } from '../../types.js'
 
@@ -84,9 +84,7 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'object' && typeof fieldConfig === 'object') {
-              return merge<FieldConfig>(block, fieldConfig, {
-                arrayMerge: (_, sourceArray) => sourceArray,
-              })
+              return deepMergeWithSourceArrays(block, fieldConfig)
             }
 
             if (typeof block === 'function') {

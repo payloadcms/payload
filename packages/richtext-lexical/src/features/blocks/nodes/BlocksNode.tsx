@@ -9,12 +9,14 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
+import { deepCopyObjectSimple } from 'payload/shared'
 import React, { type JSX } from 'react'
 
-export type BlockFields<TBlockFields extends object = Record<string, unknown>> = {
+export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
   blockName: string
   blockType: string
@@ -27,7 +29,7 @@ const BlockComponent = React.lazy(() =>
   })),
 )
 
-export type SerializedBlockNode<TBlockFields extends object = Record<string, unknown>> = Spread<
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
     fields: BlockFields<TBlockFields>
@@ -117,7 +119,7 @@ export class BlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
+    const fieldsCopy = deepCopyObjectSimple(fields)
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy

@@ -194,7 +194,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    result = await beforeChange<DataFromCollectionSlug<TSlug>>({
+    result = await beforeChange({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -280,7 +280,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // afterChange - Fields
     // /////////////////////////////////////
 
-    result = await afterChange<DataFromCollectionSlug<TSlug>>({
+    result = await afterChange({
       collection: collectionConfig,
       context: req.context,
       data: versionDoc,

@@ -29,7 +29,12 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { CollectionSlug, TypedAuthOperations, TypedCollection } from '../../index.js'
+import type {
+  CollectionSlug,
+  JsonObject,
+  TypedAuthOperations,
+  TypedCollection,
+} from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -42,7 +47,7 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
-export type RequiredDataFromCollection<TData extends Record<string, any>> = MarkOptional<
+export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
   'createdAt' | 'id' | 'sizes' | 'updatedAt'
 >
