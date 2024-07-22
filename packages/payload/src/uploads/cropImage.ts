@@ -42,7 +42,7 @@ export async function cropImage({
 
     const cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
 
-    return await cropped.toBuffer({
+    return await cropped.withMetadata().toBuffer({
       resolveWithObject: true,
     })
   } catch (error) {
