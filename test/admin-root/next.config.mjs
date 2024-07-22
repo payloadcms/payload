@@ -6,7 +6,6 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// eslint-disable-next-line no-restricted-exports
 export default withBundleAnalyzer(
   withPayload({
     eslint: {
