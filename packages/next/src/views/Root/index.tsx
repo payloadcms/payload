@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
-import { WithServerSideProps, generateAdminURL } from '@payloadcms/ui/shared'
+import { WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -43,7 +43,7 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = generateAdminURL(
+  const currentRoute = formatAdminURL(
     adminRoute,
     `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
   )
@@ -74,7 +74,7 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const routeWithAdmin = generateAdminURL(adminRoute, createFirstUserRoute)
+    const routeWithAdmin = formatAdminURL(adminRoute, createFirstUserRoute)
 
     const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
     const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy

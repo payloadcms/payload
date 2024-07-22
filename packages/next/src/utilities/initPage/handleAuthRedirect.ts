@@ -1,4 +1,4 @@
-import { generateAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 
@@ -31,7 +31,7 @@ export const handleAuthRedirect = ({
         : undefined,
     )
 
-    const adminLoginRoute = generateAdminURL(adminRoute, loginRouteFromConfig)
+    const adminLoginRoute = formatAdminURL(adminRoute, loginRouteFromConfig)
 
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined

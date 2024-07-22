@@ -2,9 +2,9 @@
 import type { SanitizedConfig } from 'payload'
 
 import { useSearchParams } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
-import { generateAdminURL } from 'packages/ui/src/utilities/generateAdminURL.js'
 import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -39,7 +39,7 @@ export const DocumentTabLink: React.FC<{
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
-  let docPath = generateAdminURL(
+  let docPath = formatAdminURL(
     adminRoute,
     `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
   )

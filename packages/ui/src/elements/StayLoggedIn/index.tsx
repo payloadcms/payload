@@ -1,5 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
@@ -24,8 +25,9 @@ export const StayLoggedInModal: React.FC = () => {
     admin: {
       routes: { logout: logoutRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
+
   const { toggleModal } = useModal()
   const { t } = useTranslation()
 
@@ -41,7 +43,12 @@ export const StayLoggedInModal: React.FC = () => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(stayLoggedInModalSlug)
-              router.push(`${admin}${logoutRoute}`)
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: logoutRoute,
+                }),
+              )
             }}
           >
             {t('authentication:logOut')}

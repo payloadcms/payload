@@ -1,4 +1,5 @@
 'use client'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
@@ -19,10 +20,8 @@ const DefaultLogout: React.FC<{
     admin: {
       routes: { logout: logoutRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
-
-  const basePath = process.env.NEXT_BASE_PATH ?? ''
 
   const LinkElement = Link || 'a'
 
@@ -30,7 +29,10 @@ const DefaultLogout: React.FC<{
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      href={`${basePath}${admin}${logoutRoute}`}
+      href={formatAdminURL({
+        adminRoute,
+        path: logoutRoute,
+      })}
       tabIndex={tabIndex}
     >
       <LogOutIcon />

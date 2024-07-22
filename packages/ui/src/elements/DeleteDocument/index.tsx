@@ -3,6 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -32,7 +33,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
-    routes: { admin, api },
+    routes: { admin: adminRoute, api },
     serverURL,
   } = useConfig()
 
@@ -75,7 +76,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                   json.message,
               )
 
-              return router.push(`${admin}/collections/${collectionSlug}`)
+              return router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}`,
+                }),
+              )
             }
             toggleModal(modalSlug)
             if (json.errors) {
@@ -104,7 +110,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     i18n,
     title,
     router,
-    admin,
+    adminRoute,
     addDefaultError,
   ])
 

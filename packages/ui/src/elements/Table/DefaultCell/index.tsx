@@ -5,7 +5,7 @@ import React from 'react' // TODO: abstract this out to support all routers
 import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { generateAdminURL } from 'packages/ui/src/utilities/generateAdminURL.js'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -57,7 +57,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   if (isLink) {
     WrapElement = Link
     wrapElementProps.href = customCellContext?.collectionSlug
-      ? generateAdminURL(
+      ? formatAdminURL(
           adminRoute,
           `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
         )

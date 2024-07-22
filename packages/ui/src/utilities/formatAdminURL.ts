@@ -1,11 +1,13 @@
 import type { Config } from 'payload'
 
 /** Will read the `routes.admin` config and appropriately handle "/" paths */
-export const generateAdminURL = (
-  path: string,
-  adminRoute: Config['routes']['admin'],
-  serverURL?: Config['serverURL'],
-): string => {
+export const formatAdminURL = (args: {
+  adminRoute: Config['routes']['admin']
+  path: string
+  serverURL?: Config['serverURL']
+}): string => {
+  const { adminRoute, path, serverURL } = args
+
   if (adminRoute && adminRoute !== '/') {
     return `${serverURL || ''}${adminRoute}${path}`
   }

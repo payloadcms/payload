@@ -7,8 +7,8 @@ import React, { Fragment, useEffect } from 'react'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
-import { generateAdminURL } from '../../utilities/generateAdminURL.js'
 import { Autosave } from '../Autosave/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
@@ -200,7 +200,7 @@ export const DocumentControls: React.FC<{
                 {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
-                      href={generateAdminURL(
+                      href={formatAdminURL(
                         adminRoute,
                         `/collections/${collectionConfig?.slug}/create`,
                       )}

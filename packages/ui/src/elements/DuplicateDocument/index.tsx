@@ -4,6 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -31,13 +32,16 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
   const { toggleModal } = useModal()
   const locale = useLocale()
   const { setModified } = useForm()
+
   const {
-    routes: { api },
+    routes: { api: apiRoute },
     serverURL,
   } = useConfig()
+
   const {
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = useConfig()
+
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()
 
@@ -53,7 +57,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       }
       await requests
         .post(
-          `${serverURL}${api}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
+          `${serverURL}${apiRoute}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
           {
             body: JSON.stringify({}),
             headers: {
@@ -72,7 +76,10 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             )
             setModified(false)
             router.push(
-              `${admin}/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+              formatAdminURL({
+                adminRoute,
+                path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+              }),
             )
           } else {
             toast.error(
@@ -87,7 +94,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       locale,
       modified,
       serverURL,
-      api,
+      apiRoute,
       slug,
       id,
       i18n,
@@ -97,7 +104,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       singularLabel,
       setModified,
       router,
-      admin,
+      adminRoute,
     ],
   )
 

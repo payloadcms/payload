@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
 import { HydrateClientUser } from '@payloadcms/ui'
-import { generateAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -53,7 +53,7 @@ export const NotFoundPage = async ({
   const initPageResult = await initPage({
     config,
     redirectUnauthenticatedUser: true,
-    route: generateAdminURL(adminRoute, '/not-found'),
+    route: formatAdminURL(adminRoute, '/not-found'),
     searchParams,
   })
 

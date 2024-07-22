@@ -1,6 +1,6 @@
 import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
-import { generateAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
@@ -95,7 +95,7 @@ export const getViewFromConfig = ({
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: generateAdminURL(adminRoute, route),
+            path: formatAdminURL(adminRoute, route),
           })
         })
 
