@@ -1,6 +1,6 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
-import type pino from 'pino'
+import type { Logger } from 'pino'
 
 import { spawn } from 'child_process'
 import crypto from 'crypto'
@@ -62,7 +62,7 @@ import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getDependencies } from './utilities/dependencies/getDependencies.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
-import Logger from './utilities/logger.js'
+import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
 export interface GeneratedTypes {
@@ -291,7 +291,7 @@ export class BasePayload {
 
   globals: Globals
 
-  logger: pino.Logger
+  logger: Logger
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
@@ -483,7 +483,7 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
-    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
+    this.logger = getLogger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
 
