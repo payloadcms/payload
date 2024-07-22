@@ -33,12 +33,12 @@ export const LogoutClient: React.FC<{
           Link={Link}
           buttonStyle="secondary"
           el="link"
-          url={formatAdminURL(
+          url={formatAdminURL({
             adminRoute,
-            `/login${
+            path: `/login${
               redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
             }`,
-          )}
+          })}
         >
           {t('authentication:logBackIn')}
         </Button>

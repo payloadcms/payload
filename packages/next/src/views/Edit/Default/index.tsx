@@ -127,10 +127,10 @@ export const DefaultEditView: React.FC = () => {
 
       if (!isEditing && depth < 2) {
         // Redirect to the same locale if it's been set
-        const redirectRoute = formatAdminURL(
+        const redirectRoute = formatAdminURL({
           adminRoute,
-          `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
-        )
+          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+        })
         router.push(redirectRoute)
       } else {
         resetUploadEdits()

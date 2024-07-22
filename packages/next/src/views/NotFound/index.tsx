@@ -53,7 +53,7 @@ export const NotFoundPage = async ({
   const initPageResult = await initPage({
     config,
     redirectUnauthenticatedUser: true,
-    route: formatAdminURL(adminRoute, '/not-found'),
+    route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
   })
 

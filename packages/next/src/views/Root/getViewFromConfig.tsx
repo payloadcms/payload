@@ -95,7 +95,7 @@ export const getViewFromConfig = ({
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: formatAdminURL(adminRoute, route),
+            path: formatAdminURL({ adminRoute, path: route }),
           })
         })
 
