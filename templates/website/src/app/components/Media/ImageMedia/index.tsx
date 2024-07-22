@@ -32,7 +32,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   let alt = altFromProps
   let src: StaticImageData | string = srcFromProps || ''
 
-  if (!src && resource && typeof resource !== 'string') {
+  if (!src && resource && typeof resource === 'object') {
     const {
       alt: altFromResource,
       filename: fullFilename,
