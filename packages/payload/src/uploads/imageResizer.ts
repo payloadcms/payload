@@ -345,7 +345,7 @@ export default async function resizeAndTransformImageSizes({
         })
 
         // must read from buffer, resize.metadata will return the original image metadata
-        const { info } = await resized.toBuffer({ resolveWithObject: true })
+        const { info } = await resized.withMetadata().toBuffer({ resolveWithObject: true })
         resizeImageMeta.height = extractHeightFromImage({
           ...originalImageMeta,
           height: info.height,
@@ -403,7 +403,7 @@ export default async function resizeAndTransformImageSizes({
         resized = resized.trim(imageResizeConfig.trimOptions)
       }
 
-      const { data: bufferData, info: bufferInfo } = await resized.toBuffer({
+      const { data: bufferData, info: bufferInfo } = await resized.withMetadata().toBuffer({
         resolveWithObject: true,
       })
 
