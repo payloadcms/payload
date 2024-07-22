@@ -1,4 +1,4 @@
-import type { JsonArray, JsonObject } from '../types/index.js'
+import type { JsonArray, JsonObject, JsonValue } from '../types/index.js'
 
 export const deepCopyObject = (inObject) => {
   if (inObject instanceof Date) return inObject
@@ -26,51 +26,29 @@ export const deepCopyObject = (inObject) => {
 
 /**
  * A deepCopyObject implementation which only works for JSON objects and arrays, and is faster than
- * JSON.parse(JSON.stringify(obj)): https://github.com/benjamine/jsondiffpatch/blob/master/packages/jsondiffpatch/src/clone.ts
+ * JSON.parse(JSON.stringify(obj)): https://github.com/rhysd/fast-json-clone
  *
  * Benchmark: https://github.com/AlessioGr/fastest-deep-clone-json/blob/main/test/benchmark.js
  *
- * License:
- * The MIT License
- *
- * Copyright (c) 2018 Benjamin Eidelman, https://twitter.com/beneidel
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * @param value The JSON value to be cloned. There are two invariants. 1) It must not contain circles
+ *              as JSON does not allow it. This function will cause infinite loop for such values by
+ *              design. 2) It must contain JSON values only. Other values like `Date`, `Regexp`, `Map`,
+ *              `Set`, `Buffer`, ... are not allowed.
+ * @returns The cloned JSON value.
  */
-export const deepCopyObjectSimple = <T extends JsonObject>(arg: T): T => {
-  if (typeof arg !== 'object') {
-    return arg
-  }
-  if (arg === null) {
-    return null
-  }
-  if (Array.isArray(arg)) {
-    return arg.map(deepCopyObjectSimple) as any
-  }
-
-  const cloned: T = {} as T
-  for (const name in arg) {
-    if (Object.prototype.hasOwnProperty.call(arg, name)) {
-      ;(cloned as Record<string, unknown>)[name] = deepCopyObjectSimple(arg[name] as JsonObject)
+export function deepCopyObjectSimple(value: JsonValue): JsonValue {
+  if (typeof value !== 'object' || value === null) {
+    return value
+  } else if (Array.isArray(value)) {
+    return value.map((e) => (typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e)))
+  } else {
+    const ret: { [key: string]: JsonValue } = {}
+    for (const k in value) {
+      const v = value[k]
+      ret[k] = typeof v !== 'object' || v === null ? v : deepCopyObjectSimple(v)
     }
+    return ret
   }
-  return cloned
 }
 
 /**
