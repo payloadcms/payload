@@ -6,8 +6,6 @@ import type { Spread } from 'lexical'
 
 import { HeadingNode } from '@lexical/rich-text'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { HeadingFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
@@ -38,7 +36,7 @@ export const HeadingFeature = createServerFeature<
     const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
     return {
-      ClientFeature: HeadingFeatureClient,
+      ClientFeature: '../../exports/client/index.js#HeadingFeatureClient',
       clientFeatureProps: props,
       i18n,
       markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],

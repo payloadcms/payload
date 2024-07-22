@@ -5,8 +5,6 @@ import { deepCopyObject } from 'payload/shared'
 
 import type { ClientProps } from './feature.client.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { LinkFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
@@ -95,7 +93,7 @@ export const LinkFeature = createServerFeature<
     )
 
     return {
-      ClientFeature: LinkFeatureClient,
+      ClientFeature: '../../exports/client/index.js#LinkFeatureClient',
       clientFeatureProps: {
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,

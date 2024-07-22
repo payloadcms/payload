@@ -3,8 +3,6 @@ import type { Spread } from 'lexical'
 
 import { QuoteNode } from '@lexical/rich-text'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { BlockquoteFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 import { createNode } from '../typeUtilities.js'
@@ -20,7 +18,7 @@ export type SerializedQuoteNode = Spread<
 
 export const BlockquoteFeature = createServerFeature({
   feature: {
-    ClientFeature: BlockquoteFeatureClient,
+    ClientFeature: '../../exports/client/index.js#BlockquoteFeatureClient',
     clientFeatureProps: null,
     i18n,
     markdownTransformers: [MarkdownTransformer],

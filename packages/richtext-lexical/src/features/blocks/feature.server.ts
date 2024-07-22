@@ -4,8 +4,6 @@ import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } fro
 
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { BlocksFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { createNode } from '../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -87,7 +85,7 @@ export const BlocksFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: BlocksFeatureClient,
+      ClientFeature: '../../exports/client/index.js#BlocksFeatureClient',
       clientFeatureProps: clientProps,
       generateSchemaMap: ({ props }) => {
         /**

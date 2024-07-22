@@ -3,8 +3,6 @@ import type { Config, Field } from 'payload'
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { TableFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
 
 const fields: Field[] = [
@@ -32,7 +30,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       validRelationships,
     })
     return {
-      ClientFeature: TableFeatureClient,
+      ClientFeature: '../../exports/client/index.js#TableFeatureClient',
       generateSchemaMap: () => {
         const schemaMap = new Map<string, Field[]>()
 

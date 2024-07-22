@@ -10,6 +10,7 @@ import type {
 } from 'lexical'
 import type {
   Field,
+  PayloadComponent,
   PayloadRequest,
   ReplaceAny,
   RequestContext,
@@ -274,7 +275,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: React.FC<ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, ClientComponentProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
