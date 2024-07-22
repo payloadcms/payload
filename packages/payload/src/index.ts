@@ -57,7 +57,6 @@ import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
-import { validateSchema } from './config/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
@@ -487,10 +486,6 @@ export class BasePayload {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
-
-    if (process.env.NODE_ENV !== 'production') {
-      validateSchema(this.config, this.logger)
-    }
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
