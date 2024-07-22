@@ -7,7 +7,10 @@ import { getBaseFields } from '../../drawer/baseFields.js'
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: FieldAffectingData[] }) => Field[])
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldAffectingData[]
+      }) => (Field | FieldAffectingData)[])
     | Field[],
   config: SanitizedConfig,
   enabledCollections?: CollectionSlug[],
@@ -21,15 +24,15 @@ export function transformExtraFields(
     maxDepth,
   )
 
-  let fields: Field[]
+  let fields: (Field | FieldAffectingData)[]
 
   if (typeof customFieldSchema === 'function') {
     fields = customFieldSchema({ config, defaultFields: baseFields })
   } else if (Array.isArray(customFieldSchema)) {
     fields = customFieldSchema
   } else {
-    fields = baseFields as Field[]
+    fields = baseFields
   }
 
-  return fields
+  return fields as Field[]
 }
