@@ -973,7 +973,11 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
-export { deepCopyObject, deepCopyObjectSimple } from './utilities/deepCopyObject.js'
+export {
+  deepCopyObject,
+  deepCopyObjectComplex,
+  deepCopyObjectSimple,
+} from './utilities/deepCopyObject.js'
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
