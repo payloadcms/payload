@@ -1,24 +1,43 @@
 import type { SharpOptions } from 'sharp'
 
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { UploadEdits } from './types.js'
+
 export const percentToPixel = (value, dimension) => {
   return Math.floor((parseFloat(value) / 100) * dimension)
 }
 
-export async function cropImage({ cropData, dimensions, file, sharp }) {
+type CropImageArgs = {
+  cropData: UploadEdits['crop']
+  dimensions: { height: number; width: number }
+  file: PayloadRequest['file']
+  heightInPixels: number
+  sharp: SanitizedConfig['sharp']
+  widthInPixels: number
+}
+export async function cropImage({
+  cropData,
+  dimensions,
+  file,
+  heightInPixels,
+  sharp,
+  widthInPixels,
+}: CropImageArgs) {
   try {
-    const { height, width, x, y } = cropData
+    const { x, y } = cropData
 
-    const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+    const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true
+    if (fileIsAnimatedType) sharpOptions.animated = true
 
     const formattedCropData = {
-      height: percentToPixel(height, dimensions.height),
+      height: Number(heightInPixels),
       left: percentToPixel(x, dimensions.width),
       top: percentToPixel(y, dimensions.height),
-      width: percentToPixel(width, dimensions.width),
+      width: Number(widthInPixels),
     }
 
     const cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)

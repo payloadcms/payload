@@ -1,8 +1,7 @@
-import type { CreateVersionArgs, TypeWithVersion } from 'payload/database'
-import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { CreateVersionArgs, PayloadRequest, TypeWithID, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -15,11 +14,11 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     parent,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 

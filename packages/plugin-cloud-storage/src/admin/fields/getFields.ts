@@ -1,5 +1,4 @@
-import type { GroupField, TextField } from 'payload/types'
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 

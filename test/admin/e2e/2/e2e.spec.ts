@@ -1,15 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/utilities'
-import { mapAsync } from 'payload/utilities'
-import qs from 'qs'
+import { mapAsync } from 'payload'
+import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 
-import type { Geo, Post } from '../../payload-types.js'
-import type { Config } from '../../payload-types.js'
+import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -68,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -78,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -150,6 +149,23 @@ describe('admin2', () => {
 
         await page.locator('.search-filter__input').fill('this is fun')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('search should not persist between navigation', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=test`
+        await page.goto(url)
+        await page.waitForURL(url)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('test')
+
+        await page.locator('.nav-toggler.template-default__nav-toggler').click()
+        await expect(page.locator('#nav-uploads')).toContainText('Uploads')
+
+        const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
+        await page.goto(serverURL + uploadsUrl)
+        await page.waitForURL(serverURL + uploadsUrl)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('')
       })
 
       test('should toggle columns', async () => {
@@ -247,6 +263,14 @@ describe('admin2', () => {
 
         await page.locator('.where-builder__add-first-filter').click()
 
+        const conditionField = page.locator('.condition__field')
+        await conditionField.click()
+        const dropdownFieldOption = conditionField.locator('.rs__option', {
+          hasText: exactText('ID'),
+        })
+        await dropdownFieldOption.click()
+        await expect(page.locator('.condition__field')).toContainText('ID')
+
         const operatorField = page.locator('.condition__operator')
         const valueField = page.locator('.condition__value input')
 
@@ -257,9 +281,11 @@ describe('admin2', () => {
 
         await valueField.fill(id)
 
-        await expect(page.locator(tableRowLocator)).toHaveCount(1)
-        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
-        expect(firstId).toEqual(`ID: ${id}`)
+        const tableRows = page.locator(tableRowLocator)
+
+        await expect(tableRows).toHaveCount(1)
+        const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
+        await expect(firstId).toHaveText(`ID: ${id}`)
 
         // Remove filter
         await page.locator('.condition__actions-remove').click()
@@ -289,12 +315,15 @@ describe('admin2', () => {
         await filterField.click()
 
         // select new filter field of Number
-        const dropdownFieldOptions = filterField.locator('.rs__option')
-        await dropdownFieldOptions.locator('text=Number').click()
+        const dropdownFieldOption = filterField.locator('.rs__option', {
+          hasText: exactText('Status'),
+        })
+        await dropdownFieldOption.click()
+        await expect(filterField).toContainText('Status')
 
         // expect operator & value field to reset (be empty)
         await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
-        await expect(valueField).toHaveValue('')
+        await expect(page.locator('.condition__value input')).toHaveValue('')
       })
 
       test('should accept where query from valid URL where parameter', async () => {
@@ -726,7 +755,8 @@ describe('admin2', () => {
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await expect(options.locator('text=Title')).toHaveText('Title')
+
+        await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
 
         // list columns
         await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')

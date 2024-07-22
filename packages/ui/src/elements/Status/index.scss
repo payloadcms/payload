@@ -20,6 +20,7 @@
   &__modal {
     @include blur-bg;
     display: flex;
+    justify-content: center;
     align-items: center;
     height: 100%;
 

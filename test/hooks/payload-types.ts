@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    'hooks-users': HooksUserAuthOperations;
+  };
   collections: {
     afterOperation: AfterOperation;
     'context-hooks': ContextHook;
@@ -26,6 +29,19 @@ export interface Config {
   locale: null;
   user: HooksUser & {
     collection: 'hooks-users';
+  };
+}
+export interface HooksUserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -211,6 +227,13 @@ export interface DataHooksGlobal {
   global_afterRead_global?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

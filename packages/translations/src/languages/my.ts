@@ -4,6 +4,7 @@ export const myTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'အကောင့်',
     accountOfCurrentUser: 'သင့် အကောင့်',
+    accountVerified: 'Akaun telah disahkan dengan jayanya.',
     alreadyActivated: 'အတည်ပြုပြီး',
     alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
     apiKey: 'API Key',
@@ -17,6 +18,7 @@ export const myTranslations: DefaultTranslationsObject = {
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',
+    emailOrUsername: 'E-mel atau Nama Pengguna',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
     emailVerified: 'အီးမေးလ်အတည်ပြုခဲ့ပါပြီ။',
     enableAPIKey: 'API Key ကိုဖွင့်ရန်',
@@ -26,6 +28,8 @@ export const myTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို ထည့်သွင်းပါ။ သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်နိုင်ရန် အီးမေးလ်စာတစ်စောင်ကို သင်လက်ခံရရှိမည်ဖြစ်သည်။',
     forgotPasswordQuestion: 'စကားဝှက် မေ့နေပါသလား။',
+    forgotPasswordUsernameInstructions:
+      'Sila masukkan nama pengguna anda di bawah. Arahan mengenai bagaimana untuk menetapkan semula kata laluan anda akan dihantar ke alamat emel yang dikaitkan dengan nama pengguna anda.',
     generate: 'Generate',
     generateNewAPIKey: 'API key အသစ်ဖန်တီးရန်',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +65,8 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'အောင်မြင်စွာသော့ဖွင့်ခဲ့သည်။',
     tokenRefreshSuccessful: 'Token refresh berhasil.',
     unableToVerify: 'စိစစ်၍မရပါ။',
+    username: 'Nama pengguna',
+    usernameNotValid: 'ပေးထားသော အသုံးပြုသူအမည်မှာ တရားဝင်မှု မရှိပါ။',
     verified: 'စိစစ်ပြီး',
     verifiedSuccessfully: 'အတည်ပြုပြီးပါပြီ။',
     verify: 'စိစစ်ခြင်း',
@@ -113,6 +119,8 @@ export const myTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
+    usernameAlreadyRegistered: 'Pengguna dengan nama pengguna yang diberikan sudah mendaftar.',
+    usernameOrPasswordIncorrect: 'Nama pengguna atau kata laluan yang diberikan tidak betul.',
     valueMustBeUnique: 'value သည် အဓိပ္ပာယ်ရှိရပါမည်။',
     verificationTokenInvalid: 'အတည်ပြုခြင်းတိုကင်သည် မမှန်ကန်ပါ။',
   },
@@ -292,6 +300,7 @@ export const myTranslations: DefaultTranslationsObject = {
     updating: 'ပြင်ဆင်ရန်',
     uploading: 'တင်ပေးနေသည်',
     user: 'အသုံးပြုသူ',
+    username: 'Nama pengguna',
     users: 'အသုံးပြုသူများ',
     value: 'တန်ဖိုး',
     welcome: 'ကြိုဆိုပါတယ်။',
@@ -300,6 +309,7 @@ export const myTranslations: DefaultTranslationsObject = {
     contains: 'ပါဝင်သည်',
     equals: 'ညီမျှ',
     exists: 'တည်ရှိသည်',
+    intersects: 'ကြောက်ခြင်း',
     isGreaterThan: 'ထက်ကြီးသည်',
     isGreaterThanOrEqualTo: 'ထက်ကြီးသည် သို့မဟုတ် ညီမျှသည်',
     isIn: 'ရှိ',
@@ -309,8 +319,10 @@ export const myTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'ညီမျှသည်',
     isNotIn: 'မဝင်ပါ',
     near: 'နီး',
+    within: 'အတွင်း',
   },
   upload: {
+    addFile: 'ဖိုင်ထည့်ပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -325,6 +337,7 @@ export const myTranslations: DefaultTranslationsObject = {
     height: 'Height',
     lessInfo: 'အချက်အလက်နည်းတယ်။',
     moreInfo: 'အချက်အလက်',
+    pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'Saiz Pratonton',
     selectCollectionToBrowse: 'စုစည်းမှု တစ်ခုခုကို ရွေးချယ်ပါ။',
     selectFile: 'ဖိုင်ရွေးပါ။',
@@ -355,6 +368,8 @@ export const myTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'ဤအကွက်သည် နံပါတ်နှစ်ခု လိုအပ်ပါသည်။',
     shorterThanMax: 'ဤတန်ဖိုးသည် စာလုံး {{maxLength}} လုံး၏ အမြင့်ဆုံးအရှည်ထက် ပိုတိုရပါမည်။',
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
+    username:
+      'Sila masukkan nama pengguna yang sah. Boleh mengandungi huruf, nombor, tanda hubung, titik dan garis bawah.',
     validUploadID: "'ဤအကွက်သည် မှန်ကန်သော အပ်လုဒ် ID မဟုတ်ပါ။'",
   },
   version: {
@@ -380,12 +395,15 @@ export const myTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'အများဆိုင်ကို ဖျက်ရန် အတည်ပြုပါ။',
     confirmVersionRestoration: 'ဗားရှင်းပြန်လည် အသုံးပြုခြင်းကို အတည်ပြုပါ။',
     currentDocumentStatus: 'လက်ရှိ {{docStatus}} ဖိုင်',
+    currentDraft: 'Draf Semasa',
+    currentPublishedVersion: 'လက်ရှိထုတ်ဝေထားသောဗားရှင်း',
     draft: 'မူကြမ်း',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
     preview: 'နမူနာပြရန်',
+    previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',
     publish: 'ထုတ်ဝေသည်။',
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',

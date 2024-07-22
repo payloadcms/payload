@@ -1,9 +1,9 @@
 import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import { expect } from '@playwright/test'
-import { defaults } from 'payload/config'
-import { wait } from 'payload/utilities'
+import { defaults } from 'payload'
+import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
@@ -30,33 +30,33 @@ type LoginArgs = {
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const networkConditions = {
-  'Slow 3G': {
-    download: ((500 * 1000) / 8) * 0.8,
-    upload: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
-  },
   'Fast 3G': {
     download: ((1.6 * 1000 * 1000) / 8) * 0.9,
-    upload: ((750 * 1000) / 8) * 0.9,
     latency: 1000,
+    upload: ((750 * 1000) / 8) * 0.9,
+  },
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    latency: 400 * 5,
+    upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
     download: ((4 * 1000 * 1000) / 8) * 0.8,
-    upload: ((3 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
   },
 }
 
 /**
- * Load admin panel and make sure autologin has passed before running tests
+ * Ensure admin panel is loaded before running tests
  * @param page
  * @param serverURL
  */
-export async function ensureAutoLoginAndCompilationIsDone({
-  page,
-  serverURL,
+export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
+  page,
+  serverURL,
 }: {
   customAdminRoutes?: Config['admin']['routes']
   customRoutes?: Config['routes']
@@ -64,9 +64,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
   serverURL: string
 }): Promise<void> {
   const {
-    admin: {
-      routes: { login: loginRoute, createFirstUser: createFirstUserRoute },
-    },
     routes: { admin: adminRoute },
   } = getAdminRoutes({ customAdminRoutes, customRoutes })
 
@@ -79,16 +76,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() =>
-    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
-  ).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
 
@@ -97,8 +84,8 @@ export async function ensureAutoLoginAndCompilationIsDone({
  */
 export async function throttleTest({
   context,
-  page,
   delay,
+  page,
 }: {
   context: BrowserContext
   delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
@@ -108,9 +95,9 @@ export async function throttleTest({
 
   await cdpSession.send('Network.emulateNetworkConditions', {
     downloadThroughput: networkConditions[delay].download,
-    uploadThroughput: networkConditions[delay].upload,
     latency: networkConditions[delay].latency,
     offline: false,
+    uploadThroughput: networkConditions[delay].upload,
   })
 
   await page.route('**/*', async (route) => {
@@ -123,7 +110,7 @@ export async function throttleTest({
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { page, serverURL, customAdminRoutes, customRoutes } = args
+  const { customAdminRoutes, customRoutes, page, serverURL } = args
 
   const {
     routes: { admin: adminRoute },
@@ -139,11 +126,11 @@ export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
 }
 
 export async function login(args: LoginArgs): Promise<void> {
-  const { page, serverURL, data = devUser, customAdminRoutes, customRoutes } = args
+  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
     admin: {
-      routes: { login: loginRoute, createFirstUser: createFirstUserRoute },
+      routes: { createFirstUser: createFirstUserRoute, login: loginRoute },
     },
     routes: { admin: adminRoute },
   } = getAdminRoutes({ customAdminRoutes, customRoutes })
@@ -236,7 +223,7 @@ export async function openDocControls(page: Page): Promise<void> {
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
   await page
-    .locator(`.localizer .popup.popup--active .popup-button-list button`, {
+    .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
       hasText: newLocale,
     })
     .first()
@@ -349,8 +336,8 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
 type AdminRoutes = Config['admin']['routes']
 
 export function getAdminRoutes({
-  customRoutes,
   customAdminRoutes,
+  customRoutes,
 }: {
   customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']

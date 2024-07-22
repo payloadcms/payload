@@ -1,11 +1,9 @@
 'use client'
-import type { ElementType } from 'react'
+import type { ElementType, HTMLAttributes } from 'react'
 
 import LinkWithDefault from 'next/link.js'
 const Link = LinkWithDefault.default
 import React from 'react' // TODO: abstract this out to support all routers
-
-import type { HTMLAttributes } from 'react'
 
 export type PillProps = {
   alignIcon?: 'left' | 'right'
@@ -16,9 +14,9 @@ export type PillProps = {
   children?: React.ReactNode
   className?: string
   draggable?: boolean
-  elementProps?: HTMLAttributes<HTMLElement> & {
+  elementProps?: {
     ref: React.RefCallback<HTMLElement>
-  }
+  } & HTMLAttributes<HTMLElement>
   icon?: React.ReactNode
   id?: string
   onClick?: () => void

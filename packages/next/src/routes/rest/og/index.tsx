@@ -1,6 +1,6 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest } from 'payload'
 
-import { PayloadIcon } from '@payloadcms/ui/graphics/Icon'
+import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import { NextResponse } from 'next/server.js'
@@ -17,7 +17,7 @@ export const runtime = 'nodejs'
 
 export const contentType = 'image/png'
 
-export const generateOGImage = async ({ req }: { req: PayloadRequestWithData }) => {
+export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
   const config = req.payload.config
 
   if (config.admin.meta.defaultOGImageType === 'off') {

@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -15,6 +15,7 @@ import { dateDoc } from './collections/Date/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
+import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { numberDoc } from './collections/Number/shared.js'
@@ -281,9 +282,11 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalSimple: textToLexicalJSON({ text: 'English text' }),
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
-      lexicalBlocksSubLocalized: textToLexicalJSON({ text: 'English text' }),
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }) as any,
+      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+        'Shared text',
+        'English text in block',
+      ) as any,
     },
     locale: 'en',
     depth: 0,
@@ -295,9 +298,12 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalSimple: textToLexicalJSON({ text: 'Spanish text' }),
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
-      lexicalBlocksSubLocalized: textToLexicalJSON({ text: 'Spanish text' }),
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }) as any,
+      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+        'Shared text',
+        'Spanish text in block',
+        (lexicalLocalizedDoc1.lexicalBlocksSubLocalized.root.children[1].fields as any).id,
+      ) as any,
     },
     locale: 'es',
     depth: 0,

@@ -1,7 +1,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { Payload } from 'payload'
-import type { PaginatedDocs } from 'payload/database'
+import type { PaginatedDocs, Payload } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
 
@@ -80,9 +79,11 @@ describe('Fields', () => {
     })
 
     it('creates with default values', () => {
-      expect(doc.text).toEqual(text)
-      expect(doc.defaultFunction).toEqual(defaultText)
-      expect(doc.defaultAsync).toEqual(defaultText)
+      expect(doc.text).toStrictEqual(text)
+      expect(doc.defaultString).toStrictEqual(defaultText)
+      expect(doc.defaultEmptyString).toStrictEqual('')
+      expect(doc.defaultFunction).toStrictEqual(defaultText)
+      expect(doc.defaultAsync).toStrictEqual(defaultText)
     })
 
     it('should populate default values in beforeValidate hook', async () => {
@@ -110,7 +111,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -119,16 +119,16 @@ describe('Fields', () => {
       const hit = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           hasMany: ['one', 'five'],
+          text: 'required',
         },
       })
 
       const miss = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           hasMany: ['two'],
+          text: 'required',
         },
       })
 
@@ -475,7 +475,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -526,7 +525,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })
@@ -584,7 +583,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })
@@ -951,15 +950,15 @@ describe('Fields', () => {
 
     it('should hot module reload and still be able to create', async () => {
       const testDoc1 = await payload.findByID({
-        collection: tabsFieldsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
       })
 
       await reload(payload.config, payload)
 
       const testDoc2 = await payload.findByID({
-        collection: tabsFieldsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
       })
 
       expect(testDoc1.id).toStrictEqual(testDoc2.id)

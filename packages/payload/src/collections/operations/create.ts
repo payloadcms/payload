@@ -1,14 +1,14 @@
-import type { MarkOptional } from 'ts-essentials'
-
 import crypto from 'crypto'
 
-import type { GeneratedTypes } from '../../index.js'
-import type { Document, PayloadRequestWithData } from '../../types/index.js'
+import type { CollectionSlug } from '../../index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
+  DataFromCollectionSlug,
+  RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -28,24 +28,22 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
-export type CreateUpdateType = { [field: number | string | symbol]: unknown }
-
-export type Arguments<T extends CreateUpdateType> = {
+export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
   collection: Collection
-  data: MarkOptional<T, 'createdAt' | 'id' | 'sizes' | 'updatedAt'>
+  data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-export const createOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<GeneratedTypes['collections'][TSlug]> => {
+export const createOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
 
   try {
@@ -216,10 +214,6 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     let doc
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      if (data.email) {
-        resultWithLocales.email = (data.email as string).toLowerCase()
-      }
-
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
         resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
@@ -262,9 +256,8 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // Send verification email if applicable
     // /////////////////////////////////////
 
-    if (collectionConfig.auth && collectionConfig.auth.verify) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      sendVerificationEmail({
+    if (collectionConfig.auth && collectionConfig.auth.verify && result.email) {
+      await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
         disableEmail: disableVerificationEmail,
@@ -349,7 +342,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation<TSlug>({
       args,
       collection: collectionConfig,
       operation: 'create',

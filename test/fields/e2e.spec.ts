@@ -2,17 +2,13 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureAutoLoginAndCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -53,7 +49,7 @@ describe('fields', () => {
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -68,7 +64,7 @@ describe('fields', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('indexed', () => {
@@ -153,12 +149,34 @@ describe('fields', () => {
       const input = '{"foo": "bar"}'
       await page.goto(url.create)
       await page.waitForURL(url.create)
-      await expect(() => expect(page.locator('.json-field .code-editor')).toBeVisible()).toPass({
+      const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-      await page.locator('.json-field .inputarea').fill(input)
+      const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+      await jsonFieldInputArea.fill(input)
+
       await saveDocAndAssert(page)
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      const jsonField = page.locator('.json-field').first()
+      await expect(jsonField).toContainText('"foo": "bar"')
+    })
+
+    test('should not unflatten json field containing keys with dots', async () => {
+      const input = '{"foo.with.periods": "bar"}'
+
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+      const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
+      await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+      const json = page.locator('.group-field .json-field .inputarea')
+      await json.fill(input)
+
+      await saveDocAndAssert(page, '.form-submit button')
+      await expect(page.locator('.group-field .json-field')).toContainText(
+        '"foo.with.periods": "bar"',
+      )
     })
   })
 

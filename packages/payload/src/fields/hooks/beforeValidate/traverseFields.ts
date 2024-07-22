@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -18,7 +18,9 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  path: (number | string)[]
+  req: PayloadRequest
+  schemaPath: string[]
   siblingData: Record<string, unknown>
   /**
    * The original siblingData (not modified by any hooks)
@@ -36,7 +38,9 @@ export const traverseFields = async <T>({
   global,
   operation,
   overrideAccess,
+  path,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
@@ -53,6 +57,8 @@ export const traverseFields = async <T>({
         global,
         operation,
         overrideAccess,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,

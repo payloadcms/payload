@@ -1,12 +1,15 @@
 'use client'
-import type { FormState } from 'payload/types'
+import type { FormState } from 'payload'
 
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import isDeepEqual from 'deep-equal'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/utilities'
-import QueryString from 'qs'
+import {
+  getDataByPath as getDataByPathFunc,
+  getSiblingData as getSiblingDataFunc,
+  reduceFieldsToValues,
+  wait,
+} from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -18,17 +21,15 @@ import type {
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { getFormState } from '../../utilities/getFormState.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -40,8 +41,6 @@ import {
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
-import { getDataByPath as getDataByPathFunc } from './getDataByPath.js'
-import { getSiblingData as getSiblingDataFunc } from './getSiblingData.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 
@@ -79,7 +78,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { formQueryParams } = useFormQueryParams()
 
   const config = useConfig()
   const {
@@ -157,7 +155,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
     await Promise.all(validationPromises)
 
-    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+    if (!dequal(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
@@ -167,7 +165,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
       const {
-        action: actionArg,
+        action: actionArg = action,
         method: methodToUse = method,
         overrides = {},
         skipValidation,
@@ -276,14 +274,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       try {
         let res
-        const actionEndpoint =
-          actionArg ||
-          (typeof action === 'string'
-            ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
-            : null)
 
-        if (actionEndpoint) {
-          res = await requests[methodToUse.toLowerCase()](actionEndpoint, {
+        if (typeof actionArg === 'string') {
+          res = await requests[methodToUse.toLowerCase()](actionArg, {
             body: formData,
             headers: {
               'Accept-Language': i18n.language,
@@ -297,7 +290,7 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res)
+          handleResponse(res, successToast, errorToast)
           return
         }
 
@@ -339,8 +332,8 @@ export const Form: React.FC<FormProps> = (props) => {
                   newNonFieldErrs.push(err)
                 }
 
-                if (Array.isArray(err?.data)) {
-                  err.data.forEach((dataError) => {
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
                     if (dataError?.field) {
                       newFieldErrs.push(dataError)
                     } else {
@@ -399,7 +392,6 @@ export const Form: React.FC<FormProps> = (props) => {
       t,
       i18n,
       waitForAutocomplete,
-      formQueryParams,
     ],
   )
 
@@ -627,14 +619,9 @@ export const Form: React.FC<FormProps> = (props) => {
     [contextRef.current.fields, dispatchFields, onChange, modified],
   )
 
-  const actionString =
-    typeof action === 'string'
-      ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
-      : ''
-
   return (
     <form
-      action={method ? actionString : (action as string)}
+      action={action}
       className={classes}
       method={method}
       noValidate

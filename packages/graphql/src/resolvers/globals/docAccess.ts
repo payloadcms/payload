@@ -1,15 +1,18 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type {
+  CollectionPermission,
+  GlobalPermission,
+  PayloadRequest,
+  SanitizedGlobalConfig,
+} from 'payload'
 
-import { docAccessOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { docAccessOperationGlobal, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 export type Resolver = (
   _: unknown,
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<CollectionPermission | GlobalPermission>
 

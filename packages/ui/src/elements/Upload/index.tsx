@@ -1,17 +1,16 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload/types'
+import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
-import { isImage } from 'payload/utilities'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useForm, useUploadEdits } from '@payloadcms/ui'
+import { isImage, reduceFieldsToValues } from 'payload/shared'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
+import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -33,106 +32,172 @@ const validate = (value) => {
   return true
 }
 
-export const UploadActions = ({ canEdit, showSizePreviews }) => {
+type UploadActionsArgs = {
+  customActions?: React.ReactNode[]
+  enableAdjustments: boolean
+  enablePreviewSizes: boolean
+  mimeType: string
+}
+
+export const UploadActions = ({
+  customActions,
+  enableAdjustments,
+  enablePreviewSizes,
+  mimeType,
+}: UploadActionsArgs) => {
   const { t } = useTranslation()
+
+  const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
+
+  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) return null
+
   return (
-    <div className={`${baseClass}__file-mutation`}>
-      {showSizePreviews && (
-        <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
-          {t('upload:previewSizes')}
-        </DrawerToggler>
+    <div className={`${baseClass}__upload-actions`}>
+      {fileTypeIsAdjustable && (
+        <React.Fragment>
+          {enablePreviewSizes && (
+            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+              {t('upload:previewSizes')}
+            </DrawerToggler>
+          )}
+          {enableAdjustments && (
+            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+              {t('upload:editImage')}
+            </DrawerToggler>
+          )}
+        </React.Fragment>
       )}
-      {canEdit && (
-        <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
-          {t('upload:editImage')}
-        </DrawerToggler>
-      )}
+
+      {customActions &&
+        customActions.map((CustomAction, i) => {
+          return <React.Fragment key={i}>{CustomAction}</React.Fragment>
+        })}
     </div>
   )
 }
 
 export type UploadProps = {
   collectionSlug: string
+  customActions?: React.ReactNode[]
   initialState?: FormState
   onChange?: (file?: File) => void
-  updatedAt?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
+  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
-  const submitted = useFormSubmitted()
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { dispatchFormQueryParams, formQueryParams } = useFormQueryParams()
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
+
+  const [showUrlInput, setShowUrlInput] = useState(false)
+  const [fileUrl, setFileUrl] = useState<string>('')
+
+  const cursorPositionRef = useRef(null)
+  const urlInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = useCallback(
+    (newFile: File) => {
+      if (newFile instanceof File) {
+        const fileReader = new FileReader()
+        fileReader.onload = (e) => {
+          const imgSrc = e.target?.result
+
+          if (typeof imgSrc === 'string') {
+            setFileSrc(imgSrc)
+          }
+        }
+        fileReader.readAsDataURL(newFile)
+      }
+
+      setValue(newFile)
+      setShowUrlInput(false)
+
+      if (typeof onChange === 'function') {
+        onChange(newFile)
+      }
+    },
+    [onChange, setValue],
+  )
 
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
+    const cursorPosition = e.target.selectionStart
+
+    cursorPositionRef.current = cursorPosition
+
     if (value) {
       const fileValue = value
       // Creating a new File object with updated properties
       const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
-      setValue(newFile) // Updating the state with the new File object
+      handleFileChange(newFile)
     }
   }
 
-  const handleFileSelection = React.useCallback(
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const inputElement = document.querySelector(`.${baseClass}__filename`) as HTMLInputElement
+    if (inputElement && cursorPositionRef.current !== null) {
+      inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
+    }
+  }, [value])
+
+  const handleFileSelection = useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      setValue(fileToUpload)
+      handleFileChange(fileToUpload)
     },
-    [setValue],
+    [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setReplacingFile(true)
-    setValue(null)
+    handleFileChange(null)
     setFileSrc('')
-  }, [setValue])
+    setFileUrl('')
+    setDoc({})
+    resetUploadEdits()
+    setShowUrlInput(false)
+  }, [handleFileChange, resetUploadEdits])
 
-  const onEditsSave = React.useCallback(
-    ({ crop, focalPosition }) => {
-      setCrop({
-        x: crop.x || 0,
-        y: crop.y || 0,
-      })
-      const zoomScale = 100 / Math.min(crop.width, crop.height)
-
-      document.documentElement.style.setProperty('--file-details-thumbnail--zoom', `${zoomScale}`)
-      document.documentElement.style.setProperty(
-        '--file-details-thumbnail--top-offset',
-        `${zoomScale * (50 - crop.height / 2 - crop.y)}%`,
-      )
-      document.documentElement.style.setProperty(
-        '--file-details-thumbnail--left-offset',
-        `${zoomScale * (50 - crop.width / 2 - crop.x)}%`,
-      )
+  const onEditsSave = useCallback(
+    (args: UploadEdits) => {
       setModified(true)
-      dispatchFormQueryParams({
-        type: 'SET',
-        params: {
-          uploadEdits:
-            crop || focalPosition
-              ? {
-                  crop: crop || null,
-                  focalPoint: focalPosition ? focalPosition : null,
-                }
-              : null,
-        },
-      })
+      updateUploadEdits(args)
     },
-    [dispatchFormQueryParams, setModified],
+    [setModified, updateUploadEdits],
   )
+
+  const handlePasteUrlClick = () => {
+    setShowUrlInput((prev) => !prev)
+  }
+
+  const handleUrlSubmit = async () => {
+    if (fileUrl) {
+      try {
+        const response = await fetch(fileUrl)
+        const data = await response.blob()
+
+        // Extract the file name from the URL
+        const fileName = fileUrl.split('/').pop()
+
+        // Create a new File object from the Blob data
+        const file = new File([data], fileName, { type: data.type })
+        handleFileChange(file)
+      } catch (e) {
+        toast.error(e.message)
+      }
+    }
+  }
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(initialState || {}, true))
@@ -140,22 +205,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }, [initialState])
 
   useEffect(() => {
-    if (value instanceof File) {
-      const fileReader = new FileReader()
-      fileReader.onload = (e) => {
-        const imgSrc = e.target?.result
-
-        if (typeof imgSrc === 'string') {
-          setFileSrc(imgSrc)
-        }
-      }
-      fileReader.readAsDataURL(value)
+    if (showUrlInput && urlInputRef.current) {
+      urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
     }
-
-    if (typeof onChange === 'function') {
-      onChange(value)
-    }
-  }, [value, onChange, updatedAt])
+  }, [showUrlInput])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
@@ -171,33 +224,66 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
-  const lastSubmittedTime = submitted ? new Date().toISOString() : null
-
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
-          canEdit={showCrop || showFocalPoint}
           collectionSlug={collectionSlug}
+          customUploadActions={customActions}
           doc={doc}
+          enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
-          imageCacheTag={lastSubmittedTime}
+          imageCacheTag={doc.updatedAt}
           uploadConfig={uploadConfig}
         />
       )}
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
-          {!value && (
+          {!value && !showUrlInput && (
             <Dropzone
               className={`${baseClass}__dropzone`}
               mimeTypes={uploadConfig?.mimeTypes}
               onChange={handleFileSelection}
+              onPasteUrlClick={handlePasteUrlClick}
             />
           )}
-
-          {value && (
+          {showUrlInput && (
+            <React.Fragment>
+              <div className={`${baseClass}__remote-file-wrap`}>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                <input
+                  className={`${baseClass}__remote-file`}
+                  onChange={(e) => {
+                    setFileUrl(e.target.value)
+                  }}
+                  ref={urlInputRef}
+                  type="text"
+                  value={fileUrl}
+                />
+                <div className={`${baseClass}__add-file-wrap`}>
+                  <button
+                    className={`${baseClass}__add-file`}
+                    onClick={handleUrlSubmit}
+                    type="button"
+                  >
+                    {t('upload:addFile')}
+                  </button>
+                </div>
+              </div>
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__remove`}
+                icon="x"
+                iconStyle="with-border"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
+            </React.Fragment>
+          )}
+          {value && fileSrc && (
             <React.Fragment>
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
@@ -206,19 +292,19 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
                   type="text"
                   value={value.name}
                 />
-
-                {isImage(value.type) && value.type !== 'image/svg+xml' && (
-                  <UploadActions
-                    canEdit={showCrop || showFocalPoint}
-                    showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
-                  />
-                )}
+                <UploadActions
+                  customActions={customActions}
+                  enableAdjustments={showCrop || showFocalPoint}
+                  enablePreviewSizes={hasImageSizes && doc.filename && !replacingFile}
+                  mimeType={value.type}
+                />
               </div>
               <Button
                 buttonStyle="icon-label"
@@ -237,12 +323,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
         <Drawer Header={null} slug={editDrawerSlug}>
           <EditUpload
             fileName={value?.name || doc?.filename}
-            fileSrc={fileSrc || doc?.url}
-            imageCacheTag={lastSubmittedTime}
-            initialCrop={formQueryParams?.uploadEdits?.crop ?? {}}
+            fileSrc={doc?.url || fileSrc}
+            imageCacheTag={doc.updatedAt}
+            initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
-              x: formQueryParams?.uploadEdits?.focalPoint.x || doc.focalX || 50,
-              y: formQueryParams?.uploadEdits?.focalPoint.y || doc.focalY || 50,
+              x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
+              y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
             }}
             onSave={onEditsSave}
             showCrop={showCrop}
@@ -257,7 +343,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes doc={doc} uploadConfig={uploadConfig} />
+          <PreviewSizes doc={doc} imageCacheTag={doc.updatedAt} uploadConfig={uploadConfig} />
         </Drawer>
       )}
     </div>

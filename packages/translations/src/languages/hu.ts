@@ -4,6 +4,7 @@ export const huTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Fiók',
     accountOfCurrentUser: 'Az aktuális felhasználó fiókja',
+    accountVerified: 'A fiók sikeresen hitelesítve.',
     alreadyActivated: 'Már aktiválva van',
     alreadyLoggedIn: 'Már bejelentkezett',
     apiKey: 'API-kulcs',
@@ -17,6 +18,7 @@ export const huTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Jelszó megerősítése',
     createFirstUser: 'Első felhasználó létrehozása',
     emailNotValid: 'A megadott e-mail cím érvénytelen',
+    emailOrUsername: 'E-mail vagy Felhasználónév',
     emailSent: 'E-mail elküldve',
     emailVerified: 'Az email sikeresen megerősítve.',
     enableAPIKey: 'API-kulcs engedélyezése',
@@ -26,6 +28,8 @@ export const huTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Kérjük, adja meg e-mail címét alább. Kapni fog egy e-mail üzenetet a jelszó visszaállításához szükséges utasításokkal.',
     forgotPasswordQuestion: 'Elfelejtette jelszavát?',
+    forgotPasswordUsernameInstructions:
+      'Kérjük, adja meg felhasználónevét lentebb. A jelszó visszaállításáról szóló utasításokat a felhasználónevéhez tartozó e-mail címre küldjük.',
     generate: 'Generálás',
     generateNewAPIKey: 'Új API-kulcs generálása',
     generatingNewAPIKeyWillInvalidate:
@@ -63,6 +67,8 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Sikeresen feloldva',
     tokenRefreshSuccessful: 'A token frissítése sikeres.',
     unableToVerify: 'Sikertelen megerősítés',
+    username: 'Felhasználónév',
+    usernameNotValid: 'A megadott felhasználónév nem érvényes.',
     verified: 'Megerősítve',
     verifiedSuccessfully: 'Sikeresen megerősítve',
     verify: 'Megerősítés',
@@ -114,6 +120,8 @@ export const huTranslations: DefaultTranslationsObject = {
     unspecific: 'Hiba történt.',
     userEmailAlreadyRegistered: 'A megadott email címmel már regisztráltak egy felhasználót.',
     userLocked: 'Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.',
+    usernameAlreadyRegistered: 'Egy felhasználó a megadott felhasználónévvel már regisztrált.',
+    usernameOrPasswordIncorrect: 'A megadott felhasználónév vagy jelszó helytelen.',
     valueMustBeUnique: 'Az értéknek egyedinek kell lennie',
     verificationTokenInvalid: 'Az ellenőrző token érvénytelen.',
   },
@@ -291,6 +299,7 @@ export const huTranslations: DefaultTranslationsObject = {
     updating: 'Frissítés',
     uploading: 'Feltöltés',
     user: 'Felhasználó',
+    username: 'Felhasználónév',
     users: 'Felhasználók',
     value: 'Érték',
     welcome: 'Üdvözöljük',
@@ -299,6 +308,7 @@ export const huTranslations: DefaultTranslationsObject = {
     contains: 'tartalmaz',
     equals: 'egyenlő',
     exists: 'létezik',
+    intersects: 'metszéspontokban',
     isGreaterThan: 'nagyobb, mint',
     isGreaterThanOrEqualTo: 'nagyobb vagy egyenlő, mint',
     isIn: 'benne van',
@@ -308,8 +318,10 @@ export const huTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nem egyenlő',
     isNotIn: 'nincs benne',
     near: 'közel',
+    within: 'belül',
   },
   upload: {
+    addFile: 'Fájl hozzáadása',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
@@ -324,6 +336,7 @@ export const huTranslations: DefaultTranslationsObject = {
     height: 'Magasság',
     lessInfo: 'Kevesebb információ',
     moreInfo: 'További információ',
+    pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',
     selectFile: 'Válasszon ki egy fájlt',
@@ -353,6 +366,8 @@ export const huTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Ennek az értéknek rövidebbnek kell lennie, mint a maximálisan megengedett {{maxLength}} karakter.',
     trueOrFalse: 'Ez a mező csak igaz vagy hamis lehet.',
+    username:
+      'Adjon meg egy érvényes felhasználónevet. Tartalmazhat betűket, számokat, kötőjeleket, pontokat és aláhúzásokat.',
     validUploadID: 'Ez a mező nem érvényes feltöltési azonosító.',
   },
   version: {
@@ -378,12 +393,15 @@ export const huTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'A közzététel visszavonásának megerősítése',
     confirmVersionRestoration: 'Verzió-visszaállítás megerősítése',
     currentDocumentStatus: 'Jelenlegi {{docStatus}} dokumentum',
+    currentDraft: 'Aktuális tervezet',
+    currentPublishedVersion: 'Jelenleg Közzétett Verzió',
     draft: 'Piszkozat',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
     preview: 'Előnézet',
+    previouslyPublished: 'Korábban Közzétéve',
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',
     publish: 'Közzététel',
     publishChanges: 'Módosítások közzététele',

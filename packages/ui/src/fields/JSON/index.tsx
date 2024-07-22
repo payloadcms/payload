@@ -1,34 +1,32 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { JSONField as JSONFieldType } from 'payload/types'
-
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
-export type JSONFieldProps = FormFieldBase & {
+export type JSONFieldProps = {
   editorOptions?: JSONFieldType['admin']['editorOptions']
   jsonSchema?: Record<string, unknown>
   name?: string
   path?: string
   width?: string
-}
+} & FormFieldBase
 
-const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
+const _JSONField: React.FC<JSONFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -67,7 +65,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
     useField<string>({
-      path: pathFromContext || pathFromProps || name,
+      path: pathFromContext ?? pathFromProps ?? name,
       validate: memoizedValidate,
     })
 
@@ -140,7 +138,6 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         required={required}
         {...(labelProps || {})}
       />
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         {BeforeInput}
@@ -163,4 +160,4 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 }
 
-export const JSONField = withCondition(JSONFieldComponent)
+export const JSONField = withCondition(_JSONField)

@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     relation: Relation;
     audio: Audio;
@@ -17,6 +20,7 @@ export interface Config {
     'focal-only': FocalOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
+    'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
@@ -29,6 +33,7 @@ export interface Config {
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
+    'custom-upload-field': CustomUploadField;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -37,6 +42,19 @@ export interface Config {
   locale: null;
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -434,6 +452,58 @@ export interface FocalNoSize {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "animated-type-media".
+ */
+export interface AnimatedTypeMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    squareSmall?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedWidth?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedAll?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
@@ -769,6 +839,25 @@ export interface RequiredFile {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-upload-field".
+ */
+export interface CustomUploadField {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -817,6 +906,13 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

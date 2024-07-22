@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import fs from 'fs'
 import { printSchema } from 'graphql'

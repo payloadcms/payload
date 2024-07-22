@@ -1,6 +1,5 @@
 import { execSync } from 'child_process'
 import ciInfo from 'ci-info'
-import ConfImport from 'conf'
 import { randomBytes } from 'crypto'
 import { findUp } from 'find-up'
 import fs from 'fs'
@@ -11,9 +10,8 @@ import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 
+import { Conf } from './conf/index.js'
 import { oneWayHash } from './oneWayHash.js'
-
-const Conf = (ConfImport.default || ConfImport) as unknown as typeof ConfImport.default
 
 export type BaseEvent = {
   ciName: null | string

@@ -1,20 +1,20 @@
-import type { Locale } from 'payload/config'
 import type {
   Data,
-  PayloadRequestWithData,
+  Locale,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from 'payload/types'
+} from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { reduceFieldsToValues } from 'payload/shared'
 
 export const getDocumentData = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale: Locale
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): Promise<Data> => {
   const { id, collectionConfig, globalConfig, locale, req } = args
 
@@ -26,7 +26,7 @@ export const getDocumentData = async (args: {
           id,
           collectionSlug: collectionConfig?.slug,
           globalSlug: globalConfig?.slug,
-          locale: locale.code,
+          locale: locale?.code,
           operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
           schemaPath: collectionConfig?.slug || globalConfig?.slug,
         },

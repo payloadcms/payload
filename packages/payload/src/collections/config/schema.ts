@@ -8,11 +8,6 @@ import {
 } from '../../config/shared/componentSchema.js'
 import { openGraphSchema } from '../../config/shared/openGraphSchema.js'
 
-const strategyBaseSchema = joi.object().keys({
-  logout: joi.boolean(),
-  refresh: joi.boolean(),
-})
-
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   access: joi.object({
@@ -26,16 +21,17 @@ const collectionSchema = joi.object().keys({
   }),
   admin: joi.object({
     components: joi.object({
-      AfterList: joi.array().items(componentSchema),
-      AfterListTable: joi.array().items(componentSchema),
-      BeforeList: joi.array().items(componentSchema),
-      BeforeListTable: joi.array().items(componentSchema),
+      afterList: joi.array().items(componentSchema),
+      afterListTable: joi.array().items(componentSchema),
+      beforeList: joi.array().items(componentSchema),
+      beforeListTable: joi.array().items(componentSchema),
       edit: joi.object({
         Description: componentSchema,
         PreviewButton: componentSchema,
         PublishButton: componentSchema,
         SaveButton: componentSchema,
         SaveDraftButton: componentSchema,
+        Upload: componentSchema,
       }),
       views: joi.object({
         Edit: joi.alternatives().try(
@@ -96,6 +92,13 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       lockTime: joi.number(),
+      loginWithUsername: joi.alternatives().try(
+        joi.boolean(),
+        joi.object().keys({
+          allowEmailLogin: joi.boolean(),
+          requireEmail: joi.boolean(),
+        }),
+      ),
       maxLoginAttempts: joi.number(),
       removeTokenFromResponses: joi.boolean().valid(true),
       strategies: joi.array().items(
@@ -145,6 +148,8 @@ const collectionSchema = joi.object().keys({
     beforeOperation: joi.array().items(joi.func()),
     beforeRead: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
+    me: joi.array().items(joi.func()),
+    refresh: joi.array().items(joi.func()),
   }),
   labels: joi.object({
     plural: joi
@@ -184,6 +189,7 @@ const collectionSchema = joi.object().keys({
           .unknown(),
       ),
       mimeTypes: joi.array().items(joi.string()),
+      modifyResponseHeaders: joi.func(),
       resizeOptions: joi
         .object()
         .keys({

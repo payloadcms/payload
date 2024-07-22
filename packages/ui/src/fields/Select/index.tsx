@@ -1,9 +1,9 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 import type { SelectInputProps } from './Input.js'
 
@@ -12,17 +12,17 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
 
-export type SelectFieldProps = FormFieldBase & {
+export type SelectFieldProps = {
   hasMany?: boolean
   isClearable?: boolean
   isSortable?: boolean
   name?: string
-  onChange?: (e: string) => void
+  onChange?: (e: string | string[]) => void
   options?: Option[]
   path?: string
   value?: string
   width?: string
-}
+} & FormFieldBase
 
 const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -36,7 +36,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectField: React.FC<SelectFieldProps> = (props) => {
+const _SelectField: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -62,7 +62,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     width,
   } = props
 
-  const [options] = useState(formatOptions(optionsFromProps))
+  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
@@ -75,25 +75,23 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
-  const onChange = useCallback(
-    (selectedOption) => {
+  const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
+    (selectedOption: OptionObject | OptionObject[]) => {
       if (!disabled) {
-        let newValue
-        if (!selectedOption) {
-          newValue = null
-        } else if (hasMany) {
+        let newValue: string | string[] = null
+        if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
             newValue = selectedOption.map((option) => option.value)
           } else {
             newValue = []
           }
-        } else {
+        } else if (selectedOption && !Array.isArray(selectedOption)) {
           newValue = selectedOption.value
         }
 
@@ -136,6 +134,6 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 }
 
-export const Select = withCondition(SelectField)
+export const SelectField = withCondition(_SelectField)
 
 export { SelectInput, type SelectInputProps }

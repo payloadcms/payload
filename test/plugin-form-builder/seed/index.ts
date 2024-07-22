@@ -1,11 +1,10 @@
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequestWithData
+  const req = {} as PayloadRequest
 
   try {
     await payload.create({

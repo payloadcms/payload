@@ -1,10 +1,10 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
-import { Logo } from '@payloadcms/ui/graphics/Logo'
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
 import { redirect } from 'next/navigation.js'
+import { generateAdminURL } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { Logo } from '../../elements/Logo/index.js'
 import './index.scss'
 
 export const verifyBaseClass = 'verify'

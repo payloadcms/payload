@@ -1,11 +1,11 @@
 'use client'
-import type { LabelProps, SanitizedLabelProps } from 'payload/types'
+import type { LabelProps, SanitizedLabelProps } from 'payload'
 
 import React from 'react'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
-import { Check } from '../../icons/Check/index.js'
-import { Line } from '../../icons/Line/index.js'
+import { CheckIcon } from '../../icons/Check/index.js'
+import { LineIcon } from '../../icons/Line/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
   AfterInput?: React.ReactNode
@@ -71,8 +71,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
             .filter(Boolean)
             .join(' ')}
         >
-          {checked && <Check />}
-          {!checked && partialChecked && <Line />}
+          {checked && <CheckIcon />}
+          {!checked && partialChecked && <LineIcon />}
         </span>
         {AfterInput}
       </div>

@@ -20,6 +20,12 @@ export function getValidTemplates(): ProjectTemplate[] {
       description: 'Blank 3.0 Template',
       url: 'https://github.com/payloadcms/payload/templates/blank-3.0#beta',
     },
+    {
+      name: 'website',
+      type: 'starter',
+      description: 'Website Template',
+      url: 'https://github.com/payloadcms/payload/templates/website#beta',
+    },
 
     // Remove these until they have been updated for 3.0
 
@@ -28,12 +34,6 @@ export function getValidTemplates(): ProjectTemplate[] {
     //   type: 'starter',
     //   description: 'Blank Template',
     //   url: 'https://github.com/payloadcms/payload/templates/blank',
-    // },
-    // {
-    //   name: 'website',
-    //   type: 'starter',
-    //   description: 'Website Template',
-    //   url: 'https://github.com/payloadcms/payload/templates/website',
     // },
     // {
     //   name: 'ecommerce',

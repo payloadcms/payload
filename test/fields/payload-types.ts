@@ -24,6 +24,9 @@ export type BlockColumns =
   | null;
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -56,12 +59,31 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {
     tabsWithRichText: TabsWithRichText;
   };
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -207,7 +229,7 @@ export interface LexicalMigrateField {
 export interface LexicalLocalizedField {
   id: string;
   title: string;
-  lexicalSimple?: {
+  lexicalBlocksSubLocalized?: {
     root: {
       type: string;
       children: {
@@ -223,21 +245,6 @@ export interface LexicalLocalizedField {
     [k: string]: unknown;
   } | null;
   lexicalBlocksLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lexicalBlocksSubLocalized?: {
     root: {
       type: string;
       children: {
@@ -687,6 +694,8 @@ export interface TextField {
   text: string;
   localizedText?: string | null;
   i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
   defaultFunction?: string | null;
   defaultAsync?: string | null;
   overrideLength?: string | null;
@@ -921,15 +930,22 @@ export interface IndexedField {
  */
 export interface JsonField {
   id: string;
-  json?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  json?: {
+    foo?: 'bar' | 'foobar';
+    number?: 10 | 5;
+    [k: string]: unknown;
+  };
+  group?: {
+    jsonWithinGroup?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1438,6 +1454,13 @@ export interface LexicalBlocksRadioButtonsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'radioButtons';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

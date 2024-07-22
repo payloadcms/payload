@@ -1,5 +1,4 @@
-import type { Find } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
+import type { Find, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -15,7 +14,7 @@ export const find: Find = async function find(
     locale,
     page = 1,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     sort: sortArg,
     where,
   },

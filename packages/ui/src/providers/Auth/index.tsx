@@ -1,10 +1,9 @@
 'use client'
-import type { ClientUser, Permissions } from 'payload/auth'
-import type { MeOperationResult } from 'payload/types'
+import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -13,7 +12,6 @@ import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<void>
@@ -24,7 +22,9 @@ export type AuthContext<T = ClientUser> = {
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
   setUser: (user: T) => void
+  strategy?: string
   token?: string
+  tokenExpiration?: number
   user?: T | null
 }
 
@@ -33,7 +33,6 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { searchParams } = useSearchParams()
   const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
@@ -46,9 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const {
     admin: {
-      autoLogin,
       routes: { inactivity: logoutInactivityRoute },
-      routes: { login: loginRoute },
       user: userSlug,
     },
     routes: { admin, api },
@@ -211,35 +208,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (json?.token) {
             setTokenAndExpiration(json)
           }
-        } else if (autoLogin && autoLogin.prefillOnly !== true) {
-          // auto log-in with the provided autoLogin credentials. This is used in dev mode
-          // so you don't have to log in over and over again
-          const autoLoginResult = await requests.post(
-            `${serverURL}${api}/${userSlug}${loginRoute}`,
-            {
-              body: JSON.stringify({
-                email: autoLogin.email,
-                password: autoLogin.password,
-              }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-            },
-          )
-          if (autoLoginResult.status === 200) {
-            const autoLoginJson = await autoLoginResult.json()
-            setUser(autoLoginJson.user)
-            if (autoLoginJson?.token) {
-              setTokenAndExpiration(autoLoginJson)
-            }
-            router.replace(
-              typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin,
-            )
-          } else {
-            setUser(null)
-            revokeTokenAndExpire()
-          }
         } else {
           setUser(null)
           revokeTokenAndExpire()
@@ -248,19 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [
-    serverURL,
-    api,
-    userSlug,
-    i18n.language,
-    autoLogin,
-    setTokenAndExpiration,
-    router,
-    searchParams,
-    admin,
-    revokeTokenAndExpire,
-    loginRoute,
-  ])
+  }, [serverURL, api, userSlug, i18n.language, setTokenAndExpiration, revokeTokenAndExpire])
 
   // On mount, get user and set
   useEffect(() => {

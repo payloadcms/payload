@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig } from 'payload/config'
+import type { MetaConfig } from 'payload'
 
-import { staticOGImage } from '@payloadcms/ui/assets'
-import { payloadFaviconDark, payloadFaviconLight } from '@payloadcms/ui/assets'
-import QueryString from 'qs'
+import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
+import * as qs from 'qs-esm'
 
 const defaultOpenGraph = {
   description:
@@ -13,7 +12,7 @@ const defaultOpenGraph = {
   title: 'Payload App',
 }
 
-export const meta = async (args: MetaConfig & { serverURL: string }): Promise<any> => {
+export const meta = async (args: { serverURL: string } & MetaConfig): Promise<any> => {
   const {
     defaultOGImageType,
     description,
@@ -59,7 +58,7 @@ export const meta = async (args: MetaConfig & { serverURL: string }): Promise<an
             {
               alt: ogTitle,
               height: 630,
-              url: `/api/og${QueryString.stringify(
+              url: `/api/og${qs.stringify(
                 {
                   description: openGraphFromProps?.description || defaultOpenGraph.description,
                   title: ogTitle,

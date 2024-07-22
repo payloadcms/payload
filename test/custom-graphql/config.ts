@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { commitTransaction, initTransaction, killTransaction } from 'payload/database'
+import { commitTransaction, initTransaction, killTransaction } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -26,6 +26,18 @@ export default buildConfigWithDefaults({
   collections: [],
   globals: [],
   graphQL: {
+    mutations: (GraphQL) => {
+      return {
+        MutateTransactionID1: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+        MutateTransactionID2: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+      }
+    },
     queries: (GraphQL) => {
       return {
         TransactionID1: {
@@ -40,18 +52,6 @@ export default buildConfigWithDefaults({
           type: GraphQLJSON,
           args: {},
           resolve: () => 'json test',
-        },
-      }
-    },
-    mutations: (GraphQL) => {
-      return {
-        MutateTransactionID1: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        MutateTransactionID2: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
         },
       }
     },

@@ -1,26 +1,25 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { NumberField as NumberFieldType } from 'payload/types'
+import type { NumberField as NumberFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type NumberFieldProps = FormFieldBase & {
+export type NumberFieldProps = {
   hasMany?: boolean
   max?: number
   maxRows?: number
@@ -31,9 +30,9 @@ export type NumberFieldProps = FormFieldBase & {
   placeholder?: NumberFieldType['admin']['placeholder']
   step?: number
   width?: string
-}
+} & FormFieldBase
 
-const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
+const _NumberField: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -77,7 +76,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
     number | number[]
   >({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -171,7 +170,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
             className={`field-${path.replace(/\./g, '__')}`}
             disabled={disabled}
             filterOption={(_, rawInput) => {
-              // eslint-disable-next-line no-restricted-globals
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
             }}
@@ -204,7 +202,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               name={path}
               onChange={handleChange}
               onWheel={(e) => {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
                 e.target.blur()
               }}
@@ -226,4 +223,4 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   )
 }
 
-export const NumberField = withCondition(NumberFieldComponent)
+export const NumberField = withCondition(_NumberField)

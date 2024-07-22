@@ -1,8 +1,6 @@
 'use client'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
+import { Button, useAuth, useTranslation } from '@payloadcms/ui'
+import { generateAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 

@@ -1,14 +1,13 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
+import { WithServerSideProps, generateAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
+import { DefaultTemplate } from '../../templates/Default/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
@@ -16,7 +15,7 @@ export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
@@ -77,7 +76,14 @@ export const RootPage = async ({
 
     const routeWithAdmin = generateAdminURL(adminRoute, createFirstUserRoute)
 
-    if (!dbHasUser && currentRoute !== routeWithAdmin) {
+    const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
+    const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
+
+    if (disableLocalStrategy && currentRoute === routeWithAdmin) {
+      redirect(adminRoute)
+    }
+
+    if (!dbHasUser && currentRoute !== routeWithAdmin && !disableLocalStrategy) {
       redirect(routeWithAdmin)
     }
 

@@ -1,14 +1,15 @@
-import type { Where } from 'payload/types'
+import type { AdminViewProps, Where } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { TableColumnsProvider } from '@payloadcms/ui/elements/TableColumns'
-import { ListInfoProvider } from '@payloadcms/ui/providers/ListInfo'
-import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
+import {
+  HydrateClientUser,
+  ListInfoProvider,
+  ListQueryProvider,
+  TableColumnsProvider,
+} from '@payloadcms/ui'
+import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig } from 'payload/config'
-import { type AdminViewProps } from 'payload/types'
-import { isNumber, isReactComponentOrFunction, mergeListSearchAndWhere } from 'payload/utilities'
+import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
+import { isNumber, isReactComponentOrFunction } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
@@ -26,6 +27,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     collectionConfig,
     locale: fullLocale,
     permissions,
+    req,
     req: {
       i18n,
       locale,
@@ -52,6 +54,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        req,
         user,
         where: {
           key: {
@@ -97,7 +100,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || undefined
+        : listPreferences?.sort || collectionConfig.defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -108,6 +111,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
       locale,
       overrideAccess: false,
       page,
+      req,
       sort,
       user,
       where: whereQuery || {},

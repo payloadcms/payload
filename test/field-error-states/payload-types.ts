@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     'error-fields': ErrorField;
     uploads: Upload;
@@ -17,10 +20,25 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  globals: {};
+  globals: {
+    'global-validate-drafts-on': GlobalValidateDraftsOn;
+  };
   locale: null;
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -327,6 +345,26 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-validate-drafts-on".
+ */
+export interface GlobalValidateDraftsOn {
+  id: string;
+  group: {
+    title: string;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

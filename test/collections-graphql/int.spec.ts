@@ -2,8 +2,7 @@ import type { Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
-import { mapAsync } from 'payload/utilities'
+import { getFileByPath, mapAsync } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
@@ -980,8 +979,8 @@ describe('collections-graphql', () => {
         })
 
         await payload.update({
-          collection: 'cyclical-relationship',
           id: newDoc.id,
+          collection: 'cyclical-relationship',
           data: {
             relationToSelf: newDoc.id,
           },
@@ -1014,16 +1013,16 @@ describe('collections-graphql', () => {
     // publish doc
     const newDoc = await payload.create({
       collection: 'cyclical-relationship',
-      draft: false,
       data: {
         title: publishValue,
       },
+      draft: false,
     })
 
     // create cyclical relationship
     await payload.update({
-      collection: 'cyclical-relationship',
       id: newDoc.id,
+      collection: 'cyclical-relationship',
       data: {
         relationToSelf: newDoc.id,
       },
@@ -1031,12 +1030,12 @@ describe('collections-graphql', () => {
 
     // save new version
     await payload.update({
-      collection: 'cyclical-relationship',
       id: newDoc.id,
-      draft: true,
+      collection: 'cyclical-relationship',
       data: {
         title: draftValue,
       },
+      draft: true,
     })
 
     const draftParentPublishedChild = `{
@@ -1085,10 +1084,10 @@ describe('collections-graphql', () => {
 
     const mediaDoc = await payload.create({
       collection: 'media',
-      file,
       data: {
         title: 'example',
       },
+      file,
     })
 
     // doc with upload relation
@@ -1186,24 +1185,26 @@ describe('collections-graphql', () => {
       expect(errors[0].message).toEqual('The following field is invalid: password')
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
-      expect(errors[0].extensions.data[0].message).toEqual('No password was given')
-      expect(errors[0].extensions.data[0].field).toEqual('password')
+      expect(errors[0].extensions.data.errors[0].message).toEqual('No password was given')
+      expect(errors[0].extensions.data.errors[0].field).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)
       expect(errors[1].message).toEqual('The following field is invalid: email')
       expect(errors[1].path[0]).toEqual('test3')
       expect(errors[1].extensions.name).toEqual('ValidationError')
-      expect(errors[1].extensions.data[0].message).toEqual(
+      expect(errors[1].extensions.data.errors[0].message).toEqual(
         'A user with the given email is already registered.',
       )
-      expect(errors[1].extensions.data[0].field).toEqual('email')
+      expect(errors[1].extensions.data.errors[0].field).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
       expect(errors[2].message).toEqual('The following field is invalid: email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
-      expect(errors[2].extensions.data[0].message).toEqual('Please enter a valid email address.')
-      expect(errors[2].extensions.data[0].field).toEqual('email')
+      expect(errors[2].extensions.data.errors[0].message).toEqual(
+        'Please enter a valid email address.',
+      )
+      expect(errors[2].extensions.data.errors[0].field).toEqual('email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {

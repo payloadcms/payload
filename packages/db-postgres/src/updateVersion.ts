@@ -1,7 +1,12 @@
-import type { TypeWithVersion, UpdateVersionArgs } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+import type {
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateVersionArgs,
+} from 'payload'
 
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -15,12 +20,12 @@ export async function updateVersion<T extends TypeWithID>(
     id,
     collection,
     locale,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(

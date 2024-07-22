@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes } from 'crypto'
 
@@ -447,7 +446,6 @@ describe('Relationships', () => {
         it('should validate the format of text id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
@@ -457,7 +455,6 @@ describe('Relationships', () => {
         it('should validate the format of number id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
@@ -613,7 +610,7 @@ describe('Relationships', () => {
           },
         })
 
-        thirdLevelID = thirdLevelDoc.id as string
+        thirdLevelID = thirdLevelDoc.id
 
         const secondLevelDoc = await payload.create({
           collection: 'chained',
@@ -623,7 +620,7 @@ describe('Relationships', () => {
           },
         })
 
-        secondLevelID = secondLevelDoc.id as string
+        secondLevelID = secondLevelDoc.id
 
         const firstLevelDoc = await payload.create({
           collection: 'chained',
@@ -633,7 +630,7 @@ describe('Relationships', () => {
           },
         })
 
-        firstLevelID = firstLevelDoc.id as string
+        firstLevelID = firstLevelDoc.id
       })
 
       it('should allow querying one level deep', async () => {
@@ -896,7 +893,7 @@ describe('Relationships', () => {
   describe('Creating', () => {
     describe('With transactions', () => {
       it('should be able to create filtered relations within a transaction', async () => {
-        const req = {} as PayloadRequestWithData
+        const req = {} as PayloadRequest
         req.transactionID = await payload.db.beginTransaction?.()
         const related = await payload.create({
           collection: relationSlug,

@@ -7,6 +7,10 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+    customers: CustomerAuthOperations;
+  };
   collections: {
     users: User;
     products: Product;
@@ -23,6 +27,32 @@ export interface Config {
     | (Customer & {
         collection: 'customers';
       });
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+}
+export interface CustomerAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -130,6 +160,13 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

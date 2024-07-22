@@ -4,6 +4,7 @@ export const skTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
     accountOfCurrentUser: 'Aktuálny používateľský účet',
+    accountVerified: 'Účet úspešne overený.',
     alreadyActivated: 'Už aktivované',
     alreadyLoggedIn: 'Už prihlásený',
     apiKey: 'API kľúč',
@@ -17,6 +18,7 @@ export const skTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Potvrdiť heslo',
     createFirstUser: 'Vytvorenie prvého používateľa',
     emailNotValid: 'Zadaný e-mail nie je platný',
+    emailOrUsername: 'E-mail alebo Užívateľské meno',
     emailSent: 'E-mail bol odoslaný',
     emailVerified: 'Email úspešne overený.',
     enableAPIKey: 'Povolenie API kľúča',
@@ -26,6 +28,8 @@ export const skTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Zadajte svoj e-mail nižšie. Dostanete e-mail s pokynmi na obnovenie hesla.',
     forgotPasswordQuestion: 'Zabudli ste heslo?',
+    forgotPasswordUsernameInstructions:
+      'Prosím, zadajte nižšie svoje používateľské meno. Inštrukcie na obnovenie vášho hesla budú odoslané na e-mailovú adresu spojenú s vaším používateľským menom.',
     generate: 'Generovať',
     generateNewAPIKey: 'Vygenerovať nový API kľúč',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +66,8 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Úspešne odomknuté',
     tokenRefreshSuccessful: 'Obnovenie tokenu bolo úspešné.',
     unableToVerify: 'Nemožno overiť',
+    username: 'Používateľské meno',
+    usernameNotValid: 'Zadané užívateľské meno nie je platné.',
     verified: 'Overené',
     verifiedSuccessfully: 'Úspešne overené',
     verify: 'Overiť',
@@ -114,6 +120,8 @@ export const skTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Používateľ s daným e-mailom je už zaregistrovaný.',
     userLocked:
       'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
+    usernameAlreadyRegistered: 'Používateľ s daným používateľským menom je už zaregistrovaný.',
+    usernameOrPasswordIncorrect: 'Zadané meno alebo heslo je nesprávne.',
     valueMustBeUnique: 'Hodnota musí byť jedinečná',
     verificationTokenInvalid: 'Overovací token je neplatný.',
   },
@@ -290,6 +298,7 @@ export const skTranslations: DefaultTranslationsObject = {
     updating: 'Aktualizácia',
     uploading: 'Nahrávanie',
     user: 'Používateľ',
+    username: 'Používateľské meno',
     users: 'Používatelia',
     value: 'Hodnota',
     welcome: 'Vitajte',
@@ -298,6 +307,7 @@ export const skTranslations: DefaultTranslationsObject = {
     contains: 'obsahuje',
     equals: 'rovná sa',
     exists: 'existuje',
+    intersects: 'pretína sa',
     isGreaterThan: 'je väčšie ako',
     isGreaterThanOrEqualTo: 'je väčšie alebo rovné',
     isIn: 'je v',
@@ -307,8 +317,10 @@ export const skTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'nie je rovné',
     isNotIn: 'nie je v',
     near: 'blízko',
+    within: 'vnútri',
   },
   upload: {
+    addFile: 'Pridať súbor',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
@@ -323,6 +335,7 @@ export const skTranslations: DefaultTranslationsObject = {
     height: 'Výška',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
+    pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',
     selectFile: 'Vyberte súbor',
@@ -350,6 +363,8 @@ export const skTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Toto pole vyžaduje dve čísla.',
     shorterThanMax: 'Táto hodnota musí byť kratšia ako maximálna dĺžka {{maxLength}} znakov.',
     trueOrFalse: 'Toto pole môže byť rovné iba true alebo false.',
+    username:
+      'Prosím, zadajte platné používateľské meno. Môže obsahovať písmená, čísla, pomlčky, bodky a podčiarknutia.',
     validUploadID: 'Toto pole nie je platné ID pre odoslanie.',
   },
   version: {
@@ -374,12 +389,15 @@ export const skTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'Potvrdiť zrušenie publikovania',
     confirmVersionRestoration: 'Potvrdiť obnovenie verzie',
     currentDocumentStatus: 'Súčasný {{docStatus}} dokument',
+    currentDraft: 'Aktuálny koncept',
+    currentPublishedVersion: 'Aktuálne publikovaná verzia',
     draft: 'Návrh',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',
     noRowsFound: 'Nenájdené {{label}}',
     preview: 'Náhľad',
+    previouslyPublished: 'Predtým publikované',
     problemRestoringVersion: 'Pri obnovovaní tejto verzie došlo k problému',
     publish: 'Publikovať',
     publishChanges: 'Publikovať zmeny',

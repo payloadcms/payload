@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Config } from 'payload/config'
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { Where } from 'payload'
+import type { Config } from 'payload'
+import type { PaginatedDocs } from 'payload'
 
-import qs from 'qs'
+import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
 

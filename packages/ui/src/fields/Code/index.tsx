@@ -1,28 +1,27 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { CodeField as CodeFieldType } from 'payload/types'
+import type { CodeField as CodeFieldType } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type CodeFieldProps = FormFieldBase & {
+export type CodeFieldProps = {
   editorOptions?: CodeFieldType['admin']['editorOptions']
   language?: CodeFieldType['admin']['language']
   name?: string
   path?: string
   width: string
-}
+} & FormFieldBase
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
@@ -31,7 +30,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeField: React.FC<CodeFieldProps> = (props) => {
+const _CodeField: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -66,7 +65,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -111,4 +110,4 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
   )
 }
 
-export const Code = withCondition(CodeField)
+export const CodeField = withCondition(_CodeField)

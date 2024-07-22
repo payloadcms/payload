@@ -7,6 +7,11 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+    'api-keys': ApiKeyAuthOperations;
+    'public-users': PublicUserAuthOperations;
+  };
   collections: {
     users: User;
     'api-keys': ApiKey;
@@ -27,6 +32,45 @@ export interface Config {
     | (PublicUser & {
         collection: 'public-users';
       });
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+}
+export interface ApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+}
+export interface PublicUserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -153,9 +197,16 @@ export interface PayloadMigration {
   updatedAt: string;
   createdAt: string;
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
+}
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

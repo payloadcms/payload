@@ -4,6 +4,7 @@ export const ruTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Аккаунт',
     accountOfCurrentUser: 'Аккаунт текущего пользователя',
+    accountVerified: 'Учетная запись успешно подтверждена.',
     alreadyActivated: 'Уже активирован',
     alreadyLoggedIn: 'Уже вошли в систему',
     apiKey: 'API ключ',
@@ -17,6 +18,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Подтверждение пароля',
     createFirstUser: 'Создание первого пользователя',
     emailNotValid: 'Указанный адрес электронной почты неверен',
+    emailOrUsername: 'Электронная почта или Имя пользователя',
     emailSent: 'Email отправлен',
     emailVerified: 'Электронная почта успешно подтверждена.',
     enableAPIKey: 'Активировать API ключ',
@@ -26,6 +28,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Пожалуйста, введите ваш email. Вы получите письмо с инструкцией по восстановлению пароля.',
     forgotPasswordQuestion: 'Забыли пароль?',
+    forgotPasswordUsernameInstructions:
+      'Пожалуйста, введите ваше имя пользователя ниже. Инструкции по сбросу вашего пароля будут отправлены на адрес электронной почты, связанный с вашим именем пользователя.',
     generate: 'Сгенерировать',
     generateNewAPIKey: 'Сгенерировать новый API ключ',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +66,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Успешно разблокирован',
     tokenRefreshSuccessful: 'Обновление токена прошло успешно.',
     unableToVerify: 'Невозможно подтвердить',
+    username: 'Имя пользователя',
+    usernameNotValid: 'Предоставленное имя пользователя недействительно.',
     verified: 'Подтверждено',
     verifiedSuccessfully: 'Успешно подтверждено',
     verify: 'Подтвердить',
@@ -114,6 +120,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Пользователь с указанным email уже зарегистрирован.',
     userLocked:
       'Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа.',
+    usernameAlreadyRegistered: 'Пользователь с данным именем пользователя уже зарегистрирован.',
+    usernameOrPasswordIncorrect: 'Указанное имя пользователя или пароль неверны.',
     valueMustBeUnique: 'Значение должно быть уникальным',
     verificationTokenInvalid: 'Проверочный токен недействителен.',
   },
@@ -292,6 +300,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     updating: 'Обновление',
     uploading: 'Загрузка',
     user: 'пользователь',
+    username: 'Имя пользователя',
     users: 'пользователи',
     value: 'Значение',
     welcome: 'Добро пожаловать',
@@ -300,6 +309,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     contains: 'содержит',
     equals: 'равно',
     exists: 'существует',
+    intersects: 'пересекает',
     isGreaterThan: 'больше чем',
     isGreaterThanOrEqualTo: 'больше или равно',
     isIn: 'находится',
@@ -309,8 +319,10 @@ export const ruTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'не равно',
     isNotIn: 'нет в',
     near: 'рядом',
+    within: 'в пределах',
   },
   upload: {
+    addFile: 'Добавить файл',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
@@ -325,6 +337,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     height: 'Высота',
     lessInfo: 'Меньше информации',
     moreInfo: 'Больше информации',
+    pasteURL: 'Вставить URL',
     previewSizes: 'Предварительный просмотр размеров',
     selectCollectionToBrowse: 'Выберите Коллекцию для просмотра',
     selectFile: 'Выберите файл',
@@ -352,6 +365,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'В этом поле требуется два числа.',
     shorterThanMax: 'Это значение должно быть короче максимальной длины символов {{maxLength}}.',
     trueOrFalse: 'Это поле может быть равно только true или false.',
+    username:
+      'Пожалуйста, введите действительное имя пользователя. Может содержать буквы, цифры, дефисы, точки и подчёркивания.',
     validUploadID: "'Это поле не является действительным ID загрузки.'",
   },
   version: {
@@ -376,12 +391,15 @@ export const ruTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'Подтвердить отмену публикации',
     confirmVersionRestoration: 'Подтвердить восстановление версии',
     currentDocumentStatus: 'Текущий статус {{docStatus}} документа',
+    currentDraft: 'Текущий проект',
+    currentPublishedVersion: 'Текущая опубликованная версия',
     draft: 'Черновик',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
     preview: 'Предпросмотр',
+    previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',
     publish: 'Публиковать',
     publishChanges: 'Опубликовать изменения',

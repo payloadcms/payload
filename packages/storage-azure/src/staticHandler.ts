@@ -1,6 +1,6 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
@@ -26,7 +26,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       )
 
       const blob = await blockBlobClient.download(start, end)
-      // eslint-disable-next-line no-underscore-dangle
+       
       const response = blob._response
 
       // Manually create a ReadableStream for the web from a Node.js stream.

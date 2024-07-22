@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { Config, SanitizedConfig } from 'payload'
 
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -26,7 +26,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 // import { slateEditor } from '@payloadcms/richtext-slate'
-import { type Config, buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
@@ -163,12 +163,6 @@ export async function buildConfigWithDefaults(
 
     ...testConfig,
 
-    typescript: {
-      declare: {
-        ignoreTSError: true,
-      },
-      ...testConfig?.typescript,
-    },
     i18n: {
       supportedLanguages: {
         de,
@@ -177,17 +171,24 @@ export async function buildConfigWithDefaults(
       },
       ...(testConfig?.i18n || {}),
     },
+    typescript: {
+      declare: {
+        ignoreTSError: true,
+      },
+      ...testConfig?.typescript,
+    },
   }
 
-  config.admin = {
-    autoLogin:
+  if (!config.admin) {
+    config.admin = {}
+  }
+  if (config.admin.autoLogin === undefined) {
+    config.admin.autoLogin =
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
         ? false
         : {
             email: 'dev@payloadcms.com',
-            password: 'test',
-          },
-    ...(config.admin || {}),
+          }
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {

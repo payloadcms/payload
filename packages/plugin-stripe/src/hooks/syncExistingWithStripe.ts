@@ -1,6 +1,6 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'
@@ -11,18 +11,15 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 // api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-type HookArgsWithCustomCollection = Omit<
-  Parameters<CollectionBeforeChangeHook>[0],
-  'collection'
-> & {
+type HookArgsWithCustomCollection = {
   collection: CollectionConfig
-}
+} & Omit<Parameters<CollectionBeforeChangeHook>[0], 'collection'>
 
 export type CollectionBeforeChangeHookWithArgs = (
-  args: HookArgsWithCustomCollection & {
+  args: {
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
-  },
+  } & HookArgsWithCustomCollection,
 ) => void
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {

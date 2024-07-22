@@ -4,6 +4,7 @@ export const bgTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Профил',
     accountOfCurrentUser: 'Профил на текущия потребител',
+    accountVerified: 'Профилът е верифициран успешно.',
     alreadyActivated: 'Вече активиран',
     alreadyLoggedIn: 'Вече влязъл',
     apiKey: 'API ключ',
@@ -17,6 +18,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Потвърди парола',
     createFirstUser: 'Създай първи потребител',
     emailNotValid: 'Даденият имейл не е валиден',
+    emailOrUsername: 'Имейл или Потребителско име',
     emailSent: 'Имейлът е изпратен',
     emailVerified: 'Успешно потвърден имейл.',
     enableAPIKey: 'Активирай API ключ',
@@ -26,6 +28,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Моля, въведи имейла си по-долу. Ще получиш съобщение с насоки как да промениш паролата си.',
     forgotPasswordQuestion: 'Забравена парола?',
+    forgotPasswordUsernameInstructions:
+      'Моля, въведете вашето потребителско име по-долу. Инструкции как да възстановите паролата си ще бъдат изпратени на имейл адреса, асоцииран с вашето потребителско име.',
     generate: 'Генерирай',
     generateNewAPIKey: 'Генерирай нов API ключ',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +65,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Успешно отключен',
     tokenRefreshSuccessful: 'Освежаването на токена беше успешно.',
     unableToVerify: 'Неуспешно потвърждение',
+    username: 'Потребителско име',
+    usernameNotValid: 'Предоставеното потребителско име не е валидно.',
     verified: 'Потвърден',
     verifiedSuccessfully: 'Потвърден успешно',
     verify: 'Потвърди',
@@ -112,6 +118,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     unspecific: 'Грешка.',
     userEmailAlreadyRegistered: 'Потребител с дадения имейл вече е регистриран.',
     userLocked: 'Този потребител има прекалено много невалидни опити за влизане и е заключен.',
+    usernameAlreadyRegistered: 'Потребител със зададеното потребителско име вече е регистриран.',
+    usernameOrPasswordIncorrect: 'Предоставеното потребителско име или парола са неправилни.',
     valueMustBeUnique: 'Стойността трябва да е уникална',
     verificationTokenInvalid: 'Ключът за верификация е невалиден.',
   },
@@ -288,6 +296,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     updating: 'Обновява се',
     uploading: 'Качва се',
     user: 'Потребител',
+    username: 'Потребителско име',
     users: 'Потребители',
     value: 'Стойност',
     welcome: 'Добре дошъл',
@@ -296,6 +305,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     contains: 'съдържа',
     equals: 'е равно на',
     exists: 'съществува',
+    intersects: 'пресича',
     isGreaterThan: 'е по-голямо от',
     isGreaterThanOrEqualTo: 'е по-голямо от или равно на',
     isIn: 'е в',
@@ -305,8 +315,10 @@ export const bgTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'не е равно на',
     isNotIn: 'не е в',
     near: 'близко',
+    within: 'в рамките на',
   },
   upload: {
+    addFile: 'Добавяне на файл',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
@@ -321,6 +333,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     height: 'Височина',
     lessInfo: 'По-малко информация',
     moreInfo: 'Повече информация',
+    pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',
     selectFile: 'Избери файл',
@@ -350,6 +363,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Тази стойност трябва да е по-малка от максималната стойност от {{maxLength}} символа.',
     trueOrFalse: 'Това поле може да бъде само "true" или "false".',
+    username:
+      'Моля, въведете валидно потребителско име. Може да съдържа букви, цифри, тирета, точки и долни черти.',
     validUploadID: 'Това поле не е валиден идентификатор на качването.',
   },
   version: {
@@ -373,12 +388,15 @@ export const bgTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'Потвърди скриване',
     confirmVersionRestoration: 'Потвърди възстановяване на версия',
     currentDocumentStatus: 'Сегашен статус на документа: {{docStatus}}',
+    currentDraft: 'Текущ проект',
+    currentPublishedVersion: 'Текуща публикувана версия',
     draft: 'Чернова',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
     noFurtherVersionsFound: 'Не са открити повече версии',
     noRowsFound: 'Не е открит {{label}}',
     preview: 'Предварителен преглед',
+    previouslyPublished: 'Предишно публикувано',
     problemRestoringVersion: 'Имаше проблем при възстановяването на тази версия',
     publish: 'Публикувай',
     publishChanges: 'Публикувай промените',

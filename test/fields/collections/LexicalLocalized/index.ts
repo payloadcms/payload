@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -21,20 +21,11 @@ export const LexicalLocalizedFields: CollectionConfig = {
       localized: true,
     },
     {
-      name: 'lexicalSimple',
+      name: 'lexicalBlocksSubLocalized',
       type: 'richText',
-      localized: true,
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
-    },
-    {
-      name: 'lexicalBlocksLocalized',
       admin: {
-        description: 'Localized field with localized block subfields',
+        description: 'Non-localized field with localized block subfields',
       },
-      type: 'richText',
-      localized: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
@@ -49,6 +40,22 @@ export const LexicalLocalizedFields: CollectionConfig = {
                     localized: true,
                   },
                   {
+                    name: 'counter',
+                    type: 'number',
+                    hooks: {
+                      beforeChange: [
+                        ({ value }) => {
+                          return value ? value + 1 : 1
+                        },
+                      ],
+                      afterRead: [
+                        ({ value }) => {
+                          return value ? value * 10 : 10
+                        },
+                      ],
+                    },
+                  },
+                  {
                     name: 'rel',
                     type: 'relationship',
                     relationTo: lexicalLocalizedFieldsSlug,
@@ -61,11 +68,12 @@ export const LexicalLocalizedFields: CollectionConfig = {
       }),
     },
     {
-      name: 'lexicalBlocksSubLocalized',
-      type: 'richText',
+      name: 'lexicalBlocksLocalized',
       admin: {
-        description: 'Non-localized field with localized block subfields',
+        description: 'Localized field with localized block subfields',
       },
+      type: 'richText',
+      localized: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,

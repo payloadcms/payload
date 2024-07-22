@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
 import React from 'react'
 
@@ -10,9 +10,9 @@ const baseClass = 'logout'
 export { generateLogoutMetadata } from './meta.js'
 
 export const LogoutView: React.FC<
-  AdminViewProps & {
+  {
     inactivity?: boolean
-  }
+  } & AdminViewProps
 > = ({ inactivity, initPageResult, searchParams }) => {
   const {
     req: {

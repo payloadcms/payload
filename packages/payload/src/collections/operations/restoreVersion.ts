@@ -1,8 +1,7 @@
-/* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -23,13 +22,13 @@ export type Arguments = {
   disableErrors?: boolean
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-export const restoreVersionOperation = async <T extends TypeWithID = any>(
+export const restoreVersionOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
-): Promise<T> => {
+): Promise<TData> => {
   const {
     id,
     collection: { config: collectionConfig },

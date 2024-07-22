@@ -1,4 +1,4 @@
-import type { EmailAdapter, SendEmailOptions } from 'payload/config'
+import type { EmailAdapter, SendEmailOptions } from 'payload'
 
 /**
  * Logs all emails to stdout

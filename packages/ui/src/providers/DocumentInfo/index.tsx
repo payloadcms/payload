@@ -1,10 +1,19 @@
 'use client'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { Data, FormState, TypeWithTimestamps } from 'payload/types'
-import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
+import type {
+  Data,
+  DocumentPermissions,
+  DocumentPreferences,
+  FormState,
+  PaginatedDocs,
+  TypeWithID,
+  TypeWithTimestamps,
+  TypeWithVersion,
+  Where,
+} from 'payload'
 
 import { notFound } from 'next/navigation.js'
-import qs from 'qs'
+import { reduceFieldsToValues } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
@@ -13,12 +22,12 @@ import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
-import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -26,10 +35,10 @@ export type * from './types.js'
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<
-  DocumentInfoProps & {
+const DocumentInfo: React.FC<
+  {
     children: React.ReactNode
-  }
+  } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
     id,
@@ -57,6 +66,8 @@ export const DocumentInfoProvider: React.FC<
   const docConfig = collectionConfig || globalConfig
 
   const { i18n } = useTranslation()
+
+  const { uploadEdits } = useUploadEdits()
 
   const [documentTitle, setDocumentTitle] = useState(() => {
     if (!initialDataFromProps) return ''
@@ -96,15 +107,18 @@ export const DocumentInfoProvider: React.FC<
 
   const baseURL = `${serverURL}${api}`
   let slug: string
+  let pluralType: 'collections' | 'globals'
   let preferencesKey: string
 
   if (globalSlug) {
     slug = globalSlug
+    pluralType = 'globals'
     preferencesKey = `global-${slug}`
   }
 
   if (collectionSlug) {
     slug = collectionSlug
+    pluralType = 'collections'
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`
@@ -502,10 +516,25 @@ export const DocumentInfoProvider: React.FC<
     data,
   ])
 
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${qs.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
+
   if (isError) notFound()
 
   const value: DocumentInfoContext = {
     ...props,
+    action,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -527,4 +556,16 @@ export const DocumentInfoProvider: React.FC<
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<
+  {
+    children: React.ReactNode
+  } & DocumentInfoProps
+> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

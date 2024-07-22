@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
@@ -74,7 +74,6 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     if (hasRequested) {
       setHasRequested(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellData])
 
   return (

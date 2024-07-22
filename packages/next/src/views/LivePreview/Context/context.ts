@@ -1,5 +1,5 @@
-import type { LivePreviewConfig } from 'payload/config'
-import type { fieldSchemaToJSON } from 'payload/utilities'
+import type { LivePreviewConfig } from 'payload'
+import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'

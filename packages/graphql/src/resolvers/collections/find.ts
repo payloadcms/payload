@@ -1,9 +1,6 @@
-import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequestWithData, Where } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection, PaginatedDocs, PayloadRequest, Where } from 'payload'
 
-import { findOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -20,7 +17,7 @@ export type Resolver = (
     where?: Where
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>
@@ -30,8 +27,8 @@ export function findResolver(collection: Collection): Resolver {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
+
+    req = isolateObjectProperty(req, ['locale', 'fallbackLocale', 'transactionID'])
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) req.query = {}
@@ -52,7 +49,7 @@ export function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
-      req: isolateObjectProperty(req, 'transactionID'),
+      req,
       sort: args.sort,
       where: args.where,
     }

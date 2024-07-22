@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -8,12 +8,18 @@ import { traverseFields } from './traverseFields.js'
 type Args<T> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
+  /**
+   * The data before hooks
+   */
   data: Record<string, unknown> | T
+  /**
+   * The data after hooks
+   */
   doc: Record<string, unknown> | T
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
   previousDoc: Record<string, unknown> | T
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 /**
@@ -24,7 +30,6 @@ export const afterChange = async <T extends Record<string, unknown>>({
   collection,
   context,
   data,
-
   doc: incomingDoc,
   global,
   operation,
@@ -41,9 +46,11 @@ export const afterChange = async <T extends Record<string, unknown>>({
     fields: collection?.fields || global?.fields,
     global,
     operation,
+    path: [],
     previousDoc,
     previousSiblingDoc: previousDoc,
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

@@ -2,7 +2,7 @@ import fs from 'fs'
 import sizeOfImport from 'image-size'
 import { promisify } from 'util'
 
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 
 import { temporaryFileTask } from './tempFile.js'
@@ -10,7 +10,7 @@ import { temporaryFileTask } from './tempFile.js'
 const { imageSize } = sizeOfImport
 const imageSizePromise = promisify(imageSize)
 
-export async function getImageSize(file: PayloadRequestWithData['file']): Promise<ProbedImageSize> {
+export async function getImageSize(file: PayloadRequest['file']): Promise<ProbedImageSize> {
   if (file.tempFilePath) {
     return imageSizePromise(file.tempFilePath)
   }

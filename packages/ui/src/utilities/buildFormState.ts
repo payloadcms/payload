@@ -1,27 +1,22 @@
-import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
-import type {
-  DocumentPreferences,
-  Field,
-  FormState,
-  PayloadRequestWithData,
-  TypeWithID,
-} from 'payload/types'
+import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { reduceFieldsToValues } from 'payload/shared'
 
+import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import {} from '../exports/client/index.js'
+import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cached = global._payload_fieldSchemaMap
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
@@ -34,12 +29,8 @@ export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap =
   return cached
 }
 
-export const buildFormState = async ({
-  req,
-}: {
-  req: PayloadRequestWithData
-}): Promise<FormState> => {
-  const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
+export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
+  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 
   const incomingUserSlug = req.user?.collection
@@ -76,7 +67,7 @@ export const buildFormState = async ({
   const fieldSchemaMap = getFieldSchemaMap(req)
 
   const id = collectionSlug ? reqData.id : undefined
-  const schemaPathSegments = schemaPath.split('.')
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fieldSchema: Field[]
 
@@ -146,7 +137,7 @@ export const buildFormState = async ({
   // to reduce the amount of fetches required
   if (!data) {
     const fetchData = async () => {
-      let resolvedData: TypeWithID
+      let resolvedData: Record<string, unknown> | TypeWithID
 
       if (collectionSlug && id) {
         resolvedData = await req.payload.findByID({

@@ -1,13 +1,10 @@
-import type { GeneratedTypes } from 'payload'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { findByIDOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { findByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
-export type Resolver<T> = (
+export type Resolver<TData> = (
   _: unknown,
   args: {
     draft: boolean
@@ -16,13 +13,13 @@ export type Resolver<T> = (
     locale?: string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
-) => Promise<T>
+) => Promise<TData>
 
-export function findByIDResolver<T extends keyof GeneratedTypes['collections']>(
+export function findByIDResolver<TSlug extends CollectionSlug>(
   collection: Collection,
-): Resolver<GeneratedTypes['collections'][T]> {
+): Resolver<DataFromCollectionSlug<TSlug>> {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale

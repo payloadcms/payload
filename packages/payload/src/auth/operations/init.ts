@@ -1,8 +1,8 @@
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 export const initOperation = async (args: {
   collection: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): Promise<boolean> => {
   const { collection: slug, req } = args
 

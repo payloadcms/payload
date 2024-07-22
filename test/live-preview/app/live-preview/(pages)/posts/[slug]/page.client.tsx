@@ -1,7 +1,7 @@
 'use client'
 
 import { useLivePreview } from '@payloadcms/live-preview-react'
-import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
 import type { Post as PostType } from '../../../../../payload-types.js'

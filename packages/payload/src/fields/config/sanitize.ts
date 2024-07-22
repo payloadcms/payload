@@ -1,3 +1,4 @@
+import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -17,6 +18,7 @@ import validations from '../validations.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
+  collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
@@ -40,6 +42,7 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
+  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
@@ -108,10 +111,12 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      field.blocks = field.blocks.map((block) => ({
-        ...block,
-        fields: block.fields.concat(baseBlockFields),
-      }))
+      field.blocks = field.blocks.map((block) => {
+        return {
+          ...block,
+          fields: block.fields.concat(baseBlockFields),
+        }
+      })
     }
 
     if (field.type === 'array' && field.fields) {
@@ -172,25 +177,6 @@ export const sanitizeFields = async ({
         if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
           config.i18n.translations = deepMerge(config.i18n.translations, field.editor.i18n)
         }
-
-        // Add editor adapter hooks to field hooks
-        if (!field.hooks) field.hooks = {}
-
-        const mergeHooks = (hookName: keyof typeof field.editor.hooks) => {
-          if (typeof field.editor === 'function') return
-
-          if (field.editor?.hooks?.[hookName]?.length) {
-            field.hooks[hookName] = field.hooks[hookName]
-              ? field.hooks[hookName].concat(field.editor.hooks[hookName])
-              : [...field.editor.hooks[hookName]]
-          }
-        }
-
-        mergeHooks('afterRead')
-        mergeHooks('afterChange')
-        mergeHooks('beforeChange')
-        mergeHooks('beforeValidate')
-        mergeHooks('beforeDuplicate')
       }
       if (richTextSanitizationPromises) {
         richTextSanitizationPromises.push(sanitizeRichText)

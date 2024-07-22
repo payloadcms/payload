@@ -1,4 +1,4 @@
-import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload/types'
+import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -11,12 +11,12 @@ export type ListDrawerProps = {
   selectedCollection?: string
 }
 
-export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
+export type ListTogglerProps = {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
   drawerSlug?: string
-}
+} & HTMLAttributes<HTMLButtonElement>
 
 export type UseListDrawer = (args: {
   collectionSlugs?: string[]

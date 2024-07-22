@@ -1,16 +1,16 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, Media } from './payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
@@ -22,7 +22,9 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
+  animatedTypeMedia,
   audioSlug,
+  focalOnlySlug,
   mediaSlug,
   relationSlug,
 } from './shared.js'
@@ -35,10 +37,12 @@ let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let serverURL: string
 let mediaURL: AdminUrlUtil
+let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let focalOnlyURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -52,10 +56,12 @@ describe('uploads', () => {
     await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
+    animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -83,7 +89,7 @@ describe('uploads', () => {
 
     audioDoc = findAudio.docs[0] as unknown as Media
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should see upload filename in relation list', async () => {
@@ -118,6 +124,45 @@ describe('uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should create animated file upload', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
+    const nonAnimatedFileName = page.locator('.file-field__filename')
+
+    await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should show proper file names for resized animated file', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const smallSquareFilename = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__url a')
+    await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -209,7 +254,7 @@ describe('uploads', () => {
     // choose from existing
     await openDocDrawer(page, '.list-drawer__toggler')
 
-    await expect(page.locator('.cell-title')).toContainText('draft')
+    await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
@@ -375,6 +420,44 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+
+    test('should update image alignment based on focal point', async () => {
+      const updateFocalPosition = async (page: Page) => {
+        await page.goto(focalOnlyURL.create)
+        await page.waitForURL(focalOnlyURL.create)
+        // select and upload file
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByText('Select a file').click()
+        const fileChooser = await fileChooserPromise
+        await wait(1000)
+        await fileChooser.setFiles(path.join(dirname, 'horizontal-squares.jpg'))
+
+        await page.locator('.file-field__edit').click()
+
+        // set focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // top focal point
+
+        // apply focal point
+        await page.locator('button:has-text("Apply Changes")').click()
+        await page.waitForSelector('button#action-save')
+        await page.locator('button#action-save').click()
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await wait(1000) // Wait for the save
+      }
+
+      await updateFocalPosition(page) // red square
+      const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
+
+      const { doc: redDoc } = await client.findByID({
+        id: redSquareMediaID,
+        slug: focalOnlySlug,
+        auth: true,
+      })
+
+      // without focal point update this generated size was equal to 1736
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
   })
 })

@@ -1,23 +1,23 @@
-import type { DocumentInfoContext } from '@payloadcms/ui/providers/DocumentInfo'
-import type { Field, TextField, TextareaField, UploadField } from 'payload/types'
+import type { DocumentInfoContext } from '@payloadcms/ui'
+import type { Field, TextField, TextareaField, UploadField } from 'payload'
 
-export type GenerateTitle = <T = any>(
-  args: DocumentInfoContext & { doc: T; locale?: string },
+export type GenerateTitle<T = any> = (
+  args: { doc: T; locale?: string } & DocumentInfoContext,
 ) => Promise<string> | string
 
-export type GenerateDescription = <T = any>(
-  args: DocumentInfoContext & {
+export type GenerateDescription<T = any> = (
+  args: {
     doc: T
     locale?: string
-  },
+  } & DocumentInfoContext,
 ) => Promise<string> | string
 
-export type GenerateImage = <T = any>(
-  args: DocumentInfoContext & { doc: T; locale?: string },
+export type GenerateImage<T = any> = (
+  args: { doc: T; locale?: string } & DocumentInfoContext,
 ) => Promise<string> | string
 
-export type GenerateURL = <T = any>(
-  args: DocumentInfoContext & { doc: T; locale?: string },
+export type GenerateURL<T = any> = (
+  args: { doc: T; locale?: string } & DocumentInfoContext,
 ) => Promise<string> | string
 
 export type SEOPluginConfig = {

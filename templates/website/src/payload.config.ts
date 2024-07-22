@@ -1,3 +1,4 @@
+// storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 
 import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
@@ -6,19 +7,17 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import {
+  BoldFeature,
   FixedToolbarFeature,
   HeadingFeature,
+  ItalicFeature,
   LinkFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp' // editor-import
 import { UnderlineFeature } from '@payloadcms/richtext-lexical'
-import { ItalicFeature } from '@payloadcms/richtext-lexical'
-import { BoldFeature } from '@payloadcms/richtext-lexical'
-import dotenv from 'dotenv'
 import path from 'path'
-import { buildConfig } from 'payload/config'
-import { revalidateRedirect } from 'src/payload/hooks/revalidateRedirect'
+import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import Categories from './payload/collections/Categories'
@@ -31,17 +30,22 @@ import BeforeLogin from './payload/components/BeforeLogin'
 import { seed } from './payload/endpoints/seed'
 import { Footer } from './payload/globals/Footer/Footer'
 import { Header } from './payload/globals/Header/Header'
+import { revalidateRedirects } from './payload/hooks/revalidateRedirects'
+import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import { Page, Post } from 'src/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const generateTitle = () => {
-  return 'My Website'
+const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
+  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
 }
 
-dotenv.config({
-  path: path.resolve(dirname, '../../.env'),
-})
+const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
+  return doc?.slug
+    ? `${process.env.NEXT_PUBLIC_SERVER_URL}/${doc.slug}`
+    : process.env.NEXT_PUBLIC_SERVER_URL
+}
 
 export default buildConfig({
   admin: {
@@ -109,8 +113,22 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['pages', 'posts'],
       overrides: {
+        // @ts-expect-error
+        fields: ({ defaultFields }) => {
+          return defaultFields.map((field) => {
+            if ('name' in field && field.name === 'from') {
+              return {
+                ...field,
+                admin: {
+                  description: 'You will need to rebuild the website when changing this field.',
+                },
+              }
+            }
+            return field
+          })
+        },
         hooks: {
-          afterChange: [revalidateRedirect],
+          afterChange: [revalidateRedirects],
         },
       },
     }),
@@ -118,10 +136,8 @@ export default buildConfig({
       collections: ['categories'],
     }),
     seoPlugin({
-      collections: ['pages', 'posts'],
       generateTitle,
-      tabbedUI: true,
-      uploadsCollection: 'media',
+      generateURL,
     }),
     formBuilderPlugin({
       fields: {
@@ -149,7 +165,7 @@ export default buildConfig({
         },
       },
     }),
-    payloadCloudPlugin(),
+    payloadCloudPlugin(), // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,

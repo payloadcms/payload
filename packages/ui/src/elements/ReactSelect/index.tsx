@@ -7,8 +7,7 @@ import React, { useEffect, useId } from 'react'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
-import type { Option } from './types.js'
-import type { Props as ReactSelectAdapterProps } from './types.js'
+import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -112,7 +111,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     )
   }
   const handleKeyDown: KeyboardEventHandler = (event) => {
-    // eslint-disable-next-line no-restricted-globals
     if (numberOnly === true) {
       const acceptableKeys = [
         'Tab',

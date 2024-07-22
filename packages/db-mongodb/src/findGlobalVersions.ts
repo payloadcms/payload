@@ -1,9 +1,7 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload/database'
-import { buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -19,7 +17,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,
@@ -30,7 +28,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     this.payload.globals.config.find(({ slug }) => slug === global),
   )
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }
@@ -106,7 +104,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

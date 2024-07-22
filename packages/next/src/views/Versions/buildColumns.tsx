@@ -1,12 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Column } from '@payloadcms/ui/elements/Table'
-import type {
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
-import { SortColumn } from '@payloadcms/ui/elements/SortColumn'
+import { type Column, SortColumn } from '@payloadcms/ui'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'
@@ -18,12 +13,16 @@ export const buildVersionColumns = ({
   docID,
   globalConfig,
   i18n: { t },
+  latestDraftVersion,
+  latestPublishedVersion,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   docID?: number | string
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
+  latestDraftVersion?: string
+  latestPublishedVersion?: string
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
 
@@ -69,8 +68,13 @@ export const buildVersionColumns = ({
       accessor: '_status',
       active: true,
       components: {
-        Cell: <AutosaveCell />,
-        Heading: <SortColumn Label={t('version:type')} disable name="autosave" />,
+        Cell: (
+          <AutosaveCell
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
+          />
+        ),
+        Heading: <SortColumn Label={t('version:status')} disable name="status" />,
       },
     })
   }

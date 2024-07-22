@@ -1,11 +1,11 @@
 import type {
+  DefaultTranslationKeys,
   DefaultTranslationsObject,
   I18n,
   InitI18n,
   InitTFunction,
   Language,
 } from '../types.js'
-import type { DefaultTranslationKeys } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMerge } from './deepMerge.js'
@@ -161,9 +161,9 @@ function memoize(
   fn: (args: Parameters<InitI18n>[0]) => Promise<I18n>,
   keys: string[],
 ): (
-  args: Parameters<InitI18n>[0] & {
+  args: {
     context: 'api' | 'client'
-  },
+  } & Parameters<InitI18n>[0],
 ) => Promise<I18n> {
   const cacheMap = new Map()
 

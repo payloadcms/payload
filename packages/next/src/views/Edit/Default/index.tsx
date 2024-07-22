@@ -1,22 +1,22 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
-import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { Upload } from '@payloadcms/ui/elements/Upload'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
-import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { useRouter } from 'next/navigation.js'
-import { useSearchParams } from 'next/navigation.js'
+import {
+  DocumentControls,
+  DocumentFields,
+  Form,
+  type FormProps,
+  OperationProvider,
+  Upload,
+  useAuth,
+  useComponentMap,
+  useConfig,
+  useDocumentEvents,
+  useDocumentInfo,
+  useEditDepth,
+  useUploadEdits,
+} from '@payloadcms/ui'
+import { getFormState, generateAdminURL } from '@payloadcms/ui/shared'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
@@ -58,11 +58,13 @@ export const DefaultEditView: React.FC = () => {
   const { refreshCookieAsync, user } = useAuth()
   const config = useConfig()
   const router = useRouter()
-  const { dispatchFormQueryParams } = useFormQueryParams()
-  const { getFieldMap } = useComponentMap()
-  const params = useSearchParams()
+  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
+  const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
+  const { resetUploadEdits } = useUploadEdits()
+
+  const locale = params.get('locale')
 
   const {
     admin: { user: userSlug },
@@ -72,8 +74,6 @@ export const DefaultEditView: React.FC = () => {
     serverURL,
   } = config
 
-  const locale = params.get('locale')
-
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
 
@@ -81,6 +81,10 @@ export const DefaultEditView: React.FC = () => {
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
+  const componentMap = getComponentMap({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+  })
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
@@ -129,12 +133,7 @@ export const DefaultEditView: React.FC = () => {
         )
         router.push(redirectRoute)
       } else {
-        dispatchFormQueryParams({
-          type: 'SET',
-          params: {
-            uploadEdits: null,
-          },
-        })
+        resetUploadEdits()
       }
     },
     [
@@ -150,9 +149,9 @@ export const DefaultEditView: React.FC = () => {
       isEditing,
       refreshCookieAsync,
       adminRoute,
-      locale,
       router,
-      dispatchFormQueryParams,
+      locale,
+      resetUploadEdits,
     ],
   )
 
@@ -228,6 +227,7 @@ export const DefaultEditView: React.FC = () => {
                       collectionSlug={collectionConfig.slug}
                       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
+                      loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
@@ -237,11 +237,15 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      <Upload
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                      />
+                      {componentMap.Upload !== undefined ? (
+                        componentMap.Upload
+                      ) : (
+                        <Upload
+                          collectionSlug={collectionConfig.slug}
+                          initialState={initialState}
+                          uploadConfig={upload}
+                        />
+                      )}
                     </React.Fragment>
                   )}
                 </Fragment>

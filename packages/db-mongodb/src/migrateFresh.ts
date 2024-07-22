@@ -1,11 +1,6 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest } from 'payload'
 
-import {
-  commitTransaction,
-  initTransaction,
-  killTransaction,
-  readMigrationFiles,
-} from 'payload/database'
+import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 
 import type { MongooseAdapter } from './index.js'
@@ -50,7 +45,7 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = { payload } as PayloadRequestWithData
+  const req = { payload } as PayloadRequest
 
   // Run all migrate up
   for (const migration of migrationFiles) {

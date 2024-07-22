@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "3.0.0-beta.45",
+  "version": "3.0.0-beta.67",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -26,8 +26,8 @@
     },
     "./*": {
       "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+      "types": "./src/exports/*.ts",
+      "default": "./src/exports/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -36,8 +36,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
@@ -50,26 +50,26 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
   "publishConfig": {
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./*": {
         "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+        "types": "./dist/exports/*.d.ts",
+        "default": "./dist/exports/*.js"
       }
     },
     "main": "./dist/index.js",
@@ -78,7 +78,7 @@
   },
   "homepage:": "https://payloadcms.com",
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

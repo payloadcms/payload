@@ -4,6 +4,7 @@ export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
     accountOfCurrentUser: 'Cuenta del usuario actual',
+    accountVerified: 'Cuenta verificada con éxito.',
     alreadyActivated: 'Ya Activado',
     alreadyLoggedIn: 'Sesión iniciada',
     apiKey: 'Clave API',
@@ -17,6 +18,7 @@ export const esTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Confirmar Contraseña',
     createFirstUser: 'Crear al primer usuario',
     emailNotValid: 'El correo proporcionado es inválido',
+    emailOrUsername: 'Correo electrónico o nombre de usuario',
     emailSent: 'Correo Enviado',
     emailVerified: 'Correo electrónico verificado con éxito.',
     enableAPIKey: 'Habilitar Clave API',
@@ -26,6 +28,8 @@ export const esTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Por favor introduce tu correo electrónico. Recibirás un mensaje con las instrucciones para restablecer tu contraseña.',
     forgotPasswordQuestion: '¿Olvidaste tu contraseña?',
+    forgotPasswordUsernameInstructions:
+      'Por favor, ingrese su nombre de usuario a continuación. Se enviarán instrucciones sobre cómo restablecer su contraseña a la dirección de correo electrónico asociada con su nombre de usuario.',
     generate: 'Generar',
     generateNewAPIKey: 'Generar Nueva Clave de API',
     generatingNewAPIKeyWillInvalidate:
@@ -61,6 +65,8 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Desbloqueado correctamente',
     tokenRefreshSuccessful: 'Actualización de token exitosa.',
     unableToVerify: 'No se pudo Verificar',
+    username: 'Nombre de usuario',
+    usernameNotValid: 'El nombre de usuario proporcionado no es válido.',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificación Correcta',
     verify: 'Verificar',
@@ -114,6 +120,10 @@ export const esTranslations: DefaultTranslationsObject = {
       'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
       'Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión.',
+    usernameAlreadyRegistered:
+      'Un usuario con el nombre de usuario proporcionado ya está registrado.',
+    usernameOrPasswordIncorrect:
+      'El nombre de usuario o la contraseña proporcionados son incorrectos.',
     valueMustBeUnique: 'El valor debe ser único',
     verificationTokenInvalid: 'Token de verificación inválido.',
   },
@@ -291,6 +301,7 @@ export const esTranslations: DefaultTranslationsObject = {
     updating: 'Actualizando',
     uploading: 'Subiendo',
     user: 'Usuario',
+    username: 'Nombre de usuario',
     users: 'Usuarios',
     value: 'Valor',
     welcome: 'Bienvenido',
@@ -299,6 +310,7 @@ export const esTranslations: DefaultTranslationsObject = {
     contains: 'contiene',
     equals: 'igual',
     exists: 'existe',
+    intersects: 'interseca',
     isGreaterThan: 'es mayor que',
     isGreaterThanOrEqualTo: 'es mayor o igual que',
     isIn: 'está en',
@@ -308,8 +320,10 @@ export const esTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'no es igual a',
     isNotIn: 'no está en',
     near: 'cerca',
+    within: 'dentro de',
   },
   upload: {
+    addFile: 'Añadir archivo',
     crop: 'Cultivo',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
@@ -324,6 +338,7 @@ export const esTranslations: DefaultTranslationsObject = {
     height: 'Alto',
     lessInfo: 'Menos info',
     moreInfo: 'Más info',
+    pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
     selectCollectionToBrowse: 'Selecciona una Colección',
     selectFile: 'Selecciona un archivo',
@@ -351,6 +366,8 @@ export const esTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Este campo requiere dos números.',
     shorterThanMax: 'Este dato debe ser más corto que el máximo de {{maxLength}} caracteres.',
     trueOrFalse: 'Este campo solamente puede ser verdadero o falso.',
+    username:
+      'Por favor, introduzca un nombre de usuario válido. Puede contener letras, números, guiones, puntos y guiones bajos.',
     validUploadID: "'Este campo no es una ID de subida válida.'",
   },
   version: {
@@ -376,12 +393,15 @@ export const esTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'Confirmar despublicado',
     confirmVersionRestoration: 'Confirmar restauración de versión',
     currentDocumentStatus: 'Documento {{docStatus}} actual',
+    currentDraft: 'Borrador Actual',
+    currentPublishedVersion: 'Versión Publicada Actual',
     draft: 'Borrador',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noRowsFound: 'No encontramos {{label}}',
     preview: 'Previsualizar',
+    previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocurrió un problema al restaurar esta versión',
     publish: 'Publicar',
     publishChanges: 'Publicar cambios',

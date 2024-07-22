@@ -1,5 +1,4 @@
-import type { Count } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Count, SanitizedCollectionConfig } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -18,7 +17,7 @@ export const count: Count = async function count(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const table = this.tables[tableName]
 
   const { joins, where } = await buildQuery({

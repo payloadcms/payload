@@ -1,15 +1,14 @@
-/* eslint-disable no-param-reassign */
 import type {
   Data,
   DocumentPreferences,
   Field,
   FormField,
   FormState,
-  PayloadRequestWithData,
-} from 'payload/types'
+  PayloadRequest,
+} from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
@@ -53,7 +52,7 @@ export type AddFieldStatePromiseArgs = {
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
    */
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
    */

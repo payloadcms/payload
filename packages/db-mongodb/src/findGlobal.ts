@@ -1,7 +1,6 @@
-import type { FindGlobal } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { FindGlobal, PayloadRequest } from 'payload'
 
-import { combineQueries } from 'payload/database'
+import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -10,11 +9,11 @@ import { withSession } from './withSession.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug, locale, req = {} as PayloadRequestWithData, where },
+  { slug, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.globals
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 

@@ -1,6 +1,10 @@
-/* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload/config'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type {
+  Collection,
+  Field,
+  GraphQLInfo,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -9,9 +13,8 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -37,8 +40,8 @@ import restoreVersionResolver from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
-import buildObjectType from './buildObjectType.js'
-import buildPaginatedListType from './buildPaginatedListType.js'
+import { buildObjectType } from './buildObjectType.js'
+import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
 
@@ -380,6 +383,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             exp: {
               type: GraphQLInt,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             token: {
               type: GraphQLString,
             },
@@ -406,14 +412,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             refreshedToken: {
               type: GraphQLString,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             user: {
               type: collection.graphQL.JWT,
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
@@ -423,12 +429,24 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       }
 
       if (!collectionConfig.auth.disableLocalStrategy) {
+        const authArgs = {}
+
+        const canLoginWithEmail =
+          !collectionConfig.auth.loginWithUsername ||
+          collectionConfig.auth.loginWithUsername?.allowEmailLogin
+        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+
+        if (canLoginWithEmail) {
+          authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+        if (canLoginWithUsername) {
+          authArgs['username'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+
         if (collectionConfig.auth.maxLoginAttempts > 0) {
           graphqlResult.Mutation.fields[`unlock${singularName}`] = {
             type: new GraphQLNonNull(GraphQLBoolean),
-            args: {
-              email: { type: new GraphQLNonNull(GraphQLString) },
-            },
+            args: authArgs,
             resolve: unlock(collection),
           }
         }
@@ -449,7 +467,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
           }),
           args: {
-            email: { type: GraphQLString },
+            ...authArgs,
             password: { type: GraphQLString },
           },
           resolve: login(collection),
@@ -459,8 +477,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           type: new GraphQLNonNull(GraphQLBoolean),
           args: {
             disableEmail: { type: GraphQLBoolean },
-            email: { type: new GraphQLNonNull(GraphQLString) },
             expiration: { type: GraphQLInt },
+            ...authArgs,
           },
           resolve: forgotPassword(collection),
         }

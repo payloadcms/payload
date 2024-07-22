@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
-import type { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   ArrayField,
   Block,
@@ -23,13 +19,15 @@ import type {
   RelationshipField,
   RichTextField,
   RowField,
+  SanitizedConfig,
+  SanitizedLocalizationConfig,
   SelectField,
   Tab,
   TabsField,
   TextField,
   TextareaField,
   UploadField,
-} from 'payload/types'
+} from 'payload'
 
 import mongoose from 'mongoose'
 import {
@@ -37,7 +35,7 @@ import {
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   tabHasName,
-} from 'payload/types'
+} from 'payload/shared'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean
@@ -195,12 +193,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
       if (field.localized && config.localization) {
         config.localization.localeCodes.forEach((localeCode) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error Possible incorrect typing in mongoose types, this works
           schema.path(`${field.name}.${localeCode}`).discriminator(blockItem.slug, blockSchema)
         })
       } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error Possible incorrect typing in mongoose types, this works
         schema.path(field.name).discriminator(blockItem.slug, blockSchema)
       }

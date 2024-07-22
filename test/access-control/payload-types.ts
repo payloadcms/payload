@@ -7,6 +7,10 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+    'non-admin-user': NonAdminUserAuthOperations;
+  };
   collections: {
     users: User;
     'non-admin-user': NonAdminUser;
@@ -23,6 +27,7 @@ export interface Config {
     'hidden-fields': HiddenField;
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
+    disabled: Disabled;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -41,6 +46,32 @@ export interface Config {
     | (NonAdminUser & {
         collection: 'non-admin-user';
       });
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+}
+export interface NonAdminUserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -239,6 +270,28 @@ export interface HiddenAccessCount {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled".
+ */
+export interface Disabled {
+  id: string;
+  group?: {
+    text?: string | null;
+  };
+  namedTab?: {
+    text?: string | null;
+  };
+  unnamedTab?: string | null;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -324,6 +377,13 @@ export interface ReadNotUpdateGlobal {
   name?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

@@ -1,5 +1,4 @@
-import type { TabsFieldProps } from '@payloadcms/ui/fields/Tabs'
-import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { MappedField, TabsFieldProps } from '@payloadcms/ui'
 
 import React from 'react'
 
@@ -11,9 +10,9 @@ import Nested from '../Nested/index.js'
 const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<
-  Omit<Props, 'field'> & {
+  {
     field: MappedField & TabsFieldProps
-  }
+  } & Omit<Props, 'field'>
 > = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
   return (
     <div className={baseClass}>

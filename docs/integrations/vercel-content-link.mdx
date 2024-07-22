@@ -3,10 +3,10 @@ title: Vercel Content Link
 label: Vercel Content Link
 order: 10
 desc: Payload + Vercel Content Link allows yours editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it.
-keywords: vercel, vercel content link, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, express
+keywords: vercel, vercel content link, content link, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-[Vercel Content Link](https://vercel.com/docs/workflow-collaboration/edit-mode#content-link) will allow your editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it. This requires no changes to your front-end code and very few changes to your Payload config.
+[Vercel Content Link](https://vercel.com/docs/workflow-collaboration/edit-mode#content-link) will allow your editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it. This requires no changes to your front-end code and very few changes to your Payload Config.
 
 ![Versions](/images/docs/vercel-visual-editing.jpg)
 
@@ -30,7 +30,7 @@ Setting up Payload with Vercel Content Link is easy. First, install the `@payloa
 npm i @payloadcms/plugin-csm
 ```
 
-Then in the `plugins` array of your Payload config, call the plugin and enable any collections that require Content Source Maps.
+Then in the `plugins` array of your Payload Config, call the plugin and enable any collections that require Content Source Maps.
 
 ```ts
 import { buildConfig } from "payload/config"
@@ -91,13 +91,13 @@ import { vercelStegaSplit } from '@vercel/stega'
 const { cleaned, encoded } = vercelStegaSplit(text)
 ```
 
-### Block fields
+### Blocks and array fields
 
-All `blocks` fields by definition do not have plain text strings to encode. For this reason, blocks are given an additional `encodedSourceMap` key, which you can use to enable Content Link on entire sections of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
+All `blocks` and `array` fields by definition do not have plain text strings to encode. For this reason, they are given an additional `_encodedSourceMap` property, which you can use to enable Content Link on entire _sections_ of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
 
 ```ts
 <div data-vercel-edit-target>
-  <span style={{ display: "none" }}>{encodedSourceMap}</span>
+  <span style={{ display: "none" }}>{_encodedSourceMap}</span>
   {children}
 </div>
 ```

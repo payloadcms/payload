@@ -1,30 +1,33 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { SerializedEditorState } from 'lexical'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { useField } from '@payloadcms/ui/forms/useField'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  useField,
+  useFieldProps,
+  withCondition,
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
+import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import './bundled.css'
 import './index.scss'
-import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
 const _RichText: React.FC<
-  FormFieldBase & {
+  {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
     width?: string
-  }
+  } & FormFieldBase
 > = (props) => {
   const {
     name,
@@ -59,7 +62,7 @@ const _RichText: React.FC<
   const { path: pathFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -85,6 +88,7 @@ const _RichText: React.FC<
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
@@ -92,7 +96,6 @@ const _RichText: React.FC<
         {...(labelProps || {})}
       />
       <div className={`${baseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

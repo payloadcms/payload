@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     pages: Page;
     posts: Post;
@@ -26,6 +29,19 @@ export interface Config {
   locale: null;
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    password: string;
+    email: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -207,8 +223,8 @@ export interface Page {
   )[];
   meta?: {
     title?: string | null;
-    description?: string | null;
     image?: string | Media | null;
+    description?: string | null;
   };
   publishedAt?: string | null;
   slug?: string | null;
@@ -256,7 +272,7 @@ export interface Media {
  */
 export interface Category {
   id: string;
-  title?: string | null;
+  title: string;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -275,6 +291,7 @@ export interface Category {
  */
 export interface Post {
   id: string;
+  title: string;
   content: {
     root: {
       type: string;
@@ -294,10 +311,9 @@ export interface Post {
   categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
-    description?: string | null;
     image?: string | Media | null;
+    description?: string | null;
   };
-  title: string;
   publishedAt?: string | null;
   authors?: (string | User)[] | null;
   populatedAuthors?:
@@ -318,7 +334,6 @@ export interface Post {
 export interface User {
   id: string;
   name?: string | null;
-  roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -640,6 +655,13 @@ export interface BannerBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'banner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

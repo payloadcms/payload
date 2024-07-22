@@ -2,12 +2,12 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
-import mkdirp from 'mkdirp'
+import { mkdirSync } from 'node:fs'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
@@ -27,7 +27,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   throwOnMissingFile?: boolean
 }
 
@@ -107,13 +107,13 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    mkdirp.sync(staticPath)
+    mkdirSync(staticPath, { recursive: true })
   }
 
   let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimated = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -131,9 +131,9 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true
+    if (fileIsAnimatedType) sharpOptions.animated = true
 
-    if (sharp && (fileIsAnimated || fileHasAdjustments)) {
+    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -177,13 +177,13 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()
+        ext = file.name.split('.').pop().split('?')[0]
       } else {
         ext = ''
       }
     }
 
-    // Adust SVG mime type. fromBuffer modifies it.
+    // Adjust SVG mime type. fromBuffer modifies it.
     if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
     fileData.mimeType = mime
 
@@ -203,7 +203,14 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData && sharp) {
-      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
+      const { data: croppedImage, info } = await cropImage({
+        cropData,
+        dimensions,
+        file,
+        heightInPixels: uploadEdits.heightInPixels,
+        sharp,
+        widthInPixels: uploadEdits.widthInPixels,
+      })
 
       filesToSave.push({
         buffer: croppedImage,
@@ -217,7 +224,7 @@ export const generateFileData = async <T>({
       }
       fileData.width = info.width
       fileData.height = info.height
-      if (fileIsAnimated) {
+      if (fileIsAnimatedType) {
         const metadata = await sharpFile.metadata()
         fileData.height = metadata.pages ? info.height / metadata.pages : info.height
       }
@@ -297,16 +304,15 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
   operation: 'create' | 'update'
   originalDoc: unknown
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }): UploadEdits {
   const { data, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
-  const {
-    uploadEdits = {},
-  }: {
-    uploadEdits?: UploadEdits
-  } = req.query || {}
+  const uploadEdits =
+    req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
+      ? (req.query.uploadEdits as UploadEdits)
+      : {}
 
   if (uploadEdits.focalPoint) return uploadEdits
 

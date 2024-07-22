@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
@@ -726,7 +726,6 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Required Files', () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
       const successfulCreate = await payload.create({
         collection: 'optional-file',

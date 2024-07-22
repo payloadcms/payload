@@ -1,6 +1,6 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
 import { meta } from '../../utilities/meta.js'
 
@@ -9,7 +9,7 @@ export const generateNotFoundMeta = async ({
   i18n,
 }: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
 }): Promise<Metadata> =>
   meta({
     description: i18n.t('general:pageNotFound'),

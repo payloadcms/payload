@@ -1,18 +1,18 @@
 'use client'
-import type { ClientValidate, Description, Validate } from 'payload/types'
+import type { ClientValidate, Description, Validate } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type PasswordFieldProps = FormFieldBase & {
+export type PasswordFieldProps = {
   autoComplete?: string
   className?: string
   description?: Description
@@ -23,9 +23,9 @@ export type PasswordFieldProps = FormFieldBase & {
   style?: React.CSSProperties
   validate?: Validate
   width?: string
-}
+} & FormFieldBase
 
-const PasswordField: React.FC<PasswordFieldProps> = (props) => {
+const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
     CustomError,
@@ -97,4 +97,4 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
   )
 }
 
-export const Password = withCondition(PasswordField)
+export const PasswordField = withCondition(_PasswordField)

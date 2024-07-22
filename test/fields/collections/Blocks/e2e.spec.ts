@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -43,7 +43,7 @@ describe('Block fields', () => {
       snapshotKey: 'blockFieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -58,7 +58,7 @@ describe('Block fields', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
@@ -113,6 +113,21 @@ describe('Block fields', () => {
     const addedRow = page.locator('#field-blocks #blocks-row-1')
     await expect(addedRow).toBeVisible()
     await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
+  })
+
+  test('should duplicate block', async () => {
+    await page.goto(url.create)
+    const firstRow = page.locator('#field-blocks #blocks-row-0')
+    const rowActions = firstRow.locator('.collapsible__actions')
+    await expect(rowActions).toBeVisible()
+
+    await rowActions.locator('.array-actions__button').click()
+    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+    await expect(duplicateButton).toBeVisible()
+    await duplicateButton.click()
+
+    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+    expect(await blocks.count()).toEqual(4)
   })
 
   test('should use i18n block labels', async () => {

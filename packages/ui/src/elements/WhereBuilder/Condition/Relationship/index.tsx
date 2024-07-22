@@ -1,9 +1,7 @@
 'use client'
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { PaginatedDocs, Where } from 'payload'
 
-import QueryString from 'qs'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
@@ -92,7 +90,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${QueryString.stringify(query, { addQueryPrefix: true })}`,
+            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
             {
               credentials: 'include',
               headers: {
@@ -136,7 +134,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const loadMoreOptions = React.useCallback(() => {
     if (partiallyLoadedRelationshipSlugs.current.length > 0) {
       const abortController = new AbortController()
-      loadRelationOptions({
+      void loadRelationOptions({
         abortController,
         relationSlug: partiallyLoadedRelationshipSlugs.current[0],
       })
@@ -241,7 +239,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
     const abortControllers: AbortController[] = []
     relations.forEach((relation) => {
       const abortController = new AbortController()
-      loadRelationOptions({
+      void loadRelationOptions({
         abortController,
         relationSlug: relation,
       })
@@ -267,9 +265,9 @@ export const RelationshipField: React.FC<Props> = (props) => {
         ;((matchedOptions as Option[]) || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
-              addOptionByID(value[i].value, value[i].relationTo)
+              void addOptionByID(value[i].value, value[i].relationTo)
             } else {
-              addOptionByID(value[i], relationTo)
+              void addOptionByID(value[i], relationTo)
             }
           }
         })
@@ -279,9 +277,9 @@ export const RelationshipField: React.FC<Props> = (props) => {
         if (!matchedOption) {
           if (hasMultipleRelations) {
             const valueWithRelation = value as ValueWithRelation
-            addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
+            void addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
           } else {
-            addOptionByID(value, relationTo)
+            void addOptionByID(value, relationTo)
           }
         }
       }
@@ -314,7 +312,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               onChange(null)
               return
             }
-            if (hasMany) {
+            if (hasMany && Array.isArray(selected)) {
               onChange(
                 selected
                   ? selected.map((option) => {
@@ -329,12 +327,12 @@ export const RelationshipField: React.FC<Props> = (props) => {
                     })
                   : null,
               )
-            } else if (hasMultipleRelations) {
+            } else if (hasMultipleRelations && !Array.isArray(selected)) {
               onChange({
                 relationTo: selected?.relationTo,
                 value: selected?.value,
               })
-            } else {
+            } else if (!Array.isArray(selected)) {
               onChange(selected?.value)
             }
           }}

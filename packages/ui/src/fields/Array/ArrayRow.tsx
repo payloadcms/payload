@@ -1,6 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Row } from 'payload/types'
+import type { ArrayField, FieldPermissions, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -19,7 +18,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-type ArrayRowProps = UseDraggableSortableReturn & {
+type ArrayRowProps = {
   CustomRowLabel?: React.ReactNode
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
@@ -40,7 +39,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   rowIndex: number
   schemaPath: string
   setCollapse: (rowID: string, collapsed: boolean) => void
-}
+} & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   CustomRowLabel,

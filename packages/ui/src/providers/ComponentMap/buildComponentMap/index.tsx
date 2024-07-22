@@ -1,10 +1,10 @@
-import type { ServerProps } from 'payload/config'
 import type {
   AdminViewProps,
   EditViewProps,
   Payload,
+  ServerProps,
   WithServerSidePropsComponentProps,
-} from 'payload/types'
+} from 'payload'
 
 import React from 'react'
 
@@ -92,8 +92,8 @@ export const buildComponentMap = (args: {
     componentMap: {
       Icon,
       LogoutButton,
-      actions: config.admin?.components?.actions?.map((Component) => (
-        <WithServerSideProps Component={Component} />
+      actions: config.admin?.components?.actions?.map((Component, i) => (
+        <WithServerSideProps Component={Component} key={i} />
       )),
       collections,
       globals,

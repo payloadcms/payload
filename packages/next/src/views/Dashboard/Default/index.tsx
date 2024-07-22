@@ -1,28 +1,21 @@
-import type { Permissions } from 'payload/auth'
-import type { ServerProps } from 'payload/config'
-import type { VisibleEntities } from 'payload/types'
+import type { groupNavItems } from '@payloadcms/ui/shared'
+import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Card } from '@payloadcms/ui/elements/Card'
-import { Gutter } from '@payloadcms/ui/elements/Gutter'
-import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
-import { WithServerSideProps } from '@payloadcms/ui/elements/WithServerSideProps'
-import { SetViewActions } from '@payloadcms/ui/providers/Actions'
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
-import { EntityType, type groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
+import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
+import { EntityType, WithServerSideProps, generateAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
 
 const baseClass = 'dashboard'
 
-export type DashboardProps = ServerProps & {
+export type DashboardProps = {
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
   visibleEntities: VisibleEntities
-}
+} & ServerProps
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {

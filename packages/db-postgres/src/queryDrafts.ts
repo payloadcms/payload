@@ -1,7 +1,6 @@
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
+import type { PayloadRequest, QueryDrafts, SanitizedCollectionConfig } from 'payload'
 
-import { type QueryDrafts, combineQueries } from 'payload/database'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -10,16 +9,7 @@ import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: PostgresAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page = 1,
-    pagination,
-    req = {} as PayloadRequestWithData,
-    sort,
-    where,
-  },
+  { collection, limit, locale, page = 1, pagination, req = {} as PayloadRequest, sort, where },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = this.tableNameMap.get(

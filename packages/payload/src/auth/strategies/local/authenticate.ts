@@ -3,7 +3,7 @@ import scmp from 'scmp'
 
 import type { TypeWithID } from '../../../collections/config/types.js'
 
-type Doc = TypeWithID & Record<string, unknown>
+type Doc = Record<string, unknown> & TypeWithID
 
 type Args = {
   doc: Doc

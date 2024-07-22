@@ -1,11 +1,15 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type { FieldPermissions } from 'payload/auth'
-import type { FieldTypes, SanitizedConfig } from 'payload/config'
-import type { RichTextAdapter, RichTextFieldProps } from 'payload/types'
+import type {
+  FieldPermissions,
+  FieldTypes,
+  RichTextAdapter,
+  RichTextFieldProps,
+  SanitizedConfig,
+} from 'payload'
 import type React from 'react'
 
-import type { FeatureProviderServer } from './field/features/types.js'
-import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
+import type { FeatureProviderServer } from './features/typesServer.js'
+import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
 export type LexicalFieldAdminProps = {
   /**
@@ -32,10 +36,10 @@ export type LexicalEditorProps = {
          *  })
          *  ```
          */
-        defaultFeatures: FeatureProviderServer<any, any>[]
+        defaultFeatures: FeatureProviderServer<any, any, any>[]
         /**
          * This array contains all features that are enabled in the root richText editor (the one defined in the payload.config.ts).
-         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty
+         * If this field is the root richText editor, or if the root richText editor is not a lexical editor, this array will be empty.
          *
          * @Example
          *
@@ -45,16 +49,16 @@ export type LexicalEditorProps = {
          *  })
          *  ```
          */
-        rootFeatures: FeatureProviderServer<any, any>[]
-      }) => FeatureProviderServer<any, any>[])
-    | FeatureProviderServer<any, any>[]
+        rootFeatures: FeatureProviderServer<any, any, any>[]
+      }) => FeatureProviderServer<any, any, any>[])
+    | FeatureProviderServer<any, any, any>[]
   lexical?: LexicalEditorConfig
 }
 
-export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
+export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
-  features: FeatureProviderServer<any, any>[]
-}
+  features: FeatureProviderServer<any, any, any>[]
+} & RichTextAdapter<SerializedEditorState, AdapterProps, any>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -68,19 +72,19 @@ export type LexicalRichTextAdapterProvider =
     isRoot?: boolean
   }) => Promise<LexicalRichTextAdapter>
 
-export type FieldProps = RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps> & {
+export type FieldProps = {
   fieldTypes: FieldTypes
   indexPath: string
   path?: string
   permissions: FieldPermissions
-}
+} & RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig
 }
 
 export type GeneratedFeatureProviderComponent = {
-  ClientComponent: React.ReactNode
+  ClientFeature: React.ReactNode
   key: string
   order: number
 }

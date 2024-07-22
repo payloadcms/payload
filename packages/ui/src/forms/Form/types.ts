@@ -1,6 +1,4 @@
-import type { User } from 'payload/auth'
-import type { Field, FormField, FormState } from 'payload/types'
-import type { Data } from 'payload/types'
+import type { Data, Field, FormField, FormState, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -8,15 +6,7 @@ export type Preferences = {
   [key: string]: unknown
 }
 
-export type FormProps = (
-  | {
-      action: (formData: FormData) => Promise<void>
-    }
-  | {
-      action?: string
-      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
-    }
-) & {
+export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
@@ -33,7 +23,11 @@ export type FormProps = (
    * feature of the Lexical Rich Text field)
    */
   fields?: Field[]
-  handleResponse?: (res: Response) => void
+  handleResponse?: (
+    res: Response,
+    successToast: (value: string) => void,
+    errorToast: (value: string) => void,
+  ) => void
   initialState?: FormState
   isInitializing?: boolean
   log?: boolean
@@ -45,7 +39,15 @@ export type FormProps = (
   uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
-}
+} & (
+  | {
+      action: (formData: FormData) => Promise<void>
+    }
+  | {
+      action?: string
+      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
+    }
+)
 
 export type SubmitOptions = {
   action?: string

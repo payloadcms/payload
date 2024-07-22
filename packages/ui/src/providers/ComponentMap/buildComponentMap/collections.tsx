@@ -4,16 +4,18 @@ import type {
   EditViewProps,
   SanitizedCollectionConfig,
   SanitizedConfig,
-} from 'payload/types'
+} from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/utilities'
+import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { CollectionComponentMap } from './types.js'
 
-import { ViewDescription } from '../../../elements/ViewDescription/index.js'
+// Need to import from client barrel file
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
@@ -100,36 +102,44 @@ export const mapCollections = (args: {
       <WithServerSideProps Component={PublishButtonComponent} />
     ) : undefined
 
-    const beforeList = collectionConfig?.admin?.components?.BeforeList
+    const UploadComponent = collectionConfig?.admin?.components?.edit?.Upload
+
+    const Upload = UploadComponent ? <WithServerSideProps Component={UploadComponent} /> : undefined
+
+    const beforeList = collectionConfig?.admin?.components?.beforeList
 
     const BeforeList =
       (beforeList &&
         Array.isArray(beforeList) &&
-        beforeList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        beforeList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
       null
 
-    const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
+    const beforeListTable = collectionConfig?.admin?.components?.beforeListTable
 
     const BeforeListTable =
       (beforeListTable &&
         Array.isArray(beforeListTable) &&
-        beforeListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        beforeListTable?.map((Component, i) => (
+          <WithServerSideProps Component={Component} key={i} />
+        ))) ||
       null
 
-    const afterList = collectionConfig?.admin?.components?.AfterList
+    const afterList = collectionConfig?.admin?.components?.afterList
 
     const AfterList =
       (afterList &&
         Array.isArray(afterList) &&
-        afterList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        afterList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
       null
 
-    const afterListTable = collectionConfig?.admin?.components?.AfterListTable
+    const afterListTable = collectionConfig?.admin?.components?.afterListTable
 
     const AfterListTable =
       (afterListTable &&
         Array.isArray(afterListTable) &&
-        afterListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
+        afterListTable?.map((Component, i) => (
+          <WithServerSideProps Component={Component} key={i} />
+        ))) ||
       null
 
     let description = undefined
@@ -169,6 +179,7 @@ export const mapCollections = (args: {
       PublishButton,
       SaveButton,
       SaveDraftButton,
+      Upload,
       actionsMap: mapActions({
         WithServerSideProps,
         collectionConfig,

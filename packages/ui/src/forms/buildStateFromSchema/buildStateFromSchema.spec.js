@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import buildStateFromSchema from './index.js'
 
 describe('Form - buildStateFromSchema', () => {

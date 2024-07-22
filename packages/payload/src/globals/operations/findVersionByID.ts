@@ -1,6 +1,5 @@
-/* eslint-disable no-underscore-dangle */
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -19,7 +18,7 @@ export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 

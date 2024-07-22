@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload/database'
+import type { Connect } from 'payload'
 
 import mongoose from 'mongoose'
 
@@ -24,7 +23,7 @@ export const connect: Connect = async function connect(
 
   const urlToConnect = this.url
 
-  const connectionOptions: ConnectOptions & { useFacet: undefined } = {
+  const connectionOptions: { useFacet: undefined } & ConnectOptions = {
     autoIndex: true,
     ...this.connectOptions,
     useFacet: undefined,

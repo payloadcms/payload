@@ -1,9 +1,10 @@
 import type {
+  Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
+  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload/config'
+import type { Config, Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
@@ -131,7 +132,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
   }
 
 function vercelBlobStorageInternal(
-  options: VercelBlobStorageOptions & { baseUrl: string },
+  options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options

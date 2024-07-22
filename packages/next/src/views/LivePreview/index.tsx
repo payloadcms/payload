@@ -1,5 +1,4 @@
-import type { LivePreviewConfig } from 'payload/config'
-import type { EditViewComponent, TypeWithID } from 'payload/types'
+import type { EditViewComponent, LivePreviewConfig, TypeWithID } from 'payload'
 
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -24,7 +23,7 @@ export const LivePreviewView: EditViewComponent = async (props) => {
     } = {},
   } = initPageResult
 
-  let data: TypeWithID
+  let data: Record<string, unknown> | TypeWithID
 
   try {
     if (collectionConfig) {

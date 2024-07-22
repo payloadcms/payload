@@ -29,15 +29,15 @@ declare module 'react-select/dist/declarations/src' {
     IsMulti extends boolean,
     Group extends GroupBase<Option>,
   > extends CommonProps<Option, IsMulti, Group> {
-    customProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & CustomSelectProps
+    customProps?: CustomSelectProps & ReactSelectStateManagerProps<Option, IsMulti, Group>
   }
 }
 
-export type Option = {
+export type Option<TValue = unknown> = {
   [key: string]: unknown
   //* The ID is used to identify the option in the UI. If it doesn't exist and value cannot be transformed into a string, sorting won't work */
   id?: string
-  value: unknown
+  value: TValue
 }
 
 export type OptionGroup = {
@@ -45,7 +45,7 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type Props = {
+export type ReactSelectAdapterProps = {
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   className?: string
@@ -77,7 +77,7 @@ export type Props = {
   isSortable?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
-  onChange?: (value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  onChange?: (value: Option | Option[]) => void
   onInputChange?: (val: string) => void
   onMenuClose?: () => void
   onMenuOpen?: () => void

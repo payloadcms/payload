@@ -1,18 +1,16 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
 import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -40,19 +38,14 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = queryString.stringify(formQueryParams)
 
   const { componentMap } = useComponentMap()
 
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}?locale=${locale.code}`
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
     : null
-  const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${docID}` : ''
-  }?${formattedQueryParams}`
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -98,13 +91,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               onClick={() => toggleModal(drawerSlug)}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           <DocumentTitle />
         </Gutter>
       }
-      action={action}
       apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
       disableActions

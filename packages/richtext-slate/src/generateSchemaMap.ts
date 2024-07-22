@@ -1,4 +1,4 @@
-import type { Field, RichTextAdapter } from 'payload/types'
+import type { Field, RichTextAdapter } from 'payload'
 
 import type { AdapterArguments, RichTextCustomElement } from './types.js'
 

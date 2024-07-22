@@ -36,7 +36,7 @@ export const customCollectionParamViewPathBase = '/custom-param'
 export const customCollectionParamViewPath = `${customCollectionParamViewPathBase}/:slug`
 
 export const customAdminRoutes = {
-  logout: '/custom-logout',
   inactivity: '/custom-inactivity',
   admin: '/',
+  logout: '/custom-logout',
 }

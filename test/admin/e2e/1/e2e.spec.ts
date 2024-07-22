@@ -1,15 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 
-import type { Geo, Post } from '../../payload-types.js'
-import type { Config } from '../../payload-types.js'
+import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -35,6 +34,8 @@ import {
   slugPluralLabel,
 } from '../../shared.js'
 import {
+  customFieldsSlug,
+  customGlobalViews2GlobalSlug,
   customIdCollectionId,
   customViews2CollectionSlug,
   disableDuplicateSlug,
@@ -71,6 +72,7 @@ describe('admin1', () => {
   let postsUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let customFieldsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getAdminRoutes>
@@ -90,6 +92,7 @@ describe('admin1', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
     const context = await browser.newContext()
@@ -100,7 +103,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
 
@@ -112,7 +115,7 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('metadata', () => {
@@ -291,14 +294,6 @@ describe('admin1', () => {
       await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-
-      // Ensure auto-login logged the user back in
-
-      await expect(() => expect(page.url()).toBe(`${serverURL}${adminRoutes.routes.admin}`)).toPass(
-        {
-          timeout: POLL_TOPASS_TIMEOUT,
-        },
-      )
     })
   })
 
@@ -479,6 +474,38 @@ describe('admin1', () => {
       const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
+    })
+
+    test('global — should render custom tab label', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
+
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+
+      await expect(docTab).toBeVisible()
+      await expect(title).toContainText('Custom Tab Label View')
+    })
+
+    test('global — should render custom tab component', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.custom-doc-tab').first()
+
+      await expect(docTab).toBeVisible()
+      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(title).toContainText('Custom View With Tab Component')
+    })
+  })
+
+  describe('custom fields', () => {
+    describe('select field', () => {
+      test('should render custom select options', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.locator('#field-customSelectField .rs__control').click()
+        await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
+      })
     })
   })
 

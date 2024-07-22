@@ -1,5 +1,4 @@
-import type { FindArgs } from 'payload/database'
-import type { Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { Field, FindArgs, PayloadRequest, TypeWithID } from 'payload'
 
 import { inArray, sql } from 'drizzle-orm'
 
@@ -25,13 +24,13 @@ export const findMany = async function find({
   locale,
   page = 1,
   pagination,
-  req = {} as PayloadRequestWithData,
+  req = {} as PayloadRequest,
   skip,
   sort,
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
+  const db = adapter.sessions[await req.transactionID]?.db || adapter.drizzle
   const table = adapter.tables[tableName]
 
   const limit = limitArg ?? 10

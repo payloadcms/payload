@@ -95,7 +95,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 ### Security
 
-The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are all configured to ensure that the admin panel and front-end can communicate with each other securely.
+The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/overview#options) settings are all configured to ensure that the admin panel and front-end can communicate with each other securely.
 
 For additional help, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
 

@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
@@ -16,7 +16,7 @@ import type {
 
 import {
   closeNav,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -30,6 +30,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   createNotUpdateCollectionSlug,
+  disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
   noAdminAccessEmail,
@@ -67,6 +68,7 @@ describe('access control', () => {
   let restrictedVersionsUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
+  let disabledFields: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
   let logoutURL: string
@@ -83,13 +85,14 @@ describe('access control', () => {
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
+    disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
 
     const {
       admin: {
@@ -419,9 +422,9 @@ describe('access control', () => {
       existingDoc = await payload.create({
         collection: docLevelAccessSlug,
         data: {
+          approvedForRemoval: false,
           approvedTitle: 'Title',
           lockTitle: true,
-          approvedForRemoval: false,
         },
       })
     })
@@ -463,12 +466,12 @@ describe('access control', () => {
       await page.waitForURL(logoutURL)
 
       await login({
-        page,
-        serverURL,
         data: {
           email: noAdminAccessEmail,
           password: 'test',
         },
+        page,
+        serverURL,
       })
 
       await expect(page.locator('.next-error-h1')).toBeVisible()
@@ -478,12 +481,12 @@ describe('access control', () => {
 
       // Log back in for the next test
       await login({
-        page,
-        serverURL,
         data: {
           email: devUser.email,
           password: devUser.password,
         },
+        page,
+        serverURL,
       })
     })
 
@@ -497,9 +500,9 @@ describe('access control', () => {
       await page.goto(logoutURL)
       await page.waitForURL(logoutURL)
 
-      const nonAdminUser: NonAdminUser & {
+      const nonAdminUser: {
         token?: string
-      } = await payload.login({
+      } & NonAdminUser = await payload.login({
         collection: nonAdminUserSlug,
         data: {
           email: nonAdminUserEmail,
@@ -510,8 +513,8 @@ describe('access control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          value: nonAdminUser.token,
           url: serverURL,
+          value: nonAdminUser.token,
         },
       ])
 
@@ -521,12 +524,39 @@ describe('access control', () => {
       await expect(page.locator('.next-error-h1')).toBeVisible()
     })
   })
+
+  describe('read-only from access control', () => {
+    test('should be read-only when update returns false', async () => {
+      await page.goto(disabledFields.create)
+
+      // group field
+      await page.locator('#field-group__text').fill('group')
+
+      // named tab
+      await page.locator('#field-namedTab__text').fill('named tab')
+
+      // unnamed tab
+      await page.locator('.tabs-field__tab-button').nth(1).click()
+      await page.locator('#field-unnamedTab').fill('unnamed tab')
+
+      // array field
+      await page.locator('#field-array button').click()
+      await page.locator('#field-array__0__text').fill('array row 0')
+
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-group__text')).toBeDisabled()
+      await expect(page.locator('#field-namedTab__text')).toBeDisabled()
+      await page.locator('.tabs-field__tab-button').nth(1).click()
+      await expect(page.locator('#field-unnamedTab')).toBeDisabled()
+      await expect(page.locator('#field-array__0__text')).toBeDisabled()
+    })
+  })
 })
 
-// eslint-disable-next-line @typescript-eslint/require-await
-async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown>> {
+async function createDoc(data: any): Promise<Record<string, unknown> & TypeWithID> {
   return payload.create({
     collection: slug,
     data,
-  }) as any as Promise<TypeWithID & Record<string, unknown>>
+  }) as any as Promise<Record<string, unknown> & TypeWithID>
 }

@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
 

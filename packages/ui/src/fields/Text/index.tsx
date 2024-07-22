@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ import './index.scss'
 
 export { TextFieldProps, TextInput, TextInputProps }
 
-const TextField: React.FC<TextFieldProps> = (props) => {
+const _TextField: React.FC<TextFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -62,7 +62,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -153,4 +153,4 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 }
 
-export const Text = withCondition(TextField)
+export const TextField = withCondition(_TextField)

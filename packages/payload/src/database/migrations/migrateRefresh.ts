@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -28,7 +27,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = { payload } as PayloadRequestWithData
+  const req = { payload } as PayloadRequest
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()

@@ -1,5 +1,4 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
@@ -9,7 +8,6 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import {
   useFormInitializing,
@@ -20,6 +18,7 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
 import { useTabs } from '../Tabs/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -28,16 +27,15 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export type GroupFieldProps = FormFieldBase & {
+export type GroupFieldProps = {
   fieldMap: FieldMap
   forceRender?: boolean
   hideGutter?: boolean
   name?: string
-  permissions: FieldPermissions
   width?: string
-}
+} & FormFieldBase
 
-const GroupField: React.FC<GroupFieldProps> = (props) => {
+export const _GroupField: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -126,4 +124,4 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
 
 export { GroupProvider, useGroup }
 
-export const Group = withCondition(GroupField)
+export const GroupField = withCondition(_GroupField)

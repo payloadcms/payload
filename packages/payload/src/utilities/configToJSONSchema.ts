@@ -3,6 +3,7 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
+import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
@@ -112,6 +113,25 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
 }
 
 /**
+ * Generates the JSON Schema for database configuration
+ *
+ * @example { db: idType: string }
+ */
+function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
+  const defaultIDType: JSONSchema4 =
+    config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      defaultIDType,
+    },
+    required: ['defaultIDType'],
+  }
+}
+
+/**
  * Returns a JSON Schema Type with 'null' added if the field is not required.
  */
 export function withNullableJSONSchemaType(
@@ -152,6 +172,7 @@ export function fieldsToJSONSchema(
         if (isRequired) requiredFieldNames.add(field.name)
 
         let fieldSchema: JSONSchema4
+
         switch (field.type) {
           case 'text':
             if (field.hasMany === true) {
@@ -189,7 +210,7 @@ export function fieldsToJSONSchema(
           }
 
           case 'json': {
-            fieldSchema = {
+            fieldSchema = field.jsonSchema?.schema || {
               type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
             }
             break
@@ -516,6 +537,12 @@ export function fieldsToJSONSchema(
           }
         }
 
+        if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
+          for (const schema of field.typescriptSchema) {
+            fieldSchema = schema({ jsonSchema: fieldSchema })
+          }
+        }
+
         if (fieldSchema && fieldAffectsData(field)) {
           fieldSchemas.set(field.name, fieldSchema)
         }
@@ -581,6 +608,98 @@ export function entityToJSONSchema(
   }
 }
 
+const fieldType: JSONSchema4 = {
+  type: 'string',
+  required: false,
+}
+const generateAuthFieldTypes = (
+  loginWithUsername: Auth['loginWithUsername'],
+  withPassword = false,
+): JSONSchema4 => {
+  const passwordField = {
+    password: fieldType,
+  }
+
+  if (loginWithUsername) {
+    if (loginWithUsername.allowEmailLogin) {
+      return {
+        additionalProperties: false,
+        oneOf: [
+          {
+            additionalProperties: false,
+            properties: { email: fieldType, ...(withPassword ? { password: fieldType } : {}) },
+            required: ['email', ...(withPassword ? ['password'] : [])],
+          },
+          {
+            additionalProperties: false,
+            properties: { username: fieldType, ...(withPassword ? { password: fieldType } : {}) },
+            required: ['username', ...(withPassword ? ['password'] : [])],
+          },
+        ],
+      }
+    }
+
+    return {
+      additionalProperties: false,
+      properties: {
+        username: fieldType,
+        ...(withPassword ? { password: fieldType } : {}),
+      },
+      required: ['username', ...(withPassword ? ['password'] : [])],
+    }
+  }
+
+  return {
+    additionalProperties: false,
+    properties: {
+      email: fieldType,
+      ...(withPassword ? { password: fieldType } : {}),
+    },
+    required: ['email', ...(withPassword ? ['password'] : [])],
+  }
+}
+
+export function authCollectionToOperationsJSONSchema(
+  config: SanitizedCollectionConfig,
+): JSONSchema4 {
+  const loginWithUsername = config.auth?.loginWithUsername
+  const generatedFields: JSONSchema4 = generateAuthFieldTypes(loginWithUsername)
+  const generatedFieldsWithPassword: JSONSchema4 = generateAuthFieldTypes(loginWithUsername, true)
+
+  const properties: JSONSchema4['properties'] = {
+    forgotPassword: generatedFields,
+    login: generatedFieldsWithPassword,
+    registerFirstUser: generatedFieldsWithPassword,
+    unlock: generatedFields,
+  }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+    title: `${singular(toWords(`${config.slug}`, true))}AuthOperations`,
+  }
+}
+
+function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
+  const properties = collections.reduce((acc, collection) => {
+    if (collection.auth) {
+      acc[collection.slug] = {
+        $ref: `#/definitions/auth/${collection.slug}`,
+      }
+    }
+    return acc
+  }, {})
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
@@ -601,18 +720,42 @@ export function configToJSONSchema(
     return acc
   }, {})
 
-  return {
+  const authOperationDefinitions = [...config.collections]
+    .filter(({ auth }) => Boolean(auth))
+    .reduce(
+      (acc, authCollection) => {
+        acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
+        return acc
+      },
+      { auth: {} },
+    )
+
+  let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
-    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    definitions: {
+      ...entityDefinitions,
+      ...Object.fromEntries(interfaceNameDefinitions),
+      ...authOperationDefinitions,
+    },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
     properties: {
+      auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
   }
+
+  if (config?.typescript?.schema?.length) {
+    for (const schema of config.typescript.schema) {
+      jsonSchema = schema({ jsonSchema })
+    }
+  }
+
+  return jsonSchema
 }

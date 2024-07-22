@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+
 import { ValidationError } from '../../../errors/index.js'
 
 const defaultPasswordValidator = (password: string): string | true => {
@@ -24,16 +26,21 @@ function pbkdf2Promisified(password: string, salt: string): Promise<Buffer> {
 }
 
 type Args = {
+  collection: SanitizedCollectionConfig
   password: string
 }
 
 export const generatePasswordSaltHash = async ({
+  collection,
   password,
 }: Args): Promise<{ hash: string; salt: string }> => {
   const validationResult = defaultPasswordValidator(password)
 
   if (typeof validationResult === 'string') {
-    throw new ValidationError([{ field: 'password', message: validationResult }])
+    throw new ValidationError({
+      collection: collection?.slug,
+      errors: [{ field: 'password', message: validationResult }],
+    })
   }
 
   const saltBuffer = await randomBytes()

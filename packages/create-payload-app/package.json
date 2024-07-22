@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.0.0-beta.45",
+  "version": "3.0.0-beta.67",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -40,7 +40,7 @@
   ],
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "pack-template-files": "tsx src/scripts/pack-template-files.ts",
     "prepublishOnly": "pnpm clean && pnpm build",
@@ -66,7 +66,6 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.5",
-    "temp-dir": "2.0.0"
+    "@types/node": "20.12.5"
   }
 }

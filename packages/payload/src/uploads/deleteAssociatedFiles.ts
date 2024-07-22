@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { ErrorDeletingFile } from '../errors/index.js'
@@ -14,7 +14,7 @@ type Args = {
   doc: Record<string, unknown>
   files?: FileToSave[]
   overrideDelete: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
@@ -43,11 +43,10 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       // Since forEach will not wait until unlink is finished it could
       // happen that two operations will try to delete the same file.
       // To avoid this it is recommended to use "sync" instead
-      // eslint-disable-next-line no-restricted-syntax
+
       for (const size of sizes) {
         const sizeToDelete = `${staticPath}/${size.filename}`
         try {
-          // eslint-disable-next-line no-await-in-loop
           if (await fileExists(sizeToDelete)) {
             fs.unlinkSync(sizeToDelete)
           }

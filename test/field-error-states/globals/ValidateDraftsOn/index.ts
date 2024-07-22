@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import { slugs } from '../../shared.js'
 
@@ -19,8 +19,8 @@ export const GlobalValidateDraftsOn: GlobalConfig = {
   ],
   versions: {
     drafts: {
-      validate: true,
       autosave: true,
+      validate: true,
     },
   },
 }

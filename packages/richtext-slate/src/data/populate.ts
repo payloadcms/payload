@@ -1,7 +1,6 @@
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Collection, Field, RichTextField } from 'payload/types'
+import type { Collection, Field, PayloadRequest, RichTextField } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload/utilities'
+import { createDataloaderCacheKey } from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 
@@ -13,7 +12,7 @@ type Arguments = {
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   key: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
@@ -28,11 +27,11 @@ export const populate = async ({
   overrideAccess,
   req,
   showHiddenFields,
-}: Omit<Arguments, 'field'> & {
+}: {
   collection: Collection
   field: Field
   id: string
-}): Promise<void> => {
+} & Omit<Arguments, 'field'>): Promise<void> => {
   const dataRef = data as Record<string, unknown>
 
   const doc = await req.payloadDataLoader.load(

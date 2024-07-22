@@ -7,18 +7,41 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     posts: Post;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {
     menu: Menu;
+    'custom-ts': CustomT;
   };
   locale: null;
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -122,6 +145,36 @@ export interface Menu {
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ts".
+ */
+export interface CustomT {
+  id: string;
+  custom?: 'hello' | 'world';
+  withDefinitionsUsage?: ObjectWithNumber[];
+  json: {
+    id: string;
+    name: string;
+    age?: number;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "objectWithNumber".
+ */
+export interface ObjectWithNumber {
+  id?: number;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.45",
+  "version": "3.0.0-beta.67",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -42,13 +42,23 @@
   "exports": {
     ".": {
       "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
+    "./node": {
+      "import": "./src/exports/node.ts",
+      "types": "./src/exports/node.ts",
+      "default": "./src/exports/node.ts"
+    },
+    "./i18n/*": {
+      "import": "./src/exports/i18n/*.ts",
+      "types": "./src/exports/i18n/*.ts",
+      "default": "./src/exports/i18n/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -57,17 +67,13 @@
     "payload": "bin.js"
   },
   "files": [
-    "bin.js",
     "dist",
-    "docs",
-    "*.js",
-    "*.d.ts",
-    "!jest.config.js",
-    "!jest.components.config.js"
+    "bin.js"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
+    "build:esbuild": "echo skipping esbuild",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
@@ -80,12 +86,11 @@
   "dependencies": {
     "@next/env": "^15.0.0-rc.0",
     "@payloadcms/translations": "workspace:*",
-    "@swc-node/core": "^1.13.0",
-    "@swc-node/sourcemap-support": "^0.5.0",
+    "@swc-node/core": "1.13.1",
+    "@swc-node/sourcemap-support": "0.5.0",
     "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
-    "conf": "10.2.0",
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
@@ -98,7 +103,6 @@
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
-    "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
@@ -106,29 +110,30 @@
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
     "ts-essentials": "7.0.3",
-    "uuid": "^9.0.1"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express-fileupload": "1.4.1",
     "@types/joi": "14.3.4",
-    "@types/json-schema": "7.0.12",
+    "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
-    "@types/mkdirp": "1.0.2",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
+    "esbuild": "0.23.0",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.4.13",
+    "@swc/core": "^1.6.13",
     "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
@@ -143,13 +148,23 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
-      "./*": {
-        "import": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
+      "./node": {
+        "import": "./dist/exports/node.js",
+        "types": "./dist/exports/node.d.ts",
+        "default": "./dist/exports/node.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
+      },
+      "./i18n/*": {
+        "import": "./dist/exports/i18n/*.js",
+        "types": "./dist/exports/i18n/*.d.ts",
+        "default": "./dist/exports/i18n/*.js"
       }
     },
     "main": "./dist/index.js",

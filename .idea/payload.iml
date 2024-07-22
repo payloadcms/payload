@@ -74,6 +74,7 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/translations/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/ui/.swc" />
       <excludeFolder url="file://$MODULE_DIR$/packages/ui/.turbo" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/ui/dist" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

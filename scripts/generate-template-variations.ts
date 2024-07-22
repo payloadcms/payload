@@ -11,12 +11,12 @@
 
 import type { DbType, StorageAdapterType } from 'packages/create-payload-app/src/types.js'
 
+import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { execSync } from 'child_process'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -56,7 +56,7 @@ async function main() {
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          `${templateRepoUrlBase}/${dirname}` +
+          `${templateRepoUrlBase}/with-vercel-postgres` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -76,7 +76,7 @@ async function main() {
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
-          `${templateRepoUrlBase}/${dirname}` +
+          `${templateRepoUrlBase}/with-vercel-mongodb` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +

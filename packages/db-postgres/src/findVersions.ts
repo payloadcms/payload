@@ -1,7 +1,6 @@
-import type { FindVersions } from 'payload/database'
-import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
+import type { FindVersions, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
@@ -16,7 +15,7 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     skip,
     sort: sortArg,
     where,

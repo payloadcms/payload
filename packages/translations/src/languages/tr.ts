@@ -4,6 +4,7 @@ export const trTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesap',
     accountOfCurrentUser: 'Şu anki kullanıcının hesabı',
+    accountVerified: 'Hesap başarıyla doğrulandı.',
     alreadyActivated: 'Hesap zaten etkinleştirildi',
     alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
     apiKey: 'API Anahtarı',
@@ -17,6 +18,7 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',
     emailNotValid: 'Girilen e-posta geçersiz',
+    emailOrUsername: 'E-posta veya Kullanıcı Adı',
     emailSent: 'E-posta gönderildi',
     emailVerified: 'E-posta başarıyla doğrulandı.',
     enableAPIKey: 'Api anahtarını etkinleştir',
@@ -26,6 +28,8 @@ export const trTranslations: DefaultTranslationsObject = {
     forgotPasswordEmailInstructions:
       'Lütfen e-posta adresinizi aşağıdaki alana girin. Parolanızı nasıl sıfırlayacağınızı gösteren bir e-posta adresi alacaksınız.',
     forgotPasswordQuestion: 'Parolanızı mı unuttunuz?',
+    forgotPasswordUsernameInstructions:
+      'Lütfen kullanıcı adınızı aşağıya girin. Şifrenizi nasıl sıfırlayacağınıza dair talimatlar, kullanıcı adınızla ilişkilendirilmiş e-posta adresine gönderilecektir.',
     generate: 'Oluştur',
     generateNewAPIKey: 'Yeni bir API anahtarı oluştur',
     generatingNewAPIKeyWillInvalidate:
@@ -62,6 +66,8 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyUnlocked: 'Hesabın kilidi başarıyla açıldı',
     tokenRefreshSuccessful: 'Token yenileme başarılı.',
     unableToVerify: 'Doğrulama başarısız',
+    username: 'Kullanıcı Adı',
+    usernameNotValid: 'Sağlanan kullanıcı adı geçerli değil.',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',
@@ -114,6 +120,8 @@ export const trTranslations: DefaultTranslationsObject = {
     userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',
+    usernameAlreadyRegistered: 'Verilen kullanıcı adına sahip bir kullanıcı zaten kayıtlı.',
+    usernameOrPasswordIncorrect: 'Sağlanan kullanıcı adı veya şifre yanlış.',
     valueMustBeUnique: 'Değer benzersiz olmalıdır',
     verificationTokenInvalid: 'Doğrulama tokeni geçersiz.',
   },
@@ -293,6 +301,7 @@ export const trTranslations: DefaultTranslationsObject = {
     updating: 'Güncelleniyor',
     uploading: 'Yükleniyor',
     user: 'kullanıcı',
+    username: 'Kullanıcı Adı',
     users: 'kullanıcı',
     value: 'Değer',
     welcome: 'Hoşgeldiniz',
@@ -301,6 +310,7 @@ export const trTranslations: DefaultTranslationsObject = {
     contains: 'içerir',
     equals: 'eşittir',
     exists: 'var',
+    intersects: 'kesişir',
     isGreaterThan: 'şundan büyüktür',
     isGreaterThanOrEqualTo: 'büyüktür veya eşittir',
     isIn: 'içinde',
@@ -310,8 +320,10 @@ export const trTranslations: DefaultTranslationsObject = {
     isNotEqualTo: 'eşit değildir',
     isNotIn: 'içinde değil',
     near: 'yakın',
+    within: 'içinde',
   },
   upload: {
+    addFile: 'Dosya ekle',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -326,6 +338,7 @@ export const trTranslations: DefaultTranslationsObject = {
     height: 'Yükseklik',
     lessInfo: 'Daha az bilgi',
     moreInfo: 'Daha fazla bilgi',
+    pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',
     selectFile: 'Dosya seç',
@@ -353,6 +366,8 @@ export const trTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Bu alana en az iki rakam girilmesi zorunludur.',
     shorterThanMax: 'Bu alan {{maxLength}} karakterden daha kısa olmalıdır.',
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
+    username:
+      'Lütfen geçerli bir kullanıcı adı girin. Harfler, numaralar, kısa çizgiler, noktalar ve alt çizgiler içerebilir.',
     validUploadID: "'Bu alan geçerli bir karşıya yükleme ID'sine sahip değil.'",
   },
   version: {
@@ -375,12 +390,15 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmUnpublish: 'Yayından kaldırmayı onayla',
     confirmVersionRestoration: 'Sürümü Geri Getirmeyi Onayla',
     currentDocumentStatus: 'Şu an {{docStatus}} döküman',
+    currentDraft: 'Mevcut Taslak',
+    currentPublishedVersion: 'Mevcut Yayınlanan Sürüm',
     draft: 'Taslak',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
     preview: 'Önizleme',
+    previouslyPublished: 'Daha Önce Yayınlanmış',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',
     publish: 'Yayınla',
     publishChanges: 'Değişiklikleri yayınla',

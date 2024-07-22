@@ -1,6 +1,6 @@
-import type { Field, PayloadRequestWithData } from 'payload/types'
+import type { Field, PayloadRequest } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
 import { populate } from './populate.js'
 import { recurseRichText } from './richTextRelationshipPromise.js'
@@ -13,7 +13,7 @@ type NestedRichTextFieldsArgs = {
   fields: Field[]
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
@@ -148,7 +148,7 @@ export const recurseNestedFields = ({
       field.tabs.forEach((tab) => {
         recurseNestedFields({
           currentDepth,
-          data,
+          data: tabHasName(tab) ? data[tab.name] : data,
           depth,
           draft,
           fields: tab.fields,

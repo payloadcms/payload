@@ -9,9 +9,9 @@ import { CMSLink } from '../../components/Link'
 type Props = Extract<Page['layout'][0], { blockType: 'content' }>
 
 export const ContentBlock: React.FC<
-  Props & {
+  {
     id?: string
-  }
+  } & Props
 > = (props) => {
   const { columns } = props
 
@@ -38,7 +38,7 @@ export const ContentBlock: React.FC<
                 key={index}
               >
                 <RichText content={richText} enableGutter={false} />
-                {enableLink && <CMSLink className="classes.link" {...link} />}
+                {enableLink && <CMSLink {...link} />}
               </div>
             )
           })}

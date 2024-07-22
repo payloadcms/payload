@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import deleteOperation from '../operations/delete.js'
 
@@ -16,7 +16,7 @@ export const deleteHandler: PayloadHandler = async (incomingReq): Promise<Respon
     data = {}
   }
 
-  const reqWithData: PayloadRequestWithData = incomingReq
+  const reqWithData: PayloadRequest = incomingReq
 
   if (data) {
     reqWithData.data = data

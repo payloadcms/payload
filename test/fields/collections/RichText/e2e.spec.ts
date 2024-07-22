@@ -2,11 +2,11 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -43,7 +43,7 @@ describe('Rich Text', () => {
       snapshotKey: 'fieldsRichTextTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -58,7 +58,7 @@ describe('Rich Text', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   async function navigateToRichTextFields() {

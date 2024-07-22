@@ -1,24 +1,26 @@
-import type { Payload, RequestContext } from '../../../index.js'
-import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  CollectionSlug,
+  Payload,
+  RequestContext,
+} from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { unlockOperation } from '../unlock.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   context?: RequestContext
-  data: {
-    email
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
 }
 
-async function localUnlock<T extends keyof GeneratedTypes['collections']>(
+async function localUnlock<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
+  options: Options<TSlug>,
 ): Promise<boolean> {
   const { collection: collectionSlug, data, overrideAccess = true } = options
 
@@ -30,7 +32,7 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  return unlockOperation({
+  return unlockOperation<TSlug>({
     collection,
     data,
     overrideAccess,

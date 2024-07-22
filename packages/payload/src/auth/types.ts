@@ -1,7 +1,7 @@
 import type { DeepRequired } from 'ts-essentials'
 
 import type { Payload } from '../index.js'
-import type { PayloadRequestWithData, Where } from '../types/index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 
 export type Permission = {
   permission: boolean
@@ -64,8 +64,9 @@ export type Permissions = {
 export type User = {
   [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
   collection: string
-  email: string
+  email?: string
   id: number | string
+  username?: string
 }
 
 /**
@@ -74,42 +75,52 @@ export type User = {
  */
 export type ClientUser = Omit<User, 'collection'>
 
-type GenerateVerifyEmailHTML = (args: {
-  req: PayloadRequestWithData
+type GenerateVerifyEmailHTML<TUser = any> = (args: {
+  req: PayloadRequest
   token: string
-  user: any
-}) => Promise<string> | string
-type GenerateVerifyEmailSubject = (args: {
-  req: PayloadRequestWithData
-  token: string
-  user: any
+  user: TUser
 }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: {
-  req?: PayloadRequestWithData
-  token?: string
-  user?: unknown
+type GenerateVerifyEmailSubject<TUser = any> = (args: {
+  req: PayloadRequest
+  token: string
+  user: TUser
 }) => Promise<string> | string
-type GenerateForgotPasswordEmailSubject = (args?: {
-  req?: PayloadRequestWithData
+
+type GenerateForgotPasswordEmailHTML<TUser = any> = (args?: {
+  req?: PayloadRequest
   token?: string
-  user?: any
+  user?: TUser
+}) => Promise<string> | string
+
+type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
+  req?: PayloadRequest
+  token?: string
+  user?: TUser
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
-  cookies?: Map<string, string>
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
 }
-export type AuthStrategyFunction = ({
-  headers,
-  isGraphQL,
-  payload,
-}: AuthStrategyFunctionArgs) => Promise<User | null> | User | null
+
+export type AuthStrategyResult = {
+  responseHeaders?: Headers
+  user: User | null
+}
+
+export type AuthStrategyFunction = (
+  args: AuthStrategyFunctionArgs,
+) => AuthStrategyResult | Promise<AuthStrategyResult>
 export type AuthStrategy = {
   authenticate: AuthStrategyFunction
   name: string
+}
+
+export type LoginWithUsernameOptions = {
+  allowEmailLogin?: boolean
+  requireEmail?: boolean
 }
 
 export interface IncomingAuthType {
@@ -125,6 +136,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
   lockTime?: number
+  loginWithUsername?: LoginWithUsernameOptions | boolean
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: AuthStrategy[]
@@ -143,11 +155,13 @@ export type VerifyConfig = {
   generateEmailSubject?: GenerateVerifyEmailSubject
 }
 
-export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'verify'> {
+export interface Auth
+  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  loginWithUsername: LoginWithUsernameOptions | false
   verify?: VerifyConfig | boolean
 }
 

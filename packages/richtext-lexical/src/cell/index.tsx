@@ -1,27 +1,26 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { CellComponentProps } from 'payload/types'
+import type { CellComponentProps } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { useTableCell } from '@payloadcms/ui/elements/Table'
-import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
+import { useClientFunctions, useTableCell } from '@payloadcms/ui'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../field/features/types.js'
-import type { SanitizedClientEditorConfig } from '../field/lexical/config/types.js'
+import type { FeatureProviderClient } from '../features/typesClient.js'
+import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
 
-import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default.js'
-import { loadClientFeatures } from '../field/lexical/config/client/loader.js'
-import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize.js'
-import { getEnabledNodes } from '../field/lexical/nodes/index.js'
+import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
+import { loadClientFeatures } from '../lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
+import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
-  CellComponentProps & {
+  {
     admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
-  }
+  } & CellComponentProps
 > = (props) => {
   const { admin, lexicalEditorConfig, richTextComponentMap } = props
 
@@ -35,7 +34,9 @@ export const RichTextCell: React.FC<
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
 
-  const [featureProviders, setFeatureProviders] = useState<FeatureProviderClient<unknown>[]>([])
+  const [featureProviders, setFeatureProviders] = useState<
+    FeatureProviderClient<unknown, unknown>[]
+  >([])
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
@@ -56,12 +57,12 @@ export const RichTextCell: React.FC<
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
+      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
       let featureProvidersAndComponentsLoaded = 0 // feature providers and components only
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          if (!key.includes('.components.')) {
+          if (!key.includes('.lexical_internal_components.')) {
             featureProvidersLocal.push(plugin)
           }
           featureProvidersAndComponentsLoaded++
@@ -166,7 +167,9 @@ export const RichTextCell: React.FC<
           featureProviderComponents.map((featureProvider) => {
             // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
             const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(`feature.${featureProvider.key}.components.`),
+              key.startsWith(
+                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
+              ),
             )
 
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
@@ -180,7 +183,7 @@ export const RichTextCell: React.FC<
                       return FeatureComponent
                     })
                   : null}
-                {featureProvider.ClientComponent}
+                {featureProvider.ClientFeature}
               </React.Fragment>
             )
           })}

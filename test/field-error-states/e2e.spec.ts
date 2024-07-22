@@ -5,11 +5,7 @@ import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import {
-  ensureAutoLoginAndCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { slugs } from './shared.js'
@@ -35,7 +31,7 @@ describe('field error states', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async () => {
@@ -71,7 +67,6 @@ describe('field error states', () => {
   })
 
   describe('draft validations', () => {
-    // eslint-disable-next-line playwright/expect-expect
     test('should not validate drafts by default', async () => {
       await page.goto(validateDraftsOff.create)
       await saveDocAndAssert(page, '#action-save-draft')

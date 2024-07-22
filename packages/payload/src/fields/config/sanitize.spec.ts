@@ -1,6 +1,4 @@
-import { Config } from '../../config/types.js'
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
-import { sanitizeFields } from './sanitize.js'
+import type { Config } from '../../config/types.js'
 import type {
   ArrayField,
   Block,
@@ -11,14 +9,17 @@ import type {
   TextField,
 } from './types.js'
 
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
+import { sanitizeFields } from './sanitize.js'
+
 describe('sanitizeFields', () => {
   const config = {} as Config
   it('should throw on missing type field', async () => {
     const fields: Field[] = [
       // @ts-expect-error
       {
-        label: 'some-collection',
         name: 'Some Collection',
+        label: 'some-collection',
       },
     ]
     await expect(async () => {
@@ -32,9 +33,9 @@ describe('sanitizeFields', () => {
   it('should throw on invalid field name', async () => {
     const fields: Field[] = [
       {
-        label: 'some.collection',
         name: 'some.collection',
         type: 'text',
+        label: 'some.collection',
       },
     ]
     await expect(async () => {
@@ -68,9 +69,9 @@ describe('sanitizeFields', () => {
     it('should allow auto-label override', async () => {
       const fields: Field[] = [
         {
-          label: 'Do not label',
           name: 'someField',
           type: 'text',
+          label: 'Do not label',
         },
       ]
       const sanitizedField = (
@@ -89,9 +90,9 @@ describe('sanitizeFields', () => {
       it('should allow label opt-out', async () => {
         const fields: Field[] = [
           {
-            label: false,
             name: 'someField',
             type: 'text',
+            label: false,
           },
         ]
         const sanitizedField = (
@@ -108,6 +109,8 @@ describe('sanitizeFields', () => {
 
       it('should allow label opt-out for arrays', async () => {
         const arrayField: ArrayField = {
+          name: 'items',
+          type: 'array',
           fields: [
             {
               name: 'itemName',
@@ -115,8 +118,6 @@ describe('sanitizeFields', () => {
             },
           ],
           label: false,
-          name: 'items',
-          type: 'array',
         }
         const sanitizedField = (
           await sanitizeFields({
@@ -133,20 +134,20 @@ describe('sanitizeFields', () => {
       it('should allow label opt-out for blocks', async () => {
         const fields: Field[] = [
           {
+            name: 'noLabelBlock',
+            type: 'blocks',
             blocks: [
               {
+                slug: 'number',
                 fields: [
                   {
                     name: 'testNumber',
                     type: 'number',
                   },
                 ],
-                slug: 'number',
               },
             ],
             label: false,
-            name: 'noLabelBlock',
-            type: 'blocks',
           },
         ]
         const sanitizedField = (
@@ -166,14 +167,14 @@ describe('sanitizeFields', () => {
     it('should label arrays with plural and singular', async () => {
       const fields: Field[] = [
         {
+          name: 'items',
+          type: 'array',
           fields: [
             {
               name: 'itemName',
               type: 'text',
             },
           ],
-          name: 'items',
-          type: 'array',
         },
       ]
       const sanitizedField = (
@@ -192,14 +193,14 @@ describe('sanitizeFields', () => {
     it('should label blocks with plural and singular', async () => {
       const fields: Field[] = [
         {
-          blocks: [
-            {
-              fields: [{ name: 'testNumber', type: 'number' }],
-              slug: 'number',
-            },
-          ],
           name: 'specialBlock',
           type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              fields: [{ name: 'testNumber', type: 'number' }],
+            },
+          ],
         },
       ]
       const sanitizedField = (
@@ -225,10 +226,10 @@ describe('sanitizeFields', () => {
       const validRelationships = ['some-collection']
       const fields: Field[] = [
         {
-          label: 'my-relationship',
           name: 'My Relationship',
-          relationTo: 'some-collection',
           type: 'relationship',
+          label: 'my-relationship',
+          relationTo: 'some-collection',
         },
       ]
       await expect(async () => {
@@ -240,10 +241,10 @@ describe('sanitizeFields', () => {
       const validRelationships = ['some-collection', 'another-collection']
       const fields: Field[] = [
         {
-          label: 'my-relationship',
           name: 'My Relationship',
-          relationTo: ['some-collection', 'another-collection'],
           type: 'relationship',
+          label: 'my-relationship',
+          relationTo: ['some-collection', 'another-collection'],
         },
       ]
       await expect(async () => {
@@ -254,22 +255,22 @@ describe('sanitizeFields', () => {
     it('should not throw on valid relationship inside blocks', async () => {
       const validRelationships = ['some-collection']
       const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
         fields: [
           {
-            label: 'my-relationship',
             name: 'My Relationship',
-            relationTo: 'some-collection',
             type: 'relationship',
+            label: 'my-relationship',
+            relationTo: 'some-collection',
           },
         ],
-        slug: 'relationshipBlock',
       }
       const fields: Field[] = [
         {
-          blocks: [relationshipBlock],
-          label: 'Layout Blocks',
           name: 'layout',
           type: 'blocks',
+          blocks: [relationshipBlock],
+          label: 'Layout Blocks',
         },
       ]
       await expect(async () => {
@@ -281,10 +282,10 @@ describe('sanitizeFields', () => {
       const validRelationships = ['some-collection']
       const fields: Field[] = [
         {
-          label: 'my-relationship',
           name: 'My Relationship',
-          relationTo: 'not-valid',
           type: 'relationship',
+          label: 'my-relationship',
+          relationTo: 'not-valid',
         },
       ]
       await expect(async () => {
@@ -296,10 +297,10 @@ describe('sanitizeFields', () => {
       const validRelationships = ['some-collection', 'another-collection']
       const fields: Field[] = [
         {
-          label: 'my-relationship',
           name: 'My Relationship',
-          relationTo: ['some-collection', 'not-valid'],
           type: 'relationship',
+          label: 'my-relationship',
+          relationTo: ['some-collection', 'not-valid'],
         },
       ]
       await expect(async () => {
@@ -310,22 +311,22 @@ describe('sanitizeFields', () => {
     it('should throw on invalid relationship inside blocks', async () => {
       const validRelationships = ['some-collection']
       const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
         fields: [
           {
-            label: 'my-relationship',
             name: 'My Relationship',
-            relationTo: 'not-valid',
             type: 'relationship',
+            label: 'my-relationship',
+            relationTo: 'not-valid',
           },
         ],
-        slug: 'relationshipBlock',
       }
       const fields: Field[] = [
         {
-          blocks: [relationshipBlock],
-          label: 'Layout Blocks',
           name: 'layout',
           type: 'blocks',
+          blocks: [relationshipBlock],
+          label: 'Layout Blocks',
         },
       ]
       await expect(async () => {
@@ -337,8 +338,8 @@ describe('sanitizeFields', () => {
       const fields: Field[] = [
         {
           name: 'My Checkbox',
-          required: true,
           type: 'checkbox',
+          required: true,
         },
       ]
 

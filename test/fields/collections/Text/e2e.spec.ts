@@ -2,14 +2,14 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -53,7 +53,7 @@ describe('Text', () => {
       snapshotKey: 'fieldsTextTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -68,7 +68,7 @@ describe('Text', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should display field in list view', async () => {

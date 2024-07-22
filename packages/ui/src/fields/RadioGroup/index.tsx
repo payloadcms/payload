@@ -1,15 +1,13 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { Option } from 'payload/types'
+import type { Option } from 'payload'
 
-import { optionIsObject } from 'payload/types'
+import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 import './index.scss'
@@ -18,11 +16,11 @@ const baseClass = 'radio-group'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { FieldDescription } from '../../forms/FieldDescription/index.js'
-import { FieldError } from '../../forms/FieldError/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 
-export type RadioFieldProps = FormFieldBase & {
+export type RadioFieldProps = {
   layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
@@ -30,11 +28,11 @@ export type RadioFieldProps = FormFieldBase & {
   path?: string
   value?: string
   width?: string
-}
+} & FormFieldBase
 
 export type OnChange<T = string> = (value: T) => void
 
-const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
+const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -77,7 +75,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -102,6 +100,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
@@ -109,8 +108,6 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
@@ -158,4 +155,4 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   )
 }
 
-export const RadioGroup = withCondition(RadioGroupField)
+export const RadioGroupField = withCondition(_RadioGroupField)

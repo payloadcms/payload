@@ -17,7 +17,12 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
-import type { BulkOperationResult, Collection, TypeWithID } from './collections/config/types.js'
+import type {
+  BulkOperationResult,
+  Collection,
+  DataFromCollectionSlug,
+  TypeWithID,
+} from './collections/config/types.js'
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -39,7 +44,7 @@ import type {
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
-import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types.js'
+import type { DataFromGlobalSlug, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
@@ -55,9 +60,72 @@ import { validateSchema } from './config/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { getDependencies } from './utilities/dependencies/getDependencies.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
+
+export interface GeneratedTypes {
+  authUntyped: {
+    [slug: string]: {
+      forgotPassword: {
+        email: string
+      }
+      login: {
+        email: string
+        password: string
+      }
+      registerFirstUser: {
+        email: string
+        password: string
+      }
+      unlock: {
+        email: string
+      }
+    }
+  }
+  collectionsUntyped: {
+    [slug: string]: Record<string, unknown> & TypeWithID
+  }
+  globalsUntyped: {
+    [slug: string]: Record<string, unknown>
+  }
+  localeUntyped: null | string
+  userUntyped: User
+}
+
+// Helper type to resolve the correct type using conditional types
+type ResolveCollectionType<T> = 'collections' extends keyof T
+  ? T['collections']
+  : // @ts-expect-error
+    T['collectionsUntyped']
+// @ts-expect-error
+type ResolveGlobalType<T> = 'globals' extends keyof T ? T['globals'] : T['globalsUntyped']
+
+// Applying helper types to GeneratedTypes
+export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+
+// Extract string keys from the type
+type StringKeyOf<T> = Extract<keyof T, string>
+
+// Define the types for slugs using the appropriate collections and globals
+export type CollectionSlug = StringKeyOf<TypedCollection>
+export type GlobalSlug = StringKeyOf<TypedGlobal>
+
+// now for locale and user
+
+// @ts-expect-error
+type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
+// @ts-expect-error
+type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
+
+export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+export type TypedUser = ResolveUserType<GeneratedTypes>
+
+// @ts-expect-error
+type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
+export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -65,10 +133,9 @@ const dirname = path.dirname(filename)
 /**
  * @description Payload
  */
-export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
+export class BasePayload {
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
-   * @returns cookies: Map<string, string>
    * @returns permissions: Permissions
    * @returns user: User
    */
@@ -90,7 +157,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns count of documents satisfying query
    */
-  count = async <T extends keyof TGeneratedTypes['collections']>(
+  count = async <T extends CollectionSlug>(
     options: CountOptions<T>,
   ): Promise<{ totalDocs: number }> => {
     const { count } = localOperations
@@ -102,21 +169,21 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns created document
    */
-  create = async <T extends keyof TGeneratedTypes['collections']>(
-    options: CreateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  create = async <TSlug extends CollectionSlug>(
+    options: CreateOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
     const { create } = localOperations
-    return create<T>(this, options)
+    return create<TSlug>(this, options)
   }
   db: DatabaseAdapter
 
   decrypt = decrypt
 
-  duplicate = async <T extends keyof TGeneratedTypes['collections']>(
-    options: DuplicateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  duplicate = async <TSlug extends CollectionSlug>(
+    options: DuplicateOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
     const { duplicate } = localOperations
-    return duplicate<T>(this, options)
+    return duplicate<TSlug>(this, options)
   }
 
   email: InitializedEmailAdapter
@@ -137,11 +204,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <T extends keyof TGeneratedTypes['collections']>(
-    options: FindOptions<T>,
-  ): Promise<PaginatedDocs<TGeneratedTypes['collections'][T]>> => {
+  find = async <TSlug extends CollectionSlug>(
+    options: FindOptions<TSlug>,
+  ): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> => {
     const { find } = localOperations
-    return find<T>(this, options)
+    return find<TSlug>(this, options)
   }
 
   /**
@@ -149,18 +216,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <T extends keyof TGeneratedTypes['collections']>(
-    options: FindByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  findByID = async <TSlug extends CollectionSlug>(
+    options: FindByIDOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
     const { findByID } = localOperations
-    return findByID<T>(this, options)
+    return findByID<TSlug>(this, options)
   }
 
-  findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
-    options: FindGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  findGlobal = async <TSlug extends GlobalSlug>(
+    options: FindGlobalOptions<TSlug>,
+  ): Promise<DataFromGlobalSlug<TSlug>> => {
     const { findOne } = localGlobalOperations
-    return findOne<T>(this, options)
+    return findOne<TSlug>(this, options)
   }
 
   /**
@@ -168,11 +235,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns global version with specified ID
    */
-  findGlobalVersionByID = async <T extends keyof TGeneratedTypes['globals']>(
-    options: FindGlobalVersionByIDOptions<T>,
-  ): Promise<TypeWithVersion<TGeneratedTypes['globals'][T]>> => {
+  findGlobalVersionByID = async <TSlug extends GlobalSlug>(
+    options: FindGlobalVersionByIDOptions<TSlug>,
+  ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> => {
     const { findVersionByID } = localGlobalOperations
-    return findVersionByID<T>(this, options)
+    return findVersionByID<TSlug>(this, options)
   }
 
   /**
@@ -180,11 +247,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns versions satisfying query
    */
-  findGlobalVersions = async <T extends keyof TGeneratedTypes['globals']>(
-    options: FindGlobalVersionsOptions<T>,
-  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['globals'][T]>>> => {
+  findGlobalVersions = async <TSlug extends GlobalSlug>(
+    options: FindGlobalVersionsOptions<TSlug>,
+  ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> => {
     const { findVersions } = localGlobalOperations
-    return findVersions<T>(this, options)
+    return findVersions<TSlug>(this, options)
   }
 
   /**
@@ -192,11 +259,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  findVersionByID = async <T extends keyof TGeneratedTypes['collections']>(
-    options: FindVersionByIDOptions<T>,
-  ): Promise<TypeWithVersion<TGeneratedTypes['collections'][T]>> => {
+  findVersionByID = async <TSlug extends CollectionSlug>(
+    options: FindVersionByIDOptions<TSlug>,
+  ): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> => {
     const { findVersionByID } = localOperations
-    return findVersionByID<T>(this, options)
+    return findVersionByID<TSlug>(this, options)
   }
 
   /**
@@ -204,18 +271,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns versions satisfying query
    */
-  findVersions = async <T extends keyof TGeneratedTypes['collections']>(
-    options: FindVersionsOptions<T>,
-  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['collections'][T]>>> => {
+  findVersions = async <TSlug extends CollectionSlug>(
+    options: FindVersionsOptions<TSlug>,
+  ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> => {
     const { findVersions } = localOperations
-    return findVersions<T>(this, options)
+    return findVersions<TSlug>(this, options)
   }
 
-  forgotPassword = async <T extends keyof TGeneratedTypes['collections']>(
-    options: ForgotPasswordOptions<T>,
+  forgotPassword = async <TSlug extends CollectionSlug>(
+    options: ForgotPasswordOptions<TSlug>,
   ): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth
-    return forgotPassword<T>(this, options)
+    return forgotPassword<TSlug>(this, options)
   }
 
   getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
@@ -226,18 +293,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   logger: pino.Logger
 
-  login = async <T extends keyof TGeneratedTypes['collections']>(
-    options: LoginOptions<T>,
-  ): Promise<LoginResult & { user: TGeneratedTypes['collections'][T] }> => {
+  login = async <TSlug extends CollectionSlug>(
+    options: LoginOptions<TSlug>,
+  ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
     const { login } = localOperations.auth
-    return login<T>(this, options)
+    return login<TSlug>(this, options)
   }
 
-  resetPassword = async <T extends keyof TGeneratedTypes['collections']>(
-    options: ResetPasswordOptions<T>,
+  resetPassword = async <TSlug extends CollectionSlug>(
+    options: ResetPasswordOptions<TSlug>,
   ): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth
-    return resetPassword<T>(this, options)
+    return resetPassword<TSlug>(this, options)
   }
 
   /**
@@ -245,11 +312,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  restoreGlobalVersion = async <T extends keyof TGeneratedTypes['globals']>(
-    options: RestoreGlobalVersionOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  restoreGlobalVersion = async <TSlug extends GlobalSlug>(
+    options: RestoreGlobalVersionOptions<TSlug>,
+  ): Promise<DataFromGlobalSlug<TSlug>> => {
     const { restoreVersion } = localGlobalOperations
-    return restoreVersion<T>(this, options)
+    return restoreVersion<TSlug>(this, options)
   }
 
   /**
@@ -257,11 +324,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  restoreVersion = async <T extends keyof TGeneratedTypes['collections']>(
-    options: RestoreVersionOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  restoreVersion = async <TSlug extends CollectionSlug>(
+    options: RestoreVersionOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
     const { restoreVersion } = localOperations
-    return restoreVersion<T>(this, options)
+    return restoreVersion<TSlug>(this, options)
   }
 
   schema: GraphQLSchema
@@ -280,24 +347,24 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     tabTypes: any
   }
 
-  unlock = async <T extends keyof TGeneratedTypes['collections']>(
-    options: UnlockOptions<T>,
+  unlock = async <TSlug extends CollectionSlug>(
+    options: UnlockOptions<TSlug>,
   ): Promise<boolean> => {
     const { unlock } = localOperations.auth
-    return unlock(this, options)
+    return unlock<TSlug>(this, options)
   }
 
-  updateGlobal = async <T extends keyof TGeneratedTypes['globals']>(
-    options: UpdateGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  updateGlobal = async <TSlug extends GlobalSlug>(
+    options: UpdateGlobalOptions<TSlug>,
+  ): Promise<DataFromGlobalSlug<TSlug>> => {
     const { update } = localGlobalOperations
-    return update<T>(this, options)
+    return update<TSlug>(this, options)
   }
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[]
 
-  verifyEmail = async <T extends keyof TGeneratedTypes['collections']>(
-    options: VerifyEmailOptions<T>,
+  verifyEmail = async <TSlug extends CollectionSlug>(
+    options: VerifyEmailOptions<TSlug>,
   ): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth
     return verifyEmail(this, options)
@@ -337,19 +404,19 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]>
+  delete<TSlug extends CollectionSlug>(
+    options: DeleteByIDOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteManyOptions<T>,
-  ): Promise<BulkOperationResult<T>>
+  delete<TSlug extends CollectionSlug>(
+    options: DeleteManyOptions<TSlug>,
+  ): Promise<BulkOperationResult<TSlug>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+  delete<TSlug extends CollectionSlug>(
+    options: DeleteOptions<TSlug>,
+  ): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
     const { deleteLocal } = localOperations
-    return deleteLocal<T>(this, options)
+    return deleteLocal<TSlug>(this, options)
   }
 
   /**
@@ -357,6 +424,61 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
+    if (process.env.NODE_ENV !== 'production') {
+      // First load. First check if there are mismatching dependency versions of payload packages
+      const resolvedDependencies = await getDependencies(dirname, [
+        '@payloadcms/ui/shared',
+        'payload',
+        '@payloadcms/next/utilities',
+        '@payloadcms/richtext-lexical',
+        '@payloadcms/richtext-slate',
+        '@payloadcms/graphql',
+        '@payloadcms/plugin-cloud',
+        '@payloadcms/db-mongodb',
+        '@payloadcms/db-postgres',
+        '@payloadcms/plugin-form-builder',
+        '@payloadcms/plugin-nested-docs',
+        '@payloadcms/plugin-seo',
+        '@payloadcms/plugin-search',
+        '@payloadcms/plugin-cloud-storage',
+        '@payloadcms/plugin-stripe',
+        '@payloadcms/plugin-zapier',
+        '@payloadcms/plugin-redirects',
+        '@payloadcms/plugin-sentry',
+        '@payloadcms/bundler-webpack',
+        '@payloadcms/bundler-vite',
+        '@payloadcms/live-preview',
+        '@payloadcms/live-preview-react',
+        '@payloadcms/translations',
+        '@payloadcms/email-nodemailer',
+        '@payloadcms/email-resend',
+        '@payloadcms/storage-azure',
+        '@payloadcms/storage-s3',
+        '@payloadcms/storage-gcs',
+        '@payloadcms/storage-vercel-blob',
+        '@payloadcms/storage-uploadthing',
+      ])
+
+      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
+      const foundVersions: {
+        [version: string]: string
+      } = {}
+      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
+        if (!Object.keys(foundVersions).includes(version)) {
+          foundVersions[version] = _pkg
+        }
+      }
+      if (Object.keys(foundVersions).length > 1) {
+        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
+          .map(([version, pkg]) => `${pkg}@${version}`)
+          .join(', ')
+
+        throw new Error(
+          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all payload and @payloadcms/* packages have the same version.`,
+        )
+      }
+    }
+
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
@@ -422,11 +544,23 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     } else if (this.config.email) {
       this.email = this.config.email({ payload: this })
     } else {
-      this.logger.warn(
-        `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
-      )
+      if (process.env.NEXT_PHASE !== 'phase-production-build') {
+        this.logger.warn(
+          `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
+        )
+      }
 
       this.email = consoleEmailAdapter({ payload: this })
+    }
+
+    // Warn if image resizing is enabled but sharp is not installed
+    if (
+      !this.config.sharp &&
+      this.config.collections.some((c) => c.upload.imageSizes || c.upload.formatOptions)
+    ) {
+      this.logger.warn(
+        `Image resizing is enabled for one or more collections, but sharp not installed. Please install 'sharp' and pass into the config.`,
+      )
     }
 
     this.sendEmail = this.email['sendEmail']
@@ -474,24 +608,24 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return this
   }
 
-  update<T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateManyOptions<T>,
-  ): Promise<BulkOperationResult<T>>
+  update<TSlug extends CollectionSlug>(
+    options: UpdateManyOptions<TSlug>,
+  ): Promise<BulkOperationResult<TSlug>>
 
   /**
    * @description Update one or more documents
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]>
+  update<TSlug extends CollectionSlug>(
+    options: UpdateByIDOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+  update<TSlug extends CollectionSlug>(
+    options: UpdateOptions<TSlug>,
+  ): Promise<BulkOperationResult<TSlug> | DataFromCollectionSlug<TSlug>> {
     const { update } = localOperations
-    return update<T>(this, options)
+    return update<TSlug>(this, options)
   }
 }
 
@@ -502,11 +636,10 @@ export default initialized
 let cached = global._payload
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload = { payload: null, promise: null }
 }
 
-export const getPayload = async (options: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
+export const getPayload = async (options: InitOptions): Promise<BasePayload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
@@ -516,7 +649,7 @@ export const getPayload = async (options: InitOptions): Promise<BasePayload<Gene
   }
 
   if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options)
+    cached.promise = new BasePayload().init(options)
   }
 
   try {
@@ -529,23 +662,339 @@ export const getPayload = async (options: InitOptions): Promise<BasePayload<Gene
   return cached.payload
 }
 
-type GeneratedTypes = {
-  collections: {
-    [slug: number | string | symbol]: TypeWithID & Record<string, unknown>
-  }
-  globals: {
-    [slug: number | string | symbol]: GlobalTypeWithID & Record<string, unknown>
-  }
-  locale: null | string
-  user: User
-}
-
-type Payload = BasePayload<GeneratedTypes>
+type Payload = BasePayload
 
 interface RequestContext {
   [key: string]: unknown
 }
 
-type DatabaseAdapter = BaseDatabaseAdapter
-
-export type { DatabaseAdapter, GeneratedTypes, Payload, RequestContext }
+export interface DatabaseAdapter extends BaseDatabaseAdapter {}
+export type { Payload, RequestContext }
+export type { FieldTypes } from './admin/forms/FieldTypes.js'
+export type * from './admin/types.js'
+export { default as executeAccess } from './auth/executeAccess.js'
+export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { getAccessResults } from './auth/getAccessResults.js'
+export { getFieldsToSign } from './auth/getFieldsToSign.js'
+export * from './auth/index.js'
+export { accessOperation } from './auth/operations/access.js'
+export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
+export { initOperation } from './auth/operations/init.js'
+export { loginOperation } from './auth/operations/login.js'
+export { logoutOperation } from './auth/operations/logout.js'
+export type { MeOperationResult } from './auth/operations/me.js'
+export { meOperation } from './auth/operations/me.js'
+export { refreshOperation } from './auth/operations/refresh.js'
+export { registerFirstUserOperation } from './auth/operations/registerFirstUser.js'
+export { resetPasswordOperation } from './auth/operations/resetPassword.js'
+export { unlockOperation } from './auth/operations/unlock.js'
+export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export type {
+  AuthStrategyFunction,
+  AuthStrategyFunctionArgs,
+  CollectionPermission,
+  DocumentPermissions,
+  FieldPermissions,
+  GlobalPermission,
+  IncomingAuthType,
+  Permission,
+  Permissions,
+  User,
+  VerifyConfig,
+} from './auth/types.js'
+export type { ClientCollectionConfig } from './collections/config/client.js'
+export { createClientCollectionConfig } from './collections/config/client.js'
+export type {
+  AfterChangeHook as CollectionAfterChangeHook,
+  AfterDeleteHook as CollectionAfterDeleteHook,
+  AfterErrorHook as CollectionAfterErrorHook,
+  AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
+  AfterLoginHook as CollectionAfterLoginHook,
+  AfterLogoutHook as CollectionAfterLogoutHook,
+  AfterMeHook as CollectionAfterMeHook,
+  AfterOperationHook as CollectionAfterOperationHook,
+  AfterReadHook as CollectionAfterReadHook,
+  AfterRefreshHook as CollectionAfterRefreshHook,
+  AuthCollection,
+  AuthOperationsFromCollectionSlug,
+  BeforeChangeHook as CollectionBeforeChangeHook,
+  BeforeDeleteHook as CollectionBeforeDeleteHook,
+  BeforeLoginHook as CollectionBeforeLoginHook,
+  BeforeOperationHook as CollectionBeforeOperationHook,
+  BeforeReadHook as CollectionBeforeReadHook,
+  BeforeValidateHook as CollectionBeforeValidateHook,
+  BulkOperationResult,
+  Collection,
+  CollectionAdminOptions,
+  CollectionConfig,
+  DataFromCollectionSlug,
+  HookOperationType,
+  MeHook as CollectionMeHook,
+  RefreshHook as CollectionRefreshHook,
+  RequiredDataFromCollection,
+  RequiredDataFromCollectionSlug,
+  SanitizedCollectionConfig,
+  TypeWithID,
+  TypeWithTimestamps,
+} from './collections/config/types.js'
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+export { countOperation } from './collections/operations/count.js'
+export { createOperation } from './collections/operations/create.js'
+export { deleteOperation } from './collections/operations/delete.js'
+export { deleteByIDOperation } from './collections/operations/deleteByID.js'
+export { docAccessOperation } from './collections/operations/docAccess.js'
+export { duplicateOperation } from './collections/operations/duplicate.js'
+export { findOperation } from './collections/operations/find.js'
+export { findByIDOperation } from './collections/operations/findByID.js'
+export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
+export { findVersionsOperation } from './collections/operations/findVersions.js'
+export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
+export { updateOperation } from './collections/operations/update.js'
+export { updateByIDOperation } from './collections/operations/updateByID.js'
+export { buildConfig } from './config/build.js'
+export type { ClientConfig } from './config/client.js'
+export { createClientConfig } from './config/client.js'
+export { defaults } from './config/defaults.js'
+export { sanitizeConfig } from './config/sanitize.js'
+export type {
+  Access,
+  AccessArgs,
+  EditViewComponent,
+  EntityDescription,
+  EntityDescriptionComponent,
+  EntityDescriptionFunction,
+  SanitizedConfig,
+} from './config/types.js'
+export * from './config/types.js'
+export { combineQueries } from './database/combineQueries.js'
+export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
+export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { getLocalizedPaths } from './database/getLocalizedPaths.js'
+export { createMigration } from './database/migrations/createMigration.js'
+export { getMigrations } from './database/migrations/getMigrations.js'
+export { getPredefinedMigration } from './database/migrations/getPredefinedMigration.js'
+export { migrate } from './database/migrations/migrate.js'
+export { migrateDown } from './database/migrations/migrateDown.js'
+export { migrateRefresh } from './database/migrations/migrateRefresh.js'
+export { migrateReset } from './database/migrations/migrateReset.js'
+export { migrateStatus } from './database/migrations/migrateStatus.js'
+export { migrationTemplate } from './database/migrations/migrationTemplate.js'
+export { migrationsCollection } from './database/migrations/migrationsCollection.js'
+export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
+export type * from './database/queryValidation/types.js'
+export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
+export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
+export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
+export type {
+  BaseDatabaseAdapter,
+  BeginTransaction,
+  CommitTransaction,
+  Connect,
+  Count,
+  CountArgs,
+  Create,
+  CreateArgs,
+  CreateGlobal,
+  CreateGlobalArgs,
+  CreateGlobalVersion,
+  CreateGlobalVersionArgs,
+  CreateMigration,
+  CreateVersion,
+  CreateVersionArgs,
+  DBIdentifierName,
+  DatabaseAdapterResult as DatabaseAdapterObj,
+  DeleteMany,
+  DeleteManyArgs,
+  DeleteOne,
+  DeleteOneArgs,
+  DeleteVersions,
+  DeleteVersionsArgs,
+  Destroy,
+  Find,
+  FindArgs,
+  FindGlobal,
+  FindGlobalArgs,
+  FindGlobalVersions,
+  FindGlobalVersionsArgs,
+  FindOne,
+  FindOneArgs,
+  FindVersions,
+  FindVersionsArgs,
+  Init,
+  Migration,
+  MigrationData,
+  MigrationTemplateArgs,
+  PaginatedDocs,
+  QueryDrafts,
+  QueryDraftsArgs,
+  RollbackTransaction,
+  Transaction,
+  UpdateGlobal,
+  UpdateGlobalArgs,
+  UpdateGlobalVersion,
+  UpdateGlobalVersionArgs,
+  UpdateOne,
+  UpdateOneArgs,
+  UpdateVersion,
+  UpdateVersionArgs,
+} from './database/types.js'
+export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+export {
+  APIError,
+  APIErrorName,
+  AuthenticationError,
+  DuplicateCollection,
+  DuplicateFieldName,
+  DuplicateGlobal,
+  ErrorDeletingFile,
+  FileRetrievalError,
+  FileUploadError,
+  Forbidden,
+  InvalidConfiguration,
+  InvalidFieldName,
+  InvalidFieldRelationship,
+  LockedAuth,
+  MissingCollectionLabel,
+  MissingEditorProp,
+  MissingFieldInputOptions,
+  MissingFieldType,
+  MissingFile,
+  NotFound,
+  QueryError,
+  ValidationError,
+  ValidationErrorName,
+} from './errors/index.js'
+export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+export { baseIDField } from './fields/baseFields/baseIDField.js'
+export type { ClientFieldConfig } from './fields/config/client.js'
+export { createClientFieldConfig } from './fields/config/client.js'
+export { sanitizeFields } from './fields/config/sanitize.js'
+export type {
+  ArrayField,
+  Block,
+  BlockField,
+  CheckboxField,
+  ClientValidate,
+  CodeField,
+  CollapsibleField,
+  Condition,
+  DateField,
+  EmailField,
+  Field,
+  FieldAccess,
+  FieldAffectingData,
+  FieldBase,
+  FieldHook,
+  FieldHookArgs,
+  FieldPresentationalOnly,
+  FieldWithMany,
+  FieldWithMaxDepth,
+  FieldWithPath,
+  FieldWithSubFields,
+  FilterOptions,
+  FilterOptionsProps,
+  GroupField,
+  HookName,
+  JSONField,
+  Labels,
+  NamedTab,
+  NonPresentationalField,
+  NumberField,
+  Option,
+  OptionObject,
+  PointField,
+  PolymorphicRelationshipField,
+  RadioField,
+  RelationshipField,
+  RelationshipValue,
+  RichTextField,
+  RowAdmin,
+  RowField,
+  SelectField,
+  SingleRelationshipField,
+  Tab,
+  TabAsField,
+  TabsAdmin,
+  TabsField,
+  TextField,
+  TextareaField,
+  UIField,
+  UnnamedTab,
+  UploadField,
+  Validate,
+  ValidateOptions,
+  ValueWithRelation,
+} from './fields/config/types.js'
+export { default as getDefaultValue } from './fields/getDefaultValue.js'
+export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
+export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
+export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
+export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
+export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export type { ClientGlobalConfig } from './globals/config/client.js'
+export { createClientGlobalConfig } from './globals/config/client.js'
+export type {
+  AfterChangeHook as GlobalAfterChangeHook,
+  AfterReadHook as GlobalAfterReadHook,
+  BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeReadHook as GlobalBeforeReadHook,
+  BeforeValidateHook as GlobalBeforeValidateHook,
+  DataFromGlobalSlug,
+  GlobalAdminOptions,
+  GlobalConfig,
+  SanitizedGlobalConfig,
+} from './globals/config/types.js'
+export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
+export { findOneOperation } from './globals/operations/findOne.js'
+export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
+export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
+export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export type {
+  CollapsedPreferences,
+  DocumentPreferences,
+  FieldsPreferences,
+  InsideFieldsPreferences,
+  PreferenceRequest,
+  PreferenceUpdateRequest,
+  TabsPreferences,
+} from './preferences/types.js'
+export { getLocalI18n } from './translations/getLocalI18n.js'
+export * from './types/index.js'
+export { getFileByPath } from './uploads/getFileByPath.js'
+export type * from './uploads/types.js'
+export { combineMerge } from './utilities/combineMerge.js'
+export { commitTransaction } from './utilities/commitTransaction.js'
+export {
+  configToJSONSchema,
+  entityToJSONSchema,
+  fieldsToJSONSchema,
+  withNullableJSONSchemaType,
+} from './utilities/configToJSONSchema.js'
+export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+export { createLocalReq } from './utilities/createLocalReq.js'
+export { deepCopyObject } from './utilities/deepCopyObject.js'
+export { deepMerge } from './utilities/deepMerge.js'
+export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
+export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
+export { initTransaction } from './utilities/initTransaction.js'
+export { isEntityHidden } from './utilities/isEntityHidden.js'
+export { isPlainObject } from './utilities/isPlainObject.js'
+export { isValidID } from './utilities/isValidID.js'
+export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
+export { killTransaction } from './utilities/killTransaction.js'
+export { mapAsync } from './utilities/mapAsync.js'
+export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
+export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
+export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
+export { versionDefaults } from './versions/defaults.js'
+export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
+export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+export { getDependencies }
+export { saveVersion } from './versions/saveVersion.js'
+export type { TypeWithVersion } from './versions/types.js'

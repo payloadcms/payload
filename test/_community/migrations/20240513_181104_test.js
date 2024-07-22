@@ -10,7 +10,7 @@ const { sql } = require('@payloadcms/db-postgres')
 // loadTransformers()
 
 async function up({ payload }) {
-await payload.db.drizzle.execute(sql`
+  await payload.db.drizzle.execute(sql`
 
 DO $$ BEGIN
  CREATE TYPE "enum_posts_status" AS ENUM('draft', 'published');
@@ -138,12 +138,11 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
-`);
-
-};
+`)
+}
 
 async function down({ payload }) {
-await payload.db.drizzle.execute(sql`
+  await payload.db.drizzle.execute(sql`
 
 DROP TABLE "posts";
 DROP TABLE "_posts_v";
@@ -152,6 +151,5 @@ DROP TABLE "users";
 DROP TABLE "payload_preferences";
 DROP TABLE "payload_preferences_rels";
 DROP TABLE "payload_migrations";
-DROP TABLE "menu";`);
-
-};
+DROP TABLE "menu";`)
+}

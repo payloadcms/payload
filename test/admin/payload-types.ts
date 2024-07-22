@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     uploads: Upload;
     posts: Post;
@@ -15,6 +18,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
     'group-two-collection-ones': GroupTwoCollectionOne;
@@ -25,6 +29,9 @@ export interface Config {
     'disable-duplicate': DisableDuplicate;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     'hidden-global': HiddenGlobal;
@@ -38,6 +45,22 @@ export interface Config {
   locale: 'es' | 'en';
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -141,6 +164,16 @@ export interface CustomViewsOne {
 export interface CustomViewsTwo {
   id: string;
   title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-fields".
+ */
+export interface CustomField {
+  id: string;
+  customSelectField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -336,6 +369,13 @@ export interface GroupGlobalsTwo {
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

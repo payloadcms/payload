@@ -1,3 +1,5 @@
+import type { LoginWithUsernameOptions } from '../../auth/types.js'
+
 import defaultAccess from '../../auth/defaultAccess.js'
 
 export const defaults = {
@@ -39,6 +41,8 @@ export const defaults = {
     beforeOperation: [],
     beforeRead: [],
     beforeValidate: [],
+    me: [],
+    refresh: [],
   },
   timestamps: true,
   upload: false,
@@ -52,7 +56,13 @@ export const authDefaults = {
   },
   forgotPassword: {},
   lockTime: 600000, // 10 minutes
+  loginWithUsername: false,
   maxLoginAttempts: 5,
   tokenExpiration: 7200,
   verify: false,
+}
+
+export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
+  allowEmailLogin: false,
+  requireEmail: false,
 }

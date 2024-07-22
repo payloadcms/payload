@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.45",
+  "version": "3.0.0-beta.67",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -14,8 +14,8 @@
   "exports": {
     ".": {
       "import": "./src/index.tsx",
-      "require": "./src/index.tsx",
-      "types": "./src/index.tsx"
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
     }
   },
   "main": "./src/index.tsx",
@@ -24,15 +24,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "3.0.0-beta.0",
     "is-hotkey": "0.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
@@ -44,15 +43,15 @@
     "@payloadcms/ui": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
     "@types/node": "20.12.5",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -61,8 +60,8 @@
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "main": "./dist/index.js",
@@ -70,7 +69,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

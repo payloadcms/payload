@@ -2,14 +2,14 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openCreateDocDrawer,
@@ -50,7 +50,7 @@ describe('relationship', () => {
       snapshotKey: 'fieldsRelationshipTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -65,7 +65,7 @@ describe('relationship', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
@@ -409,8 +409,8 @@ describe('relationship', () => {
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
-    const firstOptionLabel = await firstTextDocOption.textContent()
-    expect(firstOptionLabel).toBe('Seeded text document')
+    const firstOptionLabel = firstTextDocOption
+    await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
 
   test('should allow filtering by relationship field / equals', async () => {
