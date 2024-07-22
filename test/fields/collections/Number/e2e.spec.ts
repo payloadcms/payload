@@ -9,7 +9,7 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -51,7 +51,7 @@ describe('Number', () => {
       snapshotKey: 'fieldsNumberTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -66,7 +66,7 @@ describe('Number', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should display field in list view', async () => {

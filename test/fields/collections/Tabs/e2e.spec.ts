@@ -9,7 +9,7 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   navigateToListCellLink,
   saveDocAndAssert,
@@ -53,7 +53,7 @@ describe('Tabs', () => {
       snapshotKey: 'fieldsTabsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -68,7 +68,7 @@ describe('Tabs', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should fill and retain a new value within a tab while switching tabs', async () => {

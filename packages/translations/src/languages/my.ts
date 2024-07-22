@@ -322,7 +322,7 @@ export const myTranslations: DefaultTranslationsObject = {
     within: 'အတွင်း',
   },
   upload: {
-    addImage: 'ပုံ ထည့်ပါ',
+    addFile: 'ဖိုင်ထည့်ပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',

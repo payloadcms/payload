@@ -10,7 +10,7 @@ import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, Media } from './payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
@@ -89,7 +89,7 @@ describe('uploads', () => {
 
     audioDoc = findAudio.docs[0] as unknown as Media
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('should see upload filename in relation list', async () => {

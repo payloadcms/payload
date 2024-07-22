@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -57,7 +57,7 @@ describe('SEO Plugin', () => {
     })) as unknown as PayloadPage
     id = createdPage.id
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {

@@ -318,7 +318,7 @@ export const faTranslations: DefaultTranslationsObject = {
     within: 'در داخل',
   },
   upload: {
-    addImage: 'اضافه کردن تصویر',
+    addFile: 'اضافه کردن فایل',
     crop: 'محصول',
     cropToolDescription:
       'گوشه‌های منطقه انتخاب شده را بکشید، یک منطقه جدید رسم کنید یا مقادیر زیر را تنظیم کنید.',

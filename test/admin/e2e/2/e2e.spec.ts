@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -67,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {

@@ -9,7 +9,7 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openCreateDocDrawer,
@@ -50,7 +50,7 @@ describe('relationship', () => {
       snapshotKey: 'fieldsRelationshipTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -65,7 +65,7 @@ describe('relationship', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
