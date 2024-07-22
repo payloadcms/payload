@@ -101,10 +101,10 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     }
 
     // /////////////////////////////////////
-    // Custom id
+    // Custom id if it has a custom ID field OR if the data has an ID
     // /////////////////////////////////////
 
-    if (payload.collections[collectionConfig.slug].customIDType) {
+    if (payload.collections[collectionConfig.slug].customIDType || data.id) {
       data = {
         _id: data.id,
         ...data,
