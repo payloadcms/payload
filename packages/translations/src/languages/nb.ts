@@ -18,6 +18,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Bekreft passord',
     createFirstUser: 'Opprett første bruker',
     emailNotValid: 'E-posten er ikke gyldig',
+    emailOrUsername: 'E-post eller brukernavn',
     emailSent: 'E-post sendt',
     emailVerified: 'E-post bekreftet med hell.',
     enableAPIKey: 'Aktiver API-nøkkel',
@@ -296,6 +297,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     updating: 'Oppdatering',
     uploading: 'Opplasting',
     user: 'Bruker',
+    username: 'Brukernavn',
     users: 'Brukere',
     value: 'Verdi',
     welcome: 'Velkommen',
@@ -317,7 +319,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     within: 'innen',
   },
   upload: {
-    addImage: 'Legg til bilde',
+    addFile: 'Legg til fil',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
@@ -360,6 +362,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Dette feltet krever to tall.',
     shorterThanMax: 'Denne verdien må være kortere enn maksimal lengde på {{maxLength}} tegn.',
     trueOrFalse: 'Dette feltet kan bare være likt true eller false.',
+    username:
+      'Vennligst oppgi et gyldig brukernavn. Kan inneholde bokstaver, nummer, bindestreker, punktum og understrek.',
     validUploadID: 'Dette feltet er ikke en gyldig opplastings-ID.',
   },
   version: {

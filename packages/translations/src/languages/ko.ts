@@ -18,6 +18,7 @@ export const koTranslations: DefaultTranslationsObject = {
     confirmPassword: '비밀번호 확인',
     createFirstUser: '첫 번째 사용자 생성',
     emailNotValid: '입력한 이메일은 유효하지 않습니다.',
+    emailOrUsername: '이메일 또는 사용자 이름',
     emailSent: '이메일 전송됨',
     emailVerified: '이메일이 성공적으로 인증되었습니다.',
     enableAPIKey: 'API 키 활성화',
@@ -295,6 +296,7 @@ export const koTranslations: DefaultTranslationsObject = {
     updating: '업데이트 중',
     uploading: '업로드 중',
     user: '사용자',
+    username: '사용자 이름',
     users: '사용자',
     value: '값',
     welcome: '환영합니다',
@@ -316,7 +318,7 @@ export const koTranslations: DefaultTranslationsObject = {
     within: '내에서',
   },
   upload: {
-    addImage: '이미지 추가',
+    addFile: '파일 추가',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',
@@ -358,6 +360,8 @@ export const koTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: '이 입력란은 두 개의 숫자가 필요합니다.',
     shorterThanMax: '이 값은 최대 길이인 {{maxLength}}자보다 짧아야 합니다.',
     trueOrFalse: '이 입력란은 true 또는 false만 가능합니다.',
+    username:
+      '유효한 사용자 이름을 입력해 주세요. 글자, 숫자, 하이픈, 마침표, 및 밑줄을 사용할 수 있습니다.',
     validUploadID: '이 입력란은 유효한 업로드 ID가 아닙니다.',
   },
   version: {

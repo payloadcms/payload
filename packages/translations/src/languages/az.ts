@@ -18,6 +18,7 @@ export const azTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Şifrəni təsdiq et',
     createFirstUser: 'İlk istifadəçini yaradın',
     emailNotValid: 'Təqdim olunan e-poçt etibarlı deyil',
+    emailOrUsername: 'E-poçt və ya İstifadəçi adı',
     emailSent: 'E-poçt göndərildi',
     emailVerified: 'Email uğurla təsdiqləndi.',
     enableAPIKey: 'API açarını aktivləşdir',
@@ -297,6 +298,7 @@ export const azTranslations: DefaultTranslationsObject = {
     updating: 'Yenilənir',
     uploading: 'Yüklənir',
     user: 'İstifadəçi',
+    username: 'İstifadəçi adı',
     users: 'İstifadəçilər',
     value: 'Dəyər',
     welcome: 'Xoş gəldiniz',
@@ -318,7 +320,7 @@ export const azTranslations: DefaultTranslationsObject = {
     within: 'daxilinde',
   },
   upload: {
-    addImage: 'Şəkil əlavə et',
+    addFile: 'Fayl əlavə et',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
@@ -361,6 +363,8 @@ export const azTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Bu sahə iki nömrə tələb edir.',
     shorterThanMax: 'Bu dəyər {{maxLength}} simvoldan qısa olmalıdır.',
     trueOrFalse: 'Bu sahə yalnız doğru və ya yanlış ola bilər.',
+    username:
+      'Zəhmət olmasa, etibarlı bir istifadəçi adı daxil edin. Hərflər, rəqəmlər, tire, nöqtə və alt xəttlər ola bilər.',
     validUploadID: 'Bu sahə doğru yükləmə ID-si deyil.',
   },
   version: {

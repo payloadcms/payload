@@ -18,11 +18,11 @@ Payload is database agnostic, meaning you can use any type of database behind Pa
 
 ## Collections
 
-A Collection is a group of records, called Documents, that all share a common schema. Each Collection saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/collections).
+A Collection is a group of records, called Documents, that all share a common schema. Each Collection is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/collections).
 
 ## Globals
 
-Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. Each Global saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/globals).
+Globals are in many ways similar to [Collections](../configuration/collections), except they correspond to only a single Document. Each Global is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define. [More details](../configuration/globals).
 
 ## Fields
 
@@ -30,23 +30,23 @@ Fields are the building blocks of Payload. They define the schema of the Documen
 
 ## Hooks
 
-Hooks allow you to execute your own logic during specific events of the Document lifecycle, such as read or update. [More details](../hooks/overview).
+Hooks allow you to execute your own side effects during specific events of the Document lifecycle, such as before read, after create, etc. [More details](../hooks/overview).
+
+## Authentication
+
+Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the Admin Panel, all well as your own external applications. [More details](../authentication/overview).
 
 ## Access Control
 
-Access Control determines what a user can and cannot do with any given Document. [More details](../access-control/overview).
+Access Control determines what a user can and cannot do with any given Document, such as read, update, etc., as well as what they can and cannot see within the Admin Panel. [More details](../access-control/overview).
 
 ## Admin Panel
 
 Payload dynamically generates a beautiful, fully type-safe interface to manage your users and data. The Admin Panel is a React application built using the Next.js App Router. [More details](../admin/overview).
 
-## Plugins
-
-Plugins allow for developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. [More details](../plugins/overview).
-
 ## Retrieving Data
 
-Everything Payload does (create, read, update, delete, login, logout, etc) is exposed to you via three APIs:
+Everything Payload does (create, read, update, delete, login, logout, etc.) is exposed to you via three APIs:
 
 - [Local API](#local-api) - Extremely fast, direct-to-database access
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
@@ -59,11 +59,11 @@ Everything Payload does (create, read, update, delete, login, logout, etc) is ex
 
 ### Local API
 
-By far one of the most powerful aspects of Payload is the fact that it gives you direct-to-database access to your data through the [Local API](../local-api/overview). It's _extremely_ fast and does not incur any typical REST API / GraphQL / HTTP overhead—you query your database directly in Node.js.
+By far one of the most powerful aspects of Payload is the fact that it gives you direct-to-database access to your data through the [Local API](../local-api/overview). It's _extremely_ fast and does not incur any typical HTTP overhead—you query your database directly in Node.js.
 
 The Local API is written in TypeScript, and so it is strongly typed and extremely nice to use. It works anywhere on the server, including custom Next.js Routes, Payload Hooks, Payload Access Control, and React Server Components.
 
-Here's a quick example of a React Server Component fetching page data with Payload's Local API:
+Here's a quick example of a React Server Component fetching data using the Local API:
 
 ```tsx
 import React from 'react'
@@ -100,9 +100,9 @@ const MyServerComponent: React.FC = () => {
 
 ### REST API
 
-By default, the Payload [REST API](../rest-api/overview) will be mounted automatically for you at the `/api` path of your app.
+By default, the Payload [REST API](../rest-api/overview) is mounted automatically for you at the `/api` path of your app.
 
-For example, if you have a [Collection](../configuration/collections) called `pages`:
+For example, if you have a Collection called `pages`:
 
 ```ts
 fetch('https://localhost:3000/api/pages') // highlight-line
@@ -116,26 +116,16 @@ fetch('https://localhost:3000/api/pages') // highlight-line
 
 ### GraphQL API
 
-Payload automatically exposes GraphQL queries and mutations for everything it does through a dedicated [GraphQL API](../graphql/overview).
-
-By default, you'll find the GraphQL route handler in your `/app/(payload)/api/graphql` folder, which makes the GraphQL endpoint available by default at `http://localhost:3000/api/graphql`.
-
-You'll also find a full GraphQL Playground which can be accessible via `http://localhost:3000/api/graphql-playground`.
+Payload automatically exposes GraphQL queries and mutations through a dedicated [GraphQL API](../graphql/overview). By default, the GraphQL route handler is mounted at the `/api/graphql` path of your app. You'll also find a full GraphQL Playground which can be accessible at the `/api/graphql-playground` path of your app.
 
 You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few packages:
 
 - [`graphql-request`](https://www.npmjs.com/package/graphql-request) - a very lightweight GraphQL client
 - [`@apollo/client`](https://www.apollographql.com/docs/react/api/core/ApolloClient/) - an industry-standard GraphQL client with lots of nice features
 
-If you don't use GraphQL, you can delete those files! But if you do, you'll find that GraphQL is a first-class API in Payload. Either way, the overhead of GraphQL is completely constrained to these endpoints, and will not slow down / affect Payload outside of those endpoints themselves.
-
 <Banner type="info">
   For more information about the GraphQL API, [click here](../graphql/overview).
 </Banner>
-
-### Depth
-
-Documents can be related to other Documents through a concept called "relationships". When you query a Document, you can specify these relationships are populated. [More details](../queries/depth).
 
 ## Package Structure
 
@@ -180,4 +170,7 @@ You can choose which Database Adapter you'd like to use for your project, and no
 
 Payload's Rich Text functionality is abstracted into separate packages and if you want to enable Rich Text in your project, you'll need to install one of these packages. We recommend Lexical for all new projects, and this is where Payload will focus its efforts on from this point, but Slate is still supported if you have already built with it.
 
-Rich Text is entirely optional and you may not need it for your project.
+<Banner type="info">
+  <strong>Note:</strong>
+  Rich Text is entirely optional and you may not need it for your project.
+</Banner>

@@ -18,6 +18,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     confirmPassword: 'パスワードの確認',
     createFirstUser: '最初のユーザーを作成',
     emailNotValid: '入力されたメールアドレスは無効です。',
+    emailOrUsername: 'メールまたはユーザー名',
     emailSent: 'Emailが送信されました。',
     emailVerified: 'メールが正常に確認されました。',
     enableAPIKey: 'API Keyを許可',
@@ -296,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     updating: '更新中',
     uploading: 'アップロード中',
     user: 'ユーザー',
+    username: 'ユーザーネーム',
     users: 'ユーザー',
     value: '値',
     welcome: 'ようこそ',
@@ -317,7 +319,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     within: '内で',
   },
   upload: {
-    addImage: '画像を追加',
+    addFile: 'ファイルを追加',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',
@@ -359,6 +361,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: '2つの数値が必要です。',
     shorterThanMax: '{{maxLength}} 文字以下にする必要があります。',
     trueOrFalse: '"true" または "false" の値にする必要があります。',
+    username:
+      '有効なユーザーネームを入力してください。文字、数字、ハイフン、ピリオド、アンダースコアを使用できます。',
     validUploadID: '有効なアップロードIDではありません。',
   },
   version: {

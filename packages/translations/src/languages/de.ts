@@ -18,6 +18,7 @@ export const deTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Passwort bestätigen',
     createFirstUser: 'Ersten Benutzer erstellen',
     emailNotValid: 'Die angegebene E-Mail-Adresse ist ungültig',
+    emailOrUsername: 'E-Mail oder Benutzername',
     emailSent: 'E-Mail verschickt',
     emailVerified: 'E-Mail erfolgreich verifiziert.',
     enableAPIKey: 'API-Key aktivieren',
@@ -301,6 +302,7 @@ export const deTranslations: DefaultTranslationsObject = {
     updating: 'Aktualisierung',
     uploading: 'Hochladen',
     user: 'Benutzer',
+    username: 'Benutzername',
     users: 'Benutzer',
     value: 'Wert',
     welcome: 'Willkommen',
@@ -322,7 +324,7 @@ export const deTranslations: DefaultTranslationsObject = {
     within: 'innerhalb',
   },
   upload: {
-    addImage: 'Bild hinzufügen',
+    addFile: 'Datei hinzufügen',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehen Sie die Ecken des ausgewählten Bereichs, zeichnen Sie einen neuen Bereich oder passen Sie die Werte unten an.',
@@ -365,6 +367,8 @@ export const deTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Dieses Feld muss zwei Nummern enthalten.',
     shorterThanMax: 'Dieser Wert muss kürzer als die maximale Länge von {{maxLength}} sein.',
     trueOrFalse: 'Dieses Feld kann nur wahr oder falsch sein.',
+    username:
+      'Bitte geben Sie einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',
     validUploadID: "'Dieses Feld enthält keine valide Upload-ID.'",
   },
   version: {

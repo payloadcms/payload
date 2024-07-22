@@ -7,6 +7,7 @@
   display: flex;
   align-items: center;
   background: var(--theme-input-bg);
+  border-radius: $style-radius-m;
   border: 1px solid var(--theme-elevation-100);
   position: relative;
   font-family: var(--font-body);
@@ -18,10 +19,6 @@
 
   &:hover {
     border: 1px solid var(--theme-elevation-150);
-  }
-
-  &[data-slate-node='element'] {
-    margin: calc(var(--base) * 0.625) 0;
   }
 
   &__card {
@@ -41,6 +38,7 @@
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
+    border-top-left-radius: $style-radius-m;
 
     img,
     svg {

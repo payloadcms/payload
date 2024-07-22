@@ -5,6 +5,9 @@ import httpStatus from 'http-status'
 
 import { APIError } from './APIError.js'
 
+// This gets dynamically reassigned during compilation
+export let ValidationErrorName = 'ValidationError'
+
 export class ValidationError extends APIError<{
   collection?: string
   errors: { field: string; message: string }[]
@@ -25,5 +28,7 @@ export class ValidationError extends APIError<{
       httpStatus.BAD_REQUEST,
       results,
     )
+
+    ValidationErrorName = this.constructor.name
   }
 }

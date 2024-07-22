@@ -21,28 +21,10 @@ export const CollectionWithHooks: CollectionConfig = {
 }
 ```
 
-The following Collection Hooks are available:
-
-- [`beforeOperation`](#beforeoperation)
-- [`beforeValidate`](#beforevalidate)
-- [`beforeChange`](#beforechange)
-- [`afterChange`](#afterchange)
-- [`beforeRead`](#beforeread)
-- [`afterRead`](#afterread)
-- [`beforeDelete`](#beforedelete)
-- [`afterDelete`](#afterdelete)
-- [`afterOperation`](#afteroperation)
-
-Additionally, all [Auth-enabled Collections](../authentication/overview) feature the following auth-related Hooks:
-
-- [`beforeLogin`](#beforelogin)
-- [`afterLogin`](#afterlogin)
-- [`afterLogout`](#afterlogout)
-- [`afterRefresh`](#afterrefresh)
-- [`afterMe`](#afterme)
-- [`afterForgotPassword`](#afterforgotpassword)
-- [`refresh`](#refresh)
-- [`me`](#me)
+<Banner type="info">
+  <strong>Tip:</strong>
+  You can also set hooks on the field-level to isolate hook logic to specific fields. [More details](./fields).
+</Banner>
 
 ## Config Options
 
@@ -89,9 +71,9 @@ Available Collection operations include `create`, `read`, `update`, `delete`, `l
 import type { CollectionBeforeOperationHook } from 'payload'
 
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
-  args, // original arguments passed into the operation
-  operation, // name of the operation
-  req, // full Request object
+  args,
+  operation,
+  req,
 }) => {
   return args // return modified operation arguments as necessary
 }

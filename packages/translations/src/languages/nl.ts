@@ -18,6 +18,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Wachtwoord bevestigen',
     createFirstUser: 'Eerste gebruiker aanmaken',
     emailNotValid: 'Het ingevoerde e-mailadres is niet geldig',
+    emailOrUsername: 'E-mail of Gebruikersnaam',
     emailSent: 'E-mail verzonden',
     emailVerified: 'E-mail succesvol geverifieerd.',
     enableAPIKey: 'Activeer API-sleutel',
@@ -298,6 +299,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     updating: 'Bijwerken',
     uploading: 'Uploaden',
     user: 'Gebruiker',
+    username: 'Gebruikersnaam',
     users: 'Gebruikers',
     value: 'Waarde',
     welcome: 'Welkom',
@@ -319,7 +321,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     within: 'binnen',
   },
   upload: {
-    addImage: 'Afbeelding toevoegen',
+    addFile: 'Bestand toevoegen',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
@@ -362,6 +364,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Dit veld vereist twee nummers.',
     shorterThanMax: 'Dit veld moet korter zijn dan de maximale lengte van {{maxLength}} tekens.',
     trueOrFalse: 'Dit veld kan alleen waar of onwaar zijn.',
+    username:
+      'Voer een geldige gebruikersnaam in. Kan letters, cijfers, koppeltekens, punten en underscores bevatten.',
     validUploadID: 'Dit veld is geen geldige upload-ID.',
   },
   version: {

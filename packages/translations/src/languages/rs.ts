@@ -17,6 +17,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Потврди лозинку',
     createFirstUser: 'Креирај првог корисника',
     emailNotValid: 'Адреса е-поште није валидна',
+    emailOrUsername: 'Email ili Korisničko ime',
     emailSent: 'Порука е-поште прослеђена',
     emailVerified: 'Uspešno verifikovan email.',
     enableAPIKey: 'Омогући API кључ',
@@ -295,6 +296,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     updating: 'Ажурирање',
     uploading: 'Пренос',
     user: 'Корисник',
+    username: 'Korisničko ime',
     users: 'Корисници',
     value: 'Вредност',
     welcome: 'Добродошли',
@@ -316,7 +318,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     within: 'unutar',
   },
   upload: {
-    addImage: 'Додај слику',
+    addFile: 'Додај датотеку',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',
@@ -359,6 +361,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Ово поље захтева два броја.',
     shorterThanMax: 'Ова вредност мора бити краћа од максималне дужине од {{maxLength}} карактера',
     trueOrFalse: 'Ово поље може бити само тачно или нетачно',
+    username:
+      'Molimo unesite važeće korisničko ime. Može sadržati slova, brojeve, crtice, tačke i donje crte.',
     validUploadID: 'Ово поље не садржи валидан ИД преноса.',
   },
   version: {

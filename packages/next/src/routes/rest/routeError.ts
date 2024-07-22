@@ -1,7 +1,7 @@
 import type { Collection, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
-import { APIError } from 'payload'
+import { APIError, APIErrorName, ValidationErrorName } from 'payload'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -16,7 +16,7 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorRes
 
     // Payload 'ValidationError' and 'APIError'
     if (
-      (proto.constructor.name === 'ValidationError' || proto.constructor.name === 'APIError') &&
+      (proto.constructor.name === ValidationErrorName || proto.constructor.name === APIErrorName) &&
       incoming.data
     ) {
       return {
@@ -31,7 +31,7 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorRes
     }
 
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (proto.constructor.name === 'ValidationError' && 'errors' in incoming && incoming.errors) {
+    if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce((acc, key) => {
           acc.push({

@@ -44,7 +44,7 @@ export const CollectionWithAccessControl: CollectionConfig = {
     unlock: () => {...},
 
     // Version-enabled Collections only
-    readVersion: () => {...},
+    readVersions: () => {...},
   },
   // highlight-end
 }
@@ -286,7 +286,7 @@ The following arguments are provided to the `admin` function:
 
 ### Unlock
 
-Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/config#options).
+Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#options).
 
 To add Unlock Access Control to a Collection, use the `unlock` property in the [Collection Config](../collections/overview):
 

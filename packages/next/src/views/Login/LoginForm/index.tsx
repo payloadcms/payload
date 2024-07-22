@@ -8,27 +8,24 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { FormState, PayloadRequest } from 'payload'
 
-import {
-  EmailField,
-  Form,
-  FormSubmit,
-  PasswordField,
-  TextField,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
-import { email, password, text } from 'payload/shared'
+import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
+import { password } from 'payload/shared'
 
+import type { LoginFieldProps } from '../LoginField/index.js'
+
+import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
 export const LoginForm: React.FC<{
+  prefillEmail?: string
+  prefillPassword?: string
+  prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
+}> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
   const config = useConfig()
 
   const {
     admin: {
-      autoLogin,
       routes: { forgot: forgotRoute },
       user: userSlug,
     },
@@ -36,31 +33,39 @@ export const LoginForm: React.FC<{
   } = config
 
   const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
-  const loginWithUsername = collectionConfig?.auth?.loginWithUsername
+  const { auth: authOptions } = collectionConfig
+  const loginWithUsername = authOptions.loginWithUsername
+  const canLoginWithEmail =
+    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
+  const canLoginWithUsername = authOptions.loginWithUsername
+
+  const [loginType] = React.useState<LoginFieldProps['type']>(() => {
+    if (canLoginWithEmail && canLoginWithUsername) return 'emailOrUsername'
+    if (canLoginWithUsername) return 'username'
+    return 'email'
+  })
 
   const { t } = useTranslation()
 
-  const prefillForm = autoLogin && autoLogin.prefillOnly
-
   const initialState: FormState = {
     password: {
-      initialValue: prefillForm ? autoLogin.password : undefined,
+      initialValue: prefillPassword ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.password : undefined,
+      value: prefillPassword ?? undefined,
     },
   }
 
   if (loginWithUsername) {
     initialState.username = {
-      initialValue: prefillForm ? autoLogin.username : undefined,
+      initialValue: prefillUsername ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.username : undefined,
+      value: prefillUsername ?? undefined,
     }
   } else {
     initialState.email = {
-      initialValue: prefillForm ? autoLogin.email : undefined,
+      initialValue: prefillEmail ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.email : undefined,
+      value: prefillEmail ?? undefined,
     }
   }
 
@@ -75,47 +80,7 @@ export const LoginForm: React.FC<{
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
-        {loginWithUsername ? (
-          <TextField
-            label={t('authentication:username')}
-            name="username"
-            required
-            validate={(value) =>
-              text(value, {
-                name: 'username',
-                type: 'text',
-                data: {},
-                preferences: { fields: {} },
-                req: {
-                  payload: {
-                    config,
-                  },
-                  t,
-                } as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        ) : (
-          <EmailField
-            autoComplete="email"
-            label={t('general:email')}
-            name="email"
-            required
-            validate={(value) =>
-              email(value, {
-                name: 'email',
-                type: 'email',
-                data: {},
-                preferences: { fields: {} },
-                req: { t } as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        )}
+        <LoginField type={loginType} />
         <PasswordField
           autoComplete="off"
           label={t('general:password')}

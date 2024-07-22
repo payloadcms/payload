@@ -453,16 +453,15 @@ export type CORSConfig = {
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
-    /** Automatically log in as a user when visiting the admin dashboard. */
+    /** Automatically log in as a user */
     autoLogin?:
       | {
           /**
            * The email address of the user to login as
-           *
            */
           email?: string
-          /** The password of the user to login as */
-          password: string
+          /** The password of the user to login as. This is only needed if `prefillOnly` is set to true */
+          password?: string
           /**
            * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
            *
@@ -473,9 +472,9 @@ export type Config = {
           username?: string
         }
       | false
+
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
-
     /**
      * Add extra and/or replace built-in components with custom components
      *

@@ -2,13 +2,13 @@
 title: Hooks Overview
 label: Overview
 order: 10
-desc: Hooks allow you to add your own logic to Payload, including integrating with third-party APIs, adding auto-generated data, or modifing Payload's base functionality.
+desc: Hooks allow you to add your own logic to Payload, including integrating with third-party APIs, adding auto-generated data, or modifying Payload's base functionality.
 keywords: hooks, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Hooks allow you to execute your own side effects during specific events of the Document lifecycle. With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework. They allow you to perform business logic, third-party integrations, etc. during precise moments within the data lifecycle.
+Hooks allow you to execute your own side effects during specific events of the Document lifecycle. They allow you to do things like mutate data, perform business logic, integrate with third-parties, or anything else, all during precise moments within your application.
 
-There are many use cases for Hooks, including:
+With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework. There are many use cases for Hooks, including:
 
 - Modify data before it is read or updated
 - Encrypt and decrypt sensitive data
@@ -18,16 +18,66 @@ There are many use cases for Hooks, including:
 - Send emails when contact forms are submitted
 - Track data ownership or changes over time
 
-There are three main types of Hooks in Payload:
+There are four main types of Hooks in Payload:
 
+- [Root Hooks](#root-hooks)
 - [Collection Hooks](/docs/hooks/collections)
 - [Global Hooks](/docs/hooks/globals)
 - [Field Hooks](/docs/hooks/fields)
 
 <Banner type="warning">
   <strong>Reminder:</strong>
-  Payload also ships a set of _React_ hooks that you can use in your frontend application. Although they share a common name, these are very different things and should not be confused. [More details](../admin.hooks).
+  Payload also ships a set of _React_ hooks that you can use in your frontend application. Although they share a common name, these are very different things and should not be confused. [More details](../admin/hooks).
 </Banner>
+
+## Root Hooks
+
+Root Hooks are not associated with any specific Collection, Global, or Field. They are useful for globally-oriented side effects, such as when an error occurs at the application level.
+
+To add Root Hooks, use the `hooks` property in your [Payload Config](/docs/configuration/config):
+
+```ts
+import {  buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  hooks: {
+    afterError: () => {...}
+  },
+  // highlight-end
+})
+```
+
+The following options are available:
+
+| Option       | Description                                                                                   |
+|--------------|-----------------------------------------------------------------------------------------------|
+| **`afterError`** | Runs after an error occurs in the Payload application.                                         |
+
+### afterError
+
+The `afterError` Hook is triggered when an error occurs in the Payload application. This can be useful for logging errors to a third-party service, sending an email to the development team, logging the error to Sentry or DataDog, etc.
+
+```ts
+import {  buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  hooks: {
+    afterError: async ({ error }) => {
+      // Do something
+    }
+  },
+})
+```
+
+The following arguments are provided to the `afterError` Hook:
+
+| Argument | Description                                                                                   |
+|----------|-----------------------------------------------------------------------------------------------|
+| **`error`**  | The error that occurred.                                                                      |
+| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
 
 ## Async vs. Synchronous
 

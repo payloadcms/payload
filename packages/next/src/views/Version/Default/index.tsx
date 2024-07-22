@@ -74,7 +74,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
     initialData: initialComparisonDoc,
-    initialParams: { depth: 1, draft: 'true', locale: '*' },
+    initialParams: { depth: 1, draft: 'true', locale: 'all' },
   })
 
   const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents

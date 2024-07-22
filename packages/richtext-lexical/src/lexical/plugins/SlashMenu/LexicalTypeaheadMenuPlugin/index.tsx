@@ -21,7 +21,7 @@ import * as React from 'react'
 
 import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'
 import type { MenuRenderFn, MenuResolution } from './LexicalMenu.js'
-import type { SlashMenuGroup, SlashMenuGroupInternal, SlashMenuItem } from './types.js'
+import type { SlashMenuGroupInternal, SlashMenuItem } from './types.js'
 
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu.js'
 
@@ -100,29 +100,6 @@ function startTransition(callback: () => void) {
   }
 }
 
-// Got from https://stackoverflow.com/a/42543908/2013580
-export function getScrollParent(
-  element: HTMLElement,
-  includeHidden: boolean,
-): HTMLBodyElement | HTMLElement {
-  let style = getComputedStyle(element)
-  const excludeStaticParent = style.position === 'absolute'
-  const overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/
-  if (style.position === 'fixed') {
-    return document.body
-  }
-  for (let parent: HTMLElement | null = element; (parent = parent.parentElement); ) {
-    style = getComputedStyle(parent)
-    if (excludeStaticParent && style.position === 'static') {
-      continue
-    }
-    if (overflowRegex.test(style.overflow + style.overflowY + style.overflowX)) {
-      return parent
-    }
-  }
-  return document.body
-}
-
 export { useDynamicPositioning } from './LexicalMenu.js'
 
 export type TypeaheadMenuPluginProps = {
@@ -190,7 +167,7 @@ export function LexicalTypeaheadMenuPlugin({
               matchingString: '',
               replaceableString: '',
             }
-            if (match !== null && !isSelectionOnEntityBoundary(editor, match.leadOffset)) {
+            if (!isSelectionOnEntityBoundary(editor, match.leadOffset)) {
               if (node !== null) {
                 const editorWindow = editor._window ?? window
                 const range = editorWindow.document.createRange()

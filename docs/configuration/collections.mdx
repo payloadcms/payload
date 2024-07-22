@@ -6,9 +6,9 @@ desc: Structure your Collections for your needs by defining fields, adding slugs
 keywords: collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-A Collection is a group of records, called Documents, that all share a common schema. You can define as many Collections as your application needs. Each Collection saves to the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates the [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) to manage your Documents.
+A Collection is a group of records, called Documents, that all share a common schema. You can define as many Collections as your application needs. Each Document in a Collection is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates a [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) used to manage your Documents.
 
-Collections are also the primary way to achieve [Authentication](../authentication/overview) in Payload. By defining a Collection with `auth` options, that Collection receives additional operations to support user authentication.
+Collections are also used to achieve [Authentication](../authentication/overview) in Payload. By defining a Collection with `auth` options, that Collection receives additional operations to support user authentication.
 
 Collections are the primary way to structure recurring data in your application, such as users, products, pages, posts, and other types of content that you might want to manage. Each Collection can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
@@ -59,15 +59,15 @@ The following options are available:
 
 | Option                 | Description                                                                                                                                                                                                              |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`admin`**            | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                               |
+| **`admin`**            | The configuration options for the Admin Panel. [More details](../admin/collections).                                                                                                                                            |
 | **`access`**           | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                   |
-| **`auth`**             | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](../authentication/config) documentation.                                                          |
+| **`auth`**             | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                          |
 | **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                      |
 | **`defaultSort`**      | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
 | **`dbName`**      | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined. |
 | **`endpoints`**        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                    |
-| **`fields`** \*        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](../fields/overview) for a full list of field types as well as how to configure them. |
+| **`fields`** \*        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview). |
 | **`graphQL`**          | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |
 | **`hooks`**            | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                         |
 | **`labels`**           | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
@@ -93,145 +93,14 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 
 ### Admin Options
 
-You can customize the way that the [Admin Panel](../admin/overview) behaves on a Collection-by-Collection basis.
-
-To configure Admin Options for Collections, use the `admin` property in your Collection Config:
-
-```ts
-import { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: { // highlight-line
-    // ...
-  },
-}
-```
-
-The following options are available:
-
-| Option                       | Description                                                                                                                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`group`**                      | Text used as a label for grouping Collection and Global links together in the navigation.                                                                                                             |
-| **`hidden`**                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                 |
-| **`hooks`**                      | Admin-specific hooks for this Collection. [More details](#admin-hooks).                                                                                                                                        |
-| **`useAsTitle`**                 | Specify a top-level field to use for a document title throughout the [Admin Panel](../admin/overview). If no field is defined, the ID of the document is used as the title.                                                |
-| **`description`**                | Text or React component to display below the Collection label in the List View to give editors more information.                                                                                      |
-| **`defaultColumns`**             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                              |
-| **`hideAPIURL`**                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                        |
-| **`enableRichTextLink`**         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
-| **`enableRichTextRelationship`** | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| **`meta`**                       | Metadata overrides to apply to the [Admin Panel](../admin/overview). Included properties are `description` and `openGraph`.                                                                           |
-| **`preview`**                    | Function to generate preview URLs within the [Admin Panel](../admin/overview) that can point to your app. [More details](#preview).                                                                                                |
-| **`livePreview`**                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                              |
-| **`components`**                 | Swap in your own React components to be used within this Collection. [More details](../admin/components#collections).                                                                                       |
-| **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                      |
-| **`pagination`**             | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                              |
-
-#### Preview
-
-It is possible to display a Preview Button in the Admin Panel within the Edit View. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
-
-To configure the Preview Button, set the `admin.preview` property to a function in your Collection Config:
-
-```ts
-import { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: {
-    // highlight-start
-    preview: (doc, { locale }) => {
-      if (doc?.slug) {
-        return `/${doc.slug}?locale=${locale}`
-      }
-
-      return null
-    },
-    // highlight-end
-  },
-}
-```
-
-The preview function receives two arguments:
-
-| Argument | Description |
-| --- | --- |
-| **`doc`** | The document being edited |
-| **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
-
-<Banner type="success">
-  <strong>Reminder:</strong>
-  For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
-</Banner>
-
-#### Pagination
-
-All Collections receive their own List View which displays a paginated list of documents that can be sorted and filtered. The pagination behavior of the List View can be customized on a per-Collection basis.
-
-To configure pagination options, use the `admin.pagination` property in your Collection Config:
-
-```ts
-import { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: {
-    // highlight-start
-    pagination: {
-      defaultLimit: 10,
-      limits: [10, 20, 50],
-    },
-    // highlight-end
-  },
-}
-```
-
-The following options are available:
-
-| Option         | Description                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
-| `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List View. |
-
-#### List Searchable Fields
-
-In the List View, there is a "search" box that allows you to quickly find a document through a simple text search. By default, it searches on the ID field. If defined, the `admin.useAsTitle` field is used. Or, you can explicitly define which fields to search based on the needs of your application.
-
-To define which fields should be searched, use the `admin.listSearchableFields` property in your Collection Config:
-
-```ts
-import { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: {
-    // highlight-start
-    listSearchableFields: ['title', 'slug'],
-    // highlight-end
-  },
-}
-```
-
-<Banner type="warning">
-  <strong>Tip:</strong>
-  If you are adding `listSearchableFields`, make sure you index each of these fields so your admin queries can remain performant.
-</Banner>
+You can customize the way that the [Admin Panel](../admin/overview) behaves on a Collection-by-Collection basis. To learn more, go to the [Collection Admin Options](../admin/collections) documentation.
 
 ## TypeScript
 
-You can import Collection types as follows:
+You can import types from Payload to help make writing your Collection configs easier and type-safe. There are two main types that represent the Collection Config, `CollectionConfig` and `SanitizeCollectionConfig`.
+
+The `CollectionConfig` type represents a raw Collection Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedCollectionConfig` type represents a Collection Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
 ```ts
-import { CollectionConfig } from 'payload'
-
-// This is the type used for incoming Collection configs.
-// Only the bare minimum properties are marked as required.
-```
-
-```ts
-import { SanitizedCollectionConfig } from 'payload'
-
-// This is the type used after an incoming Collection config is fully sanitized.
-// Generally, this is only used internally by Payload.
+import { CollectionConfig, SanitizedCollectionConfig } from 'payload'
 ```

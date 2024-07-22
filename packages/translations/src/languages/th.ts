@@ -18,6 +18,7 @@ export const thTranslations: DefaultTranslationsObject = {
     confirmPassword: 'ยืนยันรหัสผ่าน',
     createFirstUser: 'สร้างผู้ใช้แรก',
     emailNotValid: 'อีเมลไม่ถูกต้อง',
+    emailOrUsername: 'อีเมลหรือชื่อผู้ใช้',
     emailSent: 'ส่งอีเมลเรียบร้อยแล้ว',
     emailVerified: 'อีเมลได้รับการยืนยันเรียบร้อยแล้ว',
     enableAPIKey: 'เปิดใช้ API Key',
@@ -292,6 +293,7 @@ export const thTranslations: DefaultTranslationsObject = {
     updating: 'กำลังอัปเดต',
     uploading: 'กำลังอัปโหลด',
     user: 'ผู้ใช้',
+    username: 'ชื่อผู้ใช้',
     users: 'ผู้ใช้',
     value: 'ค่า',
     welcome: 'ยินดีต้อนรับ',
@@ -313,7 +315,7 @@ export const thTranslations: DefaultTranslationsObject = {
     within: 'ภายใน',
   },
   upload: {
-    addImage: 'เพิ่มรูปภาพ',
+    addFile: 'เพิ่มไฟล์',
     crop: 'พืชผล',
     cropToolDescription: 'ลากมุมของพื้นที่ที่เลือก, วาดพื้นที่ใหม่หรือปรับค่าด้านล่าง',
     dragAndDrop: 'ลากและวางไฟล์',
@@ -354,6 +356,7 @@ export const thTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'ต้องมีตัวเลข 2 ค่า',
     shorterThanMax: 'ค่าต้องมีความยาวน้อยกว่า {{maxLength}} ตัวอักษร',
     trueOrFalse: 'เป็นได้แค่ "ใช่" หรือ "ไม่ใช่"',
+    username: 'กรุณาใส่ชื่อผู้ใช้ที่ถูกต้อง สามารถมีตัวอักษร ตัวเลข ขีดกลาง จุด และขีดล่าง',
     validUploadID: 'ไม่ใช่ ID ของการอัปโหลดที่ถูกต้อง',
   },
   version: {

@@ -63,23 +63,13 @@ To install a Database Adapter, you can run **one** of the following commands:
     ```
 
 <Banner type="success">
-  <strong>Reminder:</strong>
+  <strong>Note:</strong>
   New [Database Adapters](/docs/database/overview) are becoming available every day. Check the docs for the most up-to-date list of what's available.
 </Banner>
 
 #### 2. Copy Payload files into your Next.js app folder
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run.
-
-The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel UI.
-
-You can copy the Payload `/app` folder files from the Payload blank template on GitHub:
-
-```
-https://github.com/payloadcms/payload/tree/beta/templates/blank-3.0/src/app/(payload)
-```
-
-Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/beta/templates/blank-3.0/src/app/(payload)) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
 
 ```plaintext
 app/
@@ -92,6 +82,8 @@ app/
 <Banner type="warning">
   You may need to copy all of your existing frontend files, including your existing root layout, into its own newly created [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups), i.e. `(my-app)`.
 </Banner>
+
+The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
 
 You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
 

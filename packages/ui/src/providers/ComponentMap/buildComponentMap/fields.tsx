@@ -315,6 +315,7 @@ export const mapFields = (args: {
 
               const reducedBlock: ReducedBlock = {
                 slug: block.slug,
+                LabelComponent: block.admin?.components?.Label,
                 custom: block.admin?.custom,
                 fieldMap: blockFieldMap,
                 imageAltText: block.imageAltText,

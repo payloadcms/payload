@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
@@ -15,7 +15,7 @@ export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>

@@ -18,6 +18,7 @@ export const esTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Confirmar Contraseña',
     createFirstUser: 'Crear al primer usuario',
     emailNotValid: 'El correo proporcionado es inválido',
+    emailOrUsername: 'Correo electrónico o nombre de usuario',
     emailSent: 'Correo Enviado',
     emailVerified: 'Correo electrónico verificado con éxito.',
     enableAPIKey: 'Habilitar Clave API',
@@ -300,6 +301,7 @@ export const esTranslations: DefaultTranslationsObject = {
     updating: 'Actualizando',
     uploading: 'Subiendo',
     user: 'Usuario',
+    username: 'Nombre de usuario',
     users: 'Usuarios',
     value: 'Valor',
     welcome: 'Bienvenido',
@@ -321,7 +323,7 @@ export const esTranslations: DefaultTranslationsObject = {
     within: 'dentro de',
   },
   upload: {
-    addImage: 'Añadir imagen',
+    addFile: 'Añadir archivo',
     crop: 'Cultivo',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
@@ -364,6 +366,8 @@ export const esTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Este campo requiere dos números.',
     shorterThanMax: 'Este dato debe ser más corto que el máximo de {{maxLength}} caracteres.',
     trueOrFalse: 'Este campo solamente puede ser verdadero o falso.',
+    username:
+      'Por favor, introduzca un nombre de usuario válido. Puede contener letras, números, guiones, puntos y guiones bajos.',
     validUploadID: "'Este campo no es una ID de subida válida.'",
   },
   version: {

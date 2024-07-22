@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -67,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -149,6 +149,23 @@ describe('admin2', () => {
 
         await page.locator('.search-filter__input').fill('this is fun')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('search should not persist between navigation', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=test`
+        await page.goto(url)
+        await page.waitForURL(url)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('test')
+
+        await page.locator('.nav-toggler.template-default__nav-toggler').click()
+        await expect(page.locator('#nav-uploads')).toContainText('Uploads')
+
+        const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
+        await page.goto(serverURL + uploadsUrl)
+        await page.waitForURL(serverURL + uploadsUrl)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('')
       })
 
       test('should toggle columns', async () => {

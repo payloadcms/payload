@@ -1,11 +1,9 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -24,8 +22,6 @@ export const Localizer: React.FC<{
   const { i18n } = useTranslation()
   const locale = useLocale()
   const { stringifyParams } = useSearchParams()
-  const router = useRouter()
-  const { clearRouteCache } = useRouteCache()
 
   if (localization) {
     const { locales } = localization
@@ -43,18 +39,13 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.Button
                     active={locale.code === localeOption.code}
+                    href={stringifyParams({
+                      params: {
+                        locale: localeOption.code,
+                      },
+                    })}
                     key={localeOption.code}
-                    onClick={() => {
-                      router.replace(
-                        stringifyParams({
-                          params: {
-                            locale: localeOption.code,
-                          },
-                        }),
-                      )
-                      clearRouteCache()
-                      close()
-                    }}
+                    onClick={close}
                   >
                     {localeOptionLabel}
                     {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}

@@ -12,7 +12,6 @@ import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<void>
@@ -34,11 +33,9 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { searchParams } = useSearchParams()
   const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
-  const [strategy, setStrategy] = useState<string>()
   const pathname = usePathname()
   const router = useRouter()
   // const { code } = useLocale()
@@ -48,9 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const {
     admin: {
-      autoLogin,
       routes: { inactivity: logoutInactivityRoute },
-      routes: { login: loginRoute },
       user: userSlug,
     },
     routes: { admin, api },
@@ -79,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
     setTokenExpiration(undefined)
-    setStrategy(undefined)
   }, [])
 
   const setTokenAndExpiration = useCallback(
@@ -88,7 +82,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token && json?.exp) {
         setTokenInMemory(token)
         setTokenExpiration(json.exp)
-        if (json.strategy) setStrategy(json.strategy)
       } else {
         revokeTokenAndExpire()
       }
@@ -215,36 +208,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (json?.token) {
             setTokenAndExpiration(json)
           }
-        } else if (autoLogin && autoLogin.prefillOnly !== true) {
-          // auto log-in with the provided autoLogin credentials. This is used in dev mode
-          // so you don't have to log in over and over again
-          const autoLoginResult = await requests.post(
-            `${serverURL}${api}/${userSlug}${loginRoute}`,
-            {
-              body: JSON.stringify({
-                email: autoLogin.email,
-                password: autoLogin.password,
-                username: autoLogin.username,
-              }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-            },
-          )
-          if (autoLoginResult.status === 200) {
-            const autoLoginJson = await autoLoginResult.json()
-            setUser(autoLoginJson.user)
-            if (autoLoginJson?.token) {
-              setTokenAndExpiration(autoLoginJson)
-            }
-            router.replace(
-              typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin,
-            )
-          } else {
-            setUser(null)
-            revokeTokenAndExpire()
-          }
         } else {
           setUser(null)
           revokeTokenAndExpire()
@@ -253,21 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [
-    serverURL,
-    api,
-    userSlug,
-    i18n.language,
-    autoLogin,
-    setTokenAndExpiration,
-    router,
-    searchParams,
-    admin,
-    revokeTokenAndExpire,
-    strategy,
-    tokenExpiration,
-    loginRoute,
-  ])
+  }, [serverURL, api, userSlug, i18n.language, setTokenAndExpiration, revokeTokenAndExpire])
 
   // On mount, get user and set
   useEffect(() => {

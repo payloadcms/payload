@@ -58,9 +58,9 @@ const useClientPlugin = {
   },
 }
 
-// Bundle only the .scss files into a single css file
-await esbuild
-  .build({
+async function build() {
+  // Bundle only the .scss files into a single css file
+  await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
@@ -68,24 +68,24 @@ await esbuild
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
-  .then(() => {
-    fs.rename('dist/index.css', 'dist/styles.css', (err) => {
-      if (err) console.error(`Error while renaming index.css: ${err}`)
-    })
 
-    fs.unlink('dist/index.js', (err) => {
-      if (err) console.error(`Error while deleting index.js: ${err}`)
-    })
+  try {
+    fs.renameSync('dist/index.css', 'dist/styles.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
 
-    console.log('styles.css bundled successfully')
-  })
-  .catch((e) => {
-    throw e
-  })
+  try {
+    fs.unlinkSync('dist/index.js')
+  } catch (err) {
+    console.error(`Error while deleting index.js: ${err}`)
+    throw err
+  }
 
-// Bundle `client.ts`
-const resultClient = await esbuild
-  .build({
+  console.log('styles.css bundled successfully')
+  // Bundle `client.ts`
+  const resultClient = await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     platform: 'browser',
@@ -138,21 +138,14 @@ function require(m) {
       removeCSSImports,
       useClientPlugin, // required for banner to work
       /*commonjs({
-        ignore: ['date-fns', '@floating-ui/react'],
-      }),*/
+          ignore: ['date-fns', '@floating-ui/react'],
+        }),*/
     ],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('client.ts bundled successfully')
-    return res
-  })
-  .catch((e) => {
-    throw e
-  })
+  console.log('client.ts bundled successfully')
 
-const resultShared = await esbuild
-  .build({
+  const resultShared = await esbuild.build({
     entryPoints: ['src/exports/shared/index.ts'],
     bundle: true,
     platform: 'node',
@@ -188,13 +181,10 @@ const resultShared = await esbuild
     plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('shared.ts bundled successfully')
-    return res
-  })
-  .catch((e) => {
-    throw e
-  })
+  console.log('shared.ts bundled successfully')
 
-fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
-fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
+  fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+  fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
+}
+
+await build()

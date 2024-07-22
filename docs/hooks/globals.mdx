@@ -21,13 +21,10 @@ export const GlobalWithHooks: GlobalConfig = {
 }
 ```
 
-The following Global Hooks are available:
-
-- [`beforeValidate`](#beforevalidate)
-- [`beforeChange`](#beforechange)
-- [`afterChange`](#afterchange)
-- [`beforeRead`](#beforeread)
-- [`afterRead`](#afterread)
+<Banner type="info">
+  <strong>Tip:</strong>
+  You can also set hooks on the field-level to isolate hook logic to specific fields. [More details](./fields).
+</Banner>
 
 ## Config Options
 
@@ -58,11 +55,11 @@ Runs before the `update` operation. This hook allows you to add or format data b
 import type { GlobalBeforeValidateHook } from 'payload'
 
 const beforeValidateHook: GlobalBeforeValidateHook = async ({
-  data, // incoming data to update or create with
-  req, // full Request object
-  originalDoc, // original document
+  data,
+  req,
+  originalDoc,
 }) => {
-  return data // Return data to update the document with
+  return data
 }
 ```
 
@@ -84,11 +81,11 @@ Immediately following validation, `beforeChange` hooks will run within the `upda
 import type { GlobalBeforeChangeHook } from 'payload'
 
 const beforeChangeHook: GlobalBeforeChangeHook = async ({
-  data, // incoming data to update or create with
-  req, // full Request object
-  originalDoc, // original document
+  data,
+  req,
+  originalDoc,
 }) => {
-  return data // Return data to update the document with
+  return data
 }
 ```
 
@@ -110,9 +107,9 @@ After a global is updated, the `afterChange` hook runs. Use this hook to purge c
 import type { GlobalAfterChangeHook } from 'payload'
 
 const afterChangeHook: GlobalAfterChangeHook = async ({
-  doc, // full document data
-  previousDoc, // document data before updating the collection
-  req, // full Request object
+  doc,
+  previousDoc,
+  req,
 }) => {
   return data
 }
@@ -136,8 +133,8 @@ Runs before `findOne` global operation is transformed for output by `afterRead`.
 import type { GlobalBeforeReadHook } from 'payload'
 
 const beforeReadHook: GlobalBeforeReadHook = async ({
-  doc, // full document data
-  req, // full Request object
+  doc,
+  req,
 }) => {...}
 ```
 
@@ -158,9 +155,9 @@ Runs as the last step before a global is returned. Flattens locales, hides prote
 import type { GlobalAfterReadHook } from 'payload'
 
 const afterReadHook: GlobalAfterReadHook = async ({
-  doc, // full document data
-  req, // full Request object
-  findMany, // boolean to denote if this hook is running against finding one, or finding many (useful in versions)
+  doc,
+  req,
+  findMany,
 }) => {...}
 ```
 
