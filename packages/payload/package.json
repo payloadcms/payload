@@ -84,7 +84,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "^15.0.0-rc.0",
+    "@next/env": "^15.0.0-canary.53",
     "@payloadcms/translations": "workspace:*",
     "@swc-node/core": "1.13.1",
     "@swc-node/sourcemap-support": "0.5.0",
