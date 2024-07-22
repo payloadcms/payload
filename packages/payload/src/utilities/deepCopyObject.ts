@@ -100,6 +100,7 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
       typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e),
     ) as T
   } else {
+    if (value instanceof Date) return new Date(value) as unknown as T
     const ret: { [key: string]: T } = {}
     for (const k in value) {
       const v = value[k]
