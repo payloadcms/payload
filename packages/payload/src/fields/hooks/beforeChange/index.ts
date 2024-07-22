@@ -3,7 +3,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -42,7 +42,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData)
+  const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions = []
   const errors: { field: string; message: string }[] = []
 

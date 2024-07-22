@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -36,7 +36,7 @@ export const afterChange = async <T extends Record<string, unknown>>({
   previousDoc,
   req,
 }: Args<T>): Promise<T> => {
-  const doc = deepCopyObject(incomingDoc)
+  const doc = deepCopyObjectSimple(incomingDoc)
 
   await traverseFields({
     collection,
