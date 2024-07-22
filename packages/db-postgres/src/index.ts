@@ -95,10 +95,11 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction,
+      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
