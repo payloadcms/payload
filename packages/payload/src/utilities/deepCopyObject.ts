@@ -24,7 +24,7 @@ export const deepCopyObject = (inObject) => {
 
 /**
  * A deepCopyObject implementation which only works for objects and arrays, and is faster than
- * JSON.parse(JSON.stringify(inObject)): https://www.measurethat.net/Benchmarks/Show/31439/0/jsonstringify-vs-structuredclone-vs-simple-deepcopyobje
+ * JSON.parse(JSON.stringify(inObject)): https://www.measurethat.net/Benchmarks/Show/31442/0/jsonstringify-vs-structuredclone-vs-simple-deepcopyobje
  *
  * This is not recursive and should thus be more memory efficient, due to less stack frames
  */
