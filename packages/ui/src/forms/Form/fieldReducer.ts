@@ -1,9 +1,8 @@
 import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { dequal } from 'dequal/lite'
-import { deepCopyObject } from 'payload' // lite: no need for Map and Set support
-import { deepCopyObjectSimple } from 'payload/shared'
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { deepCopyObject, deepCopyObjectSimple } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
