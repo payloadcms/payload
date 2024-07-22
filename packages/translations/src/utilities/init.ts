@@ -143,10 +143,9 @@ export function t<
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMergeSimple<DefaultTranslationsObject>(
-    translations,
-    config?.translations?.[language] ?? {},
-  )
+  const mergedTranslations = config?.translations?.[language]
+    ? deepMergeSimple<DefaultTranslationsObject>(translations, config?.translations?.[language])
+    : translations
 
   return {
     t: (key, vars) => {
