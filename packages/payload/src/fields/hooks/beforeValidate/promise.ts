@@ -6,7 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import getValueWithDefault from '../../getDefaultValue.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
@@ -274,7 +274,7 @@ export const promise = async <T>({
 
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = getValueWithDefault({
+        siblingData[field.name] = await getDefaultValue({
           defaultValue: field.defaultValue,
           locale: req.locale,
           user: req.user,

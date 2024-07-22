@@ -1,4 +1,4 @@
-import type { JsonObject, JsonValue, PayloadRequest } from '../types/index.js'
+import type { JsonValue, PayloadRequest } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
@@ -9,13 +9,18 @@ type Args = {
   value?: JsonValue
 }
 
-const getValueWithDefault = ({ defaultValue, locale, user, value }: Args): JsonValue => {
+export const getDefaultValue = async ({
+  defaultValue,
+  locale,
+  user,
+  value,
+}: Args): Promise<JsonValue> => {
   if (typeof value !== 'undefined') {
     return value
   }
 
   if (defaultValue && typeof defaultValue === 'function') {
-    return defaultValue({ locale, user })
+    return await defaultValue({ locale, user })
   }
 
   if (typeof defaultValue === 'object') {
@@ -24,6 +29,3 @@ const getValueWithDefault = ({ defaultValue, locale, user, value }: Args): JsonV
 
   return defaultValue
 }
-
-// eslint-disable-next-line no-restricted-exports
-export default getValueWithDefault
