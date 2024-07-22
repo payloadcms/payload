@@ -5,7 +5,6 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 
-import { withMergedProps } from '@payloadcms/ui/shared'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import {
@@ -27,8 +26,6 @@ import type {
   LexicalRichTextAdapterProvider,
 } from './types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { RichTextCell, RichTextField } from './exports/client/index.js'
 import { i18n } from './i18n.js'
 import { defaultEditorConfig, defaultEditorFeatures } from './lexical/config/server/default.js'
 import { loadFeatures } from './lexical/config/server/loader.js'
@@ -147,20 +144,20 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     }
 
     return {
-      CellComponent: withMergedProps({
-        Component: RichTextCell,
-        toMergeIntoProps: {
+      CellComponent: {
+        clientProps: {
           admin: props?.admin,
           lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
         },
-      }),
-      FieldComponent: withMergedProps({
-        Component: RichTextField,
-        toMergeIntoProps: {
+        path: './exports/client/index.js#RichTextCell',
+      },
+      FieldComponent: {
+        clientProps: {
           admin: props?.admin,
           lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
         },
-      }),
+        path: './exports/client/index.js#FieldComponent',
+      },
       editorConfig: finalSanitizedEditorConfig,
       features,
       generateComponentMap: getGenerateComponentMap({
@@ -463,8 +460,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
-                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root
-                    ?.children ?? [],
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
+                  [],
               })
             }
 

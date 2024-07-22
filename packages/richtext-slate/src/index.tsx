@@ -4,11 +4,9 @@ import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 
-import { RichTextCell } from './cell/index.js'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
-import { RichTextField } from './field/index.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
@@ -46,8 +44,8 @@ export function slateEditor(
     }
 
     return {
-      CellComponent: RichTextCell,
-      FieldComponent: RichTextField,
+      CellComponent: './cell/index.js#RichTextCell',
+      FieldComponent: './field/index.js#RichTextField',
       generateComponentMap: getGenerateComponentMap(args),
       generateSchemaMap: getGenerateSchemaMap(args),
       graphQLPopulationPromises({
