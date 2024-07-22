@@ -1,8 +1,6 @@
 import type { MongooseQueryOptions } from 'mongoose'
 import type { Document, FindOne, PayloadRequest } from 'payload'
 
-import { deepCopyObjectSimple } from 'payload'
-
 import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
@@ -30,7 +28,7 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result: Document = deepCopyObjectSimple(doc)
+  let result: Document = JSON.parse(JSON.stringify(doc))
 
   // custom id type reset
   result.id = result._id

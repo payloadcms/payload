@@ -1,7 +1,7 @@
 import type { PaginateOptions } from 'mongoose'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
-import { combineQueries, deepCopyObjectSimple, flattenWhereToOperators } from 'payload'
+import { combineQueries, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -82,7 +82,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = deepCopyObjectSimple(result.docs)
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,

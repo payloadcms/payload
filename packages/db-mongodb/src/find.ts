@@ -1,7 +1,7 @@
 import type { PaginateOptions } from 'mongoose'
 import type { Find, PayloadRequest } from 'payload'
 
-import { deepCopyObjectSimple, flattenWhereToOperators } from 'payload'
+import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -81,7 +81,7 @@ export const find: Find = async function find(
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = deepCopyObjectSimple(result.docs)
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,

@@ -1,7 +1,5 @@
 import type { Create, Document, PayloadRequest } from 'payload'
 
-import { deepCopyObjectSimple } from 'payload'
-
 import type { MongooseAdapter } from './index.js'
 
 import { handleError } from './utilities/handleError.js'
@@ -21,7 +19,7 @@ export const create: Create = async function create(
   }
 
   // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
-  const result: Document = deepCopyObjectSimple(doc)
+  const result: Document = JSON.parse(JSON.stringify(doc))
   const verificationToken = doc._verificationToken
 
   // custom id type reset

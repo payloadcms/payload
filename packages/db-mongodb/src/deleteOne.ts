@@ -1,7 +1,5 @@
 import type { DeleteOne, Document, PayloadRequest } from 'payload'
 
-import { deepCopyObjectSimple } from 'payload'
-
 import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
@@ -21,7 +19,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const doc = await Model.findOneAndDelete(query, options).lean()
 
-  let result: Document = deepCopyObjectSimple(doc)
+  let result: Document = JSON.parse(JSON.stringify(doc))
 
   // custom id type reset
   result.id = result._id
