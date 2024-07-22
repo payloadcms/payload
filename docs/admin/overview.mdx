@@ -169,7 +169,7 @@ The following options are available:
 
 | Option             | Default route           | Description                           |
 | ------------------ | ----------------------- | ------------------------------------- |
-| `admin`            | `/admin`                | The Admin Panel itself.               |
+| `admin`            | `/admin`                | The Admin Panel itself. Set to `"/"` to bind to the root of your app. |
 | `api`              | `/api`                  | The [REST API](../rest-api/overview) base path.               |
 | `graphQL`          | `/graphql`              | The [GraphQL API](../graphql/overview) base path.            |
 | `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
@@ -181,7 +181,7 @@ The following options are available:
 
 <Banner type="success">
   <strong>Tip:</strong>
-   You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
+   You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
 </Banner>
 
 ### Admin-level Routes
