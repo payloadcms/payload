@@ -644,8 +644,8 @@ importers:
   packages/payload:
     dependencies:
       '@next/env':
-        specifier: ^15.0.0-rc.0
-        version: 15.0.0-rc.0
+        specifier: ^15.0.0-canary.53
+        version: 15.0.0-canary.53
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -5911,10 +5911,6 @@ packages:
 
   /@next/env@15.0.0-canary.53:
     resolution: {integrity: sha512-8GBJH7RckXulT5+PpxUT0cBzmxosv8NEcouXzKfC0qsqqTvD7B8XpqHSpHzITUwQH1ToG6a/Jb8fnDrwW/nhEw==}
-
-  /@next/env@15.0.0-rc.0:
-    resolution: {integrity: sha512-6W0ndQvHR9sXcqcKeR/inD2UTRCs9+VkSK3lfaGmEuZs7EjwwXMO2BPYjz9oBrtfPL3xuTjtXsHKSsalYQ5l1Q==}
-    dev: false
 
   /@next/eslint-plugin-next@14.2.5:
     resolution: {integrity: sha512-LY3btOpPh+OTIpviNojDpUdIbHW9j0JBYBjsIp8IxtDFfYFyORvw3yNq6N231FVqQA7n7lwaf7xHbVJlA1ED7g==}

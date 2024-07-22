@@ -31,7 +31,7 @@
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "eslint": "^8",
-    "eslint-config-next": "15.0.0-rc.0",
+    "eslint-config-next": "15.0.0-canary.53",
     "typescript": "5.5.3"
   },
   "engines": {
