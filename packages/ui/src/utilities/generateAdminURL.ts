@@ -1,9 +1,14 @@
-export const generateAdminURL = (path: string, adminRoute: string, serverURL?: string): string => {
-  let url = path
+import type { Config } from 'payload'
 
+/** Will read the `routes.admin` config and appropriately handle "/" paths */
+export const generateAdminURL = (
+  path: string,
+  adminRoute: Config['routes']['admin'],
+  serverURL?: Config['serverURL'],
+): string => {
   if (adminRoute && adminRoute !== '/') {
-    url = `${adminRoute}${url}`
+    return `${serverURL || ''}${adminRoute}${path}`
   }
 
-  return `${serverURL}${url}`
+  return `${serverURL || ''}${path}`
 }

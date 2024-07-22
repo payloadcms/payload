@@ -57,4 +57,6 @@ export const handleAdminPage = ({
       globalConfig,
     }
   }
+
+  return {}
 }

@@ -1,4 +1,4 @@
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
+import { generateAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 

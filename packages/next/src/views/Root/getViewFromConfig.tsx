@@ -1,6 +1,6 @@
 import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
-import { generateAdminURL } from '@payloadcms/ui/utilities/generateAdminURL'
+import { generateAdminURL } from '@payloadcms/ui/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
