@@ -1,0 +1,1902 @@
+type Query {
+  Post(id: String!, draft: Boolean): Post
+  Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, sort: String): Posts
+  countPosts(draft: Boolean, where: Post_where): countPosts
+  docAccessPost(id: String!): postsDocAccess
+  versionPost(id: String): PostVersion
+  versionsPosts(where: versionsPost_where, limit: Int, page: Int, sort: String): versionsPosts
+  User(id: String!, draft: Boolean): User
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
+  countUsers(draft: Boolean, where: User_where): countUsers
+  docAccessUser(id: String!): usersDocAccess
+  meUser: usersMe
+  initializedUser: Boolean
+  PayloadPreference(id: String!, draft: Boolean): PayloadPreference
+  PayloadPreferences(
+    draft: Boolean
+    where: PayloadPreference_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadPreferences
+  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
+  Menu(draft: Boolean): Menu
+  docAccessMenu: menuDocAccess
+  Access: Access
+}
+
+type Post {
+  id: String
+  text: String
+  richText(depth: Int): JSON
+  richText2(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: Post__status
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+  @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+enum Post__status {
+  draft
+  published
+}
+
+type Posts {
+  docs: [Post]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Post_where {
+  text: Post_text_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  _status: Post__status_operator
+  id: Post_id_operator
+  AND: [Post_where_and]
+  OR: [Post_where_or]
+}
+
+input Post_text_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_richText_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input Post_richText2_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input Post_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Post_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Post__status_operator {
+  equals: Post__status_Input
+  not_equals: Post__status_Input
+  in: [Post__status_Input]
+  not_in: [Post__status_Input]
+  all: [Post__status_Input]
+  exists: Boolean
+}
+
+enum Post__status_Input {
+  draft
+  published
+}
+
+input Post_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_where_and {
+  text: Post_text_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  _status: Post__status_operator
+  id: Post_id_operator
+  AND: [Post_where_and]
+  OR: [Post_where_or]
+}
+
+input Post_where_or {
+  text: Post_text_operator
+  richText: Post_richText_operator
+  richText2: Post_richText2_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  _status: Post__status_operator
+  id: Post_id_operator
+  AND: [Post_where_and]
+  OR: [Post_where_or]
+}
+
+type countPosts {
+  totalDocs: Int
+}
+
+type postsDocAccess {
+  fields: PostsDocAccessFields
+  create: PostsCreateDocAccess
+  read: PostsReadDocAccess
+  update: PostsUpdateDocAccess
+  delete: PostsDeleteDocAccess
+  readVersions: PostsReadVersionsDocAccess
+}
+
+type PostsDocAccessFields {
+  text: PostsDocAccessFields_text
+  richText: PostsDocAccessFields_richText
+  richText2: PostsDocAccessFields_richText2
+  updatedAt: PostsDocAccessFields_updatedAt
+  createdAt: PostsDocAccessFields_createdAt
+  _status: PostsDocAccessFields__status
+}
+
+type PostsDocAccessFields_text {
+  create: PostsDocAccessFields_text_Create
+  read: PostsDocAccessFields_text_Read
+  update: PostsDocAccessFields_text_Update
+  delete: PostsDocAccessFields_text_Delete
+}
+
+type PostsDocAccessFields_text_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_text_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_text_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_text_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText {
+  create: PostsDocAccessFields_richText_Create
+  read: PostsDocAccessFields_richText_Read
+  update: PostsDocAccessFields_richText_Update
+  delete: PostsDocAccessFields_richText_Delete
+}
+
+type PostsDocAccessFields_richText_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2 {
+  create: PostsDocAccessFields_richText2_Create
+  read: PostsDocAccessFields_richText2_Read
+  update: PostsDocAccessFields_richText2_Update
+  delete: PostsDocAccessFields_richText2_Delete
+}
+
+type PostsDocAccessFields_richText2_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_richText2_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt {
+  create: PostsDocAccessFields_updatedAt_Create
+  read: PostsDocAccessFields_updatedAt_Read
+  update: PostsDocAccessFields_updatedAt_Update
+  delete: PostsDocAccessFields_updatedAt_Delete
+}
+
+type PostsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt {
+  create: PostsDocAccessFields_createdAt_Create
+  read: PostsDocAccessFields_createdAt_Read
+  update: PostsDocAccessFields_createdAt_Update
+  delete: PostsDocAccessFields_createdAt_Delete
+}
+
+type PostsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status {
+  create: PostsDocAccessFields__status_Create
+  read: PostsDocAccessFields__status_Read
+  update: PostsDocAccessFields__status_Update
+  delete: PostsDocAccessFields__status_Delete
+}
+
+type PostsDocAccessFields__status_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields__status_Delete {
+  permission: Boolean!
+}
+
+type PostsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+  @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+type PostsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsReadVersionsDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostVersion {
+  parent(draft: Boolean): Post
+  version: PostVersion_Version
+  createdAt: DateTime
+  updatedAt: DateTime
+  latest: Boolean
+  id: String
+}
+
+type PostVersion_Version {
+  text: String
+  richText(depth: Int): JSON
+  richText2(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: PostVersion_Version__status
+}
+
+enum PostVersion_Version__status {
+  draft
+  published
+}
+
+type versionsPosts {
+  docs: [PostVersion]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input versionsPost_where {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
+}
+
+input versionsPost_parent_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsPost_version__text_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPost_version__richText_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input versionsPost_version__richText2_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input versionsPost_version__updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_version__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_version___status_operator {
+  equals: versionsPost_version___status_Input
+  not_equals: versionsPost_version___status_Input
+  in: [versionsPost_version___status_Input]
+  not_in: [versionsPost_version___status_Input]
+  all: [versionsPost_version___status_Input]
+  exists: Boolean
+}
+
+enum versionsPost_version___status_Input {
+  draft
+  published
+}
+
+input versionsPost_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_latest_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsPost_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPost_where_and {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
+}
+
+input versionsPost_where_or {
+  parent: versionsPost_parent_operator
+  version__text: versionsPost_version__text_operator
+  version__richText: versionsPost_version__richText_operator
+  version__richText2: versionsPost_version__richText2_operator
+  version__updatedAt: versionsPost_version__updatedAt_operator
+  version__createdAt: versionsPost_version__createdAt_operator
+  version___status: versionsPost_version___status_operator
+  createdAt: versionsPost_createdAt_operator
+  updatedAt: versionsPost_updatedAt_operator
+  latest: versionsPost_latest_operator
+  id: versionsPost_id_operator
+  AND: [versionsPost_where_and]
+  OR: [versionsPost_where_or]
+}
+
+type User {
+  id: String
+  updatedAt: DateTime
+  createdAt: DateTime
+  email: EmailAddress!
+  resetPasswordToken: String
+  resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: DateTime
+  password: String!
+}
+
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
+type Users {
+  docs: [User]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input User_where {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
+}
+
+input User_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_email_operator {
+  equals: EmailAddress
+  not_equals: EmailAddress
+  like: EmailAddress
+  contains: EmailAddress
+  in: [EmailAddress]
+  not_in: [EmailAddress]
+  all: [EmailAddress]
+}
+
+input User_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_where_and {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
+}
+
+input User_where_or {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
+}
+
+type countUsers {
+  totalDocs: Int
+}
+
+type usersDocAccess {
+  fields: UsersDocAccessFields
+  create: UsersCreateDocAccess
+  read: UsersReadDocAccess
+  update: UsersUpdateDocAccess
+  delete: UsersDeleteDocAccess
+  unlock: UsersUnlockDocAccess
+}
+
+type UsersDocAccessFields {
+  updatedAt: UsersDocAccessFields_updatedAt
+  createdAt: UsersDocAccessFields_createdAt
+  email: UsersDocAccessFields_email
+  password: UsersDocAccessFields_password
+}
+
+type UsersDocAccessFields_updatedAt {
+  create: UsersDocAccessFields_updatedAt_Create
+  read: UsersDocAccessFields_updatedAt_Read
+  update: UsersDocAccessFields_updatedAt_Update
+  delete: UsersDocAccessFields_updatedAt_Delete
+}
+
+type UsersDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt {
+  create: UsersDocAccessFields_createdAt_Create
+  read: UsersDocAccessFields_createdAt_Read
+  update: UsersDocAccessFields_createdAt_Update
+  delete: UsersDocAccessFields_createdAt_Delete
+}
+
+type UsersDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email {
+  create: UsersDocAccessFields_email_Create
+  read: UsersDocAccessFields_email_Read
+  update: UsersDocAccessFields_email_Update
+  delete: UsersDocAccessFields_email_Delete
+}
+
+type UsersDocAccessFields_email_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password {
+  create: UsersDocAccessFields_password_Create
+  read: UsersDocAccessFields_password_Read
+  update: UsersDocAccessFields_password_Update
+  delete: UsersDocAccessFields_password_Delete
+}
+
+type UsersDocAccessFields_password_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Delete {
+  permission: Boolean!
+}
+
+type UsersCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUnlockDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type usersMe {
+  collection: String
+  exp: Int
+  token: String
+  user: User
+}
+
+type PayloadPreference {
+  id: String
+  user: PayloadPreference_User_Relationship!
+  key: String
+  value: JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type PayloadPreference_User_Relationship {
+  relationTo: PayloadPreference_User_RelationTo
+  value: PayloadPreference_User
+}
+
+enum PayloadPreference_User_RelationTo {
+  users
+}
+
+union PayloadPreference_User = User
+
+type PayloadPreferences {
+  docs: [PayloadPreference]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input PayloadPreference_where {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+input PayloadPreference_user_Relation {
+  relationTo: PayloadPreference_user_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadPreference_user_Relation_RelationTo {
+  users
+}
+
+input PayloadPreference_key_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadPreference_value_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  within: JSON
+  intersects: JSON
+  exists: Boolean
+}
+
+input PayloadPreference_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadPreference_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadPreference_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadPreference_where_and {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+input PayloadPreference_where_or {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+type countPayloadPreferences {
+  totalDocs: Int
+}
+
+type payload_preferencesDocAccess {
+  fields: PayloadPreferencesDocAccessFields
+  create: PayloadPreferencesCreateDocAccess
+  read: PayloadPreferencesReadDocAccess
+  update: PayloadPreferencesUpdateDocAccess
+  delete: PayloadPreferencesDeleteDocAccess
+}
+
+type PayloadPreferencesDocAccessFields {
+  user: PayloadPreferencesDocAccessFields_user
+  key: PayloadPreferencesDocAccessFields_key
+  value: PayloadPreferencesDocAccessFields_value
+  updatedAt: PayloadPreferencesDocAccessFields_updatedAt
+  createdAt: PayloadPreferencesDocAccessFields_createdAt
+}
+
+type PayloadPreferencesDocAccessFields_user {
+  create: PayloadPreferencesDocAccessFields_user_Create
+  read: PayloadPreferencesDocAccessFields_user_Read
+  update: PayloadPreferencesDocAccessFields_user_Update
+  delete: PayloadPreferencesDocAccessFields_user_Delete
+}
+
+type PayloadPreferencesDocAccessFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key {
+  create: PayloadPreferencesDocAccessFields_key_Create
+  read: PayloadPreferencesDocAccessFields_key_Read
+  update: PayloadPreferencesDocAccessFields_key_Update
+  delete: PayloadPreferencesDocAccessFields_key_Delete
+}
+
+type PayloadPreferencesDocAccessFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value {
+  create: PayloadPreferencesDocAccessFields_value_Create
+  read: PayloadPreferencesDocAccessFields_value_Read
+  update: PayloadPreferencesDocAccessFields_value_Update
+  delete: PayloadPreferencesDocAccessFields_value_Delete
+}
+
+type PayloadPreferencesDocAccessFields_value_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt {
+  create: PayloadPreferencesDocAccessFields_updatedAt_Create
+  read: PayloadPreferencesDocAccessFields_updatedAt_Read
+  update: PayloadPreferencesDocAccessFields_updatedAt_Update
+  delete: PayloadPreferencesDocAccessFields_updatedAt_Delete
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt {
+  create: PayloadPreferencesDocAccessFields_createdAt_Create
+  read: PayloadPreferencesDocAccessFields_createdAt_Read
+  update: PayloadPreferencesDocAccessFields_createdAt_Update
+  delete: PayloadPreferencesDocAccessFields_createdAt_Delete
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Menu {
+  globalText: String
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type menuDocAccess {
+  fields: MenuDocAccessFields
+  read: MenuReadDocAccess
+  update: MenuUpdateDocAccess
+}
+
+type MenuDocAccessFields {
+  globalText: MenuDocAccessFields_globalText
+  updatedAt: MenuDocAccessFields_updatedAt
+  createdAt: MenuDocAccessFields_createdAt
+}
+
+type MenuDocAccessFields_globalText {
+  create: MenuDocAccessFields_globalText_Create
+  read: MenuDocAccessFields_globalText_Read
+  update: MenuDocAccessFields_globalText_Update
+  delete: MenuDocAccessFields_globalText_Delete
+}
+
+type MenuDocAccessFields_globalText_Create {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_globalText_Read {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_globalText_Update {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_globalText_Delete {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt {
+  create: MenuDocAccessFields_updatedAt_Create
+  read: MenuDocAccessFields_updatedAt_Read
+  update: MenuDocAccessFields_updatedAt_Update
+  delete: MenuDocAccessFields_updatedAt_Delete
+}
+
+type MenuDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt {
+  create: MenuDocAccessFields_createdAt_Create
+  read: MenuDocAccessFields_createdAt_Read
+  update: MenuDocAccessFields_createdAt_Update
+  delete: MenuDocAccessFields_createdAt_Delete
+}
+
+type MenuDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type MenuReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type MenuUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Access {
+  canAccessAdmin: Boolean!
+  posts: postsAccess
+  users: usersAccess
+  payload_preferences: payload_preferencesAccess
+  menu: menuAccess
+}
+
+type postsAccess {
+  fields: PostsFields
+  create: PostsCreateAccess
+  read: PostsReadAccess
+  update: PostsUpdateAccess
+  delete: PostsDeleteAccess
+  readVersions: PostsReadVersionsAccess
+}
+
+type PostsFields {
+  text: PostsFields_text
+  richText: PostsFields_richText
+  richText2: PostsFields_richText2
+  updatedAt: PostsFields_updatedAt
+  createdAt: PostsFields_createdAt
+  _status: PostsFields__status
+}
+
+type PostsFields_text {
+  create: PostsFields_text_Create
+  read: PostsFields_text_Read
+  update: PostsFields_text_Update
+  delete: PostsFields_text_Delete
+}
+
+type PostsFields_text_Create {
+  permission: Boolean!
+}
+
+type PostsFields_text_Read {
+  permission: Boolean!
+}
+
+type PostsFields_text_Update {
+  permission: Boolean!
+}
+
+type PostsFields_text_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_richText {
+  create: PostsFields_richText_Create
+  read: PostsFields_richText_Read
+  update: PostsFields_richText_Update
+  delete: PostsFields_richText_Delete
+}
+
+type PostsFields_richText_Create {
+  permission: Boolean!
+}
+
+type PostsFields_richText_Read {
+  permission: Boolean!
+}
+
+type PostsFields_richText_Update {
+  permission: Boolean!
+}
+
+type PostsFields_richText_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_richText2 {
+  create: PostsFields_richText2_Create
+  read: PostsFields_richText2_Read
+  update: PostsFields_richText2_Update
+  delete: PostsFields_richText2_Delete
+}
+
+type PostsFields_richText2_Create {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Read {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Update {
+  permission: Boolean!
+}
+
+type PostsFields_richText2_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt {
+  create: PostsFields_updatedAt_Create
+  read: PostsFields_updatedAt_Read
+  update: PostsFields_updatedAt_Update
+  delete: PostsFields_updatedAt_Delete
+}
+
+type PostsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt {
+  create: PostsFields_createdAt_Create
+  read: PostsFields_createdAt_Read
+  update: PostsFields_createdAt_Update
+  delete: PostsFields_createdAt_Delete
+}
+
+type PostsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PostsFields__status {
+  create: PostsFields__status_Create
+  read: PostsFields__status_Read
+  update: PostsFields__status_Update
+  delete: PostsFields__status_Delete
+}
+
+type PostsFields__status_Create {
+  permission: Boolean!
+}
+
+type PostsFields__status_Read {
+  permission: Boolean!
+}
+
+type PostsFields__status_Update {
+  permission: Boolean!
+}
+
+type PostsFields__status_Delete {
+  permission: Boolean!
+}
+
+type PostsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsReadVersionsAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type usersAccess {
+  fields: UsersFields
+  create: UsersCreateAccess
+  read: UsersReadAccess
+  update: UsersUpdateAccess
+  delete: UsersDeleteAccess
+  unlock: UsersUnlockAccess
+}
+
+type UsersFields {
+  updatedAt: UsersFields_updatedAt
+  createdAt: UsersFields_createdAt
+  email: UsersFields_email
+  password: UsersFields_password
+}
+
+type UsersFields_updatedAt {
+  create: UsersFields_updatedAt_Create
+  read: UsersFields_updatedAt_Read
+  update: UsersFields_updatedAt_Update
+  delete: UsersFields_updatedAt_Delete
+}
+
+type UsersFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt {
+  create: UsersFields_createdAt_Create
+  read: UsersFields_createdAt_Read
+  update: UsersFields_createdAt_Update
+  delete: UsersFields_createdAt_Delete
+}
+
+type UsersFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_email {
+  create: UsersFields_email_Create
+  read: UsersFields_email_Read
+  update: UsersFields_email_Update
+  delete: UsersFields_email_Delete
+}
+
+type UsersFields_email_Create {
+  permission: Boolean!
+}
+
+type UsersFields_email_Read {
+  permission: Boolean!
+}
+
+type UsersFields_email_Update {
+  permission: Boolean!
+}
+
+type UsersFields_email_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_password {
+  create: UsersFields_password_Create
+  read: UsersFields_password_Read
+  update: UsersFields_password_Update
+  delete: UsersFields_password_Delete
+}
+
+type UsersFields_password_Create {
+  permission: Boolean!
+}
+
+type UsersFields_password_Read {
+  permission: Boolean!
+}
+
+type UsersFields_password_Update {
+  permission: Boolean!
+}
+
+type UsersFields_password_Delete {
+  permission: Boolean!
+}
+
+type UsersCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUnlockAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_preferencesAccess {
+  fields: PayloadPreferencesFields
+  create: PayloadPreferencesCreateAccess
+  read: PayloadPreferencesReadAccess
+  update: PayloadPreferencesUpdateAccess
+  delete: PayloadPreferencesDeleteAccess
+}
+
+type PayloadPreferencesFields {
+  user: PayloadPreferencesFields_user
+  key: PayloadPreferencesFields_key
+  value: PayloadPreferencesFields_value
+  updatedAt: PayloadPreferencesFields_updatedAt
+  createdAt: PayloadPreferencesFields_createdAt
+}
+
+type PayloadPreferencesFields_user {
+  create: PayloadPreferencesFields_user_Create
+  read: PayloadPreferencesFields_user_Read
+  update: PayloadPreferencesFields_user_Update
+  delete: PayloadPreferencesFields_user_Delete
+}
+
+type PayloadPreferencesFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key {
+  create: PayloadPreferencesFields_key_Create
+  read: PayloadPreferencesFields_key_Read
+  update: PayloadPreferencesFields_key_Update
+  delete: PayloadPreferencesFields_key_Delete
+}
+
+type PayloadPreferencesFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value {
+  create: PayloadPreferencesFields_value_Create
+  read: PayloadPreferencesFields_value_Read
+  update: PayloadPreferencesFields_value_Update
+  delete: PayloadPreferencesFields_value_Delete
+}
+
+type PayloadPreferencesFields_value_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt {
+  create: PayloadPreferencesFields_updatedAt_Create
+  read: PayloadPreferencesFields_updatedAt_Read
+  update: PayloadPreferencesFields_updatedAt_Update
+  delete: PayloadPreferencesFields_updatedAt_Delete
+}
+
+type PayloadPreferencesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt {
+  create: PayloadPreferencesFields_createdAt_Create
+  read: PayloadPreferencesFields_createdAt_Read
+  update: PayloadPreferencesFields_createdAt_Update
+  delete: PayloadPreferencesFields_createdAt_Delete
+}
+
+type PayloadPreferencesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type menuAccess {
+  fields: MenuFields
+  read: MenuReadAccess
+  update: MenuUpdateAccess
+}
+
+type MenuFields {
+  globalText: MenuFields_globalText
+  updatedAt: MenuFields_updatedAt
+  createdAt: MenuFields_createdAt
+}
+
+type MenuFields_globalText {
+  create: MenuFields_globalText_Create
+  read: MenuFields_globalText_Read
+  update: MenuFields_globalText_Update
+  delete: MenuFields_globalText_Delete
+}
+
+type MenuFields_globalText_Create {
+  permission: Boolean!
+}
+
+type MenuFields_globalText_Read {
+  permission: Boolean!
+}
+
+type MenuFields_globalText_Update {
+  permission: Boolean!
+}
+
+type MenuFields_globalText_Delete {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt {
+  create: MenuFields_updatedAt_Create
+  read: MenuFields_updatedAt_Read
+  update: MenuFields_updatedAt_Update
+  delete: MenuFields_updatedAt_Delete
+}
+
+type MenuFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt {
+  create: MenuFields_createdAt_Create
+  read: MenuFields_createdAt_Read
+  update: MenuFields_createdAt_Update
+  delete: MenuFields_createdAt_Delete
+}
+
+type MenuFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type MenuReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type MenuUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Mutation {
+  createPost(data: mutationPostInput!, draft: Boolean): Post
+  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
+  deletePost(id: String!): Post
+  duplicatePost(id: String!): Post
+  restoreVersionPost(id: String): Post
+  createUser(data: mutationUserInput!, draft: Boolean): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
+  deleteUser(id: String!): User
+  refreshTokenUser(token: String): usersRefreshedUser
+  logoutUser: String
+  unlockUser(email: String!): Boolean!
+  loginUser(email: String, password: String): usersLoginResult
+  forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
+  resetPasswordUser(password: String, token: String): usersResetPassword
+  verifyEmailUser(token: String): Boolean
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+  ): PayloadPreference
+  deletePayloadPreference(id: String!): PayloadPreference
+  duplicatePayloadPreference(id: String!): PayloadPreference
+  updateMenu(data: mutationMenuInput!, draft: Boolean): Menu
+}
+
+input mutationPostInput {
+  text: String
+  richText: JSON
+  richText2: JSON
+  updatedAt: String
+  createdAt: String
+  _status: Post__status_MutationInput
+}
+
+enum Post__status_MutationInput {
+  draft
+  published
+}
+
+input mutationPostUpdateInput {
+  text: String
+  richText: JSON
+  richText2: JSON
+  updatedAt: String
+  createdAt: String
+  _status: PostUpdate__status_MutationInput
+}
+
+enum PostUpdate__status_MutationInput {
+  draft
+  published
+}
+
+input mutationUserInput {
+  updatedAt: String
+  createdAt: String
+  email: String!
+  resetPasswordToken: String
+  resetPasswordExpiration: String
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: String
+  password: String!
+}
+
+input mutationUserUpdateInput {
+  updatedAt: String
+  createdAt: String
+  email: String
+  resetPasswordToken: String
+  resetPasswordExpiration: String
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: String
+  password: String
+}
+
+type usersRefreshedUser {
+  exp: Int
+  refreshedToken: String
+  user: usersJWT
+}
+
+type usersJWT {
+  email: EmailAddress!
+  collection: String!
+}
+
+type usersLoginResult {
+  exp: Int
+  token: String
+  user: User
+}
+
+type usersResetPassword {
+  token: String
+  user: User
+}
+
+input mutationPayloadPreferenceInput {
+  user: PayloadPreference_UserRelationshipInput
+  key: String
+  value: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadPreference_UserRelationshipInput {
+  relationTo: PayloadPreference_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadPreference_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadPreferenceUpdateInput {
+  user: PayloadPreferenceUpdate_UserRelationshipInput
+  key: String
+  value: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadPreferenceUpdate_UserRelationshipInput {
+  relationTo: PayloadPreferenceUpdate_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadPreferenceUpdate_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationMenuInput {
+  globalText: String
+  updatedAt: String
+  createdAt: String
+}
