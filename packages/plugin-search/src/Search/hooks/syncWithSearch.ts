@@ -32,6 +32,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
           pluginSearchRead: true,
         },
         locale: 'all',
+        overrideAccess: false,
         req,
       })
     }
@@ -72,6 +73,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             ...dataToSave,
             priority: defaultPriority,
           },
+          overrideAccess: false,
           req,
         })
       }
@@ -83,6 +85,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
         const searchDocQuery = await payload.find({
           collection: 'search',
           depth: 0,
+          overrideAccess: false,
           req,
           where: {
             'doc.value': {
@@ -105,6 +108,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
               collection: 'search',
+              overrideAccess: false,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -126,6 +130,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                overrideAccess: false,
                 req,
               })
             } catch (err: unknown) {
@@ -138,6 +143,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
               await payload.delete({
                 id: searchDocID,
                 collection: 'search',
+                overrideAccess: false,
                 req,
               })
             } catch (err: unknown) {
@@ -152,6 +158,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              overrideAccess: false,
               req,
             })
           } catch (err: unknown) {
