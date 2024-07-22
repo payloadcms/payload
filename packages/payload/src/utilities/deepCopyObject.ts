@@ -26,35 +26,51 @@ export const deepCopyObject = (inObject) => {
 
 /**
  * A deepCopyObject implementation which only works for JSON objects and arrays, and is faster than
- * JSON.parse(JSON.stringify(inObject)): https://www.measurethat.net/Benchmarks/Show/31442/0/jsonstringify-vs-structuredclone-vs-simple-deepcopyobje
+ * JSON.parse(JSON.stringify(obj)): https://github.com/benjamine/jsondiffpatch/blob/master/packages/jsondiffpatch/src/clone.ts
  *
- * This is not recursive and should thus be more memory efficient, due to less stack frames
+ * Benchmark: https://github.com/AlessioGr/fastest-deep-clone-json/blob/main/test/benchmark.js
+ *
+ * License:
+ * The MIT License
+ *
+ * Copyright (c) 2018 Benjamin Eidelman, https://twitter.com/beneidel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-export const deepCopyObjectSimple = <T extends JsonObject>(inObject: T): T => {
-  if (typeof inObject !== 'object' || inObject === null) {
-    return inObject
+export const deepCopyObjectSimple = <T extends JsonObject>(arg: T): T => {
+  if (typeof arg !== 'object') {
+    return arg
+  }
+  if (arg === null) {
+    return null
+  }
+  if (Array.isArray(arg)) {
+    return arg.map(deepCopyObjectSimple) as any
   }
 
-  const stack: { source: JsonArray | JsonObject; target }[] = [
-    { source: inObject, target: Array.isArray(inObject) ? [] : {} },
-  ]
-  const root = stack[0].target
-
-  while (stack.length > 0) {
-    const { source, target } = stack.pop()
-
-    for (const key in source) {
-      const value = source[key]
-      if (typeof value === 'object' && value !== null) {
-        target[key] = Array.isArray(value) ? [] : {}
-        stack.push({ source: value, target: target[key] })
-      } else {
-        target[key] = value
-      }
+  const cloned: T = {} as T
+  for (const name in arg) {
+    if (Object.prototype.hasOwnProperty.call(arg, name)) {
+      ;(cloned as Record<string, unknown>)[name] = deepCopyObjectSimple(arg[name] as JsonObject)
     }
   }
-
-  return root
+  return cloned
 }
 
 /**
