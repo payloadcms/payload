@@ -253,7 +253,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
 
       const duplicateRowState = deepCopyObject(rows[rowIndex])
-      if (duplicateRowState.id) duplicateRowState.id.value = new ObjectId().toHexString()
+      if (duplicateRowState.id) {
+        duplicateRowState.id.value = new ObjectId().toHexString()
+        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      }
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
