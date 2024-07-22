@@ -21,7 +21,7 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
     }
   }, [])
 
-  if (resource && typeof resource !== 'string') {
+  if (resource && typeof resource === 'object') {
     const { filename } = resource
 
     return (
