@@ -94,7 +94,6 @@ const DocumentInfo: React.FC<
     hasPublishPermissionFromProps,
   )
   const isInitializing = initialState === undefined || data === undefined
-  const hasInitializedDocPermissions = useRef(false)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
@@ -102,6 +101,9 @@ const DocumentInfo: React.FC<
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
+  const hasInitializedDocPermissions = useRef(false)
+  // Separate locale cache used for handling permissions
+  const prevLocalePermissions = useRef(locale)
 
   const versionsConfig = docConfig?.versions
 
@@ -262,11 +264,12 @@ const DocumentInfo: React.FC<
         locale: locale || undefined,
       }
 
-      const newIsEditing = getIsEditing({ id: data?.id, collectionSlug, globalSlug })
+      const idToUse = data?.id || id
+      const newIsEditing = getIsEditing({ id: idToUse, collectionSlug, globalSlug })
 
       if (newIsEditing) {
         const docAccessURL = collectionSlug
-          ? `/${collectionSlug}/access/${data.id}`
+          ? `/${collectionSlug}/access/${idToUse}`
           : globalSlug
             ? `/globals/${globalSlug}/access`
             : null
@@ -329,7 +332,7 @@ const DocumentInfo: React.FC<
         )
       }
     },
-    [serverURL, api, permissions, i18n.language, locale, collectionSlug, globalSlug],
+    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug],
   )
 
   const getDocPreferences = useCallback(() => {
@@ -485,25 +488,23 @@ const DocumentInfo: React.FC<
   }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const loadDocPermissions = async () => {
-      const docPermissions: DocumentPermissions = docPermissionsFromProps
-      const hasSavePermission: boolean = hasSavePermissionFromProps
-      const hasPublishPermission: boolean = hasPublishPermissionFromProps
+    const localeChanged = locale !== prevLocalePermissions.current
 
-      if (
-        !docPermissions ||
-        hasSavePermission === undefined ||
-        hasSavePermission === null ||
-        hasPublishPermission === undefined ||
-        hasPublishPermission === null
+    if (data && (collectionSlug || globalSlug)) {
+      if (localeChanged) {
+        prevLocalePermissions.current = locale
+        void getDocPermissions(data)
+      } else if (
+        hasInitializedDocPermissions.current === false &&
+        (!docPermissions ||
+          hasSavePermission === undefined ||
+          hasSavePermission === null ||
+          hasPublishPermission === undefined ||
+          hasPublishPermission === null)
       ) {
-        await getDocPermissions(data)
+        hasInitializedDocPermissions.current = true
+        void getDocPermissions(data)
       }
-    }
-
-    if (!hasInitializedDocPermissions.current && data && (collectionSlug || globalSlug)) {
-      hasInitializedDocPermissions.current = true
-      void loadDocPermissions()
     }
   }, [
     getDocPermissions,
@@ -514,6 +515,10 @@ const DocumentInfo: React.FC<
     collectionSlug,
     globalSlug,
     data,
+    locale,
+    docPermissions,
+    hasSavePermission,
+    hasPublishPermission,
   ])
 
   const action: string = React.useMemo(() => {
