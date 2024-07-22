@@ -286,7 +286,7 @@ describe('Localization', () => {
         const post = await payload.create({
           collection: localizedSortSlug,
           data: {
-            date: new Date(),
+            date: new Date().toISOString(),
             title: `EN ${i}`,
           },
           locale: englishLocale,
@@ -296,7 +296,7 @@ describe('Localization', () => {
           id: post.id,
           collection: localizedSortSlug,
           data: {
-            date: new Date(),
+            date: new Date().toISOString(),
             title: `ES ${i}`,
           },
           locale: spanishLocale,
