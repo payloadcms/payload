@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -10,7 +10,7 @@ type Args = {
   context: RequestContext
   currentDepth: number
   depth: number
-  doc: Record<string, unknown>
+  doc: JsonObject
   draft: boolean
   fallbackLocale: null | string
   /**
@@ -28,7 +28,7 @@ type Args = {
   req: PayloadRequest
   schemaPath: string[]
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }

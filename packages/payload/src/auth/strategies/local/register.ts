@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
-import type { Payload } from '../../../index.js'
+import type { JsonObject, Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
@@ -7,7 +7,7 @@ import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
-  doc: Record<string, unknown>
+  doc: JsonObject
   password: string
   payload: Payload
   req: PayloadRequest

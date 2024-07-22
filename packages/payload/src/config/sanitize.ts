@@ -1,7 +1,7 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import merge from 'deepmerge'
+import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type {
   Config,
@@ -17,8 +17,7 @@ import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
-import { deepMerge } from '../utilities/deepMerge.js'
-import { isPlainObject } from '../utilities/isPlainObject.js'
+import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
@@ -48,9 +47,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults: Config = merge(defaults, incomingConfig, {
-    isMergeableObject: isPlainObject,
-  }) as Config
+  const configWithDefaults: Config = deepMergeWithReactComponents(defaults, incomingConfig)
 
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
@@ -163,7 +160,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       isRoot: true,
     })
     if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMerge(config.i18n.translations, config.editor.i18n)
+      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
     }
   }
 

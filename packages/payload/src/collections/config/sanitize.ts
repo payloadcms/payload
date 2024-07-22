@@ -1,5 +1,3 @@
-import merge from 'deepmerge'
-
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
@@ -9,8 +7,8 @@ import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
+import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
@@ -29,9 +27,7 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = merge(defaults, collection, {
-    isMergeableObject: isPlainObject,
-  })
+  const sanitized: CollectionConfig = deepMergeWithReactComponents(defaults, collection)
 
   // /////////////////////////////////
   // Sanitize fields
@@ -141,9 +137,10 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeAuthFields(sanitized.fields, sanitized)
 
-    sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {}, {
-      isMergeableObject: isPlainObject,
-    })
+    sanitized.auth = deepMergeWithReactComponents(
+      authDefaults,
+      typeof sanitized.auth === 'object' ? sanitized.auth : {},
+    )
 
     if (!sanitized.auth.disableLocalStrategy && sanitized.auth.verify === true) {
       sanitized.auth.verify = {}
@@ -157,12 +154,12 @@ export const sanitizeCollection = async (
     }
 
     sanitized.auth.loginWithUsername = sanitized.auth.loginWithUsername
-      ? merge(
-          loginWithUsernameDefaults,
-          typeof sanitized.auth.loginWithUsername === 'boolean'
+      ? {
+          ...loginWithUsernameDefaults,
+          ...(typeof sanitized.auth.loginWithUsername === 'boolean'
             ? {}
-            : sanitized.auth.loginWithUsername,
-        )
+            : sanitized.auth.loginWithUsername),
+        }
       : false
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))

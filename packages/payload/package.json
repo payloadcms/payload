@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.67",
+  "version": "3.0.0-beta.68",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -84,7 +84,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "^15.0.0-rc.0",
+    "@next/env": "^15.0.0-canary.53",
     "@payloadcms/translations": "workspace:*",
     "@swc-node/core": "1.13.1",
     "@swc-node/sourcemap-support": "0.5.0",
@@ -99,13 +99,12 @@
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "image-size": "^1.1.1",
-    "joi": "^17.12.1",
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
     "monaco-editor": "0.38.0",
-    "pino": "8.15.0",
-    "pino-pretty": "10.2.0",
+    "pino": "9.3.1",
+    "pino-pretty": "11.2.1",
     "pluralize": "8.0.0",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
@@ -117,7 +116,6 @@
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express-fileupload": "1.4.1",
-    "@types/joi": "14.3.4",
     "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
