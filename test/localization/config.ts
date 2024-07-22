@@ -10,6 +10,7 @@ import {
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -78,6 +79,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -321,6 +327,11 @@ export default buildConfigWithDefaults({
         label: 'Arabic',
         rtl: true,
       },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
+      },
     ],
   },
   onInit: async (payload) => {
@@ -381,6 +392,7 @@ export default buildConfigWithDefaults({
         title: relationEnglishTitle2,
       },
     })
+
     await payload.update({
       id: localizedPost.id,
       collection,
