@@ -101,6 +101,7 @@ const DocumentInfo: React.FC<
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
+  const hasInitializedDocPermissions = useRef(false)
   // Separate locale cache used for handling permissions
   const prevLocalePermissions = useRef(locale)
 
@@ -489,9 +490,21 @@ const DocumentInfo: React.FC<
   useEffect(() => {
     const localeChanged = locale !== prevLocalePermissions.current
 
-    if (localeChanged && data && (collectionSlug || globalSlug)) {
-      prevLocalePermissions.current = locale
-      void getDocPermissions(data)
+    if (data && (collectionSlug || globalSlug)) {
+      if (localeChanged) {
+        prevLocalePermissions.current = locale
+        void getDocPermissions(data)
+      } else if (
+        hasInitializedDocPermissions.current === false &&
+        (!docPermissions ||
+          hasSavePermission === undefined ||
+          hasSavePermission === null ||
+          hasPublishPermission === undefined ||
+          hasPublishPermission === null)
+      ) {
+        hasInitializedDocPermissions.current = true
+        void getDocPermissions(data)
+      }
     }
   }, [
     getDocPermissions,
@@ -503,6 +516,9 @@ const DocumentInfo: React.FC<
     globalSlug,
     data,
     locale,
+    docPermissions,
+    hasSavePermission,
+    hasPublishPermission,
   ])
 
   const action: string = React.useMemo(() => {
