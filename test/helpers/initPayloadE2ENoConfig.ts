@@ -39,7 +39,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
-  const dir = getNextJSRootDir(testSuiteName)
+  const { rootDir } = getNextJSRootDir(testSuiteName)
 
   if (prebuild) {
     await new Promise<void>((res, rej) => {
@@ -50,7 +50,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
         env: {
           PATH: process.env.PATH,
           NODE_ENV: 'production',
-          NEXTJS_DIR: dir,
+          NEXTJS_DIR: rootDir,
         },
       })
 

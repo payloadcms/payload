@@ -23,7 +23,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./admin-root/config.ts"]
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": ["dist", "build", "temp", "node_modules"],
