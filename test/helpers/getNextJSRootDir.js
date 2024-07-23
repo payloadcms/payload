@@ -2,7 +2,7 @@ import fs from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-import { adminRoute as rootAdminRoute } from '../../admin-root/shared.js'
+import { adminRoute as rootAdminRoute } from '../admin-root/shared.js'
 
 const _filename = fileURLToPath(import.meta.url)
 const _dirname = dirname(_filename)
@@ -23,6 +23,10 @@ export const getNextJSRootDir = (testSuite) => {
 
   if (testSuite === 'admin-root') {
     adminRoute = rootAdminRoute
+  }
+
+  if (testSuite === 'admin-nested') {
+    adminRoute = nestedAdminRoute
   }
 
   if (hasNextConfig) {
