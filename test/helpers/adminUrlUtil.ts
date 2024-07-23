@@ -1,12 +1,5 @@
-// eslint-disable-next-line payload/no-relative-monorepo-imports
-import { formatAdminURL } from '../../packages/ui/src/utilities/formatAdminURL.js'
-
-type Config = {
-  routes: {
-    admin: string
-  }
-  serverURL: string
-}
+import { formatAdminURL } from '../../packages/ui/src/utilities/formatAdminURL.js' // eslint-disable-line payload/no-relative-monorepo-imports
+import type { Config } from '../../packages/payload/src/config/types.js' // eslint-disable-line payload/no-relative-monorepo-imports
 
 export class AdminUrlUtil {
   account: string
@@ -65,11 +58,7 @@ export class AdminUrlUtil {
   }
 
   edit(id: number | string): string {
-    return formatAdminURL({
-      adminRoute: this.routes.admin,
-      path: `/${this.entitySlug}/${id}`,
-      serverURL: this.serverURL,
-    })
+    return `${this.list}/${id}`
   }
 
   global(slug: string): string {
