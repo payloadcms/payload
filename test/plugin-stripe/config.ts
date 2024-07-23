@@ -87,6 +87,7 @@ export default buildConfigWithDefaults({
         'customer.subscription.updated': subscriptionCreatedOrUpdated,
         'product.created': syncPriceJSON,
         'product.updated': syncPriceJSON,
+        something: async () => Promise.resolve(),
       },
     }),
   ],

@@ -9,8 +9,6 @@ export const syncPriceJSON = async (args) => {
 
   const { id: eventID, default_price } = event.data.object
 
-  console.log(event.data.object)
-
   let payloadProductID
 
   // First lookup the product in Payload
