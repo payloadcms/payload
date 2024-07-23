@@ -8,7 +8,7 @@ export type StripeWebhookHandler<T = any> = (args: {
   pluginConfig?: StripePluginConfig
   req: PayloadRequest
   stripe: Stripe
-}) => void
+}) => Promise<void> | void
 
 export type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler
