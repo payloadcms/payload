@@ -1,6 +1,12 @@
-import type { Config } from 'payload'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { formatAdminURL } from '../../packages/ui/src/utilities/formatAdminURL.js'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+type Config = {
+  routes: {
+    admin: string
+  }
+  serverURL: string
+}
 
 export class AdminUrlUtil {
   account: string
@@ -16,7 +22,6 @@ export class AdminUrlUtil {
   routes: Config['routes']
 
   serverURL: string
-
   constructor(serverURL: string, slug: string, routes?: Config['routes']) {
     this.routes = {
       admin: routes?.admin || '/admin',

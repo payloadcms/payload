@@ -1,4 +1,10 @@
-import type { Config } from 'payload'
+// import type { Config } from 'payload'
+type Config = {
+  routes: {
+    admin: string
+  }
+  serverURL: string
+}
 
 /** Will read the `routes.admin` config and appropriately handle "/" paths */
 export const formatAdminURL = (args: {
