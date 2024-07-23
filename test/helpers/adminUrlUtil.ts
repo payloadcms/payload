@@ -1,5 +1,8 @@
+// IMPORTANT: ensure that imports do not contain React components, etc. as this breaks Playwright tests
+// Instead of pointing to the bundled code, which will include React components, use direct import paths
 import { formatAdminURL } from '../../packages/ui/src/utilities/formatAdminURL.js' // eslint-disable-line payload/no-relative-monorepo-imports
-import type { Config } from '../../packages/payload/src/config/types.js' // eslint-disable-line payload/no-relative-monorepo-imports
+
+import type { Config } from 'payload'
 
 export class AdminUrlUtil {
   account: string

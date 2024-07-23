@@ -1,12 +1,6 @@
-// import type { Config } from 'payload'
-type Config = {
-  routes: {
-    admin: string
-  }
-  serverURL: string
-}
+import type { Config } from 'payload'
 
-/** Will read the `routes.admin` config and appropriately handle "/" paths */
+/** Will read the `routes.admin` config and appropriately handle `"/"` admin paths */
 export const formatAdminURL = (args: {
   adminRoute: Config['routes']['admin']
   path: string
