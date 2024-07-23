@@ -47,7 +47,6 @@ import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
 import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
-import { generateDrizzleJSON } from './generateDrizzleJSON.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
@@ -131,7 +130,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findGlobalVersions,
       findOne,
       findVersions,
-      generateDrizzleJSON,
       init,
       insert,
       migrate,

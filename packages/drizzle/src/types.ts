@@ -108,8 +108,6 @@ export type Execute<T> = (args: {
   | SQLiteRaw<Promise<{ rows: T[] }>>
   | SQLiteRaw<ResultSet>
 
-export type GenerateDrizzleJSON = (args: { schema: Record<string, unknown> }) => unknown
-
 export type Insert = (args: {
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
   onConflictDoUpdate?: unknown
@@ -117,7 +115,8 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
-export type RequireDrizzleKit = (adapter: DrizzleAdapter) => {
+export type RequireDrizzleKit = () => {
+  generateDrizzleJson: (args: { schema: Record<string, unknown> }) => unknown
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
@@ -172,7 +171,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: GenerateDrizzleJSON
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
   initializing: Promise<void>

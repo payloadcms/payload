@@ -76,10 +76,6 @@ export type Execute<T> = (args: {
   sql?: SQL<unknown>
 }) => SQLiteRaw<Promise<T>> | SQLiteRaw<ResultSet>
 
-export type GenerateDrizzleJSON = (args: {
-  schema: Record<string, GenericRelation | GenericTable>
-}) => Record<string, unknown>
-
 export type Insert = (args: {
   db: LibSQLDatabase
   onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
@@ -114,7 +110,6 @@ export type SQLiteAdapter = {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: GenerateDrizzleJSON
   idType: Args['idType']
   initializing: Promise<void>
   insert: Insert

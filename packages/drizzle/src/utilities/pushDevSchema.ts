@@ -9,7 +9,7 @@ import type { DrizzleAdapter } from '../types.js'
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
-  const { pushSchema } = adapter.requireDrizzleKit(adapter)
+  const { pushSchema } = adapter.requireDrizzleKit()
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, warnings } = await pushSchema(adapter.schema, adapter.drizzle)

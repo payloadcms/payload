@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
+ 
 import type { Payload, PayloadRequest } from 'payload'
 
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
@@ -64,7 +64,7 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
 
     // If already ran, skip
     if (alreadyRan) {
-      continue // eslint-disable-line no-continue
+      continue  
     }
 
     await runMigrationFile(payload, migration, newBatch)
@@ -72,13 +72,15 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
+  const db = payload.db as DrizzleAdapter
+  const { generateDrizzleJson } = db.requireDrizzleKit()
   const start = Date.now()
   const req = { payload } as PayloadRequest
   const adapter = payload.db as DrizzleAdapter
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
-  const drizzleJSON = await adapter.generateDrizzleJSON({ schema: adapter.schema })
+  const drizzleJSON = await generateDrizzleJson({ schema: adapter.schema })
 
   try {
     await initTransaction(req)

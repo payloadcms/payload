@@ -87,10 +87,6 @@ export type Execute<T> = (args: {
   sql?: SQL<unknown>
 }) => Promise<QueryResult<Record<string, T>>>
 
-export type GenerateDrizzleJSON = (args: {
-  schema: Record<string, GenericRelation | GenericTable>
-}) => PgSchema
-
 export type Insert = (args: {
   db: PostgresDB | TransactionPg
   onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
@@ -123,7 +119,6 @@ export type PostgresAdapter = {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  generateDrizzleJSON: GenerateDrizzleJSON
   idType: Args['idType']
   initializing: Promise<void>
   insert: Insert
