@@ -7,7 +7,7 @@ export const emailField = ({ required = true }: { required?: boolean }): Field =
   type: 'email',
   admin: {
     components: {
-      Field: required ? () => null : undefined,
+      Field: () => null,
     },
   },
   hooks: {

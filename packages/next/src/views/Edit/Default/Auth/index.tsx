@@ -34,6 +34,7 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly,
     requirePassword,
     useAPIKey,
+    username,
     verify,
   } = props
 
@@ -64,9 +65,8 @@ export const Auth: React.FC<Props> = (props) => {
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${collectionSlug}/unlock`
     const response = await fetch(url, {
-      body: JSON.stringify({
-        email,
-      }),
+      body:
+        loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -80,7 +80,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, t])
+  }, [i18n, serverURL, api, collectionSlug, email, username, t])
 
   useEffect(() => {
     if (!modified) {
@@ -98,6 +98,15 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
+          {Boolean(loginWithUsername) && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
           {(!loginWithUsername ||
             loginWithUsername?.allowEmailLogin ||
             loginWithUsername?.requireEmail) && (
@@ -108,15 +117,6 @@ export const Auth: React.FC<Props> = (props) => {
               name="email"
               readOnly={readOnly}
               required={!loginWithUsername || loginWithUsername?.requireEmail}
-            />
-          )}
-          {loginWithUsername && (
-            <TextField
-              disabled={disabled}
-              label={t('authentication:username')}
-              name="username"
-              readOnly={readOnly}
-              required
             />
           )}
           {(changingPassword || requirePassword) && (
