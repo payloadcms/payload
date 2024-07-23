@@ -66,10 +66,6 @@
     bottom: 0;
     left: 0;
     pointer-events: none;
-
-    > * {
-      pointer-events: all;
-    }
   }
 
   &__header-wrap--has-drag-handle {
