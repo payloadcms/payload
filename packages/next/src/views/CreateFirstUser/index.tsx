@@ -1,7 +1,7 @@
 import type { AdminViewProps, Field } from 'payload'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import React, { useState } from 'react'
+import React from 'react'
 
 import type { LoginFieldProps } from '../Login/LoginField/index.js'
 
@@ -77,7 +77,12 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     <div className="create-first-user">
       <h1>{req.t('general:welcome')}</h1>
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
-      <CreateFirstUserClient initialState={formState} loginType={loginType} userSlug={userSlug} />
+      <CreateFirstUserClient
+        initialState={formState}
+        loginType={loginType}
+        requireEmail={emailRequired}
+        userSlug={userSlug}
+      />
     </div>
   )
 }

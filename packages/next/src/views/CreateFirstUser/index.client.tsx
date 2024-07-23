@@ -20,8 +20,9 @@ import { LoginField } from '../Login/LoginField/index.js'
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
   loginType: 'email' | 'emailOrUsername' | 'username'
+  requireEmail?: boolean
   userSlug: string
-}> = ({ initialState, loginType, userSlug }) => {
+}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -61,7 +62,7 @@ export const CreateFirstUserClient: React.FC<{
       {loginType === 'emailOrUsername' ? (
         <>
           <LoginField type="username" />
-          <LoginField type="email" />
+          <LoginField required={requireEmail} type="email" />
         </>
       ) : (
         <LoginField type={loginType} />
