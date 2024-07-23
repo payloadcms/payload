@@ -1,5 +1,7 @@
 import type { Config } from 'payload'
 
+import { formatAdminURL } from '@payloadcms/ui/shared'
+
 export class AdminUrlUtil {
   account: string
 
@@ -10,12 +12,29 @@ export class AdminUrlUtil {
   list: string
 
   constructor(serverURL: string, slug: string, routes?: Config['routes']) {
-    const adminRoute = routes?.admin || '/admin'
+    this.admin = formatAdminURL({
+      adminRoute: routes?.admin || '/',
+      path: '',
+      serverURL,
+    })
 
-    this.account = `${serverURL}${adminRoute}/account`
-    this.admin = `${serverURL}${adminRoute}`
-    this.list = `${this.admin}/collections/${slug}`
-    this.create = `${this.list}/create`
+    this.account = formatAdminURL({
+      adminRoute: routes?.admin || '/admin',
+      path: '/account',
+      serverURL,
+    })
+
+    this.list = formatAdminURL({
+      adminRoute: routes?.admin || '/admin',
+      path: `/collections/${slug}`,
+      serverURL,
+    })
+
+    this.create = formatAdminURL({
+      adminRoute: routes?.admin || '/admin',
+      path: `/collections/${slug}/create`,
+      serverURL,
+    })
   }
 
   collection(slug: string): string {
