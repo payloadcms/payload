@@ -6,31 +6,34 @@ desc: UI fields are purely presentational and allow developers to customize the 
 keywords: custom field, react component, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The UI (user interface) field gives you a ton of power to add your own React components directly
-  into the Admin Panel, nested directly within your other fields. It has absolutely no effect on the
-  data of your documents. It is presentational-only.
-</Banner>
+The UI (user interface) Field gives you a ton of power to add your own React components directly into the [Admin Panel](../admin/overview), nested directly within your other fields. It has absolutely no effect on the data of your documents. It is presentational-only. Think of it as a way for you to "plug in" your own React components directly within your other fields, so you can provide your editors with new controls exactly where you want them to go.
 
-This field is helpful if you need to build in custom functionality via React components within the Admin Panel. Think of it as a way for you to "plug in" your own React components directly within your other fields, so you can provide your editors with new controls exactly where you want them to go.
-
-With this field, you can also inject custom `Cell` components that appear as additional columns within collections' List views.
-
-**Example uses:**
+With the UI Field, you can:
 
 - Add a custom message or block of text within the body of an Edit View to describe the purpose of surrounding fields
 - Add a "Refund" button to an Order's Edit View sidebar, which might make a fetch call to a custom `refund` endpoint
 - Add a "view page" button into a Pages List View to give editors a shortcut to view a page on the frontend of the site
 - Build a "clear cache" button or similar mechanism to manually clear caches of specific documents
 
-## Config
+To add a UI Field, set the `type` to `ui` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyUIField: Field = {
+  // ...
+  type: 'ui', // highlight-line
+}
+```
+
+## Config Options
 
 | Option                          | Description                                                                                                            |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*                   | A unique identifier for this field.                                                                                    |
 | **`label`**                     | Human-readable label for this UI field.                                                                                |
-| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More](/docs/admin/components/#field-component)    |
-| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More](/docs/admin/components/#field-component) |
+| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More](../admin/components/#field-component)    |
+| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More](../admin/components/#field-component) |
 | **`admin.disableListColumn`**   | Set `disableListColumn` to `true` to prevent the UI field from appearing in the list view column selector.             |
 | **`custom`**                    | Extension point for adding custom data (e.g. for plugins)                                                              |
 

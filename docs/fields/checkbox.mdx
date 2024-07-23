@@ -6,7 +6,7 @@ desc: Checkbox field types allow the developer to save a boolean value in the da
 keywords: checkbox, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>The Checkbox field type saves a boolean in the database.</Banner>
+The Checkbox Field type saves a boolean in the database.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/checkbox.png"
@@ -15,7 +15,18 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
   caption="Admin Panel screenshot of Checkbox field with Text field below"
 />
 
-## Config
+To add a Checkbox Field, set the `type` to `checkbox` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyCheckboxField: Field = {
+  // ...
+  type: 'checkbox', // highlight-line
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,7 +41,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 | **`defaultValue`**     | Provide data to be used for this field's default value, will default to false if field is also `required`. [More](/docs/fields/overview#default-values)                     |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                    |
+| **`admin`**            | Admin-specific configuration. [More details](../admin/fields#admin-options).                                                    |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 
@@ -38,7 +49,7 @@ _\* An asterisk denotes that a property is required._
 
 ## Example
 
-`collections/ExampleCollection.ts`
+Here is an example of a Checkbox Field in a Collection:
 
 ```ts
 import { CollectionConfig } from 'payload'
