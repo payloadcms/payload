@@ -69,8 +69,6 @@
     &:focus {
       .checkbox-input__input,
       & input[type='checkbox'] {
-        @include inputShadowActive;
-
         outline: 0;
         box-shadow: 0 0 3px 3px var(--theme-success-400) !important;
         border: 1px solid var(--theme-elevation-150);

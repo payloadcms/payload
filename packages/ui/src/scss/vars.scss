@@ -50,8 +50,8 @@ $style-stroke-width-m: 2px !default;
 // MISC
 //////////////////////////////
 
-$top-header-offset: calc(var(--base) - 1px);
-$top-header-offset-m: calc(var(--base) * 3);
+$top-header-offset: calc(base(1) - 1px);
+$top-header-offset-m: base(3);
 $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 //////////////////////////////
@@ -59,41 +59,19 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 //////////////////////////////
 
 @mixin shadow-sm {
-  box-shadow:
-    0 2px 3px 0 rgba(0, 2, 4, 0.05),
-    0 10px 4px -8px rgba(0, 2, 4, 0.02);
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 @mixin shadow-m {
-  box-shadow:
-    0 0 30px 0 rgb(0 2 4 / 12%),
-    0 30px 25px -8px rgb(0 2 4 / 10%);
+  box-shadow: 0 4px 8px 0px rgba(0, 0, 0, 0.2);
 }
 
 @mixin shadow-lg {
-  box-shadow:
-    0 20px 35px -10px rgba(0, 2, 4, 0.2),
-    0 6px 4px -4px rgba(0, 2, 4, 0.02);
+  box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
 }
 
 @mixin shadow-lg-top {
-  box-shadow:
-    0 -20px 35px -10px rgba(0, 2, 4, 0.2),
-    0 -6px 4px -4px rgba(0, 2, 4, 0.02);
-}
-
-@mixin shadow {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-@mixin inputShadowActive {
-  box-shadow:
-    0 2px 3px 0 rgba(0, 2, 4, 0.16),
-    0 6px 4px -4px rgba(0, 2, 4, 0.13);
+  box-shadow: 0 2px 16px -2px rgba(0, 0, 0, 0.2);
 }
 
 @mixin inputShadow {
@@ -101,15 +79,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:not(:disabled) {
     &:hover {
-      box-shadow:
-        0 2px 3px 0 rgba(0, 2, 4, 0.13),
-        0 6px 4px -4px rgba(0, 2, 4, 0.1);
-    }
-
-    &:active,
-    &:focus-within,
-    &:focus {
-      @include inputShadowActive;
+      box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
     }
   }
 }
@@ -152,14 +122,17 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   font-family: var(--font-body);
   width: 100%;
   border: 1px solid var(--theme-elevation-150);
-  border-radius: 3px;
+  border-radius: var(--style-radius-s);
   background: var(--theme-input-bg);
   color: var(--theme-elevation-800);
   font-size: 1rem;
   height: base(2);
   line-height: base(1);
-  padding: base(0.5) base(0.75);
+  padding: base(0.4) base(0.75);
   -webkit-appearance: none;
+  transition-property: border, box-shadow;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
   &[data-rtl='true'] {
     direction: rtl;

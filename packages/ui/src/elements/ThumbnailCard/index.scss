@@ -2,7 +2,7 @@
 
 .thumbnail-card {
   @include btn-reset;
-  @include shadow;
+  @include shadow-sm;
   width: 100%;
   background: var(--theme-input-bg);
 
