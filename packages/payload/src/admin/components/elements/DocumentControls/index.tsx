@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
+import type { CollectionEditViewProps } from '../../views/types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { formatDate } from '../../../utilities/formatDate'
@@ -34,6 +35,7 @@ export const DocumentControls: React.FC<{
   id?: string
   isAccountView?: boolean
   isEditing?: boolean
+  onSave?: CollectionEditViewProps['onSave']
   permissions?: CollectionPermission | GlobalPermission
 }> = (props) => {
   const {
@@ -45,6 +47,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    onSave,
     permissions,
   } = props
 
@@ -111,6 +114,7 @@ export const DocumentControls: React.FC<{
                         collection={collection}
                         global={global}
                         id={id}
+                        onSave={onSave}
                         publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                       />
                     </li>

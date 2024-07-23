@@ -17,11 +17,12 @@ import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
 import { reduceFieldsToValuesWithValidation } from '../../forms/Form/reduceFieldsToValuesWithValidation'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useEditDepth } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
 import './index.scss'
 const baseClass = 'autosave'
 
-const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
+const Autosave: React.FC<Props> = ({ id, collection, global, onSave, publishedDocUpdatedAt }) => {
   const {
     routes: { admin, api },
     serverURL,
@@ -34,6 +35,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   const { dispatchFields, setSubmitted } = useForm()
   const history = useHistory()
   const { i18n, t } = useTranslation('version')
+  const depth = useEditDepth()
 
   let interval = 800
   const validateDrafts =
@@ -77,15 +79,19 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
     if (res.status === 201) {
       const json = await res.json()
-      history.replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-        state: {
-          data: json.doc,
-        },
-      })
+      if (depth === 1) {
+        history.replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+          state: {
+            data: json.doc,
+          },
+        })
+      } else {
+        onSave(json)
+      }
     } else {
       toast.error(t('error:autosaving'))
     }
-  }, [serverURL, api, collection?.slug, locale, i18n.language, history, admin, t])
+  }, [serverURL, api, collection?.slug, locale, i18n.language, history, admin, t, depth, onSave])
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
