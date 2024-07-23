@@ -2,16 +2,17 @@
 title: Blocks Field
 label: Blocks
 order: 30
-desc: The Blocks field type is a great layout build and can be used to construct any flexible content model. Learn how to use Block fields, see examples and options.
+desc: The Blocks Field is a great layout build and can be used to construct any flexible content model. Learn how to use Block Fields, see examples and options.
 keywords: blocks, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Blocks field type is <strong>incredibly powerful</strong> and can be used as a{' '}
-  <em>layout builder</em> as well as to define any other flexible content model you can think of. It
-  stores an array of objects, where each object must match the shape of one of your provided block
-  configs.
-</Banner>
+The Blocks Field is <strong>incredibly powerful</strong>, storing an array of objects based on the fields that your define, where each item in the array is a "block" with its own unique schema.
+
+Blocks are a great way to create a flexible content model that can be used to build a wide variety of content types, including:
+
+- A layout builder tool that grants editors to design highly customizable page or post layouts. Blocks could include configs such as `Quote`, `CallToAction`, `Slider`, `Content`, `Gallery`, or others.
+- A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
+- Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
@@ -20,13 +21,23 @@ keywords: blocks, fields, config, configuration, documentation, Content Manageme
   caption="Admin Panel screenshot of add Blocks drawer view"
 />
 
-**Example uses:**
+To add a Blocks Field, set the `type` to `blocks` in your [Field Config](./overview):
 
-- A layout builder tool that grants editors to design highly customizable page or post layouts. Blocks could include configs such as `Quote`, `CallToAction`, `Slider`, `Content`, `Gallery`, or others.
-- A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
-- Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
+```ts
+import type { Field } from 'payload/types'
 
-## Field config
+export const MyBlocksField: Field = {
+  // ...
+  // highlight-start
+  type: 'blocks',
+  blocks: [
+    // ...
+  ],
+  // highlight-end
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,22 +55,35 @@ keywords: blocks, fields, config, configuration, documentation, Content Manageme
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this field will be kept, so there is no need to specify each nested field as `localized`. |
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                       |
 | **`labels`**           | Customize the block row labels appearing in the Admin dashboard.                                                                                                                                                                                                                   |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                        |
 
 _\* An asterisk denotes that a property is required._
 
-## Admin Config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+The customize the appearance and behavior of the Blocks Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyBlocksField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The Blocks Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Option              | Description                        |
 | ------------------- | ---------------------------------- |
 | **`initCollapsed`**    | Set the initial collapsed state |
 | **`isSortable`**       | Disable order sorting by setting this value to `false` |
 
-## Block configs
+## Block Configs
 
 Blocks are defined as separate configs of their own.
 
