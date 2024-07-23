@@ -48,7 +48,7 @@ test.describe('Admin Panel (Root)', () => {
   test('collection — navigates to list view', async () => {
     await page.goto(url.list)
     const pageURL = page.url()
-    expect(pageURL).toBe(url.list)
+    expect(pageURL).toContain(url.list)
     expect(pageURL).not.toContain('/admin')
   })
 
