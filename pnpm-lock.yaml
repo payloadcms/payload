@@ -206,6 +206,9 @@ importers:
       '@sindresorhus/slugify':
         specifier: ^1.1.0
         version: 1.1.2
+      '@swc/core':
+        specifier: ^1.6.13
+        version: 1.6.13
       arg:
         specifier: ^5.0.0
         version: 5.0.2

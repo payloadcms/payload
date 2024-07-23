@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-in-test */
 import type { CompilerOptions } from 'typescript'
 
 import * as CommentJson from 'comment-json'
