@@ -232,6 +232,7 @@ export const DefaultEditView: React.FC = () => {
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
                       useAPIKey={auth.useAPIKey}
+                      username={data?.username}
                       verify={auth.verify}
                     />
                   )}
