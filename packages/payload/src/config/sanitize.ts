@@ -151,6 +151,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
 
+  // Pass through the email config as is so adapters don't break
+  if (incomingConfig.email) config.email = incomingConfig.email
+
   /*
     Execute richText sanitization
    */
