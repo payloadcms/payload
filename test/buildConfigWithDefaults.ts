@@ -169,9 +169,7 @@ export async function buildConfigWithDefaults(
     secret: 'TEST_SECRET',
     sharp,
     telemetry: false,
-
     ...testConfig,
-
     i18n: {
       supportedLanguages: {
         de,
@@ -191,6 +189,7 @@ export async function buildConfigWithDefaults(
   if (!config.admin) {
     config.admin = {}
   }
+
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'

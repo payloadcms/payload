@@ -2,14 +2,17 @@
 title: Array Field
 label: Array
 order: 20
-desc: Array fields are intended for sets of repeating fields, that you define. Learn how to use array fields, see examples and options.
+desc: Array Fields are intended for sets of repeating fields, that you define. Learn how to use Array Fields, see examples and options.
 keywords: array, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Array field type is used when you need to have a set of "repeating" fields. It stores an array
-  of objects containing the fields that you define. Its uses can be simple or highly complex.
-</Banner>
+The Array Field is used when you need to have a set of "repeating" [Fields](./overview). It stores an array of objects containing fields that you define. These fields can be of any type, including other arrays to achieve infinitely nested structures.
+
+Arrays are useful for many different types of content from simple to complex, such as:
+
+- A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
+- Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
+- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/array.png"
@@ -18,13 +21,23 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
   caption="Admin Panel screenshot of an Array field with two Rows"
 />
 
-**Example uses:**
+To create an Array Field, set the `type` to `array` in your [Field Config](./overview):
 
-- A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
-- Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
-- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
+```ts
+import type { Field } from 'payload/types'
 
-## Config
+export const MyArrayField: Field = {
+  // ...
+  // highlight-start
+  type: 'array',
+  fields: [
+    // ...
+  ],
+  // highlight-end
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,7 +55,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this Array will be kept, so there is no need to specify each nested field as `localized`. |
 | **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                |
 | **`labels`**           | Customize the row labels appearing in the Admin dashboard.                                                                                                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                          |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
 | **`interfaceName`**    | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                |
 | **`dbName`**           | Custom table name for the field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                    |
@@ -50,9 +63,22 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 
 _\* An asterisk denotes that a property is required._
 
-## Admin Config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+The customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyArrayField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The Array Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Option                    | Description                                                                                                          |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -62,7 +88,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 
 ## Example
 
-`collections/ExampleCollection.ts`
+In this example, we have an Array Field called `slider` that contains a set of fields for a simple image slider. Each row in the array has a `title`, `image`, and `caption`. We also customize the row label to display the title if it exists, or a default label if it doesn't.
 
 ```ts
 import { CollectionConfig } from 'payload'

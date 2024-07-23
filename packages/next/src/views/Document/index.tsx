@@ -1,7 +1,7 @@
 import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
-import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { RenderCustomComponent, formatAdminURL , isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -174,7 +174,11 @@ export const Document: React.FC<AdminViewProps> = async ({
     })
 
     if (doc?.id) {
-      const redirectURL = `${serverURL}${adminRoute}/collections/${collectionSlug}/${doc.id}`
+      const redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}/${doc.id}`,
+        serverURL,
+      })
       redirect(redirectURL)
     } else {
       notFound()

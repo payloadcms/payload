@@ -348,15 +348,19 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     }
 
     if (collectionConfig.auth) {
-      const authFields: Field[] = collectionConfig.auth.disableLocalStrategy
-        ? []
-        : [
-            {
-              name: 'email',
-              type: 'email',
-              required: true,
-            },
-          ]
+      const authFields: Field[] =
+        collectionConfig.auth.disableLocalStrategy ||
+        (collectionConfig.auth.loginWithUsername &&
+          !collectionConfig.auth.loginWithUsername.allowEmailLogin &&
+          !collectionConfig.auth.loginWithUsername.requireEmail)
+          ? []
+          : [
+              {
+                name: 'email',
+                type: 'email',
+                required: true,
+              },
+            ]
       collection.graphQL.JWT = buildObjectType({
         name: formatName(`${slug}JWT`),
         config,

@@ -12,6 +12,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 import { toast } from 'sonner'
@@ -36,8 +37,11 @@ const initialState: FormState = {
 export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
-    admin: { user: userSlug },
-    routes: { admin, api },
+    admin: {
+      routes: { login: loginRoute },
+      user: userSlug,
+    },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = useConfig()
 
@@ -49,18 +53,23 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
     async (data) => {
       if (data.token) {
         await fetchFullUser()
-        history.push(`${admin}`)
+        history.push(adminRoute)
       } else {
-        history.push(`${admin}/login`)
+        history.push(
+          formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          }),
+        )
         toast.success(i18n.t('general:updatedSuccessfully'))
       }
     },
-    [fetchFullUser, history, admin, i18n],
+    [fetchFullUser, history, adminRoute, i18n],
   )
 
   return (
     <Form
-      action={`${serverURL}${api}/${userSlug}/reset-password`}
+      action={`${serverURL}${apiRoute}/${userSlug}/reset-password`}
       initialState={initialState}
       method="POST"
       onSuccess={onSuccess}

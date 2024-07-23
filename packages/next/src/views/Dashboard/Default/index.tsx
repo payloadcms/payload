@@ -3,7 +3,7 @@ import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import { EntityType, WithServerSideProps } from '@payloadcms/ui/shared'
+import { EntityType, WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
@@ -100,19 +100,31 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
 
                       if (type === EntityType.collection) {
                         title = getTranslation(entity.labels.plural, i18n)
+
                         buttonAriaLabel = t('general:showAllLabel', { label: title })
-                        href = `${adminRoute}/collections/${entity.slug}`
-                        createHREF = `${adminRoute}/collections/${entity.slug}/create`
+
+                        href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
+
+                        createHREF = formatAdminURL({
+                          adminRoute,
+                          path: `/collections/${entity.slug}/create`,
+                        })
+
                         hasCreatePermission =
                           permissions?.collections?.[entity.slug]?.create?.permission
                       }
 
                       if (type === EntityType.global) {
                         title = getTranslation(entity.label, i18n)
+
                         buttonAriaLabel = t('general:editLabel', {
                           label: getTranslation(entity.label, i18n),
                         })
-                        href = `${adminRoute}/globals/${entity.slug}`
+
+                        href = formatAdminURL({
+                          adminRoute,
+                          path: `/globals/${entity.slug}`,
+                        })
                       }
 
                       return (
