@@ -35,6 +35,7 @@ export const DefaultCollectionEdit: React.FC<
     hasSavePermission,
     internalState,
     isEditing,
+    onSave,
     permissions,
   } = props
 
@@ -68,6 +69,7 @@ export const DefaultCollectionEdit: React.FC<
         hasSavePermission={hasSavePermission}
         id={id}
         isEditing={isEditing}
+        onSave={onSave}
         permissions={permissions}
       />
       <DocumentFields
