@@ -9,43 +9,69 @@ export class AdminUrlUtil {
 
   create: string
 
+  entitySlug: string
+
   list: string
 
+  routes: Config['routes']
+
+  serverURL: string
+
   constructor(serverURL: string, slug: string, routes?: Config['routes']) {
+    this.routes = {
+      admin: routes?.admin || '/admin',
+    }
+
+    this.serverURL = serverURL
+
+    this.entitySlug = slug
+
     this.admin = formatAdminURL({
-      adminRoute: routes?.admin || '/',
+      adminRoute: this.routes.admin,
       path: '',
-      serverURL,
+      serverURL: this.serverURL,
     })
 
     this.account = formatAdminURL({
-      adminRoute: routes?.admin || '/admin',
+      adminRoute: this.routes.admin,
       path: '/account',
-      serverURL,
+      serverURL: this.serverURL,
     })
 
     this.list = formatAdminURL({
-      adminRoute: routes?.admin || '/admin',
-      path: `/collections/${slug}`,
-      serverURL,
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}`,
+      serverURL: this.serverURL,
     })
 
     this.create = formatAdminURL({
-      adminRoute: routes?.admin || '/admin',
-      path: `/collections/${slug}/create`,
-      serverURL,
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}/create`,
+      serverURL: this.serverURL,
     })
   }
 
   collection(slug: string): string {
-    return `${this.admin}/collections/${slug}`
+    return formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/collections/${slug}`,
+      serverURL: this.serverURL,
+    })
   }
 
   edit(id: number | string): string {
-    return `${this.list}/${id}`
+    return formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `${this.entitySlug}/${id}`,
+      serverURL: this.serverURL,
+    })
   }
 
   global(slug: string): string {
-    return `${this.admin}/globals/${slug}`
+    return formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/globals/${slug}`,
+      serverURL: this.serverURL,
+    })
   }
 }
