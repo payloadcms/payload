@@ -25,10 +25,6 @@ export const getNextJSRootDir = (testSuite) => {
     adminRoute = rootAdminRoute
   }
 
-  if (testSuite === 'admin-nested') {
-    adminRoute = nestedAdminRoute
-  }
-
   if (hasNextConfig) {
     return {
       rootDir: testSuiteDir,
