@@ -15,7 +15,7 @@ import {
   useEditDepth,
   useUploadEdits,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
+import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
@@ -127,7 +127,10 @@ export const DefaultEditView: React.FC = () => {
 
       if (!isEditing && depth < 2) {
         // Redirect to the same locale if it's been set
-        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        const redirectRoute = formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+        })
         router.push(redirectRoute)
       } else {
         resetUploadEdits()

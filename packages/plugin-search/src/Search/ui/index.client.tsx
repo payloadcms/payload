@@ -3,6 +3,7 @@
 import type { FormState } from 'payload'
 
 import { useConfig, useWatchForm } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import React from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
@@ -35,7 +36,10 @@ export const LinkToDocClient: React.FC = () => {
     serverURL,
   } = config
 
-  const href = `${serverURL}${adminRoute}/collections/${relationTo}/${docId}`
+  const href = `${serverURL}${formatAdminURL({
+    adminRoute,
+    path: '/collections/${relationTo}/${docId}',
+  })}`
 
   return (
     <div>

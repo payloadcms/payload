@@ -12,7 +12,7 @@ import {
   useNav,
   useTranslation,
 } from '@payloadcms/ui'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType, formatAdminURL, groupNavItems } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -25,7 +25,7 @@ export const DefaultNavClient: React.FC = () => {
   const {
     collections,
     globals,
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = useConfig()
 
   const { i18n } = useTranslation()
@@ -69,13 +69,13 @@ export const DefaultNavClient: React.FC = () => {
               let id: string
 
               if (type === EntityType.collection) {
-                href = `${admin}/collections/${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
                 entityLabel = getTranslation(entity.labels.plural, i18n)
                 id = `nav-${entity.slug}`
               }
 
               if (type === EntityType.global) {
-                href = `${admin}/globals/${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/globals/${entity.slug}` })
                 entityLabel = getTranslation(entity.label, i18n)
                 id = `nav-global-${entity.slug}`
               }
