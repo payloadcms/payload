@@ -29,7 +29,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const loginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
   const emailRequired = loginWithUsername && loginWithUsername.requireEmail
 
-  let loginType = loginWithUsername ? 'username' : 'email'
+  let loginType: LoginFieldProps['type'] = loginWithUsername ? 'username' : 'email'
   if (loginWithUsername && (loginWithUsername.allowEmailLogin || loginWithUsername.requireEmail)) {
     loginType = 'emailOrUsername'
   }
