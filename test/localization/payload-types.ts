@@ -27,7 +27,7 @@ export interface Config {
   globals: {
     'global-array': GlobalArray;
   };
-  locale: 'en' | 'es' | 'pt' | 'ar';
+  locale: 'en' | 'es' | 'hu' | 'pt' | 'ar';
   user: User & {
     collection: 'users';
   };
@@ -70,6 +70,7 @@ export interface User {
 export interface LocalizedPost {
   id: string;
   title?: string | null;
+  localizedDescription?: string | null;
   description?: string | null;
   localizedCheckbox?: boolean | null;
   children?: (string | LocalizedPost)[] | null;
@@ -316,6 +317,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

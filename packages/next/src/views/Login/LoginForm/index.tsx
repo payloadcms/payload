@@ -9,6 +9,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 import type { FormState, PayloadRequest } from 'payload'
 
 import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { password } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
@@ -29,7 +30,7 @@ export const LoginForm: React.FC<{
       routes: { forgot: forgotRoute },
       user: userSlug,
     },
-    routes: { admin, api },
+    routes: { admin: adminRoute, api: apiRoute },
   } = config
 
   const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
@@ -71,12 +72,12 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={`${api}/${userSlug}/login`}
+      action={`${apiRoute}/${userSlug}/login`}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}
       method="POST"
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
+      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
@@ -104,7 +105,14 @@ export const LoginForm: React.FC<{
           }
         />
       </div>
-      <Link href={`${admin}${forgotRoute}`}>{t('authentication:forgotPasswordQuestion')}</Link>
+      <Link
+        href={formatAdminURL({
+          adminRoute,
+          path: forgotRoute,
+        })}
+      >
+        {t('authentication:forgotPasswordQuestion')}
+      </Link>
       <FormSubmit>{t('authentication:login')}</FormSubmit>
     </Form>
   )

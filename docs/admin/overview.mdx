@@ -169,19 +169,32 @@ The following options are available:
 
 | Option             | Default route           | Description                           |
 | ------------------ | ----------------------- | ------------------------------------- |
-| `admin`            | `/admin`                | The Admin Panel itself.               |
+| `admin`            | `/admin`                | The Admin Panel itself. |
 | `api`              | `/api`                  | The [REST API](../rest-api/overview) base path.               |
 | `graphQL`          | `/graphql`              | The [GraphQL API](../graphql/overview) base path.            |
 | `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
 
-<Banner type="warning">
-  <strong>Warning:</strong>
-  Changing Root-level Routes _after_ your project was generated will also require you to manually update the corresponding directories in your project. For example, changing `routes.admin` will require you to rename the `(payload)/admin` directory in your project to match the new route. [More details](#project-structure).
-</Banner>
-
 <Banner type="success">
   <strong>Tip:</strong>
-   You can easily add _new_ routes to the Admin Panel through the `endpoints` property of the Payload Config. See [Custom Endpoints](../rest-api/overview#custom-endpoints) for more information.
+   You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
+</Banner>
+
+#### Customizing Root-level Routes
+
+You can change the Root-level Routes as needed, such as to mount the Admin Panel at the root of your application.
+
+Changing Root-level Routes also requires a change to [Project Structure](#project-structure) to match the new route. For example, if you set `routes.admin` to `/`, you would need to completely remove the `admin` directory from the project structure:
+
+```plaintext
+app/
+├─ (payload)/
+├── [[...segments]]/
+├──── ...
+```
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  If you set Root-level Routes _before_ auto-generating the Admin Panel, your [Project Structure](#project-structure) will already be set up correctly.
 </Banner>
 
 ### Admin-level Routes

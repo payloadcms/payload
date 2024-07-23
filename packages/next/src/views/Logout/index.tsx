@@ -18,7 +18,7 @@ export const LogoutView: React.FC<
     req: {
       payload: {
         config: {
-          routes: { admin },
+          routes: { admin: adminRoute },
         },
       },
     },
@@ -27,7 +27,7 @@ export const LogoutView: React.FC<
   return (
     <div className={`${baseClass}__wrap`}>
       <LogoutClient
-        adminRoute={admin}
+        adminRoute={adminRoute}
         inactivity={inactivity}
         redirect={searchParams.redirect as string}
       />

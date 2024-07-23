@@ -6,7 +6,7 @@ desc: The Email field enforces that the value provided is a valid email address.
 keywords: email, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>The Email field enforces that the value provided is a valid email address.</Banner>
+The Email Field enforces that the value provided is a valid email address.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/email.png"
@@ -15,7 +15,18 @@ keywords: email, fields, config, configuration, documentation, Content Managemen
   caption="Admin Panel screenshot of an Email field"
 />
 
-## Config
+To create an Email Field, set the `type` to `email` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyEmailField: Field = {
+  // ...
+  type: 'email', // highlight-line
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -31,23 +42,33 @@ keywords: email, fields, config, configuration, documentation, Content Managemen
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                   |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                   |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 
 _\* An asterisk denotes that a property is required._
 
-## Admin config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), this field type allows for the following `admin` properties:
+The customize the appearance and behavior of the Email Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
-**`placeholder`**
+```ts
+import type { Field } from 'payload/types'
 
-Set this property to define a placeholder string for the field.
+export const MyEmailField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
 
-**`autoComplete`**
+The Email Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-Set this property to a string that will be used for browser autocomplete.
+| Property                       | Description                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                         |
+| **`autoComplete`**             | Set this property to a string that will be used for browser autocomplete.                                                               |
 
 ## Example
 

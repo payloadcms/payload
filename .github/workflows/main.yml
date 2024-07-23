@@ -292,6 +292,7 @@ jobs:
           - access-control
           - admin__e2e__1
           - admin__e2e__2
+          - admin-root
           - auth
           - field-error-states
           - fields-relationship

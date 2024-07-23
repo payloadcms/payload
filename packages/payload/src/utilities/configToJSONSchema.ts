@@ -612,65 +612,111 @@ const fieldType: JSONSchema4 = {
   type: 'string',
   required: false,
 }
-const generateAuthFieldTypes = (
-  loginWithUsername: Auth['loginWithUsername'],
-  withPassword = false,
-): JSONSchema4 => {
-  const passwordField = {
-    password: fieldType,
+const generateAuthFieldTypes = ({
+  type,
+  loginWithUsername,
+}: {
+  loginWithUsername: Auth['loginWithUsername']
+  type: 'forgotOrUnlock' | 'login' | 'register'
+}): JSONSchema4 => {
+  const emailAuthFields = {
+    additionalProperties: false,
+    properties: { email: fieldType },
+    required: ['email'],
+  }
+  const usernameAuthFields = {
+    additionalProperties: false,
+    properties: { username: fieldType },
+    required: ['username'],
+  }
+
+  if (['login', 'register'].includes(type)) {
+    emailAuthFields.properties['password'] = fieldType
+    emailAuthFields.required.push('password')
+    usernameAuthFields.properties['password'] = fieldType
+    usernameAuthFields.required.push('password')
   }
 
   if (loginWithUsername) {
-    if (loginWithUsername.allowEmailLogin) {
-      return {
-        additionalProperties: false,
-        oneOf: [
-          {
+    switch (type) {
+      case 'login': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow username or email and require password for login
+          return {
             additionalProperties: false,
-            properties: { email: fieldType, ...(withPassword ? { password: fieldType } : {}) },
-            required: ['email', ...(withPassword ? ['password'] : [])],
-          },
-          {
+            oneOf: [emailAuthFields, usernameAuthFields],
+          }
+        } else {
+          // allow only username and password for login
+          return usernameAuthFields
+        }
+      }
+
+      case 'register': {
+        if (loginWithUsername.requireEmail) {
+          // require username, email and password for registration
+          return {
             additionalProperties: false,
-            properties: { username: fieldType, ...(withPassword ? { password: fieldType } : {}) },
-            required: ['username', ...(withPassword ? ['password'] : [])],
-          },
-        ],
+            properties: {
+              ...usernameAuthFields.properties,
+              ...emailAuthFields.properties,
+            },
+            required: [...usernameAuthFields.required, ...emailAuthFields.required],
+          }
+        } else if (loginWithUsername.allowEmailLogin) {
+          // allow both but only require username for registration
+          return {
+            additionalProperties: false,
+            properties: {
+              ...usernameAuthFields.properties,
+              ...emailAuthFields.properties,
+            },
+            required: usernameAuthFields.required,
+          }
+        } else {
+          // require only username and password for registration
+          return usernameAuthFields
+        }
+      }
+
+      case 'forgotOrUnlock': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow email or username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            oneOf: [emailAuthFields, usernameAuthFields],
+          }
+        } else {
+          // allow only username for unlock/forgot-password
+          return usernameAuthFields
+        }
       }
     }
-
-    return {
-      additionalProperties: false,
-      properties: {
-        username: fieldType,
-        ...(withPassword ? { password: fieldType } : {}),
-      },
-      required: ['username', ...(withPassword ? ['password'] : [])],
-    }
   }
 
-  return {
-    additionalProperties: false,
-    properties: {
-      email: fieldType,
-      ...(withPassword ? { password: fieldType } : {}),
-    },
-    required: ['email', ...(withPassword ? ['password'] : [])],
-  }
+  // default email (and password for login/register)
+  return emailAuthFields
 }
 
 export function authCollectionToOperationsJSONSchema(
   config: SanitizedCollectionConfig,
 ): JSONSchema4 {
   const loginWithUsername = config.auth?.loginWithUsername
-  const generatedFields: JSONSchema4 = generateAuthFieldTypes(loginWithUsername)
-  const generatedFieldsWithPassword: JSONSchema4 = generateAuthFieldTypes(loginWithUsername, true)
+  const loginUserFields: JSONSchema4 = generateAuthFieldTypes({ type: 'login', loginWithUsername })
+  const forgotOrUnlockUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'forgotOrUnlock',
+    loginWithUsername,
+  })
+  const registerUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'register',
+    loginWithUsername,
+  })
 
   const properties: JSONSchema4['properties'] = {
-    forgotPassword: generatedFields,
-    login: generatedFieldsWithPassword,
-    registerFirstUser: generatedFieldsWithPassword,
-    unlock: generatedFields,
+    forgotPassword: forgotOrUnlockUserFields,
+    login: loginUserFields,
+    registerFirstUser: registerUserFields,
+    unlock: forgotOrUnlockUserFields,
   }
 
   return {

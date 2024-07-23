@@ -33,15 +33,15 @@ process.env.PAYLOAD_DROP_DATABASE = 'true'
 const { beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const rootDir = getNextJSRootDir(testSuiteArg)
+const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
-  await open('http://localhost:3000/admin')
+  await open(`http://localhost:3000${adminRoute}`)
 }
 
 // @ts-expect-error
 await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
 
 // fetch the admin url to force a render
-fetch(`http://localhost:${process.env.PORT || 3000}/admin`)
+fetch(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
