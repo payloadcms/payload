@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { CreateMigration } from 'payload'
 
