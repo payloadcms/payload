@@ -1087,19 +1087,22 @@ describe('collections-rest', () => {
 
           it('should sort find results by nearest distance', async () => {
             // creating twice as many records as we are querying to get a random sample
-            // eslint-disable-next-line @typescript-eslint/require-await
+            const promises = []
             for (let i = 0; i < 11; i++) {
               // setTimeout used to randomize the creation timestamp
-              setTimeout(async () => {
-                await payload.create({
-                  collection: pointSlug,
-                  data: {
-                    // only randomize longitude to make distance comparison easy
-                    point: [Math.random(), 0],
-                  },
-                })
+              setTimeout(() => {
+                promises.push(
+                  payload.create({
+                    collection: pointSlug,
+                    data: {
+                      // only randomize longitude to make distance comparison easy
+                      point: [Math.random(), 0],
+                    },
+                  }),
+                )
               }, Math.random())
             }
+            await Promise.all(promises)
 
             const { docs } = await restClient
               .GET(`/${pointSlug}`, {
