@@ -1,1 +1,1 @@
-export const adminRoute = '/admin'
+export const adminRoute = '/'
