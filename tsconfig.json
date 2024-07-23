@@ -45,6 +45,9 @@
       "@payloadcms/live-preview-react": [
         "./packages/live-preview-react/src/index.ts"
       ],
+      "@payloadcms/live-preview-vue": [
+        "./packages/live-preview-vue/src/index.ts"
+      ],
       "@payloadcms/ui": [
         "./packages/ui/src/exports/client/index.ts"
       ],
@@ -90,6 +93,9 @@
     },
     {
       "path": "./packages/live-preview-react"
+    },
+    {
+      "path": "./packages/live-preview-vue"
     },
     {
       "path": "./packages/next"
