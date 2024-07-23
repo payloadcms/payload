@@ -2,6 +2,8 @@ import fs from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
+import { adminRoute as rootAdminRoute } from '../../admin-root/shared.js'
+
 const _filename = fileURLToPath(import.meta.url)
 const _dirname = dirname(_filename)
 
@@ -20,7 +22,7 @@ export const getNextJSRootDir = (testSuite) => {
   let adminRoute = '/admin'
 
   if (testSuite === 'admin-root') {
-    adminRoute = '/'
+    adminRoute = rootAdminRoute
   }
 
   if (hasNextConfig) {

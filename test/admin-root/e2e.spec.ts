@@ -31,7 +31,7 @@ test.describe('Admin Panel (Root)', () => {
 
     await ensureCompilationIsDone({
       customRoutes: {
-        admin: '/',
+        admin: adminRoute,
       },
       page,
       serverURL,
