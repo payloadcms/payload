@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
-throw new Error('asfdadsf')
+
 async function build() {
   const resultServer = await esbuild.build({
     entryPoints: ['src/index.ts'],
@@ -31,7 +31,7 @@ async function build() {
     plugins: [commonjs()],
     sourcemap: true,
   })
-  console.log('db-postgres bundled successfully')
+  console.log('db-sqlite bundled successfully')
 
   fs.writeFileSync('meta_server.json', JSON.stringify(resultServer.metafile))
 }
