@@ -12,6 +12,7 @@ import {
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -68,6 +69,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -309,6 +315,11 @@ export default buildConfigWithDefaults({
         code: 'ar',
         label: 'Arabic',
         rtl: true,
+      },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
       },
     ],
   },
