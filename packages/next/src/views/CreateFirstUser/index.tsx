@@ -29,7 +29,10 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const loginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
   const emailRequired = loginWithUsername && loginWithUsername.requireEmail
 
-  let loginType = 'email' as LoginFieldProps['type']
+  let loginType = loginWithUsername ? 'username' : 'email'
+  if (loginWithUsername && (loginWithUsername.allowEmailLogin || loginWithUsername.requireEmail)) {
+    loginType = 'emailOrUsername'
+  }
 
   const emailField = {
     name: 'email',
@@ -61,10 +64,6 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
       required: true,
     },
   ]
-
-  if (loginWithUsername) {
-    loginType = emailRequired ? 'emailOrUsername' : 'username'
-  }
 
   const formState = await buildStateFromSchema({
     fieldSchema: fields as Field[],

@@ -24,7 +24,7 @@ export const CreateFirstUserClient: React.FC<{
   userSlug: string
 }> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
   const { getFieldMap } = useComponentMap()
-
+  console.log({ loginType })
   const {
     routes: { admin, api: apiRoute },
     serverURL,
@@ -59,13 +59,9 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {loginType === 'emailOrUsername' ? (
-        <>
-          <LoginField type="username" />
-          <LoginField required={requireEmail} type="email" />
-        </>
-      ) : (
-        <LoginField type={loginType} />
+      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
+      {['email', 'emailOrUsername'].includes(loginType) && (
+        <LoginField required={requireEmail} type="email" />
       )}
       <PasswordField
         autoComplete="off"
