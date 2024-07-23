@@ -1,8 +1,10 @@
-import type { SharpOptions } from 'sharp'
+import type { Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { UploadEdits } from './types.js'
+
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 export const percentToPixel = (value, dimension) => {
   return Math.floor((parseFloat(value) / 100) * dimension)
@@ -13,16 +15,20 @@ type CropImageArgs = {
   dimensions: { height: number; width: number }
   file: PayloadRequest['file']
   heightInPixels: number
+  req?: PayloadRequest
   sharp: SanitizedConfig['sharp']
   widthInPixels: number
+  withMetadata?: ((options: { metadata: SharpMetadata }) => boolean) | boolean
 }
 export async function cropImage({
   cropData,
   dimensions,
   file,
   heightInPixels,
+  req,
   sharp,
   widthInPixels,
+  withMetadata,
 }: CropImageArgs) {
   try {
     const { x, y } = cropData
@@ -40,9 +46,17 @@ export async function cropImage({
       width: Number(widthInPixels),
     }
 
-    const cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
+    let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
+    const metadata = await cropped.metadata()
 
-    return await cropped.withMetadata().toBuffer({
+    cropped = optionallyAppendMetadata({
+      metadata,
+      req,
+      sharpFile: cropped,
+      withMetadata,
+    })
+
+    return await cropped.toBuffer({
       resolveWithObject: true,
     })
   } catch (error) {

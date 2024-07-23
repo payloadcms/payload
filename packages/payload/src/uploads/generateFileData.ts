@@ -19,6 +19,7 @@ import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { resizeAndTransformImageSizes } from './imageResizer.js'
 import { isImage } from './isImage.js'
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type Args<T> = {
   collection: Collection
@@ -71,6 +72,7 @@ export const generateFileData = async <T>({
     resizeOptions,
     staticDir,
     trimOptions,
+    withMetadata,
   } = collectionConfig.upload
 
   const staticPath = staticDir
@@ -161,7 +163,13 @@ export const generateFileData = async <T>({
 
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
-      fileBuffer = await sharpFile.withMetadata().toBuffer({ resolveWithObject: true })
+      sharpFile = optionallyAppendMetadata({
+        metadata,
+        req,
+        sharpFile,
+        withMetadata,
+      })
+      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
       ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
@@ -208,8 +216,10 @@ export const generateFileData = async <T>({
         dimensions,
         file,
         heightInPixels: uploadEdits.heightInPixels,
+        req,
         sharp,
         widthInPixels: uploadEdits.widthInPixels,
+        withMetadata,
       })
 
       filesToSave.push({
@@ -274,6 +284,7 @@ export const generateFileData = async <T>({
         sharp,
         staticPath,
         uploadEdits,
+        withMetadata,
       })
 
       fileData.sizes = sizeData

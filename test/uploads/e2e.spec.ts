@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -27,6 +26,8 @@ import {
   focalOnlySlug,
   mediaSlug,
   relationSlug,
+  withMetadataSlug,
+  withoutMetadataSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,6 +44,8 @@ let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
+let withMetadataURL: AdminUrlUtil
+let withoutMetadataURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -62,6 +65,8 @@ describe('uploads', () => {
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
+    withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
+    withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -344,6 +349,58 @@ describe('uploads', () => {
     })
 
     expect(uploadedImage.mimeType).toEqual('image/png')
+  })
+
+  test('should upload image with metadata', async () => {
+    await page.goto(withMetadataURL.create)
+    await page.waitForURL(withMetadataURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID,
+      slug: withMetadataSlug,
+      auth: true,
+    })
+
+    expect(mediaDoc.sizes.sizeOne.filesize).toEqual(9431)
+  })
+
+  test('should upload image without metadata', async () => {
+    await page.goto(withoutMetadataURL.create)
+    await page.waitForURL(withoutMetadataURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID,
+      slug: withoutMetadataSlug,
+      auth: true,
+    })
+
+    expect(mediaDoc.sizes.sizeTwo.filesize).toEqual(2147)
   })
 
   describe('image manipulation', () => {
