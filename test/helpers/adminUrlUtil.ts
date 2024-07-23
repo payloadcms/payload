@@ -62,7 +62,7 @@ export class AdminUrlUtil {
   edit(id: number | string): string {
     return formatAdminURL({
       adminRoute: this.routes.admin,
-      path: `${this.entitySlug}/${id}`,
+      path: `/${this.entitySlug}/${id}`,
       serverURL: this.serverURL,
     })
   }
