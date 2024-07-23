@@ -5,7 +5,7 @@ import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
@@ -62,15 +62,18 @@ export const SetStepNav: React.FC<{
       nav = [
         {
           label: getTranslation(pluralLabel, i18n),
-          url: `${adminRoute}/collections/${collectionSlug}`,
+          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }),
         },
         {
           label: docLabel,
-          url: `${adminRoute}/collections/${collectionSlug}/${id}`,
+          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}/${id}` }),
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/collections/${collectionSlug}/${id}/versions`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/${id}/versions`,
+          }),
         },
         {
           label: doc?.createdAt
@@ -84,11 +87,17 @@ export const SetStepNav: React.FC<{
       nav = [
         {
           label: globalConfig.label,
-          url: `${adminRoute}/globals/${globalConfig.slug}`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/globals/${globalConfig.slug}`,
+          }),
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/globals/${globalConfig.slug}/versions`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/globals/${globalConfig.slug}/versions`,
+          }),
         },
         {
           label: doc?.createdAt

@@ -1,6 +1,6 @@
 'use client'
 import { useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -19,7 +19,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 }) => {
   const {
     admin: { dateFormat },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = useConfig()
 
   const { i18n } = useTranslation()
@@ -30,9 +30,17 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   let to: string
 
-  if (collectionSlug) to = `${admin}/collections/${collectionSlug}/${docID}/versions/${versionID}`
+  if (collectionSlug)
+    to = formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionSlug}/${docID}/versions/${versionID}`,
+    })
 
-  if (globalSlug) to = `${admin}/globals/${globalSlug}/versions/${versionID}`
+  if (globalSlug)
+    to = formatAdminURL({
+      adminRoute,
+      path: `/globals/${globalSlug}/versions/${versionID}`,
+    })
 
   return (
     <Link href={to}>

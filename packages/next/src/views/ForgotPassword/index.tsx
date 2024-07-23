@@ -1,6 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
 import { Button, Translation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -22,9 +23,9 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
 
   const {
     admin: {
-      routes: { account: accountRoute },
+      routes: { account: accountRoute, login: loginRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
 
   if (user) {
@@ -34,14 +35,23 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
         <p>
           <Translation
             elements={{
-              '0': ({ children }) => <Link href={`${admin}${accountRoute}`}>{children}</Link>,
+              '0': ({ children }) => (
+                <Link
+                  href={formatAdminURL({
+                    adminRoute,
+                    path: accountRoute,
+                  })}
+                >
+                  {children}
+                </Link>
+              ),
             }}
             i18nKey="authentication:loggedInChangePassword"
             t={i18n.t}
           />
         </p>
         <br />
-        <Button Link={Link} buttonStyle="secondary" el="link" to={admin}>
+        <Button Link={Link} buttonStyle="secondary" el="link" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>
@@ -51,7 +61,14 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <Link href={`${admin}/login`}>{i18n.t('authentication:backToLogin')}</Link>
+      <Link
+        href={formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        })}
+      >
+        {i18n.t('authentication:backToLogin')}
+      </Link>
     </Fragment>
   )
 }

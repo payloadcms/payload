@@ -6,6 +6,7 @@ import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Hamburger } from '../Hamburger/index.js'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { Localizer } from '../Localizer/index.js'
@@ -89,7 +90,7 @@ export const AppHeader: React.FC = () => {
             <LinkElement
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              href={`${adminRoute}${accountRoute}`}
+              href={formatAdminURL({ adminRoute, path: accountRoute })}
               tabIndex={0}
             >
               <Account />

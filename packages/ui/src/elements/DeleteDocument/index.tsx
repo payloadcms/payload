@@ -12,6 +12,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
@@ -32,7 +33,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
-    routes: { admin, api },
+    routes: { admin: adminRoute, api },
     serverURL,
   } = useConfig()
 
@@ -75,7 +76,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                   json.message,
               )
 
-              return router.push(`${admin}/collections/${collectionSlug}`)
+              return router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}`,
+                }),
+              )
             }
             toggleModal(modalSlug)
             if (json.errors) {
@@ -104,7 +110,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     i18n,
     title,
     router,
-    admin,
+    adminRoute,
     addDefaultError,
   ])
 
