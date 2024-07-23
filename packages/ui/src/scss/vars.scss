@@ -13,7 +13,7 @@ $breakpoint-l-width: 1440px !default;
 // BASELINE GRID
 //////////////////////////////
 
-$baseline-px: 25px !default;
+$baseline-px: 20px !default;
 $baseline-body-size: 13px !default;
 $baseline: math.div($baseline-px, $baseline-body-size) + rem;
 
@@ -152,9 +152,9 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   font-family: var(--font-body);
   width: 100%;
   border: 1px solid var(--theme-elevation-150);
+  border-radius: 3px;
   background: var(--theme-input-bg);
   color: var(--theme-elevation-800);
-  border-radius: 0;
   font-size: 1rem;
   height: base(2);
   line-height: base(1);
