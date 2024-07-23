@@ -6,18 +6,13 @@ desc: Upload fields will allow a file to be uploaded, only from a collection sup
 keywords: upload, images media, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Upload field allows for the selection of a Document from a collection supporting Uploads, and
-  formats the selection as a thumbnail in the Admin Panel.
-</Banner>
+The Upload Field allows for the selection of a Document from a Collection supporting [Uploads](../upload/overview), and formats the selection as a thumbnail in the Admin Panel.
 
-<Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  To use this field, you need to have a Collection configured to allow Uploads. For more
-  information, [click here](/docs/upload/overview) to read about how to enable Uploads on a
-  collection by collection basis.
-</Banner>
+Upload fields are useful for a variety of use cases, such as:
+
+- To provide a `Page` with a featured image
+- To allow for a `Product` to deliver a downloadable asset like PDF or MP3
+- To give a layout building block the ability to feature a background image
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/upload.png"
@@ -26,13 +21,26 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
   caption="Admin Panel screenshot of an Upload field"
 />
 
-**Example uses:**
+To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
 
-- To provide a `Page` with a featured image
-- To allow for a `Product` to deliver a downloadable asset like PDF or MP3
-- To give a layout building block the ability to feature a background image
+```ts
+import type { Field } from 'payload/types'
 
-## Config
+export const MyUploadField: Field = {
+  // ...
+  // highlight-start
+  type: 'upload',
+  relationTo: 'media',
+  // highlight-end
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  To use the Upload Field, you must have a [Collection](../configuration/collections) configured to allow [Uploads](../upload/overview).
+</Banner>
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,7 +59,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                    |
+| **`admin`**            | Admin-specific configuration. [Admin Options](../admin/fields#admin-options).                                                    |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 
