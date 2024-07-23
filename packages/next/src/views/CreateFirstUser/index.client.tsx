@@ -58,7 +58,14 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {loginType && <LoginField type={loginType} />}
+      {loginType === 'emailOrUsername' ? (
+        <>
+          <LoginField type="username" />
+          <LoginField type="email" />
+        </>
+      ) : (
+        <LoginField type={loginType} />
+      )}
       <PasswordField
         autoComplete="off"
         label={t('authentication:newPassword')}

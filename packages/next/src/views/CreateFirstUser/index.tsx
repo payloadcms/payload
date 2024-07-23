@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewProps, Field } from 'payload'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import React, { useState } from 'react'
@@ -45,20 +45,9 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     required: true,
   }
 
-  const fields = []
-
-  if (loginWithUsername) {
-    fields.push(usernameField)
-    if (emailRequired || loginWithEmail) {
-      fields.push(emailField)
-    }
-    loginType = 'username'
-  } else {
-    fields.push(emailField)
-    loginType = 'email'
-  }
-
-  fields.push(
+  const fields = [
+    ...(loginWithUsername ? [usernameField] : []),
+    ...(emailRequired || loginWithEmail ? [emailField] : []),
     {
       name: 'password',
       type: 'text',
@@ -71,10 +60,14 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
       label: req.t('authentication:confirmPassword'),
       required: true,
     },
-  )
+  ]
+
+  if (loginWithUsername) {
+    loginType = emailRequired ? 'emailOrUsername' : 'username'
+  }
 
   const formState = await buildStateFromSchema({
-    fieldSchema: fields,
+    fieldSchema: fields as Field[],
     operation: 'create',
     preferences: { fields: {} },
     req,

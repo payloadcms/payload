@@ -98,6 +98,15 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
+          {Boolean(loginWithUsername) && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
           {(!loginWithUsername ||
             loginWithUsername?.allowEmailLogin ||
             loginWithUsername?.requireEmail) && (
@@ -108,15 +117,6 @@ export const Auth: React.FC<Props> = (props) => {
               name="email"
               readOnly={readOnly}
               required={!loginWithUsername || loginWithUsername?.requireEmail}
-            />
-          )}
-          {Boolean(loginWithUsername) && (
-            <TextField
-              disabled={disabled}
-              label={t('authentication:username')}
-              name="username"
-              readOnly={readOnly}
-              required
             />
           )}
           {(changingPassword || requirePassword) && (
