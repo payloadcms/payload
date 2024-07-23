@@ -5,6 +5,7 @@ import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 
 const baseClass = 'nav'
 
@@ -19,10 +20,8 @@ const DefaultLogout: React.FC<{
     admin: {
       routes: { logout: logoutRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
-
-  const basePath = process.env.NEXT_BASE_PATH ?? ''
 
   const LinkElement = Link || 'a'
 
@@ -30,7 +29,10 @@ const DefaultLogout: React.FC<{
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      href={`${basePath}${admin}${logoutRoute}`}
+      href={formatAdminURL({
+        adminRoute,
+        path: logoutRoute,
+      })}
       tabIndex={tabIndex}
     >
       <LogOutIcon />

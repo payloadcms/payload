@@ -446,6 +446,7 @@ export const mapFields = (args: {
             const emailField: EmailFieldProps = {
               ...baseFieldProps,
               name: field.name,
+              autoComplete: field.admin?.autoComplete,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               placeholder: field.admin?.placeholder,

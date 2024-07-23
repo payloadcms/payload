@@ -21,7 +21,8 @@ export const handleAdminPage = ({
   route: string
 }) => {
   if (isAdminRoute(route, adminRoute)) {
-    const routeSegments = route.replace(adminRoute, '').split('/').filter(Boolean)
+    const baseAdminRoute = adminRoute && adminRoute !== '/' ? route.replace(adminRoute, '') : route
+    const routeSegments = baseAdminRoute.split('/').filter(Boolean)
     const [entityType, entitySlug, createOrID] = routeSegments
     const collectionSlug = entityType === 'collections' ? entitySlug : undefined
     const globalSlug = entityType === 'globals' ? entitySlug : undefined
@@ -56,4 +57,6 @@ export const handleAdminPage = ({
       globalConfig,
     }
   }
+
+  return {}
 }

@@ -70,8 +70,6 @@ const typescriptRules = {
   '@typescript-eslint/no-unsafe-argument': 'off',
   '@typescript-eslint/no-unsafe-return': 'off',
   '@typescript-eslint/unbound-method': 'warn',
-  // This rule doesn't work well in .tsx files
-  '@typescript-eslint/no-misused-promises': 'off',
   '@typescript-eslint/consistent-type-imports': 'warn',
   '@typescript-eslint/no-explicit-any': 'warn',
   // Type-aware any rules end

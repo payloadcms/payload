@@ -110,7 +110,7 @@ async function cleanDirectories(patterns) {
   )
 
   // Print details for each pattern with colors, formatted for alignment
-  console.log(chalk.blue('Summary of deleted items:'))
+  console.log(chalk.blue('\nSummary of deleted items:'))
   Object.keys(deletedCounts).forEach((pattern) => {
     const itemCount =
       `${deletedCounts[pattern].count} item${deletedCounts[pattern].count !== 1 ? 's' : ''} deleted`.padEnd(
@@ -127,7 +127,7 @@ async function cleanDirectories(patterns) {
       `Total deleted items: ${Object.values(deletedCounts).reduce((acc, { count }) => acc + count, 0)}`,
     ),
   )
-  console.log(chalk.cyan(`Total size of deleted items: ${formatSize(totalSize)}`))
+  console.log(chalk.cyan(`Total size of deleted items: ${formatSize(totalSize)}\n`))
 }
 
 // Get patterns from command-line arguments

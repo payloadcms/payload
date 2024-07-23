@@ -12,6 +12,7 @@ import configPromise from './config.js'
 import {
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -37,7 +38,6 @@ describe('Localization', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
 
-    // @ts-expect-error Force typing
     post1 = await payload.create({
       collection,
       data: {
@@ -45,7 +45,6 @@ describe('Localization', () => {
       },
     })
 
-    // @ts-expect-error Force typing
     postWithLocalizedData = await payload.create({
       collection,
       data: {
@@ -185,7 +184,6 @@ describe('Localization', () => {
           },
         })
 
-        // @ts-expect-error Force typing
         localizedPost = await payload.update({
           id,
           collection,
@@ -276,6 +274,67 @@ describe('Localization', () => {
 
         expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
+
+      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
+        describe('Localized sorting', () => {
+          let localizedAccentPostOne: LocalizedPost
+          let localizedAccentPostTwo: LocalizedPost
+          beforeEach(async () => {
+            localizedAccentPostOne = await payload.create({
+              collection,
+              data: {
+                title: 'non accent post',
+                localizedDescription: 'something',
+              },
+              locale: englishLocale,
+            })
+
+            localizedAccentPostTwo = await payload.create({
+              collection,
+              data: {
+                title: 'accent post',
+                localizedDescription: 'veterinarian',
+              },
+              locale: englishLocale,
+            })
+
+            await payload.update({
+              id: localizedAccentPostOne.id,
+              collection,
+              data: {
+                title: 'non accent post',
+                localizedDescription: 'valami',
+              },
+              locale: hungarianLocale,
+            })
+
+            await payload.update({
+              id: localizedAccentPostTwo.id,
+              collection,
+              data: {
+                title: 'accent post',
+                localizedDescription: 'állatorvos',
+              },
+              locale: hungarianLocale,
+            })
+          })
+
+          it('should sort alphabetically even with accented letters', async () => {
+            const sortByDescriptionQuery = await payload.find({
+              collection,
+              sort: 'description',
+              where: {
+                title: {
+                  like: 'accent',
+                },
+              },
+              locale: hungarianLocale,
+            })
+
+            expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+          })
+        })
+      }
     })
   })
 
@@ -352,7 +411,6 @@ describe('Localization', () => {
         },
       })
 
-      // @ts-expect-error Force typing
       withRelationship = await payload.create({
         collection: withLocalizedRelSlug,
         data: {

@@ -5,9 +5,10 @@ import { EmailField, TextField, useConfig, useTranslation } from '@payloadcms/ui
 import { email, username } from 'payload/shared'
 import React from 'react'
 export type LoginFieldProps = {
+  required?: boolean
   type: 'email' | 'emailOrUsername' | 'username'
 }
-export const LoginField: React.FC<LoginFieldProps> = ({ type }) => {
+export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
   const { t } = useTranslation()
   const config = useConfig()
 
@@ -17,7 +18,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type }) => {
         autoComplete="email"
         label={t('general:email')}
         name="email"
-        required
+        required={required}
         validate={(value) =>
           email(value, {
             name: 'email',

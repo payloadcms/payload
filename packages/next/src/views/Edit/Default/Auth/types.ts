@@ -10,5 +10,6 @@ export type Props = {
   readOnly: boolean
   requirePassword?: boolean
   useAPIKey?: boolean
+  username: string
   verify?: VerifyConfig | boolean
 }

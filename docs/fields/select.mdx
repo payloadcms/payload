@@ -6,10 +6,7 @@ desc: The Select field provides a dropdown-style interface for choosing options 
 keywords: select, multi-select, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Select field provides a dropdown-style interface for choosing options from a predefined list
-  as an enumeration.
-</Banner>
+The Select Field provides a dropdown-style interface for choosing options from a predefined list as an enumeration.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/select.png"
@@ -18,7 +15,23 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
   caption="Admin Panel screenshot of a Select field"
 />
 
-## Config
+To add a Select Field, set the `type` to `select` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MySelectField: Field = {
+  // ...
+  // highlight-start
+  type: 'select',
+  options: [
+    // ...
+  ]
+  // highlight-end
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -36,7 +49,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                          |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                               |
 | **`required`**         | Require this field to have a value.                                                                                                                                           |
-| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                      |
+| **`admin`**            | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-options) for more details.                                                      |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                     |
 | **`enumName`**         | Custom enum name for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                               |
 | **`dbName`**           | Custom table name (if `hasMany` set to `true`) for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined. |
@@ -46,24 +59,33 @@ _\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
   <strong>Important:</strong>
-  <br />
   Option values should be strings that do not contain hyphens or special characters due to GraphQL
   enumeration naming constraints. Underscores are allowed. If you determine you need your option
   values to be non-strings or contain special characters, they will be formatted accordingly before
   being used as a GraphQL enum.
 </Banner>
 
-## Admin config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the Select field type also allows for the following admin-specific properties:
+The customize the appearance and behavior of the Select Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
-**`isClearable`**
+```ts
+import type { Field } from 'payload/types'
 
-Set to `true` if you'd like this field to be clearable within the Admin UI.
+export const MySelectField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
 
-**`isSortable`**
+The Select Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`)
+| Property                       | Description                                                                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`isClearable`**              | Set to `true` if you'd like this field to be clearable within the Admin UI.                                                              |
+| **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`) |
 
 ## Example
 

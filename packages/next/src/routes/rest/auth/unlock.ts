@@ -8,14 +8,15 @@ import { headersWithCors } from '../../../utilities/headersWithCors.js'
 export const unlock: CollectionRouteHandler = async ({ collection, req }) => {
   const { t } = req
 
-  const authData = collection.config.auth?.loginWithUsername
-    ? {
-        email: typeof req.data?.email === 'string' ? req.data.email : '',
-        username: typeof req.data?.username === 'string' ? req.data.username : '',
-      }
-    : {
-        email: typeof req.data?.email === 'string' ? req.data.email : '',
-      }
+  const authData =
+    collection.config.auth?.loginWithUsername !== false
+      ? {
+          email: typeof req.data?.email === 'string' ? req.data.email : '',
+          username: typeof req.data?.username === 'string' ? req.data.username : '',
+        }
+      : {
+          email: typeof req.data?.email === 'string' ? req.data.email : '',
+        }
 
   await unlockOperation({
     collection,
