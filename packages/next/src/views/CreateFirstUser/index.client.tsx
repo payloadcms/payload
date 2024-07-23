@@ -24,7 +24,7 @@ export const CreateFirstUserClient: React.FC<{
   userSlug: string
 }> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
   const { getFieldMap } = useComponentMap()
-  console.log({ loginType })
+
   const {
     routes: { admin, api: apiRoute },
     serverURL,
