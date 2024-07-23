@@ -67,7 +67,6 @@ const Uploads: CollectionConfig = {
   },
   upload: {
     withMetadata: ({ metadata }) => {
-      console.log(metadata)
       if (metadata.format === 'jpeg') {
         return true
       }
