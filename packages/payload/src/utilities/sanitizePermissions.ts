@@ -46,7 +46,7 @@ function isPermissionObject(data: PermissionObject): boolean {
 /**
  * Recursively remove empty objects from an object.
  */
-function cleanEmptyObjects(obj: any): any {
+function cleanEmptyObjects(obj: any): void {
   Object.keys(obj).forEach((key) => {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       // Recursive call
@@ -55,9 +55,10 @@ function cleanEmptyObjects(obj: any): any {
         // Delete the key if the object is empty
         delete obj[key]
       }
+    } else if (obj[key] === null || obj[key] === undefined) {
+      delete obj[key]
     }
   })
-  return obj
 }
 
 /**
