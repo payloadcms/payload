@@ -113,7 +113,7 @@ export class InlineBlockNode extends DecoratorNode<React.ReactElement> {
   }
 
   setFields(fields: InlineBlockFields): void {
-    const fieldsCopy = deepCopyObjectSimple(fields) as InlineBlockFields
+    const fieldsCopy = deepCopyObjectSimple(fields)
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy

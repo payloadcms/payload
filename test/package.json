@@ -27,6 +27,8 @@
     "@lexical/markdown": "0.16.1",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
+    "@payloadcms/db-sqlite": "workspace:*",
+    "@payloadcms/drizzle": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",

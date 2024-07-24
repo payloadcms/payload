@@ -3,6 +3,11 @@ import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, TabAsField } from 'payload'
 
+import {
+  createTableName,
+  hasLocalesTable,
+  validateExistingBlockIsIdentical,
+} from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
@@ -26,13 +31,10 @@ import toSnakeCase from 'to-snake-case'
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
 import type { BaseExtraConfig, RelationMap } from './build.js'
 
-import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
-import { createTableName } from './createTableName.js'
 import { idToUUID } from './idToUUID.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
-import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical.js'
 
 type Args = {
   adapter: PostgresAdapter

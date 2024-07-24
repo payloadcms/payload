@@ -414,6 +414,8 @@ describe('Versions', () => {
 
         expect(latestDraft).toMatchObject({
           ...versionToRestore.version,
+          // timestamps cannot be guaranteed to be the exact same to the milliseconds
+          createdAt: latestDraft.createdAt,
           updatedAt: latestDraft.updatedAt,
         })
         expect(latestDraft.blocksField).toHaveLength(0)
@@ -439,8 +441,8 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
-            title: patchedTitle,
             _status: 'draft',
+            title: patchedTitle,
           },
           draft: true,
           locale: 'en',
@@ -453,8 +455,8 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
-            title: spanishTitle,
             _status: 'draft',
+            title: spanishTitle,
           },
           draft: true,
           locale: 'es',
@@ -519,19 +521,19 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'initial value',
-            description: 'description to bulk update',
             _status: 'published',
+            description: 'description to bulk update',
+            title: 'initial value',
           },
         })
 
         await payload.update({
-          collection: draftCollectionSlug,
           id: doc.id,
-          draft: true,
+          collection: draftCollectionSlug,
           data: {
             title: 'updated title',
           },
+          draft: true,
         })
 
         // bulk publish
@@ -600,7 +602,7 @@ describe('Versions', () => {
         const result = await payload.db.queryDrafts({
           collection,
           where: {
-            id: {
+            parent: {
               in: drafts.docs.map(({ id }) => id),
             },
             // appendVersionToQueryKey,
@@ -684,6 +686,13 @@ describe('Versions', () => {
           data: {
             description: 'B',
             title: 'B',
+          },
+        })
+
+        const result = await payload.find({
+          collection: 'version-posts',
+          where: {
+            updatedAt: { less_than_equal: '2027-01-01T00:00:00.000Z' },
           },
         })
 

@@ -119,7 +119,7 @@ const batchAndLoadDocs =
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {
-            in: ids as JsonValue,
+            in: ids,
           },
         },
       })
