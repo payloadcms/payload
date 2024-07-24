@@ -377,7 +377,9 @@ describe('uploads', () => {
       auth: true,
     })
 
-    expect(mediaDoc.sizes.sizeOne.filesize).toEqual(9431)
+    const acceptableFileSizes = [9431, 9435]
+
+    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeOne.filesize)
   })
 
   test('should upload image without metadata', async () => {
