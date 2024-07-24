@@ -32,8 +32,7 @@ export const updateOne: UpdateOne = async function updateOne(
     handleError(error, req)
   }
 
-  result.id = result._id.toString()
-  result = sanitizeInternalFields(result)
+  result = this.jsonParse ? JSON.parse(JSON.stringify(result)) : result
 
-  return result
+  return sanitizeInternalFields(result)
 }

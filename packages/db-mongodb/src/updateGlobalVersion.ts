@@ -3,6 +3,7 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
@@ -30,16 +31,14 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  let doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
-  const result = doc.toObject()
+  doc = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc
 
   const verificationToken = doc._verificationToken
 
-  // custom id type reset
-  result.id = result._id.toString()
   if (verificationToken) {
-    result._verificationToken = verificationToken
+    doc._verificationToken = verificationToken
   }
-  return result
+  return sanitizeInternalFields(doc)
 }

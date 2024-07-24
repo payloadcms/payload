@@ -390,10 +390,8 @@ describe('database', () => {
           { lean: true },
         )
 
-        const test = doc.toObject()
-
-        const result = JSON.parse(JSON.stringify(doc))
-        result.id = result._id
+        const result = doc.toObject()
+        result.id = result._id.toString()
         existingDataDoc = result
       }
     })

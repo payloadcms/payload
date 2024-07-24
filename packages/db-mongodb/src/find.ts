@@ -90,8 +90,13 @@ export const find: Find = async function find(
   return {
     ...result,
     docs: result.docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id.toString()
+      if (this.jsonParse) {
+        doc = JSON.parse(JSON.stringify(doc))
+        doc.id = doc._id
+      } else {
+        doc.id = JSON.parse(JSON.stringify(doc._id))
+      }
+
       return sanitizeInternalFields(doc)
     }),
   }

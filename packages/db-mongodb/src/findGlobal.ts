@@ -30,8 +30,13 @@ export const findGlobal: FindGlobal = async function findGlobal(
   if (!doc) {
     return null
   }
+
+  if (this.jsonParse) {
+    doc = JSON.parse(JSON.stringify(doc))
+  }
+
   if (doc._id) {
-    doc.id = doc._id
+    doc.id = JSON.parse(JSON.stringify(doc._id))
     delete doc._id
   }
 

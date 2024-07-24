@@ -1,9 +1,9 @@
 import type { CreateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const createVersion: CreateVersion = async function createVersion(
@@ -60,13 +60,13 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
-  const result: Document = doc.toObject()
+  const result = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc.toObject()
+
   const verificationToken = doc._verificationToken
 
-  // custom id type reset
-  result.id = result._id.toString()
   if (verificationToken) {
     result._verificationToken = verificationToken
   }
-  return result
+
+  return sanitizeInternalFields(result)
 }

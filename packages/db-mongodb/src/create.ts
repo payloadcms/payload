@@ -1,9 +1,10 @@
 import type { Create } from 'payload/database'
-import type { Document, PayloadRequest } from 'payload/types'
+import type { PayloadRequest } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
 import handleError from './utilities/handleError'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const create: Create = async function create(
@@ -19,14 +20,13 @@ export const create: Create = async function create(
     handleError(error, req)
   }
 
-  const result: Document = doc.toObject()
+  const result = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc.toObject()
+
   const verificationToken = doc._verificationToken
 
-  // custom id type reset
-  result.id = result._id.toString()
   if (verificationToken) {
     result._verificationToken = verificationToken
   }
 
-  return result
+  return sanitizeInternalFields(result)
 }

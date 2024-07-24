@@ -29,8 +29,8 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  // custom id type reset
-  doc.id = doc._id.toString()
+  doc = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc
+
   doc = sanitizeInternalFields(doc)
 
   return doc

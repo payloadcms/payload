@@ -102,11 +102,11 @@ export const findVersions: FindVersions = async function findVersions(
 
   const result = await Model.paginate(query, paginationOptions)
 
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
+
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id
+    docs: docs.map((doc) => {
       return sanitizeInternalFields(doc)
     }),
   }

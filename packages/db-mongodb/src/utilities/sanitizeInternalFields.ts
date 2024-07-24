@@ -2,10 +2,10 @@ const internalFields = ['__v']
 
 const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: T): T =>
   Object.entries(incomingDoc).reduce((newDoc, [key, val]): T => {
-    if (key === '_id') {
+    if (key === '_id' || key === 'id') {
       return {
         ...newDoc,
-        id: val,
+        id: JSON.parse(JSON.stringify(val)),
       }
     }
 
