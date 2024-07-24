@@ -1,11 +1,11 @@
 import type { CollectionPermission, GlobalPermission } from '../auth/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Access } from '../config/types.js'
-import type { FieldAccess } from '../fields/config/types.js'
+import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
-import { tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
@@ -122,12 +122,25 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     }
   }
 
-  const executeFieldPolicies = async ({ entityPermission, fields, operation, policiesObj }) => {
+  const executeFieldPolicies = async ({
+    entityPermission,
+    fields,
+    operation,
+    policiesObj,
+  }: {
+    entityPermission: any
+    fields: Field[]
+    operation: AllOperations
+    policiesObj: any
+  }) => {
     const mutablePolicies = policiesObj.fields
+
+    // Fields don't have all operations of a collection
+    if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') return
 
     await Promise.all(
       fields.map(async (field) => {
-        if (field.name) {
+        if (fieldAffectsData(field) && field.name) {
           if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {}
 
           if (field.access && typeof field.access[operation] === 'function') {
@@ -144,7 +157,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             }
           }
 
-          if (field.fields) {
+          if ('fields' in field && field.fields) {
             if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {}
 
             await executeFieldPolicies({
@@ -155,7 +168,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             })
           }
 
-          if (field?.blocks) {
+          if ('blocks' in field && field.blocks) {
             if (!mutablePolicies[field.name]?.blocks) mutablePolicies[field.name].blocks = {}
 
             await Promise.all(
@@ -180,7 +193,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
               }),
             )
           }
-        } else if (field.fields) {
+        } else if ('fields' in field && field.fields) {
           await executeFieldPolicies({
             entityPermission,
             fields: field.fields,
