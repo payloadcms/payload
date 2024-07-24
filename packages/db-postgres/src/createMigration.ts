@@ -1,6 +1,5 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
-import type { CreateMigration, MigrationTemplateArgs } from 'payload'
+import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
 import { createRequire } from 'module'
@@ -11,37 +10,10 @@ import { fileURLToPath } from 'url'
 
 import type { PostgresAdapter } from './types.js'
 
+import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
+import { getMigrationTemplate } from './getMigrationTemplate.js'
+
 const require = createRequire(import.meta.url)
-
-const migrationTemplate = ({
-  downSQL,
-  imports,
-  upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
-${imports ? `${imports}\n` : ''}
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-${upSQL}
-};
-
-export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
-${downSQL}
-};
-`
-
-const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
-  id: '00000000-0000-0000-0000-000000000000',
-  _meta: {
-    columns: {},
-    schemas: {},
-    tables: {},
-  },
-  dialect: 'pg',
-  enums: {},
-  prevId: '00000000-0000-0000-0000-00000000000',
-  schemas: {},
-  tables: {},
-  version: '5',
-})
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
@@ -75,7 +47,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const filePath = `${dir}/${fileName}`
 
-  let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+  let drizzleJsonBefore = defaultDrizzleSnapshot
 
   if (!upSQL) {
     // Get latest migration snapshot
@@ -93,7 +65,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
-    const sqlExecute = 'await payload.db.drizzle.execute(sql`'
+    const sqlExecute = 'await db.execute(sql`'
 
     if (sqlStatementsUp?.length) {
       upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n')}\`)`
@@ -121,15 +93,15 @@ export const createMigration: CreateMigration = async function createMigration(
         process.exit(0)
       }
     }
-  }
 
-  // write schema
-  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+    // write schema
+    fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+  }
 
   // write migration
   fs.writeFileSync(
     `${filePath}.ts`,
-    migrationTemplate({
+    getMigrationTemplate({
       downSQL: downSQL || `  // Migration code`,
       imports,
       upSQL: upSQL || `  // Migration code`,

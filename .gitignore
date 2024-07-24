@@ -22,6 +22,10 @@ meta_shared.json
 # Ignore test directory media folder/files
 /media
 test/media
+*payloadtests.db
+*payloadtests.db-journal
+*payloadtests.db-shm
+*payloadtests.db-wal
 /versions
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode

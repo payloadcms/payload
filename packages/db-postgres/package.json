@@ -40,11 +40,12 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepack": "pnpm clean && pnpm turbo build",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
-    "@libsql/client": "^0.5.2",
+    "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.11.2",
     "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",

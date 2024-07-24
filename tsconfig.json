@@ -86,6 +86,9 @@
       "path": "./packages/db-postgres"
     },
     {
+      "path": "./packages/drizzle"
+    },
+    {
       "path": "./packages/graphql"
     },
     {

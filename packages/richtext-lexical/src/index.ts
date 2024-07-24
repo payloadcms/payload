@@ -463,8 +463,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
-                   
-                  (siblingDocWithLocales[field.name] as unknown as SerializedEditorState)?.root
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root
                     ?.children ?? [],
               })
             }
