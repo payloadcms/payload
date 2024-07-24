@@ -11,6 +11,10 @@ export const cloneDataFromOriginalDoc = (originalDocData: unknown): unknown => {
     })
   }
 
+  if (originalDocData instanceof Date) {
+    return originalDocData
+  }
+
   if (typeof originalDocData === 'object' && originalDocData !== null) {
     return { ...originalDocData }
   }

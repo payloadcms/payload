@@ -19,10 +19,10 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 
   let [result] = (await Model.create([global], options)) as any
 
-  result = JSON.parse(JSON.stringify(result))
+  result = result.toObject()
 
   // custom id type reset
-  result.id = result._id
+  result.id = result._id.toString()
   result = sanitizeInternalFields(result)
 
   return result

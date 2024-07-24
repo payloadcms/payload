@@ -35,7 +35,6 @@ export const findGlobal: FindGlobal = async function findGlobal(
     delete doc._id
   }
 
-  doc = JSON.parse(JSON.stringify(doc))
   doc = sanitizeInternalFields(doc)
 
   return doc

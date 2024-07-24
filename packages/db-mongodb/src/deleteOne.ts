@@ -21,10 +21,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const doc = await Model.findOneAndDelete(query, options).lean()
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  let result: Document = doc.toObject()
 
   // custom id type reset
-  result.id = result._id
+  result.id = result._id.toString()
   result = sanitizeInternalFields(result)
 
   return result

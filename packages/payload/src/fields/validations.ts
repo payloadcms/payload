@@ -209,6 +209,10 @@ export const checkbox: Validate<unknown, unknown, CheckboxField> = (
 }
 
 export const date: Validate<unknown, unknown, DateField> = (value, { required, t }) => {
+  if (value instanceof Date) {
+    return true
+  }
+
   if (value && !isNaN(Date.parse(value.toString()))) {
     /* eslint-disable-line */
     return true

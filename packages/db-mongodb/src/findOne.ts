@@ -1,7 +1,6 @@
 import type { MongooseQueryOptions } from 'mongoose'
 import type { FindOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
@@ -24,17 +23,15 @@ export const findOne: FindOne = async function findOne(
     where,
   })
 
-  const doc = await Model.findOne(query, {}, options)
+  let doc = await Model.findOne(query, {}, options)
 
   if (!doc) {
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
-
   // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  doc.id = doc._id.toString()
+  doc = sanitizeInternalFields(doc)
 
-  return result
+  return doc
 }

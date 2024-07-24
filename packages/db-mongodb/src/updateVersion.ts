@@ -25,12 +25,12 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
-  const result = JSON.parse(JSON.stringify(doc))
+  const result = doc.toObject()
 
   const verificationToken = doc._verificationToken
 
   // custom id type reset
-  result.id = result._id
+  result.id = result._id.toString()
   if (verificationToken) {
     result._verificationToken = verificationToken
   }

@@ -60,11 +60,11 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
+  const result: Document = doc.toObject()
   const verificationToken = doc._verificationToken
 
   // custom id type reset
-  result.id = result._id
+  result.id = result._id.toString()
   if (verificationToken) {
     result._verificationToken = verificationToken
   }

@@ -19,12 +19,11 @@ export const create: Create = async function create(
     handleError(error, req)
   }
 
-  // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
-  const result: Document = JSON.parse(JSON.stringify(doc))
+  const result: Document = doc.toObject()
   const verificationToken = doc._verificationToken
 
   // custom id type reset
-  result.id = result._id
+  result.id = result._id.toString()
   if (verificationToken) {
     result._verificationToken = verificationToken
   }

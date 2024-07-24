@@ -87,15 +87,16 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
-    docs: docs.map((doc) => {
+    docs: result.docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
+      const parent = doc.parent.toString()
+
       doc = {
-        _id: doc.parent,
-        id: doc.parent,
+        _id: parent,
+        id: parent,
         ...doc.version,
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,

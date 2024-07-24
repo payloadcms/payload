@@ -15,8 +15,8 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     throw new Error('Error: missing MongoDB connection URL.')
   }
 
-  let urlToConnect = this.url
-  let successfulConnectionMessage = 'Connected to MongoDB server successfully!'
+  const urlToConnect = this.url
+  const successfulConnectionMessage = 'Connected to MongoDB server successfully!'
 
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
@@ -24,29 +24,29 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     useFacet: undefined,
   }
 
-  if (process.env.NODE_ENV === 'test') {
-    if (process.env.PAYLOAD_TEST_MONGO_URL) {
-      urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
-    } else {
-      connectionOptions.dbName = 'payloadmemory'
-      const { MongoMemoryReplSet } = require('mongodb-memory-server')
-      const getPort = require('get-port')
+  // if (process.env.NODE_ENV === 'test') {
+  //   if (process.env.PAYLOAD_TEST_MONGO_URL) {
+  //     urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
+  //   } else {
+  //     connectionOptions.dbName = 'payloadmemory'
+  //     const { MongoMemoryReplSet } = require('mongodb-memory-server')
+  //     const getPort = require('get-port')
 
-      const port = await getPort()
-      this.mongoMemoryServer = await MongoMemoryReplSet.create({
-        instance: {
-          dbName: 'payloadmemory',
-          port,
-        },
-        replSet: {
-          count: 3,
-        },
-      })
+  //     const port = await getPort()
+  //     this.mongoMemoryServer = await MongoMemoryReplSet.create({
+  //       instance: {
+  //         dbName: 'payloadmemory',
+  //         port,
+  //       },
+  //       replSet: {
+  //         count: 3,
+  //       },
+  //     })
 
-      urlToConnect = this.mongoMemoryServer.getUri()
-      successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
-    }
-  }
+  //     urlToConnect = this.mongoMemoryServer.getUri()
+  //     successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
+  //   }
+  // }
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
