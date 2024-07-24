@@ -187,6 +187,8 @@ const createDatabaseTestConfig = async () => {
     configWithDefaults.db = mongooseAdapter({
       migrationDir,
       url: 'mongodb://127.0.0.1/payloadtests',
+      // Disable JSON parsing to retain existing data shape(s)
+      jsonParse: false,
       // Disable strict mode for Mongoose
       schemaOptions: {
         strict: false,

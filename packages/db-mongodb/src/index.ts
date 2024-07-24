@@ -56,6 +56,7 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   /** Define Mongoose options for the globals collection.
@@ -63,6 +64,8 @@ export interface Args {
   globals?: {
     schemaOptions?: SchemaOptions
   }
+  /** Set to false to disable the automatic JSON stringify/parse of data queried by MongoDB. For example, if you have data not tracked by Payload such as `Date` fields and similar, you can use this option to ensure that existing `Date` properties remain as `Date` and not strings. */
+  jsonParse?: boolean
   migrationDir?: string
   /** Define default Mongoose schema options for all schemas created.
    */
@@ -87,6 +90,7 @@ export type MongooseAdapter = BaseDatabaseAdapter &
     globalsOptions: {
       schemaOptions?: SchemaOptions
     }
+    jsonParse: boolean
     mongoMemoryServer: any
     schemaOptions?: SchemaOptions
     sessions: Record<number | string, ClientSession>
@@ -114,6 +118,7 @@ declare module 'payload' {
     globalsOptions: {
       schemaOptions?: SchemaOptions
     }
+    jsonParse: boolean
     mongoMemoryServer: any
     schemaOptions?: SchemaOptions
 
@@ -131,6 +136,7 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   globals,
+  jsonParse = true,
   migrationDir: migrationDirArg,
   schemaOptions,
   transactionOptions = {},
@@ -153,6 +159,7 @@ export function mongooseAdapter({
       disableIndexHints,
       globals: undefined,
       globalsOptions: globals || {},
+      jsonParse,
       mongoMemoryServer: undefined,
       schemaOptions: schemaOptions || {},
       sessions: {},

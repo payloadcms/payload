@@ -1,9 +1,10 @@
 import type { Create } from 'payload/database'
-import type { Document, PayloadRequest } from 'payload/types'
+import type { PayloadRequest } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
 import handleError from './utilities/handleError'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const create: Create = async function create(
@@ -19,15 +20,13 @@ export const create: Create = async function create(
     handleError(error, req)
   }
 
-  // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
-  const result: Document = JSON.parse(JSON.stringify(doc))
+  const result = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc.toObject()
+
   const verificationToken = doc._verificationToken
 
-  // custom id type reset
-  result.id = result._id
   if (verificationToken) {
     result._verificationToken = verificationToken
   }
 
-  return result
+  return sanitizeInternalFields(result)
 }

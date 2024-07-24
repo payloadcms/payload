@@ -353,39 +353,45 @@ describe('database', () => {
       if (payload.db.name === 'mongoose') {
         const Model = payload.db.collections['custom-schema']
 
-        const [doc] = await Model.create([
-          {
-            text: 'hello',
-            localizedText: {
-              en: 'goodbye',
+        const [doc] = await Model.create(
+          [
+            {
+              text: 'hello',
+              localizedText: {
+                en: 'goodbye',
+              },
+              noFieldDefined: 'hi',
+              isoDate: new Date('2024-07-24T12:00:00Z'),
+              array: [
+                {
+                  id: uuid(),
+                  noFieldDefined: 'hi',
+                  isoDate: new Date('2024-07-24T12:00:00Z'),
+                  text: 'hello',
+                  localizedText: {
+                    en: 'goodbye',
+                  },
+                },
+              ],
+              blocks: [
+                {
+                  id: uuid(),
+                  blockType: 'block',
+                  noFieldDefined: 'hi',
+                  isoDate: new Date('2024-07-24T12:00:00Z'),
+                  text: 'hello',
+                  localizedText: {
+                    en: 'goodbye',
+                  },
+                },
+              ],
             },
-            noFieldDefined: 'hi',
-            array: [
-              {
-                id: uuid(),
-                noFieldDefined: 'hi',
-                text: 'hello',
-                localizedText: {
-                  en: 'goodbye',
-                },
-              },
-            ],
-            blocks: [
-              {
-                id: uuid(),
-                blockType: 'block',
-                noFieldDefined: 'hi',
-                text: 'hello',
-                localizedText: {
-                  en: 'goodbye',
-                },
-              },
-            ],
-          },
-        ])
+          ],
+          { lean: true },
+        )
 
-        const result = JSON.parse(JSON.stringify(doc))
-        result.id = result._id
+        const result = doc.toObject()
+        result.id = result._id.toString()
         existingDataDoc = result
       }
     })
@@ -406,6 +412,10 @@ describe('database', () => {
         expect(docWithExistingData.noFieldDefined).toStrictEqual('hi')
         expect(docWithExistingData.array[0].noFieldDefined).toStrictEqual('hi')
         expect(docWithExistingData.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        expect(docWithExistingData.isoDate instanceof Date).toBeTruthy()
+        expect(docWithExistingData.array[0].isoDate instanceof Date).toBeTruthy()
+        expect(docWithExistingData.blocks[0].isoDate instanceof Date).toBeTruthy()
       }
     })
 
@@ -447,6 +457,10 @@ describe('database', () => {
         expect(result.noFieldDefined).toStrictEqual('hi')
         expect(result.array[0].noFieldDefined).toStrictEqual('hi')
         expect(result.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        expect(result.isoDate instanceof Date).toBeTruthy()
+        expect(result.array[0].isoDate instanceof Date).toBeTruthy()
+        expect(result.blocks[0].isoDate instanceof Date).toBeTruthy()
       }
     })
   })

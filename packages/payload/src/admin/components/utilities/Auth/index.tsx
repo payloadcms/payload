@@ -71,10 +71,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 
   const setActiveUser = React.useCallback(
-    (user: User | null) => {
-      setUser(user)
-      userIDRef.current = user?.id || null
-      void refreshPermissions()
+    async (userToSet: User | null) => {
+      if ((userIDRef.current && !userToSet?.id) || userToSet?.id) {
+        // refresh on logout and login
+        await refreshPermissions()
+      }
+      userIDRef.current = userToSet?.id || null
+      setUser(userToSet)
     },
     [refreshPermissions],
   )
@@ -129,10 +132,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (request.status === 200) {
               const json = await request.json()
-              setActiveUser(json.user)
+              await setActiveUser(json.user)
               setTokenAndExpiration(json)
             } else {
-              setActiveUser(null)
+              await setActiveUser(null)
               redirectToInactivityRoute()
             }
           } catch (e) {
@@ -165,13 +168,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (request.status === 200) {
           const json = await request.json()
           if (!skipSetUser) {
-            setActiveUser(json.user)
+            await setActiveUser(json.user)
             setTokenAndExpiration(json)
           }
           return json.user
         }
 
-        setActiveUser(null)
+        await setActiveUser(null)
         redirectToInactivityRoute()
         return null
       } catch (e) {
@@ -190,8 +193,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ],
   )
 
-  const logOut = useCallback(() => {
-    setActiveUser(null)
+  const logOut = useCallback(async () => {
+    await setActiveUser(null)
     revokeTokenAndExpire()
     void requests.post(`${serverURL}${api}/${userSlug}/logout`)
   }, [serverURL, api, userSlug, revokeTokenAndExpire, setActiveUser])
@@ -208,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const json = await request.json()
 
         if (json?.user) {
-          setActiveUser(json.user)
+          await setActiveUser(json.user)
           if (json?.token) {
             setTokenAndExpiration(json)
           }
@@ -227,16 +230,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })
           if (autoLoginResult.status === 200) {
             const autoLoginJson = await autoLoginResult.json()
-            setActiveUser(autoLoginJson.user)
+            await setActiveUser(autoLoginJson.user)
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
           } else {
-            setActiveUser(null)
+            await setActiveUser(null)
             revokeTokenAndExpire()
           }
         } else {
-          setActiveUser(null)
+          await setActiveUser(null)
           revokeTokenAndExpire()
         }
       }
@@ -298,8 +301,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(
-        () => {
-          setActiveUser(null)
+        async () => {
+          await setActiveUser(null)
           revokeTokenAndExpire()
           redirectToInactivityRoute()
         },
