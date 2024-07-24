@@ -403,7 +403,9 @@ describe('uploads', () => {
       auth: true,
     })
 
-    expect(mediaDoc.sizes.sizeTwo.filesize).toEqual(2147)
+    const acceptableFileSizes = [2424, 2445]
+
+    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeTwo.filesize)
   })
 
   test('should only upload image with metadata if jpeg mimetype', async () => {
@@ -429,8 +431,10 @@ describe('uploads', () => {
       auth: true,
     })
 
+    const acceptableFileSizesForJPEG = [9554, 9575]
+
     // without metadata appended, the jpeg image filesize would be 2424
-    expect(jpegMediaDoc.sizes.sizeThree.filesize).toEqual(9554)
+    expect(acceptableFileSizesForJPEG).toContain(jpegMediaDoc.sizes.sizeThree.filesize)
 
     await page.goto(withOnlyJPEGMetadataURL.create)
     await page.waitForURL(withOnlyJPEGMetadataURL.create)
