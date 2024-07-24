@@ -15,10 +15,17 @@ a.btn {
   cursor: pointer;
   font-weight: normal;
   text-decoration: none;
-  text-align: center;
   color: inherit;
 
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .btn__icon {
+    width: base(1);
+    height: base(1);
     border: 1px solid;
     border-radius: 100%;
     @include color-svg(currentColor);
@@ -40,21 +47,16 @@ a.btn {
     }
   }
 
-  span {
-    line-height: base(1);
-  }
-
-  span,
-  svg {
-    vertical-align: top;
+  &__label {
+    line-height: base(1.2);
   }
 
   &--size-medium {
-    padding: base(0.5) $baseline;
+    padding: base(0.4) base(0.8);
   }
 
   &--size-small {
-    padding: base(0.25) base(0.5);
+    padding: base(0.2) base(0.4);
   }
 
   &--style-primary {

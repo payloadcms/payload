@@ -3,7 +3,7 @@
 .file-details {
   background: var(--theme-elevation-50);
   border: 1px solid var(--theme-border-color);
-  border-radius: var(--style-radius-s);
+  border-radius: var(--style-radius-m);
   overflow: hidden;
   @include inputShadow;
 
@@ -83,7 +83,7 @@
     cursor: pointer;
     background-color: var(--theme-elevation-150);
     border: none;
-    border-radius: $style-radius-s;
+    border-radius: $style-radius-m;
     padding: base(0.25) base(0.5);
 
     &:hover {

@@ -23,8 +23,8 @@
     @extend %body;
     text-align: left;
     cursor: pointer;
-    border-top-right-radius: $style-radius-s;
-    border-top-left-radius: $style-radius-s;
+    border-top-right-radius: $style-radius-m;
+    border-top-left-radius: $style-radius-m;
     width: 100%;
     color: transparent;
 
@@ -74,8 +74,8 @@
 
   &--collapsed {
     .collapsible__toggle {
-      border-bottom-right-radius: $style-radius-s;
-      border-bottom-left-radius: $style-radius-s;
+      border-bottom-right-radius: $style-radius-m;
+      border-bottom-left-radius: $style-radius-m;
     }
   }
 
@@ -99,8 +99,8 @@
 
   &__content {
     background-color: var(--theme-elevation-0);
-    border-bottom-left-radius: $style-radius-s;
-    border-bottom-right-radius: $style-radius-s;
+    border-bottom-left-radius: $style-radius-m;
+    border-bottom-right-radius: $style-radius-m;
     padding: var(--base);
   }
 
