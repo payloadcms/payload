@@ -74,7 +74,7 @@ export async function buildConfigWithDefaults(
 
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
-    editor: lexicalEditor({
+    /*editor: lexicalEditor({
       features: [
         ParagraphFeature(),
         RelationshipFeature(),
@@ -154,7 +154,8 @@ export async function buildConfigWithDefaults(
           ],
         }),
       ],
-    }),
+    }),*/
+    editor: undefined,
     email: testEmailAdapter,
     endpoints: [localAPIEndpoint, reInitEndpoint],
     secret: 'TEST_SECRET',

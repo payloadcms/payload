@@ -1,9 +1,12 @@
 'use client'
+import type { ComponentImportMap } from 'payload'
+
 import React, { createContext, useCallback, useContext } from 'react'
 
 import type { ComponentMap, FieldMap, MappedField } from './buildComponentMap/types.js'
 
 export type IComponentMapContext = {
+  componentImportMap: ComponentImportMap
   componentMap: ComponentMap
   getComponentMap: (args: {
     collectionSlug?: string
@@ -20,9 +23,10 @@ export type IComponentMapContext = {
 const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
 
 export const ComponentMapProvider: React.FC<{
-  children: React.ReactNode
-  componentMap: ComponentMap
-}> = ({ children, componentMap }) => {
+  readonly children: React.ReactNode
+  readonly componentImportMap: ComponentImportMap
+  readonly componentMap: ComponentMap
+}> = ({ children, componentImportMap, componentMap }) => {
   const getMappedFieldByPath: IComponentMapContext['getMappedFieldByPath'] = useCallback(
     ({ collectionSlug, globalSlug, path }) => {
       let fieldMap: FieldMap
@@ -73,7 +77,13 @@ export const ComponentMapProvider: React.FC<{
 
   return (
     <ComponentMapContext.Provider
-      value={{ componentMap, getComponentMap, getFieldMap, getMappedFieldByPath }}
+      value={{
+        componentImportMap,
+        componentMap,
+        getComponentMap,
+        getFieldMap,
+        getMappedFieldByPath,
+      }}
     >
       {children}
     </ComponentMapContext.Provider>

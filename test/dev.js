@@ -44,4 +44,4 @@ if (args.o) {
 await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
 
 // fetch the admin url to force a render
-fetch(`http://localhost:${process.env.PORT || 3000}/admin`)
+//fetch(`http://localhost:${process.env.PORT || 3000}/admin`) // TODO: Add back

@@ -1,12 +1,13 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
+  ComponentImportMap,
   EditViewProps,
+  ResolvedComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
 } from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
@@ -18,12 +19,14 @@ import type { CollectionComponentMap } from './types.js'
 import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
+import { getComponent } from './getComponent.js'
 
 export const mapCollections = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   WithServerSideProps: WithServerSidePropsPrePopulated
   collections: SanitizedCollectionConfig[]
+  componentImportMap: ComponentImportMap
   config: SanitizedConfig
   i18n: I18nClient
   readOnly?: boolean
@@ -35,6 +38,7 @@ export const mapCollections = (args: {
     DefaultListView,
     WithServerSideProps,
     collections,
+    componentImportMap,
     config,
     i18n,
     i18n: { t },
@@ -54,64 +58,86 @@ export const mapCollections = (args: {
 
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
-    const CustomEditView =
-      typeof editViewFromConfig === 'function'
-        ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' &&
-            isReactComponentOrFunction(editViewFromConfig.Default)
-          ? editViewFromConfig.Default
-          : typeof editViewFromConfig?.Default === 'object' &&
-              'Component' in editViewFromConfig.Default &&
-              isReactComponentOrFunction(editViewFromConfig.Default.Component)
-            ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
-            : undefined
+    let CustomEditView: ResolvedComponent<EditViewProps, EditViewProps> = undefined
+    let CustomListView: ResolvedComponent<any, any> = undefined
 
-    const CustomListView =
-      typeof listViewFromConfig === 'function'
-        ? listViewFromConfig
-        : typeof listViewFromConfig === 'object' &&
-            isReactComponentOrFunction(listViewFromConfig.Component)
-          ? listViewFromConfig.Component
-          : undefined
+    if (editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default) {
+      CustomEditView = getComponent({
+        componentImportMap,
+        payloadComponent: editViewFromConfig.Default,
+      })
+    }
 
-    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
+    if (listViewFromConfig?.Component) {
+      CustomListView = getComponent({
+        componentImportMap,
+        payloadComponent: listViewFromConfig.Component,
+      })
+    }
 
-    const List = CustomListView || DefaultListView
+    const Edit: React.FC<EditViewProps> = CustomEditView?.component || DefaultEditView
 
-    const SaveButtonComponent = collectionConfig?.admin?.components?.edit?.SaveButton
+    const List: React.FC<any> = CustomListView?.component || DefaultListView
 
-    const SaveButton = SaveButtonComponent ? (
+    const SaveButtonComponent = getComponent({
+      componentImportMap,
+      payloadComponent: collectionConfig?.admin?.components?.edit?.SaveButton,
+    })
+
+    const SaveButton = SaveButtonComponent?.component ? (
       <WithServerSideProps Component={SaveButtonComponent} />
     ) : undefined
 
-    const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
+    const SaveDraftButtonComponent = getComponent({
+      componentImportMap,
+      payloadComponent: collectionConfig?.admin?.components?.edit?.SaveDraftButton,
+    })
 
-    const SaveDraftButton = SaveDraftButtonComponent ? (
+    const SaveDraftButton = SaveDraftButtonComponent?.component ? (
       <WithServerSideProps Component={SaveDraftButtonComponent} />
     ) : undefined
 
-    const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
+    const PreviewButtonComponent = getComponent({
+      componentImportMap,
+      payloadComponent: collectionConfig?.admin?.components?.edit?.PreviewButton,
+    })
 
-    const PreviewButton = PreviewButtonComponent ? (
+    const PreviewButton = PreviewButtonComponent?.component ? (
       <WithServerSideProps Component={PreviewButtonComponent} />
     ) : undefined
 
-    const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
+    const PublishButtonComponent = getComponent({
+      componentImportMap,
+      payloadComponent: collectionConfig?.admin?.components?.edit?.PublishButton,
+    })
 
-    const PublishButton = PublishButtonComponent ? (
+    const PublishButton = PublishButtonComponent?.component ? (
       <WithServerSideProps Component={PublishButtonComponent} />
     ) : undefined
 
-    const UploadComponent = collectionConfig?.admin?.components?.edit?.Upload
+    const UploadComponent = getComponent({
+      componentImportMap,
+      payloadComponent: collectionConfig?.admin?.components?.edit?.Upload,
+    })
 
-    const Upload = UploadComponent ? <WithServerSideProps Component={UploadComponent} /> : undefined
+    const Upload = UploadComponent?.component ? (
+      <WithServerSideProps Component={UploadComponent} />
+    ) : undefined
 
     const beforeList = collectionConfig?.admin?.components?.beforeList
 
     const BeforeList =
       (beforeList &&
         Array.isArray(beforeList) &&
-        beforeList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
+        beforeList?.map((Component, i) => (
+          <WithServerSideProps
+            Component={getComponent({
+              componentImportMap,
+              payloadComponent: Component,
+            })}
+            key={i}
+          />
+        ))) ||
       null
 
     const beforeListTable = collectionConfig?.admin?.components?.beforeListTable
@@ -120,7 +146,13 @@ export const mapCollections = (args: {
       (beforeListTable &&
         Array.isArray(beforeListTable) &&
         beforeListTable?.map((Component, i) => (
-          <WithServerSideProps Component={Component} key={i} />
+          <WithServerSideProps
+            Component={getComponent({
+              componentImportMap,
+              payloadComponent: Component,
+            })}
+            key={i}
+          />
         ))) ||
       null
 
@@ -129,7 +161,15 @@ export const mapCollections = (args: {
     const AfterList =
       (afterList &&
         Array.isArray(afterList) &&
-        afterList?.map((Component, i) => <WithServerSideProps Component={Component} key={i} />)) ||
+        afterList?.map((Component, i) => (
+          <WithServerSideProps
+            Component={getComponent({
+              componentImportMap,
+              payloadComponent: Component,
+            })}
+            key={i}
+          />
+        ))) ||
       null
 
     const afterListTable = collectionConfig?.admin?.components?.afterListTable
@@ -138,7 +178,13 @@ export const mapCollections = (args: {
       (afterListTable &&
         Array.isArray(afterListTable) &&
         afterListTable?.map((Component, i) => (
-          <WithServerSideProps Component={Component} key={i} />
+          <WithServerSideProps
+            Component={getComponent({
+              componentImportMap,
+              payloadComponent: Component,
+            })}
+            key={i}
+          />
         ))) ||
       null
 
@@ -159,13 +205,14 @@ export const mapCollections = (args: {
     }
 
     const DescriptionComponent =
-      collectionConfig.admin?.components?.edit?.Description ||
-      (description ? ViewDescription : undefined)
+      getComponent({
+        componentImportMap,
+        payloadComponent: collectionConfig.admin?.components?.edit?.Description,
+      }) || (description ? { component: ViewDescription } : undefined)
 
-    const Description =
-      DescriptionComponent !== undefined ? (
-        <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
-      ) : undefined
+    const Description = DescriptionComponent?.component ? (
+      <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
+    ) : undefined
 
     const componentMap: CollectionComponentMap = {
       AfterList,
@@ -183,9 +230,11 @@ export const mapCollections = (args: {
       actionsMap: mapActions({
         WithServerSideProps,
         collectionConfig,
+        componentImportMap,
       }),
       fieldMap: mapFields({
         WithServerSideProps,
+        componentImportMap,
         config,
         fieldSchema: fields,
         i18n,

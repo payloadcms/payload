@@ -698,6 +698,10 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
+export { generateComponentImportMap } from './bin/generateComponentImportMap/index.js'
+export type { ComponentImportMap } from './bin/generateComponentImportMap/index.js'
+
+export { genComponentImportMapIterateFields } from './bin/generateComponentImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
 export { createClientCollectionConfig } from './collections/config/client.js'
 export type {

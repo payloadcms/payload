@@ -290,12 +290,10 @@ export type CollectionAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?: EditConfig
-      List?:
-        | {
-            Component?: PayloadComponent
-            actions?: CustomComponent[]
-          }
-        | PayloadComponent
+      List?: {
+        Component?: PayloadComponent
+        actions?: CustomComponent[]
+      }
     }
   }
   /** Extension point to add your custom data. Available in server and client. */

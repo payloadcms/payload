@@ -1,5 +1,7 @@
+export { parsePayloadComponent } from '../bin/generateComponentImportMap/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 export { serverProps } from '../config/types.js'
+
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -18,8 +20,8 @@ export {
 } from '../fields/config/types.js'
 
 export * from '../fields/validations.js'
-
 export { validOperators } from '../types/constants.js'
+
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
@@ -29,13 +31,13 @@ export {
   deepCopyObjectComplex,
   deepCopyObjectSimple,
 } from '../utilities/deepCopyObject.js'
-
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
+
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
@@ -63,5 +65,4 @@ export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 
 export { versionDefaults } from '../versions/defaults.js'
-
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

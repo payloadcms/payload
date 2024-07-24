@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   CellComponentProps,
-  CustomComponent,
+  ComponentImportMap,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
@@ -48,6 +48,7 @@ import type {
 import { FieldDescription } from '../../../exports/client/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { HiddenField } from '../../../exports/client/index.js'
+import { getComponent } from './getComponent.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -62,6 +63,7 @@ function generateFieldPath(parentPath, name) {
 
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated
+  componentImportMap: ComponentImportMap
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -75,6 +77,7 @@ export const mapFields = (args: {
 }): FieldMap => {
   const {
     WithServerSideProps,
+    componentImportMap,
     config,
     disableAddingID,
     fieldSchema,
@@ -87,9 +90,15 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: CustomComponent<FieldComponentProps> = field.admin?.components?.Field
+    let CustomFieldComponent = getComponent({
+      componentImportMap,
+      payloadComponent: field.admin?.components?.Field,
+    })
 
-    let CustomCellComponent = field.admin?.components?.Cell
+    let CustomCellComponent = getComponent({
+      componentImportMap,
+      payloadComponent: field.admin?.components?.Cell,
+    })
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
 
@@ -97,7 +106,9 @@ export const mapFields = (args: {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
         if (isHidden) {
           if (CustomFieldComponent) {
-            CustomFieldComponent = HiddenField
+            CustomFieldComponent = {
+              component: HiddenField,
+            }
           }
         }
 
@@ -115,20 +126,31 @@ export const mapFields = (args: {
             Array.isArray(field.admin?.components?.afterInput) && (
               <Fragment>
                 {field.admin.components.afterInput.map((Component, i) => (
-                  <WithServerSideProps Component={Component} key={i} />
+                  <WithServerSideProps
+                    Component={getComponent({
+                      componentImportMap,
+                      payloadComponent: Component,
+                    })}
+                    key={i}
+                  />
                 ))}
               </Fragment>
             )) ||
           null
 
         const BeforeInput =
-          ('admin' in field &&
-            field.admin?.components &&
+          (field?.admin?.components &&
             'beforeInput' in field.admin.components &&
             Array.isArray(field.admin.components.beforeInput) && (
               <Fragment>
                 {field.admin.components.beforeInput.map((Component, i) => (
-                  <WithServerSideProps Component={Component} key={i} />
+                  <WithServerSideProps
+                    Component={getComponent({
+                      componentImportMap,
+                      payloadComponent: Component,
+                    })}
+                    key={i}
+                  />
                 ))}
               </Fragment>
             )) ||
@@ -149,18 +171,18 @@ export const mapFields = (args: {
           schemaPath: path,
         }
 
-        const CustomLabelComponent =
-          ('admin' in field &&
-            field.admin?.components &&
-            'Label' in field.admin.components &&
-            field.admin.components?.Label) ||
-          undefined
+        const CustomLabelComponent = getComponent({
+          componentImportMap,
+          payloadComponent:
+            field?.admin?.components && 'Label' in field.admin.components
+              ? field?.admin?.components?.Label
+              : undefined,
+        })
 
         // If we return undefined here (so if no CUSTOM label component is set), the field client component is responsible for falling back to the default label
-        const CustomLabel =
-          CustomLabelComponent !== undefined ? (
-            <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
-          ) : undefined
+        const CustomLabel = CustomLabelComponent.component ? (
+          <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
+        ) : undefined
 
         let description = undefined
         if (field.admin && 'description' in field.admin) {
@@ -179,39 +201,39 @@ export const mapFields = (args: {
         }
 
         let CustomDescriptionComponent = undefined
-        if (
-          field.admin?.components &&
-          'Description' in field.admin.components &&
-          field.admin.components?.Description
-        ) {
-          CustomDescriptionComponent = field.admin.components.Description
+        if (field.admin?.components && 'Description' in field.admin.components) {
+          CustomDescriptionComponent = getComponent({
+            componentImportMap,
+            payloadComponent: field.admin.components.Description,
+          })
         } else if (description) {
-          CustomDescriptionComponent = FieldDescription
+          CustomDescriptionComponent = {
+            component: FieldDescription,
+          }
         }
 
-        const CustomDescription =
-          CustomDescriptionComponent !== undefined ? (
-            <WithServerSideProps
-              Component={CustomDescriptionComponent}
-              {...(descriptionProps || {})}
-            />
-          ) : undefined
+        const CustomDescription = CustomDescriptionComponent ? (
+          <WithServerSideProps
+            Component={CustomDescriptionComponent}
+            {...(descriptionProps || {})}
+          />
+        ) : undefined
 
         const errorProps = {
           path,
         }
 
         const CustomErrorComponent =
-          ('admin' in field &&
-            field.admin?.components &&
-            'Error' in field.admin.components &&
-            field.admin?.components?.Error) ||
-          undefined
+          field?.admin?.components && 'Error' in field.admin.components
+            ? getComponent({
+                componentImportMap,
+                payloadComponent: field.admin?.components?.Error,
+              })
+            : undefined
 
-        const CustomError =
-          CustomErrorComponent !== undefined ? (
-            <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
-          ) : undefined
+        const CustomError = CustomErrorComponent ? (
+          <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
+        ) : undefined
 
         // These fields are shared across all field types even if they are not used in the default field, as the custom field component can use them
         const baseFieldProps: FormFieldBase = {
@@ -267,7 +289,10 @@ export const mapFields = (args: {
               'RowLabel' in field.admin.components &&
               field.admin.components.RowLabel
             ) {
-              const CustomRowLabelComponent = field.admin.components.RowLabel
+              const CustomRowLabelComponent = getComponent({
+                componentImportMap,
+                payloadComponent: field?.admin?.components?.RowLabel,
+              })
               CustomRowLabel = (
                 <WithServerSideProps Component={CustomRowLabelComponent} {...(labelProps || {})} />
               )
@@ -281,12 +306,14 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 fieldSchema: field.fields,
                 filter,
                 i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
+                // TODO: verify if we need disableAddingID here. If not, explicitly set it
               }),
               isSortable: field.admin?.isSortable,
               labels: field.labels,
@@ -305,12 +332,14 @@ export const mapFields = (args: {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 fieldSchema: block.fields,
                 filter,
                 i18n,
                 parentPath: `${path}.${block.slug}`,
                 readOnly: readOnlyOverride,
+                // TODO: verify if we need disableAddingID here. If not, explicitly set it
               })
 
               const reducedBlock: ReducedBlock = {
@@ -390,7 +419,10 @@ export const mapFields = (args: {
               'RowLabel' in field.admin.components &&
               field?.admin?.components?.RowLabel
             ) {
-              const CustomCollapsibleLabelComponent = field.admin.components.RowLabel
+              const CustomCollapsibleLabelComponent = getComponent({
+                componentImportMap,
+                payloadComponent: field.admin.components.RowLabel,
+              })
               CustomCollapsibleLabel = (
                 <WithServerSideProps
                   Component={CustomCollapsibleLabelComponent}
@@ -406,6 +438,7 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -466,6 +499,7 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -607,11 +641,17 @@ export const mapFields = (args: {
             }
 
             if (RichTextFieldComponent) {
-              CustomFieldComponent = RichTextFieldComponent
+              CustomFieldComponent = getComponent({
+                componentImportMap,
+                payloadComponent: RichTextFieldComponent,
+              })
             }
 
             if (RichTextCellComponent) {
-              CustomCellComponent = RichTextCellComponent
+              CustomCellComponent = getComponent({
+                componentImportMap,
+                payloadComponent: RichTextCellComponent,
+              })
             }
 
             fieldComponentProps = richTextField
@@ -625,6 +665,7 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -647,6 +688,7 @@ export const mapFields = (args: {
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 disableAddingID: true,
                 fieldSchema: tab.fields,
@@ -767,10 +809,10 @@ export const mapFields = (args: {
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
-          CustomCell: CustomCellComponent ? (
+          CustomCell: CustomCellComponent?.component ? (
             <WithServerSideProps Component={CustomCellComponent} {...cellComponentProps} />
           ) : undefined,
-          CustomField: CustomFieldComponent ? (
+          CustomField: CustomFieldComponent?.component ? (
             <WithServerSideProps Component={CustomFieldComponent} {...fieldComponentProps} />
           ) : undefined,
           cellComponentProps,

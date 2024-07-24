@@ -1,3 +1,4 @@
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -15,6 +16,15 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
+  admin: {
+    componentImportMap: {
+      baseDir: path.resolve(dirname),
+    },
+    avatar: {
+      Component: 'collections/Posts/MyAvatar.js#MyAvatar',
+    },
+  },
+  editor: lexicalEditor(),
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

@@ -3,7 +3,12 @@ import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type {
+  Config,
+  PayloadComponent,
+  ResolvedComponent,
+  SanitizedConfig,
+} from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
@@ -185,11 +190,12 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  generateComponentImportMap?: Config['admin']['componentImportMap']['generators'][0]
   generateComponentMap: (args: {
-    WithServerSideProps: PayloadComponent<
-      Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>,
-      Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>
-    >
+    WithServerSideProps: React.FC<{
+      [key: string]: any
+      Component: ResolvedComponent<any, any>
+    }>
     config: SanitizedConfig
     i18n: I18nClient
     schemaPath: string

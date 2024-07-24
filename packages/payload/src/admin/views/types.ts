@@ -11,7 +11,7 @@ export type AdminViewConfig = {
   Component: AdminViewComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
-  path: string
+  path?: string
   sensitive?: boolean
   strict?: boolean
 }
@@ -23,8 +23,6 @@ export type AdminViewProps = {
 }
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>
-
-export type AdminView = AdminViewComponent | AdminViewConfig
 
 export type EditViewProps = {
   collectionSlug?: string

@@ -1,6 +1,6 @@
 import type { InitOptions, Payload, SanitizedConfig } from 'payload'
 
-import { BasePayload } from 'payload'
+import { BasePayload, generateComponentImportMap } from 'payload'
 import WebSocket from 'ws'
 
 let cached: {
@@ -43,6 +43,20 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
       args: ['generate:types'],
       log: false,
     })
+  }
+
+  // Generate component map
+  if (config.admin?.componentImportMap?.autoGenerate !== false) {
+    if (process.env.NEXT_PUBLIC_PAYLOAD_CORE_DEV === 'true') {
+      await generateComponentImportMap(config, {
+        log: true,
+      })
+    } else {
+      void payload.bin({
+        args: ['generate:componentimportmap'],
+        log: false,
+      })
+    }
   }
 
   await payload.db.init()

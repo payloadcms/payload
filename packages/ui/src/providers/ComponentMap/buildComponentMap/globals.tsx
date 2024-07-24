@@ -1,7 +1,12 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  ComponentImportMap,
+  EditViewProps,
+  ResolvedComponent,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
-import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
@@ -13,6 +18,7 @@ import type { GlobalComponentMap } from './types.js'
 import { ViewDescription } from '../../../exports/client/index.js'
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
+import { getComponent } from './getComponent.js'
 
 export const mapGlobals = ({
   args,
@@ -20,6 +26,7 @@ export const mapGlobals = ({
   args: {
     DefaultEditView: React.FC<EditViewProps>
     WithServerSideProps: WithServerSidePropsPrePopulated
+    componentImportMap: ComponentImportMap
     config: SanitizedConfig
     globals: SanitizedGlobalConfig[]
     i18n: I18nClient
@@ -31,6 +38,7 @@ export const mapGlobals = ({
   const {
     DefaultEditView,
     WithServerSideProps,
+    componentImportMap,
     config,
     globals,
     i18n,
@@ -41,45 +49,54 @@ export const mapGlobals = ({
   return globals.reduce((acc, globalConfig) => {
     const { slug, fields } = globalConfig
 
-    const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
+    const SaveButton = getComponent({
+      componentImportMap,
+      payloadComponent: globalConfig?.admin?.components?.elements?.SaveButton,
+    })
 
-    const SaveButton = globalConfig?.admin?.components?.elements?.SaveButton
-
-    const SaveButtonComponent = SaveButton ? (
+    const SaveButtonComponent = SaveButton?.component ? (
       <WithServerSideProps Component={SaveButton} />
     ) : undefined
 
-    const SaveDraftButton = globalConfig?.admin?.components?.elements?.SaveDraftButton
+    const SaveDraftButton = getComponent({
+      componentImportMap,
+      payloadComponent: globalConfig?.admin?.components?.elements?.SaveDraftButton,
+    })
 
-    const SaveDraftButtonComponent = SaveDraftButton ? (
+    const SaveDraftButtonComponent = SaveDraftButton?.component ? (
       <WithServerSideProps Component={SaveDraftButton} />
     ) : undefined
 
-    const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
+    const PreviewButton = getComponent({
+      componentImportMap,
+      payloadComponent: globalConfig?.admin?.components?.elements?.PreviewButton,
+    })
 
-    const PreviewButtonComponent = PreviewButton ? (
+    const PreviewButtonComponent = PreviewButton?.component ? (
       <WithServerSideProps Component={PreviewButton} />
     ) : undefined
 
-    const PublishButton = globalConfig?.admin?.components?.elements?.PublishButton
+    const PublishButton = getComponent({
+      componentImportMap,
+      payloadComponent: globalConfig?.admin?.components?.elements?.PublishButton,
+    })
 
-    const PublishButtonComponent = PublishButton ? (
+    const PublishButtonComponent = PublishButton?.component ? (
       <WithServerSideProps Component={PublishButton} />
     ) : undefined
 
-    const CustomEditView =
-      typeof editViewFromConfig === 'function'
-        ? editViewFromConfig
-        : typeof editViewFromConfig === 'object' &&
-            isReactComponentOrFunction(editViewFromConfig.Default)
-          ? editViewFromConfig.Default
-          : typeof editViewFromConfig?.Default === 'object' &&
-              'Component' in editViewFromConfig.Default &&
-              isReactComponentOrFunction(editViewFromConfig.Default.Component)
-            ? editViewFromConfig.Default.Component
-            : undefined
+    const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
-    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
+    let CustomEditView: ResolvedComponent<EditViewProps, EditViewProps> = undefined
+
+    if (editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default) {
+      CustomEditView = getComponent({
+        componentImportMap,
+        payloadComponent: editViewFromConfig.Default,
+      })
+    }
+
+    const Edit: React.FC<EditViewProps> = CustomEditView?.component || DefaultEditView
 
     let description = undefined
     if (globalConfig.admin && 'description' in globalConfig.admin) {
@@ -96,14 +113,16 @@ export const mapGlobals = ({
     const descriptionProps: ViewDescriptionProps = {
       description,
     }
-    const DescriptionComponent =
-      globalConfig.admin?.components?.elements?.Description ||
-      (description ? ViewDescription : undefined)
 
-    const Description =
-      DescriptionComponent !== undefined ? (
-        <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
-      ) : undefined
+    const DescriptionComponent =
+      getComponent({
+        componentImportMap,
+        payloadComponent: globalConfig.admin?.components?.elements?.Description,
+      }) || (description ? { component: ViewDescription } : undefined)
+
+    const Description = DescriptionComponent?.component ? (
+      <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
+    ) : undefined
 
     const componentMap: GlobalComponentMap = {
       Description,
@@ -115,10 +134,12 @@ export const mapGlobals = ({
       Upload: null,
       actionsMap: mapActions({
         WithServerSideProps,
+        componentImportMap,
         globalConfig,
       }),
       fieldMap: mapFields({
         WithServerSideProps,
+        componentImportMap,
         config,
         fieldSchema: fields,
         i18n,

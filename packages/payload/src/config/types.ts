@@ -9,14 +9,18 @@ import type GraphQL from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
-import type { JSX } from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
-import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
+import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
+import type {
+  AddToComponentImportMap,
+  ComponentMap,
+  ImportMap,
+} from '../bin/generateComponentImportMap/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -36,15 +40,15 @@ import type { PayloadLogger } from '../utilities/logger.js'
  * If the path is an empty string, it will be treated as () => null
  */
 export type PayloadComponent<
-  TComponentServerProps extends object = Record<string, any>,
-  TComponentClientProps extends object = Record<string, any>,
+  TComponentServerProps extends never | object = Record<string, any>,
+  TComponentClientProps extends never | object = Record<string, any>,
 > = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
 
 // We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
 // We also NEED to actually use those generics for this to work, thus they are part of the props.
 export type RawPayloadComponent<
-  TComponentServerProps extends object = Record<string, any>,
-  TComponentClientProps extends object = Record<string, any>,
+  TComponentServerProps extends never | object = Record<string, any>,
+  TComponentClientProps extends never | object = Record<string, any>,
 > = {
   clientProps?: TComponentClientProps | object
   exportName?: string
@@ -90,6 +94,15 @@ export type PayloadServerReactComponent<TPayloadComponent> =
       ? never
       : React.FC<TComponentServerProps>
     : never
+
+export type ResolvedComponent<
+  TComponentServerProps extends never | object,
+  TComponentClientProps extends never | object,
+> = {
+  clientProps?: TComponentClientProps
+  component: React.FC<TComponentClientProps | TComponentServerProps>
+  serverProps?: TComponentServerProps
+}
 
 export type BinScriptConfig = {
   key: string
@@ -370,7 +383,7 @@ export type EditViewConfig =
     }
   | {
       Component: EditViewComponent
-      path: string
+      path?: string
     }
   | {
       actions?: CustomComponent[]
@@ -538,9 +551,31 @@ export type Config = {
       | 'default'
       | 'gravatar'
       | {
-          Component: PayloadComponent
+          Component: PayloadComponent<never>
         }
+    componentImportMap?: {
+      /**
+       * Automatically generate component map during development
+       * @default true
+       */
+      autoGenerate?: boolean
 
+      /** The base directory for normal paths */
+      baseDir?: string
+      /**
+       * You can use generators to add custom components to the component import map.
+       * This allows you to import custom components in the admin panel.
+       */
+      generators?: Array<
+        (props: {
+          addToComponentImportMap: AddToComponentImportMap
+          baseDir: string
+          componentMap: ComponentMap
+          config: SanitizedConfig
+          importMap: ImportMap
+        }) => void
+      >
+    }
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -603,11 +638,11 @@ export type Config = {
        */
       views?: {
         /** Add custom admin views */
-        [key: string]: AdminView
+        [key: string]: AdminViewConfig
         /** Replace the account screen */
-        Account?: AdminView
+        Account?: AdminViewConfig
         /** Replace the admin homepage */
-        Dashboard?: AdminView
+        Dashboard?: AdminViewConfig
       }
     }
     /** Extension point to add your custom data. Available in server and client. */
@@ -651,10 +686,6 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs
    */
   collections?: CollectionConfig[]
-  /**
-   * Replace the built-in components with custom ones
-   */
-  components?: { [key: string]: (() => JSX.Element) | JSX.Element }
   /**
    * Prefix a string to all cookies that Payload sets.
    *
@@ -847,38 +878,36 @@ export type SanitizedConfig = {
     adapters: string[]
   } & ExpressFileUploadOptions
 } & Omit<
+  // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
+  // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
+  // the result type is different
   DeepRequired<Config>,
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig =
-  | (
-      | {
-          /**
-           * Replace or modify individual nested routes, or add new ones:
-           * + `Default` - `/admin/collections/:collection/:id`
-           * + `API` - `/admin/collections/:collection/:id/api`
-           * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-           * + `References` - `/admin/collections/:collection/:id/references`
-           * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-           * + `Versions` - `/admin/collections/:collection/:id/versions`
-           * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-           * + `CustomView` - `/admin/collections/:collection/:id/:path`
-           */
-          API?: EditViewComponent | Partial<EditViewConfig>
-          Default?: EditViewComponent | Partial<EditViewConfig>
-          LivePreview?: EditViewComponent | Partial<EditViewConfig>
-          Version?: EditViewComponent | Partial<EditViewConfig>
-          Versions?: EditViewComponent | Partial<EditViewConfig>
-          // TODO: uncomment these as they are built
-          // References?: EditView
-          // Relationships?: EditView
-        }
-      | {
-          [key: string]: EditViewConfig
-        }
-    )
-  | EditViewComponent
+export type EditConfig = {
+  [key: string]: Partial<EditViewConfig>
+  /**
+   * Replace or modify individual nested routes, or add new ones:
+   * + `Default` - `/admin/collections/:collection/:id`
+   * + `API` - `/admin/collections/:collection/:id/api`
+   * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+   * + `References` - `/admin/collections/:collection/:id/references`
+   * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+   * + `Versions` - `/admin/collections/:collection/:id/versions`
+   * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+   * + `CustomView` - `/admin/collections/:collection/:id/:path`
+   */
+  API?: Partial<EditViewConfig>
+  Default?: Partial<EditViewConfig>
+  LivePreview?: Partial<EditViewConfig>
+  Version?: Partial<EditViewConfig>
+  Versions?: Partial<EditViewConfig>
+
+  // TODO: uncomment these as they are built
+  // References?: EditView
+  // Relationships?: EditView
+}
 
 export type EntityDescriptionComponent = CustomComponent
 
