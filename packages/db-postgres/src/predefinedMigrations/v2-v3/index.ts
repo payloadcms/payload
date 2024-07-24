@@ -79,7 +79,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(addColumnsStatement)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(addColumnsStatement))
 
   for (const collection of payload.config.collections) {
@@ -235,7 +234,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(addConstraintsStatement)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(addConstraintsStatement))
 
   // NOT NULL
@@ -246,7 +244,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(notNullStatements)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(notNullStatements))
 
   // DROP TABLE
@@ -257,7 +254,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(dropTablesStatement)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(dropTablesStatement))
 
   // DROP CONSTRAINT
@@ -268,7 +264,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(dropConstraintsStatement)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(dropConstraintsStatement))
 
   // DROP COLUMN
@@ -279,6 +274,5 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info(dropColumnsStatement)
   }
 
-  // @ts-expect-error drizzle-orm confusing libsql and pgsql types
   await db.execute(sql.raw(dropColumnsStatement))
 }

@@ -67,7 +67,6 @@ export const fetchAndResave = async ({
           try {
             await upsertRow({
               id: doc.id,
-              // @ts-expect-error adapter is a PostgresAdapter that implements DrizzleAdapter
               adapter,
               data: doc,
               db,
@@ -117,7 +116,6 @@ export const fetchAndResave = async ({
           try {
             await upsertRow({
               id: doc.id,
-              // @ts-expect-error adapter is a PostgresAdapter that implements DrizzleAdapter
               adapter,
               data: doc,
               db,
@@ -174,7 +172,6 @@ export const fetchAndResave = async ({
             try {
               await upsertRow({
                 id: doc.id,
-                // @ts-expect-error adapter is a PostgresAdapter that implements DrizzleAdapter
                 adapter,
                 data: doc,
                 db,
@@ -215,7 +212,6 @@ export const fetchAndResave = async ({
 
           try {
             await upsertRow({
-              // @ts-expect-error adapter is a PostgresAdapter that implements DrizzleAdapter
               adapter,
               data: doc,
               db,

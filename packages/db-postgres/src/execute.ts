@@ -6,10 +6,8 @@ export const execute: Execute<any> = function execute({ db, drizzle, raw, sql: s
   const executeFrom = db ?? drizzle
 
   if (raw) {
-    // @ts-expect-error drizzle-orm confusing libsql and pgsql types
     return executeFrom.execute(sql.raw(raw))
   } else {
-    // @ts-expect-error drizzle-orm confusing libsql and pgsql types
     return executeFrom.execute(sql`${statement}`)
   }
 }

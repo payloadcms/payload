@@ -15,7 +15,6 @@ export const insert: Insert = async function insert({
     result = await (db as TransactionPg)
       .insert(table)
       .values(values)
-      // @ts-expect-error drizzle-orm confusing libsql and pgsql types
       .onConflictDoUpdate(onConflictDoUpdate)
       .returning()
   } else {
