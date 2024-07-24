@@ -13,6 +13,8 @@
   &__add-button,
   &__add-button.doc-drawer__toggler {
     @include formInput;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
     position: relative;
     height: 100%;
     margin-left: -1px;
