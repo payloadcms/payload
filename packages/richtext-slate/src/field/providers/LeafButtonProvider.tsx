@@ -1,13 +1,13 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 
 import React from 'react'
 
 type LeafButtonContextType = {
-  fieldProps: FormFieldBase & {
+  fieldProps: {
     name: string
-  }
+  } & FormFieldBase
   path: string
   schemaPath: string
 }
@@ -19,9 +19,9 @@ const LeafButtonContext = React.createContext<LeafButtonContextType>({
 })
 
 export const LeafButtonProvider: React.FC<
-  LeafButtonContextType & {
+  {
     children: React.ReactNode
-  }
+  } & LeafButtonContextType
 > = (props) => {
   const { children, ...rest } = props
 

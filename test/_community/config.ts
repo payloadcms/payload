@@ -1,10 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
-import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+// import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 const filename = fileURLToPath(import.meta.url)
@@ -16,11 +15,66 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
-  // globals: [
-  //   MenuGlobal,
-  //   // ...add more globals here
-  // ],
   cors: ['http://localhost:3000', 'http://localhost:3001'],
+  globals: [
+    MenuGlobal,
+    {
+      slug: 'custom-ts',
+      fields: [
+        {
+          name: 'custom',
+          type: 'text',
+          typescriptSchema: [
+            () => ({
+              enum: ['hello', 'world'],
+            }),
+          ],
+        },
+        {
+          name: 'withDefinitionsUsage',
+          type: 'text',
+          typescriptSchema: [
+            () => ({
+              type: 'array',
+              items: {
+                $ref: `#/definitions/objectWithNumber`,
+              },
+            }),
+          ],
+        },
+        {
+          name: 'json',
+          type: 'json',
+          jsonSchema: {
+            fileMatch: ['a://b/foo.json'],
+            schema: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                  age: {
+                    type: 'integer',
+                  },
+                  // Add other properties here
+                },
+                required: ['id', 'name'], // Specify which properties are required
+              },
+            },
+            uri: 'a://b/foo.json',
+          },
+          required: true,
+        },
+      ],
+    },
+    // ...add more globals here
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -46,5 +100,24 @@ export default buildConfigWithDefaults({
     //   data: {},
     //   file: imageFile,
     // })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    schema: [
+      ({ jsonSchema }) => {
+        jsonSchema.definitions.objectWithNumber = {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            id: {
+              type: 'number',
+              required: true,
+            },
+          },
+          required: true,
+        }
+        return jsonSchema
+      },
+    ],
   },
 })

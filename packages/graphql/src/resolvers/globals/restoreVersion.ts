@@ -1,7 +1,6 @@
-import type { Document, PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
+import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 
-import { restoreVersionOperationGlobal } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty, restoreVersionOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -11,7 +10,7 @@ type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
 ) => Promise<Document>
 export default function restoreVersionResolver(globalConfig: SanitizedGlobalConfig): Resolver {

@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { collectionEndpoints } from './endpoints/collections.js'
@@ -15,9 +19,9 @@ export default buildConfigWithDefaults({
     {
       slug: collectionSlug,
       access: {
-        read: () => true,
         create: () => true,
         delete: () => true,
+        read: () => true,
         update: () => true,
       },
       endpoints: collectionEndpoints,
@@ -30,7 +34,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsCollectionSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -38,8 +41,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
+  endpoints,
   globals: [
     {
       slug: globalSlug,
@@ -48,7 +53,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsGlobalSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -56,9 +60,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
-  endpoints,
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -67,5 +71,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

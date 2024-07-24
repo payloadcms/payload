@@ -1,10 +1,11 @@
-import type { FieldWithPath } from 'payload/types'
+'use client'
+import type { FieldWithPath } from 'payload'
 
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, type JSX, useState } from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -18,7 +19,7 @@ export type FieldSelectProps = {
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const combineLabel = ({
+export const combineLabel = ({
   customLabel,
   field,
   prefix,
@@ -34,8 +35,11 @@ const combineLabel = ({
       ? field.fieldComponentProps.CustomLabel
       : null
   const DefaultLabelToRender =
-    field && 'labelProps' in field.fieldComponentProps && field.fieldComponentProps.labelProps ? (
-      <FieldLabel {...field.fieldComponentProps.labelProps} />
+    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label ? (
+      <FieldLabel
+        label={field.fieldComponentProps.label}
+        {...(field.fieldComponentProps.labelProps || {})}
+      />
     ) : null
 
   const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel

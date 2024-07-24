@@ -2,8 +2,12 @@ import crypto from 'crypto'
 import httpStatus from 'http-status'
 import { URL } from 'url'
 
-import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
@@ -11,22 +15,39 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: {
     [key: string]: unknown
-    email: string
-  }
+  } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export type Result = string
 
-export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
-  if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<null | string> => {
+  const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
+  const { data } = incomingArgs
+
+  const canLoginWithUsername = Boolean(loginWithUsername)
+  const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+
+  const sanitizedEmail =
+    (canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()) || null
+  const sanitizedUsername =
+    'username' in data && typeof data?.username === 'string'
+      ? data.username.toLowerCase().trim()
+      : null
+
+  if (!sanitizedEmail && !sanitizedUsername) {
+    throw new APIError(
+      `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   let args = incomingArgs
@@ -68,21 +89,40 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     let token: string = crypto.randomBytes(20).toString('hex')
-
     type UserDoc = {
+      email?: string
       id: number | string
       resetPasswordExpiration?: string
       resetPasswordToken?: string
     }
 
-    if (!data.email) {
-      throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
+    if (!sanitizedEmail && !sanitizedUsername) {
+      throw new APIError(
+        `Missing ${loginWithUsername ? 'username' : 'email'}.`,
+        httpStatus.BAD_REQUEST,
+      )
+    }
+
+    let whereConstraint: Where = {}
+
+    if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = {
+        email: {
+          equals: sanitizedEmail,
+        },
+      }
+    } else if (canLoginWithUsername && sanitizedUsername) {
+      whereConstraint = {
+        username: {
+          equals: sanitizedUsername,
+        },
+      }
     }
 
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: data.email.toLowerCase() } },
+      where: whereConstraint,
     })
 
     // We don't want to indicate specifically that an email was not found,
@@ -100,17 +140,15 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
       req,
     })
 
-    if (!disableEmail) {
-      const protocol = new URL(req.url).protocol
+    if (!disableEmail && user.email) {
+      const protocol = new URL(req.url).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
-          : `${protocol}://${req.headers.get('host')}`
+          : `${protocol}//${req.headers.get('host')}`
 
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}/reset/${token}">
-     ${serverURL}${config.routes.admin}/reset/${token}
-    </a>
+    <a href="${serverURL}${config.routes.admin}/${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}/${config.admin.routes.reset}/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
@@ -131,12 +169,11 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
         })
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      email.sendEmail({
+      await email.sendEmail({
         from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
         html,
         subject,
-        to: data.email,
+        to: user.email,
       })
     }
 

@@ -1,7 +1,9 @@
 'use client'
 
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useEffect, useState } from 'react'
+
+import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 
 import { Pill } from './Pill.js'
 
@@ -19,7 +21,7 @@ export const LengthIndicator: React.FC<{
 
   const [label, setLabel] = useState('')
   const [barWidth, setBarWidth] = useState<number>(0)
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   useEffect(() => {
     const textLength = text?.length || 0

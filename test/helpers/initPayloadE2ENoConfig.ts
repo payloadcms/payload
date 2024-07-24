@@ -2,9 +2,8 @@ import { createServer } from 'http'
 import nextImport from 'next'
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
-import { wait } from 'payload/utilities'
-import { parse } from 'url'
-import { fileURLToPath } from 'url'
+import { wait } from 'payload/shared'
+import { fileURLToPath, parse } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 
@@ -40,7 +39,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
-  const dir = getNextJSRootDir(testSuiteName)
+  const { rootDir } = getNextJSRootDir(testSuiteName)
 
   if (prebuild) {
     await new Promise<void>((res, rej) => {
@@ -51,7 +50,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
         env: {
           PATH: process.env.PATH,
           NODE_ENV: 'production',
-          NEXTJS_DIR: dir,
+          NEXTJS_DIR: rootDir,
         },
       })
 
@@ -69,7 +68,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
     dev: !prebuild,
     hostname: 'localhost',
     port,
-    dir,
+    dir: rootDir,
   })
 
   const handle = app.getRequestHandler()

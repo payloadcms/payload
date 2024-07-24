@@ -1,4 +1,8 @@
-import searchPlugin from '@payloadcms/plugin-search'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { searchPlugin } from '@payloadcms/plugin-search'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -27,27 +31,39 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     searchPlugin({
-      beforeSync: ({ originalDoc, searchDoc }) => ({
-        ...searchDoc,
-        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
-      }),
+      beforeSync: ({ originalDoc, searchDoc }) => {
+        return {
+          ...searchDoc,
+          excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
+          slug: originalDoc.slug,
+        }
+      },
       collections: ['pages', 'posts'],
       defaultPriorities: {
         pages: 10,
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
       },
       searchOverrides: {
-        fields: [
+        fields: ({ defaultFields }) => [
+          ...defaultFields,
           {
             name: 'excerpt',
-            type: 'text',
+            type: 'textarea',
             admin: {
-              readOnly: true,
+              position: 'sidebar',
             },
-            label: 'Excerpt',
+          },
+          {
+            name: 'slug',
+            required: false,
+            type: 'text',
+            localized: true,
           },
         ],
       },
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

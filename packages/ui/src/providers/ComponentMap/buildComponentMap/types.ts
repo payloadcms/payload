@@ -1,12 +1,12 @@
-import type { HiddenInputFieldProps } from '@payloadcms/ui/fields/HiddenInput'
-import type { FieldTypes } from 'payload/config'
 import type {
+  Block,
   BlockField,
   CellComponentProps,
+  FieldTypes,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
-} from 'payload/types'
+} from 'payload'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
@@ -16,6 +16,7 @@ import type { CollapsibleFieldProps } from '../../../fields/Collapsible/index.js
 import type { DateFieldProps } from '../../../fields/DateTime/index.js'
 import type { EmailFieldProps } from '../../../fields/Email/index.js'
 import type { GroupFieldProps } from '../../../fields/Group/index.js'
+import type { HiddenInputFieldProps } from '../../../fields/Hidden/index.js'
 import type { JSONFieldProps } from '../../../fields/JSON/index.js'
 import type { NumberFieldProps } from '../../../fields/Number/index.js'
 import type { PointFieldProps } from '../../../fields/Point/index.js'
@@ -35,6 +36,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
+  LabelComponent: Block['admin']['components']['Label']
   custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string
@@ -71,6 +73,8 @@ export type MappedField = {
   cellComponentProps: CellComponentProps
   custom?: Record<any, string>
   disableBulkEdit?: boolean
+  disableListColumn?: boolean
+  disableListFilter?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean
@@ -92,13 +96,13 @@ export type ActionMap = {
   List: React.ReactNode[]
 }
 
-export type CollectionComponentMap = ConfigComponentMapBase & {
+export type CollectionComponentMap = {
   AfterList: React.ReactNode
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode
   BeforeListTable: React.ReactNode
   List: React.ReactNode
-}
+} & ConfigComponentMapBase
 
 export type GlobalComponentMap = ConfigComponentMapBase
 
@@ -109,6 +113,7 @@ export type ConfigComponentMapBase = {
   PublishButton: React.ReactNode
   SaveButton: React.ReactNode
   SaveDraftButton: React.ReactNode
+  Upload: React.ReactNode
   actionsMap: ActionMap
   fieldMap: FieldMap
   isPreviewEnabled: boolean

@@ -1,6 +1,6 @@
 'use client'
 
-import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useConfig } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { useParams } from 'next/navigation.js'
 import React from 'react'
@@ -15,7 +15,7 @@ export const CustomTabComponentClient: React.FC<{
   } = useConfig()
   const params = useParams()
 
-  const baseRoute = (params.segments.slice(0, 3) as string[]).join('/')
+  const baseRoute = (params.segments.slice(0, 2) as string[]).join('/')
 
   return <Link href={`${adminRoute}/${baseRoute}${path}`}>Custom Tab Component</Link>
 }

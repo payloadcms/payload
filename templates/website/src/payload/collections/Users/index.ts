@@ -1,20 +1,15 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import { admins } from '../../access/admins'
-import { anyone } from '../../access/anyone'
-import adminsAndUser from './access/adminsAndUser'
-import { checkRole } from './checkRole'
-import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
-import { loginAfterCreate } from './hooks/loginAfterCreate'
+import { authenticated } from '../../access/authenticated'
 
 const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    admin: ({ req: { user } }) => checkRole(['admin'], user),
-    create: anyone,
-    delete: admins,
-    read: adminsAndUser,
-    update: adminsAndUser,
+    admin: authenticated,
+    create: authenticated,
+    delete: authenticated,
+    read: authenticated,
+    update: authenticated,
   },
   admin: {
     defaultColumns: ['name', 'email'],
@@ -26,34 +21,7 @@ const Users: CollectionConfig = {
       name: 'name',
       type: 'text',
     },
-    {
-      name: 'roles',
-      type: 'select',
-      access: {
-        create: admins,
-        read: admins,
-        update: admins,
-      },
-      defaultValue: ['user'],
-      hasMany: true,
-      hooks: {
-        beforeChange: [ensureFirstUserIsAdmin],
-      },
-      options: [
-        {
-          label: 'admin',
-          value: 'admin',
-        },
-        {
-          label: 'user',
-          value: 'user',
-        },
-      ],
-    },
   ],
-  hooks: {
-    afterChange: [loginAfterCreate],
-  },
   timestamps: true,
 }
 

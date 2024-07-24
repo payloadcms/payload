@@ -1,26 +1,15 @@
-import type { Collection } from 'payload/types'
+import type { Collection } from 'payload'
 
-import { extractJWT, generatePayloadCookie } from 'payload/auth'
-import { refreshOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { generatePayloadCookie, isolateObjectProperty, refreshOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
 function refreshResolver(collection: Collection): any {
-  async function resolver(_, args, context: Context) {
-    let token
-
-    token = extractJWT(context.req)
-
-    if (args.token) {
-      token = args.token
-    }
-
+  async function resolver(_, __, context: Context) {
     const options = {
       collection,
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
-      token,
     }
 
     const result = await refreshOperation(options)

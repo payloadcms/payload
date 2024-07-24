@@ -3,9 +3,13 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Collection } from '../config/types.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  RequiredDataFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'
@@ -27,23 +31,23 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
-export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
+export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
   collection: Collection
-  data: DeepPartial<T>
+  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<GeneratedTypes['collections'][TSlug]> => {
+export const updateByIDOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
 
   try {
@@ -130,6 +134,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       context: req.context,
       depth: 0,
       doc: docWithLocales,
+      draft: draftArg,
       fallbackLocale: null,
       global: null,
       locale,
@@ -146,6 +151,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       collection,
       config,
       data,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -170,7 +176,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+    data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -230,7 +236,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+    let result = await beforeChange({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -240,7 +246,11 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       global: null,
       operation: 'update',
       req,
-      skipValidation: Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate &&
+        data._status !== 'published',
     })
 
     // /////////////////////////////////////
@@ -250,7 +260,10 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     const dataToUpdate: Record<string, unknown> = { ...result }
 
     if (shouldSavePassword && typeof password === 'string') {
-      const { hash, salt } = await generatePasswordSaltHash({ password })
+      const { hash, salt } = await generatePasswordSaltHash({
+        collection: collectionConfig,
+        password,
+      })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
       delete dataToUpdate.password
@@ -299,6 +312,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       context: req.context,
       depth,
       doc: result,
+      draft: draftArg,
       fallbackLocale,
       global: null,
       locale,
@@ -327,7 +341,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // afterChange - Fields
     // /////////////////////////////////////
 
-    result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+    result = await afterChange({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -360,7 +374,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'updateByID',

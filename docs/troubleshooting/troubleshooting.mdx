@@ -3,14 +3,14 @@ title: Troubleshooting
 label: Troubleshooting
 order: 10
 desc: Troubleshooting Common Issues in Payload
-keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, express, troubleshooting
+keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs, troubleshooting
 ---
 
 ## Common Issues
 
 ### "Unauthorized, you must be logged in to make this request" when attempting to log in
 
-This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve heck the following settings in your Payload config:
+This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve heck the following settings in your Payload Config:
 
 - CORS - If you are using the '\*', try to explicitly only allow certain domains instead including the one you have specified.
 - CSRF - Do you have this set? if so, make sure your domain is whitelisted within the csrf domains. If not, probably not the issue, but probably can't hurt to whitelist it anyway.

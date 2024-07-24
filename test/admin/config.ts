@@ -1,4 +1,9 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -25,6 +30,8 @@ import { CustomMinimalView } from './components/views/CustomMinimal/index.js'
 import { CustomView } from './components/views/CustomView/index.js'
 import { CustomNestedView } from './components/views/CustomViewNested/index.js'
 import { CustomViewWithParam } from './components/views/CustomViewWithParam/index.js'
+import { default as customFaviconDark } from './custom-favicon-dark.png'
+import { default as customFaviconLight } from './custom-favicon-light.png'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -33,7 +40,12 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { seed } from './seed.js'
-import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
+import {
+  customAdminRoutes,
+  customNestedViewPath,
+  customParamViewPath,
+  customViewPath,
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -74,6 +86,28 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    meta: {
+      description: 'This is a custom meta description',
+      icons: [
+        {
+          type: 'image/png',
+          rel: 'icon',
+          url: customFaviconDark.src,
+        },
+        {
+          type: 'image/png',
+          media: '(prefers-color-scheme: dark)',
+          rel: 'icon',
+          url: customFaviconLight.src,
+        },
+      ],
+      openGraph: {
+        description: 'This is a custom OG description',
+        title: 'This is a custom OG title',
+      },
+      titleSuffix: '- Custom CMS',
+    },
+    routes: customAdminRoutes,
   },
   collections: [
     UploadCollection,
@@ -83,6 +117,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
     CollectionGroup2A,
@@ -133,5 +168,8 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
     }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

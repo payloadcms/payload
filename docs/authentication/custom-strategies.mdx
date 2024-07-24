@@ -1,0 +1,94 @@
+---
+title: Custom Strategies
+label: Custom Strategies
+order: 60
+desc: Create custom authentication strategies to handle everything auth in Payload.
+keywords: authentication, config, configuration, overview, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+<Banner type="warning">
+  This is an advanced feature, so only attempt this if you are an experienced developer. Otherwise,
+  just let Payload's built-in authentication handle user auth for you.
+</Banner>
+
+### Creating a strategy
+
+At the core, a strategy is a way to authenticate a user making a request. As of `3.0` we moved away from [Passport](https://www.passportjs.org) in favor of pulling back the curtain and putting you in full control.
+
+A strategy is made up of the following:
+
+| Parameter                   | Description                                                               |
+| --------------------------- | ------------------------------------------------------------------------- |
+| **`name`** \*               | The name of your strategy                                                 |
+| **`authenticate`**&nbsp;\*  | A function that takes in the parameters below and returns a user or null. |
+
+The `authenticate` function is passed the following arguments:
+
+| Argument            | Description                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| **`headers`** \*    | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
+| **`payload`** \*    | The Payload class. Useful for authenticating the identifiable information against Payload.        |
+| **`isGraphQL`**     | Whether or not the request was made from a GraphQL endpoint. Default is `false`.                  |
+
+
+### Example Strategy
+
+At its core a strategy simply takes information from the incoming request and returns a user. This is exactly how Payload's built-in strategies function.
+
+Your `authenticate` method should return an object containing a Payload user document and any optional headers that you'd like Payload to set for you when we return a response.
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
+    disableLocalStrategy: true,
+    // highlight-start
+    strategies: [
+      {
+        name: 'custom-strategy',
+        authenticate: ({ payload, headers }) => {
+          const usersQuery = await payload.find({
+            collection: 'users',
+            where: {
+              code: {
+                equals: headers.get('code'),
+              },
+              secret: {
+                equals: headers.get('secret'),
+              },
+            },
+          })
+
+          return {
+            // Send the user back to authenticate,
+            // or send null if no user should be authenticated
+            user: usersQuery.docs[0] || null,
+
+            // Optionally, you can return headers
+            // that you'd like Payload to set here when
+            // it returns the response
+            responseHeaders: new Headers({
+              'some-header': 'my header value'
+            })
+          }
+        }
+      }
+    ]
+    // highlight-end
+  },
+  fields: [
+    {
+      name: 'code',
+      type: 'text',
+      index: true,
+      unique: true,
+    },
+    {
+      name: 'secret',
+      type: 'text',
+    },
+  ]
+}
+```

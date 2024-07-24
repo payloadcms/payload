@@ -1,19 +1,18 @@
-import type { DocToSync, SearchConfig, SyncWithSearch } from '../../types.js'
+import type { DocToSync, SyncWithSearch } from '../../types.js'
 
-const syncWithSearch: SyncWithSearch = async (args) => {
+export const syncWithSearch: SyncWithSearch = async (args) => {
   const {
     collection,
     doc,
     operation,
+    pluginConfig,
     req: { payload },
     req,
-    // @ts-expect-error
-    searchConfig,
   } = args
 
   const { id, _status: status, title } = doc || {}
 
-  const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
+  const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = pluginConfig
 
   let dataToSave: DocToSync = {
     doc: {
@@ -24,8 +23,17 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   }
 
   if (typeof beforeSync === 'function') {
+    let docToSyncWith = doc
+    if (payload.config?.localization) {
+      docToSyncWith = await payload.findByID({
+        id,
+        collection,
+        locale: 'all',
+        req,
+      })
+    }
     dataToSave = await beforeSync({
-      originalDoc: doc,
+      originalDoc: docToSyncWith,
       payload,
       req,
       searchDoc: dataToSave,
@@ -159,5 +167,3 @@ const syncWithSearch: SyncWithSearch = async (args) => {
 
   return doc
 }
-
-export default syncWithSearch

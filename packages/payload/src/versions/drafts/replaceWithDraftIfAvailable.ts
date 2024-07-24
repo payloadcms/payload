@@ -2,11 +2,12 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 
@@ -16,7 +17,7 @@ type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
@@ -60,7 +61,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
-  const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
+  const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
@@ -84,7 +85,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     return doc
   }
 
-  draft = JSON.parse(JSON.stringify(draft))
+  draft = deepCopyObjectSimple(draft)
   draft = sanitizeInternalFields(draft)
 
   // Patch globalType onto version doc

@@ -1,70 +1,75 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.18",
+  "version": "3.0.0-beta.68",
   "description": "The officially supported Slate richtext adapter for Payload",
+  "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/richtext-slate"
   },
   "license": "MIT",
-  "homepage": "https://payloadcms.com",
-  "author": "Payload CMS, Inc.",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.tsx",
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
-  "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.0.2",
     "is-hotkey": "0.2.0",
-    "react": "18.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
     "slate-hyperscript": "0.81.3",
     "slate-react": "0.92.0"
   },
   "devDependencies": {
-    "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@types/is-hotkey": "^0.1.10",
     "@types/node": "20.12.5",
-    "@types/react": "18.2.74",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*",
+    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.tsx",
-      "require": "./src/index.tsx",
-      "types": "./src/index.tsx"
-    }
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   },
   "publishConfig": {
     "exports": {
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "engines": {
-    "node": ">=18.20.2"
-  },
-  "files": [
-    "dist"
-  ]
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+  }
 }

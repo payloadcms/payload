@@ -1,12 +1,11 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../../credentials.js'
 import removeFiles from '../../helpers/removeFiles.js'
-import { postsSlug } from '../collections/Posts.js'
-import { pagesSlug, tenantsSlug } from '../shared.js'
+import { pagesSlug, postsSlug, ssrAutosavePagesSlug, ssrPagesSlug, tenantsSlug } from '../shared.js'
 import { footer } from './footer.js'
 import { header } from './header.js'
 import { home } from './home.js'
@@ -107,6 +106,40 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+  })
+
+  await payload.create({
+    collection: ssrPagesSlug,
+    data: {
+      ...JSON.parse(
+        JSON.stringify(home)
+          .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID)
+          .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
+          .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
+          .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
+          .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
+      title: 'SSR Home',
+      slug: 'home',
+    },
+  })
+
+  await payload.create({
+    collection: ssrAutosavePagesSlug,
+    data: {
+      ...JSON.parse(
+        JSON.stringify(home)
+          .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID)
+          .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
+          .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
+          .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
+          .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
+      title: 'SSR Home',
+      slug: 'home',
+    },
   })
 
   await payload.updateGlobal({

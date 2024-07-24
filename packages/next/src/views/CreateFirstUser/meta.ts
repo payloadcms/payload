@@ -5,11 +5,11 @@ import { meta } from '../../utilities/meta.js'
 export const generateCreateFirstUserMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
-}) => {
-  return meta({
-    config,
+}) =>
+  meta({
     description: t('authentication:createFirstUser'),
     keywords: t('general:create'),
+    serverURL: config.serverURL,
     title: t('authentication:createFirstUser'),
+    ...(config.admin.meta || {}),
   })
-}

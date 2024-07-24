@@ -1,20 +1,17 @@
 {
   "name": "template-blank-3.0",
-  "description": "A blank template to get started with Payload 3.0",
   "version": "1.0.0",
+  "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "generate:types": "payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "generate:types": "payload generate:types"
-  },
-  "engines": {
-    "node": ">=18.19.0"
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "beta",
@@ -22,18 +19,32 @@
     "@payloadcms/plugin-cloud": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
-    "next": "^14.3.0-canary.7",
+    "graphql": "^16.8.1",
+    "next": "15.0.0-canary.53",
     "payload": "beta",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.0-rc-6230622a1a-20240610",
+    "react-dom": "^19.0.0-rc-6230622a1a-20240610",
     "sharp": "0.32.6"
   },
   "devDependencies": {
-    "@types/node": "^20.11.25",
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "dotenv": "^16.4.5",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "@types/node": "^20.12.12",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.0-canary.53",
+    "typescript": "5.5.3"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.0",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

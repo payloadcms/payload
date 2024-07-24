@@ -2,14 +2,14 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -17,6 +17,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -31,7 +32,9 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('Array', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({
       dirname,
@@ -40,12 +43,18 @@ describe('Array', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsArrayTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsArrayTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -54,7 +63,7 @@ describe('Array', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
@@ -98,7 +107,7 @@ describe('Array', () => {
     await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: arrayWithMinRows',
     )
   })
@@ -281,7 +290,7 @@ describe('Array', () => {
     await targetInput.fill(bulkText)
 
     await page.locator('#edit-array-fields .form-submit .edit-many__save').click()
-    await expect(page.locator('.Toastify__toast--success')).toContainText(
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 3 Array Fields successfully.',
     )
   })

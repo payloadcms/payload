@@ -1,11 +1,8 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/types'
+import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
@@ -17,21 +14,25 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { FileDetails } from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'upload'
 
-export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
+export type UploadInputProps = {
   api?: string
   collection?: ClientCollectionConfig
+  customUploadActions?: React.ReactNode[]
   filterOptions?: FilterOptionsResult
   onChange?: (e) => void
   relationTo?: UploadField['relationTo']
   serverURL?: string
   showError?: boolean
   value?: string
-}
+} & Omit<UploadFieldProps, 'filterOptions'>
 
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
@@ -41,6 +42,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     api = '/api',
     className,
     collection,
+    customUploadActions,
     descriptionProps,
     errorProps,
     filterOptions,
@@ -133,56 +135,60 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldError CustomError={CustomError} {...(errorProps || {})} />
         <FieldLabel
           CustomLabel={CustomLabel}
           label={label}
           required={required}
           {...(labelProps || {})}
         />
-        {collection?.upload && (
-          <React.Fragment>
-            {fileDoc && !missingFile && (
-              <FileDetails
-                collectionSlug={relationTo}
-                doc={fileDoc}
-                handleRemove={
-                  readOnly
-                    ? undefined
-                    : () => {
-                        onChange(null)
-                      }
-                }
-                uploadConfig={collection.upload}
-              />
-            )}
-            {(!fileDoc || missingFile) && (
-              <div className={`${baseClass}__wrap`}>
-                <div className={`${baseClass}__buttons`}>
-                  <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                      {t('fields:uploadNewLabel', {
-                        label: getTranslation(collection.labels.singular, i18n),
-                      })}
-                    </Button>
-                  </DocumentDrawerToggler>
-                  <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                    <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                      {t('fields:chooseFromExisting')}
-                    </Button>
-                  </ListDrawerToggler>
+        <div className={`${fieldBaseClass}__wrap`}>
+          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+
+          {collection?.upload && (
+            <React.Fragment>
+              {fileDoc && !missingFile && (
+                <FileDetails
+                  collectionSlug={relationTo}
+                  customUploadActions={customUploadActions}
+                  doc={fileDoc}
+                  handleRemove={
+                    readOnly
+                      ? undefined
+                      : () => {
+                          onChange(null)
+                        }
+                  }
+                  uploadConfig={collection.upload}
+                />
+              )}
+              {(!fileDoc || missingFile) && (
+                <div className={`${baseClass}__wrap`}>
+                  <div className={`${baseClass}__buttons`}>
+                    <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                        {t('fields:uploadNewLabel', {
+                          label: getTranslation(collection.labels.singular, i18n),
+                        })}
+                      </Button>
+                    </DocumentDrawerToggler>
+                    <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                        {t('fields:chooseFromExisting')}
+                      </Button>
+                    </ListDrawerToggler>
+                  </div>
                 </div>
-              </div>
-            )}
-            {CustomDescription !== undefined ? (
-              CustomDescription
-            ) : (
-              <FieldDescription {...(descriptionProps || {})} />
-            )}
-          </React.Fragment>
-        )}
-        {!readOnly && <DocumentDrawer onSave={onSave} />}
-        {!readOnly && <ListDrawer onSelect={onSelect} />}
+              )}
+              {CustomDescription !== undefined ? (
+                CustomDescription
+              ) : (
+                <FieldDescription {...(descriptionProps || {})} />
+              )}
+            </React.Fragment>
+          )}
+          {!readOnly && <DocumentDrawer onSave={onSave} />}
+          {!readOnly && <ListDrawer onSelect={onSelect} />}
+        </div>
       </div>
     )
   }

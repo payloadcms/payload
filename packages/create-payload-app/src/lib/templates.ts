@@ -15,10 +15,16 @@ export function validateTemplate(templateName: string): boolean {
 export function getValidTemplates(): ProjectTemplate[] {
   return [
     {
-      name: 'blank-3.0',
+      name: 'blank',
       type: 'starter',
       description: 'Blank 3.0 Template',
       url: 'https://github.com/payloadcms/payload/templates/blank-3.0#beta',
+    },
+    {
+      name: 'website',
+      type: 'starter',
+      description: 'Website Template',
+      url: 'https://github.com/payloadcms/payload/templates/website#beta',
     },
 
     // Remove these until they have been updated for 3.0
@@ -30,23 +36,17 @@ export function getValidTemplates(): ProjectTemplate[] {
     //   url: 'https://github.com/payloadcms/payload/templates/blank',
     // },
     // {
-    //   name: 'website',
-    //   type: 'starter',
-    //   description: 'Website Template',
-    //   url: 'https://github.com/payloadcms/payload/templates/website',
-    // },
-    // {
     //   name: 'ecommerce',
     //   type: 'starter',
     //   description: 'E-commerce Template',
     //   url: 'https://github.com/payloadcms/payload/templates/ecommerce',
     // },
-    {
-      name: 'plugin',
-      type: 'plugin',
-      description: 'Template for creating a Payload plugin',
-      url: 'https://github.com/payloadcms/payload-plugin-template#beta',
-    },
+    // {
+    //   name: 'plugin',
+    //   type: 'plugin',
+    //   description: 'Template for creating a Payload plugin',
+    //   url: 'https://github.com/payloadcms/payload-plugin-template#beta',
+    // },
     // {
     //   name: 'payload-demo',
     //   type: 'starter',

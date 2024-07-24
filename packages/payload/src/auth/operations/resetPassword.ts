@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -25,7 +25,7 @@ export type Arguments = {
   }
   depth?: number
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
@@ -59,7 +59,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: new Date() },
+        resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
     })
@@ -67,7 +67,10 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     if (!user) throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
 
     // TODO: replace this method
-    const { hash, salt } = await generatePasswordSaltHash({ password: data.password })
+    const { hash, salt } = await generatePasswordSaltHash({
+      collection: collectionConfig,
+      password: data.password,
+    })
 
     user.salt = salt
     user.hash = hash
@@ -117,5 +120,3 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     throw error
   }
 }
-
-export default resetPasswordOperation

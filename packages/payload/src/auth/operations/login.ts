@@ -1,8 +1,12 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection } from '../../collections/config/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+  DataFromCollectionSlug,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -24,21 +28,18 @@ export type Result = {
   user?: User
 }
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: {
-    email: string
-    password: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-export const loginOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> => {
+export const loginOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
 
   try {
@@ -80,28 +81,108 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
     // Login
     // /////////////////////////////////////
 
+    let user
     const { email: unsanitizedEmail, password } = data
+    const loginWithUsername = collectionConfig.auth.loginWithUsername
 
-    if (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '') {
-      throw new ValidationError([{ field: 'email', message: req.i18n.t('validation:required') }])
+    const sanitizedEmail =
+      typeof unsanitizedEmail === 'string' ? unsanitizedEmail.toLowerCase().trim() : null
+    const sanitizedUsername =
+      'username' in data && typeof data?.username === 'string'
+        ? data.username.toLowerCase().trim()
+        : null
+
+    const canLoginWithUsername = Boolean(loginWithUsername)
+    const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+
+    // cannot login with email, did not provide username
+    if (!canLoginWithEmail && !sanitizedUsername) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
+      })
     }
+
+    // cannot login with username, did not provide email
+    if (!canLoginWithUsername && !sanitizedEmail) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
+      })
+    }
+
+    // can login with either email or username, did not provide either
+    if (!sanitizedUsername && !sanitizedEmail) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [
+          { field: 'email', message: req.i18n.t('validation:required') },
+          { field: 'username', message: req.i18n.t('validation:required') },
+        ],
+      })
+    }
+
+    // did not provide password for login
     if (typeof password !== 'string' || password.trim() === '') {
-      throw new ValidationError([{ field: 'password', message: req.i18n.t('validation:required') }])
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ field: 'password', message: req.i18n.t('validation:required') }],
+      })
     }
 
-    const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
+    let whereConstraint: Where = {}
+    const emailConstraint: Where = {
+      email: {
+        equals: sanitizedEmail,
+      },
+    }
+    const usernameConstraint: Where = {
+      username: {
+        equals: sanitizedUsername,
+      },
+    }
 
-    let user = await payload.db.findOne<any>({
+    if (canLoginWithEmail && canLoginWithUsername && (sanitizedUsername || sanitizedEmail)) {
+      if (sanitizedUsername) {
+        whereConstraint = {
+          or: [
+            usernameConstraint,
+            {
+              email: {
+                equals: sanitizedUsername,
+              },
+            },
+          ],
+        }
+      } else {
+        whereConstraint = {
+          or: [
+            emailConstraint,
+            {
+              username: {
+                equals: sanitizedEmail,
+              },
+            },
+          ],
+        }
+      }
+    } else if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = emailConstraint
+    } else if (canLoginWithUsername && sanitizedUsername) {
+      whereConstraint = usernameConstraint
+    }
+
+    user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: email.toLowerCase() } },
+      where: whereConstraint,
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t)
+      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
     }
 
-    if (user && isLocked(user.lockUntil)) {
+    if (user && isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
     }
 
@@ -137,9 +218,13 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email,
+      email: sanitizedEmail,
       user,
     })
+
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
 
     await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
       await priorHook
@@ -185,6 +270,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       context: req.context,
       depth,
       doc: user,
+      draft: undefined,
       fallbackLocale,
       global: null,
       locale,
@@ -225,7 +311,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
         })) || user
     }, Promise.resolve())
 
-    let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       exp: (jwt.decode(token) as jwt.JwtPayload).exp,
       token,
       user,
@@ -235,7 +321,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: args.collection?.config,
       operation: 'login',

@@ -1,6 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -15,7 +14,7 @@ type Args = {
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
 }
@@ -101,6 +100,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       context: req.context,
       depth,
       doc,
+      draft: draftEnabled,
       fallbackLocale,
       global: globalConfig,
       locale,

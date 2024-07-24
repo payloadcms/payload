@@ -3,24 +3,11 @@ import type DataLoader from 'dataloader'
 
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
 import type payload from '../index.js'
-import type { GeneratedTypes } from '../index.js'
+import type { TypedLocale, TypedUser } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
-export type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
-}
-
-export type CustomPayloadRequestProperties<U = unknown> = {
+export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
@@ -29,7 +16,7 @@ export type CustomPayloadRequestProperties<U = unknown> = {
    * The requested locale if specified
    * Only available for localized collections
    */
-  locale?: GeneratedTypes['locale']
+  locale?: TypedLocale
   /**
    * The payload object
    */
@@ -44,6 +31,8 @@ export type CustomPayloadRequestProperties<U = unknown> = {
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
   query: Record<string, unknown>
+  /** Any response headers that are required to be set when a response is sent */
+  responseHeaders?: Headers
   /** The route parameters
    * @example
    * /:collection/:id -> /posts/123
@@ -54,22 +43,33 @@ export type CustomPayloadRequestProperties<U = unknown> = {
   t: TFunction
   /**
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   * Can also be used to ensure consistency when multiple operations try to create a transaction concurrently on the same request.
    */
-  transactionID?: number | string
+  transactionID?: Promise<number | string> | number | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
    */
   transactionIDPromise?: Promise<void>
-  /** The signed in user */
-  user: (U & GeneratedTypes['user']) | null
+  /** The signed-in user */
+  user: TypedUser | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
-export type PayloadRequestData = {
-  /** Data from the request body */
-  data?: Record<string, unknown>
-  /** The locale that should be used for a field when it is not translated to the requested locale */
+type PayloadRequestData = {
+  /**
+   * Data from the request body
+   *
+   * Within Payload operations, i.e. hooks, data will be there
+   * BUT in custom endpoints it will not be, you will need to
+   * use either:
+   *  1. `const data = await req.json()`
+   *
+   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *    `await addDataAndFileToRequest(req)`
+   * */
+  data?: JsonObject
+  /** The file on the request, same rules apply as the `data` property */
   file?: {
     data: Buffer
     mimetype: string
@@ -78,18 +78,29 @@ export type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest<U = unknown> = Partial<Request> &
-  Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequestProperties<U>
-export type PayloadRequestWithData<U = unknown> = PayloadRequest<U> & PayloadRequestData
+export type PayloadRequest = CustomPayloadRequestProperties &
+  Partial<Request> &
+  PayloadRequestData &
+  Required<Pick<Request, 'headers'>>
+
 export interface RequestContext {
   [key: string]: unknown
 }
 
 export type Operator = (typeof validOperators)[number]
 
+// Makes it so things like passing new Date() will error
+export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
+
+export interface JsonArray extends Array<JsonValue> {}
+
+export interface JsonObject {
+  [key: string]: JsonValue
+}
+
 export type WhereField = {
-  [key in Operator]?: unknown
+  // any json-serializable value
+  [key in Operator]?: JsonValue
 }
 
 export type Where = {

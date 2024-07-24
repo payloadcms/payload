@@ -6,10 +6,10 @@ import type { SanitizedConfig } from '../config/types.js'
 
 export const getLocalI18n = async ({
   config,
-  language = 'en',
+  language,
 }: {
   config: SanitizedConfig
-  language?: AcceptedLanguages
+  language: AcceptedLanguages
 }) =>
   initI18n({
     config: config.i18n,

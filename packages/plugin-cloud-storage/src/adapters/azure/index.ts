@@ -16,6 +16,11 @@ export interface Args {
   containerName: string
 }
 
+/**
+ * @deprecated Use [`@payloadcms/azure`](https://www.npmjs.com/package/@payloadcms/azure) instead.
+ *
+ * This adapter has been superceded by `@payloadcms/azure` and will be removed in Payload 3.0.
+ */
 export const azureBlobStorageAdapter = ({
   allowContainerCreate,
   baseURL,
@@ -52,6 +57,7 @@ export const azureBlobStorageAdapter = ({
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      name: 'azure',
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({

@@ -1,7 +1,8 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { AdminViewComponent } from 'payload/types'
+import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
-import type { initPage } from '../../utilities/initPage.js'
+import { formatAdminURL } from '@payloadcms/ui/shared'
+
+import type { initPage } from '../../utilities/initPage/index.js'
 
 import { Account } from '../Account/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
@@ -15,20 +16,27 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
+  account: 'account',
   forgot: forgotPasswordBaseClass,
   login: loginBaseClass,
   reset: resetPasswordBaseClass,
   verify: verifyBaseClass,
 }
 
-const oneSegmentViews = {
-  'create-first-user': CreateFirstUserView,
+type OneSegmentViews = {
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: AdminViewComponent
+}
+
+const oneSegmentViews: OneSegmentViews = {
+  account: Account,
+  createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
+  inactivity: LogoutInactivity,
   login: LoginView,
   logout: LogoutView,
-  'logout-inactivity': LogoutInactivity,
   unauthorized: UnauthorizedView,
 }
 
@@ -54,7 +62,7 @@ export const getViewFromConfig = ({
 } => {
   let ViewToRender: AdminViewComponent = null
   let templateClassName: string
-  let templateType: 'default' | 'minimal' = 'minimal'
+  let templateType: 'default' | 'minimal' | undefined
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -78,22 +86,41 @@ export const getViewFromConfig = ({
       break
     }
     case 1: {
-      if (oneSegmentViews[segmentOne] && segmentOne !== 'account') {
+      // users can override the default routes via `admin.routes` config
+      // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
+      let viewToRender: keyof typeof oneSegmentViews
+
+      if (config.admin.routes) {
+        const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
+          return isPathMatchingRoute({
+            currentRoute,
+            exact: true,
+            path: formatAdminURL({ adminRoute, path: route }),
+          })
+        })
+
+        if (matchedRoute) {
+          viewToRender = matchedRoute[0] as keyof typeof oneSegmentViews
+        }
+      }
+
+      if (oneSegmentViews[viewToRender]) {
+        // --> /account
         // --> /create-first-user
         // --> /forgot
         // --> /login
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
-        ViewToRender = oneSegmentViews[segmentOne]
-        templateClassName = baseClasses[segmentOne]
+
+        ViewToRender = oneSegmentViews[viewToRender]
+        templateClassName = baseClasses[viewToRender]
         templateType = 'minimal'
-      } else if (segmentOne === 'account') {
-        // --> /account
-        initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = Account
-        templateClassName = 'account'
-        templateType = 'default'
+
+        if (viewToRender === 'account') {
+          initPageOptions.redirectUnauthenticatedUser = true
+          templateType = 'default'
+        }
       }
       break
     }

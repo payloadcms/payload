@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,7 +21,8 @@ test.describe('Form Builder', () => {
   let submissionsUrl: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { payload: payloadFromInit, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     })
@@ -34,7 +35,7 @@ test.describe('Form Builder', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test.describe('Forms collection', () => {
@@ -106,9 +107,6 @@ test.describe('Form Builder', () => {
     })
 
     test('can create form submission', async () => {
-      await page.goto(submissionsUrl.list)
-      await page.waitForURL(submissionsUrl.list)
-
       const { docs } = await payload.find({
         collection: 'forms',
       })

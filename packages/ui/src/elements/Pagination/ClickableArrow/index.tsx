@@ -1,6 +1,7 @@
+'use client'
 import React from 'react'
 
-import { Chevron } from '../../../icons/Chevron/index.js'
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import './index.scss'
 
 const baseClass = 'clickable-arrow'
@@ -29,7 +30,7 @@ export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
       onClick={!isDisabled ? updatePage : undefined}
       type="button"
     >
-      <Chevron />
+      <ChevronIcon />
     </button>
   )
 }

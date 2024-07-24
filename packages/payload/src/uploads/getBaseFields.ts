@@ -129,12 +129,15 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       ...url,
       hooks: {
         afterRead: [
-          ({ data }) =>
-            generateURL({
+          ({ data, value }) => {
+            if (value && !data.filename) return value
+
+            return generateURL({
               collectionSlug: collection.slug,
               config,
               filename: data?.filename,
-            }),
+            })
+          },
         ],
       },
     },
@@ -145,6 +148,25 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     width,
     height,
   ]
+
+  // Add focal point fields if not disabled
+  if (
+    uploadOptions.focalPoint !== false ||
+    uploadOptions.imageSizes ||
+    uploadOptions.resizeOptions
+  ) {
+    uploadFields = uploadFields.concat(
+      ['focalX', 'focalY'].map((name) => {
+        return {
+          name,
+          type: 'number',
+          admin: {
+            hidden: true,
+          },
+        }
+      }),
+    )
+  }
 
   if (uploadOptions.mimeTypes) {
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
@@ -169,7 +191,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...url,
               hooks: {
                 afterRead: [
-                  ({ data }) => {
+                  ({ data, value }) => {
+                    if (value && size.height && size.width && !data.filename) return value
+
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
@@ -192,7 +216,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           ],
           label: size.name,
         })),
-        label: ({ t }) => t('upload:Sizes'),
+        label: ({ t }) => t('upload:sizes'),
       },
     ])
   }

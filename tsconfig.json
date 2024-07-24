@@ -45,35 +45,14 @@
       "@payloadcms/live-preview-react": [
         "./packages/live-preview-react/src/index.ts"
       ],
-      "@payloadcms/ui/assets": [
-        "./packages/ui/src/assets/index.ts"
+      "@payloadcms/live-preview-vue": [
+        "./packages/live-preview-vue/src/index.ts"
       ],
-      "@payloadcms/ui/elements/*": [
-        "./packages/ui/src/elements/*/index.tsx"
+      "@payloadcms/ui": [
+        "./packages/ui/src/exports/client/index.ts"
       ],
-      "@payloadcms/ui/fields/*": [
-        "./packages/ui/src/fields/*/index.tsx"
-      ],
-      "@payloadcms/ui/forms/*": [
-        "./packages/ui/src/forms/*/index.tsx"
-      ],
-      "@payloadcms/ui/graphics/*": [
-        "./packages/ui/src/graphics/*/index.tsx"
-      ],
-      "@payloadcms/ui/hooks/*": [
-        "./packages/ui/src/hooks/*.ts"
-      ],
-      "@payloadcms/ui/icons/*": [
-        "./packages/ui/src/icons/*/index.tsx"
-      ],
-      "@payloadcms/ui/providers/*": [
-        "./packages/ui/src/providers/*/index.tsx"
-      ],
-      "@payloadcms/ui/templates/*": [
-        "./packages/ui/src/templates/*/index.tsx"
-      ],
-      "@payloadcms/ui/utilities/*": [
-        "./packages/ui/src/utilities/*.ts"
+      "@payloadcms/ui/shared": [
+        "./packages/ui/src/exports/shared/index.ts"
       ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"
@@ -98,10 +77,16 @@
   "composite": true,
   "references": [
     {
+      "path": "./packages/create-payload-app"
+    },
+    {
       "path": "./packages/db-mongodb"
     },
     {
       "path": "./packages/db-postgres"
+    },
+    {
+      "path": "./packages/drizzle"
     },
     {
       "path": "./packages/graphql"
@@ -111,6 +96,9 @@
     },
     {
       "path": "./packages/live-preview-react"
+    },
+    {
+      "path": "./packages/live-preview-vue"
     },
     {
       "path": "./packages/next"

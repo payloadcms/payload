@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { User } from 'payload/auth'
+import type { Payload, User } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import { v4 as uuid } from 'uuid'
@@ -73,9 +72,9 @@ describe('Auth', () => {
     it('should prevent registering a new first user', async () => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
+          'confirm-password': password,
           email,
           password,
-          'confirm-password': password,
         }),
       })
 
@@ -135,6 +134,8 @@ describe('Auth', () => {
 
         const data = await response.json()
 
+        expect(data.strategy).toBeDefined()
+        expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
       })
@@ -459,17 +460,50 @@ describe('Auth', () => {
           await tryLogin()
           await tryLogin()
 
-          await payload.update({
+          const loginAfterLimit = await restClient
+            .POST(`/${slug}/login`, {
+              body: JSON.stringify({
+                email: userEmail,
+                password,
+              }),
+              headers: {
+                Authorization: `JWT ${token}`,
+                'Content-Type': 'application/json',
+              },
+              method: 'post',
+            })
+            .then((res) => res.json())
+
+          expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
+
+          const lockedUser = await payload.find({
             collection: slug,
-            data: {
-              lockUntil: Date.now() - 605 * 1000,
-            },
+            showHiddenFields: true,
             where: {
               email: {
                 equals: userEmail,
               },
             },
           })
+
+          expect(lockedUser.docs[0].loginAttempts).toBe(2)
+          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+
+          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
+          const userLockElapsed = await payload.update({
+            collection: slug,
+            data: {
+              lockUntil: manuallyReleaseLock,
+            },
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
 
           // login
           await restClient.POST(`/${slug}/login`, {
@@ -729,6 +763,26 @@ describe('Auth', () => {
       })
 
       expect(authenticated.token).toBeTruthy()
+    })
+
+    it('should forget and reset password', async () => {
+      const forgot = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+        },
+      })
+
+      const reset = await payload.resetPassword({
+        collection: 'users',
+        data: {
+          password: 'test',
+          token: forgot,
+        },
+        overrideAccess: true,
+      })
+
+      expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
     })
   })
 })

@@ -1,20 +1,22 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import { initPage } from '../../utilities/initPage.js'
+import { DefaultTemplate } from '../../templates/Default/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
 export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
+  isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
 
@@ -34,11 +36,17 @@ export const RootPage = async ({
   const config = await configPromise
 
   const {
-    admin: { user: userSlug },
+    admin: {
+      routes: { createFirstUser: _createFirstUserRoute },
+      user: userSlug,
+    },
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = `${adminRoute}${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`
+  const currentRoute = formatAdminURL({
+    adminRoute,
+    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+  })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -66,9 +74,16 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const createFirstUserRoute = `${adminRoute}/create-first-user`
+    const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
-    if (!dbHasUser && currentRoute !== createFirstUserRoute) {
+    const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
+    const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
+
+    if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
+      redirect(adminRoute)
+    }
+
+    if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
       redirect(createFirstUserRoute)
     }
 
@@ -78,16 +93,40 @@ export const RootPage = async ({
   }
 
   const RenderedView = (
-    <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
+    <WithServerSideProps
+      Component={DefaultView}
+      serverOnlyProps={
+        {
+          initPageResult,
+          params,
+          searchParams,
+        } as any
+      }
+    />
   )
 
   return (
     <Fragment>
+      {!templateType && <Fragment>{RenderedView}</Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
-        <DefaultTemplate config={config} visibleEntities={initPageResult.visibleEntities}>
+        <DefaultTemplate
+          i18n={initPageResult?.req.i18n}
+          locale={initPageResult?.locale}
+          params={params}
+          payload={initPageResult?.req.payload}
+          permissions={initPageResult?.permissions}
+          searchParams={searchParams}
+          user={initPageResult?.req.user}
+          visibleEntities={{
+            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+            // which this caused as soon as initPageResult.visibleEntities is passed in
+            collections: initPageResult.visibleEntities?.collections,
+            globals: initPageResult.visibleEntities?.globals,
+          }}
+        >
           {RenderedView}
         </DefaultTemplate>
       )}

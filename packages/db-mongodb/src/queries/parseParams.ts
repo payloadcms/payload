@@ -1,13 +1,8 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 import type { FilterQuery } from 'mongoose'
-import type { Payload } from 'payload'
-import type { Operator, Where } from 'payload/types'
-import type { Field } from 'payload/types'
+import type { Field, Operator, Payload, Where } from 'payload'
 
-import deepmerge from 'deepmerge'
-import { validOperators } from 'payload/types'
-import { combineMerge } from 'payload/utilities'
+import { deepMergeWithCombinedArrays } from 'payload'
+import { validOperators } from 'payload/shared'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'
@@ -74,7 +69,7 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 }
               } else if (typeof searchParam?.value === 'object') {
-                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge })
+                result = deepMergeWithCombinedArrays(result, searchParam.value)
               }
             }
           }

@@ -8,15 +8,14 @@
       "tsx": true,
       "dts": true
     },
-    "experimental": {
-      "plugins": [
-        [
-          "swc-plugin-transform-remove-imports",
-          {
-            "test": "\\.(scss|css)$"
-          }
-        ]
-      ]
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "pragmaFrag": "React.Fragment",
+        "throwIfNamespace": true,
+        "development": false,
+        "useBuiltins": true
+      }
     }
   },
   "module": {

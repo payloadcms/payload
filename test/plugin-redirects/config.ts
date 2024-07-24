@@ -1,4 +1,8 @@
-import { redirects } from '@payloadcms/plugin-redirects'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -25,8 +29,22 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    redirects({
+    redirectsPlugin({
       collections: ['pages'],
+      overrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              type: 'text',
+              name: 'customField',
+            },
+          ]
+        },
+      },
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

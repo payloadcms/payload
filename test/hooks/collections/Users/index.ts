@@ -1,10 +1,11 @@
-import type { Payload } from 'payload'
-import type { BeforeLoginHook, CollectionConfig } from 'payload/types'
+import type { BeforeLoginHook, CollectionConfig, Payload } from 'payload'
 
-import { AuthenticationError } from 'payload/errors'
+import { AuthenticationError } from 'payload'
 
 import { devUser, regularUser } from '../../../credentials.js'
 import { afterLoginHook } from './afterLoginHook.js'
+import { meHook } from './meHook.js'
+import { refreshHook } from './refreshHook.js'
 
 const beforeLoginHook: BeforeLoginHook = ({ req, user }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined
@@ -46,6 +47,8 @@ const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    me: [meHook],
+    refresh: [refreshHook],
     afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },

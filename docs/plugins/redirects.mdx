@@ -8,7 +8,7 @@ keywords: plugins, redirects, redirect, plugin, payload, cms, seo, indexing, sea
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)](https://www.npmjs.com/package/@payloadcms/plugin-redirects)
 
-This plugin allows you to easily manage redirects for your application from within your admin panel. It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
+This plugin allows you to easily manage redirects for your application from within your [Admin Panel](../admin/overview). It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
 
 For example, if you have a page at `/about` and you want to change it to `/about-us`, you can create a redirect from the old page to the new one, then you can use this data to write HTTP redirects into your front-end application. This will ensure that users are redirected to the correct page without penalty because search engines are notified of the change at the request level. This is a very lightweight plugin that will allow you to integrate managed redirects for any front-end framework.
 
@@ -21,7 +21,7 @@ For example, if you have a page at `/about` and you want to change it to `/about
   with as much detail as possible.
 </Banner>
 
-##### Core features
+## Core features
 
 - Adds a `redirects` collection to your config that:
   - includes a `from` and `to` fields
@@ -32,16 +32,16 @@ For example, if you have a page at `/about` and you want to change it to `/about
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-redirects
+  pnpm add @payloadcms/plugin-redirects
 ```
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
-import { buildConfig } from 'payload/config'
-import redirects from '@payloadcms/plugin-redirects'
+import { buildConfig } from 'payload'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 const config = buildConfig({
   collections: [
@@ -51,7 +51,7 @@ const config = buildConfig({
     },
   ],
   plugins: [
-    redirects({
+    redirectsPlugin({
       collections: ['pages'],
     }),
   ],
@@ -66,6 +66,25 @@ export default config
 | ------------- | ---------- | ----------------------------------------------------------------------------------------------- |
 | `collections` | `string[]` | An array of collection slugs to populate in the `to` field of each redirect.                    |
 | `overrides`   | `object`   | A partial collection config that allows you to override anything on the `redirects` collection. |
+
+Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
+
+```ts
+redirectsPlugin({
+  collections: ['pages'],
+  overrides: {
+    fields: ({ defaultFields }) => {
+      return [
+        ...defaultFields,
+        {
+          type: 'text',
+          name: 'customField',
+        },
+      ]
+    },
+  },
+})
+```
 
 ## TypeScript
 

@@ -1,7 +1,6 @@
-import type { Collection } from 'payload/types'
+import type { Collection } from 'payload'
 
-import { unlockOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { isolateObjectProperty, unlockOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -9,7 +8,7 @@ function unlockResolver(collection: Collection) {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
-      data: { email: args.email },
+      data: { email: args.email, username: args.username },
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 

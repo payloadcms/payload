@@ -1,13 +1,12 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
-import type {} from 'payload/types'
+import type { ClientValidate } from 'payload'
 
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextFieldProps, TextInputProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -18,7 +17,7 @@ import './index.scss'
 
 export { TextFieldProps, TextInput, TextInputProps }
 
-const TextField: React.FC<TextFieldProps> = (props) => {
+const _TextField: React.FC<TextFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -31,6 +30,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     errorProps,
     hasMany,
     inputRef,
+    label,
     labelProps,
     localized,
     maxLength,
@@ -60,12 +60,13 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext || pathFromProps || name,
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -80,7 +81,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!disabled) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -93,7 +94,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [disabled, setValue],
   )
 
   // useEffect update valueToRender:
@@ -127,6 +128,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       errorProps={errorProps}
       hasMany={hasMany}
       inputRef={inputRef}
+      label={label}
       labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
@@ -139,7 +141,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={formProcessing || readOnly}
+      readOnly={disabled}
       required={required}
       rtl={renderRTL}
       showError={showError}
@@ -151,4 +153,4 @@ const TextField: React.FC<TextFieldProps> = (props) => {
   )
 }
 
-export const Text = withCondition(TextField)
+export const TextField = withCondition(_TextField)

@@ -1,15 +1,14 @@
-import type { SanitizedConfig } from 'payload/config'
-import type { Where } from 'payload/types'
-import type { ParsedQs } from 'qs'
+import type { SanitizedConfig, Where } from 'payload'
+import type { ParsedQs } from 'qs-esm'
 
 import {
   REST_DELETE as createDELETE,
   REST_GET as createGET,
+  GRAPHQL_POST as createGraphqlPOST,
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
 } from '@payloadcms/next/routes'
-import { GRAPHQL_POST as createGraphqlPOST } from '@payloadcms/next/routes'
-import QueryString from 'qs'
+import * as qs from 'qs-esm'
 
 import { devUser } from '../credentials.js'
 
@@ -32,7 +31,7 @@ type FileArg = {
 }
 
 function generateQueryString(query: RequestOptions['query'], params: ParsedQs): string {
-  return QueryString.stringify(
+  return qs.stringify(
     {
       ...(params || {}),
       ...(query || {}),
@@ -70,7 +69,7 @@ export class NextRESTClient {
     this._GRAPHQL_POST = createGraphqlPOST(config)
   }
 
-  private buildHeaders(options: RequestInit & RequestOptions & FileArg): Headers {
+  private buildHeaders(options: FileArg & RequestInit & RequestOptions): Headers {
     const defaultHeaders = {
       'Content-Type': 'application/json',
     }
@@ -86,6 +85,9 @@ export class NextRESTClient {
     if (options.auth !== false && this.token) {
       headers.set('Authorization', `JWT ${this.token}`)
     }
+    if (options.auth === false) {
+      headers.set('DisableAutologin', 'true')
+    }
 
     return headers
   }
@@ -99,21 +101,21 @@ export class NextRESTClient {
     const url = `${this.serverURL}${this.config.routes.api}/${slugs}`
 
     return {
-      url,
       slug: slugs.split('/'),
-      params: params ? QueryString.parse(params) : undefined,
+      params: params ? qs.parse(params) : undefined,
+      url,
     }
   }
 
   async DELETE(path: ValidPath, options: RequestInit & RequestOptions = {}): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'DELETE',
       headers: this.buildHeaders(options),
+      method: 'DELETE',
     })
     return this._DELETE(request, { params: { slug } })
   }
@@ -122,14 +124,14 @@ export class NextRESTClient {
     path: ValidPath,
     options: Omit<RequestInit, 'body'> & RequestOptions = {},
   ): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'GET',
       headers: this.buildHeaders(options),
+      method: 'GET',
     })
     return this._GET(request, { params: { slug } })
   }
@@ -141,36 +143,36 @@ export class NextRESTClient {
       `${this.serverURL}${this.config.routes.api}${this.config.routes.graphQL}${queryParams}`,
       {
         ...rest,
-        method: 'POST',
         headers: this.buildHeaders(options),
+        method: 'POST',
       },
     )
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: RequestInit & RequestOptions & FileArg): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+  async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
-      method: 'PATCH',
       headers: this.buildHeaders(options),
+      method: 'PATCH',
     })
     return this._PATCH(request, { params: { slug } })
   }
 
   async POST(
     path: ValidPath,
-    options: RequestInit & RequestOptions & FileArg = {},
+    options: FileArg & RequestInit & RequestOptions = {},
   ): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)
     const request = new Request(`${url}${queryParams}`, {
       ...options,
-      method: 'POST',
       headers: this.buildHeaders(options),
+      method: 'POST',
     })
     return this._POST(request, { params: { slug } })
   }

@@ -1,9 +1,10 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
+
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface BlocksCellProps extends DefaultCellComponentProps<any> {
   blocks: CellComponentProps['blocks']

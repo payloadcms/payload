@@ -32,7 +32,7 @@
   }
 
   .rs__menu {
-    z-index: 2;
+    z-index: 4;
     border-radius: 0;
     @include shadow-lg;
     background: var(--theme-input-bg);
@@ -59,9 +59,16 @@
     }
   }
 
-  &--error {
+  &--error,
+  &--error:hover,
+  &--error:focus-within {
     div.rs__control {
-      background-color: var(--theme-error-100);
+      background-color: var(--theme-error-50);
+      border: 1px solid var(--theme-error-500);
+
+      & > div.rs__indicator > button.dropdown-indicator[type='button'] {
+        border: none;
+      }
     }
   }
 

@@ -19,7 +19,11 @@ export type PackageDetails = {
   version: string
 }
 
+/**
+ * Accepts package whitelist (directory names inside packages dir) and returns details for each package
+ */
 export const getPackageDetails = async (packages: string[]): Promise<PackageDetails[]> => {
+  // Fetch all package.json files, filter out packages not in the whitelist
   const packageJsons = await globby('packages/*/package.json', {
     cwd: projectRoot,
     absolute: true,
@@ -30,6 +34,9 @@ export const getPackageDetails = async (packages: string[]): Promise<PackageDeta
       const packageJson = await fse.readJson(packageJsonPath)
       const isPublic = packageJson.private !== true
       if (!isPublic) return null
+
+      const isInWhitelist = packages.includes(path.basename(path.dirname(packageJsonPath)))
+      if (!isInWhitelist) return null
 
       return {
         name: packageJson.name as string,

@@ -5,7 +5,6 @@ import { Text } from 'slate'
 import { CMSLink } from '../Link/index.js'
 import { Media } from '../Media/index.js'
 
-// eslint-disable-next-line no-use-before-define
 type Children = Leaf[]
 
 type Leaf = {

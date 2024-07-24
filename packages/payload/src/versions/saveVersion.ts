@@ -1,9 +1,9 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
-import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../index.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 
@@ -15,7 +15,7 @@ type Args = {
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
 }
 
 export const saveVersion = async ({
@@ -31,7 +31,7 @@ export const saveVersion = async ({
   let result
   let createNewVersion = true
   const now = new Date().toISOString()
-  const versionData = deepCopyObject(doc)
+  const versionData = deepCopyObjectSimple(doc)
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
 
@@ -130,6 +130,7 @@ export const saveVersion = async ({
       errorMessage = `There was an error while saving a version for the global ${global.label}.`
     payload.logger.error(errorMessage)
     payload.logger.error(err)
+    return
   }
 
   let max = 100

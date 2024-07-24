@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
 
-import { mapAsync } from 'payload/utilities'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+import { getFileByPath, mapAsync } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
@@ -13,6 +15,9 @@ const title = 'title'
 
 let restClient: NextRESTClient
 let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
@@ -960,7 +965,155 @@ describe('collections-graphql', () => {
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          id: newDoc.id,
+          collection: 'cyclical-relationship',
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query {
+          CyclicalRelationships(locale: es) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
     })
+  })
+
+  it('should query correctly with draft argument', async () => {
+    const publishValue = '1'
+    const draftValue = '2'
+
+    // publish doc
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      data: {
+        title: publishValue,
+      },
+      draft: false,
+    })
+
+    // create cyclical relationship
+    await payload.update({
+      id: newDoc.id,
+      collection: 'cyclical-relationship',
+      data: {
+        relationToSelf: newDoc.id,
+      },
+    })
+
+    // save new version
+    await payload.update({
+      id: newDoc.id,
+      collection: 'cyclical-relationship',
+      data: {
+        title: draftValue,
+      },
+      draft: true,
+    })
+
+    const draftParentPublishedChild = `{
+      CyclicalRelationships(draft: true) {
+        docs {
+          title
+          relationToSelf(draft: false) {
+            title
+          }
+        }
+      }
+    }`
+    const res1 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: draftParentPublishedChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc = res1.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc.title).toEqual(draftValue)
+    expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
+
+    const publishedParentDraftChild = `{
+      CyclicalRelationships(draft: false) {
+        docs {
+          title
+          relationToSelf(draft: true) {
+            title
+          }
+        }
+      }
+    }`
+    const res2 = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query: publishedParentDraftChild }),
+      })
+      .then((res) => res.json())
+
+    const queriedDoc2 = res2.data.CyclicalRelationships.docs[0]
+    expect(queriedDoc2.title).toEqual(publishValue)
+    expect(queriedDoc2.relationToSelf.title).toEqual(draftValue)
+  })
+
+  it('should query upload enabled docs', async () => {
+    const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
+
+    const mediaDoc = await payload.create({
+      collection: 'media',
+      data: {
+        title: 'example',
+      },
+      file,
+    })
+
+    // doc with upload relation
+    const newDoc = await payload.create({
+      collection: 'cyclical-relationship',
+      data: {
+        media: mediaDoc.id,
+      },
+    })
+
+    const query = `{
+      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+        media {
+          id
+          title
+        }
+      }
+    }`
+    const res = await restClient
+      .GRAPHQL_POST({
+        body: JSON.stringify({ query }),
+      })
+      .then((res) => res.json())
+    const queriedDoc = res.data.CyclicalRelationship
+    expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+    expect(queriedDoc.media.title).toEqual('example')
   })
 
   describe('Error Handler', () => {
@@ -1032,24 +1185,26 @@ describe('collections-graphql', () => {
       expect(errors[0].message).toEqual('The following field is invalid: password')
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
-      expect(errors[0].extensions.data[0].message).toEqual('No password was given')
-      expect(errors[0].extensions.data[0].field).toEqual('password')
+      expect(errors[0].extensions.data.errors[0].message).toEqual('No password was given')
+      expect(errors[0].extensions.data.errors[0].field).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)
       expect(errors[1].message).toEqual('The following field is invalid: email')
       expect(errors[1].path[0]).toEqual('test3')
       expect(errors[1].extensions.name).toEqual('ValidationError')
-      expect(errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+      expect(errors[1].extensions.data.errors[0].message).toEqual(
+        'A user with the given email is already registered.',
       )
-      expect(errors[1].extensions.data[0].field).toEqual('email')
+      expect(errors[1].extensions.data.errors[0].field).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
       expect(errors[2].message).toEqual('The following field is invalid: email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
-      expect(errors[2].extensions.data[0].message).toEqual('Please enter a valid email address.')
-      expect(errors[2].extensions.data[0].field).toEqual('email')
+      expect(errors[2].extensions.data.errors[0].message).toEqual(
+        'Please enter a valid email address.',
+      )
+      expect(errors[2].extensions.data.errors[0].field).toEqual('email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {

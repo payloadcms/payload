@@ -1,127 +1,88 @@
-import type { Page } from '../payload-types'
+import type { Page } from '../../payload-types'
 
-export const staticHome: Page = {
-  id: '',
+// Used for pre-seeded content so that the homepage is not empty
+// @ts-expect-error
+export const homeStatic: Page = {
   slug: 'home',
-  createdAt: '',
+  _status: 'published',
   hero: {
     type: 'lowImpact',
-    links: null,
-    media: '',
-    richText: [
-      {
-        type: 'h1',
+    richText: {
+      root: {
+        type: 'root',
         children: [
           {
-            text: 'Payload Website Template',
-          },
-        ],
-      },
-      {
-        children: [
-          {
-            text: 'Welcome to your website! ',
-          },
-          {
-            bold: true,
-            text: 'Your database is currently empty.',
-          },
-          {
-            text: ' To seed your database with a few pages, posts, and projects, ',
-          },
-          {
-            type: 'link',
+            type: 'heading',
             children: [
               {
-                text: 'log in to the admin dashboard',
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Payload Website Template',
+                version: 1,
               },
             ],
-            linkType: 'custom',
-            url: '/admin',
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            tag: 'h1',
+            version: 1,
           },
           {
-            text: ' and click "seed your database". If you have already seeded your database, ',
-          },
-          {
-            bold: true,
-            text: 'you may need to hard refresh this page to clear the cached request.',
-          },
-        ],
-      },
-      {
-        children: [
-          {
-            text: 'The code for this template is completely open-source and can be found ',
-          },
-          {
-            type: 'link',
+            type: 'paragraph',
             children: [
               {
-                text: 'here',
-              },
-            ],
-            linkType: 'custom',
-            newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-          },
-          {
-            text: '.',
-          },
-        ],
-      },
-    ],
-  },
-  layout: [
-    {
-      blockName: 'CTA',
-      blockType: 'cta',
-      links: [
-        {
-          link: {
-            type: 'custom',
-            appearance: 'primary',
-            label: 'Go to dashboard',
-            reference: null,
-            url: '/admin',
-          },
-        },
-      ],
-      richText: [
-        {
-          type: 'h4',
-          children: [
-            {
-              text: 'Seed your database',
-            },
-          ],
-        },
-        {
-          children: [
-            {
-              text: 'Your database is currently empty. To seed your database, ',
-            },
-            {
-              type: 'link',
-              children: [
-                {
-                  text: 'log in to the admin dashboard',
+                type: 'link',
+                children: [
+                  {
+                    type: 'text',
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Visit the admin dashboard',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                fields: {
+                  linkType: 'custom',
+                  newTab: false,
+                  url: '/admin',
                 },
-              ],
-              linkType: 'custom',
-              url: '/admin',
-            },
-            {
-              text: ' and click "seed your database".',
-            },
-          ],
-        },
-      ],
+                format: '',
+                indent: 0,
+                version: 2,
+              },
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: ' to make your account and seed content for your website.',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1,
+      },
     },
-  ],
+  },
   meta: {
     description: 'An open-source website built with Payload and Next.js.',
     title: 'Payload Website Template',
   },
   title: 'Home',
-  updatedAt: '',
 }

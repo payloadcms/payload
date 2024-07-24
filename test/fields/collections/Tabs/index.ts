@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { tabsFieldsSlug } from '../../slugs.js'
 import { getBlocksField } from '../Blocks/index.js'

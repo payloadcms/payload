@@ -1,6 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, RichTextFieldProps } from 'payload/types'
+import type { Field, RichTextFieldProps, SanitizedConfig } from 'payload'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }
@@ -58,9 +56,7 @@ export type AdapterArguments = {
     hideGutter?: boolean
     leaves?: RichTextLeaf[]
     link?: {
-      fields?:
-        | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
-        | Field[]
+      fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
     }
     placeholder?: Record<string, string> | string
     rtl?: boolean

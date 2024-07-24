@@ -1,26 +1,27 @@
+import { jest } from '@jest/globals'
+import fs from 'fs'
 import fse from 'fs-extra'
-import path from 'path'
-import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
-import { createProject } from './create-project.js'
-import { fileURLToPath } from 'node:url'
-import { dbReplacements } from './packages.js'
-import { getValidTemplates } from './templates.js'
 import globby from 'globby'
+import * as os from 'node:os'
+import path from 'path'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 
-const projectDir = path.resolve(dirname, './tmp')
+import { createProject } from './create-project.js'
+import { dbReplacements } from './replacements.js'
+import { getValidTemplates } from './templates.js'
+
 describe('createProject', () => {
+  let projectDir: string
   beforeAll(() => {
     console.log = jest.fn()
   })
 
   beforeEach(() => {
-    if (fse.existsSync(projectDir)) {
-      fse.rmdirSync(projectDir, { recursive: true })
-    }
+    const tempDirectory = fs.realpathSync(os.tmpdir())
+    projectDir = `${tempDirectory}/${Math.random().toString(36).substring(7)}`
   })
+
   afterEach(() => {
     if (fse.existsSync(projectDir)) {
       fse.rmSync(projectDir, { recursive: true })
@@ -28,11 +29,10 @@ describe('createProject', () => {
   })
 
   describe('#createProject', () => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank',
+      '--local-template': 'blank-3.0',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
@@ -42,15 +42,15 @@ describe('createProject', () => {
       const template: ProjectTemplate = {
         name: 'plugin',
         type: 'plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
         description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload-plugin-template',
       }
       await createProject({
         cliArgs: args,
-        projectName,
-        projectDir,
-        template,
         packageManager,
+        projectDir,
+        projectName,
+        template,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
@@ -85,20 +85,23 @@ describe('createProject', () => {
 
         await createProject({
           cliArgs,
-          projectName,
-          projectDir,
-          template: template as ProjectTemplate,
-          packageManager,
           dbDetails: {
-            dbUri: `${db}://localhost:27017/create-project-test`,
             type: db as DbType,
+            dbUri: `${db}://localhost:27017/create-project-test`,
           },
+          packageManager,
+          projectDir,
+          projectName,
+          template: template as ProjectTemplate,
         })
 
         const dbReplacement = dbReplacements[db as DbType]
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
+
+        // Verify git was initialized
+        expect(fse.existsSync(path.resolve(projectDir, '.git'))).toBe(true)
 
         // Should only have one db adapter
         expect(
@@ -124,7 +127,7 @@ describe('createProject', () => {
 
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement.join('\n'))
+        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
       })
     })
   })

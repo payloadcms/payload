@@ -1,13 +1,11 @@
-import type { Payload } from 'payload'
-import type { Connect } from 'payload/database'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { Connect, Payload } from 'payload'
 
-import { sql } from 'drizzle-orm'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
-
-import { pushDevSchema } from './utilities/pushDevSchema.js'
 
 const connectWithReconnect = async function ({
   adapter,
@@ -61,37 +59,35 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.pool = new pg.Pool(this.poolOptions)
-    await connectWithReconnect({ adapter: this, payload: this.payload })
+    if (!this.pool) {
+      this.pool = new pg.Pool(this.poolOptions)
+      await connectWithReconnect({ adapter: this, payload: this.payload })
+    }
 
     const logger = this.logger || false
-
     this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
-        await this.drizzle.execute(
-          sql.raw(`
-          drop schema if exists ${this.schemaName || 'public'} cascade;
-          create schema ${this.schemaName || 'public'};
-        `),
-        )
+        await this.dropDatabase({ adapter: this })
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
     process.exit(1)
   }
 
   // Only push schema if not in production
   if (
-    process.env.NODE_ENV === 'production' ||
-    process.env.PAYLOAD_MIGRATING === 'true' ||
-    this.push === false
-  )
-    return
+    process.env.NODE_ENV !== 'production' &&
+    process.env.PAYLOAD_MIGRATING !== 'true' &&
+    this.push !== false
+  ) {
+    await pushDevSchema(this as unknown as DrizzleAdapter)
+  }
 
-  await pushDevSchema(this)
+  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
 }

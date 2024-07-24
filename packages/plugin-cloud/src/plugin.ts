@@ -1,4 +1,4 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
@@ -11,7 +11,7 @@ import {
 } from './hooks/uploadCache.js'
 import { getStaticHandler } from './staticHandler.js'
 
-export const payloadCloud =
+export const payloadCloudPlugin =
   (pluginOptions?: PluginOptions) =>
   async (incomingConfig: Config): Promise<Config> => {
     let config = { ...incomingConfig }

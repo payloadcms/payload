@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
@@ -12,11 +12,10 @@ import { generateMetadata as versionMeta } from '../Version/meta.js'
 import { generateMetadata as versionsMeta } from '../Versions/meta.js'
 
 export type GenerateEditViewMetadata = (
-  args: Parameters<GenerateViewMetadata>[0] & {
+  args: {
     collectionConfig?: SanitizedCollectionConfig | null
     globalConfig?: SanitizedGlobalConfig | null
-    isEditing: boolean
-  },
+  } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
 
 export const getMetaBySegment: GenerateEditViewMetadata = async ({
@@ -33,7 +32,8 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   const isCollection = segmentOne === 'collections'
   const isGlobal = segmentOne === 'globals'
 
-  const isEditing = Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
+  const isEditing =
+    isGlobal || Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
 
   if (isCollection) {
     // `/:id`

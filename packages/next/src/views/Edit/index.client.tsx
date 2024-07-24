@@ -1,9 +1,6 @@
 'use client'
 
-import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
-import { SetViewActions } from '@payloadcms/ui/providers/Actions'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { SetViewActions, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const EditViewClient: React.FC = () => {
@@ -16,9 +13,8 @@ export const EditViewClient: React.FC = () => {
     globalSlug,
   })
 
-  // Allow the `DocumentInfoProvider` to hydrate
-  if (!Edit || (!collectionSlug && !globalSlug)) {
-    return <LoadingOverlay />
+  if (!Edit) {
+    return null
   }
 
   return (

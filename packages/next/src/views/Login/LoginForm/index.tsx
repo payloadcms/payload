@@ -6,76 +6,83 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState, PayloadRequestWithData } from 'payload/types'
+import type { FormState, PayloadRequest } from 'payload'
 
-import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { FormSubmit } from '@payloadcms/ui/forms/Submit'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { email, password } from 'payload/fields/validations'
+import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
+import { password } from 'payload/shared'
 
+import type { LoginFieldProps } from '../LoginField/index.js'
+
+import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
 export const LoginForm: React.FC<{
+  prefillEmail?: string
+  prefillPassword?: string
+  prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ searchParams }) => {
+}> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
   const config = useConfig()
 
   const {
-    admin: { autoLogin, user: userSlug },
-    routes: { admin, api },
+    admin: {
+      routes: { forgot: forgotRoute },
+      user: userSlug,
+    },
+    routes: { admin: adminRoute, api: apiRoute },
   } = config
+
+  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const { auth: authOptions } = collectionConfig
+  const loginWithUsername = authOptions.loginWithUsername
+  const canLoginWithEmail =
+    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
+  const canLoginWithUsername = authOptions.loginWithUsername
+
+  const [loginType] = React.useState<LoginFieldProps['type']>(() => {
+    if (canLoginWithEmail && canLoginWithUsername) return 'emailOrUsername'
+    if (canLoginWithUsername) return 'username'
+    return 'email'
+  })
 
   const { t } = useTranslation()
 
-  const prefillForm = autoLogin && autoLogin.prefillOnly
-
   const initialState: FormState = {
-    email: {
-      initialValue: prefillForm ? autoLogin.email : undefined,
-      valid: true,
-      value: prefillForm ? autoLogin.email : undefined,
-    },
     password: {
-      initialValue: prefillForm ? autoLogin.password : undefined,
+      initialValue: prefillPassword ?? undefined,
       valid: true,
-      value: prefillForm ? autoLogin.password : undefined,
+      value: prefillPassword ?? undefined,
     },
+  }
+
+  if (loginWithUsername) {
+    initialState.username = {
+      initialValue: prefillUsername ?? undefined,
+      valid: true,
+      value: prefillUsername ?? undefined,
+    }
+  } else {
+    initialState.email = {
+      initialValue: prefillEmail ?? undefined,
+      valid: true,
+      value: prefillEmail ?? undefined,
+    }
   }
 
   return (
     <Form
-      action={`${api}/${userSlug}/login`}
+      action={`${apiRoute}/${userSlug}/login`}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}
       method="POST"
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
+      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
       waitForAutocomplete
     >
-      <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
-        <Email
-          autoComplete="email"
-          label={t('general:email')}
-          name="email"
-          required
-          validate={(value) =>
-            email(value, {
-              name: 'email',
-              type: 'email',
-              data: {},
-              preferences: { fields: {} },
-              req: { t } as PayloadRequestWithData,
-              required: true,
-              siblingData: {},
-            })
-          }
-        />
-        <Password
+        <LoginField type={loginType} />
+        <PasswordField
           autoComplete="off"
           label={t('general:password')}
           name="password"
@@ -91,14 +98,21 @@ export const LoginForm: React.FC<{
                   config,
                 },
                 t,
-              } as PayloadRequestWithData,
+              } as PayloadRequest,
               required: true,
               siblingData: {},
             })
           }
         />
       </div>
-      <Link href={`${admin}/forgot`}>{t('authentication:forgotPasswordQuestion')}</Link>
+      <Link
+        href={formatAdminURL({
+          adminRoute,
+          path: forgotRoute,
+        })}
+      >
+        {t('authentication:forgotPasswordQuestion')}
+      </Link>
       <FormSubmit>{t('authentication:login')}</FormSubmit>
     </Form>
   )

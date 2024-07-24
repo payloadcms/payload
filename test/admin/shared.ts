@@ -1,3 +1,5 @@
+import type { Config } from 'payload'
+
 export const slugSingularLabel = 'Post'
 
 export const slugPluralLabel = 'Posts'
@@ -34,3 +36,8 @@ export const customNestedTabViewTitle = 'Custom Nested Tab View'
 export const customCollectionParamViewPathBase = '/custom-param'
 
 export const customCollectionParamViewPath = `${customCollectionParamViewPathBase}/:slug`
+
+export const customAdminRoutes: Config['admin']['routes'] = {
+  inactivity: '/custom-inactivity',
+  logout: '/custom-logout',
+}

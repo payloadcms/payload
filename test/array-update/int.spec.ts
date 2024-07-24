@@ -25,12 +25,12 @@ describe('array-update', () => {
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: originalText,
+            required: 'a required field here',
           },
           {
-            required: 'another required field here',
             optional: 'this is cool',
+            required: 'another required field here',
           },
         ],
       },
@@ -54,8 +54,8 @@ describe('array-update', () => {
     })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
-      required: updatedText,
       optional: originalText,
+      required: updatedText,
     })
   })
 
@@ -63,8 +63,8 @@ describe('array-update', () => {
     const updatedText = 'here is some new text'
 
     const secondArrayItem = {
-      required: 'test',
       optional: 'optional test',
+      required: 'test',
     }
 
     const doc = await payload.create({
@@ -72,8 +72,8 @@ describe('array-update', () => {
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: 'some optional text',
+            required: 'a required field here',
           },
           secondArrayItem,
         ],
@@ -90,7 +90,7 @@ describe('array-update', () => {
           },
           {
             id: doc.arrayOfFields?.[1].id,
-            required: doc.arrayOfFields?.[1].required as string,
+            required: doc.arrayOfFields?.[1].required,
             // NOTE - not passing optional field. It should persist
             // because we're passing ID
           },

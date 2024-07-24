@@ -1,14 +1,15 @@
-import payload from 'payload';
-import { CollectionConfig, FieldHook } from 'payload/types';
+import type { CollectionConfig, FieldHook } from 'payload/types'
 
-const getTotalPrice: FieldHook = async ({ data }) => {
-  const { price, salesTaxPercentage, fees } = data.tickets;
-  const totalPrice = Math.round(price * (1 + (salesTaxPercentage / 100))) + fees;
+const getTotalPrice: FieldHook = ({ data }) => {
+  if (!data) return 0
 
-  return totalPrice;
-};
+  const { fees, price, salesTaxPercentage } = data.tickets
+  const totalPrice = Math.round(price * (1 + salesTaxPercentage / 100)) + fees
 
-const Events: CollectionConfig = {
+  return totalPrice
+}
+
+export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
     defaultColumns: ['title', 'date', 'location'],
@@ -31,9 +32,9 @@ const Events: CollectionConfig = {
         {
           name: 'location',
           type: 'relationship',
-          relationTo: 'locations',
-          maxDepth: 0,
           hasMany: false,
+          maxDepth: 0,
+          relationTo: 'locations',
         },
       ],
     },
@@ -82,12 +83,14 @@ const Events: CollectionConfig = {
                 readOnly: true,
               },
               hooks: {
-                beforeChange: [({ siblingData }) => {
-                  // Mutate the sibling data to prevent DB storage
-                  // eslint-disable-next-line no-param-reassign
-                  siblingData.totalPrice = undefined;
-                }],
                 afterRead: [getTotalPrice],
+                beforeChange: [
+                  ({ siblingData }) => {
+                    // Mutate the sibling data to prevent DB storage
+                    // eslint-disable-next-line no-param-reassign
+                    siblingData.totalPrice = undefined
+                  },
+                ],
               },
             },
           ],
@@ -95,6 +98,4 @@ const Events: CollectionConfig = {
       ],
     },
   ],
-};
-
-export default Events;
+}

@@ -3,9 +3,9 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Collection } from '../config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -28,13 +28,13 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
+export const duplicateOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
-): Promise<GeneratedTypes['collections'][TSlug]> => {
+): Promise<DataFromCollectionSlug<TSlug>> => {
   let args = incomingArgs
   const operation = 'create'
 
@@ -120,6 +120,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       context: req.context,
       depth: 0,
       doc: docWithLocales,
+      draft: draftArg,
       fallbackLocale: null,
       global: null,
       locale: req.locale,
@@ -140,7 +141,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    let data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+    let data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -193,7 +194,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+    result = await beforeChange({
       id,
       collection: collectionConfig,
       context: req.context,
@@ -204,7 +205,10 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       global: null,
       operation,
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // set req.locale back to the original locale
@@ -247,6 +251,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       context: req.context,
       depth,
       doc: versionDoc,
+      draft: draftArg,
       fallbackLocale,
       global: null,
       locale: localeArg,
@@ -275,7 +280,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // afterChange - Fields
     // /////////////////////////////////////
 
-    result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+    result = await afterChange({
       collection: collectionConfig,
       context: req.context,
       data: versionDoc,
@@ -308,7 +313,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation,

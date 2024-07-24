@@ -1,18 +1,25 @@
-import type { BrowserContext, Locator, Page } from '@playwright/test'
+import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
+import type { Config } from 'payload'
 
 import { expect } from '@playwright/test'
-import { wait } from 'payload/utilities'
+import { defaults } from 'payload'
+import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
+import { setTimeout } from 'timers/promises'
 
 import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 type FirstRegisterArgs = {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }
 
 type LoginArgs = {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   data?: {
     email: string
     password: string
@@ -20,53 +27,65 @@ type LoginArgs = {
   page: Page
   serverURL: string
 }
+const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const networkConditions = {
-  'Slow 3G': {
-    download: ((500 * 1000) / 8) * 0.8,
-    upload: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
-  },
   'Fast 3G': {
     download: ((1.6 * 1000 * 1000) / 8) * 0.9,
-    upload: ((750 * 1000) / 8) * 0.9,
     latency: 1000,
+    upload: ((750 * 1000) / 8) * 0.9,
+  },
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    latency: 400 * 5,
+    upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
     download: ((4 * 1000 * 1000) / 8) * 0.8,
-    upload: ((3 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
   },
 }
 
 /**
- * Load admin panel and make sure autologin has passed before running tests
+ * Ensure admin panel is loaded before running tests
  * @param page
  * @param serverURL
  */
-export async function ensureAutoLoginAndCompilationIsDone({
+export async function ensureCompilationIsDone({
+  customAdminRoutes,
+  customRoutes,
   page,
   serverURL,
 }: {
+  customAdminRoutes?: Config['admin']['routes']
+  customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }): Promise<void> {
-  const adminURL = `${serverURL}/admin`
+  const {
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  const adminURL = `${serverURL}${adminRoute}`
 
   await page.goto(adminURL)
   await page.waitForURL(adminURL)
-  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+
+  await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
-  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
+
+  await expect(page.locator('.dashboard__label').first()).toBeVisible()
 }
 
-export async function delayNetwork({
+/**
+ * CPU throttling & 2 different kinds of network throttling
+ */
+export async function throttleTest({
   context,
-  page,
   delay,
+  page,
 }: {
   context: BrowserContext
   delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
@@ -76,41 +95,62 @@ export async function delayNetwork({
 
   await cdpSession.send('Network.emulateNetworkConditions', {
     downloadThroughput: networkConditions[delay].download,
-    uploadThroughput: networkConditions[delay].upload,
     latency: networkConditions[delay].latency,
     offline: false,
+    uploadThroughput: networkConditions[delay].upload,
   })
+
+  await page.route('**/*', async (route) => {
+    await setTimeout(random(500, 1000))
+    await route.continue()
+  })
+
+  const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
+  await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
-  const { page, serverURL } = args
+  const { customAdminRoutes, customRoutes, page, serverURL } = args
 
-  await page.goto(`${serverURL}/admin`)
+  const {
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
   await page.fill('#field-password', devUser.password)
   await page.fill('#field-confirm-password', devUser.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}/admin`)
+  await page.waitForURL(`${serverURL}${adminRoute}`)
 }
 
 export async function login(args: LoginArgs): Promise<void> {
-  const { page, serverURL, data = devUser } = args
+  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
-  await page.goto(`${serverURL}/admin/login`)
-  await page.waitForURL(`${serverURL}/admin/login`)
+  const {
+    admin: {
+      routes: { createFirstUser: createFirstUserRoute, login: loginRoute },
+    },
+    routes: { admin: adminRoute },
+  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+
+  await page.goto(`${serverURL}${adminRoute}${loginRoute}`)
+  await page.waitForURL(`${serverURL}${adminRoute}${loginRoute}`)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}/admin`)
+  await page.waitForURL(`${serverURL}${adminRoute}`)
 
-  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+  await expect(() =>
+    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
+  ).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 }
@@ -124,14 +164,23 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
     await page.keyboard.down('Control')
   }
   await page.keyboard.down('s')
-  await expect(page.locator('.Toastify')).toContainText('successfully')
+  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 }
 
-export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
+export async function saveDocAndAssert(
+  page: Page,
+  selector = '#action-save',
+  expectation: 'error' | 'success' = 'success',
+): Promise<void> {
   await wait(500) // TODO: Fix this
   await page.click(selector, { delay: 100 })
-  await expect(page.locator('.Toastify')).toContainText('successfully')
-  await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+
+  if (expectation === 'success') {
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+  } else {
+    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+  }
 }
 
 export async function openNav(page: Page): Promise<void> {
@@ -150,6 +199,16 @@ export async function openDocDrawer(page: Page, selector: string): Promise<void>
   await wait(500) // wait for drawer form state to initialize
 }
 
+export async function openCreateDocDrawer(page: Page, fieldSelector: string): Promise<void> {
+  await wait(500) // wait for parent form state to initialize
+  const relationshipField = page.locator(fieldSelector)
+  await expect(relationshipField.locator('input')).toBeEnabled()
+  const addNewButton = relationshipField.locator('.relationship-add-new__add-button')
+  await expect(addNewButton).toBeVisible()
+  await addNewButton.click()
+  await wait(500) // wait for drawer form state to initialize
+}
+
 export async function closeNav(page: Page): Promise<void> {
   if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
   await page.locator('.nav-toggler >> visible=true').click()
@@ -164,7 +223,7 @@ export async function openDocControls(page: Page): Promise<void> {
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
   await page
-    .locator(`.localizer .popup.popup--active .popup-button-list button`, {
+    .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
       hasText: newLocale,
     })
     .first()
@@ -272,4 +331,43 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   console.log('Localstack is running. Running test suite.')
 
   return describe
+}
+
+type AdminRoutes = Config['admin']['routes']
+
+export function getAdminRoutes({
+  customAdminRoutes,
+  customRoutes,
+}: {
+  customAdminRoutes?: AdminRoutes
+  customRoutes?: Config['routes']
+}): {
+  admin: {
+    routes: AdminRoutes
+  }
+  routes: Config['routes']
+} {
+  let routes = defaults.routes
+  let adminRoutes = defaults.admin.routes
+
+  if (customAdminRoutes) {
+    adminRoutes = {
+      ...adminRoutes,
+      ...customAdminRoutes,
+    }
+  }
+
+  if (customRoutes) {
+    routes = {
+      ...routes,
+      ...customRoutes,
+    }
+  }
+
+  return {
+    admin: {
+      routes: adminRoutes,
+    },
+    routes,
+  }
 }

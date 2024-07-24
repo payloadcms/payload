@@ -4,6 +4,7 @@ import { emailDefaults } from './defaults.js'
 import { getStringifiedToAddress } from './getStringifiedToAddress.js'
 
 export const consoleEmailAdapter: EmailAdapter<void> = ({ payload }) => ({
+  name: 'console',
   defaultFromAddress: emailDefaults.defaultFromAddress,
   defaultFromName: emailDefaults.defaultFromName,
   sendEmail: async (message) => {

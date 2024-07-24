@@ -1,12 +1,13 @@
-/* eslint-disable no-param-reassign */
-import type { RichTextAdapter } from '../../../admin/types.js'
+import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import getValueWithDefault from '../../getDefaultValue.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -15,7 +16,8 @@ type Args = {
   context: RequestContext
   currentDepth: number
   depth: number
-  doc: Record<string, unknown>
+  doc: JsonObject
+  draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
   /**
@@ -27,10 +29,18 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: null | string
   overrideAccess: boolean
+  /**
+   * The parent's path.
+   */
+  parentPath: (number | string)[]
+  /**
+   * The parent's schemaPath (path without indexes).
+   */
+  parentSchemaPath: string[]
   populationPromises: Promise<void>[]
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }
@@ -49,6 +59,7 @@ export const promise = async ({
   currentDepth,
   depth,
   doc,
+  draft,
   fallbackLocale,
   field,
   fieldPromises,
@@ -57,6 +68,8 @@ export const promise = async ({
   global,
   locale,
   overrideAccess,
+  parentPath,
+  parentSchemaPath,
   populationPromises,
   req,
   showHiddenFields,
@@ -64,6 +77,12 @@ export const promise = async ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
+  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+    field,
+    parentPath,
+    parentSchemaPath,
+  })
+
   if (
     fieldAffectsData(field) &&
     field.hidden &&
@@ -141,25 +160,14 @@ export const promise = async ({
     }
 
     case 'richText': {
-      const editor: RichTextAdapter = field?.editor
-      // This is run here AND in the GraphQL Resolver
-      if (editor?.populationPromises) {
-        editor.populationPromises({
-          context,
-          currentDepth,
-          depth,
-          field,
-          fieldPromises,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
+      // Rich Text fields should use afterRead hooks to do population. The previous editor.populationPromises have been renamed to editor.graphQLPopulationPromises
       break
     }
 
@@ -198,10 +206,14 @@ export const promise = async ({
                 context,
                 data: doc,
                 field,
+                findMany,
                 global,
                 operation: 'read',
                 originalDoc: doc,
+                overrideAccess,
+                path: fieldPath,
                 req,
+                schemaPath: fieldSchemaPath,
                 siblingData: siblingDoc,
                 value,
               })
@@ -224,7 +236,9 @@ export const promise = async ({
             operation: 'read',
             originalDoc: doc,
             overrideAccess,
+            path: fieldPath,
             req,
+            schemaPath: fieldSchemaPath,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
           })
@@ -262,7 +276,7 @@ export const promise = async ({
       typeof siblingDoc[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {
-      siblingDoc[field.name] = await getValueWithDefault({
+      siblingDoc[field.name] = await getDefaultValue({
         defaultValue: field.defaultValue,
         locale,
         user: req.user,
@@ -275,6 +289,7 @@ export const promise = async ({
         relationshipPopulationPromise({
           currentDepth,
           depth,
+          draft,
           fallbackLocale,
           field,
           locale,
@@ -289,7 +304,7 @@ export const promise = async ({
 
   switch (field.type) {
     case 'group': {
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      let groupDoc = siblingDoc[field.name] as JsonObject
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
 
       traverseFields({
@@ -298,6 +313,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -306,8 +322,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        path: fieldPath,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc: groupDoc,
         triggerAccessControl,
@@ -318,16 +336,17 @@ export const promise = async ({
     }
 
     case 'array': {
-      const rows = siblingDoc[field.name]
+      const rows = siblingDoc[field.name] as JsonObject
 
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           traverseFields({
             collection,
             context,
             currentDepth,
             depth,
             doc,
+            draft,
             fallbackLocale,
             fieldPromises,
             fields: field.fields,
@@ -336,8 +355,10 @@ export const promise = async ({
             global,
             locale,
             overrideAccess,
+            path: [...fieldPath, i],
             populationPromises,
             req,
+            schemaPath: fieldSchemaPath,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
@@ -347,13 +368,14 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
+            localeRows.forEach((row, i) => {
               traverseFields({
                 collection,
                 context,
                 currentDepth,
                 depth,
                 doc,
+                draft,
                 fallbackLocale,
                 fieldPromises,
                 fields: field.fields,
@@ -362,10 +384,12 @@ export const promise = async ({
                 global,
                 locale,
                 overrideAccess,
+                path: [...fieldPath, i],
                 populationPromises,
                 req,
+                schemaPath: fieldSchemaPath,
                 showHiddenFields,
-                siblingDoc: row || {},
+                siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
                 triggerHooks,
               })
@@ -382,8 +406,10 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+        rows.forEach((row, i) => {
+          const block = field.blocks.find(
+            (blockType) => blockType.slug === (row as JsonObject).blockType,
+          )
 
           if (block) {
             traverseFields({
@@ -392,6 +418,7 @@ export const promise = async ({
               currentDepth,
               depth,
               doc,
+              draft,
               fallbackLocale,
               fieldPromises,
               fields: block.fields,
@@ -400,10 +427,12 @@ export const promise = async ({
               global,
               locale,
               overrideAccess,
+              path: [...fieldPath, i],
               populationPromises,
               req,
+              schemaPath: fieldSchemaPath,
               showHiddenFields,
-              siblingDoc: row || {},
+              siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
               triggerHooks,
             })
@@ -412,8 +441,10 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
-              const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            localeRows.forEach((row, i) => {
+              const block = field.blocks.find(
+                (blockType) => blockType.slug === (row as JsonObject).blockType,
+              )
 
               if (block) {
                 traverseFields({
@@ -422,6 +453,7 @@ export const promise = async ({
                   currentDepth,
                   depth,
                   doc,
+                  draft,
                   fallbackLocale,
                   fieldPromises,
                   fields: block.fields,
@@ -430,10 +462,12 @@ export const promise = async ({
                   global,
                   locale,
                   overrideAccess,
+                  path: [...fieldPath, i],
                   populationPromises,
                   req,
+                  schemaPath: fieldSchemaPath,
                   showHiddenFields,
-                  siblingDoc: row || {},
+                  siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
                   triggerHooks,
                 })
@@ -456,6 +490,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -464,8 +499,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        path: fieldPath,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
@@ -478,7 +515,7 @@ export const promise = async ({
     case 'tab': {
       let tabDoc = siblingDoc
       if (tabHasName(field)) {
-        tabDoc = siblingDoc[field.name] as Record<string, unknown>
+        tabDoc = siblingDoc[field.name] as JsonObject
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
@@ -488,6 +525,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.fields,
@@ -496,8 +534,10 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        path: fieldPath,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc: tabDoc,
         triggerAccessControl,
@@ -514,6 +554,7 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
         fallbackLocale,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
@@ -522,13 +563,110 @@ export const promise = async ({
         global,
         locale,
         overrideAccess,
+        path: fieldPath,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
         triggerHooks,
       })
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterRead?.length) {
+        await editor.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const shouldRunHookOnAllLocales =
+            field.localized &&
+            (locale === 'all' || !flattenLocales) &&
+            typeof siblingDoc[field.name] === 'object'
+
+          if (shouldRunHookOnAllLocales) {
+            const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
+              (async () => {
+                const hookedValue = await currentHook({
+                  collection,
+                  context,
+                  currentDepth,
+                  data: doc,
+                  depth,
+                  draft,
+                  fallbackLocale,
+                  field,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  global,
+                  locale,
+                  operation: 'read',
+                  originalDoc: doc,
+                  overrideAccess,
+                  path: fieldPath,
+                  populationPromises,
+                  req,
+                  schemaPath: fieldSchemaPath,
+                  showHiddenFields,
+                  siblingData: siblingDoc,
+                  triggerAccessControl,
+                  triggerHooks,
+                  value,
+                })
+
+                if (hookedValue !== undefined) {
+                  siblingDoc[field.name][locale] = hookedValue
+                }
+              })(),
+            )
+
+            await Promise.all(hookPromises)
+          } else {
+            const hookedValue = await currentHook({
+              collection,
+              context,
+              currentDepth,
+              data: doc,
+              depth,
+              draft,
+              fallbackLocale,
+              field,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              global,
+              locale,
+              operation: 'read',
+              originalDoc: doc,
+              overrideAccess,
+              path: fieldPath,
+              populationPromises,
+              req,
+              schemaPath: fieldSchemaPath,
+              showHiddenFields,
+              siblingData: siblingDoc,
+              triggerAccessControl,
+              triggerHooks,
+              value: siblingDoc[field.name],
+            })
+
+            if (hookedValue !== undefined) {
+              siblingDoc[field.name] = hookedValue
+            }
+          }
+        }, Promise.resolve())
+      }
       break
     }
 

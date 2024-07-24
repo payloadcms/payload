@@ -1,6 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { ClientValidate } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,23 +12,22 @@ import './index.scss'
 
 const baseClass = 'point'
 
-import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-
 import type { FormFieldBase } from '../shared/index.js'
 
-export type PointFieldProps = FormFieldBase & {
-  label?: FieldBase['label']
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
+
+export type PointFieldProps = {
   name?: string
   path?: string
   placeholder?: string
   step?: number
   width?: string
-}
+} & FormFieldBase
 
-const PointField: React.FC<PointFieldProps> = (props) => {
+export const _PointField: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -40,6 +38,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -71,7 +70,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromContext || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
@@ -90,7 +89,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
 
   const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-    const fieldLabel = labelProps && labelProps.label ? getTranslation(labelProps.label, i18n) : ''
+    const fieldLabel = label ? getTranslation(label, i18n) : ''
 
     return {
       ...labelProps,
@@ -114,7 +113,6 @@ const PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
           {CustomLabel !== undefined ? (
@@ -144,6 +142,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
             <FieldLabel {...getCoordinateFieldLabel('latitude')} />
           )}
           <div className="input-wrapper">
+            <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
             {BeforeInput}
             <input
               disabled={readOnly}
@@ -168,4 +167,4 @@ const PointField: React.FC<PointFieldProps> = (props) => {
   )
 }
 
-export const Point = withCondition(PointField)
+export const PointField = withCondition(_PointField)

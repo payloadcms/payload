@@ -1,27 +1,26 @@
-import type { Config } from 'payload/config'
-import type { Field, GroupField, TabsField, TextField } from 'payload/types'
+import type { Config, Field, GroupField, TabsField, TextField } from 'payload'
 
 import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-import { deepMerge } from 'payload/utilities'
-import React from 'react'
+import { withMergedProps } from '@payloadcms/ui/shared'
+import { deepMergeSimple } from 'payload/shared'
 
 import type {
   GenerateDescription,
   GenerateImage,
   GenerateTitle,
   GenerateURL,
-  PluginConfig,
+  SEOPluginConfig,
 } from './types.js'
 
-import { MetaDescription } from './fields/MetaDescription.js'
-import { MetaImage } from './fields/MetaImage.js'
-import { MetaTitle } from './fields/MetaTitle.js'
+import { MetaDescriptionComponent } from './fields/MetaDescription/MetaDescriptionComponent.js'
+import { MetaImageComponent } from './fields/MetaImage/MetaImageComponent.js'
+import { MetaTitleComponent } from './fields/MetaTitle/MetaTitleComponent.js'
+import { OverviewComponent } from './fields/Overview/OverviewComponent.js'
+import { PreviewComponent } from './fields/Preview/PreviewComponent.js'
 import { translations } from './translations/index.js'
-import { Overview } from './ui/Overview.js'
-import { Preview } from './ui/Preview.js'
 
-const seo =
-  (pluginConfig: PluginConfig) =>
+export const seoPlugin =
+  (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
     const seoFields: GroupField[] = [
       {
@@ -33,7 +32,7 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: Overview,
+                Field: OverviewComponent,
               },
             },
             label: 'Overview',
@@ -43,12 +42,13 @@ const seo =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => (
-                  <MetaTitle
-                    {...props}
-                    hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaTitleComponent,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateTitleFn: typeof pluginConfig?.generateTitle === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -59,14 +59,14 @@ const seo =
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => (
-                  <MetaDescription
-                    {...props}
-                    hasGenerateDescriptionFn={
-                      typeof pluginConfig?.generateDescription === 'function'
-                    }
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: MetaDescriptionComponent,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateDescriptionFn:
+                      typeof pluginConfig?.generateDescription === 'function',
+                  },
+                }),
               },
             },
             localized: true,
@@ -74,18 +74,18 @@ const seo =
           },
           ...(pluginConfig?.uploadsCollection
             ? [
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 {
                   name: 'image',
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => (
-                        <MetaImage
-                          {...props}
-                          hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
-                        />
-                      ),
+                      Field: withMergedProps({
+                        Component: MetaImageComponent,
+                        sanitizeServerOnlyProps: true,
+                        toMergeIntoProps: {
+                          hasGenerateImageFn: typeof pluginConfig?.generateImage === 'function',
+                        },
+                      }),
                     },
                     description:
                       'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
@@ -103,12 +103,13 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => (
-                  <Preview
-                    {...props}
-                    hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
-                  />
-                ),
+                Field: withMergedProps({
+                  Component: PreviewComponent,
+                  sanitizeServerOnlyProps: true,
+                  toMergeIntoProps: {
+                    hasGenerateURLFn: typeof pluginConfig?.generateURL === 'function',
+                  },
+                }),
               },
             },
             label: 'Preview',
@@ -198,10 +199,13 @@ const seo =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateTitle>[0] =
-              reqWithData.data as unknown as Parameters<GenerateTitle>[0]
-            const result = pluginConfig.generateTitle ? await pluginConfig.generateTitle(args) : ''
+            await addDataAndFileToRequest(req)
+            req.t
+            const result = pluginConfig.generateTitle
+              ? await pluginConfig.generateTitle(
+                  req.data as unknown as Parameters<GenerateTitle>[0],
+                )
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -209,11 +213,11 @@ const seo =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateDescription>[0] =
-              reqWithData.data as unknown as Parameters<GenerateDescription>[0]
+            await addDataAndFileToRequest(req)
             const result = pluginConfig.generateDescription
-              ? await pluginConfig.generateDescription(args)
+              ? await pluginConfig.generateDescription(
+                  req.data as unknown as Parameters<GenerateDescription>[0],
+                )
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -222,10 +226,10 @@ const seo =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateURL>[0] =
-              reqWithData.data as unknown as Parameters<GenerateURL>[0]
-            const result = pluginConfig.generateURL ? await pluginConfig.generateURL(args) : ''
+            await addDataAndFileToRequest(req)
+            const result = pluginConfig.generateURL
+              ? await pluginConfig.generateURL(req.data as unknown as Parameters<GenerateURL>[0])
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -233,10 +237,12 @@ const seo =
         },
         {
           handler: async (req) => {
-            const reqWithData = await addDataAndFileToRequest({ request: req })
-            const args: Parameters<GenerateImage>[0] =
-              reqWithData.data as unknown as Parameters<GenerateImage>[0]
-            const result = pluginConfig.generateImage ? await pluginConfig.generateImage(args) : ''
+            await addDataAndFileToRequest(req)
+            const result = pluginConfig.generateImage
+              ? await pluginConfig.generateImage(
+                  req.data as unknown as Parameters<GenerateImage>[0],
+                )
+              : ''
             return new Response(result, { status: 200 })
           },
           method: 'post',
@@ -292,10 +298,8 @@ const seo =
       i18n: {
         ...config.i18n,
         translations: {
-          ...deepMerge(translations, config.i18n?.translations),
+          ...deepMergeSimple(translations, config.i18n?.translations),
         },
       },
     }
   }
-
-export { seo }

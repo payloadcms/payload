@@ -1,0 +1,306 @@
+---
+title: Client-side Live Preview
+label: Client-side
+order: 40
+desc: Learn how to implement Live Preview in your client-side front-end application.
+keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, useLivePreview
+---
+
+<Banner type="info">
+  If your front-end application supports Server Components like the [Next.js App Router](https://nextjs.org/docs/app), etc., we suggest setting up [server-side Live Preview](./server) instead.
+</Banner>
+
+While using Live Preview, the [Admin Panel](../admin/overview) emits a new `window.postMessage` event every time your document has changed. Your front-end application can listen for these events and re-render accordingly.
+
+If your front-end application is built with [React](#react) or [Vue](#vue), use the `useLivePreview` hooks that Payload provides. In the future, all other major frameworks like Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
+
+By default, all hooks accept the following args:
+
+| Path               | Description                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| **`serverURL`** \* | The URL of your Payload server.                                                        |
+| **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made. |
+| **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                              |
+| **`apiRoute`**     | The path of your API route as defined in `routes.api`. Defaults to `/api`.             |
+
+_\* An asterisk denotes that a property is required._
+
+And return the following values:
+
+| Path            | Description                                                      |
+| --------------- | ---------------------------------------------------------------- |
+| **`data`**      | The live data of the document, merged with the initial data.     |
+| **`isLoading`** | A boolean that indicates whether or not the document is loading. |
+
+<Banner type="info">
+  If your front-end is tightly coupled to required fields, you should ensure that your UI does not
+  break when these fields are removed. For example, if you are rendering something like
+  `data.relatedPosts[0].title`, your page will break once you remove the first related post. To get
+  around this, use conditional logic, optional chaining, or default values in your UI where needed.
+  For example, `data?.relatedPosts?.[0]?.title`.
+</Banner>
+
+<Banner type="info">
+  It is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../queries/depth) for more information.
+</Banner>
+
+## Frameworks
+
+Live Preview will work with any front-end framework that supports the native [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) API. By default, Payload officially supports the most popular frameworks, including:
+
+- [React](#react)
+- [Vue](#vue)
+
+If your framework is not listed, you can still integrate with Live Preview using the underlying tooling that Payload provides. [More details](#building-your-own-hook).
+
+### React
+
+If your front-end application is built with client-side [React](https://react.dev) like [Next.js Pages Router](https://nextjs.org/docs/pages), you can use the `useLivePreview` hook that Payload provides.
+
+First, install the `@payloadcms/live-preview-react` package:
+
+```bash
+npm install @payloadcms/live-preview-react
+```
+
+Then, use the `useLivePreview` hook in your React component:
+
+```tsx
+'use client'
+import { useLivePreview } from '@payloadcms/live-preview-react'
+import { Page as PageType } from '@/payload-types'
+
+// Fetch the page in a server component, pass it to the client component, then thread it through the hook
+// The hook will take over from there and keep the preview in sync with the changes you make
+// The `data` property will contain the live data of the document
+export const PageClient: React.FC<{
+  page: {
+    title: string
+  }
+}> = ({ page: initialPage }) => {
+  const { data } = useLivePreview<PageType>({
+    initialData: initialPage,
+    serverURL: PAYLOAD_SERVER_URL,
+    depth: 2,
+  })
+
+  return <h1>{data.title}</h1>
+}
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  If you are using [React Server Components](https://react.dev/reference/rsc/server-components), we strongly suggest setting up [server-side Live Preview](./server) instead.
+</Banner>
+
+### Vue
+
+If your front-end application is built with [Vue 3](https://vuejs.org) or [Nuxt 3](https://nuxt.js), you can use the `useLivePreview` composable that Payload provides.
+
+First, install the `@payloadcms/live-preview-vue` package:
+
+```bash
+npm install @payloadcms/live-preview-vue
+```
+
+Then, use the `useLivePreview` hook in your Vue component:
+
+```ts
+<script setup lang="ts">
+import type { PageData } from '~/types';
+import { defineProps } from 'vue';
+import { useLivePreview } from '@payloadcms/live-preview-vue';
+
+// Fetch the initial data on the parent component or using async state
+const props = defineProps<{ initialData: PageData }>();
+
+// The hook will take over from here and keep the preview in sync with the changes you make.
+// The `data` property will contain the live data of the document only when viewed from the Preview view of the Admin UI.
+const { data } = useLivePreview<PageData>({
+  initialData: props.initialData,
+  serverURL: "<PAYLOAD_SERVER_URL>",
+  depth: 2,
+});
+</script>
+
+<template>
+  <h1>{{ data.title }}</h1>
+</template>
+```
+
+## Building your own hook
+
+No matter what front-end framework you are using, you can build your own hook using the same underlying tooling that Payload provides.
+
+First, install the base `@payloadcms/live-preview` package:
+
+```bash
+npm install @payloadcms/live-preview
+```
+
+This package provides the following functions:
+
+| Path                     | Description                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **`subscribe`**          | Subscribes to the Admin Panel's `window.postMessage` events and calls the provided callback function.                      |
+| **`unsubscribe`**        | Unsubscribes from the Admin Panel's `window.postMessage` events.                                                           |
+| **`ready`**              | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.         |
+| **`isLivePreviewEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a Live Preview event, i.e. debounced form state.         |
+
+The `subscribe` function takes the following args:
+
+| Path               | Description                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| **`callback`** \*  | A callback function that is called with `data` every time a change is made to the document. |
+| **`serverURL`** \* | The URL of your Payload server.                                                             |
+| **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made.      |
+| **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                                   |
+
+With these functions, you can build your own hook using your front-end framework of choice:
+
+```tsx
+import { subscribe, unsubscribe } from '@payloadcms/live-preview'
+
+// To build your own hook, subscribe to Live Preview events using the `subscribe` function
+// It handles everything from:
+// 1. Listening to `window.postMessage` events
+// 2. Merging initial data with active form state
+// 3. Populating relationships and uploads
+// 4. Calling the `onChange` callback with the result
+// Your hook should also:
+// 1. Tell the Admin Panel when it is ready to receive messages
+// 2. Handle the results of the `onChange` callback to update the UI
+// 3. Unsubscribe from the `window.postMessage` events when it unmounts
+```
+
+Here is an example of what the same `useLivePreview` React hook from above looks like under the hood:
+
+```tsx
+import { subscribe, unsubscribe, ready } from '@payloadcms/live-preview'
+import { useCallback, useEffect, useState, useRef } from 'react'
+
+export const useLivePreview = <T extends any>(props: {
+  depth?: number
+  initialData: T
+  serverURL: string
+}): {
+  data: T
+  isLoading: boolean
+} => {
+  const { depth = 0, initialData, serverURL } = props
+  const [data, setData] = useState<T>(initialData)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const hasSentReadyMessage = useRef<boolean>(false)
+
+  const onChange = useCallback((mergedData) => {
+    // When a change is made, the `onChange` callback will be called with the merged data
+    // Set this merged data into state so that React will re-render the UI
+    setData(mergedData)
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    // Listen for `window.postMessage` events from the Admin Panel
+    // When a change is made, the `onChange` callback will be called with the merged data
+    const subscription = subscribe({
+      callback: onChange,
+      depth,
+      initialData,
+      serverURL,
+    })
+
+    // Once subscribed, send a `ready` message back up to the Admin Panel
+    // This will indicate that the front-end is ready to receive messages
+    if (!hasSentReadyMessage.current) {
+      hasSentReadyMessage.current = true
+
+      ready({
+        serverURL,
+      })
+    }
+
+    // When the component unmounts, unsubscribe from the `window.postMessage` events
+    return () => {
+      unsubscribe(subscription)
+    }
+  }, [serverURL, onChange, depth, initialData])
+
+  return {
+    data,
+    isLoading,
+  }
+}
+```
+
+<Banner type="info">
+  When building your own hook, ensure that the args and return values are consistent with the ones
+  listed at the top of this document. This will ensure that all hooks follow the same API.
+</Banner>
+
+## Example
+
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload). There you will find examples of various front-end frameworks and how to integrate each one of them, including:
+
+- [Next.js App Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-app)
+- [Next.js Pages Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-pages)
+
+## Troubleshooting
+
+#### Relationships and/or uploads are not populating
+
+If you are using relationships or uploads in your front-end application, and your front-end application runs on a different domain than your Payload server, you may need to configure [CORS](../configuration/overview) to allow requests to be made between the two domains. This includes sites that are running on a different port or subdomain. Similarly, if you are protecting resources behind user authentication, you may also need to configure [CSRF](../authentication/overview#csrf-protection) to allow cookies to be sent between the two domains. For example:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  // If your site is running on a different domain than your Payload server,
+  // This will allows requests to be made between the two domains
+  cors: {
+    [
+      'http://localhost:3001' // Your front-end application
+    ],
+  },
+  // If you are protecting resources behind user authentication,
+  // This will allow cookies to be sent between the two domains
+  csrf: {
+    [
+      'http://localhost:3001' // Your front-end application
+    ],
+  },
+}
+```
+
+#### Relationships and/or uploads disappear after editing a document
+
+It is possible that either you are setting an improper [`depth`](../queries/depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
+
+```tsx
+// Your initial request
+const { docs } = await payload.find({
+  collection: 'pages',
+  depth: 1, // Ensure this is set to the proper depth for your application
+  where: {
+    slug: {
+      equals: 'home',
+    },
+  },
+})
+```
+
+```tsx
+// Your hook
+const { data } = useLivePreview<PageType>({
+  initialData: initialPage,
+  serverURL: PAYLOAD_SERVER_URL,
+  depth: 1, // Ensure this matches the depth of your initial request
+})
+```
+
+#### Iframe refuses to connect
+
+If your front-end application has set a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) that blocks the Admin Panel from loading your front-end application, the iframe will not be able to load your site. To resolve this, you can whitelist the Admin Panel's domain in your CSP by setting the `frame-ancestors` directive:
+
+```plaintext
+frame-ancestors: "self" localhost:* https://your-site.com;
+```

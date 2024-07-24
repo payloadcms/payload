@@ -13,6 +13,7 @@ const FormWatchContext = createContext({} as Context)
 const SubmittedContext = createContext(false)
 const ProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
+const InitializingContext = createContext(false)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
 
 /**
@@ -25,6 +26,7 @@ const useWatchForm = (): Context => useContext(FormWatchContext)
 const useFormSubmitted = (): boolean => useContext(SubmittedContext)
 const useFormProcessing = (): boolean => useContext(ProcessingContext)
 const useFormModified = (): boolean => useContext(ModifiedContext)
+const useFormInitializing = (): boolean => useContext(InitializingContext)
 
 /**
  * Get and set the value of a form field based on a selector
@@ -46,12 +48,14 @@ export {
   FormContext,
   FormFieldsContext,
   FormWatchContext,
+  InitializingContext,
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
   useForm,
   useFormFields,
+  useFormInitializing,
   useFormModified,
   useFormProcessing,
   useFormSubmitted,

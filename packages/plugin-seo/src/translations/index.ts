@@ -1,3 +1,5 @@
+import type { NestedKeysStripped } from '@payloadcms/translations'
+
 export const translations = {
   en: {
     $schema: './translation-schema.json',
@@ -149,6 +151,31 @@ export const translations = {
       tooShort: 'Zbyt krótkie',
     },
   },
+  ru: {
+    $schema: './translation-schema.json',
+    'plugin-seo': {
+      almostThere: 'Почти готово',
+      autoGenerate: 'Сгенерировать автоматически',
+      bestPractices: 'лучшие практики',
+      characterCount: '{{current}}/{{minLength}}-{{maxLength}} символов, ',
+      charactersLeftOver: 'осталось {{characters}} символов',
+      charactersToGo: 'на {{characters}} символов меньше',
+      charactersTooMany: 'на {{characters}} символов больше',
+      checksPassing: '{{current}}/{{max}} проверок пройдено',
+      good: 'Хорошо',
+      imageAutoGenerationTip: 'Автогенерация использует выбранное главное изображение.',
+      lengthTipDescription:
+        'Должно быть от {{minLength}} до {{maxLength}} символов. Для помощи в написании качественных метаописаний см.',
+      lengthTipTitle:
+        'Должно быть от {{minLength}} до {{maxLength}} символов. Для помощи в написании качественных метазаголовков см.',
+      noImage: 'Нет изображения',
+      preview: 'Предварительный просмотр',
+      previewDescription:
+        'Фактические результаты могут отличаться в зависимости от контента и релевантности поиска.',
+      tooLong: 'Слишком длинно',
+      tooShort: 'Слишком коротко',
+    },
+  },
   uk: {
     $schema: './translation-schema.json',
     'plugin-seo': {
@@ -162,13 +189,20 @@ export const translations = {
       checksPassing: '{{current}}/{{max}} перевірок пройдено',
       good: 'Чудово',
       imageAutoGenerationTip: 'Автоматична генерація використає зображення з головного блоку',
-      lengthTipDescription: 'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
-      lengthTipTitle: 'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
+      lengthTipDescription:
+        'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метаописи — перегляньте ',
+      lengthTipTitle:
+        'Має бути від {{minLength}} до {{maxLength}} символів. Щоб дізнатися, як писати якісні метазаголовки — перегляньте ',
       noImage: 'Немає зображення',
       preview: 'Попередній перегляд',
-      previewDescription: 'Реальне відображення може відрізнятися в залежності від вмісту та релевантності пошуку.',
+      previewDescription:
+        'Реальне відображення може відрізнятися в залежності від вмісту та релевантності пошуку.',
       tooLong: 'Задовгий',
       tooShort: 'Закороткий',
     },
   },
 }
+
+export type PluginSEOTranslations = typeof translations.en
+
+export type PluginSEOTranslationKeys = NestedKeysStripped<PluginSEOTranslations>

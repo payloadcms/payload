@@ -1,11 +1,9 @@
 'use client'
 
-import type { TextFieldProps } from '@payloadcms/ui/fields/Text'
-import type { Data } from 'payload/types'
+import type { TextFieldProps } from '@payloadcms/ui'
+import type { Data } from 'payload'
 
-import { Text } from '@payloadcms/ui/fields/Text'
-import { useWatchForm } from '@payloadcms/ui/forms/Form'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { TextField, useLocale, useWatchForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {
@@ -47,18 +45,19 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
 
   // TODO: make this a number field, block by Payload
   if (valueType === 'static') {
-    return <Text {...props} />
+    return <TextField {...props} />
   }
 
   const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
 
   const localLabels = typeof label === 'object' ? label : { [localeCode]: label }
+
   const labelValue = localLabels[localeCode] || localLabels['en'] || ''
 
   if (valueType === 'valueOfField' && !isNumberField) {
     return (
       <div>
-        <div>{labelValue}</div>
+        <div>{String(labelValue)}</div>
         <div
           style={{
             color: '#9A9A9A',

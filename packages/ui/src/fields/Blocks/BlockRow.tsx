@@ -1,6 +1,5 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
-import type { Labels, Row } from 'payload/types'
+import type { FieldPermissions, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -19,7 +18,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = UseDraggableSortableReturn & {
+type BlockFieldProps = {
   addRow: (rowIndex: number, blockType: string) => void
   block: ReducedBlock
   blocks: ReducedBlock[]
@@ -28,6 +27,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   forceRender?: boolean
   hasMaxRows?: boolean
   indexPath: string
+  isSortable?: boolean
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   path: string
@@ -39,7 +39,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
-}
+} & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlockFieldProps> = ({
   addRow,
@@ -50,6 +50,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   errorCount,
   forceRender,
   hasMaxRows,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -78,6 +79,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  const LabelComponent = block?.LabelComponent
+
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
@@ -97,6 +100,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               duplicateRow={duplicateRow}
               fieldMap={block.fieldMap}
               hasMaxRows={hasMaxRows}
+              isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
               removeRow={removeRow}
@@ -107,25 +111,33 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         }
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
-          <div className={`${baseClass}__block-header`}>
-            <span className={`${baseClass}__block-number`}>
-              {String(rowIndex + 1).padStart(2, '0')}
-            </span>
-            <Pill
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-              pillStyle="white"
-            >
-              {getTranslation(block.labels.singular, i18n)}
-            </Pill>
-            <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-          </div>
+          LabelComponent ? (
+            <LabelComponent blockKind={'block'} formData={row} />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <span className={`${baseClass}__block-number`}>
+                {String(rowIndex + 1).padStart(2, '0')}
+              </span>
+              <Pill
+                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                pillStyle="white"
+              >
+                {getTranslation(block.labels.singular, i18n)}
+              </Pill>
+              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
+          )
         }
         isCollapsed={row.collapsed}
         key={row.id}

@@ -1,13 +1,9 @@
-import type { Payload } from 'payload'
-import type { PathToQuery } from 'payload/database'
-import type { Field } from 'payload/types'
-import type { Operator } from 'payload/types'
+import type { Field, Operator, PathToQuery, Payload } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
-import { getLocalizedPaths } from 'payload/database'
-import { fieldAffectsData } from 'payload/types'
-import { validOperators } from 'payload/types'
+import { getLocalizedPaths } from 'payload'
+import { validOperators } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -193,17 +189,19 @@ export async function buildSearchParam({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
+        let multiIDCondition = '$or'
+        if (operatorKey === '$ne') multiIDCondition = '$and'
 
         const result = {
           value: {
-            $or: [{ [path]: { [operatorKey]: formattedValue } }],
+            [multiIDCondition]: [{ [path]: { [operatorKey]: formattedValue } }],
           },
         }
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({
-              [path]: { [operatorKey]: new ObjectId(formattedValue) },
+            result.value[multiIDCondition].push({
+              [path]: { [operatorKey]: ObjectId(formattedValue) },
             })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
@@ -218,11 +216,13 @@ export async function buildSearchParam({
             )
 
             if (hasNumberIDRelation)
-              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
+              result.value[multiIDCondition].push({
+                [path]: { [operatorKey]: parseFloat(formattedValue) },
+              })
           }
         }
 
-        if (result.value.$or.length > 1) {
+        if (result.value[multiIDCondition].length > 1) {
           return result
         }
       }

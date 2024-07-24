@@ -1,8 +1,8 @@
-import type { PluginConfig } from '../../../types.js'
+import type { FormBuilderPluginConfig } from '../../../types.js'
 
 export const createCharge = async (
   beforeChangeData: any,
-  formConfig: PluginConfig,
+  formConfig: FormBuilderPluginConfig,
 ): Promise<any> => {
   const { data, operation } = beforeChangeData
 

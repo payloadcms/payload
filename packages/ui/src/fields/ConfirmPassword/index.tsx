@@ -1,13 +1,13 @@
 'use client'
-import type { FormField } from 'payload/types'
+import type { FormField } from 'payload'
 
 import React, { useCallback } from 'react'
 
-import { FieldError } from '../../forms/FieldError/index.js'
-import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFormFields } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -15,10 +15,10 @@ export type ConfirmPasswordFieldProps = {
   disabled?: boolean
 }
 
-export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
+export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
   const { disabled } = props
 
-  const password = useFormFields<FormField>(([fields]) => fields.password)
+  const password = useFormFields<FormField>(([fields]) => fields?.password)
   const { t } = useTranslation()
 
   const validate = useCallback(
@@ -50,21 +50,23 @@ export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <FieldError path={path} />
       <FieldLabel
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
       />
-      <input
-        autoComplete="off"
-        disabled={!!disabled}
-        id="field-confirm-password"
-        name="confirm-password"
-        onChange={setValue}
-        type="password"
-        value={(value as string) || ''}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError path={path} />
+        <input
+          autoComplete="off"
+          disabled={!!disabled}
+          id="field-confirm-password"
+          name="confirm-password"
+          onChange={setValue}
+          type="password"
+          value={(value as string) || ''}
+        />
+      </div>
     </div>
   )
 }

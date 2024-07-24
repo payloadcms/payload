@@ -1,23 +1,31 @@
-import type { AdminViewProps } from 'payload/types'
+import type { AdminViewProps } from 'payload'
 
-import { Logo } from '@payloadcms/ui/graphics/Logo'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
+import { Logo } from '../../elements/Logo/index.js'
 import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
 export { generateVerifyMetadata } from './meta.js'
 
-export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params }) => {
+export const Verify: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   // /:collectionSlug/verify/:token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [collectionSlug, verify, token] = params.segments
-  const { req } = initPageResult
+  const { locale, permissions, req } = initPageResult
 
   const {
+    i18n,
     payload: { config },
+    payload,
+    user,
   } = req
 
   const {
@@ -32,17 +40,25 @@ export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params 
       token,
     })
 
-    return redirect(`${adminRoute}/login`)
+    return redirect(formatAdminURL({ adminRoute, path: '/login' }))
   } catch (e) {
     // already verified
-    if (e?.status === 202) redirect(`${adminRoute}/login`)
+    if (e?.status === 202) redirect(formatAdminURL({ adminRoute, path: '/login' }))
     textToRender = req.t('authentication:unableToVerify')
   }
 
   return (
     <React.Fragment>
       <div className={`${verifyBaseClass}__brand`}>
-        <Logo config={config} />
+        <Logo
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          user={user}
+        />
       </div>
       <h2>{textToRender}</h2>
     </React.Fragment>

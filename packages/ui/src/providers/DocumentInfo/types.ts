@@ -1,4 +1,3 @@
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
@@ -7,11 +6,13 @@ import type {
   DocumentPreferences,
   FormState,
   InsideFieldsPreferences,
+  PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithTimestamps,
-} from 'payload/types'
+  TypeWithVersion,
+} from 'payload'
 import type React from 'react'
 
 export type DocumentInfoProps = {
@@ -26,25 +27,30 @@ export type DocumentInfoProps = {
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
+  hasPublishPermission?: boolean
   hasSavePermission?: boolean
   id: null | number | string
+  initialData?: Data
+  initialState?: FormState
   isEditing?: boolean
   onLoadError?: (data?: any) => Promise<void> | void
   onSave?: (data: Data) => Promise<void> | void
 }
 
-export type DocumentInfoContext = DocumentInfoProps & {
+export type DocumentInfoContext = {
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
-  getDocPermissions: () => Promise<void>
+  getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   initialData: Data
   initialState?: FormState
+  isInitializing: boolean
+  isLoading: boolean
   preferencesKey?: string
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
+  publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setDocFieldPreferences: (
     field: string,
-    fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
+    fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentTitle: (title: string) => void
   slug?: string
@@ -52,4 +58,4 @@ export type DocumentInfoContext = DocumentInfoProps & {
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
-}
+} & DocumentInfoProps

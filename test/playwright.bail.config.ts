@@ -4,7 +4,7 @@ import baseConfig from './playwright.config.js'
 
 const config: PlaywrightTestConfig = {
   ...baseConfig,
-  maxFailures: 1,
+  maxFailures: process.env.CI ? undefined : 1,
 }
 
 export default config

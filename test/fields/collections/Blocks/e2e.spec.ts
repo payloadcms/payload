@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -13,6 +13,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -26,7 +27,9 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('Block fields', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ serverURL } = await initPayloadE2ENoConfig({
       dirname,
@@ -35,12 +38,18 @@ describe('Block fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'blockFieldsTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'blockFieldsTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -49,7 +58,7 @@ describe('Block fields', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
@@ -104,6 +113,21 @@ describe('Block fields', () => {
     const addedRow = page.locator('#field-blocks #blocks-row-1')
     await expect(addedRow).toBeVisible()
     await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
+  })
+
+  test('should duplicate block', async () => {
+    await page.goto(url.create)
+    const firstRow = page.locator('#field-blocks #blocks-row-0')
+    const rowActions = firstRow.locator('.collapsible__actions')
+    await expect(rowActions).toBeVisible()
+
+    await rowActions.locator('.array-actions__button').click()
+    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+    await expect(duplicateButton).toBeVisible()
+    await duplicateButton.click()
+
+    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+    expect(await blocks.count()).toEqual(4)
   })
 
   test('should use i18n block labels', async () => {
@@ -173,7 +197,7 @@ describe('Block fields', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -199,7 +223,7 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: blocksWithMinRows',
     )
   })

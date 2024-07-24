@@ -1,6 +1,8 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig, Field } from 'payload'
 
-export interface PluginConfig {
+export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
+
+export type RedirectsPluginConfig = {
   collections?: string[]
-  overrides?: Partial<CollectionConfig>
+  overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
 }

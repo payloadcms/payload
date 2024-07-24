@@ -3,7 +3,7 @@ import { URL } from 'url'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { InitializedEmailAdapter } from '../email/types.js'
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { User, VerifyConfig } from './types.js'
 
 type Args = {
@@ -11,7 +11,7 @@ type Args = {
   config: SanitizedConfig
   disableEmail: boolean
   email: InitializedEmailAdapter
-  req: PayloadRequestWithData
+  req: PayloadRequest
   token: string
   user: User
 }
@@ -29,11 +29,11 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
-    const protocol = new URL(req.url).protocol
+    const protocol = new URL(req.url).protocol // includes the final :
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL
-        : `${protocol}://${req.headers.get('host')}`
+        : `${protocol}//${req.headers.get('host')}`
 
     const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
 
@@ -64,9 +64,8 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    email.sendEmail({
-      from: `"${email.defaultFromName}" <${email.defaultFromName}>`,
+    await email.sendEmail({
+      from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
       html,
       subject,
       to: user.email,

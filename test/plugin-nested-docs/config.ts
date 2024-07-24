@@ -1,4 +1,8 @@
-import { nestedDocs } from '@payloadcms/plugin-nested-docs'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -26,12 +30,12 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    nestedDocs({
+    nestedDocsPlugin({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title as string,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
-    nestedDocs({
+    nestedDocsPlugin({
       breadcrumbsFieldSlug: 'categorization',
       collections: ['categories'],
       generateLabel: (_, doc) => doc.name as string,
@@ -39,4 +43,7 @@ export default buildConfigWithDefaults({
       parentFieldSlug: 'owner',
     }),
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

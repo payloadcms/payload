@@ -1,10 +1,11 @@
-import { CollectionConfig, FieldHook } from 'payload/types';
+import type { CollectionConfig, FieldHook } from 'payload/types'
 
-const populateFullTitle: FieldHook = async ({ data }) => (
-  `${data.title} ${data.firstName} ${data.lastName}`
-);
+const populateFullTitle: FieldHook = ({ data }) => {
+  if (!data) return ''
+  return `${data.title} ${data.firstName} ${data.lastName}`
+}
 
-const Staff: CollectionConfig = {
+export const Staff: CollectionConfig = {
   slug: 'staff',
   admin: {
     defaultColumns: ['fullTitle', 'location'],
@@ -18,18 +19,18 @@ const Staff: CollectionConfig = {
         create: () => false,
         update: () => false,
       },
-      hooks: {
-        beforeChange: [({ siblingData }) => {
-          // Mutate the sibling data to prevent DB storage
-          // eslint-disable-next-line no-param-reassign
-          siblingData.fullTitle = undefined;
-        }],
-        afterRead: [
-          populateFullTitle,
-        ],
-      },
       admin: {
         hidden: true,
+      },
+      hooks: {
+        afterRead: [populateFullTitle],
+        beforeChange: [
+          ({ siblingData }) => {
+            // Mutate the sibling data to prevent DB storage
+            // eslint-disable-next-line no-param-reassign
+            siblingData.fullTitle = undefined
+          },
+        ],
       },
     },
     {
@@ -50,12 +51,10 @@ const Staff: CollectionConfig = {
     {
       name: 'location',
       type: 'relationship',
-      relationTo: 'locations',
-      maxDepth: 0,
       hasMany: true,
+      maxDepth: 0,
+      relationTo: 'locations',
       required: true,
     },
   ],
-};
-
-export default Staff;
+}

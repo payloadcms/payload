@@ -1,19 +1,24 @@
-import type { PayloadRequestWithData } from 'payload/types'
+import type { PayloadRequest } from 'payload'
 
-import { Forbidden } from 'payload/errors'
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { Forbidden } from 'payload'
 
-import type { StripeConfig } from '../types.js'
+import type { StripePluginConfig } from '../types.js'
 
 import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
-  req: PayloadRequestWithData
-  stripeConfig: StripeConfig
+  pluginConfig: StripePluginConfig
+  req: PayloadRequest
 }): Promise<any> => {
   let responseStatus = 200
   let responseJSON
 
-  const { req, stripeConfig } = args
+  const { pluginConfig, req } = args
+
+  await addDataAndFileToRequest(req)
+
+  const requestWithData = req
 
   const {
     data: {
@@ -22,9 +27,9 @@ export const stripeREST = async (args: {
     },
     payload,
     user,
-  } = req
+  } = requestWithData
 
-  const { stripeSecretKey } = stripeConfig
+  const { stripeSecretKey } = pluginConfig
 
   try {
     if (!user) {
@@ -33,7 +38,9 @@ export const stripeREST = async (args: {
     }
 
     responseJSON = await stripeProxy({
+      // @ts-expect-error
       stripeArgs,
+      // @ts-expect-error
       stripeMethod,
       stripeSecretKey,
     })

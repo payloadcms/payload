@@ -1,5 +1,6 @@
-import type { EditViewComponent } from 'payload/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+
+import { isReactComponentOrFunction } from 'payload/shared'
 
 export const getCustomViewByKey = (
   views:
@@ -15,8 +16,8 @@ export const getCustomViewByKey = (
       ? views?.Edit?.[customViewKey]
       : views?.Edit?.[customViewKey]
         ? typeof views?.Edit?.[customViewKey] === 'object' &&
-          'Component' in views?.Edit?.[customViewKey] &&
-          typeof views?.Edit?.[customViewKey].Component === 'function' &&
+          'Component' in views.Edit[customViewKey] &&
+          isReactComponentOrFunction(views?.Edit?.[customViewKey].Component) &&
           views?.Edit?.[customViewKey].Component
         : null
 }

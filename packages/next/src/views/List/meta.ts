@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -8,9 +8,9 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 import { meta } from '../../utilities/meta.js'
 
 export const generateListMetadata = async (
-  args: Parameters<GenerateViewMetadata>[0] & {
+  args: {
     collectionConfig: SanitizedCollectionConfig
-  },
+  } & Parameters<GenerateViewMetadata>[0],
 ): Promise<Metadata> => {
   const { collectionConfig, config, i18n } = args
 
@@ -23,9 +23,11 @@ export const generateListMetadata = async (
   }
 
   return meta({
-    config,
+    ...(config.admin.meta || {}),
     description,
     keywords,
+    serverURL: config.serverURL,
     title,
+    ...(collectionConfig.admin.meta || {}),
   })
 }

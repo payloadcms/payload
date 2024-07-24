@@ -1,28 +1,35 @@
 import type React from 'react'
 
-import { isValidElement } from 'react'
+const clientRefSymbol = Symbol.for('react.client.reference')
 
-import { isPlainObject } from './isPlainObject.js'
-
-export function isReactServerComponent<T extends any>(
+export function isReactServerComponentOrFunction<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return typeof component === 'function' && isValidElement(component)
+  if (component === null || component === undefined) {
+    return false
+  }
+  const hasClientComponentSymbol = component.$$typeof == clientRefSymbol
+
+  const isFunctionalComponent = typeof component === 'function'
+  // Anonymous functions are Client Components in Turbopack. RSCs should have a name
+  const isAnonymousFunction = typeof component === 'function' && component.name === ''
+
+  const isRSC = isFunctionalComponent && !isAnonymousFunction && !hasClientComponentSymbol
+
+  return isRSC
 }
 
 export function isReactClientComponent<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  // Do this to test for client components (`use client` directive) bc they import as empty objects
-  return typeof component === 'object' && !isPlainObject(component)
+  if (component === null || component === undefined) {
+    return false
+  }
+  return !isReactServerComponentOrFunction(component) && component.$$typeof == clientRefSymbol
 }
 
-export function isReactComponent<T extends any>(
+export function isReactComponentOrFunction<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return isReactServerComponent(component) || isReactClientComponent(component)
-}
-
-export function isPlainFunction<T extends Function>(fn: any): fn is T {
-  return typeof fn === 'function' && !isReactComponent(fn)
+  return isReactServerComponentOrFunction(component) || isReactClientComponent(component)
 }

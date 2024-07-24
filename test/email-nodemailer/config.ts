@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -17,10 +21,13 @@ export default buildConfigWithDefaults({
     })
 
     const email = await payload.sendEmail({
-      to: 'test@example.com',
       subject: 'This was sent on init',
+      to: 'test@example.com',
     })
 
-    payload.logger.info({ msg: 'Email sent', email })
+    payload.logger.info({ email, msg: 'Email sent' })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

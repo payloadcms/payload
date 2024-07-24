@@ -1,20 +1,20 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types'
+import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
-import { getFields } from './fields/getFields'
+import { getFields } from './fields/getFields.js'
 
-const stripePlugin =
-  (incomingStripeConfig: StripeConfig) =>
+export const stripePlugin =
+  (incomingPluginConfig: StripePluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
-    const stripeConfig: SanitizedStripeConfig = {
-      ...incomingStripeConfig,
+    const pluginConfig: SanitizedStripePluginConfig = {
+      ...incomingPluginConfig,
       // TODO: in the next major version, default this to `false`
-      rest: incomingStripeConfig?.rest ?? true,
-      sync: incomingStripeConfig?.sync || [],
+      rest: incomingPluginConfig?.rest ?? true,
+      sync: incomingPluginConfig?.sync || [],
     }
 
     // NOTE: env variables are never passed to the client, but we need to know if `stripeSecretKey` is a test key
@@ -24,12 +24,12 @@ const stripePlugin =
     return {
       ...config,
       collections: collections?.map((collection) => {
-        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug)
+        const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)
 
         if (syncConfig) {
           const fields = getFields({
             collection,
-            stripeConfig,
+            pluginConfig,
             syncConfig,
           })
           return {
@@ -42,5 +42,3 @@ const stripePlugin =
       }),
     }
   }
-
-export default stripePlugin

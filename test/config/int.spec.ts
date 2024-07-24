@@ -1,14 +1,16 @@
-import type { Payload } from 'payload'
-import type { BlockField } from 'payload/types'
+import type { BlockField, Payload } from 'payload'
+
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 
+let restClient: NextRESTClient
 let payload: Payload
 
 describe('Config', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
@@ -80,7 +82,7 @@ describe('Config', () => {
       const [global] = payload.config.globals
       const [endpoint] = global.endpoints || []
 
-      expect(endpoint.custom).toEqual({ params: [{ in: 'query', name: 'name', type: 'string' }] })
+      expect(endpoint.custom).toEqual({ params: [{ name: 'name', type: 'string', in: 'query' }] })
     })
 
     it('allows a custom field in global fields', () => {
@@ -90,6 +92,13 @@ describe('Config', () => {
       expect(field.custom).toEqual({
         description: 'The title of my global',
       })
+    })
+  })
+
+  describe('cors config', () => {
+    it('includes a custom header in Access-Control-Allow-Headers', async () => {
+      const response = await restClient.GET(`/pages`)
+      expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-custom-header')
     })
   })
 })

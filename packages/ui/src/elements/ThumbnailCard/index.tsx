@@ -1,4 +1,5 @@
-import type { SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+'use client'
+import type { SanitizedCollectionConfig, TypeWithID } from 'payload'
 
 import React from 'react'
 
@@ -11,7 +12,7 @@ export type ThumbnailCardProps = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: SanitizedCollectionConfig
-  doc?: TypeWithID & { filename?: string }
+  doc?: { filename?: string } & TypeWithID
   label?: string
   onClick?: () => void
   onKeyDown?: () => void

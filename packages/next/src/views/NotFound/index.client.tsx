@@ -1,9 +1,5 @@
 'use client'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Gutter } from '@payloadcms/ui/elements/Gutter'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { Button, Gutter, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React, { useEffect } from 'react'
 
@@ -22,7 +18,7 @@ export const NotFoundClient: React.FC<{
   const { t } = useTranslation()
 
   const {
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = useConfig()
 
   useEffect(() => {
@@ -42,7 +38,7 @@ export const NotFoundClient: React.FC<{
       <Gutter className={`${baseClass}__wrap`}>
         <h1>{t('general:nothingFound')}</h1>
         <p>{t('general:sorryNotFound')}</p>
-        <Button Link={Link} className={`${baseClass}__button`} el="link" to={`${admin}`}>
+        <Button Link={Link} className={`${baseClass}__button`} el="link" to={adminRoute}>
           {t('general:backToDashboard')}
         </Button>
       </Gutter>

@@ -1,4 +1,4 @@
-import type { AdminViewComponent } from 'payload/types'
+import type { AdminViewComponent } from 'payload'
 
 import React, { Fragment } from 'react'
 

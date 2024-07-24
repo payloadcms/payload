@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from 'graphql'
-import { Kind, print } from 'graphql/language'
+import { Kind, print } from 'graphql/language/index.js'
 
 function identity(value) {
   return value
@@ -16,7 +16,6 @@ function ensureObject(value) {
 function parseObject(typeName, ast, variables) {
   const value = Object.create(null)
   ast.fields.forEach((field) => {
-    // eslint-disable-next-line no-use-before-define
     value[field.name.value] = parseLiteral(typeName, field.value, variables)
   })
 

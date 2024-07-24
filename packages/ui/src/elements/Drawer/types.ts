@@ -10,9 +10,9 @@ export type Props = {
   title?: string
 }
 
-export type TogglerProps = HTMLAttributes<HTMLButtonElement> & {
+export type TogglerProps = {
   children: React.ReactNode
   className?: string
   disabled?: boolean
   slug: string
-}
+} & HTMLAttributes<HTMLButtonElement>

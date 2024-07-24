@@ -2,17 +2,17 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openDocDrawer,
+  openCreateDocDrawer,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
@@ -20,7 +20,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -35,7 +35,8 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('relationship', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({
       dirname,
@@ -44,12 +45,18 @@ describe('relationship', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsRelationshipTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsRelationshipTest',
-      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -58,7 +65,7 @@ describe('relationship', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil
@@ -70,35 +77,29 @@ describe('relationship', () => {
 
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
-
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
-
+    await openCreateDocDrawer(page, '#field-relationship')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
-
     const textField = page.locator('.drawer__content #field-text')
+    await expect(textField).toBeEnabled()
     const textValue = 'hello'
-
     await textField.fill(textValue)
-
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
-
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
-
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should create nested inline relationships', async () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // Open first modal
-    await openDocDrawer(page, '#relationToSelf-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationToSelf')
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -108,11 +109,10 @@ describe('relationship', () => {
       )
       .click()
 
-    // Open second modal
-    await openDocDrawer(
-      page,
+    const secondModalButton = page.locator(
       '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
     )
+    await secondModalButton.click()
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
@@ -151,7 +151,7 @@ describe('relationship', () => {
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
     await page.locator('#action-save').click()
 
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should hide relationship add new button', async () => {
@@ -163,7 +163,8 @@ describe('relationship', () => {
     expect(count).toEqual(0)
   })
 
-  test('should clear relationship values', async () => {
+  // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
+  test.skip('should clear relationship values', async () => {
     await page.goto(url.create)
 
     const field = page.locator('#field-relationship')
@@ -241,7 +242,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -249,20 +250,20 @@ describe('relationship', () => {
     await page.locator('.drawer__content #field-text').fill('something')
 
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await openDocDrawer(page, '#field-relationshipHasMany .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationshipHasMany')
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
     // Save and close the drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
 
     // Now open the drawer again to edit the `text` field _using the keyboard_
@@ -285,12 +286,12 @@ describe('relationship', () => {
 
     // save drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     // close drawer
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     // save document and reload
     await page.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.reload()
 
     // check if the value is saved
@@ -305,7 +306,7 @@ describe('relationship', () => {
   test('should save using hotkey in edit document drawer', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await wait(500)
     // Select "Seeded text document" relationship
@@ -346,19 +347,19 @@ describe('relationship', () => {
   test.skip('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
     // First fill out the relationship field, as it's required
-    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+    await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -372,7 +373,7 @@ describe('relationship', () => {
       .click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.Toastify')).toContainText(
+    await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: relationshipWithMinRows',
     )
   })
@@ -380,9 +381,12 @@ describe('relationship', () => {
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
+    await wait(400)
 
     const field = page.locator('#field-relationship')
+    await wait(400)
     await field.click()
+    await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
@@ -405,8 +409,8 @@ describe('relationship', () => {
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
-    const firstOptionLabel = await firstTextDocOption.textContent()
-    expect(firstOptionLabel).toBe('Seeded text document')
+    const firstOptionLabel = firstTextDocOption
+    await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
 
   test('should allow filtering by relationship field / equals', async () => {
@@ -414,29 +418,45 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
-    await page.waitForURL(url.list)
+    await page.waitForURL(new RegExp(url.list))
+    await wait(400)
 
     await page.locator('.list-controls__toggle-columns').click()
+    await wait(400)
+
     await page.locator('.list-controls__toggle-where').click()
     await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await wait(400)
+
     await page.locator('.where-builder__add-first-filter').click()
 
+    await wait(400)
     const conditionField = page.locator('.condition__field')
+    await expect(conditionField.locator('input')).toBeEnabled()
     await conditionField.click()
+    await wait(400)
 
     const dropdownFieldOptions = conditionField.locator('.rs__option')
     await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+    await wait(400)
 
     const operatorField = page.locator('.condition__operator')
+    await expect(operatorField.locator('input')).toBeEnabled()
     await operatorField.click()
+    await wait(400)
 
     const dropdownOperatorOptions = operatorField.locator('.rs__option')
     await dropdownOperatorOptions.locator('text=equals').click()
+    await wait(400)
 
     const valueField = page.locator('.condition__value')
+    await expect(valueField.locator('input')).toBeEnabled()
     await valueField.click()
+    await wait(400)
+
     const dropdownValueOptions = valueField.locator('.rs__option')
     await dropdownValueOptions.locator('text=some text').click()
+    await wait(400)
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })

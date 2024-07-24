@@ -1,15 +1,20 @@
 'use client'
 
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
-import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
-import { Email } from '@payloadcms/ui/fields/Email'
-import { Password } from '@payloadcms/ui/fields/Password'
-import { useFormFields, useFormModified } from '@payloadcms/ui/forms/Form'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  Button,
+  CheckboxField,
+  ConfirmPasswordField,
+  EmailField,
+  PasswordField,
+  TextField,
+  useConfig,
+  useDocumentInfo,
+  useFormFields,
+  useFormModified,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
@@ -24,18 +29,21 @@ export const Auth: React.FC<Props> = (props) => {
     collectionSlug,
     disableLocalStrategy,
     email,
+    loginWithUsername,
     operation,
     readOnly,
     requirePassword,
     useAPIKey,
+    username,
     verify,
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
-  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey)
+  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
+  const { isInitializing } = useDocumentInfo()
 
   const {
     routes: { api },
@@ -57,9 +65,8 @@ export const Auth: React.FC<Props> = (props) => {
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${collectionSlug}/unlock`
     const response = await fetch(url, {
-      body: JSON.stringify({
-        email,
-      }),
+      body:
+        loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -69,11 +76,11 @@ export const Auth: React.FC<Props> = (props) => {
     })
 
     if (response.status === 200) {
-      toast.success(t('authentication:successfullyUnlocked'), { autoClose: 3000 })
+      toast.success(t('authentication:successfullyUnlocked'))
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, t])
+  }, [i18n, serverURL, api, collectionSlug, email, username, t])
 
   useEffect(() => {
     if (!modified) {
@@ -85,35 +92,50 @@ export const Auth: React.FC<Props> = (props) => {
     return null
   }
 
+  const disabled = readOnly || isInitializing
+
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <Email
-            autoComplete="email"
-            label={t('general:email')}
-            name="email"
-            readOnly={readOnly}
-            required
-          />
+          {Boolean(loginWithUsername) && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
+          {(!loginWithUsername ||
+            loginWithUsername?.allowEmailLogin ||
+            loginWithUsername?.requireEmail) && (
+            <EmailField
+              autoComplete="email"
+              disabled={disabled}
+              label={t('general:email')}
+              name="email"
+              readOnly={readOnly}
+              required={!loginWithUsername || loginWithUsername?.requireEmail}
+            />
+          )}
           {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
-              <Password
+              <PasswordField
                 autoComplete="off"
-                disabled={readOnly}
+                disabled={disabled}
                 label={t('authentication:newPassword')}
                 name="password"
                 required
               />
-              <ConfirmPassword disabled={readOnly} />
+              <ConfirmPasswordField disabled={readOnly} />
             </div>
           )}
-
           <div className={`${baseClass}__controls`}>
             {changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={disabled}
                 onClick={() => handleChangePassword(false)}
                 size="small"
               >
@@ -123,7 +145,7 @@ export const Auth: React.FC<Props> = (props) => {
             {!changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={disabled}
                 id="change-password"
                 onClick={() => handleChangePassword(true)}
                 size="small"
@@ -134,7 +156,7 @@ export const Auth: React.FC<Props> = (props) => {
             {operation === 'update' && (
               <Button
                 buttonStyle="secondary"
-                disabled={readOnly}
+                disabled={disabled}
                 onClick={() => unlock()}
                 size="small"
               >
@@ -146,7 +168,8 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          <Checkbox
+          <CheckboxField
+            disabled={disabled}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
             readOnly={readOnly}
@@ -155,7 +178,12 @@ export const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <Checkbox label={t('authentication:verified')} name="_verified" readOnly={readOnly} />
+        <CheckboxField
+          disabled={disabled}
+          label={t('authentication:verified')}
+          name="_verified"
+          readOnly={readOnly}
+        />
       )}
     </div>
   )

@@ -1,33 +1,31 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-type HookArgsWithCustomCollection = Omit<
-  Parameters<CollectionBeforeChangeHook>[0],
-  'collection'
-> & {
+type HookArgsWithCustomCollection = {
   collection: CollectionConfig
-}
+} & Omit<Parameters<CollectionBeforeChangeHook>[0], 'collection'>
 
 export type CollectionBeforeChangeHookWithArgs = (
-  args: HookArgsWithCustomCollection & {
+  args: {
     collection?: CollectionConfig
-    stripeConfig?: StripeConfig
-  },
+    pluginConfig?: StripePluginConfig
+  } & HookArgsWithCustomCollection,
 ) => void
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
-  const { collection, data, operation, originalDoc, req, stripeConfig } = args
+  const { collection, data, operation, originalDoc, pluginConfig, req } = args
 
-  const { logs, sync } = stripeConfig || {}
+  const { logs, sync } = pluginConfig || {}
 
   const { payload } = req
 
@@ -39,12 +37,15 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce(
+          (acc, field) => {
+            const { fieldPath, stripeProperty } = field
 
-          acc[stripeProperty] = data[fieldPath]
-          return acc
-        }, {} as Record<string, any>)
+            acc[stripeProperty] = data[fieldPath]
+            return acc
+          },
+          {} as Record<string, any>,
+        )
 
         syncedFields = deepen(syncedFields)
 

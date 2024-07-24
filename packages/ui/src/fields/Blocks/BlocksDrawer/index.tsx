@@ -1,8 +1,8 @@
 'use client'
-import type { I18n } from '@payloadcms/translations'
-import type { Labels } from 'payload/types'
+import type { I18nClient } from '@payloadcms/translations'
+import type { Labels } from 'payload'
 
-import * as facelessUIImport from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 
@@ -25,7 +25,7 @@ export type Props = {
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: ReducedBlock, i18n: I18n) => {
+const getBlockLabel = (block: ReducedBlock, i18n: I18nClient) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()
@@ -35,7 +35,6 @@ const getBlockLabel = (block: ReducedBlock, i18n: I18n) => {
 
 export const BlocksDrawer: React.FC<Props> = (props) => {
   const { addRow, addRowIndex, blocks, drawerSlug, labels } = props
-  const { useModal } = facelessUIImport
 
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredBlocks, setFilteredBlocks] = useState(blocks)

@@ -1,12 +1,11 @@
-/* eslint-disable no-console */
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
 import { captureException } from './captureException.js'
 import { startSentry } from './startSentry.js'
 
-export const sentry =
+export const sentryPlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
     const config = { ...incomingConfig }

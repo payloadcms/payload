@@ -1,10 +1,9 @@
 'use client'
-import type { PaginatedDocs } from 'payload/database'
-import type { Where } from 'payload/types'
+import type { PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
-import { isNumber } from 'payload/utilities'
-import qs from 'qs'
+import { isNumber } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { createContext, useContext } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
@@ -31,11 +30,12 @@ export type ListQueryProps = {
   preferenceKey?: string
 } & Handlers
 
-export type ListQueryContext = Handlers & {
+export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
-}
+  refineListData: (args: RefineOverrides) => void
+} & Handlers
 
 const Context = createContext({} as ListQueryContext)
 
@@ -176,6 +176,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        refineListData,
       }}
     >
       {children}

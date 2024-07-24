@@ -1,19 +1,20 @@
 import type {
   CollectionAfterChangeHook,
   CollectionConfig,
-  PayloadRequestWithData,
-} from 'payload/types'
+  JsonObject,
+  PayloadRequest,
+} from 'payload'
 
-import type { PluginConfig } from '../types.js'
+import type { NestedDocsPluginConfig } from '../types.js'
 
 import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
 type ResaveArgs = {
   collection: CollectionConfig
-  doc: Record<string, unknown>
+  doc: JsonObject
   draft: boolean
-  pluginConfig: PluginConfig
-  req: PayloadRequestWithData
+  pluginConfig: NestedDocsPluginConfig
+  req: PayloadRequest
 }
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
@@ -70,7 +71,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 }
 
 export const resaveChildren =
-  (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
     await resave({
       collection,

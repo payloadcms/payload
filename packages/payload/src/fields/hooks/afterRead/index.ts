@@ -1,43 +1,45 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth?: number
   depth: number
-  doc: Record<string, unknown>
+  doc: T
+  draft: boolean
   fallbackLocale: null | string
   findMany?: boolean
   flattenLocales?: boolean
   global: SanitizedGlobalConfig | null
   locale: string
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
 /**
  * This function is responsible for the following actions, in order:
  * - Remove hidden fields from response
- * - Flatten locales into requested locale
+ * - Flatten locales into requested locale. If the input doc contains all locales, the output doc after this function will only contain the requested locale.
  * - Sanitize outgoing data (point field, etc.)
  * - Execute field hooks
  * - Execute read access control
  * - Populate relationships
  */
 
-export async function afterRead<T = any>(args: Args): Promise<T> {
+export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T> {
   const {
     collection,
     context,
     currentDepth: incomingCurrentDepth,
     depth: incomingDepth,
     doc: incomingDoc,
+    draft,
     fallbackLocale,
     findMany,
     flattenLocales = true,
@@ -48,7 +50,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     showHiddenFields,
   } = args
 
-  const doc = deepCopyObject(incomingDoc)
+  const doc = deepCopyObjectSimple(incomingDoc)
   const fieldPromises = []
   const populationPromises = []
 
@@ -66,6 +68,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     currentDepth,
     depth,
     doc,
+    draft,
     fallbackLocale,
     fieldPromises,
     fields: collection?.fields || global?.fields,
@@ -74,8 +77,10 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     global,
     locale,
     overrideAccess,
+    path: [],
     populationPromises,
     req,
+    schemaPath: [],
     showHiddenFields,
     siblingDoc: doc,
   })

@@ -1,6 +1,5 @@
-import type { I18n } from '@payloadcms/translations'
-import type { Permissions } from 'payload/auth'
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+import type { I18nClient } from '@payloadcms/translations'
+import type { ClientCollectionConfig, ClientGlobalConfig, Permissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -27,7 +26,7 @@ export type Group = {
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
-  i18n: I18n,
+  i18n: I18nClient,
 ): Group[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {

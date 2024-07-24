@@ -1,5 +1,5 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 
@@ -24,7 +24,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.get('range'))
 
       const blob = await blockBlobClient.download(start, end)
-      // eslint-disable-next-line no-underscore-dangle
+
       const response = blob._response
 
       // Manually create a ReadableStream for the web from a Node.js stream.

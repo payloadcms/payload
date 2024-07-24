@@ -1,5 +1,4 @@
-import type { Payload } from 'payload'
-import type { Where } from 'payload/types'
+import type { Payload, Where } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
@@ -15,6 +14,7 @@ import configPromise from './config.js'
 import { defaultLocale } from './shared.js'
 import {
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -40,7 +40,6 @@ describe('Localization', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
 
-    // @ts-expect-error Force typing
     post1 = await payload.create({
       collection,
       data: {
@@ -48,7 +47,6 @@ describe('Localization', () => {
       },
     })
 
-    // @ts-expect-error Force typing
     postWithLocalizedData = await payload.create({
       collection,
       data: {
@@ -188,7 +186,6 @@ describe('Localization', () => {
           },
         })
 
-        // @ts-expect-error Force typing
         localizedPost = await payload.update({
           id,
           collection,
@@ -279,6 +276,67 @@ describe('Localization', () => {
 
         expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
+
+      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
+        describe('Localized sorting', () => {
+          let localizedAccentPostOne: LocalizedPost
+          let localizedAccentPostTwo: LocalizedPost
+          beforeEach(async () => {
+            localizedAccentPostOne = await payload.create({
+              collection,
+              data: {
+                title: 'non accent post',
+                localizedDescription: 'something',
+              },
+              locale: englishLocale,
+            })
+
+            localizedAccentPostTwo = await payload.create({
+              collection,
+              data: {
+                title: 'accent post',
+                localizedDescription: 'veterinarian',
+              },
+              locale: englishLocale,
+            })
+
+            await payload.update({
+              id: localizedAccentPostOne.id,
+              collection,
+              data: {
+                title: 'non accent post',
+                localizedDescription: 'valami',
+              },
+              locale: hungarianLocale,
+            })
+
+            await payload.update({
+              id: localizedAccentPostTwo.id,
+              collection,
+              data: {
+                title: 'accent post',
+                localizedDescription: 'állatorvos',
+              },
+              locale: hungarianLocale,
+            })
+          })
+
+          it('should sort alphabetically even with accented letters', async () => {
+            const sortByDescriptionQuery = await payload.find({
+              collection,
+              sort: 'description',
+              where: {
+                title: {
+                  like: 'accent',
+                },
+              },
+              locale: hungarianLocale,
+            })
+
+            expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
+          })
+        })
+      }
     })
   })
 
@@ -289,7 +347,7 @@ describe('Localization', () => {
         const post = await payload.create({
           collection: localizedSortSlug,
           data: {
-            date: new Date(),
+            date: new Date().toISOString(),
             title: `EN ${i}`,
           },
           locale: englishLocale,
@@ -299,7 +357,7 @@ describe('Localization', () => {
           id: post.id,
           collection: localizedSortSlug,
           data: {
-            date: new Date(),
+            date: new Date().toISOString(),
             title: `ES ${i}`,
           },
           locale: spanishLocale,
@@ -355,7 +413,6 @@ describe('Localization', () => {
         },
       })
 
-      // @ts-expect-error Force typing
       withRelationship = await payload.create({
         collection: withLocalizedRelSlug,
         data: {

@@ -1,23 +1,33 @@
 'use client'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { Data, FormState, TypeWithTimestamps } from 'payload/types'
-import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
+import type {
+  Data,
+  DocumentPermissions,
+  DocumentPreferences,
+  FormState,
+  PaginatedDocs,
+  TypeWithID,
+  TypeWithTimestamps,
+  TypeWithVersion,
+  Where,
+} from 'payload'
 
-import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
-import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import { notFound } from 'next/navigation.js'
-import qs from 'qs'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { reduceFieldsToValues } from 'payload/shared'
+import * as qs from 'qs-esm'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { getFormState } from '../../utilities/getFormState.js'
+import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
+import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -25,28 +35,23 @@ export type * from './types.js'
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<
-  DocumentInfoProps & {
+const DocumentInfo: React.FC<
+  {
     children: React.ReactNode
-  }
+  } & DocumentInfoProps
 > = ({ children, ...props }) => {
-  const { id, collectionSlug, globalSlug, onLoadError, onSave: onSaveFromProps } = props
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-  const [documentTitle, setDocumentTitle] = useState('')
-  const [initialData, setInitialData] = useState<Data>()
-  const [initialState, setInitialState] = useState<FormState>()
-  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
-  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
-  const [unpublishedVersions, setUnpublishedVersions] =
-    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-
-  const { getPreference, setPreference } = usePreferences()
-  const { i18n } = useTranslation()
-  const { permissions } = useAuth()
-  const { code: locale } = useLocale()
+  const {
+    id,
+    collectionSlug,
+    docPermissions: docPermissionsFromProps,
+    globalSlug,
+    hasPublishPermission: hasPublishPermissionFromProps,
+    hasSavePermission: hasSavePermissionFromProps,
+    initialData: initialDataFromProps,
+    initialState: initialStateFromProps,
+    onLoadError,
+    onSave: onSaveFromProps,
+  } = props
 
   const {
     admin: { dateFormat },
@@ -59,6 +64,47 @@ export const DocumentInfoProvider: React.FC<
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
+
+  const { i18n } = useTranslation()
+
+  const { uploadEdits } = useUploadEdits()
+
+  const [documentTitle, setDocumentTitle] = useState(() => {
+    if (!initialDataFromProps) return ''
+
+    return formatDocTitle({
+      collectionConfig,
+      data: { ...initialDataFromProps, id },
+      dateFormat,
+      fallback: id?.toString(),
+      globalConfig,
+      i18n,
+    })
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+  const [data, setData] = useState<Data>(initialDataFromProps)
+  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
+  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
+  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(docPermissionsFromProps)
+  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
+  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
+    hasPublishPermissionFromProps,
+  )
+  const isInitializing = initialState === undefined || data === undefined
+  const [unpublishedVersions, setUnpublishedVersions] =
+    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+
+  const { getPreference, setPreference } = usePreferences()
+  const { permissions } = useAuth()
+  const { code: locale } = useLocale()
+  const prevLocale = useRef(locale)
+  const hasInitializedDocPermissions = useRef(false)
+  // Separate locale cache used for handling permissions
+  const prevLocalePermissions = useRef(locale)
+
   const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
@@ -81,12 +127,13 @@ export const DocumentInfoProvider: React.FC<
     }
   }
 
-  const isEditing = Boolean(id)
+  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
+  const operation = isEditing ? 'update' : 'create'
+  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    const shouldFetchVersions = Boolean(versionsConfig)
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -209,37 +256,84 @@ export const DocumentInfoProvider: React.FC<
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
-  const getDocPermissions = React.useCallback(async () => {
-    let docAccessURL: string
-    const params = {
-      locale: locale || undefined,
-    }
-    if (pluralType === 'globals') {
-      docAccessURL = `/globals/${slug}/access`
-    } else if (pluralType === 'collections' && id) {
-      docAccessURL = `/${slug}/access/${id}`
-    }
+  const getDocPermissions = React.useCallback(
+    async (data: Data) => {
+      const params = {
+        locale: locale || undefined,
+      }
 
-    if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      })
-      const json = await res.json()
+      const idToUse = data?.id || id
+      const newIsEditing = getIsEditing({ id: idToUse, collectionSlug, globalSlug })
 
-      setDocPermissions(json)
-      setHasSavePermission(json?.update?.permission)
-    } else {
-      // fallback to permissions from the entity type
-      // (i.e. create has no id)
-      setDocPermissions(permissions?.[pluralType]?.[slug])
-      setHasSavePermission(permissions?.[pluralType]?.[slug]?.update?.permission)
-    }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, locale])
+      if (newIsEditing) {
+        const docAccessURL = collectionSlug
+          ? `/${collectionSlug}/access/${idToUse}`
+          : globalSlug
+            ? `/globals/${globalSlug}/access`
+            : null
+
+        if (docAccessURL) {
+          const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          })
+
+          const json: DocumentPermissions = await res.json()
+          const publishedAccessJSON = await fetch(
+            `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+            {
+              body: JSON.stringify({
+                data: {
+                  ...(data || {}),
+                  _status: 'published',
+                },
+              }),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              method: 'POST',
+            },
+          ).then((res) => res.json())
+
+          setDocPermissions(json)
+
+          setHasSavePermission(
+            getHasSavePermission({
+              collectionSlug,
+              docPermissions: json,
+              globalSlug,
+              isEditing: newIsEditing,
+            }),
+          )
+
+          setHasPublishPermission(publishedAccessJSON?.update?.permission)
+        }
+      } else {
+        // when creating new documents, there is no permissions saved for this document yet
+        // use the generic entity permissions instead
+        const newDocPermissions = collectionSlug
+          ? permissions?.collections?.[collectionSlug]
+          : permissions?.globals?.[globalSlug]
+
+        setDocPermissions(newDocPermissions)
+
+        setHasSavePermission(
+          getHasSavePermission({
+            collectionSlug,
+            docPermissions: newDocPermissions,
+            globalSlug,
+            isEditing: newIsEditing,
+          }),
+        )
+      }
+    },
+    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug],
+  )
 
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -277,23 +371,26 @@ export const DocumentInfoProvider: React.FC<
 
       const docPreferences = await getDocPreferences()
 
+      const newData = collectionSlug ? json.doc : json.result
+
       const newState = await getFormState({
         apiRoute: api,
         body: {
           id,
           collectionSlug,
-          data: json.doc,
+          data: newData,
           docPreferences,
           globalSlug,
           locale,
-          operation: isEditing ? 'update' : 'create',
+          operation,
           schemaPath: collectionSlug || globalSlug,
         },
         serverURL,
       })
 
       setInitialState(newState)
-      setInitialData(json.doc)
+      setData(newData)
+      await getDocPermissions(newData)
     },
     [
       api,
@@ -301,66 +398,76 @@ export const DocumentInfoProvider: React.FC<
       getDocPreferences,
       globalSlug,
       id,
-      isEditing,
+      operation,
       locale,
       onSaveFromProps,
       serverURL,
+      getDocPermissions,
     ],
   )
 
   useEffect(() => {
     const abortController = new AbortController()
+    const localeChanged = locale !== prevLocale.current
 
-    const getInitialState = async () => {
-      setIsError(false)
-      setIsLoading(true)
+    if (
+      initialStateFromProps === undefined ||
+      initialDataFromProps === undefined ||
+      localeChanged
+    ) {
+      if (localeChanged) prevLocale.current = locale
 
-      try {
-        const result = await getFormState({
-          apiRoute: api,
-          body: {
-            id,
-            collectionSlug,
-            globalSlug,
-            locale,
-            operation: isEditing ? 'update' : 'create',
-            schemaPath: collectionSlug || globalSlug,
-          },
-          onError: onLoadError,
-          serverURL,
-          signal: abortController.signal,
-        })
+      const getInitialState = async () => {
+        setIsError(false)
+        setIsLoading(true)
 
-        setInitialData(reduceFieldsToValues(result, true))
-        setInitialState(result)
-      } catch (err) {
-        if (!abortController.signal.aborted) {
-          if (typeof onLoadError === 'function') {
-            void onLoadError()
+        try {
+          const result = await getFormState({
+            apiRoute: api,
+            body: {
+              id,
+              collectionSlug,
+              globalSlug,
+              locale,
+              operation,
+              schemaPath: collectionSlug || globalSlug,
+            },
+            onError: onLoadError,
+            serverURL,
+            signal: abortController.signal,
+          })
+
+          setData(reduceFieldsToValues(result, true))
+          setInitialState(result)
+        } catch (err) {
+          if (!abortController.signal.aborted) {
+            if (typeof onLoadError === 'function') {
+              void onLoadError()
+            }
+            setIsError(true)
+            setIsLoading(false)
           }
-          setIsError(true)
-          setIsLoading(false)
         }
+        setIsLoading(false)
       }
 
-      setIsLoading(false)
+      void getInitialState()
     }
-
-    void getInitialState()
 
     return () => {
       abortController.abort()
     }
   }, [
     api,
-    isEditing,
+    operation,
     collectionSlug,
     serverURL,
     id,
-    getPreference,
     globalSlug,
     locale,
     onLoadError,
+    initialDataFromProps,
+    initialStateFromProps,
   ])
 
   useEffect(() => {
@@ -371,56 +478,79 @@ export const DocumentInfoProvider: React.FC<
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
-        data: { ...initialData, id },
+        data: { ...data, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig,
         i18n,
       }),
     )
-  }, [collectionConfig, initialData, dateFormat, i18n, id, globalConfig])
+  }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const loadDocPermissions = async () => {
-      const docPermissions: DocumentPermissions = props.docPermissions
-      const hasSavePermission: boolean = props.hasSavePermission
+    const localeChanged = locale !== prevLocalePermissions.current
 
-      if (!docPermissions || hasSavePermission === undefined || hasSavePermission === null) {
-        await getDocPermissions()
-      } else {
-        setDocPermissions(docPermissions)
-        setHasSavePermission(hasSavePermission)
+    if (data && (collectionSlug || globalSlug)) {
+      if (localeChanged) {
+        prevLocalePermissions.current = locale
+        void getDocPermissions(data)
+      } else if (
+        hasInitializedDocPermissions.current === false &&
+        (!docPermissions ||
+          hasSavePermission === undefined ||
+          hasSavePermission === null ||
+          hasPublishPermission === undefined ||
+          hasPublishPermission === null)
+      ) {
+        hasInitializedDocPermissions.current = true
+        void getDocPermissions(data)
       }
-    }
-
-    if (collectionSlug || globalSlug) {
-      void loadDocPermissions()
     }
   }, [
     getDocPermissions,
-    props.docPermissions,
-    props.hasSavePermission,
+    docPermissionsFromProps,
+    hasSavePermissionFromProps,
+    hasPublishPermissionFromProps,
     setDocPermissions,
     collectionSlug,
     globalSlug,
+    data,
+    locale,
+    docPermissions,
+    hasSavePermission,
+    hasPublishPermission,
   ])
+
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${qs.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
 
   if (isError) notFound()
 
-  if (!initialState || isLoading) {
-    return <LoadingOverlay />
-  }
-
   const value: DocumentInfoContext = {
     ...props,
+    action,
     docConfig,
     docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
+    hasPublishPermission,
     hasSavePermission,
-    initialData,
+    initialData: data,
     initialState,
+    isInitializing,
+    isLoading,
     onSave,
     publishedDoc,
     setDocFieldPreferences,
@@ -431,4 +561,16 @@ export const DocumentInfoProvider: React.FC<
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<
+  {
+    children: React.ReactNode
+  } & DocumentInfoProps
+> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

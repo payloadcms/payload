@@ -1,9 +1,13 @@
-import type { SanitizedConfig } from 'payload/config'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { SanitizedConfig } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import AfterOperation from './collections/AfterOperation/index.js'
+import { AfterOperationCollection } from './collections/AfterOperation/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
@@ -15,7 +19,7 @@ import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   collections: [
-    AfterOperation,
+    AfterOperationCollection,
     ContextHooks,
     TransformHooks,
     Hooks,
@@ -55,6 +59,9 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         collectionAfterRead: false,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

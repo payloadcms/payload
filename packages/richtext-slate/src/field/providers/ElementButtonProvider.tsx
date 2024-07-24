@@ -1,14 +1,15 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { FormFieldBase } from '@payloadcms/ui'
 
 import React from 'react'
 
 type ElementButtonContextType = {
-  fieldProps: FormFieldBase & {
+  disabled?: boolean
+  fieldProps: {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
-  }
+  } & FormFieldBase
   path: string
   schemaPath: string
 }
@@ -20,9 +21,9 @@ const ElementButtonContext = React.createContext<ElementButtonContextType>({
 })
 
 export const ElementButtonProvider: React.FC<
-  ElementButtonContextType & {
+  {
     children: React.ReactNode
-  }
+  } & ElementButtonContextType
 > = (props) => {
   const { children, ...rest } = props
 

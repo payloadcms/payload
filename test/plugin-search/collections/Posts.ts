@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { postsSlug } from '../shared.js'
 
@@ -25,6 +25,11 @@ export const Posts: CollectionConfig = {
       name: 'excerpt',
       label: 'Excerpt',
       type: 'text',
+    },
+    {
+      type: 'text',
+      name: 'slug',
+      localized: true,
     },
   ],
 }

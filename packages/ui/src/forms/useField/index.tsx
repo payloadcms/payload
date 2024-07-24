@@ -6,7 +6,7 @@ import type { FieldType, Options } from './types.js'
 
 export type { FieldType, Options }
 
-import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -16,6 +16,7 @@ import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
   useForm,
   useFormFields,
+  useFormInitializing,
   useFormModified,
   useFormProcessing,
   useFormSubmitted,
@@ -36,6 +37,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
+  const initializing = useFormInitializing()
   const { user } = useAuth()
   const { id } = useDocumentInfo()
   const operation = useOperation()
@@ -58,6 +60,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const showError = valid === false && submitted
 
   const prevValid = useRef(valid)
+  const prevErrorMessage = useRef(field?.errorMessage)
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -107,6 +110,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
+      formInitializing: initializing,
       formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
@@ -136,6 +140,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       readOnly,
       permissions,
       filterOptions,
+      initializing,
     ],
   )
 
@@ -175,8 +180,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
         // Only dispatch if the validation result has changed
         // This will prevent unnecessary rerenders
-        if (valid !== prevValid.current) {
+        if (valid !== prevValid.current || errorMessage !== prevErrorMessage.current) {
           prevValid.current = valid
+          prevErrorMessage.current = errorMessage
 
           const update: UPDATE = {
             type: 'UPDATE',

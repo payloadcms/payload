@@ -1,9 +1,5 @@
 'use client'
-import type {
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-  VisibleEntities,
-} from 'packages/payload/src/exports/types.js'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig, VisibleEntities } from 'payload'
 
 import React, { createContext, useCallback, useContext } from 'react'
 

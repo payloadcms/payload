@@ -1,6 +1,4 @@
-import type { DeleteOne } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
-import type { Document } from 'payload/types'
+import type { DeleteOne, Document, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -9,10 +7,10 @@ import { withSession } from './withSession.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequestWithData, where },
+  { collection, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const query = await Model.buildQuery({
     payload: this.payload,

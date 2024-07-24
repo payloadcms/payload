@@ -1,21 +1,21 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args<T> = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown> | T
-  doc?: Record<string, unknown> | T
+  data: T
+  doc?: T
   duplicate?: boolean
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
 }
 
 /**
@@ -26,7 +26,7 @@ type Args<T> = {
  * - Merge original document data into incoming data
  * - Compute default values for undefined fields
  */
-export const beforeValidate = async <T extends Record<string, unknown>>({
+export const beforeValidate = async <T extends JsonObject>({
   id,
   collection,
   context,
@@ -37,7 +37,7 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData)
+  const data = deepCopyObjectSimple(incomingData)
 
   await traverseFields({
     id,
@@ -49,7 +49,9 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
     global,
     operation,
     overrideAccess,
+    path: [],
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

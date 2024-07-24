@@ -1,28 +1,35 @@
-import type { Where } from 'payload/types'
+import type { AdminViewProps, Where } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
-import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { TableColumnsProvider } from '@payloadcms/ui/elements/TableColumns'
-import { ListInfoProvider } from '@payloadcms/ui/providers/ListInfo'
-import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
+import {
+  HydrateClientUser,
+  ListInfoProvider,
+  ListQueryProvider,
+  TableColumnsProvider,
+} from '@payloadcms/ui'
+import { RenderCustomComponent, formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig } from 'payload/config'
-import { type AdminViewProps } from 'payload/types'
-import { isNumber, mergeListSearchAndWhere } from 'payload/utilities'
+import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
+import { isNumber, isReactComponentOrFunction } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
 
-import { UnauthorizedView } from '../Unauthorized/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
 
-export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
+export const ListView: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     collectionConfig,
+    locale: fullLocale,
     permissions,
+    req,
     req: {
+      i18n,
       locale,
       payload,
       payload: { config },
@@ -35,7 +42,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
   const collectionSlug = collectionConfig?.slug
 
   if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    return <UnauthorizedView initPageResult={initPageResult} searchParams={searchParams} />
+    notFound()
   }
 
   let listPreferences: ListPreferences
@@ -47,6 +54,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        req,
         user,
         where: {
           key: {
@@ -58,7 +66,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
   } catch (error) {} // eslint-disable-line no-empty
 
   const {
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
 
   if (collectionConfig) {
@@ -74,7 +82,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
 
     if (CustomList && typeof CustomList === 'function') {
       CustomListView = CustomList
-    } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
+    } else if (typeof CustomList === 'object' && isReactComponentOrFunction(CustomList.Component)) {
       CustomListView = CustomList.Component
     }
 
@@ -92,7 +100,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : listPreferences?.sort || undefined
+        : listPreferences?.sort || collectionConfig.defaultSort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -103,6 +111,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       locale,
       overrideAccess: false,
       page,
+      req,
       sort,
       user,
       where: whereQuery || {},
@@ -123,7 +132,10 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
           })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
+          newDocumentURL={formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/create`,
+          })}
         >
           <ListQueryProvider
             data={data}
@@ -142,6 +154,25 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
                 CustomComponent={CustomListView}
                 DefaultComponent={DefaultListView}
                 componentProps={viewComponentProps}
+                serverOnlyProps={{
+                  collectionConfig,
+                  data,
+                  hasCreatePermission:
+                    permissions?.collections?.[collectionSlug]?.create?.permission,
+                  i18n,
+                  limit,
+                  listPreferences,
+                  locale: fullLocale,
+                  newDocumentURL: formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${collectionSlug}/create`,
+                  }),
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                }}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

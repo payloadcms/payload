@@ -1,37 +1,48 @@
 'use client'
-import type { I18n, Language } from '@payloadcms/translations'
+import type {
+  AcceptedLanguages,
+  ClientTranslationKeys,
+  ClientTranslationsObject,
+  I18nClient,
+  Language,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig } from 'payload/types'
+import type { ClientConfig, LanguageOptions } from 'payload'
 
-import { t } from '@payloadcms/translations'
-import { importDateFNSLocale } from '@payloadcms/translations'
-import enUS from 'date-fns/locale/en-US'
+import { importDateFNSLocale, t } from '@payloadcms/translations'
+import { enUS } from 'date-fns/locale/en-US'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { useRouteCache } from '../RouteCache/index.js'
 
-export type LanguageOptions = {
-  label: string
-  value: string
-}[]
-
-const Context = createContext<{
-  i18n: I18n
+type ContextType<
+  TAdditionalTranslations = {},
+  TAdditionalClientTranslationKeys extends string = never,
+> = {
+  i18n: [TAdditionalClientTranslationKeys] extends [never]
+    ? I18nClient
+    : TAdditionalTranslations extends object
+      ? I18nClient<TAdditionalTranslations, TAdditionalClientTranslationKeys>
+      : I18nClient<ClientTranslationsObject, TAdditionalClientTranslationKeys>
   languageOptions: LanguageOptions
-  switchLanguage?: (lang: string) => Promise<void>
-  t: (key: string, vars?: Record<string, any>) => string
-}>({
+  switchLanguage?: (lang: AcceptedLanguages) => Promise<void>
+  t: TFunction<ClientTranslationKeys | Extract<TAdditionalClientTranslationKeys, string>>
+}
+
+const Context = createContext<ContextType<any, any>>({
+  // Use `any` here to be replaced later with a more specific type when used
   i18n: {
     dateFNS: enUS,
     dateFNSKey: 'en-US',
     fallbackLanguage: 'en',
     language: 'en',
     t: (key) => key,
-    translations: {},
+    translations: {} as any,
   },
   languageOptions: undefined,
   switchLanguage: undefined,
-  t: (key) => key,
+  t: (key) => undefined,
 })
 
 type Props = {
@@ -41,7 +52,7 @@ type Props = {
   language: string
   languageOptions: LanguageOptions
   switchLanguageServerAction: (lang: string) => Promise<void>
-  translations: Language['translations']
+  translations: I18nClient['translations']
 }
 
 export const TranslationProvider: React.FC<Props> = ({
@@ -56,7 +67,7 @@ export const TranslationProvider: React.FC<Props> = ({
   const { clearRouteCache } = useRouteCache()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
-  const nextT = (key: string, vars?: Record<string, unknown>): string =>
+  const nextT: ContextType['t'] = (key, vars): string =>
     t({
       key,
       translations,
@@ -107,4 +118,7 @@ export const TranslationProvider: React.FC<Props> = ({
   )
 }
 
-export const useTranslation = () => useContext(Context)
+export const useTranslation = <
+  TAdditionalTranslations = {},
+  TAdditionalClientTranslationKeys extends string = never,
+>() => useContext<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)

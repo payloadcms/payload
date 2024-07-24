@@ -8,7 +8,7 @@ import type { Option } from '../../types.js'
 
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
-import { Edit } from '../../../../icons/Edit/index.js'
+import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
@@ -47,6 +47,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__content`}>
+        {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
         <components.MultiValueLabel
           {...props}
           innerProps={{
@@ -61,6 +62,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
             onClick={() => setShowTooltip(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.stopPropagation()
+              }
+            }}
             onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -69,7 +75,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
               {t('general:editLabel', { label: '' })}
             </Tooltip>
-            <Edit />
+            <EditIcon className={`${baseClass}__icon`} />
           </DocumentDrawerToggler>
           <DocumentDrawer onSave={/* onSave */ null} />
         </Fragment>

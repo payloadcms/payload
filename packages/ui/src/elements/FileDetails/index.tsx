@@ -1,4 +1,4 @@
-import { isImage } from 'payload/utilities'
+'use client'
 import React from 'react'
 
 import { UploadActions } from '../../elements/Upload/index.js'
@@ -9,14 +9,15 @@ import './index.scss'
 
 const baseClass = 'file-details'
 
-import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload/types'
+import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 export type FileDetailsProps = {
-  canEdit?: boolean
   collectionSlug: string
-  doc: Data & {
+  customUploadActions?: React.ReactNode[]
+  doc: {
     sizes?: FileSizes
-  }
+  } & Data
+  enableAdjustments?: boolean
   handleRemove?: () => void
   hasImageSizes?: boolean
   imageCacheTag?: string
@@ -24,8 +25,16 @@ export type FileDetailsProps = {
 }
 
 export const FileDetails: React.FC<FileDetailsProps> = (props) => {
-  const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
-    props
+  const {
+    collectionSlug,
+    customUploadActions,
+    doc,
+    enableAdjustments,
+    handleRemove,
+    hasImageSizes,
+    imageCacheTag,
+    uploadConfig,
+  } = props
 
   const { id, filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
 
@@ -51,9 +60,12 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
             width={width as number}
           />
 
-          {isImage(mimeType as string) && mimeType !== 'image/svg+xml' && (
-            <UploadActions canEdit={canEdit} showSizePreviews={hasImageSizes && doc.filename} />
-          )}
+          <UploadActions
+            customActions={customUploadActions}
+            enableAdjustments={enableAdjustments}
+            enablePreviewSizes={hasImageSizes && doc.filename}
+            mimeType={mimeType}
+          />
         </div>
         {handleRemove && (
           <Button

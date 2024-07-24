@@ -1,14 +1,11 @@
-import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
+import type { StepNavItem } from '@payloadcms/ui'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useStepNav } from '@payloadcms/ui/elements/StepNav'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { formatDate } from '@payloadcms/ui/utilities/formatDate'
+import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
@@ -19,17 +16,7 @@ export const SetStepNav: React.FC<{
   globalConfig?: ClientGlobalConfig
   globalSlug?: string
   id?: number | string
-  mostRecentDoc: any
-}> = ({
-  id,
-  collectionConfig,
-  collectionSlug,
-  doc,
-  fieldMap,
-  globalConfig,
-  globalSlug,
-  mostRecentDoc,
-}) => {
+}> = ({ id, collectionConfig, collectionSlug, doc, fieldMap, globalConfig, globalSlug }) => {
   const config = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
@@ -48,8 +35,9 @@ export const SetStepNav: React.FC<{
 
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
       const pluralLabel = collectionConfig?.labels?.plural
+      const formattedDoc = doc.version ? doc.version : doc
 
-      if (mostRecentDoc) {
+      if (formattedDoc) {
         if (useAsTitle !== 'id') {
           const titleField = fieldMap.find((f) => {
             const { isFieldAffectingData } = f
@@ -57,32 +45,35 @@ export const SetStepNav: React.FC<{
             return Boolean(isFieldAffectingData && fieldName === useAsTitle)
           })
 
-          if (titleField && mostRecentDoc[useAsTitle]) {
+          if (titleField && formattedDoc[useAsTitle]) {
             if (titleField.localized) {
-              docLabel = mostRecentDoc[useAsTitle]?.[locale.code]
+              docLabel = formattedDoc[useAsTitle]?.[locale.code]
             } else {
-              docLabel = mostRecentDoc[useAsTitle]
+              docLabel = formattedDoc[useAsTitle]
             }
           } else {
             docLabel = `[${t('general:untitled')}]`
           }
         } else {
-          docLabel = mostRecentDoc.id
+          docLabel = doc.id
         }
       }
 
       nav = [
         {
           label: getTranslation(pluralLabel, i18n),
-          url: `${adminRoute}/collections/${collectionSlug}`,
+          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }),
         },
         {
           label: docLabel,
-          url: `${adminRoute}/collections/${collectionSlug}/${id}`,
+          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}/${id}` }),
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/collections/${collectionSlug}/${id}/versions`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/${id}/versions`,
+          }),
         },
         {
           label: doc?.createdAt
@@ -96,11 +87,17 @@ export const SetStepNav: React.FC<{
       nav = [
         {
           label: globalConfig.label,
-          url: `${adminRoute}/globals/${globalConfig.slug}`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/globals/${globalConfig.slug}`,
+          }),
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/globals/${globalConfig.slug}/versions`,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/globals/${globalConfig.slug}/versions`,
+          }),
         },
         {
           label: doc?.createdAt
@@ -117,7 +114,6 @@ export const SetStepNav: React.FC<{
     collectionSlug,
     globalSlug,
     doc,
-    mostRecentDoc,
     id,
     locale,
     t,

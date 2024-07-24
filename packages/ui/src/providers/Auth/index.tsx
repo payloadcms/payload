@@ -1,19 +1,18 @@
 'use client'
-import type { ClientUser, Permissions } from 'payload/auth'
-import type { MeOperationResult } from 'payload/types'
+import type { ClientUser, MeOperationResult, Permissions } from 'payload'
 
-import * as facelessUIImport from '@faceless-ui/modal'
-import { stayLoggedInModalSlug } from '@payloadcms/ui/elements/StayLoggedIn'
+import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
-import qs from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
+import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<void>
@@ -24,7 +23,9 @@ export type AuthContext<T = ClientUser> = {
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
   setUser: (user: T) => void
+  strategy?: string
   token?: string
+  tokenExpiration?: number
   user?: T | null
 }
 
@@ -33,9 +34,6 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { useModal } = facelessUIImport
-
-  const { searchParams } = useSearchParams()
   const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
@@ -47,8 +45,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const config = useConfig()
 
   const {
-    admin: { autoLogin, inactivityRoute: logoutInactivityRoute, user: userSlug },
-    routes: { admin, api },
+    admin: {
+      routes: { inactivity: logoutInactivityRoute },
+      user: userSlug,
+    },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = config
 
@@ -62,14 +63,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const id = user?.id
 
   const redirectToInactivityRoute = useCallback(() => {
-    if (window.location.pathname.startsWith(admin)) {
+    if (window.location.pathname.startsWith(adminRoute)) {
       const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname)}`
-      router.replace(`${admin}${logoutInactivityRoute}${redirectParam}`)
+      router.replace(
+        formatAdminURL({
+          adminRoute,
+          path: `${logoutInactivityRoute}${redirectParam}`,
+        }),
+      )
     } else {
-      router.replace(`${admin}${logoutInactivityRoute}`)
+      router.replace(
+        formatAdminURL({
+          adminRoute,
+          path: logoutInactivityRoute,
+        }),
+      )
     }
     closeAllModals()
-  }, [router, admin, logoutInactivityRoute, closeAllModals])
+  }, [router, adminRoute, logoutInactivityRoute, closeAllModals])
 
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
@@ -97,11 +108,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (forceRefresh || (tokenExpiration && remainingTime < 120)) {
         setTimeout(async () => {
           try {
-            const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
-              headers: {
-                'Accept-Language': i18n.language,
+            const request = await requests.post(
+              `${serverURL}${apiRoute}/${userSlug}/refresh-token`,
+              {
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
               },
-            })
+            )
 
             if (request.status === 200) {
               const json = await request.json()
@@ -121,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [
       tokenExpiration,
       serverURL,
-      api,
+      apiRoute,
       userSlug,
       i18n,
       redirectToInactivityRoute,
@@ -132,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshCookieAsync = useCallback(
     async (skipSetUser?: boolean): Promise<ClientUser> => {
       try {
-        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+        const request = await requests.post(`${serverURL}${apiRoute}/${userSlug}/refresh-token`, {
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -155,18 +169,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null
       }
     },
-    [serverURL, api, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
+    [serverURL, apiRoute, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
   )
 
   const logOut = useCallback(async () => {
     setUser(null)
     revokeTokenAndExpire()
     try {
-      await requests.post(`${serverURL}${api}/${userSlug}/logout`)
+      await requests.post(`${serverURL}${apiRoute}/${userSlug}/logout`)
     } catch (e) {
       toast.error(`Logging out failed: ${e.message}`)
     }
-  }, [serverURL, api, userSlug, revokeTokenAndExpire])
+  }, [serverURL, apiRoute, userSlug, revokeTokenAndExpire])
 
   const refreshPermissions = useCallback(async () => {
     const params = {
@@ -174,7 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const request = await requests.get(`${serverURL}${api}/access?${qs.stringify(params)}`, {
+      const request = await requests.get(`${serverURL}${apiRoute}/access?${qs.stringify(params)}`, {
         headers: {
           'Accept-Language': i18n.language,
         },
@@ -189,11 +203,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Refreshing permissions failed: ${e.message}`)
     }
-  }, [serverURL, api, i18n, code])
+  }, [serverURL, apiRoute, i18n, code])
 
   const fetchFullUser = React.useCallback(async () => {
     try {
-      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+      const request = await requests.get(`${serverURL}${apiRoute}/${userSlug}/me`, {
         headers: {
           'Accept-Language': i18n.language,
         },
@@ -208,32 +222,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (json?.token) {
             setTokenAndExpiration(json)
           }
-        } else if (autoLogin && autoLogin.prefillOnly !== true) {
-          // auto log-in with the provided autoLogin credentials. This is used in dev mode
-          // so you don't have to log in over and over again
-          const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
-            body: JSON.stringify({
-              email: autoLogin.email,
-              password: autoLogin.password,
-            }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
-          if (autoLoginResult.status === 200) {
-            const autoLoginJson = await autoLoginResult.json()
-            setUser(autoLoginJson.user)
-            if (autoLoginJson?.token) {
-              setTokenAndExpiration(autoLoginJson)
-            }
-            router.replace(
-              typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin,
-            )
-          } else {
-            setUser(null)
-            revokeTokenAndExpire()
-          }
         } else {
           setUser(null)
           revokeTokenAndExpire()
@@ -242,18 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [
-    serverURL,
-    api,
-    userSlug,
-    i18n.language,
-    autoLogin,
-    setTokenAndExpiration,
-    router,
-    searchParams,
-    admin,
-    revokeTokenAndExpire,
-  ])
+  }, [serverURL, apiRoute, userSlug, i18n.language, setTokenAndExpiration, revokeTokenAndExpire])
 
   // On mount, get user and set
   useEffect(() => {

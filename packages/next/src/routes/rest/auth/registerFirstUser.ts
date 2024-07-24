@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
-import { generatePayloadCookie } from 'payload/auth'
-import { registerFirstUserOperation } from 'payload/operations'
+import { generatePayloadCookie, registerFirstUserOperation } from 'payload'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -8,13 +7,22 @@ import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
   const { data, t } = req
+  const authData = collection.config.auth?.loginWithUsername
+    ? {
+        email: typeof req.data?.email === 'string' ? req.data.email : '',
+        password: typeof req.data?.password === 'string' ? req.data.password : '',
+        username: typeof req.data?.username === 'string' ? req.data.username : '',
+      }
+    : {
+        email: typeof req.data?.email === 'string' ? req.data.email : '',
+        password: typeof req.data?.password === 'string' ? req.data.password : '',
+      }
 
   const result = await registerFirstUserOperation({
     collection,
     data: {
       ...data,
-      email: typeof data?.email === 'string' ? data.email : '',
-      password: typeof data?.password === 'string' ? data.password : '',
+      ...authData,
     },
     req,
   })

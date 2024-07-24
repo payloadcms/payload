@@ -1,17 +1,14 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui/elements/Button'
-import { Modal, useModal } from '@payloadcms/ui/elements/Modal'
-import { Pill } from '@payloadcms/ui/elements/Pill'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL, requests } from '@payloadcms/ui/shared'
+import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-// import { requests } from '../../../../api'
+import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'
@@ -27,11 +24,13 @@ const Restore: React.FC<Props> = ({
   versionID,
 }) => {
   const {
-    routes: { admin, api },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = useConfig()
+
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
+  const router = useRouter()
   const { i18n, t } = useTranslation()
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
@@ -39,38 +38,42 @@ const Restore: React.FC<Props> = ({
     versionDate,
   })
 
-  let fetchURL = `${serverURL}${api}`
+  let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
 
   if (collectionSlug) {
     fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}`
-    redirectURL = `${admin}/collections/${collectionSlug}/${originalDocID}`
+    redirectURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionSlug}/${originalDocID}`,
+    })
   }
 
   if (globalSlug) {
     fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}`
-    redirectURL = `${admin}/globals/${globalSlug}`
+    redirectURL = formatAdminURL({
+      adminRoute,
+      path: `/globals/${globalSlug}`,
+    })
   }
 
   const handleRestore = useCallback(async () => {
     setProcessing(true)
 
-    const res: any = {}
-
-    // const res = await requests.post(fetchURL, {
-    //   headers: {
-    //     'Accept-Language': i18n.language,
-    //   },
-    // })
+    const res = await requests.post(fetchURL, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    })
 
     if (res.status === 200) {
       const json = await res.json()
       toast.success(json.message)
-      // history.push(redirectURL)
+      router.push(redirectURL)
     } else {
       toast.error(t('version:problemRestoringVersion'))
     }
-  }, [fetchURL, redirectURL, t, i18n])
+  }, [fetchURL, redirectURL, t, i18n, router])
 
   return (
     <Fragment>

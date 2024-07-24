@@ -1,6 +1,6 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -15,8 +15,8 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [PostsCollection, MediaCollection],
-  globals: [MenuGlobal],
   email: nodemailerAdapter(),
+  globals: [MenuGlobal],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -34,8 +34,8 @@ export default buildConfigWithDefaults({
     })
 
     const email = await payload.sendEmail({
-      to: 'test@example.com',
       subject: 'This was sent on init',
+      to: 'test@example.com',
     })
 
     // Create image
@@ -47,5 +47,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: imageFile,
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,11 +1,12 @@
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload/types'
+'use client'
+import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload'
 import React from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
@@ -103,20 +104,21 @@ export const buildColumnState = (args: Args): Column[] => {
     const Label = (
       <FieldLabel
         CustomLabel={CustomLabelToRender}
-        {...field.fieldComponentProps?.labelProps}
+        label={field.fieldComponentProps?.label}
+        {...(field.fieldComponentProps?.labelProps || {})}
         unstyled
       />
     )
 
+    const fieldAffectsDataSubFields =
+      field &&
+      field.type &&
+      (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
+
     const Heading = (
       <SortColumn
         Label={Label}
-        disable={
-          ('disableSort' in field && Boolean(field.disableSort)) ||
-          fieldIsPresentationalOnly(field) ||
-          undefined
-        }
-        // eslint-disable-next-line react/jsx-no-duplicate-props
+        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         label={
           'fieldComponentProps' in field && 'label' in field.fieldComponentProps
             ? field.fieldComponentProps.label
@@ -133,6 +135,10 @@ export const buildColumnState = (args: Args): Column[] => {
         Label,
         accessor: name,
         active,
+        admin: {
+          disableListColumn: field.disableListColumn,
+          disableListFilter: field.disableListFilter,
+        },
         cellProps: {
           ...field.cellComponentProps,
           ...cellProps?.[index],

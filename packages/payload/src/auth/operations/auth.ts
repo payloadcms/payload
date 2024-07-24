@@ -1,42 +1,39 @@
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
-import type { Permissions, User } from '../types.js'
+import type { TypedUser } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { Permissions } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { parseCookies } from '../cookies.js'
 import { executeAuthStrategies } from '../executeAuthStrategies.js'
 import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
-  req?: Omit<PayloadRequestWithData, 'user'>
+  req?: Omit<PayloadRequest, 'user'>
 }
 
 export type AuthResult = {
-  cookies: Map<string, string>
   permissions: Permissions
-  user: GeneratedTypes['user'] | null
+  responseHeaders?: Headers
+  user: TypedUser | null
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { headers } = args
-  const req = args.req as PayloadRequestWithData
+  const req = args.req as PayloadRequest
   const { payload } = req
-
-  const cookies = parseCookies(headers)
 
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await executeAuthStrategies({
-      cookies,
+    const { responseHeaders, user } = await executeAuthStrategies({
       headers,
       payload,
     })
 
     req.user = user
+    req.responseHeaders = responseHeaders
 
     const permissions = await getAccessResults({
       req,
@@ -45,8 +42,8 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
     if (shouldCommit) await commitTransaction(req)
 
     return {
-      cookies,
       permissions,
+      responseHeaders,
       user,
     }
   } catch (error: unknown) {

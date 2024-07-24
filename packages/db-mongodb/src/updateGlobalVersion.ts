@@ -1,5 +1,4 @@
-import type { UpdateGlobalVersionArgs } from 'payload/database'
-import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
+import type { PayloadRequest, TypeWithID, UpdateGlobalVersionArgs } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -11,7 +10,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     id,
     global,
     locale,
-    req = {} as PayloadRequestWithData,
+    req = {} as PayloadRequest,
     versionData,
     where,
   }: UpdateGlobalVersionArgs<T>,
@@ -19,7 +18,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const VersionModel = this.versions[global]
   const whereToUse = where || { id: { equals: id } }
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
     new: true,
   }

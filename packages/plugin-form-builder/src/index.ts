@@ -1,6 +1,6 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
-import type { PluginConfig } from './types.js'
+import type { FormBuilderPluginConfig } from './types.js'
 
 import { generateSubmissionCollection } from './collections/FormSubmissions/index.js'
 import { generateFormCollection } from './collections/Forms/index.js'
@@ -8,10 +8,10 @@ import { generateFormCollection } from './collections/Forms/index.js'
 export { fields } from './collections/Forms/fields.js'
 export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
-const FormBuilder =
-  (incomingFormConfig: PluginConfig) =>
+export const formBuilderPlugin =
+  (incomingFormConfig: FormBuilderPluginConfig) =>
   (config: Config): Config => {
-    const formConfig: PluginConfig = {
+    const formConfig: FormBuilderPluginConfig = {
       ...incomingFormConfig,
       fields: {
         checkbox: true,
@@ -30,20 +30,6 @@ const FormBuilder =
 
     return {
       ...config,
-      // admin: {
-      //   ...config.admin,
-      //   webpack: (webpackConfig) => ({
-      //     ...webpackConfig,
-      //     resolve: {
-      //       ...webpackConfig.resolve,
-      //       alias: {
-      //         ...webpackConfig.resolve.alias,
-      //         [path.resolve(__dirname, 'collections/FormSubmissions/hooks/sendEmail.ts')]: path.resolve(__dirname, 'mocks/serverModule.js'),
-      //         [path.resolve(__dirname, 'collections/FormSubmissions/hooks/createCharge.ts')]: path.resolve(__dirname, 'mocks/serverModule.js'),
-      //       },
-      //     },
-      //   })
-      // },
       collections: [
         ...(config?.collections || []),
         generateFormCollection(formConfig),
@@ -51,5 +37,3 @@ const FormBuilder =
       ],
     }
   }
-
-export default FormBuilder

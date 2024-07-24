@@ -1,8 +1,6 @@
-import type { PayloadRequestWithData, Where } from 'payload/types'
-import type { Collection } from 'payload/types'
+import type { Collection, PayloadRequest, Where } from 'payload'
 
-import { countOperation } from 'payload/operations'
-import { isolateObjectProperty } from 'payload/utilities'
+import { countOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
@@ -14,12 +12,11 @@ export type Resolver = (
     where?: Where
   },
   context: {
-    req: PayloadRequestWithData
+    req: PayloadRequest
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<{ totalDocs: number }>
 
-export default function countResolver(collection: Collection): Resolver {
+export function countResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
@@ -28,6 +25,7 @@ export default function countResolver(collection: Collection): Resolver {
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = fallbackLocale
+    context.req = req
 
     const options = {
       collection,

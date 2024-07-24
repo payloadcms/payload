@@ -1,13 +1,13 @@
 'use client'
-import type { TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload'
 
-import { useDebounce } from '@payloadcms/ui/hooks/useDebounce'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useLocale } from '@payloadcms/ui/providers/Locale'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import querystring from 'qs'
+import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
+import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { reducer } from './reducer.js'
 
 // documents are first set to null when requested
@@ -57,14 +57,23 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
 
         if (idsToLoad.length > 0) {
           const url = `${serverURL}${api}/${slug}`
-          const params = {
-            depth: 0,
-            limit: 250,
-            locale,
-            'where[id][in]': idsToLoad,
+
+          const params = new URLSearchParams()
+
+          params.append('depth', '0')
+          params.append('limit', '250')
+
+          if (locale) {
+            params.append('locale', locale)
           }
 
-          const query = querystring.stringify(params, { addQueryPrefix: true })
+          if (idsToLoad && idsToLoad.length > 0) {
+            const idsToString = idsToLoad.map((id) => String(id))
+            params.append('where[id][in]', idsToString.join(','))
+          }
+
+          const query = `?${params.toString()}`
+
           const result = await fetch(`${url}${query}`, {
             credentials: 'include',
             headers: {

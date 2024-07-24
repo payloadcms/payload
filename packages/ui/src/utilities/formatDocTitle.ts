@@ -4,7 +4,7 @@ import type {
   ClientGlobalConfig,
   SanitizedConfig,
   TypeWithID,
-} from 'payload/types'
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -23,7 +23,7 @@ export const formatDocTitle = ({
   dateFormat: SanitizedConfig['admin']['dateFormat']
   fallback?: string
   globalConfig?: ClientGlobalConfig
-  i18n: I18n
+  i18n: I18n<any, any>
 }): string => {
   let title: string
 

@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
 
 export const Entities: CollectionConfig = {
   slug: 'entities',
@@ -18,7 +18,6 @@ export const Entities: CollectionConfig = {
     {
       name: 'children',
       type: 'relationship',
-      relationTo: ['entities', 'people'],
       access: {
         create: () => false,
         update: () => false,
@@ -26,40 +25,40 @@ export const Entities: CollectionConfig = {
       hooks: {
         afterRead: [
           async ({ data, req }) => {
+            if (!req.query.children || !data) return
+
             const { id } = data
 
-            if (!req.query.children) return
-
             const people = await req.payload.find({
-              req,
               collection: 'people',
+              depth: 0,
+              limit: 0,
+              pagination: false,
+              req,
               where: {
                 'parents.parent': { equals: id },
               },
-              limit: 0,
-              depth: 0,
-              pagination: false,
             })
 
             const entities = await req.payload.find({
-              req,
               collection: 'entities',
+              depth: 0,
+              limit: 0,
+              pagination: false,
+              req,
               where: {
                 parent: { equals: id },
               },
-              limit: 0,
-              depth: 0,
-              pagination: false,
             })
 
             return [
-              ...entities.docs.map(entity => {
+              ...entities.docs.map((entity) => {
                 return {
                   relationTo: 'entity',
                   value: entity,
                 }
               }),
-              ...people.docs.map(person => {
+              ...people.docs.map((person) => {
                 return {
                   relationTo: 'people',
                   value: person,
@@ -69,6 +68,7 @@ export const Entities: CollectionConfig = {
           },
         ],
       },
+      relationTo: ['entities', 'people'],
     },
     {
       name: 'parent',

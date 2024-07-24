@@ -1,23 +1,32 @@
-import type { ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload/config'
+import type { Config, Plugin } from 'payload'
 
-import { BlobServiceClient } from '@azure/storage-blob'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
+import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
 
 export type AzureStorageOptions = {
+  /**
+   * Whether or not to allow the container to be created if it does not exist
+   *
+   * @default false
+   */
   allowContainerCreate: boolean
+
+  /**
+   * Base URL for the Azure Blob storage account
+   */
   baseURL: string
+
   /**
    * Collection options to apply the Azure Blob adapter to.
    */
@@ -84,7 +93,7 @@ export const azureStorage: AzureStoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -95,21 +104,17 @@ function azureStorageInternal({
   connectionString,
   containerName,
 }: AzureStorageOptions): Adapter {
-  let storageClient: ContainerClient | null = null
-  const getStorageClient = () => {
-    if (storageClient) return storageClient
-
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
-    storageClient = blobServiceClient.getContainerClient(containerName)
-    return storageClient
-  }
-
   const createContainerIfNotExists = () => {
-    void getStorageClient().createIfNotExists({ access: 'blob' })
+    void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
+      access: 'blob',
+    })
   }
+
+  const getStorageClient = () => getStorageClientFunc({ connectionString, containerName })
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      name: 'azure',
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({
@@ -122,3 +127,5 @@ function azureStorageInternal({
     }
   }
 }
+
+export { getStorageClientFunc as getStorageClient }

@@ -1,12 +1,13 @@
 'use client'
-import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import { withCondition } from '@payloadcms/ui/forms/withCondition'
+
 import React, { useCallback } from 'react'
 
 import type { UploadInputProps } from './Input.js'
 import type { UploadFieldProps } from './types.js'
 
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
@@ -51,12 +52,14 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { filterOptions, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext || pathFromProps,
-    validate: memoizedValidate,
-  })
+  const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
+    useField<string>({
+      path: pathFromContext ?? pathFromProps,
+      validate: memoizedValidate,
+    })
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const onChange = useCallback(
     (incomingValue) => {
@@ -82,7 +85,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
         labelProps={labelProps}
         onChange={onChange}
         path={path}
-        readOnly={readOnly}
+        readOnly={disabled}
         relationTo={relationTo}
         required={required}
         serverURL={serverURL}
@@ -97,4 +100,4 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
   return null
 }
 
-export const Upload = withCondition(_Upload)
+export const UploadField = withCondition(_Upload)

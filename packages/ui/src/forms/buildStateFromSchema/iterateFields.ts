@@ -3,10 +3,10 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FormState,
-  PayloadRequestWithData,
-} from 'payload/types'
+  PayloadRequest,
+} from 'payload'
 
-import { fieldIsPresentationalOnly } from 'payload/types'
+import { fieldIsPresentationalOnly } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 
@@ -45,7 +45,7 @@ type Args = {
    */
   path?: string
   preferences?: DocumentPreferences
-  req: PayloadRequestWithData
+  req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
    */

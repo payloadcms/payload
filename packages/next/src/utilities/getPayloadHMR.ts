@@ -1,5 +1,4 @@
-import type { GeneratedTypes, Payload } from 'payload'
-import type { InitOptions, SanitizedConfig } from 'payload/config'
+import type { InitOptions, Payload, SanitizedConfig } from 'payload'
 
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'
@@ -7,12 +6,12 @@ import WebSocket from 'ws'
 let cached: {
   payload: Payload | null
   promise: Promise<Payload> | null
-  reload: Promise<boolean> | boolean
+  reload: Promise<void> | boolean
+  ws: WebSocket | null
 } = global._payload
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
-  cached = global._payload = { payload: null, promise: null, reload: false }
+  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
 export const reload = async (config: SanitizedConfig, payload: Payload): Promise<void> => {
@@ -36,23 +35,36 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
 
+  // Generate types
+  if (config.typescript.autoGenerate !== false) {
+    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
+    // see: https://github.com/vercel/next.js/issues/66723
+    void payload.bin({
+      args: ['generate:types'],
+      log: false,
+    })
+  }
+
   await payload.db.init()
-  await payload.db.connect({ hotReload: true })
+  if (payload.db.connect) {
+    await payload.db.connect({ hotReload: true })
+  }
 }
 
 export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   if (!options?.config) {
-    throw new Error('Error: the payload config is required for getPayload to work.')
+    throw new Error('Error: the payload config is required for getPayloadHMR to work.')
   }
 
   if (cached.payload) {
-    const config = await options.config // TODO: check if we can move this inside the cached.reload === true condition
-
     if (cached.reload === true) {
-      let resolve
+      let resolve: () => void
 
+      // getPayloadHMR is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
+      // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayloadHMR
+      // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
-
+      const config = await options.config
       await reload(config, cached.payload)
 
       resolve()
@@ -66,22 +78,26 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   }
 
   if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options)
+    // no need to await options.config here, as it's already awaited in the BasePayload.init
+    cached.promise = new BasePayload().init(options)
   }
 
   try {
     cached.payload = await cached.promise
 
     if (
+      !cached.ws &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
         const port = process.env.PORT || '3000'
-        const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)
+        cached.ws = new WebSocket(
+          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+        )
 
-        ws.onmessage = (event) => {
+        cached.ws.onmessage = (event) => {
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 

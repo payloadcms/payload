@@ -17,6 +17,14 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js storage-uploadthing",
+      "cwd": "${workspaceFolder}",
+      "name": "Uploadthing",
+      "request": "launch",
+      "type": "node-terminal",
+      "envFile": "${workspaceFolder}/test/storage-uploadthing/.env"
+    },
+    {
       "command": "node --no-deprecation test/dev.js live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",
@@ -59,6 +67,13 @@
       }
     },
     {
+      "command": "node --no-deprecation test/dev.js collections-graphql",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev GraphQL",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
@@ -93,6 +108,13 @@
       "command": "node --no-deprecation test/dev.js uploads",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Uploads",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "node --no-deprecation test/dev.js field-error-states",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Field Error States",
       "request": "launch",
       "type": "node-terminal"
     },

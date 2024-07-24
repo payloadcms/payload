@@ -1,5 +1,5 @@
 'use client'
-import * as facelessUIImport from '@faceless-ui/window-info'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import React from 'react'
 
 import { usePreferences } from '../../../providers/Preferences/index.js'
@@ -16,7 +16,6 @@ export const NavToggler: React.FC<{
   tabIndex?: number
 }> = (props) => {
   const { id, children, className, tabIndex = 0 } = props
-  const { useWindowInfo } = facelessUIImport
 
   const { t } = useTranslation()
 

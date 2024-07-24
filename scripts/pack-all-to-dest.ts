@@ -1,8 +1,8 @@
 import type { ExecSyncOptions } from 'child_process'
+import type execa from 'execa'
 
 import chalk from 'chalk'
 import { exec as execOrig, execSync } from 'child_process'
-import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
@@ -33,14 +33,16 @@ async function main() {
 
   const packageWhitelist = [
     'payload',
-    'translations',
     'ui',
     'next',
-    'graphql',
     'db-mongodb',
+    'drizzle',
+    'db-sqlite',
     'db-postgres',
-    'richtext-slate',
     'richtext-lexical',
+    'translations',
+    'plugin-cloud',
+    'graphql',
   ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)
@@ -48,22 +50,21 @@ async function main() {
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
 
-  await execa('pnpm', ['install'], execaOpts)
+  //await execa('pnpm', ['install'], execaOpts)
 
   const filtered = packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
 
-  header(`\n Outputting ${filtered.length} packages...
+  header(`\nOutputting ${filtered.length} packages...
 
-    ${filtered.map((p) => p.name).join('\n')}
+${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 `)
 
-  execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+  //execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
 
   header(`\n 📦 Packing all packages to ${dest}...`)
 
   await Promise.all(
     filtered.map(async (p) => {
-      await exec(`pnpm -r --filter ${p.shortName} run prepublishOnly`)
       await exec(`pnpm pack -C ${p.packagePath} --pack-destination ${resolvedDest}`)
     }),
   )
@@ -72,8 +73,5 @@ async function main() {
 }
 
 function header(message: string, opts?: { enable?: boolean }) {
-  const { enable } = opts ?? {}
-  if (!enable) return
-
   console.log(chalk.bold.green(`${message}\n`))
 }

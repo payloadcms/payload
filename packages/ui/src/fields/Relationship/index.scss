@@ -33,7 +33,7 @@ html[data-theme='light'] {
         }
       }
 
-      button {
+      button.relationship-add-new__add-button {
         @include lightInputError;
       }
     }
@@ -49,7 +49,7 @@ html[data-theme='dark'] {
         }
       }
 
-      button {
+      button.relationship-add-new__add-button {
         @include darkInputError;
       }
     }

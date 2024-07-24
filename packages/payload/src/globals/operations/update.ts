@@ -1,35 +1,36 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
-import type { SanitizedGlobalConfig } from '../config/types.js'
+import type { GlobalSlug, JsonObject } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { deepCopyObjectSimple } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
-type Args<T extends { [field: number | string | symbol]: unknown }> = {
+type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
-  data: DeepPartial<Omit<T, 'id'>>
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
-  req: PayloadRequestWithData
+  req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
 }
 
-export const updateOperation = async <TSlug extends keyof GeneratedTypes['globals']>(
-  args: Args<GeneratedTypes['globals'][TSlug]>,
-): Promise<GeneratedTypes['globals'][TSlug]> => {
+export const updateOperation = async <TSlug extends GlobalSlug>(
+  args: Args<TSlug>,
+): Promise<DataFromGlobalSlug<TSlug>> => {
   const {
     slug,
     autosave,
@@ -81,10 +82,10 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       where: query,
     })
 
-    let globalJSON: Record<string, unknown> = {}
+    let globalJSON: JsonObject = {}
 
     if (global) {
-      globalJSON = JSON.parse(JSON.stringify(global))
+      globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
         delete globalJSON._id
@@ -96,6 +97,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       context: req.context,
       depth: 0,
       doc: globalJSON,
+      draft: draftArg,
       fallbackLocale,
       global: globalConfig,
       locale,
@@ -166,7 +168,8 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       global: globalConfig,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
@@ -219,6 +222,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['global
       context: req.context,
       depth,
       doc: result,
+      draft: draftArg,
       fallbackLocale: null,
       global: globalConfig,
       locale,

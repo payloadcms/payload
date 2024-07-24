@@ -1,6 +1,6 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { FieldMap, MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { FieldPermissions } from 'payload/auth'
+import type { FieldPermissions } from 'payload'
 import type React from 'react'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
@@ -13,7 +13,7 @@ export type Props = {
   disableGutter?: boolean
   field: MappedField
   fieldMap: FieldMap
-  i18n: I18n
+  i18n: I18nClient
   isRichText?: boolean
   locale?: string
   locales?: string[]

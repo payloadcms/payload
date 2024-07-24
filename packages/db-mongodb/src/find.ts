@@ -1,8 +1,7 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Find } from 'payload/database'
-import type { PayloadRequestWithData } from 'payload/types'
+import type { Find, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload/database'
+import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -12,20 +11,11 @@ import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequestWithData,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint = false
 
@@ -64,6 +54,10 @@ export const find: Find = async function find(
     useEstimatedCount,
   }
 
+  if (locale && locale !== 'all' && locale !== '*') {
+    paginationOptions.collation = { locale, strength: 1 }
+  }
+
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
     // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
@@ -96,7 +90,6 @@ export const find: Find = async function find(
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

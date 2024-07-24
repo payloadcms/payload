@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import {
   HTMLConverterFeature,
@@ -39,7 +39,8 @@ export const LexicalMigrateFields: CollectionConfig = {
           TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
-            fields: [
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
               {
                 name: 'rel',
                 label: 'Rel Attribute',
@@ -79,7 +80,8 @@ export const LexicalMigrateFields: CollectionConfig = {
           TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
-            fields: [
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
               {
                 name: 'rel',
                 label: 'Rel Attribute',

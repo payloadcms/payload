@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -19,7 +19,7 @@ type Args = {
   overrideAccess: boolean
   path: string
   policies: EntityPolicies
-  req: PayloadRequestWithData
+  req: PayloadRequest
   val: unknown
   versionFields?: Field[]
 }
@@ -51,10 +51,8 @@ export async function validateSearchParam({
   const { slug } = collectionConfig || globalConfig
 
   if (globalConfig && !policies.globals[slug]) {
-    // eslint-disable-next-line no-param-reassign
     globalConfig.fields = fields
 
-    // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
       type: 'global',
       entity: globalConfig,
@@ -85,7 +83,6 @@ export async function validateSearchParam({
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections[collectionSlug]) {
-            // eslint-disable-next-line no-param-reassign
             policies.collections[collectionSlug] = await getEntityPolicies({
               type: 'collection',
               entity: req.payload.collections[collectionSlug].config,

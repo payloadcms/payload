@@ -1,14 +1,15 @@
 /* eslint-disable no-param-reassign */
-import type { Init } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload'
+import type { Init } from 'payload'
 
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
+import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
-import { createTableName } from './schema/createTableName.js'
 
 export const init: Init = function init(this: PostgresAdapter) {
   if (this.schemaName) {
@@ -16,7 +17,6 @@ export const init: Init = function init(this: PostgresAdapter) {
   } else {
     this.pgSchema = { table: pgTable }
   }
-
   if (this.payload.config.localization) {
     this.enums.enum__locales = pgEnum(
       '_locales',
@@ -25,16 +25,25 @@ export const init: Init = function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = createTableName({
+    createTableName({
       adapter: this,
       config: collection,
     })
 
+    if (collection.versions) {
+      createTableName({
+        adapter: this,
+        config: collection,
+        versions: true,
+        versionsCustomName: true,
+      })
+    }
+  })
+  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+
     buildTable({
       adapter: this,
-      buildNumbers: true,
-      buildRelationships: true,
-      buildTexts: true,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,
@@ -44,19 +53,13 @@ export const init: Init = function init(this: PostgresAdapter) {
     })
 
     if (collection.versions) {
-      const versionsTableName = createTableName({
-        adapter: this,
-        config: collection,
-        versions: true,
-        versionsCustomName: true,
-      })
+      const versionsTableName = this.tableNameMap.get(
+        `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
+      )
       const versionFields = buildVersionCollectionFields(collection)
 
       buildTable({
         adapter: this,
-        buildNumbers: true,
-        buildRelationships: true,
-        buildTexts: true,
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
@@ -72,9 +75,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
     buildTable({
       adapter: this,
-      buildNumbers: true,
-      buildRelationships: true,
-      buildTexts: true,
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.fields,
@@ -94,9 +94,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
-        buildNumbers: true,
-        buildRelationships: true,
-        buildTexts: true,
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

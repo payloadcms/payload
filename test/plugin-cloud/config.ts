@@ -1,4 +1,7 @@
-import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { fileURLToPath } from 'node:url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { payloadCloudPlugin } from '@payloadcms/plugin-cloud'
 import dotenv from 'dotenv'
 import path from 'path'
 
@@ -23,6 +26,9 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

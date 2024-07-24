@@ -1,30 +1,33 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import payload from 'payload';
-import { CollectionConfig, FieldHook } from 'payload/types';
+import type { CollectionConfig, FieldHook } from 'payload/types'
 
-const formatLocation: FieldHook = async ({ data }) => {
-  return `${data.city}${data.state ? `, ${data.state},` : ','} ${data.country}`;
-};
+const formatLocation: FieldHook = ({ data }) => {
+  if (!data) return ''
+  return `${data.city}${data.state ? `, ${data.state},` : ','} ${data.country}`
+}
 
-const getLocationStaff: FieldHook = async ({ data }) => {
-  const staff = await payload.find({
+const getLocationStaff: FieldHook = async ({ data, req }) => {
+  if (!data) return null
+
+  const staff = await req.payload.find({
     collection: 'staff',
     where: {
       location: {
         equals: data.id,
       },
     },
-  });
+  })
 
   if (staff.docs) {
-    return staff.docs.map((doc) => doc.id);
+    return staff.docs.map((doc) => doc.id)
   }
 
-  return null;
-};
+  return null
+}
 
-const getNextEvent: FieldHook = async ({ data }) => {
-  const eventsByDate = await payload.find({
+const getNextEvent: FieldHook = async ({ data, req }) => {
+  if (!data) return null
+
+  const eventsByDate = await req.payload.find({
     collection: 'events',
     sort: 'date',
     where: {
@@ -32,30 +35,32 @@ const getNextEvent: FieldHook = async ({ data }) => {
         equals: data.id,
       },
     },
-  });
+  })
 
   if (eventsByDate?.docs) {
-    return eventsByDate.docs[0]?.id;
+    return eventsByDate.docs[0]?.id
   }
 
-  return null;
-};
+  return null
+}
 
-const getAllEvents: FieldHook = async ({ data }) => {
-  const allEvents = await payload.find({
+const getAllEvents: FieldHook = async ({ data, req }) => {
+  if (!data) return null
+
+  const allEvents = await req.payload.find({
     collection: 'events',
     where: {
       location: {
         equals: data.id,
       },
     },
-  });
-  if (allEvents.docs) return allEvents.docs.map((doc) => doc.id);
+  })
+  if (allEvents.docs) return allEvents.docs.map((doc) => doc.id)
 
-  return null;
-};
+  return null
+}
 
-const Locations: CollectionConfig = {
+export const Locations: CollectionConfig = {
   slug: 'locations',
   admin: {
     defaultColumns: ['location', 'nextEvent'],
@@ -64,18 +69,7 @@ const Locations: CollectionConfig = {
   fields: [
     {
       name: 'location',
-      label: false,
       type: 'text',
-      hooks: {
-        beforeChange: [({ siblingData }) => {
-          // Mutate the sibling data to prevent DB storage
-          // eslint-disable-next-line no-param-reassign
-          siblingData.location = undefined;
-        }],
-        afterRead: [
-          formatLocation,
-        ],
-      },
       access: {
         create: () => false,
         update: () => false,
@@ -83,6 +77,17 @@ const Locations: CollectionConfig = {
       admin: {
         hidden: true,
       },
+      hooks: {
+        afterRead: [formatLocation],
+        beforeChange: [
+          ({ siblingData }) => {
+            // Mutate the sibling data to prevent DB storage
+            // eslint-disable-next-line no-param-reassign
+            siblingData.location = undefined
+          },
+        ],
+      },
+      label: false,
     },
     {
       type: 'row',
@@ -105,10 +110,7 @@ const Locations: CollectionConfig = {
     },
     {
       name: 'events',
-      maxDepth: 0,
       type: 'relationship',
-      relationTo: 'events',
-      hasMany: true,
       access: {
         create: () => false,
         update: () => false,
@@ -116,21 +118,23 @@ const Locations: CollectionConfig = {
       admin: {
         readOnly: true,
       },
+      hasMany: true,
       hooks: {
-        beforeChange: [({ siblingData }) => {
-          // Mutate the sibling data to prevent DB storage
-          // eslint-disable-next-line no-param-reassign
-          siblingData.events = undefined;
-        }],
         afterRead: [getAllEvents],
+        beforeChange: [
+          ({ siblingData }) => {
+            // Mutate the sibling data to prevent DB storage
+            // eslint-disable-next-line no-param-reassign
+            siblingData.events = undefined
+          },
+        ],
       },
+      maxDepth: 0,
+      relationTo: 'events',
     },
     {
       name: 'staff',
       type: 'relationship',
-      relationTo: 'staff',
-      hasMany: true,
-      maxDepth: 0,
       access: {
         create: () => false,
         update: () => false,
@@ -138,37 +142,42 @@ const Locations: CollectionConfig = {
       admin: {
         readOnly: true,
       },
+      hasMany: true,
       hooks: {
-        beforeChange: [({ siblingData }) => {
-          // Mutate the sibling data to prevent DB storage
-          // eslint-disable-next-line no-param-reassign
-          siblingData.staff = undefined;
-        }],
         afterRead: [getLocationStaff],
+        beforeChange: [
+          ({ siblingData }) => {
+            // Mutate the sibling data to prevent DB storage
+            // eslint-disable-next-line no-param-reassign
+            siblingData.staff = undefined
+          },
+        ],
       },
+      maxDepth: 0,
+      relationTo: 'staff',
     },
     {
       name: 'nextEvent',
       type: 'relationship',
-      relationTo: 'events',
-      admin: {
-        position: 'sidebar',
-        readOnly: true,
-      },
       access: {
         create: () => false,
         update: () => false,
       },
-      hooks: {
-        beforeChange: [({ siblingData }) => {
-          // Mutate the sibling data to prevent DB storage
-          // eslint-disable-next-line no-param-reassign
-          siblingData.nextEvent = undefined;
-        }],
-        afterRead: [getNextEvent],
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
       },
+      hooks: {
+        afterRead: [getNextEvent],
+        beforeChange: [
+          ({ siblingData }) => {
+            // Mutate the sibling data to prevent DB storage
+            // eslint-disable-next-line no-param-reassign
+            siblingData.nextEvent = undefined
+          },
+        ],
+      },
+      relationTo: 'events',
     },
   ],
-};
-
-export default Locations;
+}

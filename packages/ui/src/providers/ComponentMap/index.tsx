@@ -17,8 +17,6 @@ export type IComponentMapContext = {
   }) => MappedField | undefined
 }
 
-export { WithServerSideProps } from './buildComponentMap/WithServerSideProps.js'
-
 const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
 
 export const ComponentMapProvider: React.FC<{

@@ -1,6 +1,10 @@
-/* eslint-disable no-param-reassign */
-import type { GraphQLInfo } from 'payload/config'
-import type { Collection, Field, SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type {
+  Collection,
+  Field,
+  GraphQLInfo,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -9,9 +13,8 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -24,21 +27,21 @@ import refresh from '../resolvers/auth/refresh.js'
 import resetPassword from '../resolvers/auth/resetPassword.js'
 import unlock from '../resolvers/auth/unlock.js'
 import verifyEmail from '../resolvers/auth/verifyEmail.js'
-import countResolver from '../resolvers/collections/count.js'
+import { countResolver } from '../resolvers/collections/count.js'
 import createResolver from '../resolvers/collections/create.js'
-import getDeleteResolver from '../resolvers/collections/delete.js'
+import { getDeleteResolver } from '../resolvers/collections/delete.js'
 import { docAccessResolver } from '../resolvers/collections/docAccess.js'
 import duplicateResolver from '../resolvers/collections/duplicate.js'
-import findResolver from '../resolvers/collections/find.js'
-import findByIDResolver from '../resolvers/collections/findByID.js'
-import findVersionByIDResolver from '../resolvers/collections/findVersionByID.js'
-import findVersionsResolver from '../resolvers/collections/findVersions.js'
+import { findResolver } from '../resolvers/collections/find.js'
+import { findByIDResolver } from '../resolvers/collections/findByID.js'
+import { findVersionByIDResolver } from '../resolvers/collections/findVersionByID.js'
+import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
 import restoreVersionResolver from '../resolvers/collections/restoreVersion.js'
-import updateResolver from '../resolvers/collections/update.js'
+import { updateResolver } from '../resolvers/collections/update.js'
 import formatName from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
-import buildObjectType from './buildObjectType.js'
-import buildPaginatedListType from './buildPaginatedListType.js'
+import { buildObjectType } from './buildObjectType.js'
+import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
 
@@ -345,15 +348,19 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     }
 
     if (collectionConfig.auth) {
-      const authFields: Field[] = collectionConfig.auth.disableLocalStrategy
-        ? []
-        : [
-            {
-              name: 'email',
-              type: 'email',
-              required: true,
-            },
-          ]
+      const authFields: Field[] =
+        collectionConfig.auth.disableLocalStrategy ||
+        (collectionConfig.auth.loginWithUsername &&
+          !collectionConfig.auth.loginWithUsername.allowEmailLogin &&
+          !collectionConfig.auth.loginWithUsername.requireEmail)
+          ? []
+          : [
+              {
+                name: 'email',
+                type: 'email',
+                required: true,
+              },
+            ]
       collection.graphQL.JWT = buildObjectType({
         name: formatName(`${slug}JWT`),
         config,
@@ -379,6 +386,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
             exp: {
               type: GraphQLInt,
+            },
+            strategy: {
+              type: GraphQLString,
             },
             token: {
               type: GraphQLString,
@@ -406,14 +416,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             refreshedToken: {
               type: GraphQLString,
             },
+            strategy: {
+              type: GraphQLString,
+            },
             user: {
               type: collection.graphQL.JWT,
             },
           },
         }),
-        args: {
-          token: { type: GraphQLString },
-        },
         resolve: refresh(collection),
       }
 
@@ -423,12 +433,24 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       }
 
       if (!collectionConfig.auth.disableLocalStrategy) {
+        const authArgs = {}
+
+        const canLoginWithEmail =
+          !collectionConfig.auth.loginWithUsername ||
+          collectionConfig.auth.loginWithUsername?.allowEmailLogin
+        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+
+        if (canLoginWithEmail) {
+          authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+        if (canLoginWithUsername) {
+          authArgs['username'] = { type: new GraphQLNonNull(GraphQLString) }
+        }
+
         if (collectionConfig.auth.maxLoginAttempts > 0) {
           graphqlResult.Mutation.fields[`unlock${singularName}`] = {
             type: new GraphQLNonNull(GraphQLBoolean),
-            args: {
-              email: { type: new GraphQLNonNull(GraphQLString) },
-            },
+            args: authArgs,
             resolve: unlock(collection),
           }
         }
@@ -449,7 +471,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
             },
           }),
           args: {
-            email: { type: GraphQLString },
+            ...authArgs,
             password: { type: GraphQLString },
           },
           resolve: login(collection),
@@ -459,8 +481,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
           type: new GraphQLNonNull(GraphQLBoolean),
           args: {
             disableEmail: { type: GraphQLBoolean },
-            email: { type: new GraphQLNonNull(GraphQLString) },
             expiration: { type: GraphQLInt },
+            ...authArgs,
           },
           resolve: forgotPassword(collection),
         }

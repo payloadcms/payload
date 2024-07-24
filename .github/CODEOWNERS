@@ -3,22 +3,19 @@
 ### Package Exports ###
 /**/exports/ @denolfe @jmikrut
 
-### Adapters ###
+### Packages ###
 /packages/richtext-*/ @AlessioGr
-
-### Plugins ###
 /packages/plugin-cloud*/ @denolfe
+/packages/email-*/ @denolfe
+/packages/storage-*/ @denolfe
+/packages/create-payload-app/ @denolfe
+/packages/eslint-*/ @denolfe
 
 ### Templates ###
 /templates/ @jacobsfletch @denolfe
 
-### Misc ###
-/packages/create-payload-app/ @denolfe
-/packages/eslint-*/ @denolfe
-
 ### Build Files ###
 /**/package.json @denolfe
-
 /tsconfig.json @denolfe
 /**/tsconfig*.json @denolfe
 

@@ -1,15 +1,5 @@
 .reset-password {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-height: 100vh;
-
-  &__wrap {
-    margin: 0 auto var(--base);
-    width: 100%;
-
-    svg {
-      width: 100%;
-    }
+  form > .field-type {
+    margin-bottom: var(--base);
   }
 }

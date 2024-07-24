@@ -1,10 +1,8 @@
-import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies } from 'payload/auth'
-import { parseCookies } from 'payload/auth'
-import { getDataLoader } from 'payload/utilities'
-import qs from 'qs'
+import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
+import * as qs from 'qs-esm'
 import { URL } from 'url'
 
 import { sanitizeLocales } from './addLocalesToRequest.js'
@@ -49,6 +47,18 @@ export const createPayloadRequest = async ({
 
   let locale
   let fallbackLocale
+
+  const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
+  const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
+
+  const query = queryToParse
+    ? qs.parse(queryToParse, {
+        arrayLimit: 1000,
+        depth: 10,
+        ignoreQueryPrefix: true,
+      })
+    : {}
+
   if (config.localization) {
     const locales = sanitizeLocales({
       fallbackLocale: searchParams.get('fallback-locale'),
@@ -57,6 +67,10 @@ export const createPayloadRequest = async ({
     })
     locale = locales.locale
     fallbackLocale = locales.fallbackLocale
+
+    // Override if query params are present, in order to respect HTTP method override
+    if (query.locale) locale = query.locale
+    if (query?.['fallback-locale']) fallbackLocale = query['fallback-locale']
   }
 
   const customRequest: CustomPayloadRequestProperties = {
@@ -75,13 +89,7 @@ export const createPayloadRequest = async ({
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
-    query: urlProperties.search
-      ? qs.parse(urlProperties.search, {
-          arrayLimit: 1000,
-          depth: 10,
-          ignoreQueryPrefix: true,
-        })
-      : {},
+    query,
     routeParams: params || {},
     search: urlProperties.search,
     searchParams: urlProperties.searchParams,
@@ -94,12 +102,15 @@ export const createPayloadRequest = async ({
 
   req.payloadDataLoader = getDataLoader(req)
 
-  req.user = await executeAuthStrategies({
-    cookies,
+  const { responseHeaders, user } = await executeAuthStrategies({
     headers: req.headers,
     isGraphQL,
     payload,
   })
+
+  req.user = user
+
+  if (responseHeaders) req.responseHeaders = responseHeaders
 
   return req
 }

@@ -1,4 +1,4 @@
-export interface Breadcrumb {
+export type Breadcrumb = {
   doc: string
   label: string
   url?: string
@@ -14,7 +14,7 @@ export type GenerateLabel = (
   currentDoc: Record<string, unknown>,
 ) => string
 
-export interface PluginConfig {
+export type NestedDocsPluginConfig = {
   /**
    * Should be supplied if using an alternative field name for the 'breadcrumbs' field in collections
    */

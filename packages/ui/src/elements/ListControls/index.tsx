@@ -1,19 +1,20 @@
 'use client'
-import type { ClientCollectionConfig, FieldAffectingData, Where } from 'payload/types'
+import type { ClientCollectionConfig, Where } from 'payload'
 
-import * as facelessUIImport from '@faceless-ui/window-info'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useUseTitleField } from '@payloadcms/ui/hooks/useUseAsTitle'
+import { useListInfo } from '@payloadcms/ui'
 
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
-import { Chevron } from '../../icons/Chevron/index.js'
+import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -49,42 +50,97 @@ export type ListControlsProps = {
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
 
-  const { useWindowInfo } = facelessUIImport
-
   const { handleSearchChange } = useListQuery()
+  const { collectionSlug } = useListInfo()
   const { searchParams } = useSearchParams()
   const titleField = useUseTitleField(collectionConfig, fieldMap)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+  const [search, setSearch] = useState(
+    typeof searchParams?.search === 'string' ? searchParams?.search : '',
+  )
+
+  const searchLabel =
+    (titleField &&
+      getTranslation(
+        'label' in titleField.fieldComponentProps &&
+          typeof titleField.fieldComponentProps.label === 'string'
+          ? titleField.fieldComponentProps.label
+          : titleField.name,
+        i18n,
+      )) ??
+    'ID'
+
+  const listSearchableFields = getTextFieldsToBeSearched(
+    collectionConfig.admin.listSearchableFields,
+    fieldMap,
+  )
+
+  const searchLabelTranslated = useRef(
+    t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
+  )
+
+  const hasWhereParam = useRef(Boolean(searchParams?.where))
 
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
+  useEffect(() => {
+    if (hasWhereParam.current && !searchParams?.where) {
+      setVisibleDrawer(undefined)
+      hasWhereParam.current = false
+    } else if (searchParams?.where) {
+      hasWhereParam.current = true
+    }
+  }, [setVisibleDrawer, searchParams?.where])
+
+  useEffect(() => {
+    if (listSearchableFields?.length > 0) {
+      searchLabelTranslated.current = listSearchableFields.reduce(
+        (placeholderText: string, field, i: number) => {
+          const label =
+            'fieldComponentProps' in field &&
+            'label' in field.fieldComponentProps &&
+            field.fieldComponentProps.label
+              ? field.fieldComponentProps.label
+              : field.name
+
+          if (i === 0) {
+            return `${t('general:searchBy', {
+              label: getTranslation(label, i18n),
+            })}`
+          }
+
+          if (i === listSearchableFields.length - 1) {
+            return `${placeholderText} ${t('general:or')} ${getTranslation(label, i18n)}`
+          }
+
+          return `${placeholderText}, ${getTranslation(label, i18n)}`
+        },
+        '',
+      )
+    } else {
+      searchLabelTranslated.current = t('general:searchBy', {
+        label: getTranslation(searchLabel, i18n),
+      })
+    }
+  }, [t, listSearchableFields, i18n, searchLabel])
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
-          fieldLabel={
-            (titleField &&
-              getTranslation(
-                'label' in titleField.fieldComponentProps &&
-                  typeof titleField.fieldComponentProps.label === 'string'
-                  ? titleField.fieldComponentProps.label
-                  : titleField.name,
-                i18n,
-              )) ??
-            undefined
-          }
           fieldName={titleField?.name}
           handleChange={handleSearchChange}
-          listSearchableFields={getTextFieldsToBeSearched(
-            collectionConfig.admin.listSearchableFields,
-            fieldMap,
-          )}
+          initialParams={searchParams}
+          key={collectionSlug}
+          label={searchLabelTranslated.current}
+          setValue={setSearch}
+          value={search}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
@@ -103,7 +159,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 className={`${baseClass}__toggle-columns ${
                   visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
                 }`}
-                icon={<Chevron />}
+                icon={<ChevronIcon />}
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                 }
@@ -118,7 +174,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-where ${
                 visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
               }`}
-              icon={<Chevron />}
+              icon={<ChevronIcon />}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
             >
@@ -129,7 +185,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 aria-controls={`${baseClass}-sort`}
                 aria-expanded={visibleDrawer === 'sort'}
                 className={`${baseClass}__toggle-sort`}
-                icon={<Chevron />}
+                icon={<ChevronIcon />}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                 pillStyle="light"
               >
@@ -156,6 +212,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
+          fieldMap={fieldMap}
+          key={String(hasWhereParam.current && !searchParams?.where)}
         />
       </AnimateHeight>
       {enableSort && (

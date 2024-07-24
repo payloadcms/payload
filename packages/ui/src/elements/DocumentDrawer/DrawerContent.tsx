@@ -1,18 +1,16 @@
 'use client'
 
-import * as facelessUIImport from '@faceless-ui/modal'
-import queryString from 'qs'
+import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
 import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
-import { X } from '../../icons/X/index.js'
+import { XIcon } from '../../icons/X/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -21,14 +19,12 @@ import { RenderTitle } from '../RenderTitle/index.js'
 import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
-  id,
+  id: existingDocID,
   Header,
   collectionSlug,
   drawerSlug,
   onSave: onSaveFromProps,
 }) => {
-  const { useModal } = facelessUIImport
-
   const config = useConfig()
 
   const {
@@ -39,20 +35,17 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
   const { t } = useTranslation()
-  const [createdID, setCreatedID] = useState()
+  const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = queryString.stringify(formQueryParams)
 
   const { componentMap } = useComponentMap()
 
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
-  const isEditing = Boolean(id)
-  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}` : null
-  const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${id}` : ''
-  }?${formattedQueryParams}`
+  const isEditing = Boolean(docID)
+  const apiURL = docID
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
+    : null
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -70,7 +63,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      setCreatedID(args.doc.id)
+      setDocID(args.doc.id)
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -98,24 +91,17 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
               onClick={() => toggleModal(drawerSlug)}
               type="button"
             >
-              <X />
+              <XIcon />
             </button>
           </div>
           <DocumentTitle />
         </Gutter>
       }
-      action={action}
       apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      // Do NOT pass in the docPermissions we have here. This is because the permissions we have here do not have their where: { } returns resolved.
-      // If we set it to null though, the DocumentInfoProvider will fully-fetch the permissions from the server, and the where: { } returns will be resolved.
-      docPermissions={null}
-      // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
-      hasSavePermission={null}
-      // isLoading,
-      id={id || createdID}
+      id={docID}
       isEditing={isEditing}
       onLoadError={onLoadError}
       onSave={onSave}

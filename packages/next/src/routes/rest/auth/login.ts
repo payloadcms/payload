@@ -1,7 +1,6 @@
 import httpStatus from 'http-status'
-import { generatePayloadCookie } from 'payload/auth'
-import { loginOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { generatePayloadCookie, loginOperation } from 'payload'
+import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -10,13 +9,21 @@ import { headersWithCors } from '../../../utilities/headersWithCors.js'
 export const login: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams, t } = req
   const depth = searchParams.get('depth')
+  const authData =
+    collection.config.auth?.loginWithUsername !== false
+      ? {
+          email: typeof req.data?.email === 'string' ? req.data.email : '',
+          password: typeof req.data?.password === 'string' ? req.data.password : '',
+          username: typeof req.data?.username === 'string' ? req.data.username : '',
+        }
+      : {
+          email: typeof req.data?.email === 'string' ? req.data.email : '',
+          password: typeof req.data?.password === 'string' ? req.data.password : '',
+        }
 
   const result = await loginOperation({
     collection,
-    data: {
-      email: typeof req.data?.email === 'string' ? req.data.email : '',
-      password: typeof req.data?.password === 'string' ? req.data.password : '',
-    },
+    data: authData,
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
   })

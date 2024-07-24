@@ -1,8 +1,11 @@
 @import '../../scss/styles.scss';
 
 .radio-group {
-  &__error-wrap {
-    position: relative;
+  .tooltip:not([aria-hidden='true']) {
+    right: auto;
+    position: static;
+    margin-bottom: 0.2em;
+    max-width: fit-content;
   }
 
   &--layout-horizontal {
@@ -26,6 +29,34 @@
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+}
+
+.radio-group--read-only {
+  .radio-input {
+    cursor: default;
+
+    &__label {
+      color: var(--theme-elevation-400);
+    }
+
+    &--is-selected {
+      .radio-input__styled-radio {
+        &:before {
+          background-color: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    &:not(.radio-input--is-selected) {
+      &:hover {
+        .radio-input__styled-radio {
+          &:before {
+            opacity: 0;
+          }
+        }
+      }
+    }
   }
 }
 

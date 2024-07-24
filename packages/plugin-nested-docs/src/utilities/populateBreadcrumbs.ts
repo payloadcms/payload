@@ -1,13 +1,13 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import type { PluginConfig } from '../types.js'
+import type { NestedDocsPluginConfig } from '../types.js'
 
 import { formatBreadcrumb } from './formatBreadcrumb.js'
 import { getParents } from './getParents.js'
 
 export const populateBreadcrumbs = async (
   req: any,
-  pluginConfig: PluginConfig,
+  pluginConfig: NestedDocsPluginConfig,
   collection: CollectionConfig,
   data: any,
   originalDoc?: any,
@@ -33,7 +33,7 @@ export const populateBreadcrumbs = async (
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
     formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
-  ) // eslint-disable-line function-paren-newline
+  )  
 
   return {
     ...newData,

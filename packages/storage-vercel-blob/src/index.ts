@@ -1,11 +1,12 @@
 import type {
+  Adapter,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
+  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin } from 'payload/config'
+import type { Config, Plugin } from 'payload'
 
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateUrl } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
@@ -14,14 +15,15 @@ import { getStaticHandler } from './staticHandler.js'
 
 export type VercelBlobStorageOptions = {
   /**
-   * Access control level
+   * Access control level. Currently, only 'public' is supported.
+   * Vercel plans on adding support for private blobs in the future.
    *
    * @default 'public'
    */
   access?: 'public'
 
   /**
-   * Add a random suffix to the uploaded file name
+   * Add a random suffix to the uploaded file name in Vercel Blob storage
    *
    * @default false
    */
@@ -30,7 +32,7 @@ export type VercelBlobStorageOptions = {
   /**
    * Cache-Control max-age in seconds
    *
-   * @default 31536000 (1 year)
+   * @defaultvalue 365 * 24 * 60 * 60 (1 Year)
    */
   cacheControlMaxAge?: number
 
@@ -124,17 +126,18 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       }),
     }
 
-    return cloudStorage({
+    return cloudStoragePlugin({
       collections: collectionsWithAdapter,
     })(config)
   }
 
 function vercelBlobStorageInternal(
-  options: VercelBlobStorageOptions & { baseUrl: string },
+  options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
     return {
+      name: 'vercel-blob',
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token: options.token }),
       handleUpload: getHandleUpload({

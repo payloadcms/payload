@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
-import type { GraphQLInfo } from 'payload/config'
 import type {
   ArrayField,
   BlockField,
@@ -12,6 +8,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  GraphQLInfo,
   GroupField,
   JSONField,
   NumberField,
@@ -27,7 +24,7 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from 'payload/types'
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -41,8 +38,8 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { tabHasName } from 'payload/types'
-import { toWords } from 'payload/utilities'
+import { MissingEditorProp, createDataloaderCacheKey, toWords } from 'payload'
+import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 
@@ -80,7 +77,7 @@ type Args = {
   parentName: string
 }
 
-function buildObjectType({
+export function buildObjectType({
   name,
   baseFields = {},
   config,
@@ -320,12 +317,23 @@ function buildObjectType({
       type = type || newlyCreatedBlockType
 
       const relationshipArgs: {
+        draft?: unknown
         fallbackLocale?: unknown
         limit?: unknown
         locale?: unknown
         page?: unknown
         where?: unknown
       } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
+      )
+
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (config.localization) {
         relationshipArgs.locale = {
@@ -350,6 +358,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (hasManyValues) {
             const results = []
@@ -365,17 +374,18 @@ function buildObjectType({
               }
 
               const result = await context.req.payloadDataLoader.load(
-                JSON.stringify([
-                  context.req.transactionID,
-                  collectionSlug,
-                  id,
-                  0,
-                  0,
-                  locale,
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
                   fallbackLocale,
-                  false,
-                  false,
-                ]),
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
               )
 
               if (result) {
@@ -411,17 +421,18 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug as string,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
                 fallbackLocale,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             if (relatedDocument) {
@@ -462,6 +473,14 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (!field?.editor) {
+            throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+          }
+
+          if (typeof field?.editor === 'function') {
+            throw new Error('Attempted to access unsanitized rich text editor.')
+          }
+
           const editor: RichTextAdapter = field?.editor
 
           // RichText fields have their own depth argument in GraphQL.
@@ -469,12 +488,16 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromises) {
+          if (editor?.graphQLPopulationPromises) {
             const fieldPromises = []
             const populationPromises = []
-            editor?.populationPromises({
+            const populateDepth =
+              field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
+            editor?.graphQLPopulationPromises({
               context,
-              depth,
+              depth: populateDepth,
+              draft: args.draft,
               field,
               fieldPromises,
               findMany: false,
@@ -608,20 +631,22 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = Boolean(args.draft ?? context.req.query?.draft)
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
-              JSON.stringify([
-                context.req.transactionID,
-                relatedCollectionSlug,
-                id,
-                0,
-                0,
-                locale,
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
                 fallbackLocale,
-                false,
-                false,
-              ]),
+                locale,
+                overrideAccess: false,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
             )
 
             return relatedDocument || null
@@ -669,5 +694,3 @@ function buildObjectType({
 
   return newlyCreatedBlockType
 }
-
-export default buildObjectType

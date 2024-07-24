@@ -1,10 +1,11 @@
-import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Locale } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequestWithData } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { LanguageOptions } from '../LanguageOptions.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -40,10 +41,11 @@ export type InitPageResult = {
   cookies: Map<string, string>
   docID?: string
   globalConfig?: SanitizedGlobalConfig
-  locale: Locale
+  languageOptions: LanguageOptions
+  locale?: Locale
   permissions: Permissions
-  req: PayloadRequestWithData
-  translations: SupportedLanguages
+  req: PayloadRequest
+  translations: ClientTranslationsObject
   visibleEntities: VisibleEntities
 }
 

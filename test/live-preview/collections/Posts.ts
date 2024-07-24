@@ -1,13 +1,11 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { tenantsSlug } from '../shared.js'
-
-export const postsSlug = 'posts'
+import { postsSlug, tenantsSlug } from '../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -61,7 +59,7 @@ export const Posts: CollectionConfig = {
             {
               name: 'relatedPosts',
               type: 'relationship',
-              relationTo: 'posts',
+              relationTo: postsSlug,
               hasMany: true,
               filterOptions: ({ id }) => {
                 return {

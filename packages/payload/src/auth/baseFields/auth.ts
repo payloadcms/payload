@@ -1,21 +1,6 @@
 import type { Field } from '../../fields/config/types.js'
 
-import { email } from '../../fields/validations.js'
-
-const baseAuthFields: Field[] = [
-  {
-    name: 'email',
-    type: 'email',
-    admin: {
-      components: {
-        Field: () => null,
-      },
-    },
-    label: ({ t }) => t('general:email'),
-    required: true,
-    unique: true,
-    validate: email,
-  },
+export const baseAuthFields: Field[] = [
   {
     name: 'resetPasswordToken',
     type: 'text',
@@ -37,5 +22,3 @@ const baseAuthFields: Field[] = [
     hidden: true,
   },
 ]
-
-export default baseAuthFields

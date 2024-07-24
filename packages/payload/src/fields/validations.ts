@@ -1,6 +1,11 @@
 import Ajv from 'ajv'
+import ObjectIdImport from 'bson-objectid'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 import type { RichTextAdapter } from '../admin/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
 import type {
   ArrayField,
@@ -61,11 +66,11 @@ export const text: Validate<string | string[], unknown, unknown, TextField> = (
     const length = stringValue?.length || 0
 
     if (typeof maxLength === 'number' && length > maxLength) {
-      return t('validation:shorterThanMax', { label: t('value'), maxLength, stringValue })
+      return t('validation:shorterThanMax', { label: t('general:value'), maxLength, stringValue })
     }
 
     if (typeof minLength === 'number' && length < minLength) {
-      return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+      return t('validation:longerThanMin', { label: t('general:value'), minLength, stringValue })
     }
   }
 
@@ -121,6 +126,31 @@ export const email: Validate<string, unknown, unknown, EmailField> = (
   return true
 }
 
+export const username: Validate<string, unknown, unknown, TextField> = (
+  value,
+  {
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
+) => {
+  let maxLength: number
+
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+
+  if (value && maxLength && value.length > maxLength) {
+    return t('validation:shorterThanMax', { maxLength })
+  }
+
+  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
+    return t('validation:username')
+  }
+
+  return true
+}
+
 export const textarea: Validate<string, unknown, unknown, TextareaField> = (
   value,
   {
@@ -163,7 +193,7 @@ export const code: Validate<string, unknown, unknown, CodeField> = (
   return true
 }
 
-export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = async (
+export const json: Validate<string, unknown, unknown, { jsonError?: string } & JSONField> = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -245,7 +275,6 @@ export const date: Validate<Date, unknown, unknown, DateField> = (
   { req: { t }, required },
 ) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
-    /* eslint-disable-line */
     return true
   }
 
@@ -264,6 +293,13 @@ export const richText: Validate<object, unknown, unknown, RichTextField> = async
   value,
   options,
 ) => {
+  if (!options?.editor) {
+    throw new Error('richText field has no editor property.')
+  }
+  if (typeof options?.editor === 'function') {
+    throw new Error('Attempted to access unsanitized rich text editor.')
+  }
+
   const editor: RichTextAdapter = options?.editor
 
   return editor.validate(value, options)
@@ -361,8 +397,8 @@ const validateFilterOptions: Validate<
       [collection: string]: (number | string)[]
     } = {}
 
-    const falseCollections: string[] = []
-    const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
+    const falseCollections: CollectionSlug[] = []
+    const collections = !Array.isArray(relationTo) ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
     for (const collection of collections) {
@@ -385,8 +421,12 @@ const validateFilterOptions: Validate<
         const valueIDs: (number | string)[] = []
 
         values.forEach((val) => {
-          if (typeof val === 'object' && val?.value) {
-            valueIDs.push(val.value)
+          if (typeof val === 'object') {
+            if (val?.value) {
+              valueIDs.push(val.value)
+            } else if (ObjectId.isValid(val)) {
+              valueIDs.push(new ObjectId(val).toHexString())
+            }
           }
 
           if (typeof val === 'string' || typeof val === 'number') {
@@ -436,6 +476,10 @@ const validateFilterOptions: Validate<
 
         if (typeof val === 'string' || typeof val === 'number') {
           requestedID = val
+        }
+
+        if (typeof val === 'object' && ObjectId.isValid(val)) {
+          requestedID = new ObjectId(val).toHexString()
         }
       }
 
@@ -502,7 +546,10 @@ export const relationship: Validate<
     required,
   } = options
 
-  if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
+  if (
+    ((!value && typeof value !== 'number') || (Array.isArray(value) && value.length === 0)) &&
+    required
+  ) {
     return t('validation:required')
   }
 
@@ -535,7 +582,7 @@ export const relationship: Validate<
         collectionSlug = relationTo
 
         // custom id
-        if (val) {
+        if (val || typeof val === 'number') {
           requestedID = val
         }
       }

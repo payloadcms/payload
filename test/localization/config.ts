@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -10,6 +14,7 @@ import {
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -24,12 +29,12 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 
-export type LocalizedPostAllLocale = LocalizedPost & {
+export type LocalizedPostAllLocale = {
   title: {
     en?: string
     es?: string
   }
-}
+} & LocalizedPost
 
 const openAccess = {
   create: () => true,
@@ -66,6 +71,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -310,6 +320,11 @@ export default buildConfigWithDefaults({
         label: 'Arabic',
         rtl: true,
       },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
+      },
     ],
   },
   onInit: async (payload) => {
@@ -458,5 +473,8 @@ export default buildConfigWithDefaults({
     })
 
     console.log('SEED COMPLETE')
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename'
 
-import type { PayloadRequestWithData } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import docWithFilenameExists from './docWithFilenameExists.js'
 import fileExists from './fileExists.js'
@@ -25,11 +25,11 @@ const incrementName = (name: string) => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
-  req: PayloadRequestWithData
+  req: PayloadRequest
   staticPath: string
 }
 
-async function getSafeFileName({
+export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
   req,
@@ -37,7 +37,6 @@ async function getSafeFileName({
 }: Args): Promise<string> {
   let modifiedFilename = desiredFilename
 
-  // eslint-disable-next-line no-await-in-loop
   while (
     (await docWithFilenameExists({
       collectionSlug,
@@ -51,5 +50,3 @@ async function getSafeFileName({
   }
   return modifiedFilename
 }
-
-export default getSafeFileName

@@ -27,5 +27,6 @@ export type InitializedEmailAdapter<TSendEmailResponse = unknown> = ReturnType<
 export type EmailAdapter<TSendEmailResponse = unknown> = ({ payload }: { payload: Payload }) => {
   defaultFromAddress: string
   defaultFromName: string
+  name: string
   sendEmail: (message: SendEmailOptions) => Promise<TSendEmailResponse>
 }

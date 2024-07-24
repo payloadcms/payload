@@ -1,10 +1,11 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { LogOut } from '../../icons/LogOut/index.js'
+import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 
 const baseClass = 'nav'
 
@@ -16,8 +17,10 @@ const DefaultLogout: React.FC<{
   const config = useConfig()
 
   const {
-    admin: { logoutRoute },
-    routes: { admin },
+    admin: {
+      routes: { logout: logoutRoute },
+    },
+    routes: { admin: adminRoute },
   } = config
 
   const LinkElement = Link || 'a'
@@ -26,10 +29,13 @@ const DefaultLogout: React.FC<{
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      href={`${admin}${logoutRoute}`}
+      href={formatAdminURL({
+        adminRoute,
+        path: logoutRoute,
+      })}
       tabIndex={tabIndex}
     >
-      <LogOut />
+      <LogOutIcon />
     </LinkElement>
   )
 }

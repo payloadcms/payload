@@ -1,4 +1,16 @@
+'use client'
+
 import React, { Fragment, useCallback, useState } from 'react'
+import { toast } from '@payloadcms/ui'
+
+const SuccessMessage: React.FC = () => (
+  <div>
+    Database seeded! You can now{' '}
+    <a target="_blank" href="/">
+      visit your website
+    </a>
+  </div>
+)
 
 export const SeedButton: React.FC = () => {
   const [loading, setLoading] = useState(false)
@@ -12,14 +24,13 @@ export const SeedButton: React.FC = () => {
 
       setLoading(true)
 
-      setTimeout(async () => {
-        try {
-          await fetch('/api/seed')
-          setSeeded(true)
-        } catch (err) {
-          setError(err)
-        }
-      }, 1000)
+      try {
+        await fetch('/api/seed')
+        setSeeded(true)
+        toast.success(<SuccessMessage />, { duration: 5000 })
+      } catch (err) {
+        setError(err)
+      }
     },
     [loading, seeded],
   )

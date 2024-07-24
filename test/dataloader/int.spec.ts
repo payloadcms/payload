@@ -32,6 +32,45 @@ describe('dataloader', () => {
   })
 
   describe('graphql', () => {
+    it('should allow multiple parallel queries', async () => {
+      for (let i = 0; i < 100; i++) {
+        const query = `
+          query {
+            Shops {
+              docs {
+                name
+                items {
+                  name
+                }
+              }
+            }
+            Items {
+              docs {
+                name
+                itemTags {
+                  name
+                }
+              }
+            }
+          }`
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
+
+        const normalizedResponse = JSON.parse(JSON.stringify(data))
+
+        expect(normalizedResponse).toStrictEqual({
+          Items: { docs: [{ name: 'item1', itemTags: [{ name: 'tag1' }] }] },
+          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
+        })
+      }
+    })
+
     it('should allow querying via graphql', async () => {
       const query = `query {
         Posts {
@@ -136,6 +175,7 @@ describe('dataloader', () => {
       })
 
       const innerMostRelationship =
+        // @ts-expect-error Deep typing not worth doing
         relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)

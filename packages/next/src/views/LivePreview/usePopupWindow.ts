@@ -1,5 +1,5 @@
 'use client'
-import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useConfig } from '@payloadcms/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface PopupMessage {
@@ -14,7 +14,7 @@ export interface PopupMessage {
 
 export const usePopupWindow = (props: {
   eventType?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onMessage?: (searchParams: PopupMessage['searchParams']) => Promise<void>
   url: string
 }): {

@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
 
 export const People: CollectionConfig = {
   slug: 'people',
@@ -23,8 +23,8 @@ export const People: CollectionConfig = {
         {
           name: 'allocation',
           type: 'number',
-          min: 0,
           max: 100,
+          min: 0,
         },
       ],
     },

@@ -1,19 +1,23 @@
-import { SanitizedConfig, sanitizeConfig } from 'payload/config'
-import { Config } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload'
+
+import { sanitizeConfig } from 'payload'
+
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
-const config = sanitizeConfig({
-  localization: {
-    locales: ['en', 'es'],
-    defaultLocale: 'en',
-    fallback: true,
-  },
-} as Config) as SanitizedConfig
+let config: SanitizedConfig
 
 describe('get localized sort property', () => {
-  it('passes through a non-localized sort property', () => {
+  beforeAll(async () => {
+    config = await sanitizeConfig({
+      localization: {
+        defaultLocale: 'en',
+        fallback: true,
+        locales: ['en', 'es'],
+      },
+    } as Config)
+  })
+  it('passes through a non-localized sort property', async () => {
     const result = getLocalizedSortProperty({
-      segments: ['title'],
       config,
       fields: [
         {
@@ -22,6 +26,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['title'],
     })
 
     expect(result).toStrictEqual('title')
@@ -29,7 +34,6 @@ describe('get localized sort property', () => {
 
   it('properly localizes an un-localized sort property', () => {
     const result = getLocalizedSortProperty({
-      segments: ['title'],
       config,
       fields: [
         {
@@ -39,6 +43,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['title'],
     })
 
     expect(result).toStrictEqual('title.en')
@@ -46,7 +51,6 @@ describe('get localized sort property', () => {
 
   it('keeps specifically asked-for localized sort properties', () => {
     const result = getLocalizedSortProperty({
-      segments: ['title', 'es'],
       config,
       fields: [
         {
@@ -56,6 +60,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['title', 'es'],
     })
 
     expect(result).toStrictEqual('title.es')
@@ -63,7 +68,6 @@ describe('get localized sort property', () => {
 
   it('properly localizes nested sort properties', () => {
     const result = getLocalizedSortProperty({
-      segments: ['group', 'title'],
       config,
       fields: [
         {
@@ -79,6 +83,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['group', 'title'],
     })
 
     expect(result).toStrictEqual('group.title.en')
@@ -86,7 +91,6 @@ describe('get localized sort property', () => {
 
   it('keeps requested locale with nested sort properties', () => {
     const result = getLocalizedSortProperty({
-      segments: ['group', 'title', 'es'],
       config,
       fields: [
         {
@@ -102,6 +106,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['group', 'title', 'es'],
     })
 
     expect(result).toStrictEqual('group.title.es')
@@ -109,7 +114,6 @@ describe('get localized sort property', () => {
 
   it('properly localizes field within row', () => {
     const result = getLocalizedSortProperty({
-      segments: ['title'],
       config,
       fields: [
         {
@@ -124,6 +128,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['title'],
     })
 
     expect(result).toStrictEqual('title.en')
@@ -131,7 +136,6 @@ describe('get localized sort property', () => {
 
   it('properly localizes field within named tab', () => {
     const result = getLocalizedSortProperty({
-      segments: ['tab', 'title'],
       config,
       fields: [
         {
@@ -151,6 +155,7 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
+      segments: ['tab', 'title'],
     })
 
     expect(result).toStrictEqual('tab.title.en')
@@ -158,14 +163,12 @@ describe('get localized sort property', () => {
 
   it('properly localizes field within unnamed tab', () => {
     const result = getLocalizedSortProperty({
-      segments: ['title'],
       config,
       fields: [
         {
           type: 'tabs',
           tabs: [
             {
-              label: 'Tab',
               fields: [
                 {
                   name: 'title',
@@ -173,11 +176,13 @@ describe('get localized sort property', () => {
                   localized: true,
                 },
               ],
+              label: 'Tab',
             },
           ],
         },
       ],
       locale: 'en',
+      segments: ['title'],
     })
 
     expect(result).toStrictEqual('title.en')

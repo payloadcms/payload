@@ -1,5 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
-import type { BlockField } from 'payload/types'
+import type { BlockField, CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
@@ -127,6 +126,14 @@ const BlockFields: CollectionConfig = {
       name: 'collapsedByDefaultBlocks',
       admin: {
         initCollapsed: true,
+      },
+      localized: true,
+    },
+    {
+      ...getBlocksField('localized'),
+      name: 'disableSort',
+      admin: {
+        isSortable: false,
       },
       localized: true,
     },

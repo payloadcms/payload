@@ -1,4 +1,4 @@
-import type { Data, FormField, FormState } from 'payload/types'
+import type { Data, FormField, FormState } from 'payload'
 
 import type {
   Context,
@@ -37,6 +37,7 @@ export const initContextState: Context = {
   getField: (): FormField => undefined,
   getFields: (): FormState => ({}),
   getSiblingData,
+  initializing: undefined,
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,

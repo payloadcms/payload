@@ -1,19 +1,17 @@
-import type { I18n } from '@payloadcms/translations'
-import type { ClientCollectionConfig, FieldBase, RelationshipField } from 'payload/types'
-import type { SanitizedConfig } from 'payload/types'
+import type { I18nClient } from '@payloadcms/translations'
+import type { ClientCollectionConfig, RelationshipField, SanitizedConfig } from 'payload'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-export type RelationshipFieldProps = FormFieldBase & {
+export type RelationshipFieldProps = {
   allowCreate?: RelationshipField['admin']['allowCreate']
   hasMany?: boolean
   isSortable?: boolean
-  label?: FieldBase['label']
   name: string
   relationTo?: RelationshipField['relationTo']
   sortOptions?: RelationshipField['admin']['sortOptions']
   width?: string
-}
+} & FormFieldBase
 
 export type Option = {
   label: string
@@ -42,7 +40,7 @@ type UPDATE = {
   collection: ClientCollectionConfig
   config: SanitizedConfig
   doc: any
-  i18n: I18n
+  i18n: I18nClient
   type: 'UPDATE'
 }
 
@@ -50,7 +48,7 @@ type ADD = {
   collection: ClientCollectionConfig
   config: SanitizedConfig
   docs: any[]
-  i18n: I18n
+  i18n: I18nClient
   ids?: (number | string)[]
   sort?: boolean
   type: 'ADD'

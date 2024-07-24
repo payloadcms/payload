@@ -1,15 +1,12 @@
-import type {
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-  WithServerSideProps as WithServerSidePropsType,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import React from 'react'
 
+import type { WithServerSidePropsPrePopulated } from './index.js'
 import type { ActionMap } from './types.js'
 
 export const mapActions = (args: {
-  WithServerSideProps: WithServerSidePropsType
+  WithServerSideProps: WithServerSidePropsPrePopulated
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
 }): ActionMap => {
@@ -33,7 +30,10 @@ export const mapActions = (args: {
         view.actions.forEach((action) => {
           const Action = action
           if (typeof Action === 'function') {
-            result.Edit[key] = [...(result[key] || []), <WithServerSideProps Component={Action} />]
+            result.Edit[key] = [
+              ...(result[key] || []),
+              <WithServerSideProps Component={Action} key={key} />,
+            ]
           }
         })
       }
@@ -41,11 +41,11 @@ export const mapActions = (args: {
   }
 
   if (listActions) {
-    listActions.forEach((action) => {
+    listActions.forEach((action, i) => {
       const Action = action
       if (typeof Action === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        result.List = [...result.List, <WithServerSideProps Component={Action} />]
+        result.List = [...result.List, <WithServerSideProps Component={Action} key={i} />]
       }
     })
   }

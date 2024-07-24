@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequestWithData, Where } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
 
@@ -20,15 +20,15 @@ export type Arguments = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
-  req?: PayloadRequestWithData
+  req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
   where?: Where
 }
 
-export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
+export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
-): Promise<PaginatedDocs<T>> => {
+): Promise<PaginatedDocs<TData>> => {
   const {
     collection: { config: collectionConfig },
     depth,
@@ -72,7 +72,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
-    const paginatedDocs = await payload.db.findVersions<T>({
+    const paginatedDocs = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: limit ?? 10,
       locale,
@@ -108,7 +108,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
           return docRef
         }),
       ),
-    } as PaginatedDocs<T>
+    } as PaginatedDocs<TData>
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -124,6 +124,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
             context: req.context,
             depth,
             doc: data.version,
+            draft: undefined,
             fallbackLocale,
             findMany: true,
             global: null,
@@ -171,7 +172,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     result = {
       ...result,
-      docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
+      docs: result.docs.map((doc) => sanitizeInternalFields<TData>(doc)),
     }
 
     if (shouldCommit) await commitTransaction(req)

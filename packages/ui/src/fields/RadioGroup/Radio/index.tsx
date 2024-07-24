@@ -1,11 +1,12 @@
 'use client'
-import type { OptionObject } from 'payload/types'
+import type { OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { OnChange } from '../index.js'
 
+import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
 
@@ -17,12 +18,15 @@ export const Radio: React.FC<{
   onChange: OnChange
   option: OptionObject
   path: string
+  readOnly?: boolean
   uuid?: string
 }> = (props) => {
-  const { isSelected, onChange, option, path, uuid } = props
+  const { isSelected, onChange, option, path, readOnly, uuid } = props
   const { i18n } = useTranslation()
 
-  const id = `field-${path}-${option.value}${uuid ? `-${uuid}` : ''}`
+  const editDepth = useEditDepth()
+
+  const id = `field-${path}-${option.value}${editDepth > 1 ? `-${editDepth}` : ''}${uuid ? `-${uuid}` : ''}`
 
   return (
     <label htmlFor={id}>
@@ -31,7 +35,9 @@ export const Radio: React.FC<{
       >
         <input
           checked={isSelected}
+          disabled={readOnly}
           id={id}
+          name={path}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
           type="radio"
         />

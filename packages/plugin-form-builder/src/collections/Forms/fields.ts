@@ -1,4 +1,4 @@
-import type { Block, Field } from 'payload/types'
+import type { Block, Field } from 'payload'
 
 import type { FieldConfig, PaymentFieldConfig } from '../../types.js'
 
@@ -572,7 +572,7 @@ const Message: Block = {
   },
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+ 
 export const fields = {
   checkbox: Checkbox,
   country: Country,

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -8,16 +8,18 @@ import { promise } from './promise.js'
 type Args = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+  data: JsonObject
+  doc: JsonObject
   fields: (Field | TabAsField)[]
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
-  previousDoc: Record<string, unknown>
-  previousSiblingDoc: Record<string, unknown>
-  req: PayloadRequestWithData
-  siblingData: Record<string, unknown>
-  siblingDoc: Record<string, unknown>
+  path: (number | string)[]
+  previousDoc: JsonObject
+  previousSiblingDoc: JsonObject
+  req: PayloadRequest
+  schemaPath: string[]
+  siblingData: JsonObject
+  siblingDoc: JsonObject
 }
 
 export const traverseFields = async ({
@@ -28,9 +30,11 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
+  path,
   previousDoc,
   previousSiblingDoc,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
@@ -46,6 +50,8 @@ export const traverseFields = async ({
         field,
         global,
         operation,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         previousDoc,
         previousSiblingDoc,
         req,

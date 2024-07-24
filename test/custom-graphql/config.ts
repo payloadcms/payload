@@ -1,4 +1,9 @@
-import { commitTransaction, initTransaction, killTransaction } from 'payload/database'
+import { GraphQLJSON } from '@payloadcms/graphql/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { commitTransaction, initTransaction, killTransaction } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -21,18 +26,6 @@ export default buildConfigWithDefaults({
   collections: [],
   globals: [],
   graphQL: {
-    queries: (GraphQL) => {
-      return {
-        TransactionID1: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        TransactionID2: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-      }
-    },
     mutations: (GraphQL) => {
       return {
         MutateTransactionID1: {
@@ -45,6 +38,23 @@ export default buildConfigWithDefaults({
         },
       }
     },
+    queries: (GraphQL) => {
+      return {
+        TransactionID1: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+        TransactionID2: {
+          type: GraphQL.GraphQLString,
+          resolve: resolveTransactionId,
+        },
+        foo: {
+          type: GraphQLJSON,
+          args: {},
+          resolve: () => 'json test',
+        },
+      }
+    },
   },
   onInit: async (payload) => {
     await payload.create({
@@ -54,5 +64,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

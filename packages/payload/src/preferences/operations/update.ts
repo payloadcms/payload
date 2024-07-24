@@ -2,7 +2,7 @@ import type { PreferenceUpdateRequest } from '../types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
 import executeAccess from '../../auth/executeAccess.js'
-import UnauthorizedError from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
 async function update(args: PreferenceUpdateRequest) {
   const {

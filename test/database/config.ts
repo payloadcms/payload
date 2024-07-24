@@ -1,3 +1,7 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -5,21 +9,6 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'posts',
-      hooks: {
-        beforeOperation: [
-          ({ req, operation, args }) => {
-            if (operation === 'update') {
-              const defaultIDType = req.payload.db.defaultIDType
-
-              if (defaultIDType === 'number' && typeof args.id === 'string') {
-                throw new Error('ID was not sanitized to a number properly')
-              }
-            }
-
-            return args
-          },
-        ],
-      },
       fields: [
         {
           name: 'title',
@@ -41,6 +30,21 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      hooks: {
+        beforeOperation: [
+          ({ args, operation, req }) => {
+            if (operation === 'update') {
+              const defaultIDType = req.payload.db.defaultIDType
+
+              if (defaultIDType === 'number' && typeof args.id === 'string') {
+                throw new Error('ID was not sanitized to a number properly')
+              }
+            }
+
+            return args
+          },
+        ],
+      },
     },
     {
       slug: 'relation-a',
@@ -48,11 +52,6 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-        },
-        {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
         },
         {
           name: 'richText',
@@ -85,6 +84,74 @@ export default buildConfigWithDefaults({
         plural: 'Relation Bs',
         singular: 'Relation B',
       },
+    },
+    {
+      slug: 'pg-migrations',
+      fields: [
+        {
+          name: 'relation1',
+          type: 'relationship',
+          relationTo: 'relation-a',
+        },
+        {
+          name: 'myArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'relation2',
+              type: 'relationship',
+              relationTo: 'relation-b',
+            },
+            {
+              name: 'mySubArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'relation3',
+                  type: 'relationship',
+                  localized: true,
+                  relationTo: 'relation-b',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'myGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'relation4',
+              type: 'relationship',
+              localized: true,
+              relationTo: 'relation-b',
+            },
+          ],
+        },
+        {
+          name: 'myBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'myBlock',
+              fields: [
+                {
+                  name: 'relation5',
+                  type: 'relationship',
+                  relationTo: 'relation-a',
+                },
+                {
+                  name: 'relation6',
+                  type: 'relationship',
+                  localized: true,
+                  relationTo: 'relation-b',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      versions: true,
     },
     {
       slug: 'custom-schema',
@@ -157,7 +224,9 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
-      versions: true,
+      versions: {
+        drafts: true,
+      },
     },
   ],
   globals: [
@@ -185,6 +254,9 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

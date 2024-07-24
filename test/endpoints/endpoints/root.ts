@@ -1,41 +1,41 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
 import { applicationEndpoint, rootEndpoint } from '../shared.js'
 
 export const endpoints: Config['endpoints'] = [
   {
-    path: `/${applicationEndpoint}`,
-    method: 'post',
     handler: (req) => {
       return Response.json(req.body)
     },
+    method: 'post',
+    path: `/${applicationEndpoint}`,
   },
   {
-    path: `/${applicationEndpoint}`,
-    method: 'get',
     handler: () => {
       return Response.json({ message: 'Hello, world!' })
     },
+    method: 'get',
+    path: `/${applicationEndpoint}`,
   },
   {
-    path: `/${applicationEndpoint}/i18n`,
-    method: 'get',
     handler: (req) => {
       return Response.json({ message: req.t('general:updatedSuccessfully') })
     },
+    method: 'get',
+    path: `/${applicationEndpoint}/i18n`,
   },
   {
-    path: `/${rootEndpoint}`,
-    method: 'get',
     handler: () => {
       return Response.json({ message: 'Hello, world!' })
     },
+    method: 'get',
+    path: `/${rootEndpoint}`,
   },
   {
-    path: `/${rootEndpoint}`,
-    method: 'post',
     handler: (req) => {
       return Response.json(req.body)
     },
+    method: 'post',
+    path: `/${rootEndpoint}`,
   },
 ]

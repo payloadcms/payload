@@ -1,39 +1,38 @@
 'use client'
-import type { ClientValidate, Description, Validate } from 'payload/types'
+import type { ClientValidate, Description, Validate } from 'payload'
 
-import { FieldError } from '@payloadcms/ui/forms/FieldError'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type PasswordFieldProps = FormFieldBase & {
+export type PasswordFieldProps = {
   autoComplete?: string
   className?: string
   description?: Description
   disabled?: boolean
-  label?: string
   name: string
   path?: string
   required?: boolean
   style?: React.CSSProperties
   validate?: Validate
   width?: string
-}
+} & FormFieldBase
 
-const PasswordField: React.FC<PasswordFieldProps> = (props) => {
+const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
     CustomError,
     CustomLabel,
     autoComplete,
     className,
-    disabled,
+    disabled: disabledFromProps,
     errorProps,
     label,
     labelProps,
@@ -53,14 +52,22 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { formProcessing, path, setValue, showError, value } = useField({
+  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
+  const disabled = disabledFromProps || formInitializing || formProcessing
+
   return (
     <div
-      className={[fieldBaseClass, 'password', className, showError && 'error']
+      className={[
+        fieldBaseClass,
+        'password',
+        className,
+        showError && 'error',
+        disabled && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -68,24 +75,26 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <FieldLabel
         CustomLabel={CustomLabel}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
-      <input
-        autoComplete={autoComplete}
-        disabled={formProcessing || disabled}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
-        onChange={setValue}
-        type="password"
-        value={(value as string) || ''}
-      />
+      <div className={`${fieldBaseClass}__wrap`}>
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <input
+          autoComplete={autoComplete}
+          disabled={disabled}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={setValue}
+          type="password"
+          value={(value as string) || ''}
+        />
+      </div>
     </div>
   )
 }
 
-export const Password = withCondition(PasswordField)
+export const PasswordField = withCondition(_PasswordField)

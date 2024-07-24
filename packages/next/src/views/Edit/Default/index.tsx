@@ -1,23 +1,22 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui/forms/Form'
 
-import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
-import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
-import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
-import { Upload } from '@payloadcms/ui/elements/Upload'
-import { Form } from '@payloadcms/ui/forms/Form'
-import { useAuth } from '@payloadcms/ui/providers/Auth'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useDocumentEvents } from '@payloadcms/ui/providers/DocumentEvents'
-import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
-import { OperationProvider } from '@payloadcms/ui/providers/Operation'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { getFormState } from '@payloadcms/ui/utilities/getFormState'
-import { useRouter } from 'next/navigation.js'
-import { useSearchParams } from 'next/navigation.js'
+import {
+  DocumentControls,
+  DocumentFields,
+  Form,
+  type FormProps,
+  OperationProvider,
+  Upload,
+  useAuth,
+  useComponentMap,
+  useConfig,
+  useDocumentEvents,
+  useDocumentInfo,
+  useEditDepth,
+  useUploadEdits,
+} from '@payloadcms/ui'
+import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
@@ -44,27 +43,28 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    getDocPermissions,
     getDocPreferences,
     getVersions,
     globalSlug,
+    hasPublishPermission,
     hasSavePermission,
     initialData: data,
     initialState,
     isEditing,
+    isInitializing,
     onSave: onSaveFromContext,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
   const config = useConfig()
   const router = useRouter()
-  const { dispatchFormQueryParams } = useFormQueryParams()
-  const { getFieldMap } = useComponentMap()
-  const params = useSearchParams()
+  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
+  const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
+  const { resetUploadEdits } = useUploadEdits()
 
-  const { i18n } = useTranslation()
+  const locale = params.get('locale')
 
   const {
     admin: { user: userSlug },
@@ -74,8 +74,6 @@ export const DefaultEditView: React.FC = () => {
     serverURL,
   } = config
 
-  const locale = params.get('locale')
-
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
 
@@ -83,12 +81,16 @@ export const DefaultEditView: React.FC = () => {
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
+  const componentMap = getComponentMap({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+  })
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
   })
 
-  const operation = id ? 'update' : 'create'
+  const operation = collectionSlug && !id ? 'create' : 'update'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
@@ -115,7 +117,6 @@ export const DefaultEditView: React.FC = () => {
       }
 
       void getVersions()
-      void getDocPermissions()
 
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
@@ -126,15 +127,13 @@ export const DefaultEditView: React.FC = () => {
 
       if (!isEditing && depth < 2) {
         // Redirect to the same locale if it's been set
-        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        const redirectRoute = formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+        })
         router.push(redirectRoute)
       } else {
-        dispatchFormQueryParams({
-          type: 'SET',
-          params: {
-            uploadEdits: null,
-          },
-        })
+        resetUploadEdits()
       }
     },
     [
@@ -147,13 +146,12 @@ export const DefaultEditView: React.FC = () => {
       depth,
       collectionSlug,
       getVersions,
-      getDocPermissions,
       isEditing,
       refreshCookieAsync,
       adminRoute,
-      locale,
       router,
-      dispatchFormQueryParams,
+      locale,
+      resetUploadEdits,
     ],
   )
 
@@ -185,23 +183,13 @@ export const DefaultEditView: React.FC = () => {
           action={action}
           className={`${baseClass}__form`}
           disableValidationOnSubmit
-          disabled={!hasSavePermission}
-          initialState={initialState}
+          disabled={isInitializing || !hasSavePermission}
+          initialState={!isInitializing && initialState}
+          isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          <FormLoadingOverlayToggle
-            action={operation}
-            // formIsLoading={isLoading}
-            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-            name={`collection-edit--${
-              typeof collectionConfig?.labels?.singular === 'string'
-                ? collectionConfig.labels.singular
-                : i18n.t('general:document')
-            }`}
-            type="withoutNav"
-          />
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetDocumentStepNav
@@ -221,9 +209,10 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
-            isEditing={Boolean(id)}
+            isEditing={isEditing}
             permissions={docPermissions}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />
@@ -238,20 +227,26 @@ export const DefaultEditView: React.FC = () => {
                       collectionSlug={collectionConfig.slug}
                       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
+                      loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
                       useAPIKey={auth.useAPIKey}
+                      username={data?.username}
                       verify={auth.verify}
                     />
                   )}
                   {upload && (
                     <React.Fragment>
-                      <Upload
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                      />
+                      {componentMap.Upload !== undefined ? (
+                        componentMap.Upload
+                      ) : (
+                        <Upload
+                          collectionSlug={collectionConfig.slug}
+                          initialState={initialState}
+                          uploadConfig={upload}
+                        />
+                      )}
                     </React.Fragment>
                   )}
                 </Fragment>
