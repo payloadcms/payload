@@ -39,7 +39,7 @@ $color-purple: #f3ddf3 !default;
 //////////////////////////////
 
 $style-radius-s: 3px !default;
-$style-radius-m: 4px !default;
+$style-radius-m: 6px !default;
 $style-radius-l: 9px !default;
 $style-stroke-width: 1px !default;
 
@@ -63,7 +63,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 }
 
 @mixin shadow-m {
-  box-shadow: 0 4px 8px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px -3px rgba(0, 0, 0, 0.1);
 }
 
 @mixin shadow-lg {
