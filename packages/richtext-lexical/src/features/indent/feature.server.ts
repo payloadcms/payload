@@ -3,7 +3,7 @@ import { i18n } from './i18n.js'
 
 export const IndentFeature = createServerFeature({
   feature: {
-    ClientFeature: '../../exports/client/index.js#IndentFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#IndentFeatureClient',
     i18n,
   },
   key: 'indent',

@@ -21,7 +21,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     avatar: {
-      Component: 'collections/Posts/MyAvatar.js#MyAvatar',
+      Component: '/collections/Posts/MyAvatar.js#MyAvatar',
     },
   },
   editor: lexicalEditor(),

@@ -1,4 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
+import type { PayloadComponent } from 'payload'
 import type React from 'react'
 
 export type SlateNodeConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
@@ -22,12 +23,12 @@ export type SlateNode = {
   type?: string // doesn't always have type, e.g. for paragraphs
 }
 
-export type SlateNodeConverterClientComponent = React.FC<{
+export type SlateNodeConverterProps = {
   componentKey: string
   featureKey: string
-}>
+}
 
 export type SlateNodeConverterProvider = {
-  ClientConverter: SlateNodeConverterClientComponent
+  ClientConverter: PayloadComponent<SlateNodeConverterProps>
   converter: SlateNodeConverter
 }

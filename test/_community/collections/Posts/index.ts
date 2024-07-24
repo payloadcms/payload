@@ -11,11 +11,15 @@ export const PostsCollection: CollectionConfig = {
     {
       admin: {
         components: {
-          Label: 'collections/Posts/MyComponent.js#MyComponent',
+          Label: '/collections/Posts/MyComponent.js#MyComponent',
         },
       },
       name: 'text',
       type: 'text',
+    },
+    {
+      name: 'richText',
+      type: 'richText',
     },
     // {
     //   type: 'row',

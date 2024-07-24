@@ -93,7 +93,7 @@ export const LinkFeature = createServerFeature<
     )
 
     return {
-      ClientFeature: '../../exports/client/index.js#LinkFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,

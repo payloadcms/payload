@@ -1,5 +1,5 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type React from 'react'
+import type { PayloadComponent } from 'payload'
 
 export type LexicalPluginNodeConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   converter: ({
@@ -26,12 +26,12 @@ export type PayloadPluginLexicalData = {
   words: number
 }
 
-export type LexicalPluginNodeConverterClientComponent = React.FC<{
+export type LexicalPluginNodeConverterProps = {
   componentKey: string
   featureKey: string
-}>
+}
 
 export type LexicalPluginNodeConverterProvider = {
-  ClientConverter: LexicalPluginNodeConverterClientComponent
+  ClientConverter: PayloadComponent<LexicalPluginNodeConverterProps>
   converter: LexicalPluginNodeConverter
 }

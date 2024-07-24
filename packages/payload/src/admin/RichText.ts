@@ -2,6 +2,7 @@ import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translation
 import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
+import type { ComponentImportMap } from '../bin/generateComponentImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type {
   Config,
@@ -196,10 +197,11 @@ type RichTextAdapterBase<
       [key: string]: any
       Component: ResolvedComponent<any, any>
     }>
+    componentImportMap: ComponentImportMap
     config: SanitizedConfig
     i18n: I18nClient
     schemaPath: string
-  }) => Map<string, React.ReactNode>
+  }) => Map<string, unknown>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     i18n: I18n<any, any>

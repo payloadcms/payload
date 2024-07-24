@@ -9,6 +9,7 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
+  Config,
   Field,
   JsonObject,
   PayloadComponent,
@@ -19,7 +20,6 @@ import type {
   SanitizedConfig,
   ValidateOptions,
 } from 'payload'
-import type React from 'react'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { AdapterProps } from '../types.js'
@@ -281,13 +281,14 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
+  generateComponentImportMap?: Config['admin']['componentImportMap']['generators'][0]
   generateComponentMap?: (args: {
     config: SanitizedConfig
     i18n: I18nClient
     props: ServerProps
     schemaPath: string
   }) => {
-    [key: string]: React.FC<{ componentKey: string; featureKey: string }>
+    [key: string]: PayloadComponent
   }
   generateSchemaMap?: (args: {
     config: SanitizedConfig

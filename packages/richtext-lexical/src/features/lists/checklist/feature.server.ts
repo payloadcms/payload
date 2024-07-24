@@ -9,7 +9,7 @@ import { CHECK_LIST } from './markdownTransformers.js'
 export const ChecklistFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
     return {
-      ClientFeature: '../../../exports/client/index.js#ChecklistFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#ChecklistFeatureClient',
       i18n,
       markdownTransformers: [CHECK_LIST],
       nodes:

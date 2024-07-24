@@ -60,6 +60,9 @@
       "@payloadcms/next/*": [
         "./packages/next/src/exports/*.ts"
       ],
+      "@payloadcms/richtext-lexical/client": [
+        "./packages/richtext-lexical/src/exports/client/index.ts"
+      ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"
       ]

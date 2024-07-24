@@ -30,7 +30,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       validRelationships,
     })
     return {
-      ClientFeature: '../../exports/client/index.js#TableFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#TableFeatureClient',
       generateSchemaMap: () => {
         const schemaMap = new Map<string, Field[]>()
 

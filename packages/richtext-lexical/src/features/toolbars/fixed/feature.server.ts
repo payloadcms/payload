@@ -33,7 +33,7 @@ export const FixedToolbarFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: '../../../exports/client/index.js#FixedToolbarFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#FixedToolbarFeatureClient',
       clientFeatureProps: sanitizedProps,
       sanitizedServerFeatureProps: sanitizedProps,
     }

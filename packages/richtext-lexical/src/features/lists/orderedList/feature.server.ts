@@ -9,7 +9,7 @@ import { ORDERED_LIST } from './markdownTransformer.js'
 export const OrderedListFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
     return {
-      ClientFeature: '../../../exports/client/index.js#OrderedListFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#OrderedListFeatureClient',
       i18n,
       markdownTransformers: [ORDERED_LIST],
       nodes: featureProviderMap.has('unorderedList')

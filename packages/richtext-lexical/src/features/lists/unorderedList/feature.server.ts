@@ -8,7 +8,7 @@ import { UNORDERED_LIST } from './markdownTransformer.js'
 
 export const UnorderedListFeature = createServerFeature({
   feature: {
-    ClientFeature: '../../../exports/client/index.js#UnorderedListFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#UnorderedListFeatureClient',
     i18n,
     markdownTransformers: [UNORDERED_LIST],
     nodes: [

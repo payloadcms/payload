@@ -6,11 +6,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
 
-import { fieldHasSubFields } from '../../fields/config/types.js'
 import { iterateConfig } from './iterateConfig.js'
-import { iterateFields } from './iterateFields.js'
 import { parsePayloadComponent } from './parsePayloadComponent.js'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
@@ -53,7 +50,10 @@ export function addPayloadComponentToImportMap({
 
   const importIdentifier = exportName + '_' + Object.keys(importMap).length
   importMap[importIdentifier] = {
-    path: path.resolve(baseDir, componentPath),
+    path:
+      componentPath.startsWith('.') || componentPath.startsWith('/')
+        ? path.resolve(baseDir, componentPath.slice(1))
+        : componentPath,
     specifier: exportName,
   }
   componentMap[componentPath + '#' + exportName] = importIdentifier

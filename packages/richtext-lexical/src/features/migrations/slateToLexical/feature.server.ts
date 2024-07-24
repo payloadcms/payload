@@ -1,3 +1,4 @@
+import type { PayloadComponent } from 'payload'
 import type React from 'react'
 
 import type { SlateNodeConverterProvider } from './converter/types.js'
@@ -39,10 +40,17 @@ export const SlateToLexicalFeature = createServerFeature<
     props.converters = converters
 
     return {
-      ClientFeature: '../../../exports/client/index.js#SlateToLexicalFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#SlateToLexicalFeatureClient',
+      generateComponentImportMap: ({ addToComponentImportMap }) => {
+        for (const converter of converters) {
+          if (converter.ClientConverter) {
+            addToComponentImportMap(converter.ClientConverter)
+          }
+        }
+      },
       generateComponentMap: () => {
         const map: {
-          [key: string]: React.FC
+          [key: string]: PayloadComponent
         } = {}
 
         for (const converter of converters) {

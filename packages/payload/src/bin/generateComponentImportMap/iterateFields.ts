@@ -32,6 +32,7 @@ export function genComponentImportMapIterateFields({
         addToComponentImportMap,
         baseDir,
         componentMap,
+        config,
         fields: field.fields,
         importMap,
       })
@@ -41,6 +42,7 @@ export function genComponentImportMapIterateFields({
           addToComponentImportMap,
           baseDir,
           componentMap,
+          config,
           fields: block.fields,
           importMap,
         })
@@ -51,6 +53,7 @@ export function genComponentImportMapIterateFields({
           addToComponentImportMap,
           baseDir,
           componentMap,
+          config,
           fields: tab.fields,
           importMap,
         })

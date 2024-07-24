@@ -85,7 +85,7 @@ export const BlocksFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: '../../exports/client/index.js#BlocksFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
       clientFeatureProps: clientProps,
       generateSchemaMap: ({ props }) => {
         /**

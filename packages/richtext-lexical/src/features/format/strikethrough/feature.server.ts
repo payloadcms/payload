@@ -3,7 +3,7 @@ import { STRIKETHROUGH } from './markdownTransformers.js'
 
 export const StrikethroughFeature = createServerFeature({
   feature: {
-    ClientFeature: '../../../exports/client/index.js#StrikethroughFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#StrikethroughFeatureClient',
 
     markdownTransformers: [STRIKETHROUGH],
   },

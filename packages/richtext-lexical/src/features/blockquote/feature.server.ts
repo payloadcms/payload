@@ -18,7 +18,7 @@ export type SerializedQuoteNode = Spread<
 
 export const BlockquoteFeature = createServerFeature({
   feature: {
-    ClientFeature: '../../exports/client/index.js#BlockquoteFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#BlockquoteFeatureClient',
     clientFeatureProps: null,
     i18n,
     markdownTransformers: [MarkdownTransformer],

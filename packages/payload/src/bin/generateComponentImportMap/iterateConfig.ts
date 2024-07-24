@@ -70,6 +70,7 @@ export function iterateConfig({
     }
   }
 
+  /*
   if (
     config?.editor &&
     typeof config.editor === 'object' &&
@@ -83,5 +84,5 @@ export function iterateConfig({
       config,
       importMap,
     })
-  }
+  }*/ // No need to do that here since in the sanitized editor config, this root editor is already added to the field editor - and we already process that in iterateFields
 }

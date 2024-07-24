@@ -36,7 +36,7 @@ export const HeadingFeature = createServerFeature<
     const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
     return {
-      ClientFeature: '../../exports/client/index.js#HeadingFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',
       clientFeatureProps: props,
       i18n,
       markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],

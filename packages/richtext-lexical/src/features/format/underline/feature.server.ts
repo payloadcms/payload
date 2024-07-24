@@ -2,7 +2,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 
 export const UnderlineFeature = createServerFeature({
   feature: {
-    ClientFeature: '../../../exports/client/index.js#UnderlineFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#UnderlineFeatureClient',
   },
   key: 'underline',
 })

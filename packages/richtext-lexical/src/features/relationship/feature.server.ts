@@ -44,7 +44,7 @@ export const RelationshipFeature = createServerFeature<
   RelationshipFeatureProps
 >({
   feature: ({ props }) => ({
-    ClientFeature: '../../exports/client/index.js#RelationshipFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#RelationshipFeatureClient',
     i18n,
     nodes: [
       createNode({

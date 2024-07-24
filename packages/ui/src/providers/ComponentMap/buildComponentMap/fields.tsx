@@ -632,6 +632,7 @@ export const mapFields = (args: {
             if (typeof field.editor.generateComponentMap === 'function') {
               const result = field.editor.generateComponentMap({
                 WithServerSideProps,
+                componentImportMap,
                 config,
                 i18n,
                 schemaPath: path,
