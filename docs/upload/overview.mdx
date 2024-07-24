@@ -56,6 +56,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`staticOptions`**            | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html)                                         |
 | **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                         |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                         |
+| **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                       |
 
 _An asterisk denotes that a property above is required._
 

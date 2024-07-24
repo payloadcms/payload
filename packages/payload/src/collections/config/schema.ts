@@ -217,6 +217,7 @@ const collectionSchema = joi.object().keys({
         joi.number(),
       ),
       useTempFiles: joi.bool(),
+      withMetadata: joi.alternatives().try(joi.boolean(), joi.func()),
     }),
     joi.boolean(),
   ),

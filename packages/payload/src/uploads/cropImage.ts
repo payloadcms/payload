@@ -1,9 +1,12 @@
 import type { UploadedFile } from 'express-fileupload'
+import type { PayloadRequest } from 'payload/types'
 import type { SharpOptions } from 'sharp'
 
 import sharp from 'sharp'
 
 import type { UploadEdits } from './types'
+
+import { type WithMetadata, optionallyAppendMetadata } from './optionallyAppendMetadata'
 
 export const percentToPixel = (value, dimension): number => {
   if (!value) return 0
@@ -15,14 +18,18 @@ type CropImageArgs = {
   dimensions: { height: number; width: number }
   file: UploadedFile
   heightInPixels: number
+  req?: PayloadRequest
   widthInPixels: number
+  withMetadata?: WithMetadata
 }
 export async function cropImage({
   cropData,
   dimensions,
   file,
   heightInPixels,
+  req,
   widthInPixels,
+  withMetadata,
 }: CropImageArgs) {
   try {
     const { x, y } = cropData
@@ -40,9 +47,15 @@ export async function cropImage({
       width: Number(widthInPixels),
     }
 
-    const cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
+    let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
 
-    return await cropped.toBuffer({
+    cropped = await optionallyAppendMetadata({
+      req,
+      sharpFile: cropped,
+      withMetadata,
+    })
+
+    return await cropped.withMetadata().toBuffer({
       resolveWithObject: true,
     })
   } catch (error) {
