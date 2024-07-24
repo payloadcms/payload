@@ -94,6 +94,7 @@
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",
+    "@libsql/client": "0.6.2",
     "@next/bundle-analyzer": "15.0.0-canary.53",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
