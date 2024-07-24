@@ -22,6 +22,7 @@
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",
     "build:live-preview-react": "turbo build --filter live-preview-react",
+    "build:live-preview-vue": "turbo build --filter live-preview-vue",
     "build:next": "turbo build --filter next",
     "build:payload": "turbo build --filter payload",
     "build:plugin-cloud": "turbo build --filter plugin-cloud",
