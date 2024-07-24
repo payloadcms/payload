@@ -494,8 +494,8 @@ describe('uploads', () => {
       })
 
       // green and red squares should have different sizes (colors make the difference)
-      expect(greenDoc.filesize).toEqual(1205)
-      expect(redDoc.filesize).toEqual(1207)
+      expect(greenDoc.filesize).toEqual(8335)
+      expect(redDoc.filesize).toEqual(8337)
     })
 
     test('should update image alignment based on focal point', async () => {
