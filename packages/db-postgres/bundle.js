@@ -18,7 +18,6 @@ async function build() {
       '*.scss',
       '*.css',
       'drizzle-kit',
-      'libsql',
       'pg',
       '@payloadcms/translations',
       '@payloadcms/drizzle',
