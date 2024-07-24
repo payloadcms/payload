@@ -4,6 +4,12 @@
   background: var(--theme-elevation-50);
   padding: base(1.25) $baseline;
   position: relative;
+  border-radius: var(--style-radius-m);
+  border: 1px solid var(--theme-border-color);
+  box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+  transition-property: border, box-shadow, background;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
   &__title {
     @extend %h5;
@@ -28,6 +34,7 @@
 
     &:hover {
       background: var(--theme-elevation-100);
+      @include shadow-sm;
     }
   }
 
