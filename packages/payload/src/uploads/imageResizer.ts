@@ -19,6 +19,7 @@ import type {
 
 import { isNumber } from '../utilities/isNumber'
 import fileExists from './fileExists'
+import { type WithMetadata, optionallyAppendMetadata } from './optionallyAppendMetadata'
 
 type ResizeArgs = {
   config: SanitizedCollectionConfig
@@ -29,6 +30,7 @@ type ResizeArgs = {
   savedFilename: string
   staticPath: string
   uploadEdits?: UploadEdits
+  withMetadata?: WithMetadata
 }
 
 /** Result from resizing and transforming the requested image sizes */
@@ -270,6 +272,7 @@ export default async function resizeAndTransformImageSizes({
   savedFilename,
   staticPath,
   uploadEdits,
+  withMetadata,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
@@ -344,8 +347,15 @@ export default async function resizeAndTransformImageSizes({
           width: prioritizeHeight ? undefined : resizeWidth,
         })
 
-        // must read from buffer, resize.metadata will return the original image metadata
-        const { info } = await resized.withMetadata().toBuffer({ resolveWithObject: true })
+        const metadataAppendedFile = await optionallyAppendMetadata({
+          req,
+          sharpFile: resized,
+          withMetadata,
+        })
+
+        // Must read from buffer, resized.metadata will return the original image metadata
+        const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
+
         resizeImageMeta.height = extractHeightFromImage({
           ...originalImageMeta,
           height: info.height,
@@ -403,7 +413,13 @@ export default async function resizeAndTransformImageSizes({
         resized = resized.trim(imageResizeConfig.trimOptions)
       }
 
-      const { data: bufferData, info: bufferInfo } = await resized.withMetadata().toBuffer({
+      const metadataAppendedFile = await optionallyAppendMetadata({
+        req,
+        sharpFile: resized,
+        withMetadata,
+      })
+
+      const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
         resolveWithObject: true,
       })
 
