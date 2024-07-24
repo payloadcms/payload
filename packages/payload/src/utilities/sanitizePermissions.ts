@@ -64,13 +64,25 @@ function cleanEmptyObjects(obj: any): void {
 /**
  * Recursively resolve permissions in an object.
  */
-function recursivelySanitizePermissions(obj: PermissionObject): void {
+export function recursivelySanitizePermissions(obj: PermissionObject): void {
   if (typeof obj !== 'object') return
 
-  Object.entries(obj).forEach(([key, value]) => {
-    // Check if it's fields and all permissions are true
-    if (key === 'fields' && areAllPermissionsTrue(value)) {
-      obj[key] = true
+  const entries = Object.entries(obj)
+
+  for (let i = 0; i < entries.length; i++) {
+    const [key, value] = entries[i]
+    // Check if it's a 'fields' key
+    if (key === 'fields') {
+      // Check if fields is empty
+      if (Object.keys(obj[key]).length === 0) {
+        delete obj[key]
+        continue
+      }
+      // Otherwise set fields to true if all permissions are true
+      else if (areAllPermissionsTrue(value)) {
+        obj[key] = true
+        continue
+      }
     }
 
     // Check if the whole object is a permission object
@@ -85,14 +97,17 @@ function recursivelySanitizePermissions(obj: PermissionObject): void {
     if (isFullPermissionObject) {
       if (areAllPermissionsTrue(value)) {
         obj[key] = true
+        continue
       } else {
         for (const subKey in value) {
           if (value[subKey]['permission'] === true && !('where' in value[subKey])) {
             value[subKey] = true
+            continue
           } else if (value[subKey]['permission'] === true && 'where' in value[subKey]) {
             // do nothing
           } else {
             delete value[subKey]
+            continue
           }
         }
       }
@@ -100,15 +115,17 @@ function recursivelySanitizePermissions(obj: PermissionObject): void {
       if (value['permission'] === true && !('where' in value)) {
         // If the permission is true and there is no where clause, set the key to true
         obj[key] = true
+        continue
       } else if (value['permission'] === true && 'where' in value) {
         // otherwise do nothing so we can keep the where clause
       } else {
         delete obj[key]
+        continue
       }
     } else {
       recursivelySanitizePermissions(value)
     }
-  })
+  }
 }
 
 /**
@@ -129,5 +146,6 @@ export function sanitizePermissions(data: Permissions): Permissions {
 
   // Run clean up of empty objects at the end
   cleanEmptyObjects(data)
+
   return data
 }

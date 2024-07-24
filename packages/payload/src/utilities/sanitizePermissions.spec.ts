@@ -1,170 +1,13 @@
-import util from 'node:util'
+import type { CollectionPermission, Permissions } from '../auth/types.js'
 
-import type { Permissions } from '../auth/types.js'
-
-import { sanitizePermissions } from './sanitizePermissions.js'
+import { recursivelySanitizePermissions, sanitizePermissions } from './sanitizePermissions.js'
 
 /* eslint-disable perfectionist/sort-objects */
-describe('sanitizePermissions', () => {
-  it('should sanitize permissions for logged in user', async () => {
-    const permissions: Permissions = {
-      canAccessAdmin: true,
-      collections: {
-        'payload-preferences': {
-          fields: {
-            user: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            key: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            value: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            updatedAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-          },
-          create: {
-            permission: true,
-          },
-          read: {
-            permission: true,
-            where: {
-              'user.value': {
-                equals: 1,
-              },
-            },
-          },
-          update: {
-            permission: true,
-          },
-          delete: {
-            permission: true,
-            where: {
-              'user.value': {
-                equals: 1,
-              },
-            },
-          },
-        },
-        'payload-migrations': {
-          fields: {
-            name: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            batch: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            updatedAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-          },
+describe('recursivelySanitizePermissions', () => {
+  it('should sanitize a basic collection', () => {
+    const permissions: CollectionPermission = {
+      fields: {
+        text: {
           create: {
             permission: true,
           },
@@ -174,11 +17,174 @@ describe('sanitizePermissions', () => {
           update: {
             permission: true,
           },
-          delete: {
+        },
+      },
+      create: {
+        permission: true,
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
+      delete: {
+        permission: false,
+      },
+      readVersions: {
+        permission: true,
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      fields: true,
+      create: true,
+      read: true,
+      update: true,
+      readVersions: true,
+    })
+  })
+
+  it('should sanitize a collection with where queries', () => {
+    const permissions: CollectionPermission = {
+      fields: {},
+      create: {
+        permission: true,
+        where: {
+          user: {
+            equals: 2,
+          },
+        },
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
+      delete: {
+        permission: false,
+      },
+      readVersions: {
+        permission: true,
+        where: {
+          user: {
+            equals: 1,
+          },
+        },
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      create: {
+        permission: true,
+        where: {
+          user: {
+            equals: 2,
+          },
+        },
+      },
+      read: true,
+      update: true,
+      readVersions: {
+        permission: true,
+        where: {
+          user: {
+            equals: 1,
+          },
+        },
+      },
+    })
+  })
+
+  it('should sanitize a collection with nested fields in blocks', () => {
+    const permissions: Partial<CollectionPermission> = {
+      fields: {
+        blocks: {
+          create: {
+            permission: true,
+          },
+          blocks: {
+            blockWithTitle: {
+              fields: {
+                blockTitle: {
+                  create: {
+                    permission: true,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                id: {
+                  create: {
+                    permission: true,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                blockName: {
+                  create: {
+                    permission: true,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
             permission: true,
           },
         },
-        posts: {
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      fields: {
+        blocks: {
+          create: true,
+          blocks: {
+            blockWithTitle: {
+              fields: true,
+              create: true,
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+      },
+    })
+  })
+
+  it('should sanitize a collection with nested fields in arrays', () => {
+    const permissions: Partial<CollectionPermission> = {
+      fields: {
+        arrayOfText: {
+          create: {
+            permission: true,
+          },
           fields: {
             text: {
               create: {
@@ -190,291 +196,22 @@ describe('sanitizePermissions', () => {
               update: {
                 permission: true,
               },
-              delete: {
-                permission: true,
-              },
-              readVersions: {
-                permission: true,
-              },
             },
-            richText: {
+            hiddenText: {
               create: {
                 permission: true,
               },
               read: {
-                permission: true,
+                permission: false,
               },
               update: {
                 permission: true,
               },
-              delete: {
-                permission: true,
-              },
-              readVersions: {
-                permission: true,
-              },
             },
-            updatedAt: {
+            id: {
               create: {
                 permission: true,
               },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              readVersions: {
-                permission: true,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              readVersions: {
-                permission: true,
-              },
-            },
-            _status: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              readVersions: {
-                permission: true,
-              },
-            },
-          },
-          create: {
-            permission: true,
-          },
-          read: {
-            permission: true,
-          },
-          update: {
-            permission: true,
-          },
-          delete: {
-            permission: true,
-          },
-          readVersions: {
-            permission: true,
-          },
-        },
-        users: {
-          fields: {
-            updatedAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            email: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            resetPasswordToken: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            resetPasswordExpiration: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            salt: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            hash: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            loginAttempts: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-            lockUntil: {
-              create: {
-                permission: true,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-              delete: {
-                permission: true,
-              },
-              unlock: {
-                permission: true,
-              },
-            },
-          },
-          create: {
-            permission: true,
-          },
-          read: {
-            permission: true,
-          },
-          update: {
-            permission: true,
-          },
-          delete: {
-            permission: true,
-          },
-          unlock: {
-            permission: true,
-          },
-        },
-      },
-      globals: {
-        menu: {
-          fields: {
-            globalText: {
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-            },
-            updatedAt: {
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: true,
-              },
-            },
-            createdAt: {
               read: {
                 permission: true,
               },
@@ -493,59 +230,20 @@ describe('sanitizePermissions', () => {
       },
     }
 
-    const sanitizedPermissions = sanitizePermissions(permissions)
+    recursivelySanitizePermissions(permissions)
 
-    expect(sanitizedPermissions).toStrictEqual({
-      canAccessAdmin: true,
-      collections: {
-        'payload-preferences': {
-          fields: true,
+    expect(permissions).toStrictEqual({
+      fields: {
+        arrayOfText: {
           create: true,
-          read: {
-            permission: true,
-            where: {
-              'user.value': {
-                equals: 1,
-              },
+          fields: {
+            text: true,
+            hiddenText: {
+              create: true,
+              update: true,
             },
+            id: true,
           },
-          update: true,
-          delete: {
-            permission: true,
-            where: {
-              'user.value': {
-                equals: 1,
-              },
-            },
-          },
-        },
-        'payload-migrations': {
-          fields: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-        },
-        posts: {
-          fields: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          readVersions: true,
-        },
-        users: {
-          fields: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          unlock: true,
-        },
-      },
-      globals: {
-        menu: {
-          fields: true,
           read: true,
           update: true,
         },
@@ -553,7 +251,44 @@ describe('sanitizePermissions', () => {
     })
   })
 
-  it('should sanitize permissions for unauthenticated user', async () => {
+  it('should sanitize a collection with nested fields in richText', () => {
+    const permissions: Partial<CollectionPermission> = {
+      fields: {
+        text: {
+          create: {
+            permission: true,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        richText: {
+          create: {
+            permission: true,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      fields: true,
+    })
+  })
+})
+
+describe('sanitizePermissions', () => {
+  it('should return nothing for unauthenticated user', () => {
     const permissions: Permissions = {
       canAccessAdmin: false,
       collections: {
@@ -564,146 +299,9 @@ describe('sanitizePermissions', () => {
                 permission: false,
               },
               read: {
-                permission: true,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            key: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            value: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            updatedAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: true,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: true,
-              },
-            },
-          },
-          create: {
-            permission: false,
-          },
-          read: {
-            permission: true,
-            where: {
-              'user.value': {},
-            },
-          },
-          update: {
-            permission: false,
-          },
-          delete: {
-            permission: true,
-            where: {
-              'user.value': {},
-            },
-          },
-        },
-        'payload-migrations': {
-          fields: {
-            name: {
-              create: {
-                permission: false,
-              },
-              read: {
                 permission: false,
               },
               update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-            },
-            batch: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-            },
-            updatedAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
                 permission: false,
               },
             },
@@ -718,282 +316,6 @@ describe('sanitizePermissions', () => {
             permission: false,
           },
           delete: {
-            permission: false,
-          },
-        },
-        posts: {
-          fields: {
-            text: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              readVersions: {
-                permission: false,
-              },
-            },
-            richText: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              readVersions: {
-                permission: false,
-              },
-            },
-            updatedAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              readVersions: {
-                permission: false,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              readVersions: {
-                permission: false,
-              },
-            },
-            _status: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              readVersions: {
-                permission: false,
-              },
-            },
-          },
-          create: {
-            permission: false,
-          },
-          read: {
-            permission: false,
-          },
-          update: {
-            permission: false,
-          },
-          delete: {
-            permission: false,
-          },
-          readVersions: {
-            permission: false,
-          },
-        },
-        users: {
-          fields: {
-            updatedAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            createdAt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            email: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            resetPasswordToken: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            resetPasswordExpiration: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            salt: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            hash: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            loginAttempts: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-            lockUntil: {
-              create: {
-                permission: false,
-              },
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-              delete: {
-                permission: false,
-              },
-              unlock: {
-                permission: false,
-              },
-            },
-          },
-          create: {
-            permission: false,
-          },
-          read: {
-            permission: false,
-          },
-          update: {
-            permission: false,
-          },
-          delete: {
-            permission: false,
-          },
-          unlock: {
             permission: false,
           },
         },
@@ -1002,22 +324,9 @@ describe('sanitizePermissions', () => {
         menu: {
           fields: {
             globalText: {
-              read: {
+              create: {
                 permission: false,
               },
-              update: {
-                permission: false,
-              },
-            },
-            updatedAt: {
-              read: {
-                permission: false,
-              },
-              update: {
-                permission: false,
-              },
-            },
-            createdAt: {
               read: {
                 permission: false,
               },
@@ -1037,39 +346,7 @@ describe('sanitizePermissions', () => {
     }
 
     const sanitizedPermissions = sanitizePermissions(permissions)
-    expect(sanitizedPermissions).toStrictEqual({
-      collections: {
-        'payload-preferences': {
-          fields: {
-            user: {
-              read: true,
-              delete: true,
-            },
-            key: {
-              read: true,
-              delete: true,
-            },
-            value: {
-              read: true,
-              delete: true,
-            },
-            updatedAt: {
-              read: true,
-              delete: true,
-            },
-            createdAt: {
-              read: true,
-              delete: true,
-            },
-          },
-          read: {
-            permission: true,
-          },
-          delete: {
-            permission: true,
-          },
-        },
-      },
-    })
+
+    expect(sanitizedPermissions).toStrictEqual({})
   })
 })
