@@ -177,7 +177,7 @@ export default buildConfigWithDefaults({
             withoutEnlargement: false,
           },
         ],
-        staticDir: path.resolve(dirname, './without-meta-data'),
+        staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
         // eslint-disable-next-line @typescript-eslint/require-await
         withMetadata: async ({ metadata }) => {
           if (metadata.format === 'jpeg') {
