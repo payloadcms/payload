@@ -21,7 +21,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -123,10 +123,18 @@ export type FilterOptionsProps<TData = any> = {
   user: Partial<PayloadRequest['user']>
 }
 
-export type FilterOptions<TData = any> =
-  | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
-  | Where
+export type FilterOptionsFunc<TData = any> = (
+  options: FilterOptionsProps<TData>,
+) => Promise<Where | boolean> | Where | boolean
+
+export type FilterOptionsMono<TData = any> = FilterOptionsFunc<TData> | Where | null
+
+export type FilterOptionsPoly<TData = any> =
+  | { [relationTo: string]: Where }
+  | FilterOptionsFunc<TData>
   | null
+
+export type FilterOptions = FilterOptionsMono | FilterOptionsPoly
 
 type Admin = {
   className?: string
@@ -508,7 +516,7 @@ export type UploadField = {
       Label?: CustomComponent<LabelProps>
     }
   }
-  filterOptions?: FilterOptions
+  filterOptions?: FilterOptionsMono
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -576,7 +584,6 @@ export type SelectField = {
 } & FieldBase
 
 type SharedRelationshipProperties = {
-  filterOptions?: FilterOptions
   hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
@@ -627,12 +634,14 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   } & RelationshipAdmin
+  filterOptions: FilterOptionsPoly
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 export type SingleRelationshipField = {
   admin?: {
     sortOptions?: string
   } & RelationshipAdmin
+  filterOptions: FilterOptionsMono
   relationTo: CollectionSlug
 } & SharedRelationshipProperties
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
