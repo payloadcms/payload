@@ -7,7 +7,6 @@ export const Group: CollectionConfig = {
   fields: [
     {
       name: 'groupLocalized',
-      localized: true,
       type: 'group',
       fields: [
         {
@@ -15,15 +14,16 @@ export const Group: CollectionConfig = {
           type: 'text',
         },
       ],
+      localized: true,
     },
     {
       name: 'group',
       type: 'group',
       fields: [
         {
-          localized: true,
           name: 'title',
           type: 'text',
+          localized: true,
         },
       ],
     },
@@ -36,9 +36,9 @@ export const Group: CollectionConfig = {
           type: 'array',
           fields: [
             {
-              localized: true,
-              type: 'text',
               name: 'title',
+              type: 'text',
+              localized: true,
             },
           ],
         },
@@ -50,9 +50,9 @@ export const Group: CollectionConfig = {
               slug: 'first',
               fields: [
                 {
-                  localized: true,
-                  type: 'text',
                   name: 'title',
+                  type: 'text',
+                  localized: true,
                 },
               ],
             },

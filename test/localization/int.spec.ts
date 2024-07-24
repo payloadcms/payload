@@ -11,8 +11,8 @@ import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { tabSlug } from './collections/Tab/index.js'
 import configPromise from './config.js'
-import { defaultLocale } from './shared.js'
 import {
+  defaultLocale,
   englishTitle,
   hungarianLocale,
   localizedPostsSlug,
@@ -1119,12 +1119,12 @@ describe('Localization', () => {
     it('should properly create/update/read localized group field', async () => {
       const result = await payload.create({
         collection: groupSlug,
-        locale: englishLocale,
         data: {
           groupLocalized: {
             title: 'hello en',
           },
         },
+        locale: englishLocale,
       })
 
       expect(result.groupLocalized?.title).toBe('hello en')
