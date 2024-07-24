@@ -1,26 +1,43 @@
 @import '../../scss/styles.scss';
 
 .file-details {
-  background-color: var(--theme-elevation-50);
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-border-color);
+  border-radius: var(--style-radius-s);
+  overflow: hidden;
+  @include inputShadow;
 
   header {
     display: flex;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--theme-elevation-0);
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   &__remove {
-    margin: $baseline $baseline $baseline 0;
+    position: absolute;
+    margin: 0;
+    top: $baseline;
+    right: $baseline;
+
+    & .btn__icon {
+      border: 1px solid var(--theme-border-color);
+      background: var(--theme-input-bg);
+      @include inputShadow;
+    }
   }
 
   &__main-detail {
-    padding: $baseline base(1.5);
+    background-color: var(--theme-input-bg);
+    box-shadow: 0px 0px 0 1px var(--theme-border-color);
+    padding: base(0.6) base(1);
     width: auto;
     flex-grow: 1;
-    min-width: 0;
+    min-width: 280px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
-    align-self: center;
+    justify-content: center;
+    align-self: stretch;
     gap: base(0.25);
   }
 
@@ -102,8 +119,6 @@
 
     &__remove {
       order: 2;
-      margin-left: auto;
-      margin-right: $baseline;
     }
 
     &__main-detail {
