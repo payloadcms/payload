@@ -13,6 +13,7 @@ export const packagePublishList = [
   'db-postgres',
   'live-preview',
   'live-preview-react',
+  'live-preview-vue',
   'richtext-slate',
   'richtext-lexical',
 
