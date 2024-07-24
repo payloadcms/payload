@@ -24,6 +24,7 @@ const baseClass = 'upload'
 
 export type UploadInputProps = {
   api?: string
+  canCreate?: boolean
   collection?: ClientCollectionConfig
   customUploadActions?: React.ReactNode[]
   filterOptions?: FilterOptionsResult
@@ -40,6 +41,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     CustomError,
     CustomLabel,
     api = '/api',
+    canCreate,
     className,
     collection,
     customUploadActions,
@@ -164,13 +166,18 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
               {(!fileDoc || missingFile) && (
                 <div className={`${baseClass}__wrap`}>
                   <div className={`${baseClass}__buttons`}>
-                    <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                        {t('fields:uploadNewLabel', {
-                          label: getTranslation(collection.labels.singular, i18n),
-                        })}
-                      </Button>
-                    </DocumentDrawerToggler>
+                    {canCreate && (
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__toggler`}
+                        disabled={readOnly}
+                      >
+                        <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                          {t('fields:uploadNewLabel', {
+                            label: getTranslation(collection.labels.singular, i18n),
+                          })}
+                        </Button>
+                      </DocumentDrawerToggler>
+                    )}
                     <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
                       <Button buttonStyle="secondary" disabled={readOnly} el="div">
                         {t('fields:chooseFromExisting')}
