@@ -11,6 +11,7 @@
   "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
   "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
