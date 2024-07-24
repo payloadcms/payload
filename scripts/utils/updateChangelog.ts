@@ -197,7 +197,7 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
     const [rawNotes, _] = commit.body.split('\n\n')
     let notes = rawNotes
       .split('\n')
-      .map((l) => `> ${l}`)
+      .map((l) => `  ${l}`) // Indent notes
       .join('\n')
       .trim()
 
