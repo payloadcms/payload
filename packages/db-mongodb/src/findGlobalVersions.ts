@@ -106,7 +106,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const result = await Model.paginate(query, paginationOptions)
 
-  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result)) : result.docs
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
 
   return {
     ...result,

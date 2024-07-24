@@ -87,16 +87,11 @@ export const find: Find = async function find(
 
   const result = await Model.paginate(query, paginationOptions)
 
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
+
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      if (this.jsonParse) {
-        doc = JSON.parse(JSON.stringify(doc))
-        doc.id = doc._id
-      } else {
-        doc.id = JSON.parse(JSON.stringify(doc._id))
-      }
-
+    docs: docs.map((doc) => {
       return sanitizeInternalFields(doc)
     }),
   }
