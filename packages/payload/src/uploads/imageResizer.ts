@@ -7,6 +7,7 @@ import sanitize from 'sanitize-filename'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type {
   FileSize,
   FileSizes,
@@ -30,9 +31,7 @@ type ResizeArgs = {
   sharp?: SharpDependency
   staticPath: string
   uploadEdits?: UploadEdits
-  withMetadata?:
-    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
-    | boolean
+  withMetadata?: WithMetadata
 }
 
 /** Result from resizing and transforming the requested image sizes */

@@ -1,7 +1,8 @@
-import type { Metadata as SharpMetadata, SharpOptions } from 'sharp'
+import type { SharpOptions } from 'sharp'
 
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type { UploadEdits } from './types.js'
 
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
@@ -18,9 +19,7 @@ type CropImageArgs = {
   req?: PayloadRequest
   sharp: SanitizedConfig['sharp']
   widthInPixels: number
-  withMetadata?:
-    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
-    | boolean
+  withMetadata?: WithMetadata
 }
 export async function cropImage({
   cropData,

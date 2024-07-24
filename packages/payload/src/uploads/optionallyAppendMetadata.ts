@@ -2,6 +2,10 @@ import type { Sharp, Metadata as SharpMetadata } from 'sharp'
 
 import type { PayloadRequest } from '../types/index.js'
 
+export type WithMetadata =
+  | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
+  | boolean
+
 export async function optionallyAppendMetadata({
   req,
   sharpFile,
@@ -9,9 +13,7 @@ export async function optionallyAppendMetadata({
 }: {
   req: PayloadRequest
   sharpFile: Sharp
-  withMetadata:
-    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
-    | boolean
+  withMetadata: WithMetadata
 }): Promise<Sharp> {
   const metadata = await sharpFile.metadata()
 
