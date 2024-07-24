@@ -163,8 +163,7 @@ export const generateFileData = async <T>({
 
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
-      sharpFile = optionallyAppendMetadata({
-        metadata,
+      sharpFile = await optionallyAppendMetadata({
         req,
         sharpFile,
         withMetadata,

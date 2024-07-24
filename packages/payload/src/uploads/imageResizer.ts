@@ -30,7 +30,9 @@ type ResizeArgs = {
   sharp?: SharpDependency
   staticPath: string
   uploadEdits?: UploadEdits
-  withMetadata?: ((options: { metadata: SharpMetadata }) => boolean) | boolean
+  withMetadata?:
+    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
+    | boolean
 }
 
 /** Result from resizing and transforming the requested image sizes */
@@ -323,13 +325,14 @@ export async function resizeAndTransformImageSizes({
           width: prioritizeHeight ? undefined : resizeWidth,
         })
 
-        // must read from buffer, resize.metadata will return the original image metadata
-        const { info } = await optionallyAppendMetadata({
-          metadata: originalImageMeta,
+        const metadataAppendedFile = await optionallyAppendMetadata({
           req,
           sharpFile: resized,
           withMetadata,
-        }).toBuffer({ resolveWithObject: true })
+        })
+
+        // Must read from buffer, resized.metadata will return the original image metadata
+        const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
 
         resizeImageMeta.height = extractHeightFromImage({
           ...originalImageMeta,
@@ -388,12 +391,13 @@ export async function resizeAndTransformImageSizes({
         resized = resized.trim(imageResizeConfig.trimOptions)
       }
 
-      const { data: bufferData, info: bufferInfo } = await optionallyAppendMetadata({
-        metadata: originalImageMeta,
+      const metadataAppendedFile = await optionallyAppendMetadata({
         req,
         sharpFile: resized,
         withMetadata,
-      }).toBuffer({
+      })
+
+      const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
         resolveWithObject: true,
       })
 

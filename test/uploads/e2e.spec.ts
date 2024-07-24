@@ -27,6 +27,7 @@ import {
   mediaSlug,
   relationSlug,
   withMetadataSlug,
+  withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -46,6 +47,7 @@ let adminThumbnailFunctionURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
+let withOnlyJPEGMetadataURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -67,6 +69,7 @@ describe('uploads', () => {
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
+    withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -401,6 +404,58 @@ describe('uploads', () => {
     })
 
     expect(mediaDoc.sizes.sizeTwo.filesize).toEqual(2147)
+  })
+
+  test('should only upload image with metadata if jpeg mimetype', async () => {
+    await page.goto(withOnlyJPEGMetadataURL.create)
+    await page.waitForURL(withOnlyJPEGMetadataURL.create)
+
+    const fileChooserPromiseForJPEG = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooserForJPEG = await fileChooserPromiseForJPEG
+    await wait(1000)
+    await fileChooserForJPEG.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const jpegMediaID = page.url().split('/').pop()
+
+    const { doc: jpegMediaDoc } = await client.findByID({
+      id: jpegMediaID,
+      slug: withOnlyJPEGMetadataSlug,
+      auth: true,
+    })
+
+    // without metadata appended, the jpeg image filesize would be 2424
+    expect(jpegMediaDoc.sizes.sizeThree.filesize).toEqual(9554)
+
+    await page.goto(withOnlyJPEGMetadataURL.create)
+    await page.waitForURL(withOnlyJPEGMetadataURL.create)
+
+    const fileChooserPromiseForWEBP = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooserForWEBP = await fileChooserPromiseForWEBP
+    await wait(1000)
+    await fileChooserForWEBP.setFiles(path.join(dirname, 'animated.webp'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const webpMediaID = page.url().split('/').pop()
+
+    const { doc: webpMediaDoc } = await client.findByID({
+      id: webpMediaID,
+      slug: withOnlyJPEGMetadataSlug,
+      auth: true,
+    })
+
+    // With metadata, the animated image filesize would be 218762
+    expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
   })
 
   describe('image manipulation', () => {

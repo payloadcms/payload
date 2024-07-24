@@ -18,7 +18,9 @@ type CropImageArgs = {
   req?: PayloadRequest
   sharp: SanitizedConfig['sharp']
   widthInPixels: number
-  withMetadata?: ((options: { metadata: SharpMetadata }) => boolean) | boolean
+  withMetadata?:
+    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
+    | boolean
 }
 export async function cropImage({
   cropData,
@@ -47,10 +49,8 @@ export async function cropImage({
     }
 
     let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
-    const metadata = await cropped.metadata()
 
-    cropped = optionallyAppendMetadata({
-      metadata,
+    cropped = await optionallyAppendMetadata({
       req,
       sharpFile: cropped,
       withMetadata,

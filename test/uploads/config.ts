@@ -156,7 +156,6 @@ export default buildConfigWithDefaults({
         imageSizes: [
           {
             name: 'sizeTwo',
-            fit: 'inside',
             height: 400,
             width: 300,
           },
@@ -164,6 +163,28 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './without-meta-data'),
         withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: path.resolve(dirname, './without-meta-data'),
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
       },
     },
     {

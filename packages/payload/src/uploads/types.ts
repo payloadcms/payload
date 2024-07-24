@@ -163,7 +163,9 @@ export type UploadConfig = {
    * If a function, it will receive an object containing the metadata and should return a boolean indicating whether to append the metadata.
    * @default false
    */
-  withMetadata?: ((options: { metadata: SharpMetadata }) => boolean) | boolean
+  withMetadata?:
+    | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
+    | boolean
 }
 
 export type SanitizedUploadConfig = {
