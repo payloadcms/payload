@@ -266,12 +266,10 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Label Components receive the following props:
+Custom Label Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`label`**    | Label value provided in field, it can be used with i18n.         |
-| **`required`** | The `admin.required` property defined in the [Field Config](../fields/overview). |
 | **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
 
 <Banner type="success">
@@ -301,7 +299,7 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Error Components receive the following props:
+Custom Error Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
@@ -406,7 +404,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 _For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components)._
 
-All Description Components receive the following props:
+Custom Description Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
