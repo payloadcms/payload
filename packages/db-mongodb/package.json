@@ -33,7 +33,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@aws-sdk/client-sso-oidc": "3.614.0",
+    "@aws-sdk/client-sso-oidc": "^3.614.0",
     "bson-objectid": "2.0.4",
     "http-status": "1.6.2",
     "mongoose": "6.12.3",

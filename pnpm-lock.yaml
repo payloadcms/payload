@@ -259,7 +259,7 @@ importers:
   packages/db-mongodb:
     dependencies:
       '@aws-sdk/client-sso-oidc':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-sts@3.614.0)
       bson-objectid:
         specifier: 2.0.4
@@ -863,16 +863,16 @@ importers:
   packages/plugin-cloud:
     dependencies:
       '@aws-sdk/client-cognito-identity':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0
       '@aws-sdk/client-s3':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0
       '@aws-sdk/credential-providers':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-sso-oidc@3.614.0(@aws-sdk/client-sts@3.614.0))
       '@aws-sdk/lib-storage':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-s3@3.614.0)
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
@@ -913,10 +913,10 @@ importers:
         version: 1.2.1
     devDependencies:
       '@aws-sdk/client-s3':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0
       '@aws-sdk/lib-storage':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-s3@3.614.0)
       '@azure/storage-blob':
         specifier: ^12.11.0
@@ -1004,7 +1004,7 @@ importers:
   packages/plugin-relationship-object-ids:
     dependencies:
       '@aws-sdk/client-sso-oidc':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-sts@3.614.0)
       mongoose:
         specifier: 6.12.3
@@ -1361,10 +1361,10 @@ importers:
   packages/storage-s3:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0
       '@aws-sdk/lib-storage':
-        specifier: 3.614.0
+        specifier: ^3.614.0
         version: 3.614.0(@aws-sdk/client-s3@3.614.0)
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
@@ -7201,7 +7201,6 @@ packages:
 
   libsql@0.3.19:
     resolution: {integrity: sha512-Aj5cQ5uk/6fHdmeW0TiXK42FqUlwx7ytmMLPSaUQPin5HKKKuUPD62MAbN4OEweGBBI7q1BekoEN4gPUEL6MZA==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lie@3.1.1:
