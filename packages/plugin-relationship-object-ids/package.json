@@ -42,6 +42,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
+    "@aws-sdk/client-sso-oidc": "3.614.0",
     "mongoose": "6.12.3",
     "payload": "workspace:*"
   },
