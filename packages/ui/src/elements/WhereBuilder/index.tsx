@@ -147,18 +147,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   React.useEffect(() => {
     if (shouldUpdateQuery) {
       handleWhereChange({ or: conditions })
-
-      // Reset the page param when updating the where query
-      if (searchParams?.page && searchParams?.page !== '1') {
-        const query = {
-          ...searchParams,
-          page: '1',
-          where: { or: conditions },
-        }
-
-        router.replace(`${qs.stringify(query, { addQueryPrefix: true })}`)
-      }
-
       setShouldUpdateQuery(false)
     }
   }, [conditions, handleWhereChange, shouldUpdateQuery, searchParams, router])
