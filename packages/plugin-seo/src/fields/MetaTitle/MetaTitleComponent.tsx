@@ -83,7 +83,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={regenerateTitle}
+                onClick={void regenerateTitle}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',

@@ -264,7 +264,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                   <ArrayRow
                     {...draggableSortableItemProps}
                     CustomRowLabel={CustomRowLabel}
-                    addRow={addRow}
+                    addRow={void addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fieldMap={fieldMap}
