@@ -26,7 +26,7 @@ export type Props = {
   header?: React.ReactNode
   initCollapsed?: boolean
   isCollapsed?: boolean
-  onToggle?: (collapsed: boolean) => void
+  onToggle?: (collapsed: boolean) => Promise<void> | void
 }
 
 export const Collapsible: React.FC<Props> = ({

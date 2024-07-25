@@ -75,7 +75,7 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
   }, [path, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
-    async (incomingTabIndex: number) => {
+    async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)

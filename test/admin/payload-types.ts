@@ -170,6 +170,9 @@ export interface CustomViewsTwo {
  */
 export interface CustomField {
   id: string;
+  descriptionAsString?: string | null;
+  descriptionAsFunction?: string | null;
+  descriptionAsComponent?: string | null;
   customTextField?: string | null;
   customSelectField?: string | null;
   updatedAt: string;

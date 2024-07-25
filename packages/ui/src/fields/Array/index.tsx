@@ -131,7 +131,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
+    async (rowIndex: number): Promise<void> => {
       await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
@@ -264,7 +264,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                   <ArrayRow
                     {...draggableSortableItemProps}
                     CustomRowLabel={CustomRowLabel}
-                    addRow={void addRow}
+                    addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fieldMap={fieldMap}

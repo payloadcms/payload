@@ -83,7 +83,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={void regenerateDescription}
+                onClick={() => {
+                  void regenerateDescription()
+                }}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',

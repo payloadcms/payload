@@ -64,7 +64,7 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const fieldHasErrors = errorCount > 0
 
   const onToggle = useCallback(
-    async (newCollapsedState: boolean) => {
+    async (newCollapsedState: boolean): Promise<void> => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
       if (preferencesKey) {
@@ -144,7 +144,7 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             </div>
           }
           initCollapsed={collapsedOnMount}
-          onToggle={void onToggle}
+          onToggle={onToggle}
         >
           <RenderFields
             fieldMap={fieldMap}

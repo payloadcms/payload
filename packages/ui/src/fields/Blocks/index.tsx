@@ -131,7 +131,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string) => {
+    async (rowIndex: number, blockType: string): Promise<void> => {
       await addFieldRow({
         data: { blockType },
         path,
@@ -277,7 +277,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      addRow={void addRow}
+                      addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
@@ -340,7 +340,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
             </Button>
           </DrawerToggler>
           <BlocksDrawer
-            addRow={void addRow}
+            addRow={addRow}
             addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}

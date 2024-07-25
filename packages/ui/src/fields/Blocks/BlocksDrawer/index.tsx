@@ -16,7 +16,7 @@ import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'
 
 export type Props = {
-  addRow: (index: number, blockType?: string) => void
+  addRow: (index: number, blockType?: string) => Promise<void> | void
   addRowIndex: number
   blocks: ReducedBlock[]
   drawerSlug: string
