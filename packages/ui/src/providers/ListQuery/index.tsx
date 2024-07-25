@@ -13,7 +13,14 @@ import { useSearchParams } from '../SearchParams/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
-type Handlers = {
+type PropHandlers = {
+  handlePageChange?: (page: number) => Promise<void> | void
+  handlePerPageChange?: (limit: number) => Promise<void> | void
+  handleSearchChange?: (search: string) => Promise<void> | void
+  handleSortChange?: (sort: string) => Promise<void> | void
+  handleWhereChange?: (where: Where) => Promise<void> | void
+}
+type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
   handlePerPageChange?: (limit: number) => Promise<void>
   handleSearchChange?: (search: string) => Promise<void>
@@ -28,14 +35,14 @@ export type ListQueryProps = {
   defaultSort?: string
   modifySearchParams?: boolean
   preferenceKey?: string
-} & Handlers
+} & PropHandlers
 
 export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
   refineListData: (args: RefineOverrides) => Promise<void>
-} & Handlers
+} & ContextHandlers
 
 const Context = createContext({} as ListQueryContext)
 
