@@ -9,11 +9,11 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
 
   const defaultIDField: Field = {
     name: 'id',
+    type: 'text',
     admin: {
       disableBulkEdit: true,
     },
     label: 'ID',
-    type: 'text',
   }
 
   const shouldSkipField = (field: Field): boolean =>

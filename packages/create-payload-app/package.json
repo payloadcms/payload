@@ -2,8 +2,14 @@
   "name": "create-payload-app",
   "version": "1.0.0",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
   "bin": {
     "create-payload-app": "bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/create-payload-app"
   },
   "scripts": {
     "build": "pnpm build:swc",

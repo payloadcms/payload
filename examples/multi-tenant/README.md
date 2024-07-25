@@ -69,7 +69,7 @@ For more details on this, see the [CORS](https://payloadcms.com/docs/production/
 
 ## Front-end
 
-If you're building a website or other front-end for your tenant, you will need specify the `tenant` in your requests. For example, if you wanted to fetch all pages for the tenant `ABC`, you would make a request to `/api/pages?where[tenant][slug][equals]=abc`.
+If you're building a website or other front-end for your tenant, you will need specify the `tenant` in your requests. For example, if you wanted to fetch all pages for the tenant `ABC`, you would make a request to `/api/pages?where[tenant.name][equals]=ABC`.
 
 For a head start on building a website for your tenant(s), check out the official [Website Template](https://github.com/payloadcms/template-website). It includes a page layout builder, preview, SEO, and much more. It is not multi-tenant, though, but you can easily take the concepts from that example and apply them here.
 

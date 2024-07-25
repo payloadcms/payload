@@ -3,6 +3,12 @@
   "version": "1.1.1",
   "description": "Payload styles for ESLint and Prettier",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/eslint-config"
+  },
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",

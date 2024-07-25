@@ -35,6 +35,11 @@ export const tabsDoc: Partial<TabsField> = {
       },
     ],
     text: namedTabText,
+    arrayInRow: [
+      {
+        text: "Hello, I'm some text in an array in a row",
+      },
+    ],
   },
   localizedTab: {
     text: localizedTextValue,

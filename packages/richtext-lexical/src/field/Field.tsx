@@ -1,7 +1,13 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
 
-import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
+import {
+  Error as DefaultError,
+  Label as DefaultLabel,
+  FieldDescription,
+  useField,
+  withCondition,
+} from 'payload/components/forms'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -16,8 +22,17 @@ const baseClass = 'rich-text-lexical'
 const RichText: React.FC<FieldProps> = (props) => {
   const {
     name,
-    admin: { className, condition, description, readOnly, style, width } = {
+    admin: {
       className,
+      components: { Error, Label } = {},
+      condition,
+      description,
+      readOnly,
+      style,
+      width,
+    } = {
+      className,
+      components: {},
       condition,
       description,
       readOnly,
@@ -61,6 +76,9 @@ const RichText: React.FC<FieldProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   return (
     <div
       className={classes}
@@ -71,8 +89,12 @@ const RichText: React.FC<FieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        <Error message={errorMessage} showError={showError} />
-        <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+        <ErrorComp message={errorMessage} showError={showError} />
+        <LabelComp
+          htmlFor={`field-${path.replace(/\./g, '__')}`}
+          label={label}
+          required={required}
+        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}

@@ -7,7 +7,18 @@ import removeFiles from '../helpers/removeFiles'
 import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
-import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug, versionSlug } from './shared'
+import {
+  animatedTypeMedia,
+  audioSlug,
+  cropOnlySlug,
+  enlargeSlug,
+  focalOnlySlug,
+  globalWithMedia,
+  mediaSlug,
+  reduceSlug,
+  relationSlug,
+  versionSlug,
+} from './shared'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 
@@ -136,7 +147,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'crop-only',
+      slug: cropOnlySlug,
       fields: [],
       upload: {
         focalPoint: false,
@@ -163,7 +174,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'focal-only',
+      slug: focalOnlySlug,
       fields: [],
       upload: {
         crop: false,
@@ -187,6 +198,17 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: './focal-only',
         staticURL: '/focal-only',
+      },
+    },
+    {
+      slug: 'focal-no-sizes',
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './focal-no-sizes',
+        staticURL: '/focal-no-sizes',
       },
     },
     {
@@ -291,7 +313,45 @@ export default buildConfigWithDefaults({
           'image/jpeg',
           'image/gif',
           'image/svg+xml',
+          'image/tiff',
           'audio/mpeg',
+        ],
+      },
+    },
+    {
+      slug: animatedTypeMedia,
+      fields: [],
+      upload: {
+        staticDir: './media',
+        staticURL: '/media',
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        imageSizes: [
+          {
+            name: 'squareSmall',
+            width: 480,
+            height: 480,
+            position: 'centre',
+            withoutEnlargement: false,
+          },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+            height: undefined,
+          },
+          {
+            name: 'undefinedWidth',
+            width: undefined,
+            height: 300,
+          },
+          {
+            name: 'undefinedAll',
+            width: undefined,
+            height: undefined,
+          },
         ],
       },
     },
@@ -470,6 +530,18 @@ export default buildConfigWithDefaults({
       },
     },
   ],
+  globals: [
+    {
+      slug: globalWithMedia,
+      fields: [
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: cropOnlySlug,
+        },
+      ],
+    },
+  ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media')
     removeFiles(path.normalize(uploadsDir))
@@ -507,6 +579,43 @@ export default buildConfigWithDefaults({
         image: uploadedImage,
         versionedImage,
       },
+    })
+
+    // Create animated type images
+    const animatedImageFilePath = path.resolve(__dirname, './animated.webp')
+    const animatedImageFile = await getFileByPath(animatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: animatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: animatedImageFile,
+    })
+
+    const nonAnimatedImageFilePath = path.resolve(__dirname, './non-animated.webp')
+    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: nonAnimatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: nonAnimatedImageFile,
     })
 
     // Create audio

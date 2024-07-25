@@ -69,14 +69,24 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
   } = config
 
+  const hasMultipleRelations = Array.isArray(relationTo)
+  const initialLoadedPageState = hasMultipleRelations
+    ? relationTo.reduce((acc, relation) => {
+        return {
+          ...acc,
+          [relation]: 0,
+        }
+      }, {})
+    : {}
+
   const { i18n, t } = useTranslation('fields')
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const formProcessing = useFormProcessing()
-  const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
-  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
+  const [lastLoadedPage, setLastLoadedPage] =
+    useState<Record<string, number>>(initialLoadedPageState)
   const [errorLoading, setErrorLoading] = useState('')
   const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
   const [search, setSearch] = useState('')
@@ -146,13 +156,12 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
-            if (!searchArg) {
-              if (typeof sortOptions === 'string') {
-                fieldToSearch = sortOptions
-              } else if (sortOptions?.[relation]) {
-                fieldToSearch = sortOptions[relation]
-              }
+            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSort = collection?.defaultSort || 'id'
+            if (typeof sortOptions === 'string') {
+              fieldToSort = sortOptions
+            } else if (sortOptions?.[relation]) {
+              fieldToSort = sortOptions[relation]
             }
 
             const query: {
@@ -164,7 +173,7 @@ const Relationship: React.FC<Props> = (props) => {
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
-              sort: fieldToSearch,
+              sort: fieldToSort,
               where: {
                 and: [
                   {
@@ -267,7 +276,7 @@ const Relationship: React.FC<Props> = (props) => {
   const handleInputChange = useCallback(
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
-        setLastLoadedPage({})
+        setLastLoadedPage(initialLoadedPageState)
         updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
@@ -374,7 +383,7 @@ const Relationship: React.FC<Props> = (props) => {
 
     dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
+    setLastLoadedPage(initialLoadedPageState)
     setHasLoadedFirstPage(false)
   }, [relationTo, filterOptionsResult, locale])
 

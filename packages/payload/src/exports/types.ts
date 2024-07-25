@@ -19,6 +19,7 @@ export { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
   CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from './../admin/components/elements/types'
@@ -30,8 +31,14 @@ export type {
   AfterDeleteHook as CollectionAfterDeleteHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
+  AfterLogoutHook,
+  AfterLogoutHook as CollectionAfterLogoutHook,
+  AfterMeHook,
+  AfterMeHook as CollectionAfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
+  AfterRefreshHook,
+  AfterRefreshHook as CollectionAfterRefreshHook,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeDuplicate,
@@ -41,6 +48,8 @@ export type {
   BeforeValidateHook as CollectionBeforeValidateHook,
   Collection,
   CollectionConfig,
+  MeHook as CollectionMeHook,
+  RefreshHook as CollectionRefreshHook,
   SanitizedCollectionConfig,
   TypeWithID,
 } from './../collections/config/types'

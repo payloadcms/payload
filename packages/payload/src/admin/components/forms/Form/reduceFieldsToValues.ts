@@ -1,6 +1,6 @@
-import { unflatten as flatleyUnflatten } from 'flatley'
-
 import type { Data, Fields } from './types'
+
+import { unflatten as flatleyUnflatten } from '../../../utilities/unflatten'
 
 /**
  * Reduce flattened form fields (Fields) to just map to the respective values instead of the full FormField object
@@ -23,7 +23,7 @@ const reduceFieldsToValues = (
   })
 
   if (unflatten) {
-    return flatleyUnflatten(data, { safe: true })
+    return flatleyUnflatten(data)
   }
 
   return data

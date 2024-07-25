@@ -1,6 +1,7 @@
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { Column } from '../Table/types'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
@@ -14,8 +15,14 @@ import './index.scss'
 
 const baseClass = 'column-selector'
 
+const filterColumnFields = (fields: Column[]): Column[] => {
+  return fields.filter((field) => {
+    return !field.admin?.disableListColumn
+  })
+}
+
 const ColumnSelector: React.FC<Props> = (props) => {
-  const { collection } = props
+  const { slug } = props
 
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
@@ -27,10 +34,12 @@ const ColumnSelector: React.FC<Props> = (props) => {
     return null
   }
 
+  const filteredColumns = filterColumnFields(columns)
+
   return (
     <DraggableSortable
       className={baseClass}
-      ids={columns.map((col) => col.accessor)}
+      ids={filteredColumns.map((col) => col.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         moveColumn({
           fromIndex: moveFromIndex,
@@ -38,7 +47,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
         })
       }}
     >
-      {columns.map((col, i) => {
+      {filteredColumns.map((col, i) => {
         const { name, accessor, active, label } = col
 
         if (col.accessor === '_select') return null
@@ -53,7 +62,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
             draggable
             icon={active ? <X /> : <Plus />}
             id={accessor}
-            key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

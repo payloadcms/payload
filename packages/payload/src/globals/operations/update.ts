@@ -97,6 +97,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       context: req.context,
       depth: 0,
       doc: globalJSON,
+      draft: draftArg,
       fallbackLocale,
       global: globalConfig,
       locale,
@@ -167,7 +168,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       global: globalConfig,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft && globalConfig.versions.drafts && !globalConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
@@ -220,6 +222,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       context: req.context,
       depth,
       doc: result,
+      draft: draftArg,
       fallbackLocale: null,
       global: globalConfig,
       locale,

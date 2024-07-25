@@ -27,6 +27,7 @@ const JSONField: React.FC<Props> = (props) => {
       style,
       width,
     } = {},
+    jsonSchema,
     label,
     path: pathFromProps,
     required,
@@ -53,6 +54,25 @@ const JSONField: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
   })
+
+  const handleMount = useCallback(
+    (editor, monaco) => {
+      if (!jsonSchema) return
+
+      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
+      const modelUri = monaco.Uri.parse(jsonSchema.uri)
+
+      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        enableSchemaRequest: true,
+        schemas: [...existingSchemas, jsonSchema],
+        validate: true,
+      })
+
+      editor.setModel(model)
+    },
+    [value, jsonSchema],
+  )
 
   const handleChange = useCallback(
     (val) => {
@@ -104,6 +124,7 @@ const JSONField: React.FC<Props> = (props) => {
       <CodeEditor
         defaultLanguage="json"
         onChange={handleChange}
+        onMount={handleMount}
         options={editorOptions}
         readOnly={readOnly}
         value={stringValue}

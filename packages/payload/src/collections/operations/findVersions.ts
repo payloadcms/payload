@@ -125,6 +125,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
             context: req.context,
             depth,
             doc: data.version,
+            draft: undefined,
             fallbackLocale,
             findMany: true,
             global: null,

@@ -21,16 +21,17 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
     }),
     outputSchema: ({ isRequired }) => {
       return {
+        type: withNullableJSONSchemaType('array', isRequired),
         items: {
           type: 'object',
         },
-        type: withNullableJSONSchemaType('array', isRequired),
       }
     },
     populationPromise({
       context,
       currentDepth,
       depth,
+      draft,
       field,
       findMany,
       flattenLocales,
@@ -50,6 +51,7 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
           context,
           currentDepth,
           depth,
+          draft,
           field,
           findMany,
           flattenLocales,

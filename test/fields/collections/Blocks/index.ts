@@ -129,6 +129,14 @@ const BlockFields: CollectionConfig = {
     },
     {
       ...getBlocksField('localized'),
+      name: 'disableSort',
+      admin: {
+        isSortable: false,
+      },
+      localized: true,
+    },
+    {
+      ...getBlocksField('localized'),
       name: 'localizedBlocks',
       localized: true,
     },

@@ -48,6 +48,11 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
+  /**
+   * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   */
+  maxDepth?: number
 }
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
@@ -99,6 +104,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            type: LinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -125,10 +131,10 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            type: AutoLinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -158,7 +164,6 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: AutoLinkNode.getType(),
           },
         ],
         plugins: [

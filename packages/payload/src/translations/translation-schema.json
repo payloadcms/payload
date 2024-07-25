@@ -331,6 +331,9 @@
         "unspecific": {
           "type": "string"
         },
+        "userEmailAlreadyRegistered": {
+          "type": "string"
+        },
         "userLocked": {
           "type": "string"
         },
@@ -373,6 +376,7 @@
         "unauthorized",
         "unknown",
         "unspecific",
+        "userEmailAlreadyRegistered",
         "unableToDeleteCount",
         "unableToUpdateCount",
         "userLocked",
@@ -681,6 +685,12 @@
         "deselectAllRows": {
           "type": "string"
         },
+        "document": {
+          "type": "string"
+        },
+        "documents": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -962,6 +972,8 @@
         "deletedSuccessfully",
         "deleting",
         "descending",
+        "document",
+        "documents",
         "duplicate",
         "duplicateWithoutSaving",
         "edit",
@@ -1096,6 +1108,9 @@
     "upload": {
       "additionalProperties": false,
       "properties": {
+        "addFile": {
+          "type": "string"
+        },
         "crop": {
           "type": "string"
         },
@@ -1130,6 +1145,9 @@
           "type": "string"
         },
         "moreInfo": {
+          "type": "string"
+        },
+        "pasteURL": {
           "type": "string"
         },
         "previewSizes": {
@@ -1302,6 +1320,12 @@
         "currentDocumentStatus": {
           "type": "string"
         },
+        "currentDraft": {
+          "type": "string"
+        },
+        "currentPublishedVersion": {
+          "type": "string"
+        },
         "draft": {
           "type": "string"
         },
@@ -1318,6 +1342,9 @@
           "type": "string"
         },
         "preview": {
+          "type": "string"
+        },
+        "previouslyPublished": {
           "type": "string"
         },
         "problemRestoringVersion": {

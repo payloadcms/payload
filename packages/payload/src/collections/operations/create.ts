@@ -130,6 +130,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'create',
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
@@ -203,7 +204,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       global: null,
       operation: 'create',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
 
     // /////////////////////////////////////
@@ -290,6 +294,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      draft,
       fallbackLocale,
       global: null,
       locale,

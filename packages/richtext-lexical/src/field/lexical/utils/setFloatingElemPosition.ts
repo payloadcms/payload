@@ -1,9 +1,10 @@
 const VERTICAL_GAP = 10
 const HORIZONTAL_OFFSET = 5
 
-// TODO: This works fine with some dirty fixes (looking at you, specialHandlingForCaret). But this definitely needs refactoring and documentation, to be easier to understand and maintain.
+// TODO: needs refactoring
 // This is supposed to position the floatingElem based on the parent (anchorElem) and the target (targetRect) which is usually the selected text.
 // So basically, it positions the floatingElem either below or above the target (targetRect) and aligns it to the left or center of the target (targetRect).
+// This is used for positioning the floating toolbar (anchor: richtext editor) and its caret (anchor: floating toolbar)
 export function setFloatingElemPosition(
   targetRect: ClientRect | null,
   floatingElem: HTMLElement,
@@ -12,7 +13,9 @@ export function setFloatingElemPosition(
   verticalGap: number = VERTICAL_GAP,
   horizontalOffset: number = HORIZONTAL_OFFSET,
   specialHandlingForCaret = false,
-): void {
+  anchorFlippedOffset = 0, // Offset which was added to the anchor (for caret, floating toolbar) if it was flipped
+): number {
+  // Returns the top offset if the target was flipped
   const scrollerElem = anchorElem.parentElement
 
   if (targetRect === null || scrollerElem == null) {
@@ -33,8 +36,11 @@ export function setFloatingElemPosition(
     left = targetRect.left + targetRect.width / 2 - floatingElemRect.width / 2
   }
 
-  if (top < editorScrollerRect.top) {
-    top += floatingElemRect.height + targetRect.height + verticalGap * 2
+  let addedToTop = 0
+  if (top < editorScrollerRect.top && !specialHandlingForCaret) {
+    addedToTop = floatingElemRect.height + targetRect.height + verticalGap * 2
+
+    top += addedToTop
   }
 
   if (horizontalPosition === 'center') {
@@ -49,22 +55,21 @@ export function setFloatingElemPosition(
     }
   }
 
-  top -= anchorElementRect.top
   left -= anchorElementRect.left
 
   floatingElem.style.opacity = '1'
 
-  if (specialHandlingForCaret && top == 0 /* 0 Happens when selecting 1st line */) {
-    top -= 44 // Especially this arbitrary number needs refactoring (this is for the caret)
-    // rotate too
-    floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
-  } else if (
-    specialHandlingForCaret &&
-    top === -63 /* -63 Happens when selecting 2nd line in multi-line paragraph */
-  ) {
-    top += 18 // Especially this arbitrary number needs refactoring (this is for the caret)
+  if (specialHandlingForCaret && anchorFlippedOffset !== 0) {
+    // Floating select toolbar was flipped (positioned below text rather than above). Thus, the caret now needs to be positioned
+    // on the other side and rotated.
+    top -= anchorElementRect.bottom - anchorFlippedOffset + floatingElemRect.height - 3
+    // top += anchorFlippedOffset - anchorElementRect.height - floatingElemRect.height + 2
     floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
   } else {
+    top -= anchorElementRect.top
+
     floatingElem.style.transform = `translate(${left}px, ${top}px)`
   }
+
+  return addedToTop
 }

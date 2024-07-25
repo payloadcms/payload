@@ -139,6 +139,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       currentDepth,
       depth,
       doc: result,
+      draft: draftEnabled,
       fallbackLocale,
       global: null,
       locale,

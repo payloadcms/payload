@@ -6,6 +6,7 @@
     "alreadyActivated": "已經啟用了",
     "alreadyLoggedIn": "已經登入了",
     "apiKey": "API金鑰",
+    "authenticated": "經過身份驗證的",
     "backToLogin": "返回登入頁面",
     "beginCreateFirstUser": "首先，請建立您的第一個使用者。",
     "changePassword": "更改密碼",
@@ -90,6 +91,7 @@
     "unauthorized": "未經授權，您必須登錄才能提出這個請求。",
     "unknown": "發生了一個未知的錯誤。",
     "unspecific": "發生了一個錯誤。",
+    "userEmailAlreadyRegistered": "給定電子郵件的用戶已經註冊。",
     "userLocked": "該使用者由於有太多次失敗的登錄嘗試而被鎖定。",
     "valueMustBeUnique": "數值必須是唯一的",
     "verificationTokenInvalid": "驗證令牌無效。"
@@ -177,8 +179,11 @@
     "deletedCountSuccessfully": "已成功刪除 {{count}} 個 {{label}}。",
     "deletedSuccessfully": "已成功刪除。",
     "deleting": "刪除中...",
+    "depth": "深度",
     "descending": "降冪",
     "deselectAllRows": "取消選擇全部",
+    "document": "文件",
+    "documents": "文件",
     "duplicate": "複製",
     "duplicateWithoutSaving": "複製而不儲存變更。",
     "edit": "編輯",
@@ -193,6 +198,7 @@
     "error": "錯誤",
     "errors": "錯誤",
     "fallbackToDefaultLocale": "回到預設的語言",
+    "false": "假的",
     "filter": "過濾器",
     "filterWhere": "過濾{{label}}",
     "filters": "過濾器",
@@ -248,6 +254,7 @@
     "successfullyDuplicated": "成功複製{{label}}",
     "thisLanguage": "中文 (繁體)",
     "titleDeleted": "{{label}} \"{{title}}\"已被成功刪除。",
+    "true": "真實",
     "unauthorized": "未經授權",
     "unsavedChangesDuplicate": "您有還沒儲存的修改，確定要繼續複製嗎？",
     "untitled": "無標題",
@@ -276,6 +283,7 @@
     "near": "附近"
   },
   "upload": {
+    "addFile": "添加文件",
     "crop": "裁剪",
     "cropToolDescription": "拖動所選區域的角落，繪製一個新區域或調整以下的值。",
     "dragAndDrop": "拖放一個檔案",
@@ -288,6 +296,7 @@
     "height": "高度",
     "lessInfo": "更少資訊",
     "moreInfo": "更多資訊",
+    "pasteURL": "貼上網址",
     "previewSizes": "預覽尺寸",
     "selectCollectionToBrowse": "選擇一個要瀏覽的集合",
     "selectFile": "選擇一個文件",
@@ -317,8 +326,8 @@
     "trueOrFalse": "該字串只能等於是或否。",
     "validUploadID": "該字串不是有效的上傳ID。"
   },
-"version": {
-    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",  
+  "version": {
+    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",
     "aboutToRestore": "您將把這個文件{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRestoreGlobal": "您要將痊域的{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRevertToPublished": "您將要將這個文件的內容還原到它的發佈狀態。您確定嗎？",
@@ -334,12 +343,15 @@
     "confirmUnpublish": "確認取消發佈",
     "confirmVersionRestoration": "確認版本回復",
     "currentDocumentStatus": "目前{{docStatus}}文件",
+    "currentDraft": "目前的草案",
+    "currentPublishedVersion": "目前已發布的版本",
     "draft": "草稿",
     "draftSavedSuccessfully": "草稿儲存成功。",
     "lastSavedAgo": "上次儲存在{{distance}}之前",
     "noFurtherVersionsFound": "沒有發現其他版本",
     "noRowsFound": "沒有發現{{label}}",
     "preview": "預覽",
+    "previouslyPublished": "先前發表過的",
     "problemRestoringVersion": "回復這個版本時發生了問題",
     "publish": "發佈",
     "publishChanges": "發佈修改",
@@ -370,5 +382,5 @@
     "viewingVersionGlobal": "正在查看全域{{entityLabel}}的版本",
     "viewingVersions": "正在查看{{entityLabel}} {{documentTitle}}的版本",
     "viewingVersionsGlobal": "正在查看全域{{entityLabel}}的版本"
-}
+  }
 }

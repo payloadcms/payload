@@ -212,14 +212,20 @@ export default buildConfigWithDefaults({
       },
     })
 
-    await mapAsync([...Array(2)], async () => {
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
     })
   },
 })

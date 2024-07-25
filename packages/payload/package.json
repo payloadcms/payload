@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.11.2",
+  "version": "2.24.2",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -59,7 +59,7 @@
     "@faceless-ui/scroll-info": "1.3.0",
     "@faceless-ui/window-info": "2.1.1",
     "@monaco-editor/react": "4.5.1",
-    "@swc/core": "1.3.107",
+    "@swc/core": "1.6.1",
     "@swc/register": "0.1.10",
     "body-parser": "1.20.2",
     "body-scroll-lock": "4.0.0-beta.0",
@@ -78,7 +78,6 @@
     "express-rate-limit": "5.5.1",
     "file-type": "16.5.4",
     "find-up": "4.1.0",
-    "flatley": "5.2.0",
     "fs-extra": "10.1.0",
     "get-tsconfig": "4.6.2",
     "graphql": "16.8.1",
@@ -92,6 +91,7 @@
     "i18next": "22.5.1",
     "i18next-browser-languagedetector": "6.1.8",
     "i18next-http-middleware": "3.3.2",
+    "is-buffer": "^2.0.5",
     "is-hotkey": "0.2.0",
     "is-plain-object": "5.0.0",
     "isomorphic-fetch": "3.0.0",
@@ -118,11 +118,11 @@
     "process": "0.11.10",
     "qs": "6.11.2",
     "qs-middleware": "1.0.3",
-    "react": "18.2.0",
+    "react": "^18.0.0",
     "react-animate-height": "2.1.2",
     "react-datepicker": "4.16.0",
     "react-diff-viewer-continued": "3.2.6",
-    "react-dom": "18.2.0",
+    "react-dom": "^18.0.0",
     "react-helmet": "6.1.0",
     "react-i18next": "11.18.6",
     "react-image-crop": "10.1.8",
@@ -209,6 +209,29 @@
     "vite": "^4.4.9",
     "webpack": "^5.78.0"
   },
+  "resolutions": {
+    "ajv": "8.14.0",
+    "webpack-dev-middleware/**/ajv": "8.14.0",
+    "css-minimizer-webpack-plugin/**/ajv": "8.14.0"
+  },
+  "overrides": {
+    "ajv": "8.14.0",
+    "css-minimizer-webpack-plugin": {
+      "schema-utils": {
+        "ajv": "8.14.0"
+      }
+    }
+  },
+  "pnpm": {
+    "overrides": {
+      "ajv": "8.14.0",
+      "css-minimizer-webpack-plugin": {
+        "schema-utils": {
+          "ajv": "8.14.0"
+        }
+      }
+    }
+  },
   "engines": {
     "node": ">=14"
   },
@@ -266,7 +289,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"

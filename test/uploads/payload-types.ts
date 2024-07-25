@@ -47,6 +47,8 @@ export interface Media {
   filesize?: number
   width?: number
   height?: number
+  focalX?: number
+  focalY?: number
   sizes?: {
     maintainedAspectRatio?: {
       url?: string
@@ -161,6 +163,53 @@ export interface Media {
       filename?: string
     }
     focalTest7?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
+export interface AnimatedTypeMedia {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  focalX?: number
+  focalY?: number
+  sizes?: {
+    squareSmall?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedHeight?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedWidth?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    undefinedAll?: {
       url?: string
       width?: number
       height?: number

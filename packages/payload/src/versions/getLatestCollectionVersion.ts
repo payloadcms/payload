@@ -26,6 +26,8 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
+      limit: 1,
+      pagination: false,
       req,
       sort: '-updatedAt',
       where: { parent: { equals: id } },

@@ -8,6 +8,7 @@ type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   field: RichTextField<SerializedEditorState, AdapterProps>
   key: number | string
   overrideAccess?: boolean
@@ -21,6 +22,7 @@ export const populate = async ({
   currentDepth,
   data,
   depth,
+  draft,
   key,
   overrideAccess,
   req,
@@ -43,6 +45,7 @@ export const populate = async ({
       req.fallbackLocale,
       typeof overrideAccess === 'undefined' ? false : overrideAccess,
       showHiddenFields,
+      draft,
     ]),
   )
 

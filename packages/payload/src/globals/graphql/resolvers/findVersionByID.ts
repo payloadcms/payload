@@ -24,15 +24,21 @@ export type Resolver = (
 
 export default function findVersionByIDResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+
+    context.req = req
 
     const options = {
       id: args.id,
       depth: 0,
-      draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await findVersionByID(options)

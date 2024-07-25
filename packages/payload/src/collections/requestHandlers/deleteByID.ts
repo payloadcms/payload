@@ -6,6 +6,7 @@ import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 
 import { NotFound } from '../../errors'
+import { sanitizeCollectionID } from '../../utilities/sanitizeCollectionID'
 import deleteByID from '../operations/deleteByID'
 
 export type DeleteResult = {
@@ -18,9 +19,15 @@ export default async function deleteByIDHandler(
   res: Response,
   next: NextFunction,
 ): Promise<Response<DeleteResult> | void> {
+  const id = sanitizeCollectionID({
+    id: req.params.id,
+    collectionSlug: req.collection.config.slug,
+    payload: req.payload,
+  })
+
   try {
     const doc = await deleteByID({
-      id: req.params.id,
+      id,
       collection: req.collection,
       depth: parseInt(String(req.query.depth), 10),
       req,

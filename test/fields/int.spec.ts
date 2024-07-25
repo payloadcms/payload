@@ -8,6 +8,7 @@ import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { GroupField, RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { NotFound } from '../../packages/payload/src/errors'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
@@ -82,8 +83,13 @@ describe('Fields', () => {
 
     it('creates with default values', () => {
       expect(doc.text).toEqual(text)
+      expect(doc.defaultString).toEqual(defaultText)
       expect(doc.defaultFunction).toEqual(defaultText)
       expect(doc.defaultAsync).toEqual(defaultText)
+    })
+
+    it('supports empty strings as default value', () => {
+      expect(doc.defaultEmptyString).toEqual('')
     })
 
     it('should populate default values in beforeValidate hook', async () => {
@@ -114,6 +120,39 @@ describe('Fields', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
+    })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          hasMany: ['one', 'five'],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          hasMany: ['two'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
     })
   })
 
@@ -312,6 +351,57 @@ describe('Fields', () => {
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
     })
+
+    // https://github.com/payloadcms/payload/issues/6485
+    it('delete with selectHasMany relationship', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+      await payload.delete({
+        collection: 'select-fields',
+        id,
+      })
+      await expect(
+        payload.findByID({
+          collection: 'select-fields',
+          id,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'four'],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['three'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'select-fields',
+        where: {
+          selectHasMany: {
+            in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
   })
 
   describe('number', () => {
@@ -415,6 +505,37 @@ describe('Fields', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
+    })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [5, 10],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [13],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'number-fields',
+        where: {
+          hasMany: {
+            in: [5],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
     })
   })
 
@@ -1131,6 +1252,17 @@ describe('Fields', () => {
           collection: 'json-fields',
           data: {
             json: '{ bad input: true }',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: json')
+    })
+
+    it('should validate json schema', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'bad' },
           },
         }),
       ).rejects.toThrow('The following field is invalid: json')

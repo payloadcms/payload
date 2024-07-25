@@ -66,7 +66,7 @@ export const sanitizeQueryValue = ({
     formattedValue = Number(val)
   }
 
-  if (field.type === 'date') {
+  if (field.type === 'date' && operator !== 'exists') {
     if (typeof val === 'string') {
       formattedValue = new Date(val)
       if (Number.isNaN(Date.parse(formattedValue))) {
@@ -83,6 +83,10 @@ export const sanitizeQueryValue = ({
     if (val === 'null') {
       formattedValue = null
     }
+  }
+
+  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+    operator = 'equals'
   }
 
   if (operator === 'near' || operator === 'within' || operator === 'intersects') {

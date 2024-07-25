@@ -16,7 +16,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint
   let sort
@@ -58,6 +58,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
+  if (locale && locale !== 'all' && locale !== '*') {
+    paginationOptions.collation = { locale, strength: 1 }
+  }
+
   if (
     !useEstimatedCount &&
     Object.keys(versionQuery).length === 0 &&
@@ -83,12 +87,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
+
       doc = {
         _id: doc.parent,
         id: doc.parent,

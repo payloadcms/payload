@@ -91,12 +91,12 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
       ...(formConfig?.formSubmissionOverrides?.fields || []),
     ],
     hooks: {
+      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
       beforeChange: [
         (data) => createCharge(data, formConfig),
         (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
-      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
     },
   }
 

@@ -172,7 +172,9 @@ function useAddBlockHandle(
           pageX < left - horizontalBuffer ||
           pageX > right + horizontalBuffer
         ) {
-          setHoveredElement(null)
+          if (hoveredElement !== null) {
+            setHoveredElement(null)
+          }
           return
         }
 
@@ -196,10 +198,12 @@ function useAddBlockHandle(
       if (!_emptyBlockElem) {
         return
       }
-      setHoveredElement({
-        elem: _emptyBlockElem,
-        node: blockNode,
-      })
+      if (hoveredElement?.node !== blockNode || hoveredElement?.elem !== _emptyBlockElem) {
+        setHoveredElement({
+          elem: _emptyBlockElem,
+          node: blockNode,
+        })
+      }
     }
 
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
@@ -210,7 +214,7 @@ function useAddBlockHandle(
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
-  }, [scrollerElem, anchorElem, editor])
+  }, [scrollerElem, anchorElem, editor, hoveredElement])
 
   useEffect(() => {
     if (menuRef.current && hoveredElement?.node) {

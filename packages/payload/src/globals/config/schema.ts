@@ -10,6 +10,7 @@ import {
 const globalSchema = joi
   .object()
   .keys({
+    slug: joi.string().required(),
     access: joi.object({
       read: joi.func(),
       readVersions: joi.func(),
@@ -48,6 +49,7 @@ const globalSchema = joi
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),
+    dbName: joi.alternatives().try(joi.string(), joi.func()),
     endpoints: endpointsSchema,
     fields: joi.array(),
     graphQL: joi.alternatives().try(
@@ -64,7 +66,6 @@ const globalSchema = joi
       beforeValidate: joi.array().items(joi.func()),
     }),
     label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
-    slug: joi.string().required(),
     typescript: joi.object().keys({
       interface: joi.string(),
     }),
@@ -78,6 +79,7 @@ const globalSchema = joi
                 interval: joi.number(),
               }),
             ),
+            validate: joi.boolean(),
           }),
           joi.boolean(),
         ),

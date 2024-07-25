@@ -35,7 +35,8 @@
     place-self: flex-start;
   }
 
-  &__file-adjustments {
+  &__file-adjustments,
+  &__remote-file-wrap {
     padding: $baseline;
     width: 100%;
     display: flex;
@@ -43,12 +44,14 @@
     gap: calc(var(--base) / 2);
   }
 
-  &__filename {
+  &__filename,
+  &__remote-file {
     @include formInput;
     background-color: var(--theme-bg);
   }
 
-  &__file-mutation {
+  &__file-mutation,
+  &__add-file-wrap {
     display: flex;
     gap: calc(var(--base) / 2);
     flex-wrap: wrap;

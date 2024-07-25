@@ -12,15 +12,26 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
-import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
+import {
+  adminThumbnailSlug,
+  animatedTypeMedia,
+  audioSlug,
+  focalOnlySlug,
+  globalWithMedia,
+  mediaSlug,
+  relationSlug,
+} from './shared'
 
 const { beforeAll, describe } = test
 
 let client: RESTClient
 let mediaURL: AdminUrlUtil
+let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailURL: AdminUrlUtil
+let globalURL: string
+let focalOnlyURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -33,9 +44,12 @@ describe('uploads', () => {
     await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
+    animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug)
+    globalURL = new AdminUrlUtil(serverURL, globalWithMedia).global(globalWithMedia)
+    focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -94,6 +108,45 @@ describe('uploads', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should create animated file upload', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './non-animated.webp'))
+    const nonAnimatedFileName = page.locator('.file-field__filename')
+
+    await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should show proper file names for resized animated file', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './animated.webp'))
+    const animatedFilename = page.locator('.file-field__filename')
+
+    await expect(animatedFilename).toHaveValue('animated.webp')
+
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const smallSquareFilename = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+      .locator('.file-meta__url a')
+    await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
+  })
+
   test('should show resized images', async () => {
     await page.goto(mediaURL.edit(pngDoc.id))
 
@@ -149,6 +202,17 @@ describe('uploads', () => {
     await expect(iconMeta).toContainText('16x16')
   })
 
+  test('should resize and show tiff images', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './test-image.tiff'))
+
+    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+  })
+
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
 
@@ -173,7 +237,7 @@ describe('uploads', () => {
     // choose from existing
     await page.locator('.list-drawer__toggler').click()
 
-    await expect(page.locator('.cell-title')).toContainText('draft')
+    await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
@@ -310,6 +374,56 @@ describe('uploads', () => {
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
       expect(redDoc.filesize).toEqual(1207)
+    })
+
+    test('should update image alignment based on focal point', async () => {
+      const updateFocalPosition = async (page: Page) => {
+        await page.goto(focalOnlyURL.create)
+        await page.waitForURL(focalOnlyURL.create)
+        // select and upload file
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByText('Select a file').click()
+        const fileChooser = await fileChooserPromise
+        await wait(1000)
+        await fileChooser.setFiles(path.join(__dirname, 'horizontal-squares.jpg'))
+
+        await page.locator('.file-field__edit').click()
+
+        // set focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // top focal point
+
+        // apply focal point
+        await page.locator('button:has-text("Apply Changes")').click()
+        await page.waitForSelector('button#action-save')
+        await page.locator('button#action-save').click()
+        await wait(1000) // Wait for the save
+      }
+
+      await updateFocalPosition(page) // red square
+      const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
+
+      const { doc: redDoc } = await client.findByID({
+        id: redSquareMediaID,
+        slug: focalOnlySlug,
+        auth: true,
+      })
+
+      // without focal point update this generated size was equal to 1736
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+    })
+  })
+
+  describe('globals', () => {
+    test('should be able to crop media from a global', async () => {
+      await page.goto(globalURL)
+      await page.click('.upload__toggler.doc-drawer__toggler')
+      await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+      await page.click('.file-field__edit')
+      await page.click('.btn.edit-upload__save')
+      await saveDocAndAssert(page, '.drawer__content #action-save')
+      await saveDocAndAssert(page)
+      await expect(page.locator('.thumbnail img')).toBeVisible()
     })
   })
 })
