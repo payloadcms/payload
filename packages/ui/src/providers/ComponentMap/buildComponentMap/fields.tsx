@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   CellComponentProps,
   CustomComponent,
+  ErrorProps,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
@@ -12,7 +13,7 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { deepCopyObject, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -718,10 +719,7 @@ export const mapFields = (args: {
               )
             }
 
-            fieldComponentProps = {
-              ...fieldComponentProps,
-              CustomLabel: CustomCollapsibleLabel,
-            }
+            fieldComponentProps.CustomLabel = CustomCollapsibleLabel
 
             break
           }
@@ -743,10 +741,10 @@ export const mapFields = (args: {
           }
         }
 
-        const descriptionProps: FieldDescriptionProps = {
+        const descriptionProps: FieldDescriptionProps = deepCopyObject({
           ...fieldComponentProps,
           description,
-        }
+        })
 
         let CustomDescriptionComponent = undefined
 
@@ -768,10 +766,10 @@ export const mapFields = (args: {
             />
           ) : undefined
 
-        const errorProps = {
+        const errorProps: ErrorProps = deepCopyObject({
           ...fieldComponentProps,
           path,
-        }
+        })
 
         const CustomErrorComponent =
           ('admin' in field &&
