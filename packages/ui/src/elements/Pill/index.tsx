@@ -110,9 +110,8 @@ const StaticPill: React.FC<PillProps> = (props) => {
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >
-      {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && alignIcon === 'right' && <span className={`${baseClass}__icon`}>{icon}</span>}
+      {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }

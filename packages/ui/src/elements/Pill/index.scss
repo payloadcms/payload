@@ -6,7 +6,7 @@
   display: inline-flex;
   background: var(--theme-elevation-150);
   color: var(--theme-elevation-800);
-  border-radius: $style-radius-m;
+  border-radius: $style-radius-s;
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
@@ -34,16 +34,13 @@
 
   .icon {
     flex-shrink: 0;
+    margin: base(0.1);
   }
 
   &__label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  &__icon {
-    padding: calc(var(--base) / 4);
   }
 
   &--has-action {
@@ -56,27 +53,17 @@
   }
 
   &--has-icon {
+    padding-inline-start: base(0.4);
+    padding-inline-end: base(0.1);
     svg {
       display: block;
     }
   }
 
-  [dir='rtl'] &--align-icon-left {
-    padding-right: 0;
-    padding-left: 10px;
-  }
-
-  [dir='rtl'] &--align-icon-right {
-    padding-right: 10px;
-    padding-left: 0;
-  }
-
   &--align-icon-left {
-    padding-left: 0;
-  }
-
-  &--align-icon-right {
-    padding-right: 0;
+    flex-direction: row-reverse;
+    padding-inline-start: base(0.1);
+    padding-inline-end: base(0.4);
   }
 
   &--style-white {

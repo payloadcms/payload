@@ -5,11 +5,15 @@ import './index.scss'
 export const PlusIcon: React.FC = () => (
   <svg
     className="icon icon--plus"
-    viewBox="0 0 19 19"
-    width="19"
+    height="20"
+    viewBox="0 0 20 20"
+    width="20"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <line className="stroke" x1="9.5" x2="9.5" y1="14" y2="5" />
-    <line className="stroke" x1="5" x2="14" y1="9.5" y2="9.5" />
+    <path
+      className="stroke"
+      d="M5.33333 9.99998H14.6667M9.99999 5.33331V14.6666"
+      strokeLinecap="square"
+    />
   </svg>
 )
