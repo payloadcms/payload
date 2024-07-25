@@ -659,10 +659,10 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: LabelProps = {
+        const labelProps: LabelProps = deepCopyObject({
           ...fieldComponentProps,
           schemaPath: path,
-        }
+        })
 
         const CustomLabelComponent =
           ('admin' in field &&
@@ -694,10 +694,8 @@ export const mapFields = (args: {
               )
             }
 
-            fieldComponentProps = {
-              ...fieldComponentProps,
-              CustomRowLabel,
-            }
+            // @ts-expect-error
+            fieldComponentProps.CustomRowLabel = CustomRowLabel
 
             break
           }
