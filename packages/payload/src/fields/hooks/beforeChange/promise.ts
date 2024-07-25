@@ -48,6 +48,21 @@ type Args = {
 // - beforeDuplicate hooks (if duplicate)
 // - Unflatten locales
 
+function formatLabels(array: (number | string)[]): string {
+  return array.reduce((acc, current, index) => {
+    let formattedItem
+    if (typeof current === 'number') {
+      formattedItem = `(${current})`
+
+      return index === 0 ? formattedItem : `${acc} ${formattedItem}`
+    } else {
+      formattedItem = current.charAt(0).toUpperCase() + current.slice(1)
+
+      return index === 0 ? formattedItem : `${acc} > ${formattedItem}`
+    }
+  }, '')
+}
+
 export const promise = async ({
   id,
   collection,
@@ -146,7 +161,7 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: fieldPath.join('.'),
+          field: formatLabels(fieldPath),
           message: validationResult,
         })
       }
