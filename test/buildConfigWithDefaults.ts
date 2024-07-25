@@ -43,6 +43,9 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
+  options?: {
+    disableAutoLogin?: boolean
+  },
 ): Promise<SanitizedConfig> {
   const databaseAdapters = {
     mongodb: mongooseAdapter({
@@ -192,7 +195,7 @@ export async function buildConfigWithDefaults(
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',
