@@ -1,12 +1,11 @@
 'use client'
-import type { NumberField as NumberFieldType } from 'payload'
+import type { FormFieldBase, NumberField as NumberFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from 'payload'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'

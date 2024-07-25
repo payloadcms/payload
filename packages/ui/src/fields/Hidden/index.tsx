@@ -1,7 +1,7 @@
 'use client'
-import React, { useEffect } from 'react'
+import type { FormFieldBase } from 'payload'
 
-import type { FormFieldBase } from '../index.js'
+import React, { useEffect } from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'

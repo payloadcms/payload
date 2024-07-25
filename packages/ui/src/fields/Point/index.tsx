@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { ClientValidate, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -11,8 +11,6 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'point'
-
-import type { FormFieldBase } from 'payload'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'

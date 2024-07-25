@@ -1,8 +1,6 @@
-import type { TextareaField as TextareaFieldType } from 'payload'
+import type { FormFieldBase, TextareaField as TextareaFieldType } from 'payload'
 
 import { type ChangeEvent } from 'react'
-
-import type { FormFieldBase } from 'payload'
 
 export type TextareaFieldProps = {
   maxLength?: number

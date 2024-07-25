@@ -1,7 +1,6 @@
-import type { FieldPermissions } from 'payload'
+import type { FieldPermissions, FormFieldBase } from 'payload'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from 'payload'
 
 export type RowFieldProps = {
   fieldMap: FieldMap

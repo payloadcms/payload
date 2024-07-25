@@ -1,10 +1,11 @@
 'use client'
 
+import type { FormFieldBase } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from 'payload'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'

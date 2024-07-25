@@ -1,7 +1,7 @@
+import type { FormFieldBase } from 'payload'
 import type React from 'react'
 
 import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from 'payload'
 
 export type RichTextFieldProps = {
   name: string
