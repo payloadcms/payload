@@ -59,6 +59,16 @@ function generateFieldPath(parentPath, name) {
   return tabPath
 }
 
+function prepareCustomComponentProps(props) {
+  return deepCopyObject({
+    ...props,
+    fieldMap: undefined,
+    richTextComponentMap: undefined,
+    rows: undefined,
+    tabs: undefined,
+  })
+}
+
 export const mapFields = (args: {
   WithServerSideProps: WithServerSidePropsPrePopulated
   config: SanitizedConfig
@@ -480,9 +490,11 @@ export const mapFields = (args: {
               style: field.admin?.style,
               width: field.admin?.width,
             }
+
             if (!field?.editor) {
               throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
             }
+
             if (typeof field?.editor === 'function') {
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
@@ -497,6 +509,7 @@ export const mapFields = (args: {
                 i18n,
                 schemaPath: path,
               })
+
               richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }
@@ -659,10 +672,7 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: LabelProps = deepCopyObject({
-          ...fieldComponentProps,
-          schemaPath: path,
-        })
+        const labelProps: LabelProps = prepareCustomComponentProps(fieldComponentProps)
 
         const CustomLabelComponent =
           ('admin' in field &&
@@ -739,7 +749,7 @@ export const mapFields = (args: {
           }
         }
 
-        const descriptionProps: FieldDescriptionProps = deepCopyObject({
+        const descriptionProps: FieldDescriptionProps = prepareCustomComponentProps({
           ...fieldComponentProps,
           description,
         })
@@ -764,7 +774,7 @@ export const mapFields = (args: {
             />
           ) : undefined
 
-        const errorProps: ErrorProps = deepCopyObject({
+        const errorProps: ErrorProps = prepareCustomComponentProps({
           ...fieldComponentProps,
           path,
         })

@@ -1,4 +1,5 @@
-import type { CustomComponent } from '../../config/types.js'
+import type { CustomComponent, ServerProps } from '../../config/types.js'
+import type { FormFieldBase } from './Field.js'
 
 export type ErrorProps = {
   CustomError?: React.ReactNode
@@ -6,6 +7,7 @@ export type ErrorProps = {
   message?: string
   path?: string
   showError?: boolean
-}
+} & FormFieldBase &
+  Partial<ServerProps>
 
 export type ErrorComponent = CustomComponent<ErrorProps>
