@@ -9,7 +9,8 @@ const toWords = (inputString: string, joinWords = false): string => {
   const trimmedString = notNullString.trim()
   const arrayOfStrings = trimmedString.split(/[\s-]/)
 
-  const splitStringsArray = []
+  const splitStringsArray: string[] = []
+
   arrayOfStrings.forEach((tempString) => {
     if (tempString !== '') {
       const splitWords = tempString.split(/(?=[A-Z])/).join(' ')
@@ -46,4 +47,26 @@ const formatNames = (slug: string): { plural: string; singular: string } => {
       }
 }
 
-export { formatLabels, formatNames, toWords }
+/**
+ * Formats labels for error field schema array.
+ * @param fieldSchema - Array of strings and numbers.
+ * @returns Formatted string.
+ *
+ * @example
+ * formatErrorLabels(['test', 1, 'test2']) // => 'Test (1) > Test2'
+ */
+const formatErrorLabels = (fieldSchema: (number | string)[]): string => {
+  return fieldSchema.reduce((acc: string, current, index) => {
+    if (typeof current === 'number') {
+      return index === 0 ? `(${current})` : `${acc} (${current})`
+    } else {
+      const formattedItem = current.charAt(0).toUpperCase() + current.slice(1)
+
+      return index === 0
+        ? `${acc}${current.charAt(0).toUpperCase() + current.slice(1)}`
+        : `${acc} > ${formattedItem}`
+    }
+  }, '') as string
+}
+
+export { formatErrorLabels, formatLabels, formatNames, toWords }

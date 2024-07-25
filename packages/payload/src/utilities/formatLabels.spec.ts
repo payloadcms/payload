@@ -1,4 +1,4 @@
-import { formatLabels, toWords } from './formatLabels'
+import { formatErrorLabels, formatLabels, toWords } from './formatLabels'
 
 describe('formatLabels', () => {
   it('should format singular slug', () => {
@@ -37,5 +37,13 @@ describe('formatLabels', () => {
     it('should allow no separator (used for building GraphQL label from name)', () => {
       expect(toWords('myGraphField', true)).toBe('MyGraphField')
     })
+  })
+})
+
+describe('formatErrorLabels', () => {
+  it('should format array', () => {
+    expect(formatErrorLabels(['test', 1, 'field', 'array', 3, 'final'])).toBe(
+      'Test (1) > Field > Array (3) > Final',
+    )
   })
 })

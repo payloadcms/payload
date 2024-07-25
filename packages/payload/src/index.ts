@@ -981,7 +981,7 @@ export {
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
-export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+export { formatErrorLabels, formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { initTransaction } from './utilities/initTransaction.js'

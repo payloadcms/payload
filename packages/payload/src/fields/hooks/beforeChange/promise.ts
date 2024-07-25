@@ -6,6 +6,7 @@ import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../co
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
+import { formatErrorLabels } from '../../../utilities/formatLabels.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { beforeDuplicate } from './beforeDuplicate.js'
@@ -47,21 +48,6 @@ type Args = {
 // - Transform data for storage
 // - beforeDuplicate hooks (if duplicate)
 // - Unflatten locales
-
-function formatLabels(array: (number | string)[]): string {
-  return array.reduce((acc, current, index) => {
-    let formattedItem
-    if (typeof current === 'number') {
-      formattedItem = `(${current})`
-
-      return index === 0 ? formattedItem : `${acc} ${formattedItem}`
-    } else {
-      formattedItem = current.charAt(0).toUpperCase() + current.slice(1)
-
-      return index === 0 ? formattedItem : `${acc} > ${formattedItem}`
-    }
-  }, '')
-}
 
 export const promise = async ({
   id,
@@ -161,7 +147,7 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         errors.push({
-          field: formatLabels(fieldPath),
+          field: formatErrorLabels(fieldPath),
           message: validationResult,
         })
       }
