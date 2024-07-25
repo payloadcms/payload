@@ -42,6 +42,30 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types'
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * If enabled, collation allows for language-specific rules for string comparison.
+   * This configuration can include the strength level of the comparison:
+   * - 1: Primary - Compares base characters only, ignoring diacritics and case.
+   * - 2: Secondary - Compares base characters and diacritics.
+   * - 3: Tertiary - Compares base characters, diacritics, and case (default level).
+   * - 4: Quaternary - Considers punctuation for specific use cases.
+   * - 5: Identical - Acts as a tie-breaker for identical strings.
+   *
+   * Available on MongoDB version 3.4 and up.
+   * The locale that gets passed is your current project's locale but defaults to "en".
+   *
+   * Example:
+   * {
+   *   enabled: true,
+   *   strength: 3
+   * }
+   *
+   * Defaults to disabled.
+   */
+  collation?: {
+    enabled: boolean
+    strength: 1 | 2 | 3 | 4 | 5
+  }
   /** Define Mongoose options on a collection-by-collection basis.
    */
   collections?: {

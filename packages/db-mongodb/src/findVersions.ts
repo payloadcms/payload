@@ -70,8 +70,12 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
-  if (locale && locale !== 'all' && locale !== '*') {
-    paginationOptions.collation = { locale, strength: 1 }
+  if (this.collation && this.collation.enabled) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      strength: this.collation.strength,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
