@@ -385,9 +385,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (typeof field.relationTo === 'string') {
               fieldState.filterOptions = {
                 [field.relationTo]: field.filterOptions,
-              } as FilterOptionsResult
+              }
             } else {
-              fieldState.filterOptions = field.filterOptions as FilterOptionsResult
+              fieldState.filterOptions = field.relationTo.reduce((acc, relation) => {
+                acc[relation] = field.filterOptions
+                return acc
+              }, {})
             }
           }
 

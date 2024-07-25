@@ -127,14 +127,10 @@ export type FilterOptionsFunc<TData = any> = (
   options: FilterOptionsProps<TData>,
 ) => Promise<Where | boolean> | Where | boolean
 
-export type FilterOptionsMono<TData = any> = FilterOptionsFunc<TData> | Where | null
-
-export type FilterOptionsPoly<TData = any> =
-  | { [relationTo: string]: Where }
-  | FilterOptionsFunc<TData>
+export type FilterOptions<TData = any> =
+  | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
+  | Where
   | null
-
-export type FilterOptions = FilterOptionsMono | FilterOptionsPoly
 
 type Admin = {
   className?: string
@@ -516,7 +512,7 @@ export type UploadField = {
       Label?: CustomComponent<LabelProps>
     }
   }
-  filterOptions?: FilterOptionsMono
+  filterOptions?: FilterOptions
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -584,6 +580,7 @@ export type SelectField = {
 } & FieldBase
 
 type SharedRelationshipProperties = {
+  filterOptions?: FilterOptions
   hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
@@ -634,14 +631,12 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   } & RelationshipAdmin
-  filterOptions: FilterOptionsPoly
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 export type SingleRelationshipField = {
   admin?: {
     sortOptions?: string
   } & RelationshipAdmin
-  filterOptions: FilterOptionsMono
   relationTo: CollectionSlug
 } & SharedRelationshipProperties
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
