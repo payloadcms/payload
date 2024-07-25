@@ -502,16 +502,19 @@ describe('admin1', () => {
   describe('custom fields', () => {
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('.custom-text-label')).toBeVisible()
     })
 
     test('renders custom description component', async () => {
       await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('.custom-text-description')).toBeVisible()
     })
 
     test('ensure custom components receive field props', async () => {
       await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('#custom-field-label')).toContainText(
         'The max length of this field is: 100',
       )
@@ -520,9 +523,38 @@ describe('admin1', () => {
       )
     })
 
+    describe('field descriptions', () => {
+      test('should render static field description', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
+        await expect(page.locator('.field-description-descriptionAsString')).toContainText(
+          'Static field description.',
+        )
+      })
+
+      test('should render functional field description', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
+        await page.locator('#field-descriptionAsFunction').fill('functional')
+        await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
+          'Function description',
+        )
+      })
+
+      test('should render component field description', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
+        await page.locator('#field-descriptionAsComponent').fill('component')
+        await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
+          'Component description: descriptionAsComponent - component',
+        )
+      })
+    })
+
     describe('select field', () => {
       test('should render custom select options', async () => {
         await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
