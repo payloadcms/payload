@@ -1,6 +1,4 @@
-import type { UploadField } from 'payload'
-
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase, UploadField } from 'payload'
 
 export type UploadFieldProps = {
   filterOptions?: UploadField['filterOptions']

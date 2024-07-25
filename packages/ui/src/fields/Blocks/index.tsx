@@ -1,11 +1,10 @@
 'use client'
-import type { BlockField } from 'payload'
+import type { BlockField, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'

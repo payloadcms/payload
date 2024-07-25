@@ -1,9 +1,7 @@
 'use client'
-import type { CodeField as CodeFieldType } from 'payload'
+import type { CodeField as CodeFieldType, FormFieldBase } from 'payload'
 
 import React, { useCallback } from 'react'
-
-import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'

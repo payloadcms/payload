@@ -3,9 +3,9 @@ import type {
   CellComponentProps,
   CustomComponent,
   Field,
-  FieldBase,
   FieldDescriptionProps,
   FieldWithPath,
+  FormFieldBase,
   LabelProps,
   Option,
   SanitizedConfig,
@@ -35,7 +35,6 @@ import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
 import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
-import type { FormFieldBase } from '../../../fields/shared/index.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type {
   FieldComponentProps,
@@ -46,9 +45,7 @@ import type {
 } from './types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../../exports/client/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { HiddenField } from '../../../exports/client/index.js'
+import { FieldDescription, HiddenField } from '../../../exports/client/index.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -135,7 +132,7 @@ export const mapFields = (args: {
             )) ||
           null
 
-        let label: FieldBase['label'] = undefined
+        let label: FormFieldBase['label'] = undefined
 
         if ('label' in field) {
           if (typeof field.label === 'string' || typeof field.label === 'object') {

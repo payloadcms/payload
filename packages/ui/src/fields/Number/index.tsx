@@ -6,7 +6,7 @@ import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'

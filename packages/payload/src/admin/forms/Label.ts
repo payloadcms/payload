@@ -1,14 +1,13 @@
-import type { CustomComponent, LabelStatic } from '../../config/types.js'
+import type { CustomComponent, ServerProps } from '../../config/types.js'
+import type { FormFieldBase } from './Field.js'
 
 export type LabelProps = {
-  CustomLabel?: React.ReactNode
   as?: 'label' | 'span'
   htmlFor?: string
-  label?: LabelStatic
-  required?: boolean
   schemaPath?: string
   unstyled?: boolean
-}
+} & FormFieldBase &
+  Partial<ServerProps>
 
 export type SanitizedLabelProps = Omit<LabelProps, 'label' | 'required'>
 

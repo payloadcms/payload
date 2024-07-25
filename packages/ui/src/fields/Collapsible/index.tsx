@@ -19,7 +19,7 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'

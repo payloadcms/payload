@@ -13,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

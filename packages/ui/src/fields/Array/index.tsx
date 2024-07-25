@@ -1,11 +1,10 @@
 'use client'
-import type { ArrayField as ArrayFieldType } from 'payload'
+import type { ArrayField as ArrayFieldType, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'

@@ -3,7 +3,7 @@ import type { ClientValidate, Description, Validate } from 'payload'
 
 import React, { useCallback } from 'react'
 
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

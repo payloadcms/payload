@@ -20,6 +20,7 @@ export type {
   WithServerSidePropsComponentProps,
 } from './elements/WithServerSideProps.js'
 export type { ErrorProps } from './forms/Error.js'
+export type { FormFieldBase } from './forms/Field.js'
 export type {
   Description,
   DescriptionComponent,

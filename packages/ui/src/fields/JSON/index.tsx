@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'

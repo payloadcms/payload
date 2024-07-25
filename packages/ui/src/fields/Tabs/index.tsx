@@ -6,7 +6,7 @@ import { toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'

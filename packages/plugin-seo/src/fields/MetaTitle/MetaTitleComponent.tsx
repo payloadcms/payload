@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
+import type { FieldType, Options } from '@payloadcms/ui'
+import type { FormFieldBase } from 'payload'
 
 import {
   FieldLabel,

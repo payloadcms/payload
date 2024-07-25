@@ -4,7 +4,7 @@ import type { ClientValidate, Option, OptionObject } from 'payload'
 import React, { useCallback } from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 import type { SelectInputProps } from './Input.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'

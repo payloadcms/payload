@@ -1,7 +1,7 @@
 import type React from 'react'
 
-import type { CustomComponent, LabelFunction } from '../../config/types.js'
-import type { Payload } from '../../index.js'
+import type { CustomComponent, LabelFunction, ServerProps } from '../../config/types.js'
+import type { FormFieldBase } from './Field.js'
 
 export type DescriptionFunction = LabelFunction
 
@@ -14,5 +14,5 @@ export type FieldDescriptionProps = {
   className?: string
   description?: Record<string, string> | string
   marginPlacement?: 'bottom' | 'top'
-  payload?: Payload
-}
+} & FormFieldBase &
+  Partial<ServerProps>

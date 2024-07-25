@@ -1,4 +1,4 @@
-import type { FormFieldBase } from '../shared/index.js'
+import type { FormFieldBase } from 'payload'
 
 export type CheckboxFieldProps = {
   checked?: boolean

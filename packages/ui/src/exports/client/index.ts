@@ -140,7 +140,6 @@ export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/inde
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 export { useField } from '../../forms/useField/index.js'
-export type { FormFieldBase } from '../../fields/shared/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 
 export { withCondition } from '../../forms/withCondition/index.js'
