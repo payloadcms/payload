@@ -35,7 +35,7 @@ export type GroupFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
+const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
