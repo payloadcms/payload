@@ -141,7 +141,9 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
                   parentPath={path}
-                  setIsActive={() => handleTabChange(tabIndex)}
+                  setIsActive={() => {
+                    void handleTabChange(tabIndex)
+                  }}
                   tab={tab}
                 />
               )

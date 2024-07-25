@@ -316,7 +316,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value || 0)}
+          onClick={() => {
+            void addRow(value || 0)
+          }}
         >
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>

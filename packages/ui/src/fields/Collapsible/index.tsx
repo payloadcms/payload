@@ -144,7 +144,7 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             </div>
           }
           initCollapsed={collapsedOnMount}
-          onToggle={onToggle}
+          onToggle={void onToggle}
         >
           <RenderFields
             fieldMap={fieldMap}
