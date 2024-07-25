@@ -1,4 +1,4 @@
-import type { TransactionOptions } from 'mongodb'
+import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
@@ -42,6 +42,30 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * If enabled, collation allows for language-specific rules for string comparison.
+   * This configuration can include the following options:
+   *
+   * - `strength` (number): Comparison level (1: Primary, 2: Secondary, 3: Tertiary (default), 4: Quaternary, 5: Identical)
+   * - `caseLevel` (boolean): Include case comparison at strength level 1 or 2.
+   * - `caseFirst` (string): Sort order of case differences during tertiary level comparisons ("upper", "lower", "off").
+   * - `numericOrdering` (boolean): Compare numeric strings as numbers.
+   * - `alternate` (string): Consider whitespace and punctuation as base characters ("non-ignorable", "shifted").
+   * - `maxVariable` (string): Characters considered ignorable when `alternate` is "shifted" ("punct", "space").
+   * - `backwards` (boolean): Sort strings with diacritics from back of the string.
+   * - `normalization` (boolean): Check if text requires normalization and perform normalization.
+   *
+   * Available on MongoDB version 3.4 and up.
+   * The locale that gets passed is your current project's locale but defaults to "en".
+   *
+   * Example:
+   * {
+   *   strength: 3
+   * }
+   *
+   * Defaults to disabled.
+   */
+  collation?: Omit<CollationOptions, 'locale'>
   /** Extra configuration options */
   connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */

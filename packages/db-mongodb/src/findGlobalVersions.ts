@@ -72,8 +72,12 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     useEstimatedCount,
   }
 
-  if (locale && locale !== 'all' && locale !== '*') {
-    paginationOptions.collation = { locale, strength: 1 }
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
