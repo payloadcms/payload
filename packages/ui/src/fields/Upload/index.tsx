@@ -56,7 +56,8 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const canCreate = useMemo(() => {
+  // Checks if the user has permissions to create a new document in the related collection
+  const allowNewUpload = useMemo(() => {
     if (permissions?.collections && permissions.collections?.[relationTo]?.create) {
       if (permissions.collections[relationTo].create?.permission === true) {
         return true
@@ -88,8 +89,8 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
         CustomDescription={CustomDescription}
         CustomError={CustomError}
         CustomLabel={CustomLabel}
+        allowNewUpload={allowNewUpload}
         api={apiRoute}
-        canCreate={canCreate}
         className={className}
         collection={collection}
         descriptionProps={descriptionProps}

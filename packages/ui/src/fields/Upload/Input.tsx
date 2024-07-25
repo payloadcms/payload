@@ -23,8 +23,11 @@ import './index.scss'
 const baseClass = 'upload'
 
 export type UploadInputProps = {
+  /**
+   * Controls the visibility of the "Create new collection" button
+   */
+  allowNewUpload?: boolean
   api?: string
-  canCreate?: boolean
   collection?: ClientCollectionConfig
   customUploadActions?: React.ReactNode[]
   filterOptions?: FilterOptionsResult
@@ -40,8 +43,8 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     CustomDescription,
     CustomError,
     CustomLabel,
+    allowNewUpload,
     api = '/api',
-    canCreate,
     className,
     collection,
     customUploadActions,
@@ -166,7 +169,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
               {(!fileDoc || missingFile) && (
                 <div className={`${baseClass}__wrap`}>
                   <div className={`${baseClass}__buttons`}>
-                    {canCreate && (
+                    {allowNewUpload && (
                       <DocumentDrawerToggler
                         className={`${baseClass}__toggler`}
                         disabled={readOnly}
