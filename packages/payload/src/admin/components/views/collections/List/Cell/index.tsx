@@ -59,7 +59,7 @@ const DefaultCell: React.FC<Props> = (props) => {
       <WrapElement {...wrapElementProps}>
         <CodeCell
           collection={collection}
-          data={`ID: ${cellData}`}
+          data={`ID: ${String(cellData)}`}
           field={field as CodeField}
           nowrap
           rowData={rowData}
@@ -69,7 +69,10 @@ const DefaultCell: React.FC<Props> = (props) => {
   }
 
   let CellComponent: React.FC<CellComponentProps> | false =
-    cellData && cellData !== null && typeof cellData !== 'undefined' && cellComponents[field.type]
+    (cellData || typeof cellData === 'boolean') &&
+    cellData !== null &&
+    typeof cellData !== 'undefined' &&
+    cellComponents[field.type]
 
   if (!CellComponent) {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
@@ -78,8 +81,7 @@ const DefaultCell: React.FC<Props> = (props) => {
       if (
         (cellData === undefined ||
           cellData === null ||
-          (typeof cellData === 'string' && cellData.trim() === '') ||
-          (typeof cellData === 'boolean' && !cellData)) &&
+          (typeof cellData === 'string' && cellData.trim() === '')) &&
         'label' in field
       ) {
         return (
@@ -92,7 +94,7 @@ const DefaultCell: React.FC<Props> = (props) => {
             })}
           </WrapElement>
         )
-      } else if (typeof cellData === 'string' || typeof cellData === 'number') {
+      } else if (['number', 'string'].includes(typeof cellData)) {
         return <WrapElement {...wrapElementProps}>{cellData}</WrapElement>
       } else if (typeof cellData === 'object') {
         return <WrapElement {...wrapElementProps}>{JSON.stringify(cellData)}</WrapElement>
