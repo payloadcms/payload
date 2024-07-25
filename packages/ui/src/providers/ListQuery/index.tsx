@@ -166,9 +166,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       hasSetInitialParams.current = true
     }
 
-    // if there are no docs on the current page and docs exist, redirect to the last page
+    // reset to first page if there are no results on the current page
     if (data.docs.length === 0 && data.totalDocs > 0) {
-      currentQuery.page = String(data.totalPages)
+      currentQuery.page = '1'
       router.replace(`?${qs.stringify(currentQuery)}`)
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery, data])
