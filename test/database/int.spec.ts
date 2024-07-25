@@ -467,6 +467,8 @@ describe('database', () => {
       const result = await payload.db.create({
         collection: 'default-values',
         data: {
+          // for drizzle DBs, we need to pass an array of objects to test subfields
+          array: [{ id: 1 }],
           title: 'hello',
         },
         req: undefined,

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
 import type { Field, TabAsField } from 'payload'
@@ -30,6 +29,7 @@ import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
 import { getIDColumn } from './getIDColumn.js'
 import { idToUUID } from './idToUUID.js'
+import { withDefault } from './withDefault.js'
 
 type Args = {
   adapter: SQLiteAdapter
@@ -166,14 +166,14 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = text(columnName)
+          targetTable[fieldName] = withDefault(text(columnName), field)
         }
         break
       }
       case 'email':
       case 'code':
       case 'textarea': {
-        targetTable[fieldName] = text(columnName)
+        targetTable[fieldName] = withDefault(text(columnName), field)
         break
       }
 
@@ -195,19 +195,19 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = numeric(columnName)
+          targetTable[fieldName] = withDefault(numeric(columnName), field)
         }
         break
       }
 
       case 'richText':
       case 'json': {
-        targetTable[fieldName] = text(columnName, { mode: 'json' })
+        targetTable[fieldName] = withDefault(text(columnName, { mode: 'json' }), field)
         break
       }
 
       case 'date': {
-        targetTable[fieldName] = text(columnName)
+        targetTable[fieldName] = withDefault(text(columnName), field)
         break
       }
 
@@ -295,13 +295,13 @@ export const traverseFields = ({
             }),
           )
         } else {
-          targetTable[fieldName] = text(fieldName, { enum: options })
+          targetTable[fieldName] = withDefault(text(fieldName, { enum: options }), field)
         }
         break
       }
 
       case 'checkbox': {
-        targetTable[fieldName] = integer(columnName, { mode: 'boolean' })
+        targetTable[fieldName] = withDefault(integer(columnName, { mode: 'boolean' }), field)
         break
       }
 
