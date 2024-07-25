@@ -89,11 +89,10 @@ describe('database', () => {
     })
 
     it('should allow createdAt to be set in create', async () => {
-      const createdAt = new Date('2021-01-01T00:00:00.000Z')
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: 'posts',
         data: {
-          // TODO: createdAt should be optional on RequiredDataFromCollectionSlug
           createdAt,
           title: 'hello',
         },
@@ -104,8 +103,8 @@ describe('database', () => {
         collection: 'posts',
       })
 
-      expect(result.createdAt).toStrictEqual(createdAt.toISOString())
-      expect(doc.createdAt).toStrictEqual(createdAt.toISOString())
+      expect(result.createdAt).toStrictEqual(createdAt)
+      expect(doc.createdAt).toStrictEqual(createdAt)
     })
 
     it('updatedAt cannot be set in create', async () => {
