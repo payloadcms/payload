@@ -16,6 +16,9 @@ export interface Config {
     'gif-resize': GifResize;
     'no-image-sizes': NoImageSize;
     'object-fit': ObjectFit;
+    'with-meta-data': WithMetaDatum;
+    'without-meta-data': WithoutMetaDatum;
+    'with-only-jpeg-meta-data': WithOnlyJpegMetaDatum;
     'crop-only': CropOnly;
     'focal-only': FocalOnly;
     'focal-no-sizes': FocalNoSize;
@@ -38,6 +41,9 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {};
   locale: null;
   user: User & {
@@ -49,12 +55,15 @@ export interface UserAuthOperations {
     email: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -335,6 +344,90 @@ export interface ObjectFit {
       filename?: string | null;
     };
     fitOutside?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-meta-data".
+ */
+export interface WithMetaDatum {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-meta-data".
+ */
+export interface WithoutMetaDatum {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeTwo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-only-jpeg-meta-data".
+ */
+export interface WithOnlyJpegMetaDatum {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeThree?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
