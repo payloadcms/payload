@@ -74,7 +74,14 @@ const DefaultCell: React.FC<Props> = (props) => {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-      if (!cellData && 'label' in field) {
+      // if (!cellData && 'label' in field) {
+      if (
+        (cellData === undefined ||
+          cellData === null ||
+          (typeof cellData === 'string' && cellData.trim() === '')) &&
+        'label' in field
+      ) {
+        // if ((cellData === undefined || cellData === null) && 'label' in field) {
         return (
           <WrapElement {...wrapElementProps}>
             {t('noLabel', {
