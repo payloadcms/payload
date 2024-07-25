@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { LabelStatic } from '../../config/types.js'
 import type {
   BlockField,
   DateField,
@@ -20,7 +21,7 @@ export type CellComponentProps = {
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
   fieldType?: Field['type']
   isFieldAffectingData?: boolean
-  label?: FieldBase['label']
+  label?: LabelStatic
   labels?: Labels
   link?: boolean
   name: FieldBase['name']

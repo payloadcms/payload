@@ -1,8 +1,8 @@
 import type {
   DocumentPreferences,
   ErrorProps,
-  FieldBase,
   FieldDescriptionProps,
+  LabelStatic,
   Locale,
   SanitizedLabelProps,
   SanitizedLocalizationConfig,
@@ -24,7 +24,7 @@ export type FormFieldBase = {
   disabled?: boolean
   docPreferences?: DocumentPreferences
   errorProps?: ErrorProps
-  label?: FieldBase['label']
+  label?: LabelStatic
   labelProps?: SanitizedLabelProps
   locale?: Locale
   localized?: boolean
