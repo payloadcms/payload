@@ -174,56 +174,13 @@ export const mapFields = (args: {
           }
         }
 
-        const descriptionProps: FieldDescriptionProps = {
-          description,
-        }
-
-        let CustomDescriptionComponent = undefined
-        if (
-          field.admin?.components &&
-          'Description' in field.admin.components &&
-          field.admin.components?.Description
-        ) {
-          CustomDescriptionComponent = field.admin.components.Description
-        } else if (description) {
-          CustomDescriptionComponent = FieldDescription
-        }
-
-        const CustomDescription =
-          CustomDescriptionComponent !== undefined ? (
-            <WithServerSideProps
-              Component={CustomDescriptionComponent}
-              {...(descriptionProps || {})}
-            />
-          ) : undefined
-
-        const errorProps = {
-          path,
-        }
-
-        const CustomErrorComponent =
-          ('admin' in field &&
-            field.admin?.components &&
-            'Error' in field.admin.components &&
-            field.admin?.components?.Error) ||
-          undefined
-
-        const CustomError =
-          CustomErrorComponent !== undefined ? (
-            <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
-          ) : undefined
-
         // These fields are shared across all field types even if they are not used in the default field, as the custom field component can use them
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
-          CustomDescription,
-          CustomError,
           CustomLabel,
           custom: 'admin' in field && 'custom' in field.admin ? field.admin?.custom : undefined,
-          descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
-          errorProps,
           label: labelProps?.label,
           path,
           required: 'required' in field ? field.required : undefined,
@@ -763,6 +720,56 @@ export const mapFields = (args: {
           default: {
             break
           }
+        }
+
+        const descriptionProps: FieldDescriptionProps = {
+          ...fieldComponentProps,
+          description,
+        }
+
+        let CustomDescriptionComponent = undefined
+
+        if (
+          field.admin?.components &&
+          'Description' in field.admin.components &&
+          field.admin.components?.Description
+        ) {
+          CustomDescriptionComponent = field.admin.components.Description
+        } else if (description) {
+          CustomDescriptionComponent = FieldDescription
+        }
+
+        const CustomDescription =
+          CustomDescriptionComponent !== undefined ? (
+            <WithServerSideProps
+              Component={CustomDescriptionComponent}
+              {...(descriptionProps || {})}
+            />
+          ) : undefined
+
+        const errorProps = {
+          ...fieldComponentProps,
+          path,
+        }
+
+        const CustomErrorComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Error' in field.admin.components &&
+            field.admin?.components?.Error) ||
+          undefined
+
+        const CustomError =
+          CustomErrorComponent !== undefined ? (
+            <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
+          ) : undefined
+
+        fieldComponentProps = {
+          ...fieldComponentProps,
+          CustomDescription,
+          CustomError,
+          descriptionProps,
+          errorProps,
         }
 
         const reducedField: MappedField = {

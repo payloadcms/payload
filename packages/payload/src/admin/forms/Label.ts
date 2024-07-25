@@ -1,3 +1,5 @@
+import type { CustomComponent } from '../../config/types.js'
+
 export type LabelProps = {
   CustomLabel?: React.ReactNode
   as?: 'label' | 'span'
@@ -9,3 +11,5 @@ export type LabelProps = {
 }
 
 export type SanitizedLabelProps = Omit<LabelProps, 'label' | 'required'>
+
+export type LabelComponent = CustomComponent<LabelProps>

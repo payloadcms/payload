@@ -1,3 +1,5 @@
+import type { CustomComponent } from '../../config/types.js'
+
 export type ErrorProps = {
   CustomError?: React.ReactNode
   alignCaret?: 'center' | 'left' | 'right'
@@ -5,3 +7,5 @@ export type ErrorProps = {
   path?: string
   showError?: boolean
 }
+
+export type ErrorComponent = CustomComponent<ErrorProps>
