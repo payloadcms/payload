@@ -1,5 +1,5 @@
 'use client'
-import type { LabelStatic } from 'payload'
+import type { FieldBase } from 'payload'
 
 // TODO: abstract the `next/navigation` dependency out from this component
 import React, { useCallback } from 'react'
@@ -13,7 +13,7 @@ import './index.scss'
 export type SortColumnProps = {
   Label: React.ReactNode
   disable?: boolean
-  label?: LabelStatic
+  label?: FieldBase['label']
   name: string
 }
 
