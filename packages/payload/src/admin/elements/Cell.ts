@@ -1,5 +1,4 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { LabelStatic } from '../../config/types.js'
 import type {
   BlockField,
   DateField,
@@ -9,6 +8,7 @@ import type {
   RelationshipField,
   SelectField,
 } from '../../fields/config/types.js'
+import type { FormFieldBase } from '../types.js'
 
 export type RowData = Record<string, any>
 
@@ -21,7 +21,7 @@ export type CellComponentProps = {
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
   fieldType?: Field['type']
   isFieldAffectingData?: boolean
-  label?: LabelStatic
+  label?: FormFieldBase['label']
   labels?: Labels
   link?: boolean
   name: FieldBase['name']

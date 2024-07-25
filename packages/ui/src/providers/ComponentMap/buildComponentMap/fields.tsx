@@ -183,7 +183,7 @@ export const mapFields = (args: {
 
         switch (field.type) {
           case 'array': {
-            const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
+            const arrayFieldProps: ArrayFieldProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -235,7 +235,7 @@ export const mapFields = (args: {
               return reducedBlock
             })
 
-            const blocksField: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> = {
+            const blocksField: BlocksFieldProps = {
               ...baseFieldProps,
               name: field.name,
               blocks,
@@ -293,7 +293,7 @@ export const mapFields = (args: {
             break
           }
           case 'collapsible': {
-            const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
+            const collapsibleField: CollapsibleFieldProps = {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
@@ -314,7 +314,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = collapsibleField as CollapsibleFieldProps // TODO: dunno why this is needed
+            fieldComponentProps = collapsibleField // TODO: dunno why this is needed
             break
           }
           case 'date': {
@@ -353,7 +353,7 @@ export const mapFields = (args: {
             break
           }
           case 'group': {
-            const groupField: Omit<GroupFieldProps, 'indexPath' | 'permissions'> = {
+            const groupField: GroupFieldProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -513,7 +513,7 @@ export const mapFields = (args: {
             break
           }
           case 'row': {
-            const rowField: Omit<RowFieldProps, 'indexPath' | 'permissions'> = {
+            const rowField: Omit<RowFieldProps, 'indexPath'> = {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
@@ -559,7 +559,7 @@ export const mapFields = (args: {
               return reducedTab
             })
 
-            const tabsField: Omit<TabsFieldProps, 'indexPath' | 'permissions'> = {
+            const tabsField: Omit<TabsFieldProps, 'indexPath'> = {
               ...baseFieldProps,
               name: 'name' in field ? (field.name as string) : undefined,
               className: field.admin?.className,
