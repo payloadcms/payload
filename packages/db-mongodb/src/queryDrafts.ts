@@ -58,11 +58,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
-  if (this.collation && this.collation.enabled) {
+  if (this.collation) {
     const defaultLocale = 'en'
     paginationOptions.collation = {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
-      strength: this.collation.strength,
+      ...this.collation,
     }
   }
 
