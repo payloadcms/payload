@@ -1,10 +1,11 @@
 import type { CustomComponent } from '../../config/types.js'
+import type { FieldBase } from '../../fields/config/types.js'
 
 export type LabelProps = {
   CustomLabel?: React.ReactNode
   as?: 'label' | 'span'
   htmlFor?: string
-  label?: Record<string, string> | string
+  label?: FieldBase['label']
   required?: boolean
   schemaPath?: string
   unstyled?: boolean

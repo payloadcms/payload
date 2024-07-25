@@ -20,7 +20,7 @@ export type CellComponentProps = {
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
   fieldType?: Field['type']
   isFieldAffectingData?: boolean
-  label?: Record<string, string> | string
+  label?: FieldBase['label']
   labels?: Labels
   link?: boolean
   name: FieldBase['name']

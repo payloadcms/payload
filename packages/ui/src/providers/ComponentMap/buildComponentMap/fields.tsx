@@ -3,6 +3,7 @@ import type {
   CellComponentProps,
   CustomComponent,
   Field,
+  FieldBase,
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
@@ -134,7 +135,8 @@ export const mapFields = (args: {
             )) ||
           null
 
-        let label = undefined
+        let label: FieldBase['label'] = undefined
+
         if ('label' in field) {
           if (typeof field.label === 'string' || typeof field.label === 'object') {
             label = field.label
@@ -143,45 +145,13 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: LabelProps = {
-          label,
-          required: 'required' in field ? field.required : undefined,
-          schemaPath: path,
-        }
-
-        const CustomLabelComponent =
-          ('admin' in field &&
-            field.admin?.components &&
-            'Label' in field.admin.components &&
-            field.admin.components?.Label) ||
-          undefined
-
-        // If we return undefined here (so if no CUSTOM label component is set), the field client component is responsible for falling back to the default label
-        const CustomLabel =
-          CustomLabelComponent !== undefined ? (
-            <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
-          ) : undefined
-
-        let description = undefined
-        if (field.admin && 'description' in field.admin) {
-          if (
-            typeof field.admin?.description === 'string' ||
-            typeof field.admin?.description === 'object'
-          ) {
-            description = field.admin.description
-          } else if (typeof field.admin?.description === 'function') {
-            description = field.admin?.description({ t })
-          }
-        }
-
         // These fields are shared across all field types even if they are not used in the default field, as the custom field component can use them
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
-          CustomLabel,
           custom: 'admin' in field && 'custom' in field.admin ? field.admin?.custom : undefined,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
-          label: labelProps?.label,
+          label,
           path,
           required: 'required' in field ? field.required : undefined,
         }
@@ -207,7 +177,7 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,
-          label: labelProps?.label || undefined,
+          label,
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
@@ -722,6 +692,39 @@ export const mapFields = (args: {
           }
         }
 
+        const labelProps: LabelProps = {
+          label,
+          required: 'required' in field ? field.required : undefined,
+          schemaPath: path,
+        }
+
+        const CustomLabelComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Label' in field.admin.components &&
+            field.admin.components?.Label) ||
+          undefined
+
+        // If we return undefined here (so if no CUSTOM label component is set),
+        // the field client component is responsible for falling back to the default label
+        const CustomLabel =
+          CustomLabelComponent !== undefined ? (
+            <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
+          ) : undefined
+
+        let description = undefined
+
+        if (field.admin && 'description' in field.admin) {
+          if (
+            typeof field.admin?.description === 'string' ||
+            typeof field.admin?.description === 'object'
+          ) {
+            description = field.admin.description
+          } else if (typeof field.admin?.description === 'function') {
+            description = field.admin?.description({ t })
+          }
+        }
+
         const descriptionProps: FieldDescriptionProps = {
           ...fieldComponentProps,
           description,
@@ -768,8 +771,10 @@ export const mapFields = (args: {
           ...fieldComponentProps,
           CustomDescription,
           CustomError,
+          CustomLabel,
           descriptionProps,
           errorProps,
+          labelProps,
         }
 
         const reducedField: MappedField = {
