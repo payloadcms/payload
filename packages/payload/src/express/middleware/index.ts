@@ -45,7 +45,7 @@ const middleware = (payload: Payload): any => {
     i18nMiddleware(payload.config.i18n),
     identifyAPI('REST'),
     methodOverride('X-HTTP-Method-Override'),
-    qsMiddleware({ arrayLimit: 1000, depth: 10 }),
+    qsMiddleware({ arrayLimit: 1000, depth: 10, strictNullHandling: true }),
     bodyParser.urlencoded({ extended: true }),
     compression(payload.config.express.compression),
     localizationMiddleware,
