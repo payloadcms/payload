@@ -460,4 +460,21 @@ describe('database', () => {
       })
     })
   })
+
+  describe('defaultValue', () => {
+    it('should set default value from db.create', async () => {
+      // call the db adapter create directly to bypass Payload's default value assignment
+      const result = await payload.db.create({
+        collection: 'default-values',
+        data: {
+          title: 'hello',
+        },
+        req: undefined,
+      })
+
+      expect(result.defaultValue).toStrictEqual('default value from database')
+      expect(result.array[0].defaultValue).toStrictEqual('default value from database')
+      expect(result.group.defaultValue).toStrictEqual('default value from database')
+    })
+  })
 })
