@@ -14,7 +14,7 @@ import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
-  addRow: (rowIndex: number, blockType: string) => void
+  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   blockType: string
   blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number, blockType: string) => void
@@ -51,7 +51,7 @@ export const RowActions: React.FC<{
       <BlocksDrawer
         addRow={(_, rowBlockType) => {
           if (typeof addRow === 'function') {
-            addRow(indexToAdd, rowBlockType)
+            void addRow(indexToAdd, rowBlockType)
           }
           closeModal(drawerSlug)
         }}
