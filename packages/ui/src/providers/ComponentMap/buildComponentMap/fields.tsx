@@ -186,24 +186,9 @@ export const mapFields = (args: {
 
         switch (field.type) {
           case 'array': {
-            let CustomRowLabel: React.ReactNode
-
-            if (
-              'admin' in field &&
-              field.admin.components &&
-              'RowLabel' in field.admin.components &&
-              field.admin.components.RowLabel
-            ) {
-              const CustomRowLabelComponent = field.admin.components.RowLabel
-              CustomRowLabel = (
-                <WithServerSideProps Component={CustomRowLabelComponent} {...(labelProps || {})} />
-              )
-            }
-
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
               name: field.name,
-              CustomRowLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
@@ -311,24 +296,8 @@ export const mapFields = (args: {
             break
           }
           case 'collapsible': {
-            let CustomCollapsibleLabel: React.ReactNode
-            if (
-              field?.admin?.components &&
-              'RowLabel' in field.admin.components &&
-              field?.admin?.components?.RowLabel
-            ) {
-              const CustomCollapsibleLabelComponent = field.admin.components.RowLabel
-              CustomCollapsibleLabel = (
-                <WithServerSideProps
-                  Component={CustomCollapsibleLabelComponent}
-                  {...(labelProps || {})}
-                />
-              )
-            }
-
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
-              CustomLabel: CustomCollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
@@ -693,8 +662,7 @@ export const mapFields = (args: {
         }
 
         const labelProps: LabelProps = {
-          label,
-          required: 'required' in field ? field.required : undefined,
+          ...fieldComponentProps,
           schemaPath: path,
         }
 
@@ -711,6 +679,59 @@ export const mapFields = (args: {
           CustomLabelComponent !== undefined ? (
             <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
           ) : undefined
+
+        switch (field.type) {
+          case 'array': {
+            let CustomRowLabel: React.ReactNode
+
+            if (
+              'admin' in field &&
+              field.admin.components &&
+              'RowLabel' in field.admin.components &&
+              field.admin.components.RowLabel
+            ) {
+              const CustomRowLabelComponent = field.admin.components.RowLabel
+              CustomRowLabel = (
+                <WithServerSideProps Component={CustomRowLabelComponent} {...(labelProps || {})} />
+              )
+            }
+
+            fieldComponentProps = {
+              ...fieldComponentProps,
+              CustomRowLabel,
+            }
+
+            break
+          }
+
+          case 'collapsible': {
+            let CustomCollapsibleLabel: React.ReactNode
+
+            if (
+              field?.admin?.components &&
+              'RowLabel' in field.admin.components &&
+              field?.admin?.components?.RowLabel
+            ) {
+              const CustomCollapsibleLabelComponent = field.admin.components.RowLabel
+              CustomCollapsibleLabel = (
+                <WithServerSideProps
+                  Component={CustomCollapsibleLabelComponent}
+                  {...(labelProps || {})}
+                />
+              )
+            }
+
+            fieldComponentProps = {
+              ...fieldComponentProps,
+              CustomLabel: CustomCollapsibleLabel,
+            }
+
+            break
+          }
+
+          default:
+            break
+        }
 
         let description = undefined
 
