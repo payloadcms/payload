@@ -7,6 +7,7 @@ import sanitize from 'sanitize-filename'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type {
   FileSize,
   FileSizes,
@@ -18,6 +19,7 @@ import type {
 
 import { isNumber } from '../utilities/isNumber.js'
 import fileExists from './fileExists.js'
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type ResizeArgs = {
   config: SanitizedCollectionConfig
@@ -29,6 +31,7 @@ type ResizeArgs = {
   sharp?: SharpDependency
   staticPath: string
   uploadEdits?: UploadEdits
+  withMetadata?: WithMetadata
 }
 
 /** Result from resizing and transforming the requested image sizes */
@@ -245,6 +248,7 @@ export async function resizeAndTransformImageSizes({
   sharp,
   staticPath,
   uploadEdits,
+  withMetadata,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
@@ -320,8 +324,15 @@ export async function resizeAndTransformImageSizes({
           width: prioritizeHeight ? undefined : resizeWidth,
         })
 
-        // must read from buffer, resize.metadata will return the original image metadata
-        const { info } = await resized.toBuffer({ resolveWithObject: true })
+        const metadataAppendedFile = await optionallyAppendMetadata({
+          req,
+          sharpFile: resized,
+          withMetadata,
+        })
+
+        // Must read from buffer, resized.metadata will return the original image metadata
+        const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
+
         resizeImageMeta.height = extractHeightFromImage({
           ...originalImageMeta,
           height: info.height,
@@ -379,7 +390,13 @@ export async function resizeAndTransformImageSizes({
         resized = resized.trim(imageResizeConfig.trimOptions)
       }
 
-      const { data: bufferData, info: bufferInfo } = await resized.toBuffer({
+      const metadataAppendedFile = await optionallyAppendMetadata({
+        req,
+        sharpFile: resized,
+        withMetadata,
+      })
+
+      const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
         resolveWithObject: true,
       })
 
