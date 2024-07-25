@@ -99,6 +99,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
             if (!node) {
               return false
             }
+
             node.setFields(fields as BlockFields)
 
             setTargetNodeKey(null)
@@ -120,7 +121,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         ({ fields, nodeKey }) => {
           setBlockFields((fields as BlockFields) ?? null)
           setTargetNodeKey(nodeKey ?? null)
-          setBlockType((fields as BlockFields)?.blockType ?? ('' as any))
+          setBlockType(fields?.blockType ?? ('' as any))
 
           if (nodeKey) {
             toggleModal(drawerSlug)

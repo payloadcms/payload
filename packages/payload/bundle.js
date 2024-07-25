@@ -15,7 +15,6 @@ async function build() {
     splitting: false,
     external: [
       'lodash',
-      //'joi',
       '*.scss',
       '*.css',
       '@payloadcms/translations',

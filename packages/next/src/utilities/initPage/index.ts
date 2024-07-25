@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { InitPageResult, Locale, PayloadRequest, VisibleEntities } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -35,7 +35,7 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
-  const i18n: I18nClient = await initI18n({
+  const i18n: I18n = await initI18n({
     config: i18nConfig,
     context: 'client',
     language,

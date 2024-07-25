@@ -71,7 +71,9 @@ export const createLocalReq: CreateLocalReq = async (
   if (payload.config?.localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = payload.config.localization.defaultLocale
-    req.locale = locale || req?.locale || defaultLocale
+    const localeCandidate = locale || req?.locale || req?.query?.locale
+    req.locale =
+      localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
     const fallbackLocaleFromConfig = payload.config.localization.locales.find(
       ({ code }) => req.locale === code,
     )?.fallbackLocale

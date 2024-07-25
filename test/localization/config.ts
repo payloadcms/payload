@@ -7,11 +7,14 @@ import type { LocalizedPost } from './payload-types.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
+import { Group } from './collections/Group/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -68,6 +71,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -219,6 +227,8 @@ export default buildConfigWithDefaults({
       slug: 'dummy',
     },
     NestedToArrayAndBlock,
+    Group,
+    Tab,
     {
       slug: localizedSortSlug,
       access: openAccess,
@@ -309,6 +319,11 @@ export default buildConfigWithDefaults({
         code: 'ar',
         label: 'Arabic',
         rtl: true,
+      },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
       },
     ],
   },

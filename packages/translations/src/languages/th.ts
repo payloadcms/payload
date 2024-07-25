@@ -315,7 +315,7 @@ export const thTranslations: DefaultTranslationsObject = {
     within: 'ภายใน',
   },
   upload: {
-    addImage: 'เพิ่มรูปภาพ',
+    addFile: 'เพิ่มไฟล์',
     crop: 'พืชผล',
     cropToolDescription: 'ลากมุมของพื้นที่ที่เลือก, วาดพื้นที่ใหม่หรือปรับค่าด้านล่าง',
     dragAndDrop: 'ลากและวางไฟล์',

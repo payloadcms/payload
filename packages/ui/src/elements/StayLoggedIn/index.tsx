@@ -8,6 +8,7 @@ import { Button } from '../../elements/Button/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import './index.scss'
 
 const baseClass = 'stay-logged-in'
@@ -24,8 +25,9 @@ export const StayLoggedInModal: React.FC = () => {
     admin: {
       routes: { logout: logoutRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
+
   const { toggleModal } = useModal()
   const { t } = useTranslation()
 
@@ -41,7 +43,12 @@ export const StayLoggedInModal: React.FC = () => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(stayLoggedInModalSlug)
-              router.push(`${admin}${logoutRoute}`)
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: logoutRoute,
+                }),
+              )
             }}
           >
             {t('authentication:logOut')}

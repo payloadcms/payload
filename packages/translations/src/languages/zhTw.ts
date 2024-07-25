@@ -311,7 +311,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     within: '在...之內',
   },
   upload: {
-    addImage: '添加圖片',
+    addFile: '添加文件',
     crop: '裁剪',
     cropToolDescription: '拖動所選區域的角落，繪製一個新區域或調整以下的值。',
     dragAndDrop: '拖放一個檔案',

@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/shared'
+import { WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -37,13 +37,16 @@ export const RootPage = async ({
 
   const {
     admin: {
-      routes: { createFirstUser: createFirstUserRoute },
+      routes: { createFirstUser: _createFirstUserRoute },
       user: userSlug,
     },
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = `${adminRoute}${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`
+  const currentRoute = formatAdminURL({
+    adminRoute,
+    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+  })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -71,20 +74,20 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const routeWithAdmin = `${adminRoute}${createFirstUserRoute}`
+    const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
     const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
     const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
 
-    if (disableLocalStrategy && currentRoute === routeWithAdmin) {
+    if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
 
-    if (!dbHasUser && currentRoute !== routeWithAdmin && !disableLocalStrategy) {
-      redirect(routeWithAdmin)
+    if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+      redirect(createFirstUserRoute)
     }
 
-    if (dbHasUser && currentRoute === routeWithAdmin) {
+    if (dbHasUser && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
   }

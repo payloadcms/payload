@@ -184,4 +184,43 @@ describe('@payloadcms/plugin-search', () => {
 
     expect(deletedResults).toHaveLength(0)
   })
+
+  it('should sync localized data', async () => {
+    const createdDoc = await payload.create({
+      collection: 'posts',
+      data: {
+        _status: 'draft',
+        title: 'test title',
+        slug: 'es',
+      },
+      locale: 'es',
+    })
+
+    await payload.update({
+      collection: 'posts',
+      id: createdDoc.id,
+      data: {
+        _status: 'published',
+        title: 'test title',
+        slug: 'en',
+      },
+      locale: 'en',
+    })
+
+    const syncedSearchData = await payload.find({
+      collection: 'search',
+      locale: 'es',
+      where: {
+        and: [
+          {
+            'doc.value': {
+              equals: createdDoc.id,
+            },
+          },
+        ],
+      },
+    })
+
+    expect(syncedSearchData.docs[0].slug).toEqual('es')
+  })
 })

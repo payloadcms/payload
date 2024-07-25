@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -43,7 +43,7 @@ describe('Block fields', () => {
       snapshotKey: 'blockFieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -58,7 +58,7 @@ describe('Block fields', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   let url: AdminUrlUtil

@@ -1,7 +1,8 @@
-import type { ResizeOptions, Sharp } from 'sharp'
+import type { ResizeOptions, Sharp, Metadata as SharpMetadata } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { WithMetadata } from './optionallyAppendMetadata.js'
 
 export type FileSize = {
   filename: null | string
@@ -153,6 +154,17 @@ export type UploadConfig = {
    */
   staticDir?: string
   trimOptions?: ImageUploadTrimOptions
+  /**
+   * Optionally append metadata to the image during processing.
+   *
+   * Can be a boolean or a function.
+   *
+   * If true, metadata will be appended to the image.
+   * If false, no metadata will be appended.
+   * If a function, it will receive an object containing the metadata and should return a boolean indicating whether to append the metadata.
+   * @default false
+   */
+  withMetadata?: WithMetadata
 }
 
 export type SanitizedUploadConfig = {

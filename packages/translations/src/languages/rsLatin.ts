@@ -318,7 +318,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     within: 'unutar',
   },
   upload: {
-    addImage: 'Dodaj sliku',
+    addFile: 'Dodaj datoteku',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',

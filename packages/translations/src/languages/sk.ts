@@ -320,7 +320,7 @@ export const skTranslations: DefaultTranslationsObject = {
     within: 'vnútri',
   },
   upload: {
-    addImage: 'Pridať obrázok',
+    addFile: 'Pridať súbor',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',

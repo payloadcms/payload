@@ -1,5 +1,6 @@
 'use client'
 import { Button, useAuth, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 
@@ -32,9 +33,12 @@ export const LogoutClient: React.FC<{
           Link={Link}
           buttonStyle="secondary"
           el="link"
-          url={`${adminRoute}/login${
-            redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
-          }`}
+          url={formatAdminURL({
+            adminRoute,
+            path: `/login${
+              redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
+            }`,
+          })}
         >
           {t('authentication:logBackIn')}
         </Button>

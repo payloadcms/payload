@@ -27,10 +27,10 @@
         "./src/*"
       ],
       "@payload-config": [
-        "./src/payload.config.ts"
+        "src/payload.config.ts"
       ],
       "@payload-types": [
-        "./src/payload-types.ts"
+        "src/payload-types.ts"
       ]
     },
     "target": "ES2017"

@@ -1,17 +1,17 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args<T> = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
-  data: Record<string, unknown> | T
-  doc: Record<string, unknown> | T
-  docWithLocales: Record<string, unknown>
+  data: T
+  doc: T
+  docWithLocales: JsonObject
   duplicate?: boolean
   global: SanitizedGlobalConfig | null
   id?: number | string
@@ -29,7 +29,7 @@ type Args<T> = {
  * - beforeDuplicate hooks (if duplicate)
  * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
-export const beforeChange = async <T extends Record<string, unknown>>({
+export const beforeChange = async <T extends JsonObject>({
   id,
   collection,
   context,
@@ -42,7 +42,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData)
+  const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions = []
   const errors: { field: string; message: string }[] = []
 

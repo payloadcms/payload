@@ -10,7 +10,7 @@ import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../../../helpers.js'
@@ -73,7 +73,7 @@ describe('lexicalMain', () => {
       snapshotKey: 'fieldsLexicalMainTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     /*await throttleTest({

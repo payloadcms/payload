@@ -324,7 +324,7 @@ export const deTranslations: DefaultTranslationsObject = {
     within: 'innerhalb',
   },
   upload: {
-    addImage: 'Bild hinzufügen',
+    addFile: 'Datei hinzufügen',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehen Sie die Ecken des ausgewählten Bereichs, zeichnen Sie einen neuen Bereich oder passen Sie die Werte unten an.',

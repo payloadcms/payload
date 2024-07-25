@@ -1,7 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import deepMerge from 'deepmerge'
-
 import type { SearchPluginConfig } from '../types.js'
 
 import { LinkToDoc } from './ui/index.js'

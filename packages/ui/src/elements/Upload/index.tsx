@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig , UploadEdits } from 'payload'
+import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useForm, useUploadEdits } from '@payloadcms/ui'
 import { isImage, reduceFieldsToValues } from 'payload/shared'
@@ -268,7 +268,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     onClick={handleUrlSubmit}
                     type="button"
                   >
-                    {t('upload:addImage')}
+                    {t('upload:addFile')}
                   </button>
                 </div>
               </div>
