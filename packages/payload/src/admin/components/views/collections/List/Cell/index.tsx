@@ -68,20 +68,20 @@ const DefaultCell: React.FC<Props> = (props) => {
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
+  let CellComponent: React.FC<CellComponentProps> | false =
+    cellData && cellData !== null && typeof cellData !== 'undefined' && cellComponents[field.type]
 
   if (!CellComponent) {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-      // if (!cellData && 'label' in field) {
       if (
         (cellData === undefined ||
           cellData === null ||
-          (typeof cellData === 'string' && cellData.trim() === '')) &&
+          (typeof cellData === 'string' && cellData.trim() === '') ||
+          (typeof cellData === 'boolean' && !cellData)) &&
         'label' in field
       ) {
-        // if ((cellData === undefined || cellData === null) && 'label' in field) {
         return (
           <WrapElement {...wrapElementProps}>
             {t('noLabel', {
@@ -102,7 +102,9 @@ const DefaultCell: React.FC<Props> = (props) => {
 
   return (
     <WrapElement {...wrapElementProps}>
-      <CellComponent collection={collection} data={cellData} field={field} rowData={rowData} />
+      {CellComponent ? (
+        <CellComponent collection={collection} data={cellData} field={field} rowData={rowData} />
+      ) : null}
     </WrapElement>
   )
 }
