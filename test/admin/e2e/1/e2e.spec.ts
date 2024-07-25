@@ -500,6 +500,26 @@ describe('admin1', () => {
   })
 
   describe('custom fields', () => {
+    test('renders custom label component', async () => {
+      await page.goto(customFieldsURL.create)
+      await expect(page.locator('.custom-text-label')).toBeVisible()
+    })
+
+    test('renders custom description component', async () => {
+      await page.goto(customFieldsURL.create)
+      await expect(page.locator('.custom-text-description')).toBeVisible()
+    })
+
+    test('ensure custom components receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await expect(page.locator('#custom-field-label')).toContainText(
+        'The max length of this field is: 100',
+      )
+      await expect(page.locator('#custom-field-description')).toContainText(
+        'The max length of this field is: 100',
+      )
+    })
+
     describe('select field', () => {
       test('should render custom select options', async () => {
         await page.goto(customFieldsURL.create)
