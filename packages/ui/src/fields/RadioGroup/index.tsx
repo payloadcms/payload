@@ -32,7 +32,7 @@ export type RadioFieldProps = {
 
 export type OnChange<T = string> = (value: T) => void
 
-const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
+const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -155,4 +155,4 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   )
 }
 
-export const RadioGroupField = withCondition(_RadioGroupField)
+export const RadioGroupField = withCondition(RadioGroupFieldComponent)

@@ -25,7 +25,7 @@ export type PasswordFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
+const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
     CustomError,
@@ -97,4 +97,4 @@ const _PasswordField: React.FC<PasswordFieldProps> = (props) => {
   )
 }
 
-export const PasswordField = withCondition(_PasswordField)
+export const PasswordField = withCondition(PasswordFieldComponent)

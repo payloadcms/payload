@@ -36,7 +36,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const _SelectField: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -134,6 +134,6 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 }
 
-export const SelectField = withCondition(_SelectField)
+export const SelectField = withCondition(SelectFieldComponent)
 
 export { SelectInput, type SelectInputProps }

@@ -46,7 +46,7 @@ export type BlocksFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -278,7 +278,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      addRow={addRow}
+                      addRow={void addRow}
                       block={blockToRender}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
@@ -341,7 +341,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
             </Button>
           </DrawerToggler>
           <BlocksDrawer
-            addRow={addRow}
+            addRow={void addRow}
             addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
@@ -353,4 +353,4 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   )
 }
 
-export const BlocksField = withCondition(_BlocksField)
+export const BlocksField = withCondition(BlocksFieldComponent)
