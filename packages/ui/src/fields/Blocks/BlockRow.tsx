@@ -19,7 +19,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 const baseClass = 'blocks-field'
 
 type BlockFieldProps = {
-  addRow: (rowIndex: number, blockType: string) => void
+  addRow: (rowIndex: number, blockType: string) => Promise<void>
   block: ReducedBlock
   blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number) => void

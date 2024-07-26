@@ -16,7 +16,7 @@ import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'
 
 export type Props = {
-  addRow: (index: number, blockType?: string) => void
+  addRow: (index: number, blockType?: string) => Promise<void>
   addRowIndex: number
   blocks: ReducedBlock[]
   drawerSlug: string
@@ -76,7 +76,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
                   alignLabel="center"
                   label={getTranslation(blockLabels?.singular, i18n)}
                   onClick={() => {
-                    addRow(addRowIndex, slug)
+                    void addRow(addRowIndex, slug)
                     closeModal(drawerSlug)
                   }}
                   thumbnail={

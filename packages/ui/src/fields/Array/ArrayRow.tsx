@@ -20,7 +20,7 @@ const baseClass = 'array-field'
 
 type ArrayRowProps = {
   CustomRowLabel?: React.ReactNode
-  addRow: (rowIndex: number) => void
+  addRow: (rowIndex: number) => Promise<void>
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fieldMap: FieldMap
