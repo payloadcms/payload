@@ -1,3 +1,19 @@
+## [2.25.0](https://github.com/payloadcms/payload/compare/v2.24.2...v2.25.0) (2024-07-26)
+
+
+### Features
+
+* allows metadata to be appended to the file of the output media ([#7295](https://github.com/payloadcms/payload/issues/7295)) ([3c5cce4](https://github.com/payloadcms/payload/commit/3c5cce4c6f108f87e87b091bbfec976423de73a2))
+* **db-mongodb:** adds new optional `collation` feature flag behind mongodb collation option ([#7359](https://github.com/payloadcms/payload/issues/7359)) ([9750bc2](https://github.com/payloadcms/payload/commit/9750bc217ee7d63732a34908c84eb88b88dac0a8)), closes [#7349](https://github.com/payloadcms/payload/issues/7349)
+
+
+### Bug Fixes
+
+* properly handles `0` value number fields in list view ([#7364](https://github.com/payloadcms/payload/issues/7364)) ([5321098](https://github.com/payloadcms/payload/commit/5321098d7eada43838f6d5c69f3233c150fe0afa)), closes [#5510](https://github.com/payloadcms/payload/issues/5510)
+* preserves objectids in deepCopyObject ([#7385](https://github.com/payloadcms/payload/issues/7385)) ([1348483](https://github.com/payloadcms/payload/commit/134848364801c72cc773ef7b48854306d1b9bac3))
+* relaxes equality check for relationship options in filter ([#7344](https://github.com/payloadcms/payload/issues/7344)) ([468e544](https://github.com/payloadcms/payload/commit/468e5441f16775134d915ec7caddb17b817d3408))
+* supports null values in query strings ([#5241](https://github.com/payloadcms/payload/issues/5241)) ([c57591b](https://github.com/payloadcms/payload/commit/c57591bc4fb8d28b7de16a111faffea7d3e11f8d))
+
 ## [2.24.2](https://github.com/payloadcms/payload/compare/v2.24.1...v2.24.2) (2024-07-24)
 
 
