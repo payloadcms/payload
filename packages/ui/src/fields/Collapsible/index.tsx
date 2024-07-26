@@ -145,7 +145,8 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
             </div>
           }
           initCollapsed={collapsedOnMount}
-          onToggle={void onToggle}
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onToggle={onToggle}
         >
           <RenderFields
             fieldMap={fieldMap}

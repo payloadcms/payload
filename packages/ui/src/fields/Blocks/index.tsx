@@ -278,7 +278,8 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      addRow={void addRow}
+                      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                      addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
@@ -341,7 +342,8 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
             </Button>
           </DrawerToggler>
           <BlocksDrawer
-            addRow={void addRow}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            addRow={addRow}
             addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
