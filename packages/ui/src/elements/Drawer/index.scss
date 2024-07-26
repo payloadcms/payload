@@ -25,7 +25,8 @@ $transTime: 200;
     transform: translateX(calc(var(--base) * 4));
     position: relative;
     z-index: 2;
-    width: calc(100% - var(--gutter-h));
+    // NOTE: width is controlled by js
+    // width: calc(100% - var(--gutter-h));
     overflow: hidden;
     transition: all #{$transTime}ms linear;
     background-color: var(--theme-bg);
