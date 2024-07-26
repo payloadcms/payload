@@ -203,8 +203,13 @@ export const buildComponentMap = (args: {
     }
   }
 
+  const avatar = config?.admin?.avatar
+
   return {
     componentMap: {
+      CustomAvatar: createMappedComponent(
+        avatar && typeof avatar === 'object' && avatar && 'Component' in avatar && avatar.Component,
+      ),
       Icon,
       LogoutButton,
       actions: createMappedComponent(config.admin?.components?.actions),

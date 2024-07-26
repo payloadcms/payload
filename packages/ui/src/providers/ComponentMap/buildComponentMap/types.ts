@@ -123,6 +123,7 @@ export type ConfigComponentMapBase = {
 }
 
 export type ComponentMap = {
+  CustomAvatar: MappedComponent
   Icon: MappedComponent
   LogoutButton: MappedComponent
   actions: MappedComponent[]

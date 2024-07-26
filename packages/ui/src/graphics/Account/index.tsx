@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { getComponent } from '../../providers/ComponentMap/buildComponentMap/getComponent.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DefaultAccountIcon } from './Default/index.js'
@@ -26,16 +26,15 @@ export const Account = () => {
 
   const isOnAccountPage = pathname === `${adminRoute}${accountRoute}`
 
-  if (typeof avatar === 'object' && avatar && 'Component' in avatar) {
-    const AvatarComponent = getComponent({
-      importMap,
-      payloadComponent: avatar.Component,
-    })
-    if (AvatarComponent.Component) {
-      const Component = AvatarComponent.Component
-      return <Component active={isOnAccountPage} {...AvatarComponent.clientProps} />
-    }
-    return null
+  if (componentMap.CustomAvatar?.Component) {
+    return (
+      <RenderMappedComponent
+        clientProps={{
+          active: isOnAccountPage,
+        }}
+        component={componentMap.CustomAvatar}
+      />
+    )
   }
 
   if (!user?.email || avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
