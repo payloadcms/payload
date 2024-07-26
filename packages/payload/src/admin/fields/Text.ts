@@ -1,5 +1,6 @@
 import type { TextField } from '../../fields/config/types.js'
-import type { FormFieldBase } from '../types.js'
+import type { ErrorComponent } from '../forms/Error.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TextFieldProps = {
   hasMany?: boolean
@@ -12,6 +13,12 @@ export type TextFieldProps = {
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   path?: string
   placeholder?: TextField['admin']['placeholder']
-  type?: 'text'
+  type: 'text'
   width?: string
 } & FormFieldBase
+
+export type TextFieldLabelComponent = LabelComponent<'text'>
+
+export type TextFieldDescriptionComponent = DescriptionComponent<'text'>
+
+export type TextFieldErrorComponent = ErrorComponent<'text'>

@@ -1,5 +1,6 @@
 import type { NumberField } from '../../fields/config/types.js'
-import type { FormFieldBase } from '../types.js'
+import type { ErrorComponent } from '../forms/Error.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type NumberFieldProps = {
   hasMany?: boolean
@@ -11,5 +12,12 @@ export type NumberFieldProps = {
   path?: string
   placeholder?: NumberField['admin']['placeholder']
   step?: number
+  type: 'number'
   width?: string
 } & FormFieldBase
+
+export type NumberFieldLabelComponent = LabelComponent<'number'>
+
+export type NumberFieldDescriptionComponent = DescriptionComponent<'number'>
+
+export type NumberFieldErrorComponent = ErrorComponent<'number'>

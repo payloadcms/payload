@@ -1,9 +1,16 @@
+import type { ErrorComponent } from '../forms/Error.js'
 import type { MappedField } from '../forms/FieldMap.js'
-import type { FormFieldBase } from '../types.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RichTextComponentProps = {
   name: string
   richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
-  type?: 'richText'
+  type: 'richText'
   width?: string
 } & FormFieldBase
+
+export type RichTextFieldLabelComponent = LabelComponent<'richText'>
+
+export type RichTextFieldDescriptionComponent = DescriptionComponent<'richText'>
+
+export type RichTextFieldErrorComponent = ErrorComponent<'richText'>

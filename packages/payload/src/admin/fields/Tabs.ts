@@ -1,13 +1,14 @@
 import type { TabsField } from '../../fields/config/types.js'
+import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
-import type { FormFieldBase } from '../types.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TabsFieldProps = {
   forceRender?: boolean
   name?: string
   path?: string
   tabs?: MappedTab[]
-  type?: 'tabs'
+  type: 'tabs'
   width?: string
 } & FormFieldBase
 
@@ -16,3 +17,9 @@ export type MappedTab = {
   label: TabsField['tabs'][0]['label']
   name?: string
 }
+
+export type TabsFieldLabelComponent = LabelComponent<'tabs'>
+
+export type TabsFieldDescriptionComponent = DescriptionComponent<'tabs'>
+
+export type TabsFieldErrorComponent = ErrorComponent<'tabs'>

@@ -1,6 +1,7 @@
 import type { Block, BlockField } from '../../fields/config/types.js'
+import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
-import type { FormFieldBase } from '../types.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type BlocksFieldProps = {
   blocks?: ReducedBlock[]
@@ -11,6 +12,7 @@ export type BlocksFieldProps = {
   minRows?: number
   name?: string
   slug?: string
+  type: 'blocks'
   width?: string
 } & FormFieldBase
 
@@ -22,5 +24,10 @@ export type ReducedBlock = {
   imageURL?: string
   labels: BlockField['labels']
   slug: string
-  type?: 'blocks'
 }
+
+export type BlocksFieldLabelComponent = LabelComponent<'blocks'>
+
+export type BlocksFieldDescriptionComponent = DescriptionComponent<'blocks'>
+
+export type BlocksFieldErrorComponent = ErrorComponent<'blocks'>

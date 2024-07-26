@@ -1,5 +1,6 @@
 import type { Option } from '../../fields/config/types.js'
-import type { FormFieldBase } from '../types.js'
+import type { ErrorComponent } from '../forms/Error.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type SelectFieldProps = {
   hasMany?: boolean
@@ -9,7 +10,13 @@ export type SelectFieldProps = {
   onChange?: (e: string | string[]) => void
   options?: Option[]
   path?: string
-  type?: 'select'
+  type: 'select'
   value?: string
   width?: string
 } & FormFieldBase
+
+export type SelectFieldLabelComponent = LabelComponent<'select'>
+
+export type SelectFieldDescriptionComponent = DescriptionComponent<'select'>
+
+export type SelectFieldErrorComponent = ErrorComponent<'select'>

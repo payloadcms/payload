@@ -1,6 +1,7 @@
 import type { ArrayField } from '../../fields/config/types.js'
+import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
-import type { FormFieldBase } from '../types.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type ArrayFieldProps = {
   CustomRowLabel?: React.ReactNode
@@ -11,6 +12,12 @@ export type ArrayFieldProps = {
   maxRows?: ArrayField['maxRows']
   minRows?: ArrayField['minRows']
   name?: string
-  type?: 'array'
+  type: 'array'
   width?: string
 } & FormFieldBase
+
+export type ArrayFieldLabelComponent = LabelComponent<'array'>
+
+export type ArrayFieldDescriptionComponent = DescriptionComponent<'array'>
+
+export type ArrayFieldErrorComponent = ErrorComponent<'array'>
