@@ -161,7 +161,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       editorConfig: finalSanitizedEditorConfig,
       features,
       generateComponentMap: {
-        path: 'server:@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+        path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
         serverProps: {
           resolvedFeatureMap,
         },

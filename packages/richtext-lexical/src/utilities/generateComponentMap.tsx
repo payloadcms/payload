@@ -1,4 +1,5 @@
 import type { MappedField } from '@payloadcms/ui'
+import type { MappedComponent } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -9,10 +10,10 @@ import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): any =>
-  ({ WithServerSideProps, config, i18n, importMap, schemaPath }) => {
+  ({ config, createMappedComponent, i18n, importMap, schemaPath }) => {
     const componentMap: Map<
       string,
-      GeneratedFeatureProviderComponent[] | MappedField[] | React.ReactNode
+      GeneratedFeatureProviderComponent[] | MappedComponent | MappedField[]
     > = new Map()
 
     // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
@@ -40,20 +41,17 @@ export const getGenerateComponentMap =
 
             for (const componentKey in components) {
               const payloadComponent = components[componentKey]
-              const ResolvedComponent = getComponent({
-                importMap,
-                payloadComponent,
+
+              const mappedComponent: MappedComponent = createMappedComponent(payloadComponent, {
+                componentKey,
+                featureKey: resolvedFeature.key,
+                key: `${resolvedFeature.key}-${componentKey}`,
               })
 
-              if (ResolvedComponent?.Component) {
+              if (mappedComponent?.Component) {
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
-                  <WithServerSideProps
-                    Component={ResolvedComponent}
-                    componentKey={componentKey}
-                    featureKey={resolvedFeature.key}
-                    key={`${resolvedFeature.key}-${componentKey}`}
-                  />,
+                  mappedComponent,
                 )
               }
             }
@@ -77,8 +75,8 @@ export const getGenerateComponentMap =
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
                 const mappedFields = mapFields({
-                  WithServerSideProps,
                   config,
+                  createMappedComponent,
                   disableAddingID: true,
                   fieldSchema: fields,
                   i18n,
@@ -109,7 +107,7 @@ export const getGenerateComponentMap =
           return {
             ClientFeature:
               clientComponentProps && typeof clientComponentProps === 'object' ? (
-                <ResolvedClientComponent.component
+                <ResolvedClientComponent.Component
                   {...clientComponentProps}
                   featureKey={resolvedFeature.key}
                   key={resolvedFeature.key}
@@ -117,7 +115,7 @@ export const getGenerateComponentMap =
                   {...(ResolvedClientComponent?.clientProps || {})}
                 />
               ) : (
-                <ResolvedClientComponent.component
+                <ResolvedClientComponent.Component
                   featureKey={resolvedFeature.key}
                   key={resolvedFeature.key}
                   order={resolvedFeature.order}

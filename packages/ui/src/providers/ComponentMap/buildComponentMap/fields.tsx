@@ -594,6 +594,7 @@ export const mapFields = (args: {
 
               const result = actualGenerateComponentMap({
                 config,
+                createMappedComponent,
                 i18n,
                 importMap,
                 schemaPath: path,
