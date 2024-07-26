@@ -294,7 +294,7 @@ When using custom validation functions, Payload will use yours in place of the d
 To reuse default field validations, call them from within your custom validation function:
 
 ```ts
-import { text } from 'payload/fields/validations'
+import { text } from 'payload/shared'
 
 const field: Field = {
   name: 'notBad',
