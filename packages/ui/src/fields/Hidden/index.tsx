@@ -1,11 +1,12 @@
 'use client'
 
+import type { HiddenFieldProps } from 'payload'
+
 import React, { useEffect } from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { HiddenFieldProps } from 'packages/payload/src/index.js'
 
 /**
  * This is mainly used to save a value on the form that is not visible to the user.

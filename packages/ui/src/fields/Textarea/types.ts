@@ -1,4 +1,5 @@
-import type { TextareaFieldProps } from 'packages/payload/src/index.js'
+import type { TextareaFieldProps } from 'payload'
+
 import { type ChangeEvent } from 'react'
 
 export type TextAreaInputProps = {
