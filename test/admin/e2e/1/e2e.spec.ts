@@ -1034,17 +1034,17 @@ describe('admin1', () => {
         )
         .click()
       await wait(500)
-      const drawer1 = page.locator('[id^=doc-drawer_posts_1_]')
-      await expect(drawer1).toBeVisible()
-      const drawerLeft = await drawer1.boundingBox().then((box) => box.x)
-      await drawer1
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+      const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
+      await drawer1Content
         .locator(
           '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
         )
         .click()
-      const drawer2 = page.locator('[id^=doc-drawer_posts_2_]')
-      await expect(drawer2).toBeVisible()
-      const drawer2Left = await drawer2.boundingBox().then((box) => box.x)
+      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
+      await expect(drawer2Content).toBeVisible()
+      const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
     })
   })
