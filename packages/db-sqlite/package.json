@@ -46,8 +46,8 @@
     "@libsql/client": "^0.6.2",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.20.14-1f2c838",
-    "drizzle-orm": "0.29.4",
+    "drizzle-kit": "0.22.9-92953ac",
+    "drizzle-orm": "0.32.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"

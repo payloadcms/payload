@@ -1,9 +1,8 @@
-/* eslint-disable no-param-reassign */
-import type { ColumnDataType, Relation } from 'drizzle-orm'
+import type { Relation } from 'drizzle-orm'
 import type {
+  AnySQLiteColumn,
   ForeignKeyBuilder,
   IndexBuilder,
-  SQLiteColumn,
   SQLiteColumnBuilder,
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
@@ -32,18 +31,7 @@ import { traverseFields } from './traverseFields.js'
 export type BaseExtraConfig = Record<
   string,
   (cols: {
-    [x: string]: SQLiteColumn<{
-      baseColumn: never
-      columnType: string
-      data: unknown
-      dataType: ColumnDataType
-      driverParam: unknown
-      enumValues: string[]
-      hasDefault: false
-      name: string
-      notNull: false
-      tableName: string
-    }>
+    [x: string]: AnySQLiteColumn
   }) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
 >
 

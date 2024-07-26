@@ -10,5 +10,5 @@ export const defaultDrizzleSnapshot: DrizzleSQLiteSnapshotJSON = {
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   tables: {},
-  version: '5',
+  version: '6',
 }
