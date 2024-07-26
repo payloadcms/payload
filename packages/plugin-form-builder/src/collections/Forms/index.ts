@@ -157,7 +157,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
               name: 'cc',
               type: 'text',
               admin: {
-                width: '50%',
+                style: {
+                  maxWidth: '50%',
+                },
               },
               label: 'CC',
             },
@@ -165,7 +167,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
               name: 'bcc',
               type: 'text',
               admin: {
-                width: '50%',
+                style: {
+                  maxWidth: '50%',
+                },
               },
               label: 'BCC',
             },
