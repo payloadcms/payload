@@ -176,7 +176,7 @@ export type {
 
 export type { FieldComponentProps } from './fields/index.js'
 
-export type { ErrorProps } from './forms/Error.js'
+export type { ErrorComponent, ErrorProps, GenericErrorProps } from './forms/Error.js'
 
 export type { FormFieldBase } from './forms/Field.js'
 
@@ -185,6 +185,7 @@ export type {
   DescriptionComponent,
   DescriptionFunction,
   FieldDescriptionProps,
+  GenericDescriptionProps,
 } from './forms/FieldDescription.js'
 
 export type { MappedField } from './forms/FieldMap.js'
@@ -193,7 +194,12 @@ export type { FieldMap } from './forms/FieldMap.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
-export type { LabelComponent, LabelProps, SanitizedLabelProps } from './forms/Label.js'
+export type {
+  GenericLabelProps,
+  LabelComponent,
+  LabelProps,
+  SanitizedLabelProps,
+} from './forms/Label.js'
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 

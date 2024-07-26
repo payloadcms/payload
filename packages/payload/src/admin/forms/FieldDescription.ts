@@ -11,12 +11,14 @@ export type DescriptionComponent<T extends keyof FieldTypes = any> = CustomCompo
 >
 
 export type Description = DescriptionFunction | Record<string, string> | string
-
-export type FieldDescriptionProps<T extends keyof FieldTypes = any> = {
+export type GenericDescriptionProps = {
   CustomDescription?: React.ReactNode
   className?: string
   description?: Record<string, string> | string
   marginPlacement?: 'bottom' | 'top'
-  type?: T
+}
+export type FieldDescriptionProps<T extends keyof FieldTypes = any> = {
+  type: T
 } & FieldComponentProps &
+  GenericDescriptionProps &
   Partial<ServerProps>

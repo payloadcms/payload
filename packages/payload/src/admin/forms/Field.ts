@@ -14,10 +14,10 @@ export type FormFieldBase = {
   CustomLabel?: React.ReactNode
   className?: string
   custom?: Record<string, any>
-  descriptionProps?: FieldDescriptionProps
+  descriptionProps?: Omit<FieldDescriptionProps, 'type'>
   disabled?: boolean
   docPreferences?: DocumentPreferences
-  errorProps?: ErrorProps
+  errorProps?: Omit<ErrorProps, 'type'>
   label?: LabelStatic | false
   labelProps?: SanitizedLabelProps
   locale?: Locale

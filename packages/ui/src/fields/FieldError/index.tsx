@@ -1,6 +1,6 @@
 'use client'
 
-import type { ErrorProps } from 'payload'
+import type { GenericErrorProps } from 'payload'
 
 import React from 'react'
 
@@ -11,7 +11,7 @@ import './index.scss'
 
 const baseClass = 'field-error'
 
-const DefaultFieldError: React.FC<ErrorProps> = (props) => {
+const DefaultFieldError: React.FC<GenericErrorProps> = (props) => {
   const {
     alignCaret = 'right',
     message: messageFromProps,
@@ -41,7 +41,7 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   return null
 }
 
-export const FieldError: React.FC<ErrorProps> = (props) => {
+export const FieldError: React.FC<GenericErrorProps> = (props) => {
   const { CustomError } = props
 
   if (CustomError !== undefined) {

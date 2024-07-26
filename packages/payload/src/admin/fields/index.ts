@@ -84,26 +84,3 @@ export type FieldComponentProps =
   | ({
       type: 'upload'
     } & UploadFieldProps)
-  | (
-      | ArrayFieldProps
-      | BlocksFieldProps
-      | CheckboxFieldProps
-      | CodeFieldProps
-      | CollapsibleFieldProps
-      | DateFieldProps
-      | EmailFieldProps
-      | GroupFieldProps
-      | HiddenFieldProps
-      | JSONFieldProps
-      | NumberFieldProps
-      | PointFieldProps
-      | RadioFieldProps
-      | RelationshipFieldProps
-      | RichTextComponentProps
-      | RowFieldProps
-      | SelectFieldProps
-      | TabsFieldProps
-      | TextFieldProps
-      | TextareaFieldProps
-      | UploadFieldProps
-    )
