@@ -2,7 +2,7 @@ import type { DescriptionComponent } from 'payload'
 
 import React from 'react'
 
-export const CustomDescription: DescriptionComponent = (props) => {
+export const CustomDescription: DescriptionComponent<'text'> = (props) => {
   return (
     <div id="custom-field-description">{`The max length of this field is: ${props?.maxLength}`}</div>
   )

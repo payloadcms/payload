@@ -17,6 +17,6 @@ export type FieldDescriptionProps<T extends keyof FieldTypes = any> = {
   className?: string
   description?: Record<string, string> | string
   marginPlacement?: 'bottom' | 'top'
-  type: T
+  type?: T
 } & FieldComponentProps &
   Partial<ServerProps>

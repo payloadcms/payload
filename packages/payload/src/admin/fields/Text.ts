@@ -12,5 +12,6 @@ export type TextFieldProps = {
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   path?: string
   placeholder?: TextField['admin']['placeholder']
+  type?: 'text'
   width?: string
 } & FormFieldBase

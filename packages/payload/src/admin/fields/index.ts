@@ -18,57 +18,21 @@ import type { TextFieldProps } from './Text.js'
 import type { UploadFieldProps } from './Upload.js'
 
 export type FieldComponentProps =
-  | ({
-      type: 'array'
-    } & ArrayFieldProps)
-  | ({
-      type: 'blocks'
-    } & BlocksFieldProps)
-  | ({
-      type: 'checkbox'
-    } & CheckboxFieldProps)
-  | ({
-      type: 'code'
-    } & CodeFieldProps)
-  | ({
-      type: 'collapsible'
-    } & CollapsibleFieldProps)
-  | ({
-      type: 'date'
-    } & DateFieldProps)
-  | ({
-      type: 'email'
-    } & EmailFieldProps)
-  | ({
-      type: 'group'
-    } & GroupFieldProps)
-  | ({
-      type: 'hidden'
-    } & HiddenFieldProps)
-  | ({
-      type: 'json'
-    } & JSONFieldProps)
-  | ({
-      type: 'point'
-    } & PointFieldProps)
-  | ({
-      type: 'relationship'
-    } & RelationshipFieldProps)
-  | ({
-      type: 'richText'
-    } & RichTextComponentProps)
-  | ({
-      type: 'row'
-    } & RowFieldProps)
-  | ({
-      type: 'select'
-    } & SelectFieldProps)
-  | {
-      type: 'tabs' & TabsFieldProps
-    }
-  | ({
-      type: 'text'
-    } & TextFieldProps)
-  | ({
-      type: 'upload'
-    } & UploadFieldProps)
+  | ArrayFieldProps
+  | BlocksFieldProps
+  | CheckboxFieldProps
+  | CodeFieldProps
+  | CollapsibleFieldProps
+  | DateFieldProps
+  | EmailFieldProps
+  | GroupFieldProps
+  | HiddenFieldProps
+  | JSONFieldProps
+  | PointFieldProps
+  | RelationshipFieldProps
+  | RichTextComponentProps
+  | RowFieldProps
+  | SelectFieldProps
+  | TabsFieldProps
+  | TextFieldProps
+  | UploadFieldProps

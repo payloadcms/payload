@@ -5,5 +5,6 @@ export type UploadFieldProps = {
   name?: string
   path?: string
   relationTo?: UploadField['relationTo']
+  type?: 'upload'
   width?: string
 } & FormFieldBase

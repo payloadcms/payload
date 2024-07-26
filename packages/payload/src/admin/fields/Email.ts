@@ -6,5 +6,6 @@ export type EmailFieldProps = {
   name?: string
   path?: string
   placeholder?: EmailField['admin']['placeholder']
+  type?: 'email'
   width?: string
 } & FormFieldBase

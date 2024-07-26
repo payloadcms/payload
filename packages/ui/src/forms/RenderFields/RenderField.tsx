@@ -13,7 +13,9 @@ type Props = {
   CustomField: MappedField['CustomField']
   custom?: Record<any, string>
   disabled: boolean
-  fieldComponentProps?: FieldComponentProps
+  fieldComponentProps?: {
+    forceRender?: boolean
+  } & FieldComponentProps
   indexPath?: string
   isHidden?: boolean
   name?: string

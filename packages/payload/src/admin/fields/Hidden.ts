@@ -5,5 +5,6 @@ export type HiddenFieldProps = {
   forceUsePathFromProps?: boolean
   name?: string
   path?: string
+  type?: 'hidden'
   value?: unknown
 } & FormFieldBase

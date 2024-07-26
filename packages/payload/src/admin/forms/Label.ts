@@ -6,7 +6,7 @@ export type LabelProps<T extends keyof FieldTypes = any> = {
   as?: 'label' | 'span'
   htmlFor?: string
   schemaPath?: string
-  type: T
+  type?: T
   unstyled?: boolean
 } & FieldComponentProps &
   Partial<ServerProps>

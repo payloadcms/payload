@@ -22,4 +22,5 @@ export type ReducedBlock = {
   imageURL?: string
   labels: BlockField['labels']
   slug: string
+  type?: 'blocks'
 }

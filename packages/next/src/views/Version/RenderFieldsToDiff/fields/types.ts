@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { FieldMap, MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { FieldPermissions } from 'payload'
+import type { FieldMap, FieldPermissions, MappedField } from 'payload'
 import type React from 'react'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 

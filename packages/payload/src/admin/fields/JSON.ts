@@ -6,5 +6,6 @@ export type JSONFieldProps = {
   jsonSchema?: Record<string, unknown>
   name?: string
   path?: string
+  type?: 'json'
   width?: string
 } & FormFieldBase

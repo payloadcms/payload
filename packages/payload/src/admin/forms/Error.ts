@@ -8,7 +8,7 @@ export type ErrorProps<T extends keyof FieldTypes = any> = {
   message?: string
   path?: string
   showError?: boolean
-  type: T
+  type?: T
 } & FieldComponentProps &
   Partial<ServerProps>
 
