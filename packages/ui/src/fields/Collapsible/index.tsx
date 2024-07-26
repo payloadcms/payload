@@ -21,7 +21,7 @@ const baseClass = 'collapsible-field'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 
-const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
+const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -155,4 +155,4 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   )
 }
 
-export const CollapsibleField = withCondition(_CollapsibleField)
+export const CollapsibleField = withCondition(CollapsibleFieldComponent)

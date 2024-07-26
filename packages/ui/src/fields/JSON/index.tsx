@@ -16,7 +16,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const _JSONField: React.FC<JSONFieldProps> = (props) => {
+const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -150,4 +150,4 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
   )
 }
 
-export const JSONField = withCondition(_JSONField)
+export const JSONField = withCondition(JSONFieldComponent)

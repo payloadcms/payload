@@ -26,7 +26,7 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export const _GroupField: React.FC<GroupFieldProps> = (props) => {
+export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -115,4 +115,4 @@ export const _GroupField: React.FC<GroupFieldProps> = (props) => {
 
 export { GroupProvider, useGroup }
 
-export const GroupField = withCondition(_GroupField)
+export const GroupField = withCondition(GroupFieldComponent)

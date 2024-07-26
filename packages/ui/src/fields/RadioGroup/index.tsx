@@ -18,7 +18,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
+const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -141,4 +141,4 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   )
 }
 
-export const RadioGroupField = withCondition(_RadioGroupField)
+export const RadioGroupField = withCondition(RadioGroupFieldComponent)

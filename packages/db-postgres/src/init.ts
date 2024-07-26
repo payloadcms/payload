@@ -1,14 +1,12 @@
-/* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from 'payload'
-import type { Init } from 'payload'
+import type { Init, SanitizedCollectionConfig } from 'payload'
 
+import { createTableName } from '@payloadcms/drizzle'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
-import { createTableName } from '../../drizzle/src/createTableName.js'
 import { buildTable } from './schema/build.js'
 
 export const init: Init = function init(this: PostgresAdapter) {

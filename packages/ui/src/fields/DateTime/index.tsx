@@ -18,7 +18,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const _DateTimeField: React.FC<DateFieldProps> = (props) => {
+const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -106,4 +106,4 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
   )
 }
 
-export const DateTimeField = withCondition(_DateTimeField)
+export const DateTimeField = withCondition(DateTimeFieldComponent)

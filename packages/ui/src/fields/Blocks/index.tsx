@@ -31,7 +31,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -338,4 +338,4 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   )
 }
 
-export const BlocksField = withCondition(_BlocksField)
+export const BlocksField = withCondition(BlocksFieldComponent)

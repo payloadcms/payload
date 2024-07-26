@@ -33,7 +33,7 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -604,4 +604,4 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   )
 }
 
-export const RelationshipField = withCondition(_RelationshipField)
+export const RelationshipField = withCondition(RelationshipFieldComponent)
