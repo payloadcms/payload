@@ -421,6 +421,42 @@ describe('admin2', () => {
         await expect(page.getByPlaceholder('Enter a value')).toHaveValue('[object Object]')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
+
+      test('should reset page when filters are applied', async () => {
+        await deleteAllPosts()
+        await mapAsync([...Array(6)], async () => {
+          await createPost()
+        })
+        await page.reload()
+        await mapAsync([...Array(6)], async () => {
+          await createPost({ title: 'test' })
+        })
+        await page.reload()
+
+        const pageInfo = page.locator('.collection-list__page-info')
+        const perPage = page.locator('.per-page')
+        const tableItems = page.locator(tableRowLocator)
+
+        await expect(tableItems).toHaveCount(10)
+        await expect(pageInfo).toHaveText('1-10 of 12')
+        await expect(perPage).toContainText('Per Page: 10')
+
+        // go to page 2
+        await page.goto(`${postsUrl.list}?limit=10&page=2`)
+
+        // add filter
+        await page.locator('.list-controls__toggle-where').click()
+        await page.locator('.where-builder__add-first-filter').click()
+        await page.locator('.condition__field .rs__control').click()
+        const options = page.locator('.rs__option')
+        await options.locator('text=Tab 1 > Title').click()
+        await page.locator('.condition__operator .rs__control').click()
+        await options.locator('text=equals').click()
+        await page.locator('.condition__value input').fill('test')
+
+        // expect to be on page 1
+        await expect(pageInfo).toHaveText('1-6 of 6')
+      })
     })
 
     describe('table columns', () => {
