@@ -1,13 +1,17 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
+import type {
+  ClientCollectionConfig,
+  FilterOptionsResult,
+  UploadField,
+  UploadFieldProps,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
-import type { UploadFieldProps } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'

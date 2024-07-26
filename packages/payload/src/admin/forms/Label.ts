@@ -2,7 +2,7 @@ import type { CustomComponent, ServerProps } from '../../config/types.js'
 import type { FieldComponentProps } from '../fields/index.js'
 import type { FieldTypes } from './FieldTypes.js'
 
-export type LabelProps<T extends keyof FieldTypes> = {
+export type LabelProps<T extends keyof FieldTypes = any> = {
   as?: 'label' | 'span'
   htmlFor?: string
   schemaPath?: string

@@ -1,13 +1,15 @@
 import type { CustomComponent, ServerProps } from '../../config/types.js'
-import type { FormFieldBase } from './Field.js'
+import type { FieldComponentProps } from '../types.js'
+import type { FieldTypes } from './FieldTypes.js'
 
-export type ErrorProps = {
+export type ErrorProps<T extends keyof FieldTypes = any> = {
   CustomError?: React.ReactNode
   alignCaret?: 'center' | 'left' | 'right'
   message?: string
   path?: string
   showError?: boolean
-} & FormFieldBase &
+  type: T
+} & FieldComponentProps &
   Partial<ServerProps>
 
-export type ErrorComponent = CustomComponent<ErrorProps>
+export type ErrorComponent<T extends keyof FieldTypes = any> = CustomComponent<ErrorProps<T>>

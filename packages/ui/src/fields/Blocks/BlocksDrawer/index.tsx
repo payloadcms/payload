@@ -1,12 +1,10 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { Labels } from 'payload'
+import type { Labels, ReducedBlock } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
-
-import type { ReducedBlock } from '../../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { Drawer } from '../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'

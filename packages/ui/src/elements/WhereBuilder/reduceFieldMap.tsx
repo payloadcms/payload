@@ -1,9 +1,8 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
+import type { FieldMap } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'

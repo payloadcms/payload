@@ -20,6 +20,7 @@ export type {
   WithServerSidePropsComponentProps,
 } from './elements/WithServerSideProps.js'
 export type { ArrayFieldProps } from './fields/Array.js'
+export type { ReducedBlock } from './fields/Blocks.js'
 export type { BlocksFieldProps } from './fields/Blocks.js'
 export type { CheckboxFieldProps } from './fields/Checkbox.js'
 export type { CodeFieldProps } from './fields/Code.js'
@@ -36,6 +37,7 @@ export type { RelationshipFieldProps } from './fields/Relationship.js'
 export type { RichTextComponentProps } from './fields/RichText.js'
 export type { RowFieldProps } from './fields/Row.js'
 export type { SelectFieldProps } from './fields/Select.js'
+export type { MappedTab } from './fields/Tabs.js'
 export type { TabsFieldProps } from './fields/Tabs.js'
 export type { TextFieldProps } from './fields/Text.js'
 export type { TextareaFieldProps } from './fields/Textarea.js'
@@ -49,6 +51,7 @@ export type {
   DescriptionFunction,
   FieldDescriptionProps,
 } from './forms/FieldDescription.js'
+export type { MappedField } from './forms/FieldMap.js'
 export type { FieldMap } from './forms/FieldMap.js'
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 

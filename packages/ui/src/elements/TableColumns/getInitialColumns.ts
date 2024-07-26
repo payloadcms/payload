@@ -1,4 +1,5 @@
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap, MappedField } from 'payload'
+
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
 export function fieldAffectsData(field: MappedField): boolean {

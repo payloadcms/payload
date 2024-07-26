@@ -11,16 +11,21 @@ import type {
   EmailFieldProps,
   ErrorProps,
   Field,
+  FieldComponentProps,
   FieldDescriptionProps,
+  FieldMap,
   FieldWithPath,
   FormFieldBase,
   GroupFieldProps,
   JSONFieldProps,
   LabelProps,
+  MappedField,
+  MappedTab,
   NumberFieldProps,
   Option,
   PointFieldProps,
   RadioFieldProps,
+  ReducedBlock,
   RelationshipFieldProps,
   RichTextComponentProps,
   RowFieldProps,
@@ -37,13 +42,6 @@ import { deepCopyObject, fieldAffectsData, fieldIsPresentationalOnly } from 'pay
 import React, { Fragment } from 'react'
 
 import type { WithServerSidePropsPrePopulated } from './index.js'
-import type {
-  FieldComponentProps,
-  FieldMap,
-  MappedField,
-  MappedTab,
-  ReducedBlock,
-} from './types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { FieldDescription, HiddenField } from '../../../exports/client/index.js'
