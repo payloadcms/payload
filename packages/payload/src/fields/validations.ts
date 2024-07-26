@@ -115,6 +115,21 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   return true
 }
 
+export const confirmPassword: Validate<string, unknown, unknown, TextField> = (
+  value,
+  { req: { data, t }, required },
+) => {
+  if (required && !value) {
+    return t('validation:required')
+  }
+
+  if (value && value !== data.formState.password.value) {
+    return t('fields:passwordsDoNotMatch')
+  }
+
+  return true
+}
+
 export const email: Validate<string, unknown, unknown, EmailField> = (
   value,
   { req: { t }, required },
@@ -691,6 +706,7 @@ export default {
   blocks,
   checkbox,
   code,
+  confirmPassword,
   date,
   email,
   json,

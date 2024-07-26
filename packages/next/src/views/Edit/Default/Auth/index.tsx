@@ -33,6 +33,7 @@ export const Auth: React.FC<Props> = (props) => {
     operation,
     readOnly,
     requirePassword,
+    setSchemaPath,
     useAPIKey,
     username,
     verify,
@@ -51,15 +52,18 @@ export const Auth: React.FC<Props> = (props) => {
   } = useConfig()
 
   const handleChangePassword = useCallback(
-    (state: boolean) => {
-      if (!state) {
+    (showPasswordFields: boolean) => {
+      if (showPasswordFields) {
+        setSchemaPath(`${collectionSlug}.auth`)
+      } else {
+        setSchemaPath(collectionSlug)
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
-      setChangingPassword(state)
+      setChangingPassword(showPasswordFields)
     },
-    [dispatchFields],
+    [collectionSlug, dispatchFields, setSchemaPath],
   )
 
   const unlock = useCallback(async () => {
@@ -80,7 +84,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, username, t])
+  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
 
   useEffect(() => {
     if (!modified) {
@@ -157,7 +161,7 @@ export const Auth: React.FC<Props> = (props) => {
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
-                onClick={() => unlock()}
+                onClick={() => void unlock()}
                 size="small"
               >
                 {t('authentication:forceUnlock')}
