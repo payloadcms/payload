@@ -6,6 +6,7 @@ import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: DrizzleAdapter,
+  options: DrizzleAdapter['transactionOptions'],
 ) {
   let id
   try {
@@ -41,7 +42,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
           }
           transactionReady()
         })
-      }, this.transactionOptions)
+      }, options || this.transactionOptions)
       .catch(() => {
         // swallow
       })
