@@ -1,5 +1,5 @@
 'use client'
-import type { FormFieldBase, NumberField as NumberFieldType } from 'payload'
+import type { NumberFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
@@ -17,19 +17,6 @@ import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-
-export type NumberFieldProps = {
-  hasMany?: boolean
-  max?: number
-  maxRows?: number
-  min?: number
-  name?: string
-  onChange?: (e: number) => void
-  path?: string
-  placeholder?: NumberFieldType['admin']['placeholder']
-  step?: number
-  width?: string
-} & FormFieldBase
 
 const _NumberField: React.FC<NumberFieldProps> = (props) => {
   const {

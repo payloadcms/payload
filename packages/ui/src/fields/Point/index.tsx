@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, FormFieldBase } from 'payload'
+import type { ClientValidate, PointFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -16,14 +16,6 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-
-export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  width?: string
-} & FormFieldBase
 
 export const _PointField: React.FC<PointFieldProps> = (props) => {
   const {

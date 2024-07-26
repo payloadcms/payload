@@ -1,11 +1,9 @@
 'use client'
-import type { DocumentPreferences, FormFieldBase } from 'payload'
+import type { DocumentPreferences, TabsFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
-
-import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -23,14 +21,6 @@ import { TabsProvider } from './provider.js'
 const baseClass = 'tabs-field'
 
 export { TabsProvider }
-
-export type TabsFieldProps = {
-  forceRender?: boolean
-  name?: string
-  path?: string
-  tabs?: MappedTab[]
-  width?: string
-} & FormFieldBase
 
 const _TabsField: React.FC<TabsFieldProps> = (props) => {
   const {

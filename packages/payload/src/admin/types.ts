@@ -19,6 +19,28 @@ export type {
   WithServerSidePropsComponent,
   WithServerSidePropsComponentProps,
 } from './elements/WithServerSideProps.js'
+export type { ArrayFieldProps } from './fields/Array.js'
+export type { BlocksFieldProps } from './fields/Blocks.js'
+export type { CheckboxFieldProps } from './fields/Checkbox.js'
+export type { CodeFieldProps } from './fields/Code.js'
+export type { CollapsibleFieldProps } from './fields/Collapsible.js'
+export type { DateFieldProps } from './fields/Date.js'
+export type { EmailFieldProps } from './fields/Email.js'
+export type { GroupFieldProps } from './fields/Group.js'
+export type { HiddenFieldProps } from './fields/Hidden.js'
+export type { JSONFieldProps } from './fields/JSON.js'
+export type { NumberFieldProps } from './fields/Number.js'
+export type { PointFieldProps } from './fields/Point.js'
+export type { RadioFieldProps } from './fields/Radio.js'
+export type { RelationshipFieldProps } from './fields/Relationship.js'
+export type { RichTextComponentProps } from './fields/RichText.js'
+export type { RowFieldProps } from './fields/Row.js'
+export type { SelectFieldProps } from './fields/Select.js'
+export type { TabsFieldProps } from './fields/Tabs.js'
+export type { TextFieldProps } from './fields/Text.js'
+export type { TextareaFieldProps } from './fields/Textarea.js'
+export type { UploadFieldProps } from './fields/Upload.js'
+export type { FieldComponentProps } from './fields/index.js'
 export type { ErrorProps } from './forms/Error.js'
 export type { FormFieldBase } from './forms/Field.js'
 export type {
@@ -27,7 +49,9 @@ export type {
   DescriptionFunction,
   FieldDescriptionProps,
 } from './forms/FieldDescription.js'
+export type { FieldMap } from './forms/FieldMap.js'
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
+
 export type { LabelComponent, LabelProps, SanitizedLabelProps } from './forms/Label.js'
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'

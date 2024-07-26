@@ -1,9 +1,11 @@
 'use client'
 
+import type { LabelComponent } from 'payload'
+
 import { useFieldProps } from '@payloadcms/ui'
 import React from 'react'
 
-const CustomLabel = ({ schemaPath }) => {
+export const CustomLabel: LabelComponent<'text'> = ({ schemaPath }) => {
   const { path: pathFromContext } = useFieldProps()
 
   const path = pathFromContext ?? schemaPath // pathFromContext will be undefined in list view
@@ -14,5 +16,3 @@ const CustomLabel = ({ schemaPath }) => {
     </label>
   )
 }
-
-export default CustomLabel

@@ -1,13 +1,8 @@
 'use client'
 
-import type { FieldPermissions, FieldTypes } from 'payload'
+import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } from 'payload'
 
 import React from 'react'
-
-import type {
-  FieldComponentProps,
-  MappedField,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { HiddenField } from '../../fields/Hidden/index.js'
 import { useFieldComponents } from '../../providers/FieldComponents/index.js'

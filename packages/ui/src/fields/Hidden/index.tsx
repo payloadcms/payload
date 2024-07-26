@@ -1,25 +1,17 @@
 'use client'
-import type { FormFieldBase } from 'payload'
 
 import React, { useEffect } from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-
-export type HiddenInputFieldProps = {
-  disableModifyingForm?: false
-  forceUsePathFromProps?: boolean
-  name?: string
-  path?: string
-  value?: unknown
-} & FormFieldBase
+import { HiddenFieldProps } from 'packages/payload/src/index.js'
 
 /**
  * This is mainly used to save a value on the form that is not visible to the user.
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
-const _HiddenField: React.FC<HiddenInputFieldProps> = (props) => {
+const _HiddenField: React.FC<HiddenFieldProps> = (props) => {
   const {
     name,
     disableModifyingForm = true,

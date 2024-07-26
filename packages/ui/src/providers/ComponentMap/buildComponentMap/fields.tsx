@@ -1,41 +1,41 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  ArrayFieldProps,
+  BlocksFieldProps,
   CellComponentProps,
+  CheckboxFieldProps,
+  CodeFieldProps,
+  CollapsibleFieldProps,
   CustomComponent,
+  DateFieldProps,
+  EmailFieldProps,
   ErrorProps,
   Field,
   FieldDescriptionProps,
   FieldWithPath,
   FormFieldBase,
+  GroupFieldProps,
+  JSONFieldProps,
   LabelProps,
+  NumberFieldProps,
   Option,
+  PointFieldProps,
+  RadioFieldProps,
+  RelationshipFieldProps,
+  RichTextComponentProps,
+  RowFieldProps,
   SanitizedConfig,
+  SelectFieldProps,
+  TabsFieldProps,
+  TextFieldProps,
+  TextareaFieldProps,
+  UploadFieldProps,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import { deepCopyObject, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { ArrayFieldProps } from '../../../fields/Array/index.js'
-import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
-import type { CheckboxFieldProps } from '../../../fields/Checkbox/index.js'
-import type { CodeFieldProps } from '../../../fields/Code/index.js'
-import type { CollapsibleFieldProps } from '../../../fields/Collapsible/index.js'
-import type { DateFieldProps } from '../../../fields/DateTime/index.js'
-import type { EmailFieldProps } from '../../../fields/Email/index.js'
-import type { GroupFieldProps } from '../../../fields/Group/index.js'
-import type { JSONFieldProps } from '../../../fields/JSON/index.js'
-import type { NumberFieldProps } from '../../../fields/Number/index.js'
-import type { PointFieldProps } from '../../../fields/Point/index.js'
-import type { RadioFieldProps } from '../../../fields/RadioGroup/index.js'
-import type { RelationshipFieldProps } from '../../../fields/Relationship/types.js'
-import type { RichTextFieldProps } from '../../../fields/RichText/index.js'
-import type { RowFieldProps } from '../../../fields/Row/types.js'
-import type { SelectFieldProps } from '../../../fields/Select/index.js'
-import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
-import type { TextFieldProps } from '../../../fields/Text/types.js'
-import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
-import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 import type { WithServerSidePropsPrePopulated } from './index.js'
 import type {
   FieldComponentProps,
@@ -59,7 +59,11 @@ function generateFieldPath(parentPath, name) {
   return tabPath
 }
 
-function prepareCustomComponentProps(props) {
+function prepareCustomComponentProps(
+  props: {
+    [key: string]: any
+  } & FieldComponentProps,
+) {
   return deepCopyObject({
     ...props,
     fieldMap: undefined,
@@ -480,7 +484,7 @@ export const mapFields = (args: {
             break
           }
           case 'richText': {
-            const richTextField: RichTextFieldProps = {
+            const richTextField: RichTextComponentProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -672,7 +676,10 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: LabelProps = prepareCustomComponentProps(fieldComponentProps)
+        const labelProps: LabelProps = prepareCustomComponentProps({
+          ...fieldComponentProps,
+          schemaPath: path,
+        })
 
         const CustomLabelComponent =
           ('admin' in field &&

@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FormFieldBase } from 'payload'
+import type { CollapsibleFieldProps, DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -18,16 +18,8 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'
-
-export type CollapsibleFieldProps = {
-  fieldMap: FieldMap
-  initCollapsed?: boolean
-  width?: string
-} & FormFieldBase
 
 const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const {

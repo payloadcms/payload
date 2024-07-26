@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, EmailField as EmailFieldType, FormFieldBase } from 'payload'
+import type { ClientValidate, EmailFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,14 +13,6 @@ import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-
-export type EmailFieldProps = {
-  autoComplete?: string
-  name?: string
-  path?: string
-  placeholder?: EmailFieldType['admin']['placeholder']
-  width?: string
-} & FormFieldBase
 
 const _EmailField: React.FC<EmailFieldProps> = (props) => {
   const {

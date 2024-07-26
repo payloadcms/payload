@@ -1,10 +1,8 @@
 'use client'
-import type { BlockField, FormFieldBase } from 'payload'
+import type { BlocksFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
-
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -32,18 +30,6 @@ import { BlocksDrawer } from './BlocksDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'blocks-field'
-
-export type BlocksFieldProps = {
-  blocks?: ReducedBlock[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: BlockField['labels']
-  maxRows?: number
-  minRows?: number
-  name?: string
-  slug?: string
-  width?: string
-} & FormFieldBase
 
 const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()

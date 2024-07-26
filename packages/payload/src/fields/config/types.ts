@@ -9,12 +9,12 @@ import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
+import type { ErrorComponent } from '../../admin/forms/Error.js'
 import type {
   ConditionalDateProps,
   Description,
   DescriptionComponent,
-  ErrorProps,
-  LabelProps,
+  LabelComponent,
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
@@ -252,8 +252,8 @@ export type NumberField = {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -291,8 +291,8 @@ export type TextField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -326,8 +326,8 @@ export type EmailField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -339,8 +339,8 @@ export type EmailField = {
 export type TextareaField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -356,8 +356,8 @@ export type TextareaField = {
 export type CheckboxField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -368,8 +368,8 @@ export type CheckboxField = {
 export type DateField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -504,8 +504,8 @@ export type UIField = {
 export type UploadField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
   }
   filterOptions?: FilterOptions
@@ -521,8 +521,8 @@ export type UploadField = {
 
 type CodeAdmin = {
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   editorOptions?: EditorProps['options']
   language?: string
@@ -537,8 +537,8 @@ export type CodeField = {
 
 type JSONAdmin = {
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   editorOptions?: EditorProps['options']
 } & Admin
@@ -556,8 +556,8 @@ export type JSONField = {
 export type SelectField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
     isClearable?: boolean
     isSortable?: boolean
@@ -618,8 +618,8 @@ type SharedRelationshipProperties = {
 type RelationshipAdmin = {
   allowCreate?: boolean
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   isSortable?: boolean
 } & Admin
@@ -659,8 +659,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
   } & Admin
   editor?:
@@ -708,8 +708,8 @@ export type ArrayField = {
 export type RadioField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
     layout?: 'horizontal' | 'vertical'
   } & Admin

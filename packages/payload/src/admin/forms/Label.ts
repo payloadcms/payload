@@ -1,14 +1,19 @@
 import type { CustomComponent, ServerProps } from '../../config/types.js'
-import type { FormFieldBase } from './Field.js'
+import type { FieldComponentProps } from '../fields/index.js'
+import type { FieldTypes } from './FieldTypes.js'
 
-export type LabelProps = {
+export type LabelProps<T extends keyof FieldTypes> = {
   as?: 'label' | 'span'
   htmlFor?: string
   schemaPath?: string
+  type: T
   unstyled?: boolean
-} & FormFieldBase &
+} & FieldComponentProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps = Omit<LabelProps, 'label' | 'required'>
+export type SanitizedLabelProps<T extends keyof FieldTypes = any> = Omit<
+  LabelProps<T>,
+  'label' | 'required'
+>
 
-export type LabelComponent = CustomComponent<LabelProps>
+export type LabelComponent<T extends keyof FieldTypes = any> = CustomComponent<LabelProps<T>>
