@@ -1,10 +1,4 @@
 import type { MappedField } from '@payloadcms/ui'
-import type {
-  ComponentImportMap,
-  ResolvedComponent,
-  RichTextAdapter,
-  SanitizedConfig,
-} from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -15,7 +9,7 @@ import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): any =>
-  ({ WithServerSideProps, componentImportMap, config, i18n, schemaPath }) => {
+  ({ WithServerSideProps, config, i18n, importMap, schemaPath }) => {
     const componentMap: Map<
       string,
       GeneratedFeatureProviderComponent[] | MappedField[] | React.ReactNode
@@ -47,11 +41,11 @@ export const getGenerateComponentMap =
             for (const componentKey in components) {
               const payloadComponent = components[componentKey]
               const ResolvedComponent = getComponent({
-                componentImportMap,
+                importMap,
                 payloadComponent,
               })
 
-              if (ResolvedComponent?.component) {
+              if (ResolvedComponent?.Component) {
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
                   <WithServerSideProps
@@ -84,11 +78,11 @@ export const getGenerateComponentMap =
               for (const [schemaKey, fields] of schemas.entries()) {
                 const mappedFields = mapFields({
                   WithServerSideProps,
-                  componentImportMap,
                   config,
                   disableAddingID: true,
                   fieldSchema: fields,
                   i18n,
+                  importMap,
                   parentPath: `${schemaPath}.lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
                   readOnly: false,
                 })
@@ -103,7 +97,7 @@ export const getGenerateComponentMap =
 
           const ClientComponent = resolvedFeature.ClientFeature
           const ResolvedClientComponent = getComponent({
-            componentImportMap,
+            importMap,
             payloadComponent: ClientComponent,
           })
           const clientComponentProps = resolvedFeature.clientFeatureProps

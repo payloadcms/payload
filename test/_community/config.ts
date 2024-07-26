@@ -1,4 +1,4 @@
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -17,14 +17,31 @@ export default buildConfigWithDefaults({
     // MediaCollection
   ],
   admin: {
-    componentImportMap: {
+    importMap: {
       baseDir: path.resolve(dirname),
     },
     avatar: {
       Component: '/collections/Posts/MyAvatar.js#MyAvatar',
     },
   },
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  }),
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

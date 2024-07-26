@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -41,7 +42,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
   const { CustomDescription } = props
 
   if (CustomDescription !== undefined) {
-    return CustomDescription
+    return <RenderMappedComponent clientProps={props} component={CustomDescription} />
   }
 
   return <DefaultFieldDescription {...props} />

@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, ComponentImportMap, LanguageOptions } from 'payload'
+import type { ClientConfig, LanguageOptions } from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
@@ -32,7 +32,6 @@ import { TranslationProvider } from '../Translation/index.js'
 
 type Props = {
   children: React.ReactNode
-  componentImportMap: ComponentImportMap
   componentMap: ComponentMap
   config: ClientConfig
   dateFNSKey: Language['dateFNSKey']
@@ -46,7 +45,6 @@ type Props = {
 
 export const RootProvider: React.FC<Props> = ({
   children,
-  componentImportMap,
   componentMap,
   config,
   dateFNSKey,
@@ -61,7 +59,7 @@ export const RootProvider: React.FC<Props> = ({
     <Fragment>
       <RouteCache>
         <ConfigProvider config={config}>
-          <ComponentMapProvider componentImportMap={componentImportMap} componentMap={componentMap}>
+          <ComponentMapProvider componentMap={componentMap}>
             <FieldComponentsProvider>
               <ClientFunctionProvider>
                 <TranslationProvider

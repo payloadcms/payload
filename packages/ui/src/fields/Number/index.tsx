@@ -12,6 +12,7 @@ import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -32,7 +33,7 @@ export type NumberFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _NumberField: React.FC<NumberFieldProps> = (props) => {
+const NumberField_: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -193,7 +194,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
+            <RenderMappedComponent component={BeforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -210,17 +211,13 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            {AfterInput}
+            <RenderMappedComponent component={AfterInput} />
           </div>
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )
 }
 
-export const NumberField = withCondition(_NumberField)
+export const NumberField = withCondition(NumberField_)

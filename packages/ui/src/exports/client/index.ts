@@ -188,6 +188,7 @@ export type {
   MappedTab,
   ReducedBlock,
 } from '../../providers/ComponentMap/buildComponentMap/types.js'
+export { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'

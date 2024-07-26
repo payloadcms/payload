@@ -1,4 +1,4 @@
-import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload'
+import type { Field, MappedComponent, Operator, SanitizedCollectionConfig, Where } from 'payload'
 
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
@@ -9,6 +9,7 @@ export type WhereBuilderProps = {
 }
 
 export type FieldCondition = {
+  Filter: MappedComponent
   component?: string
   label: string
   operators: {

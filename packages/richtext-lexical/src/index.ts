@@ -34,8 +34,7 @@ import {
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
-import { getGenerateImportComponentMap } from './utilities/generateComponentImportMap.js'
-import { getGenerateComponentMap } from './utilities/generateComponentMap.js'
+import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
@@ -161,15 +160,15 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       },
       editorConfig: finalSanitizedEditorConfig,
       features,
-      generateComponentImportMap: getGenerateImportComponentMap({
-        resolvedFeatureMap,
-      }),
       generateComponentMap: {
         path: 'server:@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
         serverProps: {
           resolvedFeatureMap,
         },
       },
+      generateImportMap: getGenerateImportMap({
+        resolvedFeatureMap,
+      }),
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),

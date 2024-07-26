@@ -3,10 +3,13 @@ import type {
   BlockField,
   CellComponentProps,
   FieldTypes,
+  JsonObject,
+  MappedComponent,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
 } from 'payload'
+import type React from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
@@ -68,8 +71,8 @@ export type FieldComponentProps =
   | UploadFieldProps
 
 export type MappedField = {
-  CustomCell?: React.ReactNode
-  CustomField?: React.ReactNode
+  Cell?: MappedComponent
+  Field?: MappedComponent
   cellComponentProps: CellComponentProps
   custom?: Record<any, string>
   disableBulkEdit?: boolean
@@ -83,7 +86,7 @@ export type MappedField = {
   isSidebar?: boolean
   localized: boolean
   name?: string
-  type: keyof FieldTypes
+  type: FieldTypes
   unique?: boolean
 }
 
@@ -91,40 +94,43 @@ export type FieldMap = MappedField[]
 
 export type ActionMap = {
   Edit: {
-    [view: string]: React.ReactNode[]
+    [view: string]: MappedComponent[]
   }
-  List: React.ReactNode[]
+  List: MappedComponent[]
 }
 
 export type CollectionComponentMap = {
-  AfterList: React.ReactNode
-  AfterListTable: React.ReactNode
-  BeforeList: React.ReactNode
-  BeforeListTable: React.ReactNode
-  List: React.ReactNode
+  AfterList: MappedComponent[]
+  AfterListTable: MappedComponent[]
+  BeforeList: MappedComponent[]
+  BeforeListTable: MappedComponent[]
+  List: MappedComponent
 } & ConfigComponentMapBase
 
 export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
-  Description: React.ReactNode
-  Edit: React.ReactNode
-  PreviewButton: React.ReactNode
-  PublishButton: React.ReactNode
-  SaveButton: React.ReactNode
-  SaveDraftButton: React.ReactNode
-  Upload: React.ReactNode
+  Description: MappedComponent
+  Edit: MappedComponent
+  PreviewButton: MappedComponent
+  PublishButton: MappedComponent
+  SaveButton: MappedComponent
+  SaveDraftButton: MappedComponent
+  Upload: MappedComponent
   actionsMap: ActionMap
   fieldMap: FieldMap
   isPreviewEnabled: boolean
 }
 
 export type ComponentMap = {
-  Icon: React.ReactNode
-  LogoutButton: React.ReactNode
-  actions: React.ReactNode[]
+  Icon: MappedComponent
+  LogoutButton: MappedComponent
+  actions: MappedComponent[]
   collections: {
     [slug: SanitizedCollectionConfig['slug']]: CollectionComponentMap
+  }
+  custom: {
+    [key: string]: MappedComponent
   }
   globals: {
     [slug: SanitizedGlobalConfig['slug']]: GlobalComponentMap

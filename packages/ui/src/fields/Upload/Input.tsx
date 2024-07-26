@@ -179,11 +179,10 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                   </div>
                 </div>
               )}
-              {CustomDescription !== undefined ? (
-                CustomDescription
-              ) : (
-                <FieldDescription {...(descriptionProps || {})} />
-              )}
+              <FieldDescription
+                CustomDescription={CustomDescription}
+                {...(descriptionProps || {})}
+              />
             </React.Fragment>
           )}
           {!readOnly && <DocumentDrawer onSave={onSave} />}

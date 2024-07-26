@@ -1,5 +1,5 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { ComponentImportMap, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -31,12 +31,12 @@ export const metadata = {
 
 export const RootLayout = async ({
   children,
-  componentImportMap: componentImportMap,
   config: configPromise,
+  importMap,
 }: {
   readonly children: React.ReactNode
-  readonly componentImportMap: ComponentImportMap
   readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
 }) => {
   const config = await configPromise
 
@@ -97,8 +97,8 @@ export const RootLayout = async ({
     DefaultEditView,
     DefaultListView,
     children,
-    componentImportMap,
     i18n,
+    importMap,
     payload,
   })
 
@@ -106,7 +106,6 @@ export const RootLayout = async ({
     <html className={merriweather.variable} data-theme={theme} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
-          componentImportMap={componentImportMap}
           componentMap={componentMap}
           config={clientConfig}
           dateFNSKey={i18n.dateFNSKey}

@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField as ArrayFieldType } from 'payload'
+import type { ArrayField as ArrayFieldType, MappedComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -32,7 +32,7 @@ import './index.scss'
 const baseClass = 'array-field'
 
 export type ArrayFieldProps = {
-  CustomRowLabel?: React.ReactNode
+  CustomRowLabel?: MappedComponent
   fieldMap: FieldMap
   forceRender?: boolean
   isSortable?: boolean
@@ -43,7 +43,7 @@ export type ArrayFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -326,4 +326,4 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   )
 }
 
-export const ArrayField = withCondition(_ArrayField)
+export const ArrayField = withCondition(ArrayField_)

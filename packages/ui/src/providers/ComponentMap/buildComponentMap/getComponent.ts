@@ -1,4 +1,4 @@
-import type { ComponentImportMap, PayloadComponent, ResolvedComponent } from 'payload'
+import type { ImportMap, PayloadComponent, ResolvedComponent } from 'payload'
 
 import { parsePayloadComponent } from 'payload/shared'
 
@@ -6,10 +6,10 @@ export const getComponent = <
   TComponentServerProps extends object,
   TComponentClientProps extends object,
 >({
-  componentImportMap,
+  importMap,
   payloadComponent,
 }: {
-  componentImportMap: ComponentImportMap
+  importMap: ImportMap
   payloadComponent:
     | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | null
@@ -17,25 +17,25 @@ export const getComponent = <
 }): ResolvedComponent<TComponentServerProps, TComponentClientProps> => {
   if (!payloadComponent) {
     return {
+      Component: undefined,
       clientProps: undefined,
-      component: undefined,
       serverProps: undefined,
     }
   }
   const { exportName, path } = parsePayloadComponent(payloadComponent)
   const key = path + '#' + exportName
 
-  const component = componentImportMap[key]
-  if (!component) {
-    console.error(`Component not found in componentImportMap: ${key}`)
+  const Component = importMap[key]
+  if (!Component) {
+    console.error(`Component not found in importMap: ${key}`)
   }
 
   return {
+    Component,
     clientProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.clientProps as TComponentClientProps)
         : undefined,
-    component,
     serverProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.serverProps as TComponentServerProps)

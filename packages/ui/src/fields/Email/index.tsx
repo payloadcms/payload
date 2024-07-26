@@ -9,6 +9,7 @@ import type { FormFieldBase } from '../shared/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -24,7 +25,7 @@ export type EmailFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _EmailField: React.FC<EmailFieldProps> = (props) => {
+const EmailField_: React.FC<EmailFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -85,7 +86,7 @@ const _EmailField: React.FC<EmailFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderMappedComponent component={BeforeInput} />
         <input
           autoComplete={autoComplete}
           disabled={disabled}
@@ -96,15 +97,11 @@ const _EmailField: React.FC<EmailFieldProps> = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderMappedComponent component={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const EmailField = withCondition(_EmailField)
+export const EmailField = withCondition(EmailField_)

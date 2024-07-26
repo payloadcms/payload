@@ -1,41 +1,37 @@
 import type { RichTextAdapter } from 'payload'
 
-import { genComponentImportMapIterateFields } from 'payload'
+import { genImportMapIterateFields } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
-export const getGenerateImportComponentMap =
-  (args: {
-    resolvedFeatureMap: ResolvedServerFeatureMap
-  }): RichTextAdapter['generateComponentImportMap'] =>
-  ({ addToComponentImportMap, baseDir, componentMap, config, importMap }) => {
-    addToComponentImportMap('@payloadcms/richtext-lexical/client#RichTextCell')
-    addToComponentImportMap('@payloadcms/richtext-lexical/client#RichTextField')
-    addToComponentImportMap(
-      '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
-    )
+export const getGenerateImportMap =
+  (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
+  ({ addToImportMap, baseDir, config, importMap, imports }) => {
+    addToImportMap('@payloadcms/richtext-lexical/client#RichTextCell')
+    addToImportMap('@payloadcms/richtext-lexical/client#RichTextField')
+    addToImportMap('@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap')
 
     // iterate just through args.resolvedFeatureMap.values()
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
       if ('componentImports' in resolvedFeature) {
         if (typeof resolvedFeature.componentImports === 'function') {
           resolvedFeature.componentImports({
-            addToComponentImportMap,
+            addToImportMap,
             baseDir,
-            componentMap,
             config,
             importMap,
+            imports,
           })
         } else if (resolvedFeature.componentImports?.length) {
           resolvedFeature.componentImports.forEach((component) => {
-            addToComponentImportMap(component)
+            addToImportMap(component)
           })
         }
       }
 
       const ClientComponent = resolvedFeature.ClientFeature
       if (ClientComponent) {
-        addToComponentImportMap(ClientComponent)
+        addToImportMap(ClientComponent)
       }
 
       /*
@@ -48,13 +44,13 @@ export const getGenerateImportComponentMap =
           }
           const subFields = node.getSubFields({})
           if (subFields?.length) {
-            genComponentImportMapIterateFields({
-              addToComponentImportMap,
+            genImportMapIterateFields({
+              addToImportMap,
               baseDir,
-              componentMap,
               config,
               fields: subFields,
               importMap,
+              imports,
             })
           }
         }

@@ -1,5 +1,5 @@
 'use client'
-import type { FieldWithPath } from 'payload'
+import type { FieldWithPath, MappedComponent } from 'payload'
 
 import React, { Fragment, type JSX, useState } from 'react'
 
@@ -8,6 +8,7 @@ import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildCo
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -28,21 +29,30 @@ export const combineLabel = ({
   field?: MappedField
   prefix?: JSX.Element | string
 }): JSX.Element => {
-  const CustomLabelToRender =
+  const CustomLabelToRender: MappedComponent =
     field &&
     'CustomLabel' in field.fieldComponentProps &&
     field.fieldComponentProps.CustomLabel !== undefined
       ? field.fieldComponentProps.CustomLabel
       : null
-  const DefaultLabelToRender =
-    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label ? (
-      <FieldLabel
-        label={field.fieldComponentProps.label}
-        {...(field.fieldComponentProps.labelProps || {})}
-      />
-    ) : null
+  const DefaultLabelToRender: MappedComponent =
+    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label
+      ? {
+          type: 'client',
+          Component: FieldLabel,
+          props: {
+            label: field.fieldComponentProps.label,
+            ...(field.fieldComponentProps.labelProps || {}),
+          },
+        }
+      : null
 
-  const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel
+  const LabelToRender: MappedComponent = CustomLabelToRender ||
+    DefaultLabelToRender || {
+      type: 'client',
+      Component: null,
+      RenderedComponent: customLabel,
+    }
 
   if (!LabelToRender) return null
 
@@ -54,7 +64,9 @@ export const combineLabel = ({
           {' > '}
         </Fragment>
       )}
-      <span style={{ display: 'inline-block' }}>{LabelToRender}</span>
+      <span style={{ display: 'inline-block' }}>
+        <RenderMappedComponent component={LabelToRender} />
+      </span>
     </Fragment>
   )
 }

@@ -8,6 +8,7 @@ import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.j
 import type { SelectFieldProps } from './index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -107,7 +108,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderMappedComponent component={BeforeInput} />
         <ReactSelect
           disabled={readOnly}
           isClearable={isClearable}
@@ -121,13 +122,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           showError={showError}
           value={valueToRender as OptionObject}
         />
-        {AfterInput}
+        <RenderMappedComponent component={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }

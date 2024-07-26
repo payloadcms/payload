@@ -16,11 +16,7 @@ import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
-import type {
-  AddToComponentImportMap,
-  ImportMap,
-  Imports,
-} from '../bin/generateComponentImportMap/index.js'
+import type { AddToImportMap, Imports, InternalImportMap } from '../bin/generateImportMap/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -99,8 +95,8 @@ export type ResolvedComponent<
   TComponentServerProps extends never | object,
   TComponentClientProps extends never | object,
 > = {
+  Component: React.FC<TComponentClientProps | TComponentServerProps>
   clientProps?: TComponentClientProps
-  component: React.FC<TComponentClientProps | TComponentServerProps>
   serverProps?: TComponentServerProps
 }
 
@@ -543,7 +539,7 @@ export interface AdminDependencies {
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
-    adminDependencies: AdminDependencies
+    adminDependencies?: AdminDependencies
 
     /** Automatically log in as a user */
     autoLogin?:
@@ -571,29 +567,6 @@ export type Config = {
       | {
           Component: PayloadComponent<never>
         }
-    componentImportMap?: {
-      /**
-       * Automatically generate component map during development
-       * @default true
-       */
-      autoGenerate?: boolean
-
-      /** The base directory for normal paths */
-      baseDir?: string
-      /**
-       * You can use generators to add custom components to the component import map.
-       * This allows you to import custom components in the admin panel.
-       */
-      generators?: Array<
-        (props: {
-          addToComponentImportMap: AddToComponentImportMap
-          baseDir: string
-          componentMap: ImportMap
-          config: SanitizedConfig
-          importMap: Imports
-        }) => void
-      >
-    }
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -669,6 +642,29 @@ export type Config = {
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
+    importMap?: {
+      /**
+       * Automatically generate component map during development
+       * @default true
+       */
+      autoGenerate?: boolean
+
+      /** The base directory for normal paths */
+      baseDir?: string
+      /**
+       * You can use generators to add custom components to the component import map.
+       * This allows you to import custom components in the admin panel.
+       */
+      generators?: Array<
+        (props: {
+          addToImportMap: AddToImportMap
+          baseDir: string
+          config: SanitizedConfig
+          importMap: InternalImportMap
+          imports: Imports
+        }) => void
+      >
+    }
     livePreview?: {
       collections?: string[]
       globals?: string[]

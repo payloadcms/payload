@@ -2,7 +2,7 @@
 import configPromise from '@payload-config'
 import { RootLayout } from '@payloadcms/next/layouts'
 
-import { componentImportMap } from './admin/componentImportMap.js'
+import { importMap } from './admin/importMap.js'
 
 // import '@payloadcms/ui/styles.css' // Uncomment this line if `@payloadcms/ui` in `tsconfig.json` points to `/ui/dist` instead of `/ui/src`
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
@@ -15,7 +15,7 @@ type Args = {
 }
 
 const Layout = ({ children }: Args) => (
-  <RootLayout componentImportMap={componentImportMap} config={configPromise}>
+  <RootLayout config={configPromise} importMap={importMap}>
     {children}
   </RootLayout>
 )

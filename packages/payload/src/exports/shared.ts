@@ -1,4 +1,4 @@
-export { parsePayloadComponent } from '../bin/generateComponentImportMap/parsePayloadComponent.js'
+export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 export { serverProps } from '../config/types.js'
 

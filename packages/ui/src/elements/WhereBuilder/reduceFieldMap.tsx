@@ -4,6 +4,7 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import { getTranslation } from '@payloadcms/translations'
 
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { FieldCondition } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
@@ -20,7 +21,12 @@ export type ReduceFieldMapArgs = {
  * Reduces a field map to a flat array of fields with labels and values.
  * Used in the WhereBuilder component to render the fields in the dropdown.
  */
-export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: ReduceFieldMapArgs) => {
+export const reduceFieldMap = ({
+  fieldMap,
+  i18n,
+  labelPrefix,
+  pathPrefix,
+}: ReduceFieldMapArgs): FieldCondition[] => {
   return fieldMap.reduce((reduced, field) => {
     if (field.disableListFilter) return reduced
 
@@ -139,7 +145,8 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
         ? createNestedClientFieldPath(pathPrefix, field)
         : field.name
 
-      const formattedField = {
+      const formattedField: FieldCondition = {
+        Filter: field.fieldComponentProps.Filter,
         label: formattedLabel,
         value: formattedValue,
         ...fieldTypes[field.type],

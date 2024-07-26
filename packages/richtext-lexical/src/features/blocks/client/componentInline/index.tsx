@@ -40,7 +40,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { editorConfig, field } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
-  const { componentImportMap } = useComponentMap()
+  const { importMap } = useComponentMap()
 
   const reducedBlock: ClientBlock = (
     editorConfig?.resolvedFeatureMap?.get('blocks')
@@ -103,7 +103,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const LabelPayloadComponent = reducedBlock?.LabelComponent
 
   const LabelComponent = getComponent({
-    componentImportMap,
+    importMap,
     payloadComponent: LabelPayloadComponent,
   })
 
@@ -122,7 +122,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {LabelComponent?.component ? (
+      {LabelComponent?.Component ? (
         <LabelComponent.component blockKind={'lexicalInlineBlock'} formData={formData} />
       ) : (
         <div>{getTranslation(reducedBlock.labels.singular, i18n)}</div>

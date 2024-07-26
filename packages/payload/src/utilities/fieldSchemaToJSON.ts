@@ -1,5 +1,5 @@
-import type { FieldTypes } from '../admin/forms/FieldTypes.js'
 import type { ClientFieldConfig } from '../fields/config/client.js'
+import type { FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -8,7 +8,7 @@ export type FieldSchemaJSON = {
   name: string
   relationTo?: string // TODO: conditionally add based on `type`
   slug?: string // TODO: conditionally add based on `type`
-  type: keyof FieldTypes
+  type: FieldTypes
 }[]
 
 export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON => {

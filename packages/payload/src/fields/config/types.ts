@@ -808,6 +808,10 @@ export type Field =
   | UIField
   | UploadField
 
+type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
+
+export type FieldTypes = ExtractFieldTypes<Field>
+
 export type FieldAffectingData =
   | ArrayField
   | BlockField

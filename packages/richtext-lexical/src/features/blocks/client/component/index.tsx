@@ -44,7 +44,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
   const { path, schemaPath } = useFieldProps()
-  const { componentImportMap } = useComponentMap()
+  const { importMap } = useComponentMap()
   const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
 
   const [initialState, setInitialState] = useState<FormState | false>(false)
@@ -126,7 +126,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const LabelPayloadComponent = reducedBlock?.LabelComponent
 
   const LabelComponent = getComponent({
-    componentImportMap,
+    importMap,
     payloadComponent: LabelPayloadComponent,
   })
 
@@ -158,7 +158,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          LabelComponent?.component ? (
+          LabelComponent?.Component ? (
             <LabelComponent.component blockKind={'lexicalBlock'} formData={formData} />
           ) : (
             <div className={`${baseClass}__block-header`}>

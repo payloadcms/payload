@@ -4,20 +4,23 @@ import type {
   FieldDescriptionProps,
   LabelProps,
   Locale,
+  MappedComponent,
   SanitizedLabelProps,
   SanitizedLocalizationConfig,
   User,
   Validate,
 } from 'payload'
+import type React from 'react'
 
 export const fieldBaseClass = 'field-type'
 
 export type FormFieldBase = {
-  AfterInput?: React.ReactNode
-  BeforeInput?: React.ReactNode
-  CustomDescription?: React.ReactNode
-  CustomError?: React.ReactNode
-  CustomLabel?: React.ReactNode
+  AfterInput?: MappedComponent[]
+  BeforeInput?: MappedComponent[]
+  CustomDescription?: MappedComponent
+  CustomError?: MappedComponent
+  CustomLabel?: MappedComponent
+  Filter?: MappedComponent
   className?: string
   custom?: Record<string, any>
   descriptionProps?: FieldDescriptionProps

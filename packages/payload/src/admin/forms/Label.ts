@@ -1,5 +1,7 @@
+import type { MappedComponent } from '../types.js'
+
 export type LabelProps = {
-  CustomLabel?: React.ReactNode
+  CustomLabel?: MappedComponent
   as?: 'label' | 'span'
   htmlFor?: string
   label?: Record<string, string> | string

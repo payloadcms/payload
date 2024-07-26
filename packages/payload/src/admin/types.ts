@@ -1,3 +1,7 @@
+import type React from 'react'
+
+import type { JsonObject } from '../types/index.js'
+
 export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextFieldProps } from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
@@ -39,3 +43,16 @@ export type {
   ServerSideEditViewProps,
   VisibleEntities,
 } from './views/types.js'
+
+export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
+  | {
+      Component: React.ComponentType<TComponentClientProps>
+      RenderedComponent?: React.ReactNode
+      props?: TComponentClientProps
+      type: 'client'
+    }
+  | {
+      Component: React.ReactNode
+      type: 'server'
+    }
+  | undefined

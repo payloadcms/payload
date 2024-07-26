@@ -3,7 +3,6 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
-import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
@@ -11,6 +10,7 @@ import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
 
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 
 const baseClass = 'step-nav'
@@ -29,11 +29,11 @@ const StepNav: React.FC<{
     routes: { admin },
   } = config
 
-  const { componentMap } = useComponentMap()
+  const {
+    componentMap: { Icon },
+  } = useComponentMap()
 
   const { t } = useTranslation()
-
-  const Icon = componentMap?.Icon || <PayloadIcon />
 
   const LinkElement = Link || 'a'
 
@@ -42,7 +42,9 @@ const StepNav: React.FC<{
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
-            <span title={t('general:dashboard')}>{Icon}</span>
+            <span title={t('general:dashboard')}>
+              <RenderMappedComponent component={Icon} />
+            </span>
           </LinkElement>
           <span>/</span>
           {stepNav.map((item, i) => {
@@ -72,7 +74,9 @@ const StepNav: React.FC<{
       ) : (
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
           <div className={`${baseClass}__home`}>
-            <span title={t('general:dashboard')}>{Icon}</span>
+            <span title={t('general:dashboard')}>
+              <RenderMappedComponent component={Icon} />
+            </span>
           </div>
         </div>
       )}

@@ -1,24 +1,20 @@
 import type {
-  ComponentImportMap,
   EditConfig,
+  ImportMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
-import React from 'react'
-
-import type { WithServerSidePropsPrePopulated } from './index.js'
+import type { CreateMappedComponent } from './index.js'
 import type { ActionMap } from './types.js'
 
-import { getComponent } from './getComponent.js'
-
 export const mapActions = (args: {
-  WithServerSideProps: WithServerSidePropsPrePopulated
   collectionConfig?: SanitizedCollectionConfig
-  componentImportMap: ComponentImportMap
+  createMappedComponent: CreateMappedComponent
   globalConfig?: SanitizedGlobalConfig
+  importMap: ImportMap
 }): ActionMap => {
-  const { WithServerSideProps, collectionConfig, globalConfig } = args
+  const { collectionConfig, createMappedComponent, globalConfig } = args
 
   const editViews: EditConfig = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
 
@@ -37,31 +33,15 @@ export const mapActions = (args: {
       if (!('actions' in view)) {
         continue
       }
-      view.actions.forEach((action, i) => {
-        const ResolvedAction = getComponent({
-          componentImportMap: args.componentImportMap,
-          payloadComponent: action,
-        })
-        if (ResolvedAction?.component) {
-          if (!result.Edit[key]) {
-            result.Edit[key] = []
-          }
-          result.Edit[key].push(<WithServerSideProps Component={ResolvedAction} key={i} />)
-        }
-      })
+      if (!result.Edit[key]) {
+        result.Edit[key] = []
+      }
+      result.Edit[key] = createMappedComponent(view.actions)
     }
   }
 
   if (listActions) {
-    listActions.forEach((action, i) => {
-      const ResolvedAction = getComponent({
-        componentImportMap: args.componentImportMap,
-        payloadComponent: action,
-      })
-      if (ResolvedAction?.component) {
-        result.List.push(<WithServerSideProps Component={ResolvedAction} key={i} />)
-      }
-    })
+    result.List = createMappedComponent(listActions)
   }
 
   return result

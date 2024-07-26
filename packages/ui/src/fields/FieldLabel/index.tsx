@@ -7,6 +7,7 @@ import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
@@ -44,7 +45,7 @@ export const FieldLabel: React.FC<LabelProps> = (props) => {
   const { CustomLabel } = props
 
   if (CustomLabel !== undefined) {
-    return CustomLabel
+    return <RenderMappedComponent clientProps={props} component={CustomLabel} />
   }
 
   return <DefaultFieldLabel {...props} />

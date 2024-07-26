@@ -33,7 +33,7 @@ export type TabsFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _TabsField: React.FC<TabsFieldProps> = (props) => {
+const TabsField_: React.FC<TabsFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -163,11 +163,10 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
                   .filter(Boolean)
                   .join(' ')}
               >
-                {CustomDescription ? (
-                  CustomDescription
-                ) : (
-                  <FieldDescription {...(descriptionProps || {})} />
-                )}
+                <FieldDescription
+                  CustomDescription={CustomDescription}
+                  {...(descriptionProps || {})}
+                />
                 <RenderFields
                   fieldMap={activeTabConfig.fieldMap}
                   forceRender={forceRender}
@@ -195,4 +194,4 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
   )
 }
 
-export const TabsField = withCondition(_TabsField)
+export const TabsField = withCondition(TabsField_)

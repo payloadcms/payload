@@ -2,7 +2,7 @@ import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translation
 import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
 
-import type { ComponentImportMap } from '../bin/generateComponentImportMap/index.js'
+import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type {
   Config,
@@ -191,20 +191,20 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentImportMap?: Config['admin']['componentImportMap']['generators'][0]
   /*
    (args: {
       WithServerSideProps: React.FC<{
         [key: string]: any
         Component: ResolvedComponent<any, any>
       }>
-      componentImportMap: ComponentImportMap
+      importMap: ImportMap
       config: SanitizedConfig
       i18n: I18nClient
       schemaPath: string
     }) => Map<string, unknown>
    */
   generateComponentMap: PayloadComponent<any, never>
+  generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     i18n: I18n<any, any>

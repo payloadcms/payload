@@ -1,10 +1,13 @@
 'use client'
 
+import type { MappedComponent } from 'payload'
+
 import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -55,10 +58,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
 }
 
 type Props = {
-  CustomComponent?: React.ReactNode
+  CustomComponent?: MappedComponent
 }
 
 export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return CustomComponent
+  if (CustomComponent) return <RenderMappedComponent component={CustomComponent} />
   return <DefaultPublishButton />
 }

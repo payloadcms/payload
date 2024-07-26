@@ -17,6 +17,7 @@ import {
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
@@ -35,7 +36,7 @@ export type GroupFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const _GroupField: React.FC<GroupFieldProps> = (props) => {
+export const GroupField_: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -94,15 +95,14 @@ export const _GroupField: React.FC<GroupFieldProps> = (props) => {
               {(CustomLabel || CustomDescription || label) && (
                 <header>
                   {CustomLabel !== undefined ? (
-                    CustomLabel
+                    <RenderMappedComponent clientProps={{ label }} component={CustomLabel} />
                   ) : label ? (
                     <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                   ) : null}
-                  {CustomDescription !== undefined ? (
-                    CustomDescription
-                  ) : (
-                    <FieldDescription {...(descriptionProps || {})} />
-                  )}
+                  <FieldDescription
+                    CustomDescription={CustomDescription}
+                    {...(descriptionProps || {})}
+                  />
                 </header>
               )}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
@@ -124,4 +124,4 @@ export const _GroupField: React.FC<GroupFieldProps> = (props) => {
 
 export { GroupProvider, useGroup }
 
-export const GroupField = withCondition(_GroupField)
+export const GroupField = withCondition(GroupField_)

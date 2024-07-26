@@ -17,6 +17,7 @@ import type { FormFieldBase } from '../shared/index.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
@@ -28,7 +29,7 @@ export type DateFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _DateTimeField: React.FC<DateFieldProps> = (props) => {
+const DateTimeField_: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -95,7 +96,7 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderMappedComponent component={BeforeInput} />
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
@@ -105,15 +106,11 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
           readOnly={disabled}
           value={value}
         />
-        {AfterInput}
+        <RenderMappedComponent component={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const DateTimeField = withCondition(_DateTimeField)
+export const DateTimeField = withCondition(DateTimeField_)

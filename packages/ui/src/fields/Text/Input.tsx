@@ -7,6 +7,7 @@ import React from 'react'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -98,7 +99,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
+            <RenderMappedComponent component={BeforeInput} />
+
             <input
               data-rtl={rtl}
               disabled={readOnly}
@@ -111,14 +113,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
               type="text"
               value={value || ''}
             />
-            {AfterInput}
+            <RenderMappedComponent component={AfterInput} />
           </div>
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

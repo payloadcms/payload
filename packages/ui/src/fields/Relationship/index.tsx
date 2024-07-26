@@ -35,7 +35,7 @@ const baseClass = 'relationship'
 
 export { RelationshipFieldProps }
 
-const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipField_: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -596,14 +596,10 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )
 }
 
-export const RelationshipField = withCondition(_RelationshipField)
+export const RelationshipField = withCondition(RelationshipField_)

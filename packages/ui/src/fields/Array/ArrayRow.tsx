@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, FieldPermissions, Row } from 'payload'
+import type { ArrayField, FieldPermissions, MappedComponent, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -19,7 +19,7 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  CustomRowLabel?: React.ReactNode
+  CustomRowLabel?: MappedComponent
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number

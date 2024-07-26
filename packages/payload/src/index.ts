@@ -666,7 +666,6 @@ interface RequestContext {
 
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export type { FieldTypes } from './admin/forms/FieldTypes.js'
 export type * from './admin/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
@@ -698,10 +697,10 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
-export { generateComponentImportMap } from './bin/generateComponentImportMap/index.js'
-export type { ComponentImportMap } from './bin/generateComponentImportMap/index.js'
+export { generateImportMap } from './bin/generateImportMap/index.js'
+export type { ImportMap } from './bin/generateImportMap/index.js'
 
-export { genComponentImportMapIterateFields } from './bin/generateComponentImportMap/iterateFields.js'
+export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
 export { createClientCollectionConfig } from './collections/config/client.js'
 export type {
@@ -879,6 +878,7 @@ export type {
   FieldHook,
   FieldHookArgs,
   FieldPresentationalOnly,
+  FieldTypes,
   FieldWithMany,
   FieldWithMaxDepth,
   FieldWithPath,

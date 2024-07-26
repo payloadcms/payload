@@ -15,6 +15,7 @@ const baseClass = 'point'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -27,7 +28,7 @@ export type PointFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const _PointField: React.FC<PointFieldProps> = (props) => {
+export const PointField_: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -115,13 +116,10 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('longitude')} />
-          )}
+          <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('longitude')} />
+
           <div className="input-wrapper">
-            {BeforeInput}
+            <RenderMappedComponent component={BeforeInput} />
             <input
               disabled={readOnly}
               id={`field-longitude-${path.replace(/\./g, '__')}`}
@@ -132,18 +130,14 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            {AfterInput}
+            <RenderMappedComponent component={AfterInput} />
           </div>
         </li>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('latitude')} />
-          )}
+          <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('latitude')} />
           <div className="input-wrapper">
             <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-            {BeforeInput}
+            <RenderMappedComponent component={BeforeInput} />
             <input
               disabled={readOnly}
               id={`field-latitude-${path.replace(/\./g, '__')}`}
@@ -154,17 +148,13 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            {AfterInput}
+            <RenderMappedComponent component={AfterInput} />
           </div>
         </li>
       </ul>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const PointField = withCondition(_PointField)
+export const PointField = withCondition(PointField_)

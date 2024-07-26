@@ -9,6 +9,7 @@ import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -30,7 +31,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const _CodeField: React.FC<CodeFieldProps> = (props) => {
+const CodeField_: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -95,7 +96,7 @@ const _CodeField: React.FC<CodeFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderMappedComponent component={BeforeInput} />
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={disabled ? () => null : (val) => setValue(val)}
@@ -103,11 +104,11 @@ const _CodeField: React.FC<CodeFieldProps> = (props) => {
           readOnly={disabled}
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderMappedComponent component={AfterInput} />
       </div>
-      {CustomDescription ? CustomDescription : <FieldDescription {...(descriptionProps || {})} />}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const CodeField = withCondition(_CodeField)
+export const CodeField = withCondition(CodeField_)

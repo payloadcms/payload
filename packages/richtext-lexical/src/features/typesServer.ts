@@ -284,7 +284,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  componentImports?: Config['admin']['componentImportMap']['generators'][0] | PayloadComponent[]
+  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   componentMap?:
     | ((args: {
         config: SanitizedConfig

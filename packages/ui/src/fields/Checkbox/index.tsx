@@ -22,7 +22,7 @@ const baseClass = 'checkbox'
 
 export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 
-const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxField_: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     name,
@@ -115,13 +115,9 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const CheckboxField = withCondition(_CheckboxField)
+export const CheckboxField = withCondition(CheckboxField_)

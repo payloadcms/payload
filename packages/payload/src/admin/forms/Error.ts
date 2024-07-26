@@ -1,5 +1,7 @@
+import type { MappedComponent } from '../types.js'
+
 export type ErrorProps = {
-  CustomError?: React.ReactNode
+  CustomError?: MappedComponent
   alignCaret?: 'center' | 'left' | 'right'
   message?: string
   path?: string

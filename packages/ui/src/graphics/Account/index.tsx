@@ -19,7 +19,7 @@ export const Account = () => {
     routes: { admin: adminRoute },
   } = useConfig()
 
-  const { componentImportMap } = useComponentMap()
+  const { componentMap } = useComponentMap()
 
   const { user } = useAuth()
   const pathname = usePathname()
@@ -28,11 +28,11 @@ export const Account = () => {
 
   if (typeof avatar === 'object' && avatar && 'Component' in avatar) {
     const AvatarComponent = getComponent({
-      componentImportMap,
+      importMap,
       payloadComponent: avatar.Component,
     })
-    if (AvatarComponent.component) {
-      const Component = AvatarComponent.component
+    if (AvatarComponent.Component) {
+      const Component = AvatarComponent.Component
       return <Component active={isOnAccountPage} {...AvatarComponent.clientProps} />
     }
     return null

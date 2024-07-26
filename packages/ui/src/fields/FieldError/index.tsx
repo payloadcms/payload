@@ -7,6 +7,7 @@ import React from 'react'
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import './index.scss'
 
 const baseClass = 'field-error'
@@ -45,7 +46,7 @@ export const FieldError: React.FC<ErrorProps> = (props) => {
   const { CustomError } = props
 
   if (CustomError !== undefined) {
-    return CustomError
+    return <RenderMappedComponent clientProps={props} component={CustomError} />
   }
 
   return <DefaultFieldError {...props} />

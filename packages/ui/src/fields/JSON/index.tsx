@@ -15,6 +15,7 @@ const baseClass = 'json-field'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
@@ -26,7 +27,7 @@ export type JSONFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _JSONField: React.FC<JSONFieldProps> = (props) => {
+const JSONField_: React.FC<JSONFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -140,7 +141,7 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderMappedComponent component={BeforeInput} />
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -149,15 +150,11 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        {AfterInput}
+        <RenderMappedComponent component={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }
 
-export const JSONField = withCondition(_JSONField)
+export const JSONField = withCondition(JSONField_)

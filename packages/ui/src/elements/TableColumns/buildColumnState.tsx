@@ -86,13 +86,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const name = 'name' in field ? field.name : undefined
 
-    const Cell =
-      field.CustomCell !== undefined ? (
-        field.CustomCell
-      ) : (
-        <DefaultCell {...field.cellComponentProps} />
-      )
-
     const CustomLabelToRender =
       field &&
       'fieldComponentProps' in field &&
@@ -149,7 +142,7 @@ export const buildColumnState = (args: Args): Column[] => {
               : undefined,
         },
         components: {
-          Cell,
+          Cell: field.Cell,
           Heading,
         },
       }

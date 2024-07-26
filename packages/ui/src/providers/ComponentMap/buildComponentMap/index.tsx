@@ -1,90 +1,156 @@
 import type {
   AdminViewProps,
-  ComponentImportMap,
   EditViewProps,
+  ImportMap,
+  JsonObject,
+  MappedComponent,
   Payload,
-  ResolvedComponent,
+  PayloadComponent,
   ServerProps,
 } from 'payload'
 
+import { isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import type { ComponentMap } from './types.js'
 
-import { WithServerSideProps as WithServerSidePropsGeneric } from '../../../elements/WithServerSideProps/index.js'
+import { PayloadIcon } from '../../../graphics/Icon/index.js'
 import { mapCollections } from './collections.js'
 import { getComponent } from './getComponent.js'
 import { mapGlobals } from './globals.js'
 
-export type WithServerSidePropsPrePopulated = React.FC<{
-  [key: string]: any
-  Component: ResolvedComponent<any, any>
-}>
+export type CreateMappedComponent = {
+  (
+    payloadComponent: ({ ReactComponent: React.FC } | PayloadComponent)[],
+    props?: object,
+    fallback?: React.FC,
+  ): MappedComponent[]
+  (
+    payloadComponent: { ReactComponent: React.FC } | PayloadComponent,
+    props?: object,
+    fallback?: React.FC,
+  ): MappedComponent
+}
 
 export const buildComponentMap = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   children: React.ReactNode
-  /**
-   * The componentImportMap is generated in packages/payload/src/bin/generateComponentImportMap/index.ts
-   * every time HMR runs, or when executing the `payload generatecomponentimportmap` command.
-   */
-  componentImportMap: ComponentImportMap
   i18n: ServerProps['i18n']
+  /**
+   * The importMap is generated in packages/payload/src/bin/generateImportMap/index.ts
+   * every time HMR runs, or when executing the `payload generate:importmap` command.
+   */
+  importMap: ImportMap
   payload: Payload
   readOnly?: boolean
 }): {
   componentMap: ComponentMap
   wrappedChildren: React.ReactNode
 } => {
-  const {
-    DefaultEditView,
-    DefaultListView,
-    children,
-    componentImportMap,
-    i18n,
-    payload,
-    readOnly,
-  } = args
+  const { DefaultEditView, DefaultListView, children, i18n, importMap, payload, readOnly } = args
   const config = payload.config
 
-  const WithServerSideProps: WithServerSidePropsPrePopulated = ({ Component, ...rest }) => {
-    if (!Component.component) {
-      return null
+  const createSingleMappedComponent = (
+    payloadComponent: { ReactComponent: React.FC<any> } | PayloadComponent,
+    key: number | string,
+    props?: JsonObject,
+    Fallback?: React.FC<any>,
+  ): MappedComponent => {
+    if (!payloadComponent) {
+      if (!Fallback) {
+        return undefined
+      }
+      if (isReactServerComponentOrFunction(Fallback)) {
+        return {
+          type: 'server',
+          Component: <Fallback i18n={i18n} key={key} payload={payload} {...props} />,
+        }
+      } else {
+        return {
+          type: 'client',
+          Component: Fallback,
+          props,
+        }
+      }
     }
-    return (
-      <WithServerSidePropsGeneric
-        Component={Component.component}
-        serverOnlyProps={{
-          i18n,
-          payload,
-          ...(Component.serverProps || {}),
-        }}
-        {...rest}
-        {...(Component.clientProps || {})}
-      />
-    )
+    const resolvedComponent =
+      payloadComponent &&
+      typeof payloadComponent === 'object' &&
+      'ReactComponent' in payloadComponent
+        ? {
+            Component: payloadComponent.ReactComponent,
+          }
+        : getComponent({
+            importMap,
+            payloadComponent: payloadComponent as any,
+          })
+
+    if (!resolvedComponent.Component) {
+      console.error(`Component not found in importMap: ${key}`)
+    }
+
+    if (isReactServerComponentOrFunction(resolvedComponent.Component)) {
+      const Component: React.FC<any> = resolvedComponent.Component
+      return {
+        type: 'server',
+        Component: (
+          <Component
+            i18n={i18n}
+            key={key}
+            payload={payload}
+            {...resolvedComponent.serverProps}
+            {...props}
+          />
+        ),
+      }
+    } else {
+      return {
+        type: 'client',
+        Component: resolvedComponent.Component,
+        props: {
+          ...(resolvedComponent.clientProps || {}),
+          ...props,
+        },
+      }
+    }
+  }
+
+  const createMappedComponent: CreateMappedComponent = (payloadComponent, props, fallback) => {
+    if (!payloadComponent && !fallback) {
+      return undefined as any
+    }
+    if (payloadComponent && Array.isArray(payloadComponent)) {
+      const mappedComponents: MappedComponent[] = []
+      for (let i = 0; i < payloadComponent.length; i++) {
+        const component = createSingleMappedComponent(payloadComponent[i], i, props, fallback)
+        mappedComponents.push(component)
+      }
+      return mappedComponents as any
+    } else {
+      return createSingleMappedComponent(payloadComponent, undefined, props, fallback) as any
+    }
   }
 
   const collections = mapCollections({
     DefaultEditView,
     DefaultListView,
-    WithServerSideProps,
     collections: config.collections,
-    componentImportMap,
     config,
+    createMappedComponent,
     i18n,
+    importMap,
     readOnly,
   })
 
   const globals = mapGlobals({
     args: {
       DefaultEditView,
-      WithServerSideProps,
-      componentImportMap,
       config,
+      createMappedComponent,
       globals: config.globals,
       i18n,
+      importMap,
       readOnly,
     },
   })
@@ -107,36 +173,43 @@ export const buildComponentMap = (args: {
     return <Component>{children}</Component>
   }
 
-  const LogoutButtonComponent = getComponent({
-    componentImportMap,
-    payloadComponent: config.admin?.components?.logout?.Button,
-  })
+  const LogoutButton = createMappedComponent(config.admin?.components?.logout?.Button)
 
-  const LogoutButton = LogoutButtonComponent?.component ? (
-    <WithServerSideProps Component={LogoutButtonComponent} />
-  ) : null
+  const Icon = createMappedComponent(
+    config.admin?.components?.graphics?.Icon,
+    undefined,
+    PayloadIcon,
+  )
 
-  const IconComponent = getComponent({
-    componentImportMap,
-    payloadComponent: config.admin?.components?.graphics?.Icon,
-  })
+  const custom = {}
+  if (config?.admin?.adminDependencies) {
+    for (const [key, dependency] of Object.entries(config.admin.adminDependencies)) {
+      if (dependency.type === 'component') {
+        const CustomComponent = importMap[dependency.path]
 
-  const Icon = IconComponent?.component ? <WithServerSideProps Component={IconComponent} /> : null
+        if (isReactServerComponentOrFunction(CustomComponent)) {
+          custom[key] = {
+            type: 'server',
+            Component: <CustomComponent {...dependency.serverProps} />,
+          }
+        } else {
+          custom[key] = {
+            type: 'client',
+            Component: CustomComponent,
+            props: dependency.clientProps,
+          }
+        }
+      }
+    }
+  }
 
   return {
     componentMap: {
       Icon,
       LogoutButton,
-      actions: config.admin?.components?.actions?.map((Component, i) => (
-        <WithServerSideProps
-          Component={getComponent({
-            componentImportMap,
-            payloadComponent: Component,
-          })}
-          key={i}
-        />
-      )),
+      actions: createMappedComponent(config.admin?.components?.actions),
       collections,
+      custom,
       globals,
     },
     wrappedChildren:
@@ -146,9 +219,9 @@ export const buildComponentMap = (args: {
           providers={config.admin?.components?.providers.map(
             (Component) =>
               getComponent({
-                componentImportMap,
+                importMap,
                 payloadComponent: Component,
-              }).component,
+              }).Component,
           )}
         >
           {children}
