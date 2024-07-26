@@ -1,6 +1,6 @@
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { AddToComponentImportMap, ComponentMap, ImportMap } from './index.js'
+import type { AddToComponentImportMap, ImportMap, Imports } from './index.js'
 
 import { fieldHasSubFields } from '../../fields/config/types.js'
 
@@ -21,10 +21,10 @@ export function genComponentImportMapIterateFields({
 }: {
   addToComponentImportMap: AddToComponentImportMap
   baseDir: string
-  componentMap: ComponentMap
+  componentMap: ImportMap
   config: SanitizedConfig
   fields: Field[]
-  importMap: ImportMap
+  importMap: Imports
 }) {
   for (const field of fields) {
     if (fieldHasSubFields(field)) {

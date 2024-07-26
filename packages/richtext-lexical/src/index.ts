@@ -164,9 +164,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       generateComponentImportMap: getGenerateImportComponentMap({
         resolvedFeatureMap,
       }),
-      generateComponentMap: getGenerateComponentMap({
-        resolvedFeatureMap,
-      }),
+      generateComponentMap: {
+        path: 'server:@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+        serverProps: {
+          resolvedFeatureMap,
+        },
+      },
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
@@ -809,10 +812,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 }
 
-export { AlignFeature } from './features/align/feature.server.js'
-export { BlockquoteFeature } from './features/blockquote/feature.server.js'
-export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
-export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
+export { AlignFeature } from './features/align/server/index.js'
+export { BlockquoteFeature } from './features/blockquote/server/index.js'
+export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
+export { type BlockFields } from './features/blocks/server/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
@@ -825,14 +828,14 @@ export {
 } from './features/converters/html/converter/index.js'
 
 export type { HTMLConverter } from './features/converters/html/converter/types.js'
+export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
 export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
-} from './features/converters/html/feature.server.js'
-export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
-export { TestRecorderFeature } from './features/debug/testRecorder/feature.server.js'
-export { TreeViewFeature } from './features/debug/treeView/feature.server.js'
-export { EXPERIMENTAL_TableFeature } from './features/experimental_table/feature.server.js'
+} from './features/converters/html/index.js'
+export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
+export { TreeViewFeature } from './features/debug/treeView/server/index.js'
+export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
 export { ItalicFeature } from './features/format/italic/feature.server.js'
@@ -841,18 +844,18 @@ export { StrikethroughFeature } from './features/format/strikethrough/feature.se
 export { SubscriptFeature } from './features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './features/format/underline/feature.server.js'
-export { HeadingFeature, type HeadingFeatureProps } from './features/heading/feature.server.js'
-export { HorizontalRuleFeature } from './features/horizontalRule/feature.server.js'
-export { IndentFeature } from './features/indent/feature.server.js'
-
-export { LinkFeature, type LinkFeatureServerProps } from './features/link/feature.server.js'
+export { HeadingFeature, type HeadingFeatureProps } from './features/heading/server/index.js'
+export { HorizontalRuleFeature } from './features/horizontalRule/server/index.js'
+export { IndentFeature } from './features/indent/server/index.js'
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
+
 export { LinkNode } from './features/link/nodes/LinkNode.js'
 export type { LinkFields } from './features/link/nodes/types.js'
-export { ChecklistFeature } from './features/lists/checklist/feature.server.js'
-export { OrderedListFeature } from './features/lists/orderedList/feature.server.js'
-export { UnorderedListFeature } from './features/lists/unorderedList/feature.server.js'
+export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+export { ChecklistFeature } from './features/lists/checklist/server/index.js'
+export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
+export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
 export { LexicalPluginToLexicalFeature } from './features/migrations/lexicalPluginToLexical/feature.server.js'
 export { SlateBlockquoteConverter } from './features/migrations/slateToLexical/converter/converters/blockquote/index.js'
 export { SlateHeadingConverter } from './features/migrations/slateToLexical/converter/converters/heading/index.js'
@@ -876,18 +879,18 @@ export type {
 } from './features/migrations/slateToLexical/converter/types.js'
 export { SlateToLexicalFeature } from './features/migrations/slateToLexical/feature.server.js'
 
-export { ParagraphFeature } from './features/paragraph/feature.server.js'
+export { ParagraphFeature } from './features/paragraph/server/index.js'
 export {
   RelationshipFeature,
   type RelationshipFeatureProps,
-} from './features/relationship/feature.server.js'
+} from './features/relationship/server/index.js'
 export {
   type RelationshipData,
-  RelationshipNode,
-} from './features/relationship/nodes/RelationshipNode.js'
+  RelationshipServerNode,
+} from './features/relationship/server/nodes/RelationshipNode.js'
 
-export { FixedToolbarFeature } from './features/toolbars/fixed/feature.server.js'
-export { InlineToolbarFeature } from './features/toolbars/inline/feature.server.js'
+export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'
+export { InlineToolbarFeature } from './features/toolbars/inline/server/index.js'
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
@@ -927,10 +930,10 @@ export type {
   ServerFeatureProviderMap,
 } from './features/typesServer.js'
 
-export { UploadFeature } from './features/upload/feature.server.js'
+export { UploadFeature } from './features/upload/server/feature.server.js'
 
-export type { UploadFeatureProps } from './features/upload/feature.server.js'
-export { type UploadData, UploadNode } from './features/upload/nodes/UploadNode.js'
+export type { UploadFeatureProps } from './features/upload/server/feature.server.js'
+export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
 
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 export {

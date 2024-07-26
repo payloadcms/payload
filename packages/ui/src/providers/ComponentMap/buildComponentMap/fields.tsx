@@ -629,8 +629,15 @@ export const mapFields = (args: {
             const RichTextFieldComponent = field.editor.FieldComponent
             const RichTextCellComponent = field.editor.CellComponent
 
-            if (typeof field.editor.generateComponentMap === 'function') {
-              const result = field.editor.generateComponentMap({
+            if (field.editor.generateComponentMap) {
+              const { component: generateComponentMap, serverProps } = getComponent({
+                componentImportMap,
+                payloadComponent: field.editor.generateComponentMap,
+              })
+
+              const actualGenerateComponentMap = (generateComponentMap as any)(serverProps)
+
+              const result = actualGenerateComponentMap({
                 WithServerSideProps,
                 componentImportMap,
                 config,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { SerializedUploadNode } from '../../../../../upload/nodes/UploadNode.js'
+import type { SerializedUploadNode } from '../../../../../upload/server/nodes/UploadNode.js'
 import type { LexicalPluginNodeConverter } from '../../types.js'
 
 export const _UploadConverter: LexicalPluginNodeConverter = {

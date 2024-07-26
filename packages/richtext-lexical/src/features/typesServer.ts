@@ -231,11 +231,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   }
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
-   * automatically populate & run hooks for them
+   * automatically populate, run hooks, and generate component import maps for them
    */
   getSubFields?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
-    req: PayloadRequest
+    /**
+     * Optional. If not provided, all possible sub-fields should be returned.
+     */
+    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
@@ -281,15 +284,19 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  generateComponentImportMap?: Config['admin']['componentImportMap']['generators'][0]
-  generateComponentMap?: (args: {
-    config: SanitizedConfig
-    i18n: I18nClient
-    props: ServerProps
-    schemaPath: string
-  }) => {
-    [key: string]: PayloadComponent
-  }
+  componentImports?: Config['admin']['componentImportMap']['generators'][0] | PayloadComponent[]
+  componentMap?:
+    | ((args: {
+        config: SanitizedConfig
+        i18n: I18nClient
+        props: ServerProps
+        schemaPath: string
+      }) => {
+        [key: string]: PayloadComponent
+      })
+    | {
+        [key: string]: PayloadComponent
+      }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     i18n: I18nClient

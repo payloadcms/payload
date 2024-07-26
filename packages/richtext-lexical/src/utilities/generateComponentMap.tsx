@@ -1,5 +1,10 @@
 import type { MappedField } from '@payloadcms/ui'
-import type { RichTextAdapter } from 'payload'
+import type {
+  ComponentImportMap,
+  ResolvedComponent,
+  RichTextAdapter,
+  SanitizedConfig,
+} from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -9,9 +14,7 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
-  (args: {
-    resolvedFeatureMap: ResolvedServerFeatureMap
-  }): RichTextAdapter['generateComponentMap'] =>
+  (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): any =>
   ({ WithServerSideProps, componentImportMap, config, i18n, schemaPath }) => {
     const componentMap: Map<
       string,
@@ -30,16 +33,16 @@ export const getGenerateComponentMap =
           /**
            * Handle Feature Component Maps
            */
-          if (
-            'generateComponentMap' in resolvedFeature &&
-            typeof resolvedFeature.generateComponentMap === 'function'
-          ) {
-            const components = resolvedFeature.generateComponentMap({
-              config,
-              i18n,
-              props: resolvedFeature.sanitizedServerFeatureProps,
-              schemaPath,
-            })
+          if ('componentMap' in resolvedFeature) {
+            const components =
+              typeof resolvedFeature.componentMap === 'function'
+                ? resolvedFeature.componentMap({
+                    config,
+                    i18n,
+                    props: resolvedFeature.sanitizedServerFeatureProps,
+                    schemaPath,
+                  })
+                : resolvedFeature.componentMap
 
             for (const componentKey in components) {
               const payloadComponent = components[componentKey]

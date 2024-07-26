@@ -192,16 +192,19 @@ type RichTextAdapterBase<
   ExtraFieldProperties = {},
 > = {
   generateComponentImportMap?: Config['admin']['componentImportMap']['generators'][0]
-  generateComponentMap: (args: {
-    WithServerSideProps: React.FC<{
-      [key: string]: any
-      Component: ResolvedComponent<any, any>
-    }>
-    componentImportMap: ComponentImportMap
-    config: SanitizedConfig
-    i18n: I18nClient
-    schemaPath: string
-  }) => Map<string, unknown>
+  /*
+   (args: {
+      WithServerSideProps: React.FC<{
+        [key: string]: any
+        Component: ResolvedComponent<any, any>
+      }>
+      componentImportMap: ComponentImportMap
+      config: SanitizedConfig
+      i18n: I18nClient
+      schemaPath: string
+    }) => Map<string, unknown>
+   */
+  generateComponentMap: PayloadComponent<any, never>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     i18n: I18n<any, any>

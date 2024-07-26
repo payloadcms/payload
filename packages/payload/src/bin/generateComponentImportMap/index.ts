@@ -17,11 +17,11 @@ type ImportSpecifier = string
 type ImportPath = string
 type UserImportPath = string
 
-export type ComponentMap = {
+export type ImportMap = {
   [path: UserImportPath]: ImportIdentifier
 }
 
-export type ImportMap = {
+export type Imports = {
   [identifier: ImportIdentifier]: {
     path: ImportPath
     specifier: ImportSpecifier
@@ -34,13 +34,13 @@ export type ComponentImportMap = {
 
 export function addPayloadComponentToImportMap({
   baseDir,
-  componentMap,
   importMap,
+  imports,
   payloadComponent,
 }: {
   baseDir: string
-  componentMap: ComponentMap
   importMap: ImportMap
+  imports: Imports
   payloadComponent: PayloadComponent
 }) {
   if (!payloadComponent) {
@@ -48,15 +48,15 @@ export function addPayloadComponentToImportMap({
   }
   const { exportName, path: componentPath } = parsePayloadComponent(payloadComponent)
 
-  const importIdentifier = exportName + '_' + Object.keys(importMap).length
-  importMap[importIdentifier] = {
+  const importIdentifier = exportName + '_' + Object.keys(imports).length
+  imports[importIdentifier] = {
     path:
       componentPath.startsWith('.') || componentPath.startsWith('/')
         ? path.resolve(baseDir, componentPath.slice(1))
         : componentPath,
     specifier: exportName,
   }
-  componentMap[componentPath + '#' + exportName] = importIdentifier
+  importMap[componentPath + '#' + exportName] = importIdentifier
 }
 
 export type AddToComponentImportMap = (
@@ -68,8 +68,8 @@ export async function generateComponentImportMap(
   options?: { log: boolean },
 ): Promise<void> {
   console.log('Generating component map')
-  const componentMap: ComponentMap = {}
-  const importMap: ImportMap = {}
+  const componentMap: ImportMap = {}
+  const importMap: Imports = {}
 
   const addToComponentImportMap: AddToComponentImportMap = (payloadComponent) => {
     if (!payloadComponent) {
@@ -79,16 +79,16 @@ export async function generateComponentImportMap(
       for (const component of payloadComponent) {
         addPayloadComponentToImportMap({
           baseDir: config.admin.componentImportMap.baseDir,
-          componentMap,
-          importMap,
+          importMap: componentMap,
+          imports: importMap,
           payloadComponent: component,
         })
       }
     } else {
       addPayloadComponentToImportMap({
         baseDir: config.admin.componentImportMap.baseDir,
-        componentMap,
-        importMap,
+        importMap: componentMap,
+        imports: importMap,
         payloadComponent,
       })
     }
@@ -102,9 +102,28 @@ export async function generateComponentImportMap(
     importMap,
   })
 
+  await writeComponentMap({
+    componentMap,
+    fileName: 'componentImportMap.js',
+    importMap,
+    log: options?.log,
+  })
+}
+
+export async function writeComponentMap({
+  componentMap,
+  fileName,
+  importMap,
+  log,
+}: {
+  componentMap: ImportMap
+  fileName: string
+  importMap: Imports
+  log?: boolean
+}) {
   const outputFile = path.resolve(
     process.env.NEXT_PUBLIC_ROOT_DIR,
-    'app/(payload)/admin/componentImportMap.js',
+    `app/(payload)/admin/${fileName}`,
   )
   // Read current component map and check in the IMPORTS if there are any new imports. If not, don't write the file.
   const currentComponentMap = await fs.promises.readFile(outputFile, 'utf-8')
@@ -151,7 +170,7 @@ ${mapKeys.join(',\n')}
 }
 `
 
-  if (options?.log) {
+  if (log) {
     console.log(componentMapFile)
   }
 

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
-import type { AddToComponentImportMap, ComponentMap, ImportMap } from './index.js'
+import type { AddToComponentImportMap, ImportMap, Imports } from './index.js'
 
 import { genComponentImportMapIterateFields } from './iterateFields.js'
 
@@ -15,9 +15,9 @@ export function iterateCollections({
   addToComponentImportMap: AddToComponentImportMap
   baseDir: string
   collections: SanitizedCollectionConfig[]
-  componentMap: ComponentMap
+  componentMap: ImportMap
   config: SanitizedConfig
-  importMap: ImportMap
+  importMap: Imports
 }) {
   for (const collection of collections) {
     genComponentImportMapIterateFields({

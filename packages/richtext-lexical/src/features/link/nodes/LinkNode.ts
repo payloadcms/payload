@@ -22,7 +22,7 @@ import {
   createCommand,
 } from 'lexical'
 
-import type { LinkPayload } from '../plugins/floatingLinkEditor/types.js'
+import type { LinkPayload } from '../client/plugins/floatingLinkEditor/types.js'
 import type { LinkFields, SerializedLinkNode } from './types.js'
 
 const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', 'tel:'])

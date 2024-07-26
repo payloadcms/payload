@@ -1,4 +1,4 @@
-import type { SerializedQuoteNode } from '../../../../../blockquote/feature.server.js'
+import type { SerializedQuoteNode } from '../../../../../blockquote/server/index.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'

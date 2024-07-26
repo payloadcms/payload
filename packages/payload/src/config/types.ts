@@ -18,8 +18,8 @@ import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/ty
 import type { Permissions } from '../auth/index.js'
 import type {
   AddToComponentImportMap,
-  ComponentMap,
   ImportMap,
+  Imports,
 } from '../bin/generateComponentImportMap/index.js'
 import type {
   AfterErrorHook,
@@ -518,6 +518,23 @@ export type CORSConfig = {
   origins: '*' | string[]
 }
 
+export type AdminFunction = {
+  args: object
+  path: string
+  type: 'function'
+}
+
+export type AdminComponent = {
+  clientProps: object
+  path: string
+  serverProps: object
+  type: 'component'
+}
+
+export interface AdminDependencies {
+  [key: string]: AdminComponent | AdminFunction
+}
+
 /**
  * This is the central configuration
  *
@@ -526,6 +543,8 @@ export type CORSConfig = {
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
+    adminDependencies: AdminDependencies
+
     /** Automatically log in as a user */
     autoLogin?:
       | {
@@ -545,7 +564,6 @@ export type Config = {
           username?: string
         }
       | false
-
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -570,9 +588,9 @@ export type Config = {
         (props: {
           addToComponentImportMap: AddToComponentImportMap
           baseDir: string
-          componentMap: ComponentMap
+          componentMap: ImportMap
           config: SanitizedConfig
-          importMap: ImportMap
+          importMap: Imports
         }) => void
       >
     }

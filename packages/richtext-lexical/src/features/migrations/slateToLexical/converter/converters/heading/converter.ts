@@ -1,4 +1,4 @@
-import type { SerializedHeadingNode } from '../../../../../heading/feature.server.js'
+import type { SerializedHeadingNode } from '../../../../../heading/server/index.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'

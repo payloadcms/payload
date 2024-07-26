@@ -35,6 +35,9 @@
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
+      "@payloadcms/richtext-lexical/generateComponentMap": [
+        "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
+      ],
       "@payload-config": ["./_community/config.ts"]
     }
   },

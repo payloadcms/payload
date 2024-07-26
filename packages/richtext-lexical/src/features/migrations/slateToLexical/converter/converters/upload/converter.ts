@@ -1,4 +1,4 @@
-import type { SerializedUploadNode } from '../../../../../upload/nodes/UploadNode.js'
+import type { SerializedUploadNode } from '../../../../../upload/server/nodes/UploadNode.js'
 import type { SlateNodeConverter } from '../../types.js'
 
 export const _SlateUploadConverter: SlateNodeConverter = {

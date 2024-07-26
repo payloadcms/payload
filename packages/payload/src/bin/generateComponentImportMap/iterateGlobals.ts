@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { AddToComponentImportMap, ComponentMap, ImportMap } from './index.js'
+import type { AddToComponentImportMap, ImportMap, Imports } from './index.js'
 
 import { genComponentImportMapIterateFields } from './iterateFields.js'
 
@@ -14,10 +14,10 @@ export function iterateGlobals({
 }: {
   addToComponentImportMap: AddToComponentImportMap
   baseDir: string
-  componentMap: ComponentMap
+  componentMap: ImportMap
   config: SanitizedConfig
   globals: SanitizedGlobalConfig[]
-  importMap: ImportMap
+  importMap: Imports
 }) {
   for (const global of globals) {
     genComponentImportMapIterateFields({

@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload, PayloadRequest } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   converter: ({
