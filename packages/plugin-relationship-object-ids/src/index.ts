@@ -1,14 +1,28 @@
-import type { Config, Field } from 'payload'
+import type { Config, Field, FieldHook } from 'payload'
 
+import { getAfterReadHook } from './hooks/afterRead.js'
 import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
-const traverseFields = ({ config, fields }: { config: Config; fields: Field[] }): Field[] => {
+interface TraverseFieldsArgs {
+  config: Config
+  fields: Field[]
+  keepAfterRead: boolean
+}
+
+const traverseFields = ({ config, fields, keepAfterRead }: TraverseFieldsArgs): Field[] => {
   return fields.map((field) => {
     if (field.type === 'relationship' || field.type === 'upload') {
+      const afterRead: FieldHook[] = [...(field.hooks?.afterRead || [])]
+
+      if (!keepAfterRead) {
+        afterRead.unshift(getAfterReadHook({ config, field }))
+      }
+
       return {
         ...field,
         hooks: {
           ...(field.hooks || {}),
+          afterRead,
           beforeChange: [
             ...(field.hooks?.beforeChange || []),
             getBeforeChangeHook({ config, field }),
@@ -20,7 +34,7 @@ const traverseFields = ({ config, fields }: { config: Config; fields: Field[] })
     if ('fields' in field) {
       return {
         ...field,
-        fields: traverseFields({ config, fields: field.fields }),
+        fields: traverseFields({ config, fields: field.fields, keepAfterRead }),
       }
     }
 
@@ -30,7 +44,7 @@ const traverseFields = ({ config, fields }: { config: Config; fields: Field[] })
         tabs: field.tabs.map((tab) => {
           return {
             ...tab,
-            fields: traverseFields({ config, fields: tab.fields }),
+            fields: traverseFields({ config, fields: tab.fields, keepAfterRead }),
           }
         }),
       }
@@ -42,7 +56,7 @@ const traverseFields = ({ config, fields }: { config: Config; fields: Field[] })
         blocks: field.blocks.map((block) => {
           return {
             ...block,
-            fields: traverseFields({ config, fields: block.fields }),
+            fields: traverseFields({ config, fields: block.fields, keepAfterRead }),
           }
         }),
       }
@@ -52,9 +66,19 @@ const traverseFields = ({ config, fields }: { config: Config; fields: Field[] })
   })
 }
 
+interface Args {
+  /*
+    If you want to keep ObjectIDs as ObjectIDs after read, you can enable this flag.
+    By default, all relationship ObjectIDs are stringified within the AfterRead hook.
+  */
+  keepAfterRead?: boolean
+}
+
 export const relationshipsAsObjectID =
-  (/** Possible args in the future */) =>
+  (args?: Args) =>
   (config: Config): Config => {
+    const keepAfterRead = typeof args?.keepAfterRead === 'boolean' ? args.keepAfterRead : false
+
     return {
       ...config,
       collections: (config.collections || []).map((collection) => {
@@ -63,6 +87,7 @@ export const relationshipsAsObjectID =
           fields: traverseFields({
             config,
             fields: collection.fields,
+            keepAfterRead,
           }),
         }
       }),
@@ -72,6 +97,7 @@ export const relationshipsAsObjectID =
           fields: traverseFields({
             config,
             fields: global.fields,
+            keepAfterRead,
           }),
         }
       }),

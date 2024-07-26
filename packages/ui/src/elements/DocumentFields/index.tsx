@@ -1,9 +1,7 @@
 'use client'
-import type { Description, DocumentPermissions } from 'payload'
+import type { Description, DocumentPermissions, FieldMap } from 'payload'
 
 import React from 'react'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'

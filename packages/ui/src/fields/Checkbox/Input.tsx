@@ -15,7 +15,7 @@ export type CheckboxInputProps = {
   className?: string
   id?: string
   inputRef?: React.RefObject<HTMLInputElement | null>
-  label?: LabelProps['label']
+  label?: LabelProps<'checkbox'>['label']
   labelProps?: SanitizedLabelProps
   name?: string
   onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void

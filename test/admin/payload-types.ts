@@ -102,9 +102,6 @@ export interface Post {
   relationship?: (string | null) | Post;
   customCell?: string | null;
   sidebarField?: string | null;
-  descriptionAsString?: string | null;
-  descriptionAsFunction?: string | null;
-  descriptionAsComponent?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -173,6 +170,10 @@ export interface CustomViewsTwo {
  */
 export interface CustomField {
   id: string;
+  customTextField?: string | null;
+  descriptionAsString?: string | null;
+  descriptionAsFunction?: string | null;
+  descriptionAsComponent?: string | null;
   customSelectField?: string | null;
   updatedAt: string;
   createdAt: string;

@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
+import type { FieldType, Options } from '@payloadcms/ui'
+import type { FormFieldBase } from 'payload'
 
 import {
   FieldLabel,
@@ -82,7 +83,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={regenerateTitle}
+                onClick={() => {
+                  void regenerateTitle()
+                }}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',

@@ -5,7 +5,6 @@ import { slateEditor } from '@payloadcms/richtext-slate'
 import { CustomCell } from '../components/CustomCell/index.js'
 import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
 import { DemoUIField } from '../components/DemoUIField/Field.js'
-import { FieldDescriptionComponent } from '../components/FieldDescription/index.js'
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug } from '../slugs.js'
 
@@ -106,29 +105,6 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
-      },
-    },
-    {
-      name: 'descriptionAsString',
-      type: 'text',
-      admin: {
-        description: 'Static field description.',
-      },
-    },
-    {
-      name: 'descriptionAsFunction',
-      type: 'text',
-      admin: {
-        description: () => 'Function description',
-      },
-    },
-    {
-      name: 'descriptionAsComponent',
-      type: 'text',
-      admin: {
-        components: {
-          Description: FieldDescriptionComponent,
-        },
       },
     },
   ],

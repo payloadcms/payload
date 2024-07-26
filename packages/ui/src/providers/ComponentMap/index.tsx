@@ -1,7 +1,9 @@
 'use client'
+import type { FieldMap, MappedField } from 'payload'
+
 import React, { createContext, useCallback, useContext } from 'react'
 
-import type { ComponentMap, FieldMap, MappedField } from './buildComponentMap/types.js'
+import type { ComponentMap } from './buildComponentMap/types.js'
 
 export type IComponentMapContext = {
   componentMap: ComponentMap

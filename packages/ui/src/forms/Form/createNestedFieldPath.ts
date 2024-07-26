@@ -1,8 +1,6 @@
-import type { Field } from 'payload'
+import type { Field, MappedField } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
-
-import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export const createNestedFieldPath = (parentPath: string, field: Field): string => {
   if (parentPath) {

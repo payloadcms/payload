@@ -1,4 +1,4 @@
-import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { MappedField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getUniqueListBy } from 'payload/shared'

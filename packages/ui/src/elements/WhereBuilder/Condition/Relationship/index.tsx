@@ -248,7 +248,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
     return () => {
       abortControllers.forEach((controller) => {
-        if (controller.signal) controller.abort()
+        if (controller.signal) {
+          try {
+            controller.abort()
+          } catch (error) {
+            // swallow error
+          }
+        }
       })
     }
   }, [i18n, loadRelationOptions, relationTo])

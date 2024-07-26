@@ -61,7 +61,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     tabsWithRichText: TabsWithRichText;
@@ -92,7 +92,7 @@ export interface UserAuthOperations {
  * via the `definition` "lexical-fields".
  */
 export interface LexicalField {
-  id: number;
+  id: string;
   title: string;
   lexicalSimple?: {
     root: {
@@ -133,7 +133,7 @@ export interface LexicalField {
  * via the `definition` "lexical-migrate-fields".
  */
 export interface LexicalMigrateField {
-  id: number;
+  id: string;
   title: string;
   lexicalWithLexicalPluginData?: {
     root: {
@@ -228,7 +228,7 @@ export interface LexicalMigrateField {
  * via the `definition` "lexical-localized-fields".
  */
 export interface LexicalLocalizedField {
-  id: number;
+  id: string;
   title: string;
   lexicalBlocksSubLocalized?: {
     root: {
@@ -268,7 +268,7 @@ export interface LexicalLocalizedField {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   canViewConditionalField?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -286,7 +286,7 @@ export interface User {
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
-  id: number;
+  id: string;
   title?: string | null;
   items: {
     text: string;
@@ -350,7 +350,7 @@ export interface ArrayField {
  * via the `definition` "block-fields".
  */
 export interface BlockField {
-  id: number;
+  id: string;
   blocks: (
     | {
         text: string;
@@ -677,7 +677,7 @@ export interface BlockField {
     | null;
   relationshipBlocks?:
     | {
-        relationship?: (number | null) | TextField;
+        relationship?: (string | null) | TextField;
         id?: string | null;
         blockName?: string | null;
         blockType: 'relationships';
@@ -691,7 +691,7 @@ export interface BlockField {
  * via the `definition` "text-fields".
  */
 export interface TextField {
-  id: number;
+  id: string;
   text: string;
   localizedText?: string | null;
   i18nText?: string | null;
@@ -702,9 +702,6 @@ export interface TextField {
   overrideLength?: string | null;
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
-  customLabel?: string | null;
-  customError?: string | null;
-  beforeAndAfterInput?: string | null;
   hasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -720,7 +717,7 @@ export interface TextField {
  * via the `definition` "checkbox-fields".
  */
 export interface CheckboxField {
-  id: number;
+  id: string;
   checkbox: boolean;
   updatedAt: string;
   createdAt: string;
@@ -730,7 +727,7 @@ export interface CheckboxField {
  * via the `definition` "code-fields".
  */
 export interface CodeField {
-  id: number;
+  id: string;
   javascript?: string | null;
   typescript?: string | null;
   json?: string | null;
@@ -744,7 +741,7 @@ export interface CodeField {
  * via the `definition` "collapsible-fields".
  */
 export interface CollapsibleField {
-  id: number;
+  id: string;
   text: string;
   group?: {
     textWithinGroup?: string | null;
@@ -776,7 +773,7 @@ export interface CollapsibleField {
  * via the `definition` "conditional-logic".
  */
 export interface ConditionalLogic {
-  id: number;
+  id: string;
   text: string;
   toggleField?: boolean | null;
   fieldToToggle?: string | null;
@@ -801,7 +798,7 @@ export interface ConditionalLogic {
  * via the `definition` "date-fields".
  */
 export interface DateField {
-  id: number;
+  id: string;
   default: string;
   timeOnly?: string | null;
   timeOnlyWithCustomFormat?: string | null;
@@ -816,9 +813,10 @@ export interface DateField {
  * via the `definition` "email-fields".
  */
 export interface EmailField {
-  id: number;
+  id: string;
   email: string;
   localizedEmail?: string | null;
+  emailWithAutocomplete?: string | null;
   i18nEmail?: string | null;
   defaultEmail?: string | null;
   defaultEmptyString?: string | null;
@@ -837,7 +835,7 @@ export interface EmailField {
  * via the `definition` "radio-fields".
  */
 export interface RadioField {
-  id: number;
+  id: string;
   radio?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
@@ -847,7 +845,7 @@ export interface RadioField {
  * via the `definition` "group-fields".
  */
 export interface GroupField {
-  id: number;
+  id: string;
   group: {
     text: string;
     defaultParent?: string | null;
@@ -922,7 +920,7 @@ export interface RowField {
  * via the `definition` "indexed-fields".
  */
 export interface IndexedField {
-  id: number;
+  id: string;
   text: string;
   uniqueText?: string | null;
   uniqueRequiredText: string;
@@ -951,7 +949,7 @@ export interface IndexedField {
  * via the `definition` "json-fields".
  */
 export interface JsonField {
-  id: number;
+  id: string;
   json?: {
     foo?: 'bar' | 'foobar';
     number?: 10 | 5;
@@ -976,7 +974,7 @@ export interface JsonField {
  * via the `definition` "number-fields".
  */
 export interface NumberField {
-  id: number;
+  id: string;
   number?: number | null;
   min?: number | null;
   max?: number | null;
@@ -997,7 +995,7 @@ export interface NumberField {
  * via the `definition` "point-fields".
  */
 export interface PointField {
-  id: number;
+  id: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -1023,49 +1021,49 @@ export interface PointField {
  * via the `definition` "relationship-fields".
  */
 export interface RelationshipField {
-  id: number;
+  id: string;
   text?: string | null;
   relationship:
     | {
         relationTo: 'text-fields';
-        value: number | TextField;
+        value: string | TextField;
       }
     | {
         relationTo: 'array-fields';
-        value: number | ArrayField;
+        value: string | ArrayField;
       };
   relationHasManyPolymorphic?:
     | (
         | {
             relationTo: 'text-fields';
-            value: number | TextField;
+            value: string | TextField;
           }
         | {
             relationTo: 'array-fields';
-            value: number | ArrayField;
+            value: string | ArrayField;
           }
       )[]
     | null;
-  relationToSelf?: (number | null) | RelationshipField;
-  relationToSelfSelectOnly?: (number | null) | RelationshipField;
-  relationWithDynamicDefault?: (number | null) | User;
+  relationToSelf?: (string | null) | RelationshipField;
+  relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
-  relationshipWithMin?: (number | TextField)[] | null;
-  relationshipWithMax?: (number | TextField)[] | null;
-  relationshipHasMany?: (number | TextField)[] | null;
+  relationshipWithMin?: (string | TextField)[] | null;
+  relationshipWithMax?: (string | TextField)[] | null;
+  relationshipHasMany?: (string | TextField)[] | null;
   array?:
     | {
-        relationship?: (number | null) | TextField;
+        relationship?: (string | null) | TextField;
         id?: string | null;
       }[]
     | null;
   relationshipWithMinRows?:
     | {
         relationTo: 'text-fields';
-        value: number | TextField;
+        value: string | TextField;
       }[]
     | null;
   updatedAt: string;
@@ -1076,7 +1074,7 @@ export interface RelationshipField {
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
-  id: number;
+  id: string;
   title: string;
   lexicalCustomFields: {
     root: {
@@ -1151,7 +1149,7 @@ export interface RichTextField {
  * via the `definition` "select-fields".
  */
 export interface SelectField {
-  id: number;
+  id: string;
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
@@ -1169,7 +1167,7 @@ export interface SelectField {
  * via the `definition` "tabs-fields-2".
  */
 export interface TabsFields2 {
-  id: number;
+  id: string;
   tabsInArray?:
     | {
         text?: string | null;
@@ -1187,7 +1185,7 @@ export interface TabsFields2 {
  * via the `definition` "tabs-fields".
  */
 export interface TabsField {
-  id: number;
+  id: string;
   sidebarField?: string | null;
   array: {
     text: string;
@@ -1296,9 +1294,9 @@ export interface TabsField {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: number;
+  id: string;
   text?: string | null;
-  media?: number | Upload | null;
+  media?: string | Upload | null;
   richText?: {
     root: {
       type: string;
@@ -1331,9 +1329,9 @@ export interface Upload {
  * via the `definition` "uploads2".
  */
 export interface Uploads2 {
-  id: number;
+  id: string;
   text?: string | null;
-  media?: number | Uploads2 | null;
+  media?: string | Uploads2 | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1351,8 +1349,8 @@ export interface Uploads2 {
  * via the `definition` "uploads3".
  */
 export interface Uploads3 {
-  id: number;
-  media?: number | Uploads3 | null;
+  id: string;
+  media?: string | Uploads3 | null;
   richText?: {
     root: {
       type: string;
@@ -1385,7 +1383,7 @@ export interface Uploads3 {
  * via the `definition` "ui-fields".
  */
 export interface UiField {
-  id: number;
+  id: string;
   text: string;
   updatedAt: string;
   createdAt: string;
@@ -1395,10 +1393,10 @@ export interface UiField {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1418,7 +1416,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1429,7 +1427,7 @@ export interface PayloadMigration {
  * via the `definition` "tabsWithRichText".
  */
 export interface TabsWithRichText {
-  id: number;
+  id: string;
   tab1?: {
     rt1?: {
       root: {

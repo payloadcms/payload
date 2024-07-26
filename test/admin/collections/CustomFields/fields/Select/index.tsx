@@ -2,10 +2,11 @@
 
 import type { Option } from 'payload'
 
-import { SelectField, useField } from '@payloadcms/ui'
+import { SelectField, useField, useFieldProps } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelect = ({ path }: { path: string }) => {
+export const CustomSelect = () => {
+  const { path } = useFieldProps()
   const { setValue, value } = useField<string>({ path })
   const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
 

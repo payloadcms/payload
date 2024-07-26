@@ -1,7 +1,7 @@
-import type { LabelFunction } from 'payload'
+import type { LabelFunction, LabelStatic } from 'payload'
 
 export type StepNavItem = {
-  label: LabelFunction | Record<string, string> | string
+  label: LabelFunction | LabelStatic
   url?: string
 }
 

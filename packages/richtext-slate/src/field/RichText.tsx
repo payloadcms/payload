@@ -1,7 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui'
-import type { ClientValidate } from 'payload'
+import type { ClientValidate, FormFieldBase } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'

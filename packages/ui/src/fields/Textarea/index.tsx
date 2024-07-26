@@ -1,10 +1,10 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { ClientValidate, TextareaFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
+import type { TextAreaInputProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -15,9 +15,9 @@ import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 import './index.scss'
 
-export { TextAreaInputProps, TextareaFieldProps, TextareaInput }
+export { TextAreaInputProps, TextareaInput }
 
-const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
+const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -102,4 +102,4 @@ const _TextareaField: React.FC<TextareaFieldProps> = (props) => {
   )
 }
 
-export const TextareaField = withCondition(_TextareaField)
+export const TextareaField = withCondition(TextareaFieldComponent)

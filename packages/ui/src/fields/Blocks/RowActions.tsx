@@ -1,20 +1,15 @@
 'use client'
-import type { Labels } from 'payload'
+import type { FieldMap, Labels, ReducedBlock } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
-
-import type {
-  FieldMap,
-  ReducedBlock,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
-  addRow: (rowIndex: number, blockType: string) => Promise<void>
+  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   blockType: string
   blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number, blockType: string) => void
