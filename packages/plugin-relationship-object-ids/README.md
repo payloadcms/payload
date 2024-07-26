@@ -8,6 +8,8 @@ Minimum required version of Payload: `1.9.5`
 
 It injects a `beforeChange` field hook into each `relationship` and `upload` field, which converts string-based IDs to `ObjectID`s immediately prior to storage.
 
+By default, it also injects an `afterRead` field hook into the above fields, which ensures that the values are re-formatted back to strings after having been read from the database.
+
 #### Usage
 
 Simply import and install the plugin to make it work:
@@ -20,7 +22,11 @@ export default buildConfig({
   // your config here
   plugins: [
     // Call the plugin within your `plugins` array
-    relationshipsAsObjectID(),
+    relationshipsAsObjectID({
+      // Optionally keep relationship values as ObjectID
+      // when they are retrieved from the database.
+      keepAfterRead: true,
+    }),
   ],
 })
 ```
