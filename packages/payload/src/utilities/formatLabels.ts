@@ -60,11 +60,7 @@ const formatErrorLabels = (fieldSchema: (number | string)[]): string => {
     if (typeof current === 'number') {
       return index === 0 ? `(${current})` : `${acc} (${current})`
     } else {
-      const formattedItem = current.charAt(0).toUpperCase() + current.slice(1)
-
-      return index === 0
-        ? `${acc}${current.charAt(0).toUpperCase() + current.slice(1)}`
-        : `${acc} > ${formattedItem}`
+      return index === 0 ? `${acc}${current}` : `${acc} > ${current}`
     }
   }, '') as string
 }
