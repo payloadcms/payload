@@ -20,7 +20,8 @@ export const getBeforeChangeHook =
         // If there is an original doc,
         // And we have new files,
         // We need to delete the old files before uploading new
-        if (originalDoc) {
+        // unless the collection is versioned (then only delete on delete)
+        if (originalDoc && !collection.versions) {
           let filesToDelete: string[] = []
 
           if (typeof originalDoc?.filename === 'string') {
