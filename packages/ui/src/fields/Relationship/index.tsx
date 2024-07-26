@@ -1,12 +1,12 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
-import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
+import type { GetResults, Option, Value } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -32,8 +32,6 @@ import { SingleValue } from './select-components/SingleValue/index.js'
 const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
-
-export { RelationshipFieldProps }
 
 const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {

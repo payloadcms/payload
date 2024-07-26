@@ -1,11 +1,8 @@
 'use client'
-import type { BlockField } from 'payload'
+import type { BlocksFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
-
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -33,18 +30,6 @@ import { BlocksDrawer } from './BlocksDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'blocks-field'
-
-export type BlocksFieldProps = {
-  blocks?: ReducedBlock[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: BlockField['labels']
-  maxRows?: number
-  minRows?: number
-  name?: string
-  slug?: string
-  width?: string
-} & FormFieldBase
 
 const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
@@ -132,7 +117,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string) => {
+    async (rowIndex: number, blockType: string): Promise<void> => {
       await addFieldRow({
         data: { blockType },
         path,
@@ -278,7 +263,6 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      // eslint-disable-next-line @typescript-eslint/no-misused-promises
                       addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
@@ -342,7 +326,6 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
             </Button>
           </DrawerToggler>
           <BlocksDrawer
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             addRow={addRow}
             addRowIndex={rows?.length || 0}
             blocks={blocks}

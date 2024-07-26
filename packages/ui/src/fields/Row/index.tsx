@@ -1,7 +1,7 @@
 'use client'
-import React from 'react'
+import type { RowFieldProps } from 'payload'
 
-import type { RowFieldProps } from './types.js'
+import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'

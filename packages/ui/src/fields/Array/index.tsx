@@ -1,11 +1,8 @@
 'use client'
-import type { ArrayField as ArrayFieldType } from 'payload'
+import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -30,18 +27,6 @@ import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
 
 const baseClass = 'array-field'
-
-export type ArrayFieldProps = {
-  CustomRowLabel?: React.ReactNode
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayFieldType['labels']
-  maxRows?: ArrayFieldType['maxRows']
-  minRows?: ArrayFieldType['minRows']
-  name?: string
-  width?: string
-} & FormFieldBase
 
 export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const {
@@ -73,6 +58,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     permissions,
     readOnly: readOnlyFromContext,
   } = useFieldProps()
+
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -132,7 +118,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
+    async (rowIndex: number): Promise<void> => {
       await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
@@ -317,7 +303,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value || 0)}
+          onClick={() => {
+            void addRow(value || 0)
+          }}
         >
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>

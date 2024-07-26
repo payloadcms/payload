@@ -2,7 +2,7 @@ import type { Block, CollectionConfig, Field } from 'payload'
 
 import { deepMergeWithSourceArrays } from 'payload'
 
-import type { FieldConfig, FormBuilderPluginConfig } from '../../types.js'
+import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { fields } from './fields.js'
 

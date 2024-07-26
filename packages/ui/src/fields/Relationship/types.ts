@@ -1,17 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, RelationshipField, SanitizedConfig } from 'payload'
-
-import type { FormFieldBase } from '../shared/index.js'
-
-export type RelationshipFieldProps = {
-  allowCreate?: RelationshipField['admin']['allowCreate']
-  hasMany?: boolean
-  isSortable?: boolean
-  name: string
-  relationTo?: RelationshipField['relationTo']
-  sortOptions?: RelationshipField['admin']['sortOptions']
-  width?: string
-} & FormFieldBase
+import type { ClientCollectionConfig, SanitizedConfig } from 'payload'
 
 export type Option = {
   label: string

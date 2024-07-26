@@ -266,18 +266,46 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Label Components receive the following props:
+Custom Label Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`label`**    | Label value provided in field, it can be used with i18n.         |
-| **`required`** | The `admin.required` property defined in the [Field Config](../fields/overview). |
 | **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
 
 <Banner type="success">
   <strong>Reminder:</strong>
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
+
+#### TypeScript
+
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+
+```tsx
+import type {
+  ArrayFieldLabelComponent,
+  BlocksFieldLabelComponent,
+  CheckboxFieldLabelComponent,
+  CodeFieldLabelComponent,
+  CollapsibleFieldLabelComponent,
+  DateFieldLabelComponent,
+  EmailFieldLabelComponent,
+  GroupFieldLabelComponent,
+  HiddenFieldLabelComponent,
+  JSONFieldLabelComponent,
+  NumberFieldLabelComponent,
+  PointFieldLabelComponent,
+  RadioFieldLabelComponent,
+  RelationshipFieldLabelComponent,
+  RichTextFieldLabelComponent,
+  RowFieldLabelComponent,
+  SelectFieldLabelComponent,
+  TabsFieldLabelComponent,
+  TextFieldLabelComponent,
+  TextareaFieldLabelComponent,
+  UploadFieldLabelComponent
+} from 'payload'
+```
 
 ### The Error Component
 
@@ -301,7 +329,7 @@ export const myField: Field = {
 
 _For details on how to build Custom Components, see [Building Custom Components](./components#building-custom-components)._
 
-All Error Components receive the following props:
+Custom Error Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
@@ -311,6 +339,36 @@ All Error Components receive the following props:
   <strong>Reminder:</strong>
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
+
+#### TypeScript
+
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+
+```tsx
+import type {
+  ArrayFieldErrorComponent,
+  BlocksFieldErrorComponent,
+  CheckboxFieldErrorComponent,
+  CodeFieldErrorComponent,
+  CollapsibleFieldErrorComponent,
+  DateFieldErrorComponent,
+  EmailFieldErrorComponent,
+  GroupFieldErrorComponent,
+  HiddenFieldErrorComponent,
+  JSONFieldErrorComponent,
+  NumberFieldErrorComponent,
+  PointFieldErrorComponent,
+  RadioFieldErrorComponent,
+  RelationshipFieldErrorComponent,
+  RichTextFieldErrorComponent,
+  RowFieldErrorComponent,
+  SelectFieldErrorComponent,
+  TabsFieldErrorComponent,
+  TextFieldErrorComponent,
+  TextareaFieldErrorComponent,
+  UploadFieldErrorComponent
+} from 'payload'
+```
 
 ### The Description Property
 
@@ -406,7 +464,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 _For details on how to build a Custom Description, see [Building Custom Components](./components#building-custom-components)._
 
-All Description Components receive the following props:
+Custom Description Components receive all [Field Component](#the-field-component) props, plus the following props:
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
@@ -416,6 +474,36 @@ All Description Components receive the following props:
   <strong>Reminder:</strong>
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
+
+#### TypeScript
+
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview). The convention is to append `DescriptionComponent` to the type of field, i.e. `TextFieldDescriptionComponent`.
+
+```tsx
+import type {
+  ArrayFieldDescriptionComponent,
+  BlocksFieldDescriptionComponent,
+  CheckboxFieldDescriptionComponent,
+  CodeFieldDescriptionComponent,
+  CollapsibleFieldDescriptionComponent,
+  DateFieldDescriptionComponent,
+  EmailFieldDescriptionComponent,
+  GroupFieldDescriptionComponent,
+  HiddenFieldDescriptionComponent,
+  JSONFieldDescriptionComponent,
+  NumberFieldDescriptionComponent,
+  PointFieldDescriptionComponent,
+  RadioFieldDescriptionComponent,
+  RelationshipFieldDescriptionComponent,
+  RichTextFieldDescriptionComponent,
+  RowFieldDescriptionComponent,
+  SelectFieldDescriptionComponent,
+  TabsFieldDescriptionComponent,
+  TextFieldDescriptionComponent,
+  TextareaFieldDescriptionComponent,
+  UploadFieldDescriptionComponent
+} from 'payload'
+```
 
 ### afterInput and beforeInput
 

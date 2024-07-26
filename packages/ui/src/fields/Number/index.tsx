@@ -1,12 +1,11 @@
 'use client'
-import type { NumberField as NumberFieldType } from 'payload'
+import type { NumberFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -18,19 +17,6 @@ import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-
-export type NumberFieldProps = {
-  hasMany?: boolean
-  max?: number
-  maxRows?: number
-  min?: number
-  name?: string
-  onChange?: (e: number) => void
-  path?: string
-  placeholder?: NumberFieldType['admin']['placeholder']
-  step?: number
-  width?: string
-} & FormFieldBase
 
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {

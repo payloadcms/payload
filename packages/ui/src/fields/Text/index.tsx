@@ -1,10 +1,10 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { ClientValidate, TextFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { TextFieldProps, TextInputProps } from './types.js'
+import type { TextInputProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -15,7 +15,7 @@ import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
 import './index.scss'
 
-export { TextFieldProps, TextInput, TextInputProps }
+export { TextInput, TextInputProps }
 
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {

@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FieldPermissions } from 'payload'
+import type { CollapsibleFieldProps, DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -18,17 +18,8 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'
-
-export type CollapsibleFieldProps = {
-  fieldMap: FieldMap
-  initCollapsed?: boolean
-  width?: string
-} & FormFieldBase
 
 const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
@@ -65,7 +56,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const fieldHasErrors = errorCount > 0
 
   const onToggle = useCallback(
-    async (newCollapsedState: boolean) => {
+    async (newCollapsedState: boolean): Promise<void> => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
       if (preferencesKey) {
@@ -145,7 +136,6 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
             </div>
           }
           initCollapsed={collapsedOnMount}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onToggle={onToggle}
         >
           <RenderFields

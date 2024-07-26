@@ -1,10 +1,9 @@
 'use client'
 
+import type { GroupFieldProps } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -27,15 +26,7 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export type GroupFieldProps = {
-  fieldMap: FieldMap
-  forceRender?: boolean
-  hideGutter?: boolean
-  name?: string
-  width?: string
-} & FormFieldBase
-
-const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
+export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,

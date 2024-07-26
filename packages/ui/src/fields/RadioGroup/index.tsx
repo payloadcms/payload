@@ -1,5 +1,5 @@
 'use client'
-import type { Option } from 'payload'
+import type { RadioFieldProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
@@ -14,23 +14,9 @@ import './index.scss'
 
 const baseClass = 'radio-group'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
-
-export type RadioFieldProps = {
-  layout?: 'horizontal' | 'vertical'
-  name?: string
-  onChange?: OnChange
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
-} & FormFieldBase
-
-export type OnChange<T = string> = (value: T) => void
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {

@@ -1,7 +1,6 @@
 'use client'
 
-import type { TextFieldProps } from '@payloadcms/ui'
-import type { Data } from 'payload'
+import type { Data, TextFieldProps } from 'payload'
 
 import { TextField, useLocale, useWatchForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'

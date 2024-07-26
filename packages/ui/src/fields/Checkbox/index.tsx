@@ -1,10 +1,9 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { CheckboxFieldProps, ClientValidate } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
-import type { CheckboxFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'

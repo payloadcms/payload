@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
+import type { ClientValidate, JSONFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -12,19 +12,9 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
-
-export type JSONFieldProps = {
-  editorOptions?: JSONFieldType['admin']['editorOptions']
-  jsonSchema?: Record<string, unknown>
-  name?: string
-  path?: string
-  width?: string
-} & FormFieldBase
 
 const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {

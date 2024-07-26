@@ -1,9 +1,10 @@
 'use client'
 
+import type { UploadFieldProps } from 'payload'
+
 import React, { useCallback, useMemo } from 'react'
 
 import type { UploadInputProps } from './Input.js'
-import type { UploadFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'

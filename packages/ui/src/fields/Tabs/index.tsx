@@ -1,12 +1,9 @@
 'use client'
-import type { DocumentPreferences } from 'payload'
+import type { DocumentPreferences, TabsFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
-
-import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -24,14 +21,6 @@ import { TabsProvider } from './provider.js'
 const baseClass = 'tabs-field'
 
 export { TabsProvider }
-
-export type TabsFieldProps = {
-  forceRender?: boolean
-  name?: string
-  path?: string
-  tabs?: MappedTab[]
-  width?: string
-} & FormFieldBase
 
 const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
@@ -76,7 +65,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   }, [path, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
-    async (incomingTabIndex: number) => {
+    async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
@@ -142,7 +131,9 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
                   parentPath={path}
-                  setIsActive={() => void handleTabChange(tabIndex)}
+                  setIsActive={() => {
+                    void handleTabChange(tabIndex)
+                  }}
                   tab={tab}
                 />
               )

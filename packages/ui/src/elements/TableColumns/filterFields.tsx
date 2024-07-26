@@ -1,5 +1,5 @@
 'use client'
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap, MappedField } from 'payload'
 
 // 1. Skips fields that are hidden, disabled, or presentational-only (i.e. `ui` fields)
 // 2. Maps through top-level `tabs` fields and filters out the same
