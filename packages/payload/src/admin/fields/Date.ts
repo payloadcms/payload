@@ -7,7 +7,6 @@ export type DateFieldProps = {
   name?: string
   path?: string
   placeholder?: DateField['admin']['placeholder'] | string
-  type: 'date'
   width?: string
 } & FormFieldBase
 

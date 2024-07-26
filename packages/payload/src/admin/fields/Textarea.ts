@@ -9,7 +9,6 @@ export type TextareaFieldProps = {
   path?: string
   placeholder?: TextareaField['admin']['placeholder']
   rows?: number
-  type: 'textarea'
   width?: string
 } & FormFieldBase
 

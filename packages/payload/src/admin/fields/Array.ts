@@ -12,7 +12,6 @@ export type ArrayFieldProps = {
   maxRows?: ArrayField['maxRows']
   minRows?: ArrayField['minRows']
   name?: string
-  type: 'array'
   width?: string
 } & FormFieldBase
 

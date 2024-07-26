@@ -9,7 +9,6 @@ export type RelationshipFieldProps = {
   name: string
   relationTo?: RelationshipField['relationTo']
   sortOptions?: RelationshipField['admin']['sortOptions']
-  type: 'relationship'
   width?: string
 } & FormFieldBase
 

@@ -7,7 +7,6 @@ export type GroupFieldProps = {
   forceRender?: boolean
   hideGutter?: boolean
   name?: string
-  type: 'group'
   width?: string
 } & FormFieldBase
 

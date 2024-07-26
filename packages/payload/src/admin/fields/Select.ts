@@ -10,7 +10,6 @@ export type SelectFieldProps = {
   onChange?: (e: string | string[]) => void
   options?: Option[]
   path?: string
-  type: 'select'
   value?: string
   width?: string
 } & FormFieldBase

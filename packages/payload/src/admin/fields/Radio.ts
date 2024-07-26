@@ -8,7 +8,6 @@ export type RadioFieldProps = {
   onChange?: OnChange
   options?: Option[]
   path?: string
-  type: 'radio'
   value?: string
   width?: string
 } & FormFieldBase

@@ -6,7 +6,6 @@ export type PointFieldProps = {
   path?: string
   placeholder?: string
   step?: number
-  type: 'point'
   width?: string
 } & FormFieldBase
 

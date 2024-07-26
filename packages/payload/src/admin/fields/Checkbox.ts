@@ -9,7 +9,6 @@ export type CheckboxFieldProps = {
   onChange?: (val: boolean) => void
   partialChecked?: boolean
   path?: string
-  type: 'checkbox'
   width?: string
 } & FormFieldBase
 

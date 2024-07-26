@@ -8,7 +8,6 @@ export type RowFieldProps = {
   forceRender?: boolean
   indexPath: string
   path?: string
-  type: 'row'
   width?: string
 } & FormFieldBase
 

@@ -34,5 +34,5 @@ export const DynamicFieldSelector: React.FC<TextFieldProps> = (props) => {
     }
   }, [fields, getDataByPath])
 
-  return <SelectField {...props} options={options} type="select" />
+  return <SelectField {...props} options={options} />
 }

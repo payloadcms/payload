@@ -8,7 +8,6 @@ export type TabsFieldProps = {
   name?: string
   path?: string
   tabs?: MappedTab[]
-  type: 'tabs'
   width?: string
 } & FormFieldBase
 

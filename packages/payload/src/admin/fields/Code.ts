@@ -7,7 +7,6 @@ export type CodeFieldProps = {
   language?: CodeField['admin']['language']
   name?: string
   path?: string
-  type: 'code'
   width: string
 } & FormFieldBase
 

@@ -12,7 +12,6 @@ export type BlocksFieldProps = {
   minRows?: number
   name?: string
   slug?: string
-  type: 'blocks'
   width?: string
 } & FormFieldBase
 

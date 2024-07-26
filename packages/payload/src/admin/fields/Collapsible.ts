@@ -5,7 +5,6 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 export type CollapsibleFieldProps = {
   fieldMap: FieldMap
   initCollapsed?: boolean
-  type: 'collapsible'
   width?: string
 } & FormFieldBase
 

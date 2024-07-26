@@ -12,7 +12,6 @@ export type NumberFieldProps = {
   path?: string
   placeholder?: NumberField['admin']['placeholder']
   step?: number
-  type: 'number'
   width?: string
 } & FormFieldBase
 
