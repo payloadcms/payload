@@ -10,8 +10,6 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 
@@ -40,8 +38,6 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
     }
@@ -199,8 +195,6 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
           req,
         })) || result
     }, Promise.resolve())
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
