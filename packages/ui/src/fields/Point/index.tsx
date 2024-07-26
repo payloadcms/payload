@@ -27,7 +27,7 @@ export type PointFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const _PointField: React.FC<PointFieldProps> = (props) => {
+const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -122,6 +122,8 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           )}
           <div className="input-wrapper">
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-longitude-${path.replace(/\./g, '__')}`}
@@ -144,6 +146,8 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           <div className="input-wrapper">
             <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-latitude-${path.replace(/\./g, '__')}`}
@@ -167,4 +171,4 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
   )
 }
 
-export const PointField = withCondition(_PointField)
+export const PointField = withCondition(PointFieldComponent)

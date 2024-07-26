@@ -46,7 +46,7 @@ export type BlocksFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -278,6 +278,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
+                      // eslint-disable-next-line @typescript-eslint/no-misused-promises
                       addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
@@ -341,6 +342,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
             </Button>
           </DrawerToggler>
           <BlocksDrawer
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             addRow={addRow}
             addRowIndex={rows?.length || 0}
             blocks={blocks}
@@ -353,4 +355,4 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   )
 }
 
-export const BlocksField = withCondition(_BlocksField)
+export const BlocksField = withCondition(BlocksFieldComponent)

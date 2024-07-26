@@ -30,7 +30,7 @@ export type CollapsibleFieldProps = {
   width?: string
 } & FormFieldBase
 
-const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
+const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -145,6 +145,7 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             </div>
           }
           initCollapsed={collapsedOnMount}
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onToggle={onToggle}
         >
           <RenderFields
@@ -164,4 +165,4 @@ const _CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   )
 }
 
-export const CollapsibleField = withCondition(_CollapsibleField)
+export const CollapsibleField = withCondition(CollapsibleFieldComponent)

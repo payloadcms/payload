@@ -14,7 +14,7 @@ export { RowProvider, useRow }
 
 const baseClass = 'row'
 
-export const _RowField: React.FC<RowFieldProps> = (props) => {
+const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
   const { className, fieldMap, forceRender = false } = props
 
   const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
@@ -36,4 +36,4 @@ export const _RowField: React.FC<RowFieldProps> = (props) => {
   )
 }
 
-export const RowField = withCondition(_RowField)
+export const RowField = withCondition(RowFieldComponent)

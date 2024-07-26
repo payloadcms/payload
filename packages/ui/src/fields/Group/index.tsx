@@ -35,7 +35,7 @@ export type GroupFieldProps = {
   width?: string
 } & FormFieldBase
 
-export const _GroupField: React.FC<GroupFieldProps> = (props) => {
+const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomLabel,
@@ -124,4 +124,4 @@ export const _GroupField: React.FC<GroupFieldProps> = (props) => {
 
 export { GroupProvider, useGroup }
 
-export const GroupField = withCondition(_GroupField)
+export const GroupField = withCondition(GroupFieldComponent)
