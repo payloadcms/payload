@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-in-test */
 import type { CompilerOptions } from 'typescript'
 
 import * as CommentJson from 'comment-json'
@@ -13,11 +14,12 @@ import { promisify } from 'util'
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
 
-const commonNextCreateParams = '--typescript --eslint --no-tailwind --app --import-alias="@/*"'
+const commonNextCreateParams =
+  '--typescript --eslint --no-tailwind --app --import-alias="@/*" --turbo --yes'
 
 const nextCreateCommands: Partial<Record<'noSrcDir' | 'srcDir', string>> = {
-  noSrcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
-  srcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --src-dir`,
+  noSrcDir: `pnpm create next-app@canary . ${commonNextCreateParams} --no-src-dir`,
+  srcDir: `pnpm create next-app@canary . ${commonNextCreateParams} --src-dir`,
 }
 
 describe('create-payload-app', () => {
@@ -41,7 +43,11 @@ describe('create-payload-app', () => {
       // Create a new Next.js project with default options
       console.log(`Running: ${nextCreateCommands[nextCmdKey]} in ${projectDir}`)
       const [cmd, ...args] = nextCreateCommands[nextCmdKey].split(' ')
-      const { exitCode, stderr } = await execa(cmd, [...args], { cwd: projectDir })
+      console.log(`Running: ${cmd} ${args.join(' ')}`)
+      const { exitCode, stderr } = await execa(cmd, [...args], {
+        cwd: projectDir,
+        stdio: 'inherit',
+      })
       if (exitCode !== 0) {
         console.error({ exitCode, stderr })
       }

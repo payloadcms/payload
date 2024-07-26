@@ -79,7 +79,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const installSpinner = p.spinner()
   installSpinner.start('Installing Payload and dependencies...')
 
-  const configurationResult = installAndConfigurePayload({
+  const configurationResult = await installAndConfigurePayload({
     ...args,
     nextAppDetails,
     nextConfigType,
@@ -143,15 +143,16 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
   }
 }
 
-function installAndConfigurePayload(
+async function installAndConfigurePayload(
   args: {
     nextAppDetails: NextAppDetails
     nextConfigType: NextConfigType
     useDistFiles?: boolean
   } & InitNextArgs,
-):
+): Promise<
   | { payloadConfigPath: string; success: true }
-  | { payloadConfigPath?: string; reason: string; success: false } {
+  | { payloadConfigPath?: string; reason: string; success: false }
+> {
   const {
     '--debug': debug,
     nextAppDetails: { isSrcDir, nextAppDir, nextConfigPath } = {},
@@ -212,7 +213,7 @@ function installAndConfigurePayload(
   copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath), debug)
 
   // Wrap next.config.js with withPayload
-  wrapNextConfig({ nextConfigPath, nextConfigType })
+  await wrapNextConfig({ nextConfigPath, nextConfigType })
 
   return {
     payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
@@ -240,7 +241,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
   const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
 
   const nextConfigPath: string | undefined = (
-    await globby('next.config.*js', { absolute: true, cwd: projectDir })
+    await globby('next.config.*(t|j)s', { absolute: true, cwd: projectDir })
   )?.[0]
 
   if (!nextConfigPath || nextConfigPath.length === 0) {
@@ -286,8 +287,13 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
 function getProjectType(args: {
   nextConfigPath: string
   packageObj: Record<string, unknown>
-}): 'cjs' | 'esm' {
+}): NextConfigType {
   const { nextConfigPath, packageObj } = args
+
+  if (nextConfigPath.endsWith('.ts')) {
+    return 'ts'
+  }
+
   if (nextConfigPath.endsWith('.mjs')) {
     return 'esm'
   }

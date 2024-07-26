@@ -21,7 +21,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -122,6 +122,10 @@ export type FilterOptionsProps<TData = any> = {
    */
   user: Partial<PayloadRequest['user']>
 }
+
+export type FilterOptionsFunc<TData = any> = (
+  options: FilterOptionsProps<TData>,
+) => Promise<Where | boolean> | Where | boolean
 
 export type FilterOptions<TData = any> =
   | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
