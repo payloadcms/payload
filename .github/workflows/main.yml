@@ -196,6 +196,7 @@ jobs:
           - postgres-custom-schema
           - postgres-uuid
           - supabase
+          - sqlite
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
