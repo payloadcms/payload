@@ -138,7 +138,7 @@ export async function parseAndModifyConfigContent(
       (m) =>
         m.type === 'ExportDefaultExpression' &&
         (m.expression.type === 'Identifier' || m.expression.type === 'CallExpression'),
-    )
+    ) as ExportDefaultExpression | undefined
 
     if (exportDefaultDeclaration) {
       if (!('span' in exportDefaultDeclaration.expression)) {
