@@ -503,13 +503,13 @@ describe('admin1', () => {
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('.custom-text-label')).toBeVisible()
+      await expect(page.locator('#custom-field-label')).toBeVisible()
     })
 
     test('renders custom description component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('.custom-text-description')).toBeVisible()
+      await expect(page.locator('#custom-field-description')).toBeVisible()
     })
 
     test('ensure custom components receive field props', async () => {
@@ -540,15 +540,44 @@ describe('admin1', () => {
           'Function description',
         )
       })
+    })
 
-      test('should render component field description', async () => {
-        await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
-        await page.locator('#field-descriptionAsComponent').fill('component')
-        await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
-          'Component description: descriptionAsComponent - component',
-        )
+    test('should render component field description', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await page.locator('#field-descriptionAsComponent').fill('component')
+      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
+        'Component description: descriptionAsComponent - component',
+      )
+    })
+
+    test('should render custom error component', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      const input = page.locator('input[id="field-customTextField"]')
+      await input.fill('ab')
+      await expect(input).toHaveValue('ab')
+      const error = page.locator('.custom-error:near(input[id="field-customTextField"])')
+      const submit = page.locator('button[type="button"][id="action-save"]')
+      await submit.click()
+      await expect(error).toHaveText('#custom-error')
+    })
+
+    test('should render beforeInput and afterInput', async () => {
+      await page.goto(customFieldsURL.create)
+      const input = page.locator('input[id="field-customTextField"]')
+
+      const prevSibling = await input.evaluateHandle((el) => {
+        return el.previousElementSibling
       })
+      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      expect(prevSiblingText).toEqual('#before-input')
+
+      const nextSibling = await input.evaluateHandle((el) => {
+        return el.nextElementSibling
+      })
+      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      expect(nextSiblingText).toEqual('#after-input')
     })
 
     describe('select field', () => {
