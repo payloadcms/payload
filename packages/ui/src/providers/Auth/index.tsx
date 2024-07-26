@@ -16,7 +16,7 @@ import { useConfig } from '../Config/index.js'
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<void>
-  logOut: () => void
+  logOut: () => Promise<void>
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<ClientUser>
@@ -39,8 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()
   const router = useRouter()
-  // const { code } = useLocale()
-  const code = 'en' // TODO: re-enable i18n asap
 
   const config = useConfig()
 
@@ -106,29 +104,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const remainingTime = (typeof tokenExpiration === 'number' ? tokenExpiration : 0) - now
 
       if (forceRefresh || (tokenExpiration && remainingTime < 120)) {
-        setTimeout(async () => {
-          try {
-            const request = await requests.post(
-              `${serverURL}${apiRoute}/${userSlug}/refresh-token`,
-              {
-                headers: {
-                  'Accept-Language': i18n.language,
+        setTimeout(() => {
+          async function refresh() {
+            try {
+              const request = await requests.post(
+                `${serverURL}${apiRoute}/${userSlug}/refresh-token`,
+                {
+                  headers: {
+                    'Accept-Language': i18n.language,
+                  },
                 },
-              },
-            )
+              )
 
-            if (request.status === 200) {
-              const json = await request.json()
-              setUser(json.user)
+              if (request.status === 200) {
+                const json = await request.json()
+                setUser(json.user)
 
-              setTokenAndExpiration(json)
-            } else {
-              setUser(null)
-              redirectToInactivityRoute()
+                setTokenAndExpiration(json)
+              } else {
+                setUser(null)
+                redirectToInactivityRoute()
+              }
+            } catch (e) {
+              toast.error(e.message)
             }
-          } catch (e) {
-            toast.error(e.message)
           }
+
+          void refresh()
         }, 1000)
       }
     },
@@ -182,28 +184,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [serverURL, apiRoute, userSlug, revokeTokenAndExpire])
 
-  const refreshPermissions = useCallback(async () => {
-    const params = {
-      locale: code,
-    }
-
-    try {
-      const request = await requests.get(`${serverURL}${apiRoute}/access?${qs.stringify(params)}`, {
-        headers: {
-          'Accept-Language': i18n.language,
+  const refreshPermissions = useCallback(
+    async ({ locale }: { locale?: string } = {}) => {
+      const params = qs.stringify(
+        {
+          locale,
         },
-      })
+        {
+          addQueryPrefix: true,
+        },
+      )
 
-      if (request.status === 200) {
-        const json: Permissions = await request.json()
-        setPermissions(json)
-      } else {
-        throw new Error(`Fetching permissions failed with status code ${request.status}`)
+      try {
+        const request = await requests.get(`${serverURL}${apiRoute}/access${params}`, {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        })
+
+        if (request.status === 200) {
+          const json: Permissions = await request.json()
+          setPermissions(json)
+        } else {
+          throw new Error(`Fetching permissions failed with status code ${request.status}`)
+        }
+      } catch (e) {
+        toast.error(`Refreshing permissions failed: ${e.message}`)
       }
-    } catch (e) {
-      toast.error(`Refreshing permissions failed: ${e.message}`)
-    }
-  }, [serverURL, apiRoute, i18n, code])
+    },
+    [serverURL, apiRoute, i18n],
+  )
 
   const fetchFullUser = React.useCallback(async () => {
     try {

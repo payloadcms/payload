@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -27,6 +26,9 @@ import {
   focalOnlySlug,
   mediaSlug,
   relationSlug,
+  withMetadataSlug,
+  withOnlyJPEGMetadataSlug,
+  withoutMetadataSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,6 +45,9 @@ let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
+let withMetadataURL: AdminUrlUtil
+let withoutMetadataURL: AdminUrlUtil
+let withOnlyJPEGMetadataURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -62,6 +67,9 @@ describe('uploads', () => {
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
+    withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
+    withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
+    withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -292,6 +300,22 @@ describe('uploads', () => {
     )
   })
 
+  test('should restrict uploads in drawer based on filterOptions', async () => {
+    await page.goto(audioURL.edit(audioDoc.id))
+    await page.waitForURL(audioURL.edit(audioDoc.id))
+
+    // remove the selection and open the list drawer
+    await wait(500) // flake workaround
+    await page.locator('.file-details__remove').click()
+
+    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+
+    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    await expect(listDrawer).toBeVisible()
+
+    await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+  })
+
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
@@ -344,6 +368,116 @@ describe('uploads', () => {
     })
 
     expect(uploadedImage.mimeType).toEqual('image/png')
+  })
+
+  test('should upload image with metadata', async () => {
+    await page.goto(withMetadataURL.create)
+    await page.waitForURL(withMetadataURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID,
+      slug: withMetadataSlug,
+      auth: true,
+    })
+
+    const acceptableFileSizes = [9431, 9435]
+
+    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeOne.filesize)
+  })
+
+  test('should upload image without metadata', async () => {
+    await page.goto(withoutMetadataURL.create)
+    await page.waitForURL(withoutMetadataURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID,
+      slug: withoutMetadataSlug,
+      auth: true,
+    })
+
+    const acceptableFileSizes = [2424, 2445]
+
+    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeTwo.filesize)
+  })
+
+  test('should only upload image with metadata if jpeg mimetype', async () => {
+    await page.goto(withOnlyJPEGMetadataURL.create)
+    await page.waitForURL(withOnlyJPEGMetadataURL.create)
+
+    const fileChooserPromiseForJPEG = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooserForJPEG = await fileChooserPromiseForJPEG
+    await wait(1000)
+    await fileChooserForJPEG.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const jpegMediaID = page.url().split('/').pop()
+
+    const { doc: jpegMediaDoc } = await client.findByID({
+      id: jpegMediaID,
+      slug: withOnlyJPEGMetadataSlug,
+      auth: true,
+    })
+
+    const acceptableFileSizesForJPEG = [9554, 9575]
+
+    // without metadata appended, the jpeg image filesize would be 2424
+    expect(acceptableFileSizesForJPEG).toContain(jpegMediaDoc.sizes.sizeThree.filesize)
+
+    await page.goto(withOnlyJPEGMetadataURL.create)
+    await page.waitForURL(withOnlyJPEGMetadataURL.create)
+
+    const fileChooserPromiseForWEBP = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooserForWEBP = await fileChooserPromiseForWEBP
+    await wait(1000)
+    await fileChooserForWEBP.setFiles(path.join(dirname, 'animated.webp'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const webpMediaID = page.url().split('/').pop()
+
+    const { doc: webpMediaDoc } = await client.findByID({
+      id: webpMediaID,
+      slug: withOnlyJPEGMetadataSlug,
+      auth: true,
+    })
+
+    // With metadata, the animated image filesize would be 218762
+    expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
   })
 
   describe('image manipulation', () => {

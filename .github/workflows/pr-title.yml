@@ -101,3 +101,18 @@ jobs:
         with:
           header: pr-title-lint-error
           delete: true
+
+  label-pr-on-open:
+    name: label-pr-on-open
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag with main branch with v2
+        if: github.event.action == 'opened' && github.event.pull_request.base.ref == 'main'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: v2
+      - name: Tag with beta branch with v3
+        if: github.event.action == 'opened' && github.event.pull_request.base.ref == 'beta'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: v3

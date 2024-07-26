@@ -123,6 +123,10 @@ export type FilterOptionsProps<TData = any> = {
   user: Partial<PayloadRequest['user']>
 }
 
+export type FilterOptionsFunc<TData = any> = (
+  options: FilterOptionsProps<TData>,
+) => Promise<Where | boolean> | Where | boolean
+
 export type FilterOptions<TData = any> =
   | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
   | Where

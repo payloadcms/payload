@@ -134,6 +134,60 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'with-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './with-meta-data'),
+        withMetadata: true,
+      },
+    },
+    {
+      slug: 'without-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './without-meta-data'),
+        withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
+      },
+    },
+    {
       slug: 'crop-only',
       fields: [],
       upload: {

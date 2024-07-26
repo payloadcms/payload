@@ -27,6 +27,10 @@ import './index.scss'
 const baseClass = 'upload'
 
 export type UploadInputProps = {
+  /**
+   * Controls the visibility of the "Create new collection" button
+   */
+  allowNewUpload?: boolean
   api?: string
   collection?: ClientCollectionConfig
   customUploadActions?: React.ReactNode[]
@@ -43,6 +47,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     CustomDescription,
     CustomError,
     CustomLabel,
+    allowNewUpload,
     api = '/api',
     className,
     collection,
@@ -168,13 +173,18 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
               {(!fileDoc || missingFile) && (
                 <div className={`${baseClass}__wrap`}>
                   <div className={`${baseClass}__buttons`}>
-                    <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                      <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                        {t('fields:uploadNewLabel', {
-                          label: getTranslation(collection.labels.singular, i18n),
-                        })}
-                      </Button>
-                    </DocumentDrawerToggler>
+                    {allowNewUpload && (
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__toggler`}
+                        disabled={readOnly}
+                      >
+                        <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                          {t('fields:uploadNewLabel', {
+                            label: getTranslation(collection.labels.singular, i18n),
+                          })}
+                        </Button>
+                      </DocumentDrawerToggler>
+                    )}
                     <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
                       <Button buttonStyle="secondary" disabled={readOnly} el="div">
                         {t('fields:chooseFromExisting')}
