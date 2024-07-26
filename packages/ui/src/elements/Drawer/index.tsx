@@ -56,7 +56,6 @@ export const Drawer: React.FC<Props> = ({
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
 
-  console.log(drawerDepth)
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
 

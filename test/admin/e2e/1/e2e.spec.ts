@@ -55,6 +55,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -1019,6 +1020,32 @@ describe('admin1', () => {
       await options.locator('text=English').click()
       await localizerButton.click()
       await expect(localeListItem1).toContainText('Spanish (es)')
+    })
+  })
+
+  describe('drawers', () => {
+    test('document drawers are visually stacking', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      await wait(500)
+      const drawer1 = page.locator('[id^=doc-drawer_posts_1_]')
+      await expect(drawer1).toBeVisible()
+      const drawerLeft = await drawer1.boundingBox().then((box) => box.x)
+      await drawer1
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      const drawer2 = page.locator('[id^=doc-drawer_posts_2_]')
+      await expect(drawer2).toBeVisible()
+      const drawer2Left = await drawer2.boundingBox().then((box) => box.x)
+      expect(drawer2Left > drawerLeft).toBe(true)
     })
   })
 })

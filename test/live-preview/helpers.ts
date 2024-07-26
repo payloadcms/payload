@@ -2,21 +2,16 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText, navigateToListCellLink } from '../helpers.js'
+import { exactText } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-
-export const goToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
-  await page.goto(urlUtil.list)
-  await page.waitForURL(urlUtil.list)
-  await navigateToListCellLink(page)
-}
 
 export const goToCollectionLivePreview = async (
   page: Page,
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
-  await goToDoc(page, urlUtil)
+  await navigateToDoc(page, urlUtil)
   await page.goto(`${page.url()}/preview`)
   await page.waitForURL(`**/preview`)
 }
