@@ -688,7 +688,7 @@ export const mapFields = (args: {
 
         // If we return undefined here (so if no CUSTOM label component is set),
         // the field client component is responsible for falling back to the default label
-        const CustomLabel =
+        let CustomLabel: React.ReactNode =
           CustomLabelComponent !== undefined ? (
             <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
           ) : undefined
@@ -732,7 +732,7 @@ export const mapFields = (args: {
               )
             }
 
-            fieldComponentProps.CustomLabel = CustomCollapsibleLabel
+            CustomLabel = CustomCollapsibleLabel
 
             break
           }

@@ -702,9 +702,6 @@ export interface TextField {
   overrideLength?: string | null;
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
-  customLabel?: string | null;
-  customError?: string | null;
-  beforeAndAfterInput?: string | null;
   hasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
