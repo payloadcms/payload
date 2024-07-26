@@ -277,6 +277,36 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
 
+#### TypeScript
+
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+
+```tsx
+import {
+  ArrayFieldLabelComponent,
+  BlocksFieldLabelComponent,
+  CheckboxFieldLabelComponent,
+  CodeFieldLabelComponent,
+  CollapsibleFieldLabelComponent,
+  DateFieldLabelComponent,
+  EmailFieldLabelComponent,
+  GroupFieldLabelComponent,
+  HiddenFieldLabelComponent,
+  JSONFieldLabelComponent,
+  NumberFieldLabelComponent,
+  PointFieldLabelComponent,
+  RadioFieldLabelComponent,
+  RelationshipFieldLabelComponent,
+  RichTextFieldLabelComponent,
+  RowFieldLabelComponent,
+  SelectFieldLabelComponent,
+  TabsFieldLabelComponent,
+  TextFieldLabelComponent,
+  TextareaFieldLabelComponent,
+  UploadFieldLabelComponent
+} from 'payload'
+```
+
 ### The Error Component
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
@@ -309,6 +339,36 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
   <strong>Reminder:</strong>
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
+
+#### TypeScript
+
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+
+```tsx
+import {
+  ArrayFieldErrorComponent,
+  BlocksFieldErrorComponent,
+  CheckboxFieldErrorComponent,
+  CodeFieldErrorComponent,
+  CollapsibleFieldErrorComponent,
+  DateFieldErrorComponent,
+  EmailFieldErrorComponent,
+  GroupFieldErrorComponent,
+  HiddenFieldErrorComponent,
+  JSONFieldErrorComponent,
+  NumberFieldErrorComponent,
+  PointFieldErrorComponent,
+  RadioFieldErrorComponent,
+  RelationshipFieldErrorComponent,
+  RichTextFieldErrorComponent,
+  RowFieldErrorComponent,
+  SelectFieldErrorComponent,
+  TabsFieldErrorComponent,
+  TextFieldErrorComponent,
+  TextareaFieldErrorComponent,
+  UploadFieldErrorComponent
+} from 'payload'
+```
 
 ### The Description Property
 
@@ -414,6 +474,36 @@ Custom Description Components receive all [Field Component](#the-field-component
   <strong>Reminder:</strong>
   All [Custom Server Components](./components) receive the `payload` and `i18n` properties by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
+
+#### TypeScript
+
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview). The convention is to append `DescriptionComponent` to the type of field, i.e. `TextFieldDescriptionComponent`.
+
+```tsx
+import {
+  ArrayFieldDescriptionComponent,
+  BlocksFieldDescriptionComponent,
+  CheckboxFieldDescriptionComponent,
+  CodeFieldDescriptionComponent,
+  CollapsibleFieldDescriptionComponent,
+  DateFieldDescriptionComponent,
+  EmailFieldDescriptionComponent,
+  GroupFieldDescriptionComponent,
+  HiddenFieldDescriptionComponent,
+  JSONFieldDescriptionComponent,
+  NumberFieldDescriptionComponent,
+  PointFieldDescriptionComponent,
+  RadioFieldDescriptionComponent,
+  RelationshipFieldDescriptionComponent,
+  RichTextFieldDescriptionComponent,
+  RowFieldDescriptionComponent,
+  SelectFieldDescriptionComponent,
+  TabsFieldDescriptionComponent,
+  TextFieldDescriptionComponent,
+  TextareaFieldDescriptionComponent,
+  UploadFieldDescriptionComponent
+} from 'payload'
+```
 
 ### afterInput and beforeInput
 
