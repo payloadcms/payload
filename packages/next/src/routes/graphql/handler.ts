@@ -134,12 +134,8 @@ export const POST =
       resHeaders.append(key, headers[key])
     }
 
-    if (req.responseHeaders) {
-      mergeHeaders(req.responseHeaders, resHeaders)
-    }
-
     return new Response(apiResponse.body, {
-      headers: resHeaders,
+      headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, resHeaders) : resHeaders,
       status: apiResponse.status,
     })
   }
