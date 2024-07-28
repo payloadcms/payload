@@ -65,7 +65,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
-    const sqlExecute = 'await db.execute(sql`'
+    const sqlExecute = 'await payload.db.drizzle.execute(sql`'
 
     if (sqlStatementsUp?.length) {
       upSQL = `${sqlExecute}\n ${sqlStatementsUp?.join('\n')}\`)`

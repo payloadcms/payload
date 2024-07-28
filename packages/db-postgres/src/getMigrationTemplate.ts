@@ -6,7 +6,7 @@ export const getMigrationTemplate = ({
   upSQL,
 }: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 ${imports ? `${imports}\n` : ''}
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL}
 }
 
