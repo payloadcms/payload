@@ -10,7 +10,7 @@ export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL}
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 ${downSQL}
 }
 `
