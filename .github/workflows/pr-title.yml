@@ -38,6 +38,7 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-sqlite
             email-nodemailer
             eslint
             graphql

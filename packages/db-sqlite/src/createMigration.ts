@@ -66,7 +66,7 @@ export const createMigration: CreateMigration = async function createMigration(
     const sqlStatementsUp = await generateSQLiteMigration(drizzleJsonBefore, drizzleJsonAfter)
     const sqlStatementsDown = await generateSQLiteMigration(drizzleJsonAfter, drizzleJsonBefore)
     // need to create tables as separate statements
-    const sqlExecute = 'await db.run(sql`'
+    const sqlExecute = 'await payload.db.drizzle.run(sql`'
 
     if (sqlStatementsUp?.length) {
       upSQL = sqlStatementsUp
