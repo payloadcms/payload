@@ -156,6 +156,7 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    drizzle: PostgresDB
     enums: Record<string, GenericEnum>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
