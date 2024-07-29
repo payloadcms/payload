@@ -14,7 +14,7 @@ export async function validateNodes({
   nodes: SerializedLexicalNode[]
   payloadConfig: SanitizedConfig
   validation: {
-    options: ValidateOptions<SerializedEditorState, unknown, RichTextField>
+    options: ValidateOptions<SerializedEditorState, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }): Promise<string | true> {

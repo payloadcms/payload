@@ -5,7 +5,8 @@ import { mimeTypeValidator } from './mimeTypeValidator'
 const options = { siblingData: { filename: 'file.xyz' } } as ValidateOptions<
   undefined,
   undefined,
-  undefined
+  undefined,
+  string
 >
 
 describe('mimeTypeValidator', () => {
