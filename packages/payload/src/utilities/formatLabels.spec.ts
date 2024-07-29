@@ -43,7 +43,7 @@ describe('formatLabels', () => {
 describe('formatErrorLabels', () => {
   it('should format array', () => {
     expect(formatErrorLabels(['test', 1, 'field', 'array', 3, 'final'])).toBe(
-      'test (1) > field > array (3) > final',
+      'Test (1) > Field > Array (3) > Final',
     )
   })
 })
