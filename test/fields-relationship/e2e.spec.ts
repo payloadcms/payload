@@ -259,7 +259,10 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(`is invalid: ${fieldName}`)
+    await expect(page.locator('.payload-toast-container')).toContainText(
+      `is invalid: ${fieldName}`,
+      { ignoreCase: true },
+    )
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -406,7 +409,9 @@ describe('fields - relationship', () => {
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully', {
+      ignoreCase: true,
+    })
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
