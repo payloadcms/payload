@@ -302,8 +302,8 @@ importers:
         specifier: 2.11.2
         version: 2.11.2
       drizzle-kit:
-        specifier: 0.22.9-92953ac
-        version: 0.22.9-92953ac
+        specifier: 0.23.0-eb2ca29
+        version: 0.23.0-eb2ca29
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-fb9a90fa48-20240614)(types-react@19.0.0-rc.0)
@@ -351,8 +351,8 @@ importers:
         specifier: 2.11.2
         version: 2.11.2
       drizzle-kit:
-        specifier: 0.22.9-92953ac
-        version: 0.22.9-92953ac
+        specifier: 0.23.0-eb2ca29
+        version: 0.23.0-eb2ca29
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-fb9a90fa48-20240614)(types-react@19.0.0-rc.0)
@@ -3984,6 +3984,10 @@ packages:
     dependencies:
       react: 19.0.0-rc-fb9a90fa48-20240614
       tslib: 2.6.3
+    dev: false
+
+  /@drizzle-team/brocli@0.8.2:
+    resolution: {integrity: sha512-zTrFENsqGvOkBOuHDC1pXCkDXNd2UhP4lI3gYGhQ1R1SPeAAfqzPsV1dcpMy4uNU6kB5VpU5NGhvwxVNETR02A==}
     dev: false
 
   /@effect/schema@0.68.12(effect@3.4.5):
@@ -9059,10 +9063,11 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /drizzle-kit@0.22.9-92953ac:
-    resolution: {integrity: sha512-s1PLhbzEDSL8RqnD1/QnamFzyJgP6/2UkhxaM62WIENrmpz2K47Nwft7tE6UmR584yk7V2a7Osavq4TKsSs1fA==}
+  /drizzle-kit@0.23.0-eb2ca29:
+    resolution: {integrity: sha512-EQNdOjHU36UPjYtIXvhKs1vYnMCgiWzCq7kAKfrMDaqhD0tOK32m7s7jFPpd0437fSUT+Ff2g4M4UPtJCj4QvQ==}
     hasBin: true
     dependencies:
+      '@drizzle-team/brocli': 0.8.2
       '@esbuild-kit/esm-loader': 2.6.5
       esbuild: 0.19.12
       esbuild-register: 3.5.0(esbuild@0.19.12)

@@ -11,6 +11,7 @@ export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
+  sequences: {},
   tables: {},
   version: '7',
 }
