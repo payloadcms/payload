@@ -720,6 +720,7 @@ export const mapFields = (args: {
               )
             }
 
+            // @ts-expect-error
             fieldComponentPropsBase.CustomRowLabel = CustomRowLabel
 
             break
