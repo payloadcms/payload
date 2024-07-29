@@ -1,9 +1,10 @@
 'use client'
 
+import type { UploadFieldProps } from 'payload'
+
 import React, { useCallback, useMemo } from 'react'
 
 import type { UploadInputProps } from './Input.js'
-import type { UploadFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -16,7 +17,7 @@ import './index.scss'
 export { UploadFieldProps, UploadInput }
 export type { UploadInputProps }
 
-const _Upload: React.FC<UploadFieldProps> = (props) => {
+const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomError,
@@ -115,4 +116,4 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
   return null
 }
 
-export const UploadField = withCondition(_Upload)
+export const UploadField = withCondition(UploadComponent)

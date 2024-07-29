@@ -40,18 +40,31 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      ...[...Array(11)].map(
-        () => () =>
-          _payload.create({
-            collection: postsCollectionSlug,
-            data: {
-              description: 'Description',
-              title: 'Title',
+      ...[...Array(11)].map(() => async () => {
+        const postDoc = await _payload.create({
+          collection: postsCollectionSlug,
+          data: {
+            description: 'Description',
+            title: 'Title',
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        return await _payload.update({
+          collection: postsCollectionSlug,
+          where: {
+            id: {
+              equals: postDoc.id,
             },
-            depth: 0,
-            overrideAccess: true,
-          }),
-      ),
+          },
+          data: {
+            relationship: postDoc.id,
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+      }),
       () =>
         _payload.create({
           collection: customViews1CollectionSlug,

@@ -1,5 +1,4 @@
-import type { FieldMap } from '@payloadcms/ui'
-import type { FormState } from 'payload'
+import type { FieldMap, FormState } from 'payload'
 
 export type Props = {
   drawerSlug: string

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, DateField } from 'payload'
+import type { ClientValidate, DateField, DateFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,22 +13,12 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type DateFieldProps = {
-  date?: DateField['admin']['date']
-  name?: string
-  path?: string
-  placeholder?: DateField['admin']['placeholder'] | string
-  width?: string
-} & FormFieldBase
-
-const _DateTimeField: React.FC<DateFieldProps> = (props) => {
+const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -116,4 +106,4 @@ const _DateTimeField: React.FC<DateFieldProps> = (props) => {
   )
 }
 
-export const DateTimeField = withCondition(_DateTimeField)
+export const DateTimeField = withCondition(DateTimeFieldComponent)

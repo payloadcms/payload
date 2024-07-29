@@ -85,7 +85,9 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={regenerateImage}
+                onClick={() => {
+                  void regenerateImage()
+                }}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',

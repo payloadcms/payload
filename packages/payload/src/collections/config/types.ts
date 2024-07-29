@@ -23,6 +23,7 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
+  LabelStatic,
   LivePreviewConfig,
   OpenGraphConfig,
 } from '../../config/types.js'
@@ -438,8 +439,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Label configuration
    */
   labels?: {
-    plural?: LabelFunction | Record<string, string> | string
-    singular?: LabelFunction | Record<string, string> | string
+    plural?: LabelFunction | LabelStatic
+    singular?: LabelFunction | LabelStatic
   }
   slug: string
   /**

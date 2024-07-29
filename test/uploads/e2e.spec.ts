@@ -300,6 +300,22 @@ describe('uploads', () => {
     )
   })
 
+  test('should restrict uploads in drawer based on filterOptions', async () => {
+    await page.goto(audioURL.edit(audioDoc.id))
+    await page.waitForURL(audioURL.edit(audioDoc.id))
+
+    // remove the selection and open the list drawer
+    await wait(500) // flake workaround
+    await page.locator('.file-details__remove').click()
+
+    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+
+    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    await expect(listDrawer).toBeVisible()
+
+    await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+  })
+
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))

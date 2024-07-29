@@ -1,28 +1,15 @@
 'use client'
-import type { ClientValidate, Option, OptionObject } from 'payload'
+import type { ClientValidate, Option, OptionObject, SelectFieldProps } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 import type { SelectInputProps } from './Input.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { SelectInput } from './Input.js'
-
-export type SelectFieldProps = {
-  hasMany?: boolean
-  isClearable?: boolean
-  isSortable?: boolean
-  name?: string
-  onChange?: (e: string | string[]) => void
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
-} & FormFieldBase
 
 const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -36,7 +23,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const _SelectField: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -134,6 +121,6 @@ const _SelectField: React.FC<SelectFieldProps> = (props) => {
   )
 }
 
-export const SelectField = withCondition(_SelectField)
+export const SelectField = withCondition(SelectFieldComponent)
 
 export { SelectInput, type SelectInputProps }

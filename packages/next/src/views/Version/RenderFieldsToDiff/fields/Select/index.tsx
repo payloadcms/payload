@@ -1,7 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { SelectFieldProps } from '@payloadcms/ui'
-import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { OptionObject, SelectField } from 'payload'
+import type { MappedField, OptionObject, SelectField, SelectFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

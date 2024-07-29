@@ -13,7 +13,7 @@ import './index.scss'
 const baseClass = 'array-actions'
 
 export type Props = {
-  addRow: (current: number, blockType?: string) => void
+  addRow: (current: number, blockType?: string) => Promise<void> | void
   duplicateRow: (current: number) => void
   hasMaxRows: boolean
   index: number
@@ -77,7 +77,7 @@ export const ArrayAction: React.FC<Props> = ({
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__add`}
                   onClick={() => {
-                    addRow(index + 1)
+                    void addRow(index + 1)
                     close()
                   }}
                 >

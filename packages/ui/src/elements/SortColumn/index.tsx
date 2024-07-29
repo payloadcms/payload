@@ -1,6 +1,14 @@
 'use client'
+import type { FieldBase } from 'payload'
+
 // TODO: abstract the `next/navigation` dependency out from this component
 import React, { useCallback } from 'react'
+
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useSearchParams } from '../../providers/SearchParams/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import './index.scss'
 
 export type SortColumnProps = {
   Label: React.ReactNode
@@ -8,14 +16,6 @@ export type SortColumnProps = {
   label?: FieldBase['label']
   name: string
 }
-
-import type { FieldBase } from 'payload'
-
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
 
 const baseClass = 'sort-column'
 

@@ -1,4 +1,4 @@
-import type { MappedField, TabsFieldProps } from '@payloadcms/ui'
+import type { MappedField, TabsFieldProps } from 'payload'
 
 import React from 'react'
 

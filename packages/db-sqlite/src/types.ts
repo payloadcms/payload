@@ -132,12 +132,10 @@ export type SQLiteAdapter = {
 export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
-  db: LibSQLDatabase
   payload: Payload
   req?: Partial<PayloadRequest>
 }
 export type MigrateDownArgs = {
-  db: LibSQLDatabase
   payload: Payload
   req?: Partial<PayloadRequest>
 }
@@ -146,6 +144,7 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    drizzle: LibSQLDatabase
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields

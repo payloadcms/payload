@@ -104,13 +104,13 @@ export { RadioGroupField } from '../../fields/RadioGroup/index.js'
 export { RelationshipField } from '../../fields/Relationship/index.js'
 export { RichTextField } from '../../fields/RichText/index.js'
 export { RowField } from '../../fields/Row/index.js'
-export { SelectField, type SelectFieldProps, SelectInput } from '../../fields/Select/index.js'
-export { TabsField, type TabsFieldProps } from '../../fields/Tabs/index.js'
+export { SelectField, SelectInput } from '../../fields/Select/index.js'
+export { TabsField } from '../../fields/Tabs/index.js'
 export { TextField, TextInput } from '../../fields/Text/index.js'
-export type { TextFieldProps, TextInputProps } from '../../fields/Text/index.js'
+export type { TextInputProps } from '../../fields/Text/index.js'
 
 export { TextareaField, TextareaInput } from '../../fields/Textarea/index.js'
-export type { TextAreaInputProps, TextareaFieldProps } from '../../fields/Textarea/index.js'
+export type { TextAreaInputProps } from '../../fields/Textarea/index.js'
 
 export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
@@ -140,7 +140,6 @@ export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/inde
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 export { useField } from '../../forms/useField/index.js'
-export type { FormFieldBase } from '../../fields/shared/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 
 export { withCondition } from '../../forms/withCondition/index.js'
@@ -180,12 +179,7 @@ export type {
   CollectionComponentMap,
   ComponentMap,
   ConfigComponentMapBase,
-  FieldComponentProps,
-  FieldMap,
   GlobalComponentMap,
-  MappedField,
-  MappedTab,
-  ReducedBlock,
 } from '../../providers/ComponentMap/buildComponentMap/types.js'
 export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'

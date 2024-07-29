@@ -1,9 +1,7 @@
 'use client'
-import type { CodeField as CodeFieldType } from 'payload'
+import type { CodeFieldProps } from 'payload'
 
 import React, { useCallback } from 'react'
-
-import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -15,14 +13,6 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type CodeFieldProps = {
-  editorOptions?: CodeFieldType['admin']['editorOptions']
-  language?: CodeFieldType['admin']['language']
-  name?: string
-  path?: string
-  width: string
-} & FormFieldBase
-
 const prismToMonacoLanguageMap = {
   js: 'javascript',
   ts: 'typescript',
@@ -30,7 +20,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const _CodeField: React.FC<CodeFieldProps> = (props) => {
+const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -110,4 +100,4 @@ const _CodeField: React.FC<CodeFieldProps> = (props) => {
   )
 }
 
-export const CodeField = withCondition(_CodeField)
+export const CodeField = withCondition(CodeFieldComponent)

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, FieldMap, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -10,8 +10,6 @@ const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { useListInfo } from '@payloadcms/ui'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
