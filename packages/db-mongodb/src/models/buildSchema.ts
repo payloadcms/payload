@@ -57,9 +57,7 @@ type FieldSchemaGenerator = (
  * @param field
  */
 const formatDefaultValue = (field: FieldAffectingData) =>
-  typeof field.defaultValue !== 'undefined' &&
-  typeof field.defaultValue !== 'function' &&
-  !field.localized
+  typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
     ? field.defaultValue
     : undefined
 
