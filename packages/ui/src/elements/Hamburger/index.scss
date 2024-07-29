@@ -7,9 +7,7 @@
   background-color: var(--theme-bg);
   outline: none;
   position: relative;
-
   color: var(--theme-text);
-
   box-shadow: 0px 0px 0px 1px var(--theme-elevation-150);
   padding: base(0.1);
   border-radius: 3px;
@@ -17,6 +15,9 @@
   z-index: 1;
   height: 100%;
   width: 100%;
+  transition-property: box-shadow, background-color;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
   &:hover {
     background-color: var(--theme-elevation-100);
