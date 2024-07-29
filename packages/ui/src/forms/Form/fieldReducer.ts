@@ -309,35 +309,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'SET_ROW_COLLAPSED': {
-      const { collapsed, path, rowID, setDocFieldPreferences } = action
-
-      const arrayState = state[path]
-
-      const { collapsedRowIDs, matchedIndex } = state[path].rows.reduce(
-        (acc, row, index) => {
-          const isMatchingRow = row.id === rowID
-          if (isMatchingRow) acc.matchedIndex = index
-
-          if (!isMatchingRow && row.collapsed) acc.collapsedRowIDs.push(row.id)
-          else if (isMatchingRow && collapsed) acc.collapsedRowIDs.push(row.id)
-
-          return acc
-        },
-        {
-          collapsedRowIDs: [],
-          matchedIndex: undefined,
-        },
-      )
-
-      if (matchedIndex > -1) {
-        arrayState.rows[matchedIndex].collapsed = collapsed
-        setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
-      }
+      const { path, updatedRows } = action
 
       const newState = {
         ...state,
         [path]: {
-          ...arrayState,
+          ...state[path],
+          rows: updatedRows,
         },
       }
 
@@ -345,32 +323,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'SET_ALL_ROWS_COLLAPSED': {
-      const { collapsed, path, setDocFieldPreferences } = action
-
-      const { collapsedRowIDs, rows } = state[path].rows.reduce(
-        (acc, row) => {
-          if (collapsed) acc.collapsedRowIDs.push(row.id)
-
-          acc.rows.push({
-            ...row,
-            collapsed,
-          })
-
-          return acc
-        },
-        {
-          collapsedRowIDs: [],
-          rows: [],
-        },
-      )
-
-      setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
+      const { path, updatedRows } = action
 
       return {
         ...state,
         [path]: {
           ...state[path],
-          rows,
+          rows: updatedRows,
         },
       }
     }

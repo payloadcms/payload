@@ -7,7 +7,7 @@ import type {
 
 import { notFound } from 'next/navigation.js'
 
-import { isAdminAuthRoute, isAdminRoute } from './shared.js'
+import { getRouteWithoutAdmin, isAdminAuthRoute, isAdminRoute } from './shared.js'
 
 export const handleAdminPage = ({
   adminRoute,
@@ -20,9 +20,9 @@ export const handleAdminPage = ({
   permissions: Permissions
   route: string
 }) => {
-  if (isAdminRoute(route, adminRoute)) {
-    const baseAdminRoute = adminRoute && adminRoute !== '/' ? route.replace(adminRoute, '') : route
-    const routeSegments = baseAdminRoute.split('/').filter(Boolean)
+  if (isAdminRoute({ adminRoute, config, route })) {
+    const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
+    const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
     const [entityType, entitySlug, createOrID] = routeSegments
     const collectionSlug = entityType === 'collections' ? entitySlug : undefined
     const globalSlug = entityType === 'globals' ? entitySlug : undefined
@@ -47,7 +47,7 @@ export const handleAdminPage = ({
       }
     }
 
-    if (!permissions.canAccessAdmin && !isAdminAuthRoute(config, route, adminRoute)) {
+    if (!permissions.canAccessAdmin && !isAdminAuthRoute({ adminRoute, config, route })) {
       notFound()
     }
 

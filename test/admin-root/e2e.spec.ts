@@ -5,7 +5,7 @@ import * as path from 'path'
 import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, login } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -28,6 +28,8 @@ test.describe('Admin Panel (Root)', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
 
     await ensureCompilationIsDone({
       customRoutes: {
