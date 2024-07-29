@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
   getAdminRoutes,
   initPageConsoleErrorCatch,
@@ -67,7 +67,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getAdminRoutes({ customAdminRoutes })
   })
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -780,29 +780,6 @@ describe('admin2', () => {
           }),
         ).toHaveText('Title')
       })
-    })
-  })
-
-  describe('field descriptions', () => {
-    test('should render static field description', async () => {
-      await page.goto(postsUrl.create)
-      await expect(page.locator('.field-description-descriptionAsString')).toContainText(
-        'Static field description.',
-      )
-    })
-    test('should render functional field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsFunction').fill('functional')
-      await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
-        'Function description',
-      )
-    })
-    test('should render component field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsComponent').fill('component')
-      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
-        'Component description: descriptionAsComponent - component',
-      )
     })
   })
 })

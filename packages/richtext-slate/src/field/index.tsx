@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui'
+import type { FormFieldBase } from 'payload'
 
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'

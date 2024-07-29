@@ -12,6 +12,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
+import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -35,9 +36,10 @@ const Restore: React.FC<Props> = ({
   versionID,
 }) => {
   const {
-    routes: { admin, api },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = useConfig()
+
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
   const router = useRouter()
@@ -49,18 +51,24 @@ const Restore: React.FC<Props> = ({
     versionDate,
   })
 
-  let fetchURL = `${serverURL}${api}`
+  let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
   const canRestoreAsDraft = status !== 'draft'
 
   if (collectionSlug) {
     fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
-    redirectURL = `${admin}/collections/${collectionSlug}/${originalDocID}`
+    redirectURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionSlug}/${originalDocID}`,
+    })
   }
 
   if (globalSlug) {
     fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}?draft=${draft}`
-    redirectURL = `${admin}/globals/${globalSlug}`
+    redirectURL = formatAdminURL({
+      adminRoute,
+      path: `/globals/${globalSlug}`,
+    })
   }
 
   const handleRestore = useCallback(async () => {

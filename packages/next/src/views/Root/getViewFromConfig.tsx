@@ -1,5 +1,7 @@
 import type { AdminViewComponent, SanitizedConfig } from 'payload'
 
+import { formatAdminURL } from '@payloadcms/ui/shared'
+
 import type { initPage } from '../../utilities/initPage/index.js'
 
 import { Account } from '../Account/index.js'
@@ -93,7 +95,7 @@ export const getViewFromConfig = ({
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: `${adminRoute}${route}`,
+            path: formatAdminURL({ adminRoute, path: route }),
           })
         })
 

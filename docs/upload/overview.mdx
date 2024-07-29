@@ -104,6 +104,7 @@ _An asterisk denotes that an option is required._
 | **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                       |
 | **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                |
 | **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                    |
+| **`withMetadata`**             | If specified, appends metadata to the output image file.  Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                    |
 
 
 ### Payload-wide Upload Options

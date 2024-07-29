@@ -8,7 +8,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -21,10 +21,7 @@ const RawUploadComponent = React.lazy(() =>
 )
 
 export type UploadData = {
-  fields: {
-    // unknown, custom fields:
-    [key: string]: unknown
-  }
+  fields: JsonObject
   id: string
   relationTo: CollectionSlug
   value: number | string

@@ -6,11 +6,7 @@ desc: The Tabs field is a great way to organize complex editing experiences into
 keywords: tabs, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Tabs field is presentational-only and only affects the Admin Panel (unless a tab is named). By
-  using it, you can place fields within a nice layout component that separates certain sub-fields by
-  a tabbed interface.
-</Banner>
+The Tabs Field is presentational-only and only affects the [Admin Panel](../admin/overview) (unless a tab is named). By using it, you can place fields within a nice layout component that separates certain sub-fields by a tabbed interface.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/tabs.png"
@@ -19,12 +15,28 @@ keywords: tabs, fields, config, configuration, documentation, Content Management
   caption="Tabs field type used to separate Hero fields from Page Layout"
 />
 
-## Config
+To add a Tabs Field, set the `type` to `tabs` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyTabsField: Field = {
+  // ...
+  // highlight-start
+  type: 'tabs',
+  tabs: [
+    // ...
+  ]
+  // highlight-end
+}
+```
+
+## Config Options
 
 | Option        | Description                                                                                                              |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **`tabs`** \* | Array of tabs to render within this Tabs field.                                                                          |
-| **`admin`**   | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`admin`**   | Admin-specific configuration. [More details](../admin/fields#admin-options). |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                |
 
 ### Tab-specific Config

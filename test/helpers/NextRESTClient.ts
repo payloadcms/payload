@@ -85,6 +85,9 @@ export class NextRESTClient {
     if (options.auth !== false && this.token) {
       headers.set('Authorization', `JWT ${this.token}`)
     }
+    if (options.auth === false) {
+      headers.set('DisableAutologin', 'true')
+    }
 
     return headers
   }
@@ -148,7 +151,7 @@ export class NextRESTClient {
   }
 
   async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
-    const { url, slug, params } = this.generateRequestParts(path)
+    const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
 

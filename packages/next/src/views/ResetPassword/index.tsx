@@ -1,6 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
 import { Button, Translation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -31,7 +32,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
     admin: {
       routes: { account: accountRoute },
     },
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
 
   if (user) {
@@ -42,14 +43,23 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           <p>
             <Translation
               elements={{
-                '0': ({ children }) => <Link href={`${admin}${accountRoute}`}>{children}</Link>,
+                '0': ({ children }) => (
+                  <Link
+                    href={formatAdminURL({
+                      adminRoute,
+                      path: accountRoute,
+                    })}
+                  >
+                    {children}
+                  </Link>
+                ),
               }}
               i18nKey="authentication:loggedInChangePassword"
               t={i18n.t}
             />
           </p>
           <br />
-          <Button Link={Link} buttonStyle="secondary" el="link" to={admin}>
+          <Button Link={Link} buttonStyle="secondary" el="link" to={adminRoute}>
             {i18n.t('general:backToDashboard')}
           </Button>
         </div>

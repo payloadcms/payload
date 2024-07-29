@@ -1,4 +1,4 @@
-import type { FieldMap } from '../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap } from 'payload'
 
 /**
  * Flattens a collection's fields into a single array of fields, as long

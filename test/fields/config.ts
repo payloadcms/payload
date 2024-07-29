@@ -13,6 +13,7 @@ import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import ConditionalLogic from './collections/ConditionalLogic/index.js'
 import DateFields from './collections/Date/index.js'
+import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
@@ -61,6 +62,7 @@ export const collectionSlugs: CollectionConfig[] = [
   CollapsibleFields,
   ConditionalLogic,
   DateFields,
+  EmailFields,
   RadioFields,
   GroupFields,
   RowFields,

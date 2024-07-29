@@ -43,6 +43,7 @@ import type { Option } from '../../ReactSelect/index.js'
 
 import { RenderCustomClientComponent } from '../../../elements/RenderCustomClientComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DateField } from './Date/index.js'
@@ -78,6 +79,7 @@ export const Condition: React.FC<Props> = (props) => {
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
+  const { t } = useTranslation()
   const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
@@ -116,7 +118,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   let valueOptions
   if (booleanSelect) {
-    valueOptions = ['true', 'false']
+    valueOptions = [t('general:true'), t('general:false')]
   } else if (internalField?.props && 'options' in internalField.props) {
     valueOptions = internalField.props.options
   }

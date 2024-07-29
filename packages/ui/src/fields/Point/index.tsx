@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { ClientValidate, PointFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -12,22 +12,12 @@ import './index.scss'
 
 const baseClass = 'point'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
-export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  width?: string
-} & FormFieldBase
-
-export const _PointField: React.FC<PointFieldProps> = (props) => {
+export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -122,6 +112,8 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           )}
           <div className="input-wrapper">
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-longitude-${path.replace(/\./g, '__')}`}
@@ -144,6 +136,8 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
           <div className="input-wrapper">
             <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
             {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-latitude-${path.replace(/\./g, '__')}`}
@@ -167,4 +161,4 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
   )
 }
 
-export const PointField = withCondition(_PointField)
+export const PointField = withCondition(PointFieldComponent)

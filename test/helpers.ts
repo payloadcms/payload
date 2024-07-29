@@ -48,11 +48,11 @@ const networkConditions = {
 }
 
 /**
- * Load admin panel and make sure autologin has passed before running tests
+ * Ensure admin panel is loaded before running tests
  * @param page
  * @param serverURL
  */
-export async function ensureAutoLoginAndCompilationIsDone({
+export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
   page,
@@ -64,9 +64,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
   serverURL: string
 }): Promise<void> {
   const {
-    admin: {
-      routes: { createFirstUser: createFirstUserRoute, login: loginRoute },
-    },
     routes: { admin: adminRoute },
   } = getAdminRoutes({ customAdminRoutes, customRoutes })
 
@@ -76,16 +73,6 @@ export async function ensureAutoLoginAndCompilationIsDone({
   await page.waitForURL(adminURL)
 
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() =>
-    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
-  ).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
@@ -281,13 +268,6 @@ export const findTableCell = (page: Page, fieldName: string, rowTitle?: string):
   const cell = parentEl.locator(`td.cell-${fieldName}`)
   expect(cell).toBeTruthy()
   return cell
-}
-
-export async function navigateToListCellLink(page: Page, selector = '.cell-id') {
-  const cellLink = page.locator(`${selector} a`).first()
-  const linkURL = await cellLink.getAttribute('href')
-  await cellLink.click()
-  await page.waitForURL(`**${linkURL}`)
 }
 
 export const findTableRow = (page: Page, title: string): Locator => {

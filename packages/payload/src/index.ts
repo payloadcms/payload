@@ -1,6 +1,6 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
-import type pino from 'pino'
+import type { Logger } from 'pino'
 
 import { spawn } from 'child_process'
 import crypto from 'crypto'
@@ -50,19 +50,19 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
+import type { JsonObject } from './types/index.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
-import { validateSchema } from './config/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getDependencies } from './utilities/dependencies/getDependencies.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
-import Logger from './utilities/logger.js'
+import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
 export interface GeneratedTypes {
@@ -85,10 +85,10 @@ export interface GeneratedTypes {
     }
   }
   collectionsUntyped: {
-    [slug: string]: Record<string, unknown> & TypeWithID
+    [slug: string]: JsonObject & TypeWithID
   }
   globalsUntyped: {
-    [slug: string]: Record<string, unknown>
+    [slug: string]: JsonObject
   }
   localeUntyped: null | string
   userUntyped: User
@@ -291,7 +291,7 @@ export class BasePayload {
 
   globals: Globals
 
-  logger: pino.Logger
+  logger: Logger
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
@@ -483,13 +483,9 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
-    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
+    this.logger = getLogger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
-
-    if (process.env.NODE_ENV !== 'production') {
-      validateSchema(this.config, this.logger)
-    }
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
@@ -925,7 +921,7 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-export { default as getDefaultValue } from './fields/getDefaultValue.js'
+export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
@@ -964,7 +960,6 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-export { combineMerge } from './utilities/combineMerge.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -974,8 +969,17 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
-export { deepCopyObject } from './utilities/deepCopyObject.js'
-export { deepMerge } from './utilities/deepMerge.js'
+export {
+  deepCopyObject,
+  deepCopyObjectComplex,
+  deepCopyObjectSimple,
+} from './utilities/deepCopyObject.js'
+export {
+  deepMerge,
+  deepMergeWithCombinedArrays,
+  deepMergeWithReactComponents,
+  deepMergeWithSourceArrays,
+} from './utilities/deepMerge.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
@@ -995,6 +999,7 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { getDependencies }
 export { saveVersion } from './versions/saveVersion.js'
+export { getDependencies }
 export type { TypeWithVersion } from './versions/types.js'
+export { deepMergeSimple } from '@payloadcms/translations/utilities'

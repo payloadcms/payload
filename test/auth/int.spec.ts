@@ -489,7 +489,7 @@ describe('Auth', () => {
           expect(lockedUser.docs[0].loginAttempts).toBe(2)
           expect(lockedUser.docs[0].lockUntil).toBeDefined()
 
-          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000)
+          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
           const userLockElapsed = await payload.update({
             collection: slug,
             data: {
@@ -503,7 +503,7 @@ describe('Auth', () => {
             },
           })
 
-          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock.toISOString())
+          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
 
           // login
           await restClient.POST(`/${slug}/login`, {

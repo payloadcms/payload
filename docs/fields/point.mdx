@@ -3,18 +3,10 @@ title: Point Field
 label: Point
 order: 110
 desc: The Point field type stores coordinates in the database. Learn how to use Point field for geolocation and geometry.
-
 keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Point field type saves a pair of coordinates in the database and assigns an index for location
-  related queries.
-</Banner>
-
-<Banner type="warning">
-  <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
-</Banner>
+The Point Field saves a pair of coordinates in the database and assigns an index for location related queries. The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/point.png"
@@ -23,7 +15,21 @@ keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configurati
   caption="Admin Panel screenshot of a Point field"
 />
 
-The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
+To add a Point Field, set the `type` to `point` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyPointField: Field = {
+  // ...
+  type: 'point', // highlight-line
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  The Point Field is currently only supported in MongoDB.
+</Banner>
 
 ## Config
 
@@ -41,15 +47,11 @@ The data structure in the database matches the GeoJSON structure to represent po
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                      |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                           |
 | **`required`**         | Require this field to have a value.                                                                                                                                                       |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                 |
+| **`admin`**            | Admin-specific configuration. [More details](../admin/fields#admin-options).                                                                                                                    |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                 |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                               |
 
 _\* An asterisk denotes that a property is required._
-
-<Banner type="warning">
-  <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
-</Banner>
 
 ## Example
 

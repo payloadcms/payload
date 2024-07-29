@@ -1,6 +1,4 @@
-import type { FieldPermissions, Operation } from 'payload'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap, FieldPermissions, Operation } from 'payload'
 
 export type Props = {
   className?: string

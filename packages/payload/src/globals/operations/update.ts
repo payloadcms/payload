@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug } from '../../index.js'
+import type { GlobalSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
@@ -9,6 +9,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { deepCopyObjectSimple } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -81,10 +82,10 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       where: query,
     })
 
-    let globalJSON: Record<string, unknown> = {}
+    let globalJSON: JsonObject = {}
 
     if (global) {
-      globalJSON = JSON.parse(JSON.stringify(global))
+      globalJSON = deepCopyObjectSimple(global)
 
       if (globalJSON._id) {
         delete globalJSON._id

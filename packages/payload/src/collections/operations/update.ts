@@ -263,7 +263,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // beforeChange - Fields
         // /////////////////////////////////////
 
-        let result = await beforeChange<DataFromCollectionSlug<TSlug>>({
+        let result = await beforeChange({
           id,
           collection: collectionConfig,
           context: req.context,
@@ -349,7 +349,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // afterChange - Fields
         // /////////////////////////////////////
 
-        result = await afterChange<DataFromCollectionSlug<TSlug>>({
+        result = await afterChange({
           collection: collectionConfig,
           context: req.context,
           data,

@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from 'payload'
-import type { Init } from 'payload'
+import type { Init, SanitizedCollectionConfig } from 'payload'
 
+import { createTableName } from '@payloadcms/drizzle'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -9,7 +8,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
-import { createTableName } from './schema/createTableName.js'
 
 export const init: Init = function init(this: PostgresAdapter) {
   if (this.schemaName) {
@@ -17,7 +15,6 @@ export const init: Init = function init(this: PostgresAdapter) {
   } else {
     this.pgSchema = { table: pgTable }
   }
-
   if (this.payload.config.localization) {
     this.enums.enum__locales = pgEnum(
       '_locales',

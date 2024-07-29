@@ -52,7 +52,7 @@ export default async function Post({ params: { slug = '' } }) {
 
         <RelatedPosts
           className="mt-12"
-          docs={post.relatedPosts.filter((post) => typeof post !== 'string')}
+          docs={post.relatedPosts.filter((post) => typeof post === 'object')}
         />
       </div>
     </article>

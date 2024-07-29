@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, FieldMap, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -27,8 +27,6 @@ import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
 
 const baseClass = 'edit-many'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export type EditManyProps = {
   collection: ClientCollectionConfig
