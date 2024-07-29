@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
+import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
 import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
@@ -189,6 +189,7 @@ type RichTextAdapterBase<
     WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
     config: SanitizedConfig
     i18n: I18nClient
+    payload: Payload
     schemaPath: string
   }) => Map<string, React.ReactNode>
   generateSchemaMap?: (args: {
