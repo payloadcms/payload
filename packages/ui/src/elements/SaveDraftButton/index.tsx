@@ -76,7 +76,7 @@ export const DefaultSaveDraftButton: React.FC = () => {
       disabled={forceDisable}
       onClick={saveDraft}
       ref={ref}
-      size="small"
+      size="medium"
       type="button"
     >
       {t('version:saveDraft')}

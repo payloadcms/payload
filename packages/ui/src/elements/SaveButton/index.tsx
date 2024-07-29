@@ -38,7 +38,7 @@ export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelPr
       disabled={forceDisable}
       onClick={() => submit()}
       ref={ref}
-      size="small"
+      size="medium"
       type="button"
     >
       {label}
