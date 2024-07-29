@@ -142,7 +142,7 @@ export const promise = async ({
         preferences: { fields: {} },
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }>)
+      } as ValidateOptions<any, any, { jsonError: object }, any>)
 
       if (typeof validationResult === 'string') {
         errors.push({

@@ -11,7 +11,7 @@ export async function validateNodes({
   nodeValidations: Map<string, Array<NodeValidation>>
   nodes: SerializedLexicalNode[]
   validation: {
-    options: ValidateOptions<unknown, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }): Promise<string | true> {
