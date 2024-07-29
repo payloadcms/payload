@@ -57,7 +57,9 @@ type FieldSchemaGenerator = (
  * @param field
  */
 const formatDefaultValue = (field: FieldAffectingData) =>
-  typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
+  typeof field.defaultValue !== 'undefined' &&
+  typeof field.defaultValue !== 'function' &&
+  !field.localized
     ? field.defaultValue
     : undefined
 
@@ -95,6 +97,9 @@ const localizeSchema = (
   localization: SanitizedLocalizationConfig | false,
 ) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
+    if (schema.default === 'localizedUniqueRequired') {
+      console.log('hit')
+    }
     return {
       type: localization.localeCodes.reduce(
         (localeSchema, locale) => ({
