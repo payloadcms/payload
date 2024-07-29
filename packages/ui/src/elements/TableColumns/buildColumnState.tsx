@@ -63,7 +63,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const activeColumnsIndices = []
 
-  const sorted = sortedFieldMap.reduce((acc, field, index) => {
+  const sorted: Column[] = sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
       (preference) => 'name' in field && preference.accessor === field.name,
     )
@@ -159,10 +159,13 @@ export const buildColumnState = (args: Args): Column[] => {
       accessor: '_select',
       active: true,
       components: {
-        Cell: <SelectRow />,
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: <SelectRow />,
+        },
         Heading: <SelectAll />,
       },
-      label: null,
     })
   }
 

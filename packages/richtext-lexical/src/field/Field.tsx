@@ -21,7 +21,7 @@ import './index.scss'
 
 const baseClass = 'rich-text-lexical'
 
-const _RichText: React.FC<
+const RichText_: React.FC<
   {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
@@ -118,11 +118,7 @@ const _RichText: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )
@@ -139,4 +135,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(_RichText)
+export const RichText = withCondition(RichText_)

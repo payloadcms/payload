@@ -15,6 +15,7 @@ import {
   Pill,
   PublishMany,
   RelationshipProvider,
+  RenderMappedComponent,
   SelectionProvider,
   SetViewActions,
   StaggeredShimmers,
@@ -100,7 +101,7 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={baseClass}>
       <SetViewActions actions={actionsMap?.List} />
-      {BeforeList}
+      <RenderMappedComponent component={BeforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
@@ -120,12 +121,17 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
+                {Description && (
+                  <div className={`${baseClass}__sub-header`}>
+                    <RenderMappedComponent component={Description} />
+                  </div>
+                )}
               </Fragment>
             )}
           </header>
           <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
-          {BeforeListTable}
+          <RenderMappedComponent component={BeforeListTable} />
+
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -156,7 +162,7 @@ export const DefaultListView: React.FC = () => {
               )}
             </div>
           )}
-          {AfterListTable}
+          <RenderMappedComponent component={AfterListTable} />
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
@@ -189,17 +195,13 @@ export const DefaultListView: React.FC = () => {
                   />
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
-                      <Fragment>
-                        <ListSelection
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany collection={collectionConfig} fieldMap={fieldMap} />
-                          <PublishMany collection={collectionConfig} />
-                          <UnpublishMany collection={collectionConfig} />
-                          <DeleteMany collection={collectionConfig} />
-                        </div>
-                      </Fragment>
+                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        <EditMany collection={collectionConfig} fieldMap={fieldMap} />
+                        <PublishMany collection={collectionConfig} />
+                        <UnpublishMany collection={collectionConfig} />
+                        <DeleteMany collection={collectionConfig} />
+                      </div>
                     </div>
                   )}
                 </Fragment>
@@ -208,7 +210,7 @@ export const DefaultListView: React.FC = () => {
           )}
         </Gutter>
       </SelectionProvider>
-      {AfterList}
+      <RenderMappedComponent component={AfterList} />
     </div>
   )
 }
