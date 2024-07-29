@@ -123,7 +123,14 @@ export const confirmPassword: Validate<string, unknown, unknown, TextField> = (
     return t('validation:required')
   }
 
-  if (value && value !== data.formState.password.value) {
+  if (
+    value &&
+    typeof data.formState === 'object' &&
+    'password' in data.formState &&
+    typeof data.formState.password === 'object' &&
+    'value' in data.formState.password &&
+    value !== data.formState.password.value
+  ) {
     return t('fields:passwordsDoNotMatch')
   }
 
