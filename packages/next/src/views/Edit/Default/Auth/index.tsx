@@ -54,7 +54,7 @@ export const Auth: React.FC<Props> = (props) => {
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
-        setSchemaPath(`${collectionSlug}.auth`)
+        setSchemaPath(`_${collectionSlug}.auth`)
       } else {
         setSchemaPath(collectionSlug)
         dispatchFields({ type: 'REMOVE', path: 'password' })

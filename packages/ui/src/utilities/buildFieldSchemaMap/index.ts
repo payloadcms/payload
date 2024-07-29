@@ -35,7 +35,7 @@ export const buildFieldSchemaMap = (args: {
         },
       ]
 
-      result.set(`${collection.slug}.auth`, [...collection.fields, ...baseAuthFields])
+      result.set(`_${collection.slug}.auth`, [...collection.fields, ...baseAuthFields])
     }
 
     traverseFields({

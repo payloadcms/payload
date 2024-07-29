@@ -42,7 +42,7 @@ export const CreateFirstUserClient: React.FC<{
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
-          schemaPath: `${userSlug}.auth`,
+          schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
       }),
