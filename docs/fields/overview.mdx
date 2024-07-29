@@ -70,7 +70,16 @@ In addition to being able to define access control on a document-level, you can 
 
 ### Field names
 
-Some fields use their `name` property as a unique identifier to store and retrieve from the database. `__v`, `salt`, and `hash` are all reserved field names which are sanitized from Payload's config and cannot be used.
+All fields require a `name` property. This is the key that will be used to store and retrieve the field's value in the database. This property must be unique within the Collection, Global, or nested group that it is defined in.
+
+Payload reserves various field names for internal use. Using reserved field names will result in your field being sanitized from the config.
+
+The following field names are forbidden and cannot be used:
+
+  - `__v`
+  - `salt`
+  - `hash`
+  - `file`
 
 ### Validation
 
@@ -145,6 +154,7 @@ const field: Field = {
 Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
 Users are then required to provide a custom ID value when creating a record through the Admin UI or API.
 Valid ID types are `number` and `text`.
+When using the text value, remember that it shouldn't contain the / (slash) sign, as the API will read it separately and this can result in unexpected behavior.
 
 Example:
 

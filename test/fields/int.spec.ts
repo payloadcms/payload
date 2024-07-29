@@ -8,6 +8,7 @@ import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { GroupField, RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { NotFound } from '../../packages/payload/src/errors'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
@@ -82,8 +83,13 @@ describe('Fields', () => {
 
     it('creates with default values', () => {
       expect(doc.text).toEqual(text)
+      expect(doc.defaultString).toEqual(defaultText)
       expect(doc.defaultFunction).toEqual(defaultText)
       expect(doc.defaultAsync).toEqual(defaultText)
+    })
+
+    it('supports empty strings as default value', () => {
+      expect(doc.defaultEmptyString).toEqual('')
     })
 
     it('should populate default values in beforeValidate hook', async () => {
@@ -344,6 +350,26 @@ describe('Fields', () => {
 
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
+    })
+
+    // https://github.com/payloadcms/payload/issues/6485
+    it('delete with selectHasMany relationship', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+      await payload.delete({
+        collection: 'select-fields',
+        id,
+      })
+      await expect(
+        payload.findByID({
+          collection: 'select-fields',
+          id,
+        }),
+      ).rejects.toThrow(NotFound)
     })
 
     it('should query hasMany in', async () => {

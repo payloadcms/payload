@@ -1,5 +1,5 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { OutputInfo } from 'sharp'
+import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
@@ -19,6 +19,7 @@ import type {
 
 import { isNumber } from '../utilities/isNumber'
 import fileExists from './fileExists'
+import { type WithMetadata, optionallyAppendMetadata } from './optionallyAppendMetadata'
 
 type ResizeArgs = {
   config: SanitizedCollectionConfig
@@ -29,6 +30,7 @@ type ResizeArgs = {
   savedFilename: string
   staticPath: string
   uploadEdits?: UploadEdits
+  withMetadata?: WithMetadata
 }
 
 /** Result from resizing and transforming the requested image sizes */
@@ -68,11 +70,21 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  * @param extension - the extension to use
  * @returns the new image name that is not taken
  */
-const createImageName = (
-  outputImageName: string,
-  { height, width }: OutputInfo,
-  extension: string,
-) => `${outputImageName}-${width}x${height}.${extension}`
+
+type CreateImageNameArgs = {
+  extension: string
+  height: number
+  outputImageName: string
+  width: number
+}
+const createImageName = ({
+  extension,
+  height,
+  outputImageName,
+  width,
+}: CreateImageNameArgs): string => {
+  return `${outputImageName}-${width}x${height}.${extension}`
+}
 
 type CreateResultArgs = {
   filename?: FileSize['filename']
@@ -122,46 +134,61 @@ const createResult = ({
 }
 
 /**
- * Check if the image needs to be resized according to the requested dimensions
- * and the original image size. If the resize options withoutEnlargement or withoutReduction are provided,
- * the image will be resized regardless of the requested dimensions, given that the
- * width or height to be resized is provided.
+ * Determine whether or not to resize the image.
+ * - resize using image config
+ * - resize using image config with focal adjustments
+ * - do not resize at all
  *
- * @param resizeConfig - object containing the requested dimensions and resize options
- * @param original - the original image size
- * @returns true if resizing is not needed, false otherwise
+ * `imageResizeConfig.withoutEnlargement`:
+ * - undefined [default]: uploading images with smaller width AND height than the image size will return null
+ * - false: always enlarge images to the image size
+ * - true: if the image is smaller than the image size, return the original image
+ *
+ * `imageResizeConfig.withoutReduction`:
+ * - false [default]: always enlarge images to the image size
+ * - true: if the image is smaller than the image size, return the original image
+ *
+ * @return 'omit' | 'resize' | 'resizeWithFocalPoint'
  */
-const preventResize = (
-  { height: desiredHeight, width: desiredWidth, withoutEnlargement, withoutReduction }: ImageSize,
-  original: ProbedImageSize,
-): boolean => {
-  // default is to allow reduction
-  if (withoutReduction !== undefined) {
-    return false // needs resize
+const getImageResizeAction = ({
+  dimensions: originalImage,
+  hasFocalPoint,
+  imageResizeConfig,
+}: {
+  dimensions: ProbedImageSize
+  hasFocalPoint?: boolean
+  imageResizeConfig: ImageSize
+}): 'omit' | 'resize' | 'resizeWithFocalPoint' => {
+  const {
+    fit,
+    height: targetHeight,
+    width: targetWidth,
+    withoutEnlargement,
+    withoutReduction,
+  } = imageResizeConfig
+
+  // prevent upscaling by default when x and y are both smaller than target image size
+  if (targetHeight && targetWidth) {
+    const originalImageIsSmallerXAndY =
+      originalImage.width < targetWidth && originalImage.height < targetHeight
+    if (withoutEnlargement === undefined && originalImageIsSmallerXAndY) {
+      return 'omit' // prevent image size from being enlarged
+    }
   }
 
-  // default is to prevent enlargement
-  if (withoutEnlargement !== undefined) {
-    return false // needs resize
-  }
+  const originalImageIsSmallerXOrY =
+    originalImage.width < targetWidth || originalImage.height < targetHeight
+  if (fit === 'contain' || fit === 'inside') return 'resize'
+  if (!isNumber(targetHeight) && !isNumber(targetWidth)) return 'resize'
 
-  const isWidthOrHeightNotDefined = !desiredHeight || !desiredWidth
-  if (isWidthOrHeightNotDefined) {
-    // If width and height are not defined, it means there is a format conversion
-    // and the image needs to be "resized" (transformed).
-    return false // needs resize
-  }
+  const targetAspectRatio = targetWidth / targetHeight
+  const originalAspectRatio = originalImage.width / originalImage.height
+  if (originalAspectRatio === targetAspectRatio) return 'resize'
 
-  const hasInsufficientWidth = desiredWidth > original.width
-  const hasInsufficientHeight = desiredHeight > original.height
-  if (hasInsufficientWidth && hasInsufficientHeight) {
-    // doesn't need resize - prevent enlargement. This should only happen if both width and height are insufficient.
-    // if only one dimension is insufficient and the other is sufficient, resizing needs to happen, as the image
-    // should be resized to the sufficient dimension.
-    return true // do not create a new size
-  }
+  if (withoutEnlargement && originalImageIsSmallerXOrY) return 'resize'
+  if (withoutReduction && !originalImageIsSmallerXOrY) return 'resize'
 
-  return false // needs resize
+  return hasFocalPoint ? 'resizeWithFocalPoint' : 'resize'
 }
 
 /**
@@ -210,6 +237,19 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
 }
 
 /**
+ * Used to extract height from images, animated or not.
+ *
+ * @param sharpMetadata - the sharp metadata
+ * @returns the height of the image
+ */
+function extractHeightFromImage(sharpMetadata: SharpMetadata): number {
+  if (sharpMetadata?.pages) {
+    return sharpMetadata.height / sharpMetadata.pages
+  }
+  return sharpMetadata.height
+}
+
+/**
  * For the provided image sizes, handle the resizing and the transforms
  * (format, trim, etc.) of each requested image size and return the result object.
  * This only handles the image sizes. The transforms of the original image
@@ -217,7 +257,7 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
  *
  * The image will be resized according to the provided
  * resize config. If no image sizes are requested, the resolved data will be empty.
- * For every image that dos not need to be resized, an result object with `null`
+ * For every image that does not need to be resized, a result object with `null`
  * parameters will be returned.
  *
  * @param resizeConfig - the resize config
@@ -232,6 +272,7 @@ export default async function resizeAndTransformImageSizes({
   savedFilename,
   staticPath,
   uploadEdits,
+  withMetadata,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
@@ -252,55 +293,110 @@ export default async function resizeAndTransformImageSizes({
   // Nothing to resize here so return as early as possible
   if (!imageSizes) return defaultResult
 
-  const sharpBase = sharp(file.tempFilePath || file.data).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  // Determine if the file is animated
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const sharpOptions: SharpOptions = {}
+
+  if (fileIsAnimatedType) sharpOptions.animated = true
+
+  const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  const originalImageMeta = await sharpBase.metadata()
+
+  const resizeImageMeta = {
+    height: extractHeightFromImage(originalImageMeta),
+    width: originalImageMeta.width,
+  }
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
       imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
 
-      // This checks if a resize should happen. If not, the resized image will be
-      // skipped COMPLETELY and thus will not be included in the resulting images.
-      // All further format/trim options will thus be skipped as well.
-      if (preventResize(imageResizeConfig, dimensions)) {
-        return createResult({ name: imageResizeConfig.name })
-      }
+      const resizeAction = getImageResizeAction({
+        dimensions,
+        hasFocalPoint: Boolean(incomingFocalPoint),
+        imageResizeConfig,
+      })
+      if (resizeAction === 'omit') return createResult({ name: imageResizeConfig.name })
 
       const imageToResize = sharpBase.clone()
       let resized = imageToResize
 
-      if (incomingFocalPoint && applyPayloadAdjustments(imageResizeConfig, dimensions)) {
-        const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
-        const resizeAspectRatio = resizeWidth / resizeHeight
+      if (resizeAction === 'resizeWithFocalPoint') {
+        let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+
         const originalAspectRatio = dimensions.width / dimensions.height
+
+        // Calculate resizeWidth based on original aspect ratio if it's undefined
+        if (resizeHeight && !resizeWidth) {
+          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+        }
+
+        // Calculate resizeHeight based on original aspect ratio if it's undefined
+        if (resizeWidth && !resizeHeight) {
+          resizeHeight = Math.round(resizeWidth / originalAspectRatio)
+        }
+
+        if (!resizeHeight) resizeHeight = resizeImageMeta.height
+        if (!resizeWidth) resizeWidth = resizeImageMeta.width
+
+        const resizeAspectRatio = resizeWidth / resizeHeight
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
-
-        // Scale the image up or down to fit the resize dimensions
-        const scaledImage = imageToResize.resize({
-          height: prioritizeHeight ? resizeHeight : null,
-          width: prioritizeHeight ? null : resizeWidth,
+        // Scales the image before extracting from it
+        resized = imageToResize.resize({
+          height: prioritizeHeight ? resizeHeight : undefined,
+          width: prioritizeHeight ? undefined : resizeWidth,
         })
-        const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
-        const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
-        const maxOffsetX = scaledImageInfo.width - safeResizeWidth
-        const leftFocalEdge = Math.round(
-          scaledImageInfo.width * (incomingFocalPoint.x / 100) - safeResizeWidth / 2,
-        )
-        const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
+        const metadataAppendedFile = await optionallyAppendMetadata({
+          req,
+          sharpFile: resized,
+          withMetadata,
+        })
 
-        const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
-        const maxOffsetY = scaledImageInfo.height - safeResizeHeight
-        const topFocalEdge = Math.round(
-          scaledImageInfo.height * (incomingFocalPoint.y / 100) - safeResizeHeight / 2,
-        )
-        const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
+        // Must read from buffer, resized.metadata will return the original image metadata
+        const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
 
-        // extract the focal area from the scaled image
-        resized = scaledImage.extract({
-          height: safeResizeHeight,
-          left: safeOffsetX,
-          top: safeOffsetY,
-          width: safeResizeWidth,
+        resizeImageMeta.height = extractHeightFromImage({
+          ...originalImageMeta,
+          height: info.height,
+        })
+        resizeImageMeta.width = info.width
+
+        const halfResizeX = resizeWidth / 2
+        const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
+        const calculatedRightPixelBound = xFocalCenter + halfResizeX
+        let leftBound = xFocalCenter - halfResizeX
+
+        // if the right bound is greater than the image width, adjust the left bound
+        // keeping focus on the right
+        if (calculatedRightPixelBound > resizeImageMeta.width) {
+          leftBound = resizeImageMeta.width - resizeWidth
+        }
+
+        // if the left bound is less than 0, adjust the left bound to 0
+        // keeping the focus on the left
+        if (leftBound < 0) leftBound = 0
+
+        const halfResizeY = resizeHeight / 2
+        const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint.y / 100)
+        const calculatedBottomPixelBound = yFocalCenter + halfResizeY
+        let topBound = yFocalCenter - halfResizeY
+
+        // if the bottom bound is greater than the image height, adjust the top bound
+        // keeping the image as far right as possible
+        if (calculatedBottomPixelBound > resizeImageMeta.height) {
+          topBound = resizeImageMeta.height - resizeHeight
+        }
+
+        // if the top bound is less than 0, adjust the top bound to 0
+        // keeping the image focus near the top
+        if (topBound < 0) topBound = 0
+
+        resized = resized.extract({
+          height: resizeHeight,
+          left: Math.floor(leftBound),
+          top: Math.floor(topBound),
+          width: resizeWidth,
         })
       } else {
         resized = imageToResize.resize(imageResizeConfig)
@@ -317,7 +413,13 @@ export default async function resizeAndTransformImageSizes({
         resized = resized.trim(imageResizeConfig.trimOptions)
       }
 
-      const { data: bufferData, info: bufferInfo } = await resized.toBuffer({
+      const metadataAppendedFile = await optionallyAppendMetadata({
+        req,
+        sharpFile: resized,
+        withMetadata,
+      })
+
+      const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
         resolveWithObject: true,
       })
 
@@ -329,11 +431,15 @@ export default async function resizeAndTransformImageSizes({
 
       const mimeInfo = await fromBuffer(bufferData)
 
-      const imageNameWithDimensions = createImageName(
-        sanitizedImage.name,
-        bufferInfo,
-        mimeInfo?.ext || sanitizedImage.ext,
-      )
+      const imageNameWithDimensions = createImageName({
+        extension: mimeInfo?.ext || sanitizedImage.ext,
+        height: extractHeightFromImage({
+          ...originalImageMeta,
+          height: bufferInfo.height,
+        }),
+        outputImageName: sanitizedImage.name,
+        width: bufferInfo.width,
+      })
 
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
 
@@ -350,7 +456,8 @@ export default async function resizeAndTransformImageSizes({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
-        height,
+        height:
+          fileIsAnimatedType && originalImageMeta.pages ? height / originalImageMeta.pages : height,
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,
@@ -358,9 +465,12 @@ export default async function resizeAndTransformImageSizes({
     }),
   )
 
-  return results.reduce((acc, result) => {
-    Object.assign(acc.sizeData, result.sizeData)
-    acc.sizesToSave.push(...result.sizesToSave)
-    return acc
-  }, defaultResult)
+  return results.reduce(
+    (acc, result) => {
+      Object.assign(acc.sizeData, result.sizeData)
+      acc.sizesToSave.push(...result.sizesToSave)
+      return acc
+    },
+    { ...defaultResult },
+  )
 }

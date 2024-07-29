@@ -11,6 +11,11 @@ import type {
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
+import type { Arguments as MeArguments } from '../../auth/operations/me'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
@@ -189,6 +194,16 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
   response: unknown
 }) => any
+
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -411,6 +426,18 @@ export type CollectionConfig = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration

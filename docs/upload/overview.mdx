@@ -23,7 +23,7 @@ _Admin panel screenshot depicting a Media Collection with Upload enabled_
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
 1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
-1. The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
+1. The Admin panel will modify its built-in `List` component to show a thumbnail for each upload within the List View
 1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
 
@@ -56,6 +56,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`staticOptions`**            | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html)                                         |
 | **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                         |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                         |
+| **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                       |
 
 _An asterisk denotes that a property above is required._
 

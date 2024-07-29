@@ -2,6 +2,8 @@ import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
 
+import type { WithMetadata } from './optionallyAppendMetadata'
+
 export type FileSize = {
   filename: null | string
   filesize: null | number
@@ -93,6 +95,7 @@ export type IncomingUploadType = {
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   staticURL?: string
   trimOptions?: ImageUploadTrimOptions
+  withMetadata?: WithMetadata
 }
 
 export type Upload = {
@@ -110,6 +113,7 @@ export type Upload = {
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   staticURL: string
   trimOptions?: ImageUploadTrimOptions
+  withMetadata?: WithMetadata
 }
 
 export type File = {
@@ -124,15 +128,22 @@ export type FileToSave = {
   path: string
 }
 
+type Crop = {
+  height: number
+  unit: '%' | 'px'
+  width: number
+  x: number
+  y: number
+}
+
+type FocalPoint = {
+  x: number
+  y: number
+}
+
 export type UploadEdits = {
-  crop?: {
-    height?: number
-    width?: number
-    x?: number
-    y?: number
-  }
-  focalPoint?: {
-    x?: number
-    y?: number
-  }
+  crop?: Crop
+  focalPoint?: FocalPoint
+  heightInPixels?: number
+  widthInPixels?: number
 }

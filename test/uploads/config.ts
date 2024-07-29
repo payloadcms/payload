@@ -8,10 +8,12 @@ import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
 import {
+  animatedTypeMedia,
   audioSlug,
   cropOnlySlug,
   enlargeSlug,
   focalOnlySlug,
+  globalWithMedia,
   mediaSlug,
   reduceSlug,
   relationSlug,
@@ -142,6 +144,60 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: './object-fit',
         staticURL: '/object-fit',
+      },
+    },
+    {
+      slug: 'with-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './with-meta-data',
+        withMetadata: true,
+      },
+    },
+    {
+      slug: 'without-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './without-meta-data',
+        withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: './with-only-jpeg-meta-data',
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
       },
     },
     {
@@ -313,6 +369,43 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'image/tiff',
           'audio/mpeg',
+        ],
+      },
+    },
+    {
+      slug: animatedTypeMedia,
+      fields: [],
+      upload: {
+        staticDir: './media',
+        staticURL: '/media',
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        imageSizes: [
+          {
+            name: 'squareSmall',
+            width: 480,
+            height: 480,
+            position: 'centre',
+            withoutEnlargement: false,
+          },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+            height: undefined,
+          },
+          {
+            name: 'undefinedWidth',
+            width: undefined,
+            height: 300,
+          },
+          {
+            name: 'undefinedAll',
+            width: undefined,
+            height: undefined,
+          },
         ],
       },
     },
@@ -491,6 +584,18 @@ export default buildConfigWithDefaults({
       },
     },
   ],
+  globals: [
+    {
+      slug: globalWithMedia,
+      fields: [
+        {
+          type: 'upload',
+          name: 'media',
+          relationTo: cropOnlySlug,
+        },
+      ],
+    },
+  ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media')
     removeFiles(path.normalize(uploadsDir))
@@ -528,6 +633,43 @@ export default buildConfigWithDefaults({
         image: uploadedImage,
         versionedImage,
       },
+    })
+
+    // Create animated type images
+    const animatedImageFilePath = path.resolve(__dirname, './animated.webp')
+    const animatedImageFile = await getFileByPath(animatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: animatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: animatedImageFile,
+    })
+
+    const nonAnimatedImageFilePath = path.resolve(__dirname, './non-animated.webp')
+    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: nonAnimatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: nonAnimatedImageFile,
     })
 
     // Create audio

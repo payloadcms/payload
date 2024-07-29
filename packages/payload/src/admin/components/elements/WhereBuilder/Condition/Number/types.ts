@@ -1,5 +1,8 @@
+import type { Operator } from '../../../../../../types'
+
 export type Props = {
   disabled?: boolean
   onChange: (e: string) => void
-  value: string
+  operator: Operator
+  value: number | number[]
 }

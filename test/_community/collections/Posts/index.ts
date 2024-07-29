@@ -5,9 +5,14 @@ import { mediaSlug } from '../Media'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
+  defaultSort: 'title',
   fields: [
     {
       name: 'text',
+      type: 'text',
+    },
+    {
+      name: 'title',
       type: 'text',
     },
     {

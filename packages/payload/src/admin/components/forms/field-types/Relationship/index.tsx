@@ -69,14 +69,24 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
   } = config
 
+  const hasMultipleRelations = Array.isArray(relationTo)
+  const initialLoadedPageState = hasMultipleRelations
+    ? relationTo.reduce((acc, relation) => {
+        return {
+          ...acc,
+          [relation]: 0,
+        }
+      }, {})
+    : {}
+
   const { i18n, t } = useTranslation('fields')
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const formProcessing = useFormProcessing()
-  const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
-  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
+  const [lastLoadedPage, setLastLoadedPage] =
+    useState<Record<string, number>>(initialLoadedPageState)
   const [errorLoading, setErrorLoading] = useState('')
   const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
   const [search, setSearch] = useState('')
@@ -129,7 +139,7 @@ const Relationship: React.FC<Props> = (props) => {
       })
 
       if (!errorLoading) {
-        relationsToFetch.reduce(async (priorRelation, relation) => {
+        await relationsToFetch.reduce(async (priorRelation, relation) => {
           const relationFilterOption = filterOptionsResult?.[relation]
           let lastLoadedPageToUse
           if (search !== searchArg) {
@@ -187,12 +197,17 @@ const Relationship: React.FC<Props> = (props) => {
               query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
+            const response = await fetch(
+              `${serverURL}${api}/${relation}?${qs.stringify(query, {
+                strictNullHandling: true,
+              })}`,
+              {
+                credentials: 'include',
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
               },
-            })
+            )
 
             if (response.ok) {
               const data: PaginatedDocs<unknown> = await response.json()
@@ -259,18 +274,18 @@ const Relationship: React.FC<Props> = (props) => {
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, sort: true, value: valueArg })
+    void getResults({ search: searchArg, sort: true, value: valueArg })
     setSearch(searchArg)
   }, 300)
 
   const handleInputChange = useCallback(
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
-        setLastLoadedPage({})
+        setLastLoadedPage(initialLoadedPageState)
         updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
-    [search, updateSearch],
+    [initialLoadedPageState, search, updateSearch],
   )
 
   // ///////////////////////////////////
@@ -284,15 +299,14 @@ const Relationship: React.FC<Props> = (props) => {
       value,
     })
 
-    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation
 
       const idsToLoad = ids.filter((id) => {
-        return !options.find(
-          (optionGroup) =>
-            optionGroup?.options?.find(
-              (option) => option.value === id && option.relationTo === relation,
-            ),
+        return !options.find((optionGroup) =>
+          optionGroup?.options?.find(
+            (option) => option.value === id && option.relationTo === relation,
+          ),
         )
       })
 
@@ -310,12 +324,17 @@ const Relationship: React.FC<Props> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
+          const response = await fetch(
+            `${serverURL}${api}/${relation}?${qs.stringify(query, {
+              strictNullHandling: true,
+            })}`,
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             },
-          })
+          )
 
           const collection = collections.find((coll) => coll.slug === relation)
           let docs = []
@@ -373,7 +392,7 @@ const Relationship: React.FC<Props> = (props) => {
 
     dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
+    setLastLoadedPage(initialLoadedPageState)
     setHasLoadedFirstPage(false)
   }, [relationTo, filterOptionsResult, locale])
 
@@ -497,7 +516,7 @@ const Relationship: React.FC<Props> = (props) => {
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true)
-                getResults({
+                void getResults({
                   onSuccess: () => {
                     setHasLoadedFirstPage(true)
                     setIsLoading(false)
@@ -507,7 +526,7 @@ const Relationship: React.FC<Props> = (props) => {
               }
             }}
             onMenuScrollToBottom={() => {
-              getResults({
+              void getResults({
                 lastFullyLoadedRelation,
                 search,
                 sort: false,

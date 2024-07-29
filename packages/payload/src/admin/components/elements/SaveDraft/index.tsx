@@ -8,7 +8,6 @@ import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useEditDepth } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
-import { useOperation } from '../../utilities/OperationProvider'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
 const baseClass = 'save-draft'
@@ -70,13 +69,16 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   } = useConfig()
   const { submit } = useForm()
   const { id, collection, global } = useDocumentInfo()
-  const operation = useOperation()
   const modified = useFormModified()
 
   const { code: locale } = useLocale()
   const { t } = useTranslation('version')
 
-  const canSaveDraft = operation === 'update' && modified
+  const canSaveDraft = modified
+
+  const validateDrafts =
+    (collection?.versions.drafts && collection.versions?.drafts?.validate) ||
+    (global?.versions.drafts && global.versions?.drafts?.validate)
 
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
@@ -98,9 +100,9 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       overrides: {
         _status: 'draft',
       },
-      skipValidation: true,
+      skipValidation: !validateDrafts,
     })
-  }, [submit, collection, global, serverURL, api, locale, id])
+  }, [submit, collection, global, serverURL, api, locale, id, validateDrafts])
 
   return (
     <RenderCustomComponent

@@ -4,9 +4,10 @@ import type { CompareOption } from '../types'
 
 export type Props = {
   baseURL: string
+  latestDraftVersion?: string
+  latestPublishedVersion?: string
   onChange: (val: CompareOption) => void
   parentID?: string
-  publishedDoc: any
   value: CompareOption
   versionID: string
 }

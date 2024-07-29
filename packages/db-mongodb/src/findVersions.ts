@@ -27,7 +27,7 @@ export const findVersions: FindVersions = async function findVersions(
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }
@@ -70,6 +70,14 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
     // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
@@ -97,13 +105,12 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
 
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),
   }

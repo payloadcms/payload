@@ -15,14 +15,12 @@ export const createGlobal: CreateGlobal = async function createGlobal(
     globalType: slug,
     ...data,
   }
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let [result] = (await Model.create([global], options)) as any
 
-  result = JSON.parse(JSON.stringify(result))
+  result = this.jsonParse ? JSON.parse(JSON.stringify(result)) : result.toObject()
 
-  // custom id type reset
-  result.id = result._id
   result = sanitizeInternalFields(result)
 
   return result

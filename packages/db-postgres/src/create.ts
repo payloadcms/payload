@@ -9,7 +9,7 @@ export const create: Create = async function create(
   this: PostgresAdapter,
   { collection: collectionSlug, data, req },
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))

@@ -2,11 +2,13 @@ import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import { GraphQLClient } from 'graphql-request'
 import path from 'path'
+import { v4 as uuid } from 'uuid'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
+import type { MongooseAdapter } from '../../packages/db-mongodb/src'
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
+import type { CustomSchema } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { migrate } from '../../packages/payload/src/bin/migrate'
@@ -15,7 +17,6 @@ import { initTransaction } from '../../packages/payload/src/utilities/initTransa
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import removeFiles from '../helpers/removeFiles'
-import { MongooseAdapter } from '../../packages/db-mongodb/src'
 
 describe('database', () => {
   let serverURL
@@ -342,6 +343,125 @@ describe('database', () => {
           }),
         ).rejects.toThrow('The requested resource was not found.')
       })
+    })
+  })
+
+  describe('existing data', () => {
+    let existingDataDoc: CustomSchema
+
+    beforeAll(async () => {
+      if (payload.db.name === 'mongoose') {
+        const Model = payload.db.collections['custom-schema']
+
+        const [doc] = await Model.create(
+          [
+            {
+              text: 'hello',
+              localizedText: {
+                en: 'goodbye',
+              },
+              noFieldDefined: 'hi',
+              isoDate: new Date('2024-07-24T12:00:00Z'),
+              array: [
+                {
+                  id: uuid(),
+                  noFieldDefined: 'hi',
+                  isoDate: new Date('2024-07-24T12:00:00Z'),
+                  text: 'hello',
+                  localizedText: {
+                    en: 'goodbye',
+                  },
+                },
+              ],
+              blocks: [
+                {
+                  id: uuid(),
+                  blockType: 'block',
+                  noFieldDefined: 'hi',
+                  isoDate: new Date('2024-07-24T12:00:00Z'),
+                  text: 'hello',
+                  localizedText: {
+                    en: 'goodbye',
+                  },
+                },
+              ],
+            },
+          ],
+          { lean: true },
+        )
+
+        const result = doc.toObject()
+        result.id = result._id.toString()
+        existingDataDoc = result
+      }
+    })
+
+    it('should allow storage of existing data', async () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'mongoose') {
+        expect(existingDataDoc.noFieldDefined).toStrictEqual('hi')
+        expect(existingDataDoc.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(existingDataDoc.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        const docWithExistingData = await payload.findByID({
+          collection: 'custom-schema',
+          id: existingDataDoc.id,
+        })
+
+        expect(docWithExistingData.noFieldDefined).toStrictEqual('hi')
+        expect(docWithExistingData.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(docWithExistingData.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        expect(docWithExistingData.isoDate instanceof Date).toBeTruthy()
+        expect(docWithExistingData.array[0].isoDate instanceof Date).toBeTruthy()
+        expect(docWithExistingData.blocks[0].isoDate instanceof Date).toBeTruthy()
+      }
+    })
+
+    it('should maintain existing data while updating', async () => {
+      expect(payload.db).toBeDefined()
+
+      if (payload.db.name === 'mongoose') {
+        const result = await payload.update({
+          id: existingDataDoc.id,
+          collection: 'custom-schema',
+          data: {
+            text: 'hola',
+            localizedText: 'adios',
+            array: [
+              {
+                id: existingDataDoc.array[0].id,
+                text: 'hola',
+                localizedText: 'adios',
+              },
+            ],
+            blocks: [
+              {
+                blockType: 'block',
+                id: existingDataDoc.blocks[0].id,
+                text: 'hola',
+                localizedText: 'adios',
+              },
+            ],
+          },
+        })
+
+        expect(result.text).toStrictEqual('hola')
+        expect(result.array[0].text).toStrictEqual('hola')
+        expect(result.blocks[0].text).toStrictEqual('hola')
+        expect(result.localizedText).toStrictEqual('adios')
+        expect(result.array[0].localizedText).toStrictEqual('adios')
+        expect(result.blocks[0].localizedText).toStrictEqual('adios')
+
+        expect(result.noFieldDefined).toStrictEqual('hi')
+        expect(result.array[0].noFieldDefined).toStrictEqual('hi')
+        expect(result.blocks[0].noFieldDefined).toStrictEqual('hi')
+
+        expect(result.isoDate instanceof Date).toBeTruthy()
+        expect(result.array[0].isoDate instanceof Date).toBeTruthy()
+        expect(result.blocks[0].isoDate instanceof Date).toBeTruthy()
+      }
     })
   })
 })

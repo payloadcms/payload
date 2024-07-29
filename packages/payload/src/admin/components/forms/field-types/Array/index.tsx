@@ -266,8 +266,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
-                      getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
-                      t(minRows > 1 ? 'general:row' : 'general:rows'),
+                      getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
+                      t(minRows > 1 ? 'general:rows' : 'general:row'),
                   })}
                 </Banner>
               )}

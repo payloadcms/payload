@@ -984,6 +984,59 @@ describe('collections-graphql', () => {
         expect(queriedDoc.media.title).toEqual('example')
       })
     })
+
+    it('should cascade draft arg with globals', async () => {
+      // publish relationship doc
+      const newDoc = await payload.create({
+        collection: 'cyclical-relationship',
+        draft: false,
+        data: {
+          title: 'published relationship',
+        },
+      })
+
+      // save draft version relationship doc
+      await payload.update({
+        collection: 'cyclical-relationship',
+        id: newDoc.id,
+        draft: true,
+        data: {
+          title: 'draft relationship',
+        },
+      })
+
+      // update global (published data)
+      await payload.updateGlobal({
+        slug: 'global-1',
+        data: {
+          title: 'published title',
+          relationship: newDoc.id,
+        },
+      })
+
+      // update global (draft data)
+      await payload.updateGlobal({
+        slug: 'global-1',
+        draft: true,
+        data: {
+          title: 'draft title',
+        },
+      })
+
+      const query = `{
+        Global1(draft: true) {
+          title
+          relationship {
+            title
+          }
+        }
+      }`
+      const response = (await client.request(query)) as any
+
+      const queriedGlobal = response.Global1
+      expect(queriedGlobal.title).toEqual('draft title')
+      expect(queriedGlobal.relationship.title).toEqual('draft relationship')
+    })
   })
 
   describe('Error Handler', () => {
@@ -1064,7 +1117,7 @@ describe('collections-graphql', () => {
       expect(error.response.errors[1].path[0]).toEqual('test3')
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError')
       expect(error.response.errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+        'A user with the given email is already registered.',
       )
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email')
 
