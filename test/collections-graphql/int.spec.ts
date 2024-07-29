@@ -636,8 +636,8 @@ describe('collections-graphql', () => {
             // creating twice as many records as we are querying to get a random sample
             await mapAsync([...Array(10)], () => {
               // setTimeout used to randomize the creation timestamp
-              setTimeout(async () => {
-                await payload.create({
+              setTimeout(() => {
+                void payload.create({
                   collection: pointSlug,
                   data: {
                     // only randomize longitude to make distance comparison easy
@@ -1150,7 +1150,7 @@ describe('collections-graphql', () => {
         })
         .then((res) => res.json())
       expect(Array.isArray(errors)).toBe(true)
-      expect(errors[0].message).toEqual('The following field is invalid: min')
+      expect(errors[0].message).toEqual('The following field is invalid: Min')
       expect(typeof errors[0].locations).toBeDefined()
     })
 
@@ -1198,13 +1198,13 @@ describe('collections-graphql', () => {
       expect(errors[1].extensions.data.errors[0].field).toEqual('email')
 
       expect(Array.isArray(errors[2].locations)).toEqual(true)
-      expect(errors[2].message).toEqual('The following field is invalid: email')
+      expect(errors[2].message).toEqual('The following field is invalid: Email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
       expect(errors[2].extensions.data.errors[0].message).toEqual(
         'Please enter a valid email address.',
       )
-      expect(errors[2].extensions.data.errors[0].field).toEqual('email')
+      expect(errors[2].extensions.data.errors[0].field).toEqual('Email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {

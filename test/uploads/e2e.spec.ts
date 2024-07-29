@@ -297,6 +297,7 @@ describe('uploads', () => {
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'The following field is invalid: audio',
+      { ignoreCase: true },
     )
   })
 
