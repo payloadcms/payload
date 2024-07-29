@@ -11,6 +11,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
+import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -28,7 +29,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -159,16 +160,27 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = toggleAllRows({
+        collapsed,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
+        collapsed,
+        rowID,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -314,4 +326,4 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   )
 }
 
-export const ArrayField = withCondition(_ArrayField)
+export const ArrayField = withCondition(ArrayFieldComponent)
