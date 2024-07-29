@@ -4,7 +4,6 @@
   background: var(--theme-elevation-50);
   border: 1px solid var(--theme-border-color);
   border-radius: var(--style-radius-m);
-  overflow: hidden;
   @include inputShadow;
 
   header {
@@ -23,13 +22,16 @@
       border: 1px solid var(--theme-border-color);
       background: var(--theme-input-bg);
       @include inputShadow;
+      transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
+
+      &:hover {
+        border: 1px solid var(--theme-elevation-400);
+      }
     }
   }
 
   &__main-detail {
-    background-color: var(--theme-input-bg);
-    box-shadow: 0px 0px 0 1px var(--theme-border-color);
-    padding: base(0.6) base(1);
+    padding: base(0.8) base(1.2);
     width: auto;
     flex-grow: 1;
     min-width: 280px;
@@ -38,7 +40,7 @@
     flex-direction: column;
     justify-content: center;
     align-self: stretch;
-    gap: base(0.25);
+    gap: base(0.2);
   }
 
   &__toggle-more-info {
@@ -122,7 +124,6 @@
     }
 
     &__main-detail {
-      border-top: $style-stroke-width-m solid var(--theme-elevation-0);
       order: 3;
       width: 100%;
     }

@@ -4,6 +4,7 @@
   position: relative;
   margin-bottom: var(--base);
   background: var(--theme-elevation-50);
+  border-radius: var(--style-radius-s);
 
   &__upload {
     display: flex;
