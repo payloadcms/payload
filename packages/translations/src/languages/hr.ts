@@ -426,7 +426,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     viewingVersions: 'Pregled verzija za {{entityLabel}} {{documentTitle}}',
     viewingVersionsGlobal: 'Pregled verzije za globalni {{entityLabel}}',
   },
-};
+}
 
 export const hr: Language = {
   dateFNSKey: 'hr',
