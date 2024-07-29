@@ -1,7 +1,16 @@
-import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
+import type {
+  AdminViewProps,
+  EditViewComponent,
+  MappedComponent,
+  ServerSideEditViewProps,
+} from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
-import { RenderCustomComponent, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import {
+  RenderMappedComponent,
+  getCreateMappedComponent,
+  isEditing as getIsEditing,
+} from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -17,6 +26,7 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export const Document: React.FC<AdminViewProps> = async ({
+  importMap,
   initPageResult,
   params,
   searchParams,
@@ -49,10 +59,10 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
-  let ViewOverride: EditViewComponent
-  let CustomView: EditViewComponent
-  let DefaultView: EditViewComponent
-  let ErrorView: AdminViewComponent
+  let ViewOverride: MappedComponent<ServerSideEditViewProps>
+  let CustomView: MappedComponent<ServerSideEditViewProps>
+  let DefaultView: MappedComponent<ServerSideEditViewProps>
+  let ErrorView: MappedComponent<AdminViewProps>
 
   let apiURL: string
 
@@ -72,6 +82,21 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
+  const createMappedComponent = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      i18n,
+      initPageResult,
+      locale,
+      params,
+      payload,
+      permissions,
+      routeSegments: segments,
+      searchParams,
+      user,
+    },
+  })
+
   if (collectionConfig) {
     if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
       notFound()
@@ -89,8 +114,14 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
-    const editConfig = collectionConfig?.admin?.components?.views?.Edit
-    ViewOverride = typeof editConfig === 'function' ? editConfig : null
+    ViewOverride =
+      collectionConfig?.admin?.components?.views?.Edit?.Default &&
+      'Component' in collectionConfig.admin.components.views.Edit.Default
+        ? createMappedComponent(
+            collectionConfig?.admin?.components?.views?.Edit?.Default
+              ?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
+          )
+        : null
 
     if (!ViewOverride) {
       const collectionViews = getViewsFromConfig({
@@ -100,13 +131,25 @@ export const Document: React.FC<AdminViewProps> = async ({
         routeSegments: segments,
       })
 
-      CustomView = collectionViews?.CustomView
-      DefaultView = collectionViews?.DefaultView
-      ErrorView = collectionViews?.ErrorView
+      CustomView = createMappedComponent(
+        collectionViews?.CustomView?.payloadComponent,
+        undefined,
+        collectionViews?.CustomView?.Component,
+      )
+      DefaultView = createMappedComponent(
+        collectionViews?.DefaultView?.payloadComponent,
+        undefined,
+        collectionViews?.DefaultView?.Component,
+      )
+      ErrorView = createMappedComponent(
+        collectionViews?.ErrorView?.payloadComponent,
+        undefined,
+        collectionViews?.ErrorView?.Component,
+      )
     }
 
     if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-      ErrorView = NotFoundView
+      ErrorView = createMappedComponent(undefined, undefined, NotFoundView)
     }
   }
 
@@ -140,12 +183,24 @@ export const Document: React.FC<AdminViewProps> = async ({
         routeSegments: segments,
       })
 
-      CustomView = globalViews?.CustomView
-      DefaultView = globalViews?.DefaultView
-      ErrorView = globalViews?.ErrorView
+      CustomView = createMappedComponent(
+        globalViews?.CustomView?.payloadComponent,
+        undefined,
+        globalViews?.CustomView?.Component,
+      )
+      DefaultView = createMappedComponent(
+        globalViews?.DefaultView?.payloadComponent,
+        undefined,
+        globalViews?.DefaultView?.Component,
+      )
+      ErrorView = createMappedComponent(
+        globalViews?.ErrorView?.payloadComponent,
+        undefined,
+        globalViews?.ErrorView?.Component,
+      )
 
       if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-        ErrorView = NotFoundView
+        ErrorView = createMappedComponent(undefined, undefined, NotFoundView)
       }
     }
   }
@@ -195,7 +250,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialState={formState}
       isEditing={isEditing}
     >
-      {!ViewOverride && (
+      {!ViewOverride?.Component && (
         <DocumentHeader
           collectionConfig={collectionConfig}
           config={payload.config}
@@ -209,23 +264,17 @@ export const Document: React.FC<AdminViewProps> = async ({
         depth={1}
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
-        {ErrorView ? (
-          <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+        {ErrorView?.Component ? (
+          <RenderMappedComponent component={ErrorView} />
         ) : (
-          <RenderCustomComponent
-            CustomComponent={ViewOverride || CustomView}
-            DefaultComponent={DefaultView}
-            serverOnlyProps={{
-              i18n,
-              initPageResult,
-              locale,
-              params,
-              payload,
-              permissions,
-              routeSegments: segments,
-              searchParams,
-              user,
-            }}
+          <RenderMappedComponent
+            component={
+              ViewOverride?.Component
+                ? ViewOverride
+                : CustomView?.Component
+                  ? CustomView
+                  : DefaultView
+            }
           />
         )}
       </EditDepthProvider>

@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/shared'
+import { RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -22,10 +22,12 @@ export type GenerateViewMetadata = (args: {
 
 export const RootPage = async ({
   config: configPromise,
+  importMap,
   params,
   searchParams,
 }: {
   config: Promise<SanitizedConfig>
+  importMap: ImportMap
   params: {
     segments: string[]
   }
@@ -51,13 +53,14 @@ export const RootPage = async ({
     adminRoute,
     config,
     currentRoute,
+    importMap,
     searchParams,
     segments,
   })
 
   let dbHasUser = false
 
-  if (!DefaultView) {
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     notFound()
   }
 
@@ -89,18 +92,25 @@ export const RootPage = async ({
     }
   }
 
-  const RenderedView = (
-    <WithServerSideProps
-      Component={DefaultView}
-      serverOnlyProps={
-        {
-          initPageResult,
-          params,
-          searchParams,
-        } as any
-      }
-    />
+  const createMappedComponent = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      i18n: initPageResult?.req.i18n,
+      importMap,
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    },
+  })
+
+  const MappedDefaultView: MappedComponent = createMappedComponent(
+    DefaultView.payloadComponent,
+    undefined,
+    DefaultView.Component,
   )
+
+  const RenderedView = <RenderMappedComponent component={MappedDefaultView} />
 
   return (
     <Fragment>

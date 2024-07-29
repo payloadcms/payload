@@ -17,19 +17,21 @@ import type { ComponentMap } from './types.js'
 import { PayloadIcon } from '../../../graphics/Icon/index.js'
 import { mapCollections } from './collections.js'
 import { getComponent } from './getComponent.js'
+import { getCreateMappedComponent } from './getCreateMappedComponent.js'
 import { mapGlobals } from './globals.js'
 
 export type CreateMappedComponent = {
-  (
-    payloadComponent: ({ ReactComponent: React.FC } | PayloadComponent)[],
+  <T extends JsonObject>(
+    component: { ReactComponent: React.FC<T> } | PayloadComponent<T> | null,
     props?: object,
     fallback?: React.FC,
-  ): MappedComponent[]
-  (
-    payloadComponent: { ReactComponent: React.FC } | PayloadComponent,
+  ): MappedComponent<T>
+
+  <T extends JsonObject>(
+    components: ({ ReactComponent: React.FC<T> } | PayloadComponent<T>)[],
     props?: object,
     fallback?: React.FC,
-  ): MappedComponent
+  ): MappedComponent<T>[]
 }
 
 export const buildComponentMap = (args: {
@@ -51,86 +53,13 @@ export const buildComponentMap = (args: {
   const { DefaultEditView, DefaultListView, children, i18n, importMap, payload, readOnly } = args
   const config = payload.config
 
-  const createSingleMappedComponent = (
-    payloadComponent: { ReactComponent: React.FC<any> } | PayloadComponent,
-    key: number | string,
-    props?: JsonObject,
-    Fallback?: React.FC<any>,
-  ): MappedComponent => {
-    if (!payloadComponent) {
-      if (!Fallback) {
-        return undefined
-      }
-      if (isReactServerComponentOrFunction(Fallback)) {
-        return {
-          type: 'server',
-          Component: <Fallback i18n={i18n} key={key} payload={payload} {...props} />,
-        }
-      } else {
-        return {
-          type: 'client',
-          Component: Fallback,
-          props,
-        }
-      }
-    }
-    const resolvedComponent =
-      payloadComponent &&
-      typeof payloadComponent === 'object' &&
-      'ReactComponent' in payloadComponent
-        ? {
-            Component: payloadComponent.ReactComponent,
-          }
-        : getComponent({
-            importMap,
-            payloadComponent: payloadComponent as any,
-          })
-
-    if (!resolvedComponent.Component) {
-      console.error(`Component not found in importMap: ${key}`)
-    }
-
-    if (isReactServerComponentOrFunction(resolvedComponent.Component)) {
-      const Component: React.FC<any> = resolvedComponent.Component
-      return {
-        type: 'server',
-        Component: (
-          <Component
-            i18n={i18n}
-            key={key}
-            payload={payload}
-            {...resolvedComponent.serverProps}
-            {...props}
-          />
-        ),
-      }
-    } else {
-      return {
-        type: 'client',
-        Component: resolvedComponent.Component,
-        props: {
-          ...(resolvedComponent.clientProps || {}),
-          ...props,
-        },
-      }
-    }
-  }
-
-  const createMappedComponent: CreateMappedComponent = (payloadComponent, props, fallback) => {
-    if (!payloadComponent && !fallback) {
-      return undefined as any
-    }
-    if (payloadComponent && Array.isArray(payloadComponent)) {
-      const mappedComponents: MappedComponent[] = []
-      for (let i = 0; i < payloadComponent.length; i++) {
-        const component = createSingleMappedComponent(payloadComponent[i], i, props, fallback)
-        mappedComponents.push(component)
-      }
-      return mappedComponents as any
-    } else {
-      return createSingleMappedComponent(payloadComponent, undefined, props, fallback) as any
-    }
-  }
+  const createMappedComponent = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      i18n,
+      payload,
+    },
+  })
 
   const collections = mapCollections({
     DefaultEditView,

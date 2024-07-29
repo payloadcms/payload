@@ -1,6 +1,7 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Locale, PayloadComponent } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -17,6 +18,7 @@ export type AdminViewConfig = {
 }
 
 export type AdminViewProps = {
+  importMap: ImportMap
   initPageResult: InitPageResult
   params?: { [key: string]: string | string[] | undefined }
   searchParams: { [key: string]: string | string[] | undefined }

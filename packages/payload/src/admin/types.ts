@@ -48,7 +48,7 @@ export type MappedComponent<TComponentClientProps extends JsonObject = JsonObjec
   | {
       Component: React.ComponentType<TComponentClientProps>
       RenderedComponent?: React.ReactNode
-      props?: TComponentClientProps
+      props?: Partial<TComponentClientProps>
       type: 'client'
     }
   | {

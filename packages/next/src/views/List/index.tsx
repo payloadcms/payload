@@ -6,13 +6,13 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { RenderCustomComponent } from '@payloadcms/ui/shared'
+import { RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
-import { isNumber, isReactComponentOrFunction } from 'payload/shared'
+import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
+import type { ListPreferences } from './Default/types.js'
 
 import { DefaultListView } from './Default/index.js'
 
@@ -78,14 +78,6 @@ export const ListView: React.FC<AdminViewProps> = async ({
       return notFound()
     }
 
-    let CustomListView = null
-
-    if (CustomList && typeof CustomList === 'function') {
-      CustomListView = CustomList
-    } else if (typeof CustomList === 'object' && isReactComponentOrFunction(CustomList.Component)) {
-      CustomListView = CustomList.Component
-    }
-
     const page = isNumber(query?.page) ? Number(query.page) : 0
     const whereQuery = mergeListSearchAndWhere({
       collectionConfig,
@@ -117,10 +109,28 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const viewComponentProps: DefaultListViewProps = {
-      collectionSlug,
-      listSearchableFields: collectionConfig.admin.listSearchableFields,
-    }
+    const createMappedComponent = getCreateMappedComponent({
+      importMap: payload.importMap,
+      serverProps: {
+        collectionConfig,
+        collectionSlug,
+        data,
+        hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+        i18n,
+        limit,
+        listPreferences,
+        listSearchableFields: collectionConfig.admin.listSearchableFields,
+        locale: fullLocale,
+        newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
+        params,
+        payload,
+        permissions,
+        searchParams,
+        user,
+      },
+    })
+
+    const mappedListView = createMappedComponent(CustomList?.Component, undefined, DefaultListView)
 
     return (
       <Fragment>
@@ -147,26 +157,12 @@ export const ListView: React.FC<AdminViewProps> = async ({
               listPreferences={listPreferences}
               preferenceKey={preferenceKey}
             >
-              <RenderCustomComponent
-                CustomComponent={CustomListView}
-                DefaultComponent={DefaultListView}
-                componentProps={viewComponentProps}
-                serverOnlyProps={{
-                  collectionConfig,
-                  data,
-                  hasCreatePermission:
-                    permissions?.collections?.[collectionSlug]?.create?.permission,
-                  i18n,
-                  limit,
-                  listPreferences,
-                  locale: fullLocale,
-                  newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
-                  params,
-                  payload,
-                  permissions,
-                  searchParams,
-                  user,
+              <RenderMappedComponent
+                clientProps={{
+                  collectionSlug,
+                  listSearchableFields: collectionConfig.admin.listSearchableFields,
                 }}
+                component={mappedListView}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

@@ -1,6 +1,11 @@
 'use client'
 
-import { SetViewActions, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
+import {
+  RenderMappedComponent,
+  SetViewActions,
+  useComponentMap,
+  useDocumentInfo,
+} from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const EditViewClient: React.FC = () => {
@@ -13,14 +18,14 @@ export const EditViewClient: React.FC = () => {
     globalSlug,
   })
 
-  if (!Edit) {
+  if (!Edit?.Component) {
     return null
   }
 
   return (
     <Fragment>
       <SetViewActions actions={actionsMap?.Edit?.Default} />
-      {Edit}
+      <RenderMappedComponent component={Edit} />
     </Fragment>
   )
 }

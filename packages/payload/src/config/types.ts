@@ -16,7 +16,12 @@ import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
-import type { AddToImportMap, Imports, InternalImportMap } from '../bin/generateImportMap/index.js'
+import type {
+  AddToImportMap,
+  ImportMap,
+  Imports,
+  InternalImportMap,
+} from '../bin/generateImportMap/index.js'
 import type {
   AfterErrorHook,
   Collection,
@@ -273,6 +278,8 @@ export type InitOptions = {
    */
   disableOnInit?: boolean
 
+  importMap?: ImportMap
+
   /**
    * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
    * This allows you to bring your own logger instance and let payload use it
@@ -280,7 +287,6 @@ export type InitOptions = {
   logger?: PayloadLogger
 
   loggerDestination?: DestinationStream
-
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
@@ -515,15 +521,15 @@ export type CORSConfig = {
 }
 
 export type AdminFunction = {
-  args: object
+  args?: object
   path: string
   type: 'function'
 }
 
 export type AdminComponent = {
-  clientProps: object
+  clientProps?: object
   path: string
-  serverProps: object
+  serverProps?: object
   type: 'component'
 }
 

@@ -14,6 +14,15 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
     PostsCollection,
+    {
+      slug: 'simple',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
     // MediaCollection
   ],
   admin: {

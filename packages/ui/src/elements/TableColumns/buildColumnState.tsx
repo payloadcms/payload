@@ -156,6 +156,8 @@ export const buildColumnState = (args: Args): Column[] => {
   if (enableRowSelections) {
     sorted.unshift({
       name: '',
+      type: null,
+      Label: null,
       accessor: '_select',
       active: true,
       components: {

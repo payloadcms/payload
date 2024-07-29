@@ -17,6 +17,7 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
+import type { ImportMap } from './bin/generateImportMap/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -151,7 +152,6 @@ export class BasePayload {
   } = {}
 
   config: SanitizedConfig
-
   /**
    * @description Performs count operation
    * @param options
@@ -175,8 +175,8 @@ export class BasePayload {
     const { create } = localOperations
     return create<TSlug>(this, options)
   }
-  db: DatabaseAdapter
 
+  db: DatabaseAdapter
   decrypt = decrypt
 
   duplicate = async <TSlug extends CollectionSlug>(
@@ -188,10 +188,10 @@ export class BasePayload {
 
   email: InitializedEmailAdapter
 
+  encrypt = encrypt
+
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
-
-  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -290,6 +290,8 @@ export class BasePayload {
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
 
   globals: Globals
+
+  importMap: ImportMap
 
   logger: pino.Logger
 
@@ -478,6 +480,8 @@ export class BasePayload {
         )
       }
     }
+
+    this.importMap = options.importMap
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')

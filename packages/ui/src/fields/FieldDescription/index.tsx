@@ -39,11 +39,11 @@ const DefaultFieldDescription: React.FC<FieldDescriptionProps> = (props) => {
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
-  const { CustomDescription } = props
+  const { CustomDescription, ...rest } = props
 
-  if (CustomDescription !== undefined) {
-    return <RenderMappedComponent clientProps={props} component={CustomDescription} />
+  if (CustomDescription?.Component) {
+    return <RenderMappedComponent clientProps={rest} component={CustomDescription} />
   }
 
-  return <DefaultFieldDescription {...props} />
+  return <DefaultFieldDescription {...rest} />
 }

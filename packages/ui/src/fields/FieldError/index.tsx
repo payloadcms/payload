@@ -43,11 +43,11 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
 }
 
 export const FieldError: React.FC<ErrorProps> = (props) => {
-  const { CustomError } = props
+  const { CustomError, ...rest } = props
 
-  if (CustomError !== undefined) {
-    return <RenderMappedComponent clientProps={props} component={CustomError} />
+  if (CustomError?.Component) {
+    return <RenderMappedComponent clientProps={rest} component={CustomError} />
   }
 
-  return <DefaultFieldError {...props} />
+  return <DefaultFieldError {...rest} />
 }

@@ -39,7 +39,7 @@ export type MappedTab = {
 }
 
 export type ReducedBlock = {
-  LabelComponent: Block['admin']['components']['Label']
+  LabelComponent: MappedComponent
   custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string

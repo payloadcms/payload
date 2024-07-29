@@ -1,13 +1,17 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
+  EditViewComponent,
   EditViewProps,
   ImportMap,
   MappedComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
+  ServerSideEditViewProps,
 } from 'payload'
 import type React from 'react'
+
+import { PayloadComponent } from 'payload'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { CreateMappedComponent } from './index.js'
@@ -56,28 +60,22 @@ export const mapCollections = (args: {
 
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
-    let CustomEditView: MappedComponent<EditViewProps> = undefined
-    let CustomListView: MappedComponent = undefined
-
-    if (editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default) {
-      CustomEditView = createMappedComponent(
-        editViewFromConfig.Default,
-        {
-          collectionSlug: collectionConfig.slug,
-        },
-        DefaultEditView,
-      )
-    }
-
-    if (listViewFromConfig?.Component) {
-      CustomListView = createMappedComponent(
-        listViewFromConfig.Component,
-        {
-          collectionSlug: collectionConfig.slug,
-        },
-        DefaultListView,
-      )
-    }
+    const EditView: MappedComponent<ServerSideEditViewProps> = createMappedComponent(
+      editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
+        ? (editViewFromConfig.Default?.Component as EditViewComponent)
+        : null,
+      {
+        collectionSlug: collectionConfig.slug,
+      },
+      DefaultEditView,
+    )
+    const ListView: MappedComponent = createMappedComponent(
+      listViewFromConfig?.Component,
+      {
+        collectionSlug: collectionConfig.slug,
+      },
+      DefaultListView,
+    )
 
     const SaveButton = createMappedComponent(collectionConfig?.admin?.components?.edit?.SaveButton)
 
@@ -135,8 +133,8 @@ export const mapCollections = (args: {
       BeforeList,
       BeforeListTable,
       Description,
-      Edit: CustomEditView,
-      List: CustomListView,
+      Edit: EditView,
+      List: ListView,
       PreviewButton,
       PublishButton,
       SaveButton,

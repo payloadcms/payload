@@ -1,4 +1,5 @@
-import type { AdminViewComponent, SanitizedConfig } from 'payload'
+import type { AdminViewComponent, AdminViewProps, ImportMap, SanitizedConfig } from 'payload'
+import type React from 'react'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
@@ -25,7 +26,12 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: AdminViewComponent
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewProps>
+}
+
+export type ViewFromConfig = {
+  Component?: React.FC<AdminViewProps>
+  payloadComponent?: AdminViewComponent
 }
 
 const oneSegmentViews: OneSegmentViews = {
@@ -42,28 +48,31 @@ export const getViewFromConfig = ({
   adminRoute,
   config,
   currentRoute,
+  importMap,
   searchParams,
   segments,
 }: {
-  adminRoute
+  adminRoute: string
   config: SanitizedConfig
   currentRoute: string
+  importMap: ImportMap
   searchParams: {
     [key: string]: string | string[]
   }
   segments: string[]
 }): {
-  DefaultView: AdminViewComponent
+  DefaultView: ViewFromConfig
   initPageOptions: Parameters<typeof initPage>[0]
   templateClassName: string
   templateType: 'default' | 'minimal'
 } => {
-  let ViewToRender: AdminViewComponent = null
+  let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
+    importMap,
     route: currentRoute,
     searchParams,
   }
@@ -76,7 +85,9 @@ export const getViewFromConfig = ({
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {
-        ViewToRender = Dashboard
+        ViewToRender = {
+          Component: Dashboard,
+        }
         templateClassName = 'dashboard'
         templateType = 'default'
         initPageOptions.redirectUnauthenticatedUser = true
@@ -111,7 +122,9 @@ export const getViewFromConfig = ({
         // --> /logout-inactivity
         // --> /unauthorized
 
-        ViewToRender = oneSegmentViews[viewToRender]
+        ViewToRender = {
+          Component: oneSegmentViews[viewToRender],
+        }
         templateClassName = baseClasses[viewToRender]
         templateType = 'minimal'
 
@@ -125,7 +138,9 @@ export const getViewFromConfig = ({
     case 2: {
       if (segmentOne === 'reset') {
         // --> /reset/:token
-        ViewToRender = ResetPassword
+        ViewToRender = {
+          Component: ResetPassword,
+        }
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
       }
@@ -133,13 +148,17 @@ export const getViewFromConfig = ({
       if (isCollection) {
         // --> /collections/:collectionSlug
         initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = ListView
+        ViewToRender = {
+          Component: ListView,
+        }
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
         initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = DocumentView
+        ViewToRender = {
+          Component: DocumentView,
+        }
         templateClassName = 'global-edit'
         templateType = 'default'
       }
@@ -148,7 +167,9 @@ export const getViewFromConfig = ({
     default:
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        ViewToRender = Verify
+        ViewToRender = {
+          Component: Verify,
+        }
         templateClassName = 'verify'
         templateType = 'minimal'
       } else if (isCollection) {
@@ -159,7 +180,9 @@ export const getViewFromConfig = ({
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
         initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = DocumentView
+        ViewToRender = {
+          Component: DocumentView,
+        }
         templateClassName = `collection-default-edit`
         templateType = 'default'
       } else if (isGlobal) {
@@ -169,7 +192,9 @@ export const getViewFromConfig = ({
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
         initPageOptions.redirectUnauthenticatedUser = true
-        ViewToRender = DocumentView
+        ViewToRender = {
+          Component: DocumentView,
+        }
         templateClassName = `global-edit`
         templateType = 'default'
       }
