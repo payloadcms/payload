@@ -125,7 +125,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             value={compareValue}
             versionID={versionID}
           />
-          {localization && (
+          {Boolean(localization) && (
             <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
           )}
         </div>
@@ -138,7 +138,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             i18n={i18n}
             locales={
               locales
-                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
+                ? locales
+                    .map(({ value }) => (typeof value === 'string' ? value : undefined))
+                    .filter((label) => Boolean(label))
                 : []
             }
             version={
