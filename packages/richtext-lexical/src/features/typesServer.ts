@@ -73,7 +73,7 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   node: T
   nodeValidations: Map<string, Array<NodeValidation>>
   validation: {
-    options: ValidateOptions<unknown, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }) => Promise<string | true> | string | true
