@@ -374,7 +374,7 @@ describe('relationship', () => {
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: relationshipWithMinRows',
+      'The following field is invalid: RelationshipWithMinRows',
     )
   })
 

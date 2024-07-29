@@ -449,7 +449,7 @@ describe('Relationships', () => {
               // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
-          ).rejects.toThrow('The following field is invalid: customIdRelation')
+          ).rejects.toThrow('The following field is invalid: CustomIdRelation')
         })
 
         it('should validate the format of number id relationships', async () => {
@@ -458,7 +458,7 @@ describe('Relationships', () => {
               // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
-          ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
+          ).rejects.toThrow('The following field is invalid: CustomIdNumberRelation')
         })
 
         it('should allow update removing a relationship', async () => {
