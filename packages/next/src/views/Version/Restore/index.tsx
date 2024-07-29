@@ -11,7 +11,6 @@ import {
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { requests } from '@payloadcms/ui/shared'
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
@@ -128,7 +127,7 @@ const Restore: React.FC<Props> = ({
           >
             {t('general:cancel')}
           </Button>
-          <Button onClick={processing ? undefined : () => handleRestore()}>
+          <Button onClick={processing ? undefined : () => void handleRestore()}>
             {processing ? t('version:restoring') : t('general:confirm')}
           </Button>
         </MinimalTemplate>

@@ -19,6 +19,7 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
+  pagination?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
@@ -34,6 +35,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
+    pagination = true,
     req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
@@ -73,6 +75,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       limit: limit ?? 10,
       locale,
       page: page || 1,
+      pagination,
       req,
       sort,
       where: fullWhere,
