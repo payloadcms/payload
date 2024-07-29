@@ -109,7 +109,6 @@ a.btn {
 
     &.btn--disabled {
       background: var(--theme-elevation-200);
-      cursor: not-allowed;
     }
 
     &:not(.btn--disabled) {
@@ -157,6 +156,10 @@ a.btn {
     }
   }
 
+  &--style-none {
+    padding: 0;
+  }
+
   &:focus:not(:focus-visible) {
     .btn__icon {
       @include color-svg(var(--theme-elevation-800));
@@ -176,5 +179,9 @@ a.btn {
   &:focus-visible {
     outline: var(--accessibility-outline);
     outline-offset: var(--accessibility-outline-offset);
+  }
+
+  &.btn--disabled {
+    cursor: not-allowed;
   }
 }

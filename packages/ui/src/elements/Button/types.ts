@@ -15,7 +15,7 @@ export type Props = {
   iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string
   newTab?: boolean
-  onClick?: (event: MouseEvent) => void
+  onClick?: (event: MouseEvent) => Promise<void> | void
   round?: boolean
   size?: 'medium' | 'small'
   to?: string

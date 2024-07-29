@@ -15,14 +15,16 @@
 
 .checkbox-input {
   display: inline-flex;
+  &:hover:not(&--read-only) {
+    label,
+    input {
+      cursor: pointer;
+    }
+  }
 
   label {
     padding-bottom: 0;
     padding-left: base(0.5);
-
-    &[for] {
-      cursor: pointer;
-    }
   }
 
   [dir='rtl'] &__input {
@@ -51,7 +53,6 @@
       opacity: 0;
       border-radius: 0;
       z-index: 1;
-      cursor: pointer;
     }
   }
 
@@ -103,7 +104,7 @@
 
   &--read-only {
     .checkbox-input__input {
-      background-color: var(--theme-elevation-100);
+      @include readOnly;
     }
 
     label {
