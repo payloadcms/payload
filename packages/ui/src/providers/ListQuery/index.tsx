@@ -78,6 +78,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     async (query: RefineOverrides) => {
       if (!modifySearchParams) return
 
+      let pageQuery = 'page' in query ? query.page : currentQuery?.page
+      if ('where' in query || 'search' in query) pageQuery = '1'
+
       const updatedPreferences: Record<string, unknown> = {}
       let updatePreferences = false
 
@@ -95,7 +98,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       const params = {
         limit: 'limit' in query ? query.limit : currentQuery?.limit,
-        page: 'page' in query ? query.page : currentQuery?.page,
+        page: pageQuery,
         search: 'search' in query ? query.search : currentQuery?.search,
         sort: 'sort' in query ? query.sort : currentQuery?.sort,
         where: 'where' in query ? query.where : currentQuery?.where,
@@ -172,13 +175,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       hasSetInitialParams.current = true
     }
-
-    // reset to first page if there are no results on the current page
-    if (data.docs.length === 0 && data.totalDocs > 0) {
-      currentQuery.page = '1'
-      router.replace(`?${qs.stringify(currentQuery)}`)
-    }
-  }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery, data])
+  }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery])
 
   return (
     <Context.Provider
