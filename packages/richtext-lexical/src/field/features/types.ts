@@ -58,7 +58,7 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   nodeValidations: Map<string, Array<NodeValidation>>
   payloadConfig: SanitizedConfig
   validation: {
-    options: ValidateOptions<SerializedEditorState, unknown, RichTextField>
+    options: ValidateOptions<SerializedEditorState, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }) => Promise<string | true> | string | true
