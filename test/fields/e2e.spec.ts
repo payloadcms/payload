@@ -102,7 +102,7 @@ describe('fields', () => {
 
       // toast error
       await expect(page.locator('.payload-toast-container')).toContainText(
-        'The following field is invalid: UniqueText',
+        'The following field is invalid: uniqueText',
       )
 
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
