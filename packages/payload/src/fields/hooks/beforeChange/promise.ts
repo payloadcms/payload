@@ -121,7 +121,7 @@ export const promise = async ({
     }
 
     // Validate
-    if (!skipValidationFromHere && field.validate) {
+    if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
       let jsonError: object
 

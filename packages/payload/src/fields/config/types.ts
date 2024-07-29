@@ -266,11 +266,12 @@ export type NumberField = {
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   } & Admin
-  /** Maximum value accepted. Used in the default `validation` function. */
+  /** Maximum value accepted. Used in the default `validate` function. */
   max?: number
-  /** Minimum value accepted. Used in the default `validation` function. */
+  /** Minimum value accepted. Used in the default `validate` function. */
   min?: number
   type: 'number'
+  validate?: Validate<number | number[], unknown, unknown, NumberField>
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -306,6 +307,7 @@ export type TextField = {
   maxLength?: number
   minLength?: number
   type: 'text'
+  validate?: Validate<string | string[], unknown, unknown, TextField>
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -338,6 +340,7 @@ export type EmailField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'email'
+  validate?: Validate<string, unknown, unknown, EmailField>
 } & FieldBase
 
 export type TextareaField = {
@@ -355,6 +358,7 @@ export type TextareaField = {
   maxLength?: number
   minLength?: number
   type: 'textarea'
+  validate?: Validate<string, unknown, unknown, TextareaField>
 } & FieldBase
 
 export type CheckboxField = {
@@ -367,6 +371,7 @@ export type CheckboxField = {
     }
   } & Admin
   type: 'checkbox'
+  validate?: Validate<unknown, unknown, unknown, CheckboxField>
 } & FieldBase
 
 export type DateField = {
@@ -381,6 +386,7 @@ export type DateField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'date'
+  validate?: Validate<unknown, unknown, unknown, DateField>
 } & FieldBase
 
 export type GroupField = {
@@ -396,7 +402,8 @@ export type GroupField = {
    */
   interfaceName?: string
   type: 'group'
-} & Omit<FieldBase, 'required' | 'validation'>
+  validate?: Validate<unknown, unknown, unknown, GroupField>
+} & Omit<FieldBase, 'required'>
 
 export type RowAdmin = Omit<Admin, 'description'>
 
@@ -404,7 +411,7 @@ export type RowField = {
   admin?: RowAdmin
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name'>
+} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate'>
 
 export type CollapsibleField = {
   fields: Field[]
@@ -426,7 +433,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name'>
+  Omit<FieldBase, 'label' | 'name' | 'validate'>
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -435,7 +442,7 @@ type TabBase = {
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-} & Omit<FieldBase, 'required' | 'validation'>
+} & Omit<FieldBase, 'required' | 'validate'>
 
 export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
@@ -521,6 +528,7 @@ export type UploadField = {
   maxDepth?: number
   relationTo: CollectionSlug
   type: 'upload'
+  validate?: Validate<unknown, unknown, unknown, UploadField>
 } & FieldBase
 
 type CodeAdmin = {
@@ -537,6 +545,7 @@ export type CodeField = {
   maxLength?: number
   minLength?: number
   type: 'code'
+  validate?: Validate<string, unknown, unknown, CodeField>
 } & Omit<FieldBase, 'admin'>
 
 type JSONAdmin = {
@@ -555,6 +564,7 @@ export type JSONField = {
     uri: string
   }
   type: 'json'
+  validate?: Validate<Record<string, unknown>, unknown, unknown, JSONField>
 } & Omit<FieldBase, 'admin'>
 
 export type SelectField = {
@@ -577,6 +587,7 @@ export type SelectField = {
   hasMany?: boolean
   options: Option[]
   type: 'select'
+  validate?: Validate<string, unknown, unknown, SelectField>
 } & FieldBase
 
 type SharedRelationshipProperties = {
@@ -589,6 +600,7 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
+  validate?: Validate<unknown, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
@@ -627,12 +639,14 @@ type RelationshipAdmin = {
   }
   isSortable?: boolean
 } & Admin
+
 export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
+
 export type SingleRelationshipField = {
   admin?: {
     sortOptions?: string
@@ -707,6 +721,7 @@ export type ArrayField = {
   maxRows?: number
   minRows?: number
   type: 'array'
+  validate?: Validate<unknown[], unknown, unknown, ArrayField>
 } & FieldBase
 
 export type RadioField = {
@@ -727,6 +742,7 @@ export type RadioField = {
   enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
+  validate?: Validate<string, unknown, unknown, RadioField>
 } & FieldBase
 
 export type Block = {
@@ -781,10 +797,12 @@ export type BlockField = {
   maxRows?: number
   minRows?: number
   type: 'blocks'
+  validate?: Validate<string, unknown, unknown, BlockField>
 } & FieldBase
 
 export type PointField = {
   type: 'point'
+  validate?: Validate<unknown, unknown, unknown, PointField>
 } & FieldBase
 
 export type Field =
