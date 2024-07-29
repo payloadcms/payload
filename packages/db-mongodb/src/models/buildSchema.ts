@@ -97,9 +97,6 @@ const localizeSchema = (
   localization: SanitizedLocalizationConfig | false,
 ) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
-    if (schema.default === 'localizedUniqueRequired') {
-      console.log('hit')
-    }
     return {
       type: localization.localeCodes.reduce(
         (localeSchema, locale) => ({
