@@ -61,6 +61,7 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
+        defaultValueField,
         {
           name: 'array',
           type: 'array',
@@ -75,7 +76,16 @@ export default buildConfigWithDefaults({
           defaultValue: {},
           fields: [defaultValueField],
         },
-        defaultValueField,
+        {
+          name: 'select',
+          type: 'select',
+          defaultValue: 'default',
+          options: [
+            { value: 'option0', label: 'Option 0' },
+            { value: 'option1', label: 'Option 1' },
+            { value: 'default', label: 'Default' },
+          ],
+        },
       ],
     },
     {

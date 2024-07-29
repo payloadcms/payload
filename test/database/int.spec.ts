@@ -477,6 +477,7 @@ describe('database', () => {
       expect(result.defaultValue).toStrictEqual('default value from database')
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
+      expect(result.select).toStrictEqual('default')
     })
   })
 })
