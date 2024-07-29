@@ -29,7 +29,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -326,4 +326,4 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   )
 }
 
-export const ArrayField = withCondition(_ArrayField)
+export const ArrayField = withCondition(ArrayFieldComponent)
