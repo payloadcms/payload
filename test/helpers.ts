@@ -1,6 +1,7 @@
 import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
 import type { Config } from 'payload'
 
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
@@ -65,7 +66,7 @@ export async function ensureCompilationIsDone({
 }): Promise<void> {
   const {
     routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -114,7 +115,7 @@ export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
 
   const {
     routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
   await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
@@ -130,27 +131,37 @@ export async function login(args: LoginArgs): Promise<void> {
 
   const {
     admin: {
-      routes: { createFirstUser: createFirstUserRoute, login: loginRoute },
+      routes: { createFirstUser, login: incomingLoginRoute },
     },
-    routes: { admin: adminRoute },
-  } = getAdminRoutes({ customAdminRoutes, customRoutes })
+    routes: { admin: incomingAdminRoute },
+  } = getRoutes({ customAdminRoutes, customRoutes })
 
-  await page.goto(`${serverURL}${adminRoute}${loginRoute}`)
-  await page.waitForURL(`${serverURL}${adminRoute}${loginRoute}`)
+  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
+  const loginRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLoginRoute,
+  })
+  const createFirstUserRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: createFirstUser,
+  })
+
+  await page.goto(loginRoute)
+  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
-  await page.waitForURL(`${serverURL}${adminRoute}`)
+  await page.waitForURL(adminRoute)
 
-  await expect(() => expect(page.url()).not.toContain(`${adminRoute}${loginRoute}`)).toPass({
+  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 
-  await expect(() =>
-    expect(page.url()).not.toContain(`${adminRoute}${createFirstUserRoute}`),
-  ).toPass({
+  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
 }
@@ -328,7 +339,7 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
 
 type AdminRoutes = Config['admin']['routes']
 
-export function getAdminRoutes({
+export function getRoutes({
   customAdminRoutes,
   customRoutes,
 }: {

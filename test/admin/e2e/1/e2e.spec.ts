@@ -10,7 +10,7 @@ import {
   checkPageTitle,
   ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocControls,
   openNav,
@@ -76,7 +76,7 @@ describe('admin1', () => {
   let customFieldsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let adminRoutes: ReturnType<typeof getRoutes>
   let loginURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -106,7 +106,7 @@ describe('admin1', () => {
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    adminRoutes = getAdminRoutes({ customAdminRoutes })
+    adminRoutes = getRoutes({ customAdminRoutes })
 
     loginURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.login}`
   })

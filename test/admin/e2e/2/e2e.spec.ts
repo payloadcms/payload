@@ -10,7 +10,7 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocDrawer,
   openNav,
@@ -44,7 +44,7 @@ describe('admin2', () => {
   let postsUrl: AdminUrlUtil
 
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let adminRoutes: ReturnType<typeof getRoutes>
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = Boolean(process.env.CI)
@@ -69,7 +69,7 @@ describe('admin2', () => {
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    adminRoutes = getAdminRoutes({ customAdminRoutes })
+    adminRoutes = getRoutes({ customAdminRoutes })
   })
   beforeEach(async () => {
     await reInitializeDB({
