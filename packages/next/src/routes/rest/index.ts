@@ -167,7 +167,13 @@ const handleCustomEndpoints = async ({
 
       if (res instanceof Response) {
         if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, res.headers)
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
         }
 
         return res
@@ -379,7 +385,13 @@ export const GET =
 
       if (res instanceof Response) {
         if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, res.headers)
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
         }
 
         return res
@@ -555,7 +567,13 @@ export const POST =
 
       if (res instanceof Response) {
         if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, res.headers)
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
         }
 
         return res
@@ -643,7 +661,13 @@ export const DELETE =
 
       if (res instanceof Response) {
         if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, res.headers)
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
         }
 
         return res
@@ -732,7 +756,13 @@ export const PATCH =
 
       if (res instanceof Response) {
         if (req.responseHeaders) {
-          mergeHeaders(req.responseHeaders, res.headers)
+          const mergedResponse = new Response(res.body, {
+            headers: mergeHeaders(req.responseHeaders, res.headers),
+            status: res.status,
+            statusText: res.statusText,
+          })
+
+          return mergedResponse
         }
 
         return res

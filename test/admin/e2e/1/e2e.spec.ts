@@ -55,6 +55,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -813,6 +814,99 @@ describe('admin1', () => {
     })
   })
 
+  describe('i18n', () => {
+    test('should allow changing language', async () => {
+      await page.goto(postsUrl.account)
+
+      const field = page.locator('.payload-settings__language .react-select')
+
+      await field.click()
+      const options = page.locator('.rs__option')
+      await options.locator('text=Español').click()
+
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Tablero',
+      )
+
+      await field.click()
+      await options.locator('text=English').click()
+      await field.click()
+      await expect(page.locator('.form-submit .btn')).toContainText('Save')
+    })
+
+    test('should allow custom translation', async () => {
+      await page.goto(postsUrl.account)
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Home',
+      )
+    })
+
+    test('should allow custom translation of locale labels', async () => {
+      const selectOptionClass = '.localizer .popup-button-list__button'
+      const localizerButton = page.locator('.localizer .popup-button')
+      const localeListItem1 = page.locator(selectOptionClass).nth(0)
+
+      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
+        await localizerButton.click()
+        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
+        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
+      }
+
+      await checkLocaleLabels('Spanish (es)', 'English (en)')
+
+      // Change locale to Spanish
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
+      await localeListItem1.click()
+
+      // Go to account page
+      await page.goto(postsUrl.account)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+      const options = page.locator('.rs__option')
+
+      // Change language to Spanish
+      await languageField.click()
+      await options.locator('text=Español').click()
+
+      await checkLocaleLabels('Español (es)', 'Inglés (en)')
+
+      // Change locale and language back to English
+      await languageField.click()
+      await options.locator('text=English').click()
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
+    })
+  })
+
+  describe('drawers', () => {
+    test('document drawers are visually stacking', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+      const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
+      await drawer1Content
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
+      await expect(drawer2Content).toBeVisible()
+      const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
+      expect(drawer2Left > drawerLeft).toBe(true)
+    })
+  })
+
   describe('CRUD', () => {
     test('should create', async () => {
       await page.goto(postsUrl.create)
@@ -952,73 +1046,6 @@ describe('admin1', () => {
       const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
-    })
-  })
-
-  describe('i18n', () => {
-    test('should allow changing language', async () => {
-      await page.goto(postsUrl.account)
-
-      const field = page.locator('.payload-settings__language .react-select')
-
-      await field.click()
-      const options = page.locator('.rs__option')
-      await options.locator('text=Español').click()
-
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Tablero',
-      )
-
-      await field.click()
-      await options.locator('text=English').click()
-      await field.click()
-      await expect(page.locator('.form-submit .btn')).toContainText('Save')
-    })
-
-    test('should allow custom translation', async () => {
-      await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Home',
-      )
-    })
-
-    test('should allow custom translation of locale labels', async () => {
-      const selectOptionClass = '.localizer .popup-button-list__button'
-      const localizerButton = page.locator('.localizer .popup-button')
-      const localeListItem1 = page.locator(selectOptionClass).nth(0)
-
-      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
-        await localizerButton.click()
-        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
-        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
-      }
-
-      await checkLocaleLabels('Spanish (es)', 'English (en)')
-
-      // Change locale to Spanish
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
-      await localeListItem1.click()
-
-      // Go to account page
-      await page.goto(postsUrl.account)
-
-      const languageField = page.locator('.payload-settings__language .react-select')
-      const options = page.locator('.rs__option')
-
-      // Change language to Spanish
-      await languageField.click()
-      await options.locator('text=Español').click()
-
-      await checkLocaleLabels('Español (es)', 'Inglés (en)')
-
-      // Change locale and language back to English
-      await languageField.click()
-      await options.locator('text=English').click()
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
 })
