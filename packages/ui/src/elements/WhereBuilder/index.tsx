@@ -143,8 +143,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   React.useEffect(() => {
     if (shouldUpdateQuery) {
-      handleWhereChange({ or: conditions })
-      setShouldUpdateQuery(false)
+      async function handleChange() {
+        await handleWhereChange({ or: conditions })
+        setShouldUpdateQuery(false)
+      }
+      void handleChange()
     }
   }, [conditions, handleWhereChange, shouldUpdateQuery])
 
