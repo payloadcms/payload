@@ -19,7 +19,14 @@ export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
 
   return (
     <div className={baseClass}>
-      <Button ref={ref} {...props} disabled={canSave ? undefined : true} id={id} type={type}>
+      <Button
+        ref={ref}
+        {...props}
+        disabled={canSave ? undefined : true}
+        id={id}
+        size="large"
+        type={type}
+      >
         {children}
       </Button>
     </div>

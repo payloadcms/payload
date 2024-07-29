@@ -15,6 +15,9 @@ export default buildConfigWithDefaults({
     PostsCollection,
     // MediaCollection
   ],
+  admin: {
+    autoLogin: false,
+  },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

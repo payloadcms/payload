@@ -8,6 +8,7 @@ a.btn {
   background: transparent;
   border-radius: $style-radius-s;
   font-size: var(--base-body-size);
+  margin-block: base(1.2);
   line-height: base(1.2);
   border: 0;
   cursor: pointer;
@@ -99,6 +100,29 @@ a.btn {
 
       .btn__content {
         gap: base(0.2);
+      }
+    }
+  }
+
+  &--size-large {
+    padding: base(0.4) base(0.8);
+
+    &.btn--icon-position-left {
+      padding-inline-start: base(0.6);
+      padding-inline-end: base(0.8);
+
+      .btn__content {
+        gap: base(0.4);
+        flex-direction: row-reverse;
+      }
+    }
+
+    &.btn--icon-position-right {
+      padding-inline-start: base(0.8);
+      padding-inline-end: base(0.6);
+
+      .btn__content {
+        gap: base(0.4);
       }
     }
   }
