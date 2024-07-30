@@ -69,7 +69,7 @@ export type AddToImportMap = (payloadComponent: PayloadComponent | PayloadCompon
 
 export async function generateImportMap(
   config: SanitizedConfig,
-  options?: { log: boolean },
+  options?: { force?: boolean; log: boolean },
 ): Promise<void> {
   console.log('Generating import map')
   const importMap: InternalImportMap = {}
@@ -109,6 +109,7 @@ export async function generateImportMap(
   await writeImportMap({
     componentMap: importMap,
     fileName: 'importMap.js',
+    force: options?.force,
     importMap: imports,
     log: options?.log,
   })
@@ -117,11 +118,13 @@ export async function generateImportMap(
 export async function writeImportMap({
   componentMap,
   fileName,
+  force,
   importMap,
   log,
 }: {
   componentMap: InternalImportMap
   fileName: string
+  force?: boolean
   importMap: Imports
   log?: boolean
 }) {
@@ -129,29 +132,32 @@ export async function writeImportMap({
     process.env.NEXT_PUBLIC_ROOT_DIR,
     `app/(payload)/admin/${fileName}`,
   )
-  // Read current component map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-  const currentImportMap = await fs.promises.readFile(outputFile, 'utf-8')
-  const currentImportMapImports = currentImportMap
-    .split('\n')
-    .filter((line) => line.startsWith('import'))
-  let hasAllImports = true
-  for (const { path, specifier } of Object.values(importMap)) {
-    let foundImport = false
-    for (const currentImportMapImport of currentImportMapImports) {
-      if (currentImportMapImport.includes(path) && currentImportMapImport.includes(specifier)) {
-        foundImport = true
+
+  if (!force) {
+    // Read current component map and check in the IMPORTS if there are any new imports. If not, don't write the file.
+    const currentImportMap = await fs.promises.readFile(outputFile, 'utf-8')
+    const currentImportMapImports = currentImportMap
+      .split('\n')
+      .filter((line) => line.startsWith('import'))
+    let hasAllImports = true
+    for (const { path, specifier } of Object.values(importMap)) {
+      let foundImport = false
+      for (const currentImportMapImport of currentImportMapImports) {
+        if (currentImportMapImport.includes(path) && currentImportMapImport.includes(specifier)) {
+          foundImport = true
+          break
+        }
+      }
+      if (!foundImport) {
+        hasAllImports = false
         break
       }
     }
-    if (!foundImport) {
-      hasAllImports = false
-      break
-    }
-  }
 
-  if (hasAllImports) {
-    console.log('No new imports found, skipping writing component map')
-    return
+    if (hasAllImports) {
+      console.log('No new imports found, skipping writing component map')
+      return
+    }
   }
 
   const imports: string[] = []

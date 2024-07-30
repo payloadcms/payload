@@ -28,7 +28,7 @@ async function run() {
 
     process.env.NEXT_PUBLIC_ROOT_DIR = path.resolve(dirname, '..')
 
-    await generateImportMap(config)
+    await generateImportMap(config, { log: true, force: true })
   }
 }
 
