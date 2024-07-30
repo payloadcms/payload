@@ -1,8 +1,6 @@
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
-
-import { fieldHasSubFields } from '../../fields/config/types.js'
 
 function hasKey<T, K extends string>(
   obj: T | null | undefined,
@@ -22,12 +20,12 @@ export function genImportMapIterateFields({
   addToImportMap: AddToImportMap
   baseDir: string
   config: SanitizedConfig
-  fields: Field[]
+  fields: Block[] | Field[] | Tab[]
   importMap: InternalImportMap
   imports: Imports
 }) {
   for (const field of fields) {
-    if (fieldHasSubFields(field)) {
+    if ('fields' in field) {
       genImportMapIterateFields({
         addToImportMap,
         baseDir,
@@ -37,27 +35,23 @@ export function genImportMapIterateFields({
         imports,
       })
     } else if (field.type === 'blocks') {
-      for (const block of field.blocks) {
-        genImportMapIterateFields({
-          addToImportMap,
-          baseDir,
-          config,
-          fields: block.fields,
-          importMap,
-          imports,
-        })
-      }
+      genImportMapIterateFields({
+        addToImportMap,
+        baseDir,
+        config,
+        fields: field.blocks,
+        importMap,
+        imports,
+      })
     } else if (field.type === 'tabs') {
-      for (const tab of field.tabs) {
-        genImportMapIterateFields({
-          addToImportMap,
-          baseDir,
-          config,
-          fields: tab.fields,
-          importMap,
-          imports,
-        })
-      }
+      genImportMapIterateFields({
+        addToImportMap,
+        baseDir,
+        config,
+        fields: field.tabs,
+        importMap,
+        imports,
+      })
     } else if (field.type === 'richText') {
       if (
         field?.editor &&
@@ -77,13 +71,13 @@ export function genImportMapIterateFields({
 
     hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
 
-    addToImportMap(field?.admin?.components?.Cell)
+    hasKey(field?.admin?.components, 'Cell') && addToImportMap(field?.admin?.components?.Cell)
 
     hasKey(field?.admin?.components, 'Description') &&
       addToImportMap(field?.admin?.components?.Description)
 
-    addToImportMap(field?.admin?.components?.Field)
-    addToImportMap(field?.admin?.components?.Filter)
+    hasKey(field?.admin?.components, 'Field') && addToImportMap(field?.admin?.components?.Field)
+    hasKey(field?.admin?.components, 'Filter') && addToImportMap(field?.admin?.components?.Filter)
 
     hasKey(field?.admin?.components, 'Error') && addToImportMap(field?.admin?.components?.Error)
 
