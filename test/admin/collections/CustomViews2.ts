@@ -18,7 +18,7 @@ export const CustomViews2: CollectionConfig = {
         Edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
           CustomViewWithParam: {
-            Component: '../components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
+            Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
             Tab: {
               href: `${customCollectionParamViewPathBase}/123`,
               label: 'Custom Param View',
@@ -31,7 +31,7 @@ export const CustomViews2: CollectionConfig = {
             },
           },
           MyCustomView: {
-            Component: '../components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
             Tab: {
               href: '/custom-tab-view',
               label: customTabLabel,
@@ -39,19 +39,23 @@ export const CustomViews2: CollectionConfig = {
             path: '/custom-tab-view',
           },
           MyCustomViewWithCustomTab: {
-            Component: '../components/views/CustomTabComponent/index.js#CustomTabComponentView',
-            Tab: '../components/CustomTabComponent/index.js#CustomTabComponent',
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            Tab: {
+              TabComponent: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
             path: customTabViewPath,
           },
           MyCustomViewWithNestedPath: {
-            Component: '../components/views/CustomTabNested/index.js#CustomNestedTabView',
+            Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
             Tab: {
               href: customNestedTabViewPath,
               label: 'Custom Nested Tab View',
             },
             path: customNestedTabViewPath,
           },
-          Versions: '../components/views/CustomVersions/index.js#CustomVersionsView',
+          Versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+          },
         },
       },
     },

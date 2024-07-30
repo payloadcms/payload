@@ -21,7 +21,9 @@ export const CustomGlobalViews2: GlobalConfig = {
           },
           MyCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
-            Tab: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            Tab: {
+              TabComponent: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
             path: '/custom-tab-component',
           },
           Versions: {
