@@ -6,6 +6,10 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   defaultSort: 'title',
+  versions: {
+    // Drafts required to reproduce the issue
+    drafts: true,
+  },
   fields: [
     {
       name: 'text',
@@ -14,6 +18,12 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      // Polymorphic relationship required to reproduce the issue
+      relationTo: ['posts'],
     },
     {
       name: 'associatedMedia',
