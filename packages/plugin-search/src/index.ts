@@ -50,11 +50,6 @@ export const searchPlugin =
         })
         .filter(Boolean)
 
-      config.admin.adminDependencies['plugin-seo.LinkToDoc'] = {
-        type: 'component',
-        path: '@payloadcms/plugin-search#LinkToDoc',
-      }
-
       return {
         ...config,
         collections: [
@@ -66,5 +61,3 @@ export const searchPlugin =
 
     return config
   }
-
-export { LinkToDoc } from './Search/ui/index.js'
