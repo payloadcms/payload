@@ -7,7 +7,7 @@ import type { Media } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -19,6 +19,7 @@ import {
   focalOnlySlug,
   globalWithMedia,
   mediaSlug,
+  relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
@@ -38,6 +39,7 @@ let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
+let relationPreviewURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -59,6 +61,7 @@ describe('uploads', () => {
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
+    relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -87,16 +90,13 @@ describe('uploads', () => {
     audioDoc = findAudio.docs[0] as unknown as Media
   })
 
-  test('should see upload filename and thumbnail in relation list', async () => {
+  test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
 
     await wait(110)
     const field = page.locator('.cell-image')
 
     await expect(field).toContainText('image.png')
-
-    const thumbnail = page.locator('.cell-image img')
-    await expect(thumbnail).toBeVisible()
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -537,6 +537,44 @@ describe('uploads', () => {
       // without focal point update this generated size was equal to 1736
       expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
+  })
+
+  test('should see upload previews in relation list if allowed in config', async () => {
+    await page.goto(relationPreviewURL.list)
+
+    await wait(110)
+
+    // Show all columns with relations
+    await page.locator('.list-controls__toggle-columns').click()
+    await expect(page.locator('.column-selector')).toBeVisible()
+    const imageWithoutPreview2Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview2'),
+    })
+    const imageWithPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image With Preview3'),
+    })
+    const imageWithoutPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview3'),
+    })
+    await imageWithoutPreview2Button.click()
+    await imageWithPreview3Button.click()
+    await imageWithoutPreview3Button.click()
+
+    // Wait for the columns to be displayed
+    await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
+
+    const relationPreview1 = page.locator('.cell-imageWithPreview1 img')
+    await expect(relationPreview1).toBeVisible()
+    const relationPreview2 = page.locator('.cell-imageWithPreview2 img')
+    await expect(relationPreview2).toBeVisible()
+    const relationPreview3 = page.locator('.cell-imageWithoutPreview1 img')
+    await expect(relationPreview3).toBeHidden()
+    const relationPreview4 = page.locator('.cell-imageWithoutPreview2 img')
+    await expect(relationPreview4).toBeHidden()
+    const relationPreview5 = page.locator('.cell-imageWithPreview3 img')
+    await expect(relationPreview5).toBeVisible()
+    const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
+    await expect(relationPreview6).toBeHidden()
   })
 
   describe('globals', () => {
