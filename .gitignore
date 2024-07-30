@@ -5,6 +5,8 @@ dist
 !/.idea/runConfigurations
 !/.idea/payload.iml
 
+app/(payload)/admin/importMap.js
+
 test-results
 .devcontainer
 .localstack
