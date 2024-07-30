@@ -13,7 +13,7 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
+import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
@@ -380,7 +380,7 @@ export type EditViewConfig =
        * Or override a specific properties of an existing one
        * i.e. you can customize the `Default` view tab label, if desired
        */
-      Tab?: DocumentTab
+      Tab?: DocumentTabConfig
       path?: string
     }
   | {
@@ -390,15 +390,6 @@ export type EditViewConfig =
   | {
       actions?: CustomComponent[]
     }
-
-/**
- * Override existing views
- * i.e. Dashboard, Account, API, LivePreview, etc.
- * Path is not available here
- * All Tab properties become optional
- * i.e. you can change just the label, if desired
- */
-export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = {
   [key: string]: unknown

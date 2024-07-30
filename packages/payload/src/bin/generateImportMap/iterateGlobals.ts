@@ -39,6 +39,13 @@ export function iterateGlobals({
         if ('Component' in editViewConfig) {
           addToImportMap(editViewConfig?.Component)
         }
+        if ('actions' in editViewConfig) {
+          addToImportMap(editViewConfig?.actions)
+        }
+        if ('Tab' in editViewConfig) {
+          addToImportMap(editViewConfig?.Tab?.TabComponent)
+          addToImportMap(editViewConfig?.Tab?.Pill)
+        }
       }
     }
   }
