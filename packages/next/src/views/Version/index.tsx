@@ -99,9 +99,8 @@ export const VersionView: EditViewComponent = async (props) => {
 
   const localeOptions: OptionObject[] =
     localization &&
-    localization?.locales &&
     localization.locales.map(({ code, label }) => ({
-      label: typeof label === 'string' ? label : '',
+      label,
       value: code,
     }))
 
