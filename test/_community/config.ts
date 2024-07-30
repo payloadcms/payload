@@ -39,10 +39,49 @@ export default buildConfigWithDefaults({
       BlocksFeature({
         blocks: [
           {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
             slug: 'test',
             fields: [
               {
                 name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        inlineBlocks: [
+          {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
                 type: 'text',
               },
             ],

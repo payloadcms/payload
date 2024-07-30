@@ -125,7 +125,8 @@ export const mapFields = (args: {
         )
 
         const AfterInput = createMappedComponent(
-          'components' in field.admin &&
+          field.admin &&
+            'components' in field.admin &&
             'afterInput' in field.admin.components &&
             field?.admin?.components?.afterInput,
         )
@@ -595,6 +596,7 @@ export const mapFields = (args: {
               const result = actualGenerateComponentMap({
                 config,
                 createMappedComponent,
+                field,
                 i18n,
                 importMap,
                 schemaPath: path,

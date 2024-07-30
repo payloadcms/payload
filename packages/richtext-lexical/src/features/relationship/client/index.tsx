@@ -2,7 +2,7 @@
 
 import { $isNodeSelection } from 'lexical'
 
-import type { RelationshipFeatureProps } from '../server/feature.server.js'
+import type { RelationshipFeatureProps } from '../server/index.js'
 
 import { RelationshipIcon } from '../../../lexical/ui/icons/Relationship/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'

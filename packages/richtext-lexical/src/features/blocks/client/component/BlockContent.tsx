@@ -1,4 +1,4 @@
-import type { FormFieldBase } from '@payloadcms/ui'
+import type { FormFieldBase, ReducedBlock } from '@payloadcms/ui'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { CollapsedPreferences, Data, FormState } from 'payload'
 
@@ -10,18 +10,20 @@ import {
   ErrorPill,
   Pill,
   RenderFields,
+  RenderMappedComponent,
   SectionTitle,
   useDocumentInfo,
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
-import type { ClientBlock } from '../index.js'
-import type { BlockFields, BlockNode } from '../nodes/BlocksNode.js'
+import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockNode } from '../nodes/BlocksNode.js'
 
 import { FormSavePlugin } from './FormSavePlugin.js'
 
@@ -36,7 +38,7 @@ type Props = {
   formSchema: FieldMap
   nodeKey: string
   path: string
-  reducedBlock: ClientBlock
+  reducedBlock: ReducedBlock
   schemaPath: string
 }
 
@@ -46,15 +48,7 @@ type Props = {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const {
-    baseClass,
-    field,
-    formData,
-    formSchema,
-    nodeKey,
-    reducedBlock: { LabelComponent, labels },
-    schemaPath,
-  } = props
+  const { baseClass, field, formData, formSchema, nodeKey, reducedBlock, schemaPath } = props
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
@@ -199,8 +193,11 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          LabelComponent ? (
-            <LabelComponent blockKind={'lexicalBlock'} formData={formData} />
+          reducedBlock?.LabelComponent?.Component ? (
+            <RenderMappedComponent
+              clientProps={{ blockKind: 'lexicalBlock', formData }}
+              component={reducedBlock.LabelComponent}
+            />
           ) : (
             <div className={`${baseClass}__block-header`}>
               <div>
@@ -208,8 +205,8 @@ export const BlockContent: React.FC<Props> = (props) => {
                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                   pillStyle="white"
                 >
-                  {typeof labels.singular === 'string'
-                    ? getTranslation(labels.singular, i18n)
+                  {typeof reducedBlock?.labels.singular === 'string'
+                    ? getTranslation(reducedBlock?.labels.singular, i18n)
                     : '[Singular Label]'}
                 </Pill>
                 <SectionTitle path="blockName" readOnly={field?.readOnly} />

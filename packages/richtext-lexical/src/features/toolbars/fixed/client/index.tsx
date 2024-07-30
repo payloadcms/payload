@@ -1,6 +1,6 @@
 'use client'
 
-import type { FixedToolbarFeatureProps } from '../server/feature.server.js'
+import type { FixedToolbarFeatureProps } from '../server/index.js'
 
 import { createClientFeature } from '../../../../utilities/createClientFeature.js'
 import { FixedToolbarPlugin } from './Toolbar/index.js'

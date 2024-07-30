@@ -5,8 +5,6 @@ import { reduceFieldsToValues } from 'payload/shared'
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import {} from '../exports/client/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
@@ -82,7 +80,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   }
 
   if (!fieldSchema) {
-    throw new Error('Could not find field schema for given path')
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
   let docPreferences = reqData.docPreferences

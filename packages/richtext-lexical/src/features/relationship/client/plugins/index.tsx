@@ -15,7 +15,7 @@ import {
 import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { RelationshipFeatureProps } from '../../server/feature.server.js'
+import type { RelationshipFeatureProps } from '../../server/index.js'
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
 import { RelationshipDrawer } from '../drawer/index.js'

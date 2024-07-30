@@ -10,7 +10,7 @@ import type { EditorConfigContextType } from '../../../../../lexical/config/clie
 import type { SanitizedClientEditorConfig } from '../../../../../lexical/config/types.js'
 import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../../types.js'
-import type { FixedToolbarFeatureProps } from '../../server/feature.server.js'
+import type { FixedToolbarFeatureProps } from '../../server/index.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'

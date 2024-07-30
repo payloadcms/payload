@@ -1,7 +1,6 @@
 'use client'
 
 import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
-import type { Block } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -15,9 +14,7 @@ import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
-export type ClientBlock = {
-  LabelComponent?: Block['admin']['components']['Label']
-} & ReducedBlock
+export type ClientBlock = Pick<ReducedBlock, 'labels' | 'slug'>
 
 export type BlocksFeatureClientProps = {
   reducedBlocks: ClientBlock[]

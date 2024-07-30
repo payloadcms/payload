@@ -2,7 +2,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { useModal, useTranslation } from '@payloadcms/ui'
+import { type BlocksFieldProps, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -17,9 +17,9 @@ import {
 } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { ClientComponentProps, PluginComponent } from '../../../typesClient.js'
-import type { BlocksFeatureClientProps, ClientBlock } from '../feature.client.js'
-import type { BlockFields } from '../nodes/BlocksNode.js'
+import type { PluginComponent } from '../../../typesClient.js'
+import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlocksFeatureClientProps } from '../index.js'
 import type { InlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -43,13 +43,23 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [blockType, setBlockType] = useState<string>('' as any)
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
   const { i18n, t } = useTranslation<string, any>()
+  const { schemaPath } = useFieldProps()
 
-  const { editorConfig } = useEditorConfigContext()
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
-  const reducedBlock: ClientBlock = (
-    editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
-  )?.reducedInlineBlocks?.find((block) => block.slug === blockFields?.blockType)
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
+
+  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+
+  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
+    mappedBlock.fieldComponentProps
+
+  const reducedBlock = blockFieldComponentProps.blocks.find(
+    (block) => block.slug === blockFields?.blockType,
+  )
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -160,6 +170,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
       })}
       featureKey="blocks"
+      fieldMapOverride={reducedBlock?.fieldMap}
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)
         if (!data) {
@@ -170,6 +181,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
 
         editor.dispatchCommand(INSERT_INLINE_BLOCK_COMMAND, data)
       }}
+      schemaFieldsPathOverride={schemaFieldsPath}
       schemaPathSuffix={blockFields?.blockType}
     />
   )

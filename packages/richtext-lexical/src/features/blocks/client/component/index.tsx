@@ -1,14 +1,14 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
+import type { BlocksFieldProps, FormProps } from '@payloadcms/ui'
 
 import {
   Collapsible,
   Form,
   Pill,
+  RenderMappedComponent,
   SectionTitle,
   ShimmerEffect,
-  useComponentMap,
   useConfig,
   useDocumentInfo,
   useFieldProps,
@@ -21,12 +21,10 @@ const baseClass = 'lexical-block'
 import type { FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getComponent, getFormState } from '@payloadcms/ui/shared'
+import { getFormState } from '@payloadcms/ui/shared'
 import { v4 as uuid } from 'uuid'
 
-import type { ClientComponentProps } from '../../../typesClient.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
-import type { BlocksFeatureClientProps, ClientBlock } from '../index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { BlockContent } from './BlockContent.js'
@@ -44,23 +42,26 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
   const { path, schemaPath } = useFieldProps()
-  const { importMap } = useComponentMap()
-  const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
+  const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
   const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
 
-  const componentMapRenderedFieldsPath = `lexical_internal_feature.blocks.fields.${formData?.blockType}`
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.${formData?.blockType}`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
-  const reducedBlock: ClientBlock = (
-    editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
-  )?.reducedBlocks?.find((block) => block.slug === formData?.blockType)
+  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
+  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath)
+  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
+    mappedBlock.fieldComponentProps
+
+  const reducedBlock = blockFieldComponentProps.blocks.find(
+    (block) => block.slug === formData.blockType,
+  )
+  const fieldMap = reducedBlock.fieldMap
+
   // Field Schema
   useEffect(() => {
     const awaitInitialState = async () => {
@@ -73,7 +74,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           schemaPath: schemaFieldsPath,
         },
         serverURL: config.serverURL,
-      }) // Form State
+      })
 
       if (state) {
         setInitialState({
@@ -123,13 +124,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
-  const LabelPayloadComponent = reducedBlock?.LabelComponent
-
-  const LabelComponent = getComponent({
-    importMap,
-    payloadComponent: LabelPayloadComponent,
-  })
-
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return reducedBlock && initialState !== false ? (
@@ -158,8 +152,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          LabelComponent?.Component ? (
-            <LabelComponent.component blockKind={'lexicalBlock'} formData={formData} />
+          reducedBlock.LabelComponent?.Component ? (
+            <RenderMappedComponent
+              clientProps={{ blockKind: 'lexicalBlock', formData }}
+              component={reducedBlock.LabelComponent}
+            />
           ) : (
             <div className={`${baseClass}__block-header`}>
               <div>
@@ -187,7 +184,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     parentLexicalRichTextField,
     nodeKey,
     i18n,
-    LabelComponent,
+    reducedBlock.LabelComponent,
     submitted,
     initialState,
     reducedBlock,

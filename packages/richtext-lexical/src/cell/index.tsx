@@ -173,7 +173,7 @@ export const RichTextCell: React.FC<
             )
 
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
-              return richTextComponentMap.get(key)
+              return richTextComponentMap.get(key) as React.ReactNode
             })
 
             return (

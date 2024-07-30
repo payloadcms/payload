@@ -299,6 +299,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    field: RichTextField
     i18n: I18nClient
     props: ServerProps
     schemaMap: Map<string, Field[]>

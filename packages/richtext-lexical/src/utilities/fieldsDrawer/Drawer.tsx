@@ -1,4 +1,5 @@
 'use client'
+import type { FieldMap } from '@payloadcms/ui'
 import type { Data, FormState, JsonObject } from 'payload'
 
 import { Drawer } from '@payloadcms/ui'
@@ -12,7 +13,9 @@ export type FieldsDrawerProps = {
   drawerSlug: string
   drawerTitle?: string
   featureKey: string
+  fieldMapOverride?: FieldMap
   handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
+  schemaFieldsPathOverride?: string
   schemaPathSuffix?: string
 }
 
@@ -27,7 +30,9 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   drawerSlug,
   drawerTitle,
   featureKey,
+  fieldMapOverride,
   handleDrawerSubmit,
+  schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
   // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
@@ -37,7 +42,9 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
       <DrawerContent
         data={data}
         featureKey={featureKey}
+        fieldMapOverride={fieldMapOverride}
         handleDrawerSubmit={handleDrawerSubmit}
+        schemaFieldsPathOverride={schemaFieldsPathOverride}
         schemaPathSuffix={schemaPathSuffix}
       />
     </Drawer>

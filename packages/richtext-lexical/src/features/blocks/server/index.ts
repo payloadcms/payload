@@ -48,10 +48,6 @@ export const BlocksFeature = createServerFeature<
 
           clientProps.reducedBlocks.push({
             slug: block.slug,
-            LabelComponent: block?.admin?.components?.Label,
-            fieldMap: [],
-            imageAltText: block.imageAltText,
-            imageURL: block.imageURL,
             labels: block.labels,
           })
 
@@ -74,10 +70,6 @@ export const BlocksFeature = createServerFeature<
 
           clientProps.reducedInlineBlocks.push({
             slug: block.slug,
-            LabelComponent: block?.admin?.components?.Label,
-            fieldMap: [],
-            imageAltText: block.imageAltText,
-            imageURL: block.imageURL,
             labels: block.labels,
           })
 
@@ -100,15 +92,24 @@ export const BlocksFeature = createServerFeature<
         const schemaMap = new Map<string, Field[]>()
 
         if (props?.blocks?.length) {
-          for (const block of props.blocks) {
-            schemaMap.set(block.slug, block.fields || [])
-          }
+          schemaMap.set('lexical_blocks', [
+            {
+              name: 'lexical_blocks',
+              type: 'blocks',
+              blocks: props.blocks,
+            },
+          ])
         }
 
         if (props?.inlineBlocks?.length) {
-          for (const block of props.inlineBlocks) {
-            schemaMap.set(block.slug, block.fields || [])
-          }
+          // To generate block schemaMap which generates things like the componentMap for admin.Label
+          schemaMap.set('lexical_inline_blocks', [
+            {
+              name: 'lexical_inline_blocks',
+              type: 'blocks',
+              blocks: props.inlineBlocks,
+            },
+          ])
         }
 
         return schemaMap

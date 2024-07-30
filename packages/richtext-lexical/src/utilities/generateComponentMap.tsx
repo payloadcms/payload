@@ -10,7 +10,7 @@ import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): any =>
-  ({ config, createMappedComponent, i18n, importMap, schemaPath }) => {
+  ({ config, createMappedComponent, field, i18n, importMap, schemaPath }) => {
     const componentMap: Map<
       string,
       GeneratedFeatureProviderComponent[] | MappedComponent | MappedField[]
@@ -66,6 +66,7 @@ export const getGenerateComponentMap =
           ) {
             const schemas = resolvedFeature.generateSchemaMap({
               config,
+              field,
               i18n,
               props: resolvedFeature.sanitizedServerFeatureProps,
               schemaMap: new Map(),

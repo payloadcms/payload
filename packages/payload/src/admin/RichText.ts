@@ -207,6 +207,7 @@ type RichTextAdapterBase<
   generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    field: RichTextField
     i18n: I18n<any, any>
     schemaMap: Map<string, Field[]>
     schemaPath: string

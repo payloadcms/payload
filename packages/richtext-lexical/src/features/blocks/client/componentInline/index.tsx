@@ -7,8 +7,12 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, useComponentMap, useTranslation } from '@payloadcms/ui'
-import { getComponent } from '@payloadcms/ui/shared'
+import {
+  type BlocksFieldProps,
+  Button,
+  RenderMappedComponent,
+  useTranslation,
+} from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,
@@ -19,8 +23,6 @@ import {
   KEY_DELETE_COMMAND,
 } from 'lexical'
 
-import type { ClientComponentProps } from '../../../typesClient.js'
-import type { BlocksFeatureClientProps, ClientBlock } from '../index.js'
 import type { InlineBlockFields } from '../nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -37,16 +39,23 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
-  const { editorConfig, field } = useEditorConfigContext()
+  const { field } = useEditorConfigContext()
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
-  const { importMap } = useComponentMap()
 
-  const reducedBlock: ClientBlock = (
-    editorConfig?.resolvedFeatureMap?.get('blocks')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
-  )?.reducedInlineBlocks?.find((block) => block.slug === formData?.blockType)
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
+  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+
+  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
+    mappedBlock.fieldComponentProps
+
+  const reducedBlock = blockFieldComponentProps.blocks.find(
+    (block) => block.slug === formData.blockType,
+  )
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
       $getNodeByKey(nodeKey).remove()
@@ -100,12 +109,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     )
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
-  const LabelPayloadComponent = reducedBlock?.LabelComponent
-
-  const LabelComponent = getComponent({
-    importMap,
-    payloadComponent: LabelPayloadComponent,
-  })
+  const LabelComponent = reducedBlock?.LabelComponent
 
   const blockDisplayName = reducedBlock.labels.singular
     ? getTranslation(reducedBlock.labels.singular, i18n)
@@ -123,7 +127,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       ref={inlineBlockElemElemRef}
     >
       {LabelComponent?.Component ? (
-        <LabelComponent.component blockKind={'lexicalInlineBlock'} formData={formData} />
+        <RenderMappedComponent
+          clientProps={{ blockKind: 'lexicalInlineBlock', formData }}
+          component={LabelComponent}
+        />
       ) : (
         <div>{getTranslation(reducedBlock.labels.singular, i18n)}</div>
       )}

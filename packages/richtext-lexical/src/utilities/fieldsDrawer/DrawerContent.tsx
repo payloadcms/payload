@@ -1,5 +1,5 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui'
+import type { FieldMap, FormProps } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import {
@@ -22,7 +22,9 @@ import { useEditorConfigContext } from '../../lexical/config/client/EditorConfig
 export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
   data,
   featureKey,
+  fieldMapOverride,
   handleDrawerSubmit,
+  schemaFieldsPathOverride,
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
@@ -35,9 +37,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   } = useEditorConfigContext()
 
   const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const schemaFieldsPath =
+    schemaFieldsPathOverride ??
+    `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
+  const fieldMap: any =
+    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as FieldMap) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {
