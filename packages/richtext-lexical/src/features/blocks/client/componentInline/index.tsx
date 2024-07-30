@@ -3,16 +3,13 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 const baseClass = 'inline-block'
 
+import type { BlocksFieldProps } from 'payload'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  type BlocksFieldProps,
-  Button,
-  RenderMappedComponent,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button, RenderMappedComponent, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,
@@ -50,8 +47,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
-    mappedBlock.fieldComponentProps
+  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
   const reducedBlock = blockFieldComponentProps.blocks.find(
     (block) => block.slug === formData.blockType,

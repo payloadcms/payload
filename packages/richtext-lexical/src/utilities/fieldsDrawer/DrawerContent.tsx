@@ -1,6 +1,6 @@
 'use client'
-import type { FieldMap, FormProps } from '@payloadcms/ui'
-import type { FormState } from 'payload'
+import type { FormProps } from '@payloadcms/ui'
+import type { FieldMap, FormState } from 'payload'
 
 import {
   Form,

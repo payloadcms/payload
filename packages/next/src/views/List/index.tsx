@@ -6,7 +6,11 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  RenderMappedComponent,
+  formatAdminURL,
+  getCreateMappedComponent,
+} from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'

@@ -1,8 +1,12 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  RenderMappedComponent,
+  formatAdminURL,
+  getCreateMappedComponent,
+} from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

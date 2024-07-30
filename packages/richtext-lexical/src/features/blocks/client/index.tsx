@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlocksFieldProps } from '@payloadcms/ui'
+import type { BlocksFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -42,10 +42,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
                   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  const blockFieldComponentProps: Omit<
-                    BlocksFieldProps,
-                    'indexPath' | 'permissions'
-                  > = mappedBlock.fieldComponentProps
+                  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
                   const reducedBlock = blockFieldComponentProps.blocks.find(
                     (_block) => _block.slug === blockSlug,
@@ -83,10 +80,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
                   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  const blockFieldComponentProps: Omit<
-                    BlocksFieldProps,
-                    'indexPath' | 'permissions'
-                  > = mappedBlock.fieldComponentProps
+                  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
                   const reducedBlock = blockFieldComponentProps.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,
@@ -132,10 +126,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
                   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  const blockFieldComponentProps: Omit<
-                    BlocksFieldProps,
-                    'indexPath' | 'permissions'
-                  > = mappedBlock.fieldComponentProps
+                  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
                   const reducedBlock = blockFieldComponentProps.blocks.find(
                     (_block) => _block.slug === blockSlug,
@@ -174,10 +165,7 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
                   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  const blockFieldComponentProps: Omit<
-                    BlocksFieldProps,
-                    'indexPath' | 'permissions'
-                  > = mappedBlock.fieldComponentProps
+                  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
                   const reducedBlock = blockFieldComponentProps.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,

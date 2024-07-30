@@ -1,7 +1,7 @@
 import type { CustomComponent, ServerProps } from '../../config/types.js'
+import type { FieldTypes } from '../../fields/config/types.js'
 import type { FieldComponentProps } from '../fields/index.js'
 import type { FormFieldBase } from './Field.js'
-import type { FieldTypes } from './FieldTypes.js'
 
 export type GenericLabelProps = {
   as?: 'label' | 'span'
@@ -10,15 +10,15 @@ export type GenericLabelProps = {
   unstyled?: boolean
 } & FormFieldBase
 
-export type LabelProps<T extends keyof FieldTypes = any> = {
+export type LabelProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
 } & FieldComponentProps &
   GenericLabelProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps<T extends keyof FieldTypes = any> = Omit<
+export type SanitizedLabelProps<T extends 'hidden' | FieldTypes = any> = Omit<
   LabelProps<T>,
   'label' | 'required'
 >
 
-export type LabelComponent<T extends keyof FieldTypes = any> = CustomComponent<LabelProps<T>>
+export type LabelComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<LabelProps<T>>

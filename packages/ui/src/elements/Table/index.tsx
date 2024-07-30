@@ -5,6 +5,7 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
+import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'

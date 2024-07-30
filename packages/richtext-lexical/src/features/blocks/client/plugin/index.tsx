@@ -1,8 +1,10 @@
 'use client'
+import type { BlocksFieldProps } from 'payload'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { type BlocksFieldProps, useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
+import { useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -54,8 +56,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
-    mappedBlock.fieldComponentProps
+  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
   const reducedBlock = blockFieldComponentProps.blocks.find(
     (block) => block.slug === blockFields?.blockType,

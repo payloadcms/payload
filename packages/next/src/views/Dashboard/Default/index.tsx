@@ -3,7 +3,12 @@ import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  EntityType,
+  RenderMappedComponent,
+  formatAdminURL,
+  getCreateMappedComponent,
+} from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'

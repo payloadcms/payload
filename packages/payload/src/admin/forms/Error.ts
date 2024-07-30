@@ -10,10 +10,10 @@ export type GenericErrorProps = {
   showError?: boolean
 }
 
-export type ErrorProps<T extends FieldTypes = any> = {
+export type ErrorProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
 } & FieldComponentProps &
   GenericErrorProps &
   Partial<ServerProps>
 
-export type ErrorComponent<T extends FieldTypes = any> = CustomComponent<ErrorProps<T>>
+export type ErrorComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<ErrorProps<T>>

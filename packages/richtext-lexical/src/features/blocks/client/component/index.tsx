@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlocksFieldProps, FormProps } from '@payloadcms/ui'
+import type { FormProps } from '@payloadcms/ui'
 
 import {
   Collapsible,
@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { FormState } from 'payload'
+import type { BlocksFieldProps, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
@@ -54,8 +54,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
   const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const blockFieldComponentProps: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> =
-    mappedBlock.fieldComponentProps
+  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
 
   const reducedBlock = blockFieldComponentProps.blocks.find(
     (block) => block.slug === formData.blockType,

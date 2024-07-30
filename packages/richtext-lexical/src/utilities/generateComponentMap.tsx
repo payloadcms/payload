@@ -1,5 +1,4 @@
-import type { MappedField } from '@payloadcms/ui'
-import type { MappedComponent } from 'payload'
+import type { MappedComponent, MappedField } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'

@@ -1,9 +1,15 @@
-import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
+import type {
+  AdminViewProps,
+  EditViewComponent,
+  MappedComponent,
+  ServerSideEditViewProps,
+} from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
 import {
-  RenderCustomComponent,
+  RenderMappedComponent,
   formatAdminURL,
+  getCreateMappedComponent,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'

@@ -1,6 +1,5 @@
 'use client'
-import type { FieldMap } from '@payloadcms/ui'
-import type { Data, FormState, JsonObject } from 'payload'
+import type { Data, FieldMap, FormState, JsonObject } from 'payload'
 
 import { Drawer } from '@payloadcms/ui'
 import React from 'react'

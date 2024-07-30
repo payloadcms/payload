@@ -37,11 +37,12 @@ export type Props = {
   }) => void
 }
 
-import type { Operator } from 'payload'
+import type { MappedComponent, Operator } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { RenderMappedComponent } from '../../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
