@@ -8,6 +8,9 @@ export type DocumentDrawerProps = {
   collectionSlug: string
   drawerSlug?: string
   id?: null | number | string
+  onCreate?: DocumentInfoContext['onCreate']
+  onDelete?: DocumentInfoContext['onDelete']
+  onDuplicate?: DocumentInfoContext['onDuplicate']
   onSave?: DocumentInfoContext['onSave']
 } & Pick<DrawerProps, 'Header'>
 

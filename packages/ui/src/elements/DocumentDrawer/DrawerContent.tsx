@@ -23,6 +23,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   Header,
   collectionSlug,
   drawerSlug,
+  onCreate: onCreateFromProps,
+  onDelete: onDeleteFromProps,
+  onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
 }) => {
   const config = useConfig()
@@ -74,6 +77,45 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onSaveFromProps, collectionConfig],
   )
 
+  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setDocID(args.doc.id)
+      if (typeof onDuplicateFromProps === 'function') {
+        void onDuplicateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDuplicateFromProps, collectionConfig],
+  )
+
+  const onCreate = useCallback<DocumentDrawerProps['onCreate']>(
+    (args) => {
+      setDocID(args.doc.id)
+      if (typeof onCreateFromProps === 'function') {
+        void onCreateFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onCreateFromProps, collectionConfig],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      setDocID(args.doc.id)
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps({
+          ...args,
+          collectionConfig,
+        })
+      }
+    },
+    [onDeleteFromProps, collectionConfig],
+  )
+
   return (
     <DocumentInfoProvider
       BeforeDocument={
@@ -99,12 +141,15 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       }
       apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
-      disableActions
       disableLeaveWithoutSaving
       id={docID}
       isEditing={isEditing}
+      onCreate={onCreate}
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       onLoadError={onLoadError}
       onSave={onSave}
+      redirectAfterDuplicate={false}
     >
       {Edit}
     </DocumentInfoProvider>

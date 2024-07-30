@@ -4,6 +4,8 @@ import type { CollectionPermission, GlobalPermission, SanitizedCollectionConfig 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -32,7 +34,10 @@ export const DocumentControls: React.FC<{
   id?: number | string
   isAccountView?: boolean
   isEditing?: boolean
+  /* Only available if `redirectAfterDuplicate` is `false` */
+  onDuplicate?: DocumentInfoContext['onDuplicate']
   permissions: CollectionPermission | GlobalPermission | null
+  redirectAfterDuplicate?: boolean
   slug: SanitizedCollectionConfig['slug']
 }> = (props) => {
   const {
@@ -43,7 +48,9 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    onDuplicate,
     permissions,
+    redirectAfterDuplicate,
   } = props
 
   const { i18n } = useTranslation()
@@ -211,6 +218,8 @@ export const DocumentControls: React.FC<{
                     {!collectionConfig.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
+                        onDuplicate={onDuplicate}
+                        redirectAfterDuplicate={redirectAfterDuplicate}
                         singularLabel={collectionConfig?.labels?.singular}
                         slug={collectionConfig?.slug}
                       />

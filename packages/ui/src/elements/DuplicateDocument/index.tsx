@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -22,11 +24,19 @@ const baseClass = 'duplicate'
 
 export type Props = {
   id: string
+  onDuplicate?: DocumentInfoContext['onDuplicate']
+  redirectAfterDuplicate?: boolean
   singularLabel: SanitizedCollectionConfig['labels']['singular']
   slug: string
 }
 
-export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
+export const DuplicateDocument: React.FC<Props> = ({
+  id,
+  slug,
+  onDuplicate,
+  redirectAfterDuplicate = true,
+  singularLabel,
+}) => {
   const router = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -34,13 +44,12 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
   const { setModified } = useForm()
 
   const {
-    routes: { api: apiRoute },
+    collections,
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = useConfig()
 
-  const {
-    routes: { admin: adminRoute },
-  } = useConfig()
+  const collectionConfig = collections.find((collection) => collection.slug === slug)
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()
@@ -74,13 +83,21 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
               message ||
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
             )
+
             setModified(false)
-            router.push(
-              formatAdminURL({
-                adminRoute,
-                path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
-              }),
-            )
+
+            if (redirectAfterDuplicate) {
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+                }),
+              )
+            }
+
+            if (typeof onDuplicate === 'function') {
+              void onDuplicate({ collectionConfig, doc })
+            }
           } else {
             toast.error(
               errors?.[0].message ||
@@ -102,9 +119,12 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       modalSlug,
       t,
       singularLabel,
+      onDuplicate,
+      redirectAfterDuplicate,
       setModified,
       router,
       adminRoute,
+      collectionConfig,
     ],
   )
 
@@ -115,7 +135,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
+      <PopupList.Button id="action-duplicate" onClick={void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
@@ -131,7 +151,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             >
               {t('general:cancel')}
             </Button>
-            <Button id="confirm-duplicate" onClick={confirm}>
+            <Button id="confirm-duplicate" onClick={void confirm()}>
               {t('general:duplicateWithoutSaving')}
             </Button>
           </div>

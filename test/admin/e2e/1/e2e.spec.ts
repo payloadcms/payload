@@ -12,7 +12,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocControls,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -56,6 +55,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -904,6 +904,21 @@ describe('admin1', () => {
       await expect(drawer2Content).toBeVisible()
       const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
+    })
+
+    test('can duplicate document within a drawer', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      const originalID = await drawer1Content.locator('.id-label').textContent()
+      await wait(500)
+      await openDocControls(drawer1Content)
+      await drawer1Content.locator('#action-duplicate').click()
+      await expect(drawer1Content.locator('.id-label')).not.toHaveText(originalID)
     })
   })
 

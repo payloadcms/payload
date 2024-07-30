@@ -33,8 +33,26 @@ export type DocumentInfoProps = {
   initialData?: Data
   initialState?: FormState
   isEditing?: boolean
+  onCreate?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
+  onDelete?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
+  /* only available if `redirectAfterDuplicate` is `false` */
+  onDuplicate?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
   onLoadError?: (data?: any) => Promise<void> | void
-  onSave?: (data: Data) => Promise<void> | void
+  onSave?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+    result: Data
+  }) => Promise<void> | void
+  redirectAfterDuplicate?: boolean
 }
 
 export type DocumentInfoContext = {

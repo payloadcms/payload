@@ -52,7 +52,9 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDuplicate,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
@@ -213,7 +215,9 @@ export const DefaultEditView: React.FC = () => {
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onDuplicate={onDuplicate}
             permissions={docPermissions}
+            redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields
