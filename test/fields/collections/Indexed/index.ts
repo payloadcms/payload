@@ -32,13 +32,20 @@ const IndexedFields: CollectionConfig = {
   fields: [
     {
       name: 'text',
+      type: 'text',
       index: true,
       required: true,
-      type: 'text',
     },
     {
       name: 'uniqueText',
       type: 'text',
+      unique: true,
+    },
+    {
+      name: 'uniqueRequiredText',
+      type: 'text',
+      defaultValue: 'uniqueRequired',
+      required: true,
       unique: true,
     },
     {
@@ -47,11 +54,12 @@ const IndexedFields: CollectionConfig = {
     },
     {
       name: 'group',
+      type: 'group',
       fields: [
         {
           name: 'localizedUnique',
-          localized: true,
           type: 'text',
+          localized: true,
           unique: true,
         },
         {
@@ -64,25 +72,24 @@ const IndexedFields: CollectionConfig = {
           type: 'point',
         },
       ],
-      type: 'group',
     },
     {
+      type: 'collapsible',
       fields: [
         {
           name: 'collapsibleLocalizedUnique',
-          localized: true,
           type: 'text',
+          localized: true,
           unique: true,
         },
         {
           name: 'collapsibleTextUnique',
-          label: 'collapsibleTextUnique',
           type: 'text',
+          label: 'collapsibleTextUnique',
           unique: true,
         },
       ],
       label: 'Collapsible',
-      type: 'collapsible',
     },
   ],
   versions: true,

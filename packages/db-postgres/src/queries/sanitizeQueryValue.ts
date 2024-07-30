@@ -2,7 +2,10 @@ import { APIError } from 'payload/errors'
 import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
 import { createArrayFromCommaDelineated } from 'payload/utilities'
 
+import type { PostgresAdapter } from '../types'
+
 type SanitizeQueryValueArgs = {
+  adapter: PostgresAdapter
   field: Field | TabAsField
   operator: string
   relationOrPath: string
@@ -10,6 +13,7 @@ type SanitizeQueryValueArgs = {
 }
 
 export const sanitizeQueryValue = ({
+  adapter,
   field,
   operator: operatorArg,
   relationOrPath,
@@ -27,8 +31,10 @@ export const sanitizeQueryValue = ({
   ) {
     const allPossibleIDTypes: (number | string)[] = []
     formattedValue.forEach((val) => {
-      if (typeof val === 'string') {
+      if (adapter.idType !== 'uuid' && typeof val === 'string') {
         allPossibleIDTypes.push(val, parseInt(val))
+      } else if (typeof val === 'string') {
+        allPossibleIDTypes.push(val)
       } else {
         allPossibleIDTypes.push(val, String(val))
       }
@@ -60,7 +66,7 @@ export const sanitizeQueryValue = ({
     formattedValue = Number(val)
   }
 
-  if (field.type === 'date') {
+  if (field.type === 'date' && operator !== 'exists') {
     if (typeof val === 'string') {
       formattedValue = new Date(val)
       if (Number.isNaN(Date.parse(formattedValue))) {
@@ -77,6 +83,10 @@ export const sanitizeQueryValue = ({
     if (val === 'null') {
       formattedValue = null
     }
+  }
+
+  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+    operator = 'equals'
   }
 
   if (operator === 'near' || operator === 'within' || operator === 'intersects') {

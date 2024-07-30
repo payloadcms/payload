@@ -157,6 +157,7 @@ describe('Localization', () => {
         id,
         collection: localizedPostsSlug,
         data: {
+          localizedCheckbox: false,
           title: spanishTitle,
         },
         locale: spanishLocale,
@@ -174,8 +175,6 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
 
-      // click checkbox manually
-      await page.locator('#field-localizedCheckbox').click()
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
 

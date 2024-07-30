@@ -31,12 +31,13 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
   const editDepth = useEditDepth()
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     if (disabled) {
       return
     }
 
-    e.preventDefault()
-    e.stopPropagation()
     if (ref?.current) {
       ref.current.click()
     }
@@ -69,10 +70,15 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { submit } = useForm()
   const { id, collection, global } = useDocumentInfo()
   const modified = useFormModified()
+
   const { code: locale } = useLocale()
   const { t } = useTranslation('version')
 
   const canSaveDraft = modified
+
+  const validateDrafts =
+    (collection?.versions.drafts && collection.versions?.drafts?.validate) ||
+    (global?.versions.drafts && global.versions?.drafts?.validate)
 
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
@@ -94,9 +100,9 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       overrides: {
         _status: 'draft',
       },
-      skipValidation: true,
+      skipValidation: !validateDrafts,
     })
-  }, [submit, collection, global, serverURL, api, locale, id])
+  }, [submit, collection, global, serverURL, api, locale, id, validateDrafts])
 
   return (
     <RenderCustomComponent

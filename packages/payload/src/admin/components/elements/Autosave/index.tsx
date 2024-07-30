@@ -7,15 +7,22 @@ import type { Props } from './types'
 
 import useDebounce from '../../../hooks/useDebounce'
 import { formatTimeToNow } from '../../../utilities/formatDate'
-import { useAllFormFields, useFormModified } from '../../forms/Form/context'
+import {
+  useAllFormFields,
+  useForm,
+  useFormModified,
+  useFormSubmitted,
+} from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
+import { reduceFieldsToValuesWithValidation } from '../../forms/Form/reduceFieldsToValuesWithValidation'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useEditDepth } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
 import './index.scss'
 const baseClass = 'autosave'
 
-const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
+const Autosave: React.FC<Props> = ({ id, collection, global, onSave, publishedDocUpdatedAt }) => {
   const {
     routes: { admin, api },
     serverURL,
@@ -24,10 +31,16 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   const [fields] = useAllFormFields()
   const modified = useFormModified()
   const { code: locale } = useLocale()
-  const { replace } = useHistory()
+  const submitted = useFormSubmitted()
+  const { dispatchFields, setSubmitted } = useForm()
+  const history = useHistory()
   const { i18n, t } = useTranslation('version')
+  const depth = useEditDepth()
 
   let interval = 800
+  const validateDrafts =
+    (collection?.versions.drafts && collection.versions?.drafts?.validate) ||
+    (global?.versions.drafts && global.versions?.drafts?.validate)
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave)
     interval = collection.versions.drafts.autosave.interval
   if (global?.versions.drafts && global.versions?.drafts?.autosave)
@@ -66,27 +79,34 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
     if (res.status === 201) {
       const json = await res.json()
-      replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-        state: {
-          data: json.doc,
-        },
-      })
+      if (depth === 1) {
+        history.replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+          state: {
+            data: json.doc,
+          },
+        })
+      } else {
+        onSave(json)
+      }
     } else {
       toast.error(t('error:autosaving'))
     }
-  }, [i18n, serverURL, api, collection, locale, replace, admin, t])
+  }, [serverURL, api, collection?.slug, locale, i18n.language, history, admin, t, depth, onSave])
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
     // Immediately save it and set lastSaved
     if (!id && collection) {
-      createCollectionDoc()
+      void createCollectionDoc()
     }
   }, [id, collection, createCollectionDoc])
 
   // When debounced fields change, autosave
 
   useEffect(() => {
+    const abortController = new AbortController()
+    let autosaveTimeout = undefined
+
     const autosave = async () => {
       if (modified) {
         setSaving(true)
@@ -105,8 +125,82 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
         }
 
         if (url) {
-          setTimeout(async () => {
+          autosaveTimeout = setTimeout(async () => {
             if (modifiedRef.current) {
+              const { data, valid } = {
+                ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
+              }
+              data._status = 'draft'
+              const skipSubmission = submitted && !valid && validateDrafts
+
+              if (!skipSubmission) {
+                const res = await fetch(url, {
+                  body: JSON.stringify(data),
+                  credentials: 'include',
+                  headers: {
+                    'Accept-Language': i18n.language,
+                    'Content-Type': 'application/json',
+                  },
+                  method,
+                  signal: abortController.signal,
+                })
+
+                if (res.status === 200) {
+                  const newDate = new Date()
+                  setLastSaved(newDate.getTime())
+                  void getVersions()
+                }
+
+                if (validateDrafts && res.status === 400) {
+                  const json = await res.json()
+                  if (Array.isArray(json.errors)) {
+                    const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                      ([fieldErrs, nonFieldErrs], err) => {
+                        const newFieldErrs = []
+                        const newNonFieldErrs = []
+
+                        if (err?.message) {
+                          newNonFieldErrs.push(err)
+                        }
+
+                        if (Array.isArray(err?.data)) {
+                          err.data.forEach((dataError) => {
+                            if (dataError?.field) {
+                              newFieldErrs.push(dataError)
+                            } else {
+                              newNonFieldErrs.push(dataError)
+                            }
+                          })
+                        }
+
+                        return [
+                          [...fieldErrs, ...newFieldErrs],
+                          [...nonFieldErrs, ...newNonFieldErrs],
+                        ]
+                      },
+                      [[], []],
+                    )
+
+                    fieldErrors.forEach((err) => {
+                      dispatchFields({
+                        type: 'UPDATE',
+                        errorMessage: err.message,
+                        path: err.field,
+                        valid: false,
+                      })
+                    })
+
+                    nonFieldErrors.forEach((err) => {
+                      toast.error(err.message || i18n.t('error:unknown'))
+                    })
+
+                    setSubmitted(true)
+                    setSaving(false)
+                    return
+                  }
+                }
+              }
+
               const body = {
                 ...reduceFieldsToValues(fieldRef.current, true),
                 _status: 'draft',
@@ -124,7 +218,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
               if (res.status === 200) {
                 setLastSaved(new Date().getTime())
-                getVersions()
+                void getVersions()
               }
             }
 
@@ -134,7 +228,13 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
       }
     }
 
-    autosave()
+    void autosave()
+
+    return () => {
+      clearTimeout(autosaveTimeout)
+      if (abortController.signal) abortController.abort()
+      setSaving(false)
+    }
   }, [
     i18n,
     debouncedFields,
@@ -147,6 +247,10 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
     getVersions,
     localeRef,
     modifiedRef,
+    submitted,
+    validateDrafts,
+    setSubmitted,
+    dispatchFields,
   ])
 
   useEffect(() => {

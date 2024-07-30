@@ -59,7 +59,7 @@ const DefaultCell: React.FC<Props> = (props) => {
       <WrapElement {...wrapElementProps}>
         <CodeCell
           collection={collection}
-          data={`ID: ${cellData}`}
+          data={`ID: ${String(cellData)}`}
           field={field as CodeField}
           nowrap
           rowData={rowData}
@@ -68,33 +68,45 @@ const DefaultCell: React.FC<Props> = (props) => {
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
+  let CellComponent: React.FC<CellComponentProps> | false =
+    (cellData || typeof cellData === 'boolean') &&
+    cellData !== null &&
+    typeof cellData !== 'undefined' &&
+    cellComponents[field.type]
 
   if (!CellComponent) {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-      return (
-        <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined') &&
-            'label' in field &&
-            t('noLabel', {
+      if (
+        (cellData === undefined ||
+          cellData === null ||
+          (typeof cellData === 'string' && cellData.trim() === '')) &&
+        'label' in field
+      ) {
+        return (
+          <WrapElement {...wrapElementProps}>
+            {t('noLabel', {
               label: getTranslation(
                 typeof field.label === 'function' ? 'data' : field.label || 'data',
                 i18n,
               ),
             })}
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && JSON.stringify(cellData)}
-        </WrapElement>
-      )
+          </WrapElement>
+        )
+      } else if (['number', 'string'].includes(typeof cellData)) {
+        return <WrapElement {...wrapElementProps}>{cellData}</WrapElement>
+      } else if (typeof cellData === 'object') {
+        return <WrapElement {...wrapElementProps}>{JSON.stringify(cellData)}</WrapElement>
+      }
     }
   }
 
   return (
     <WrapElement {...wrapElementProps}>
-      <CellComponent collection={collection} data={cellData} field={field} rowData={rowData} />
+      {CellComponent ? (
+        <CellComponent collection={collection} data={cellData} field={field} rowData={rowData} />
+      ) : null}
     </WrapElement>
   )
 }

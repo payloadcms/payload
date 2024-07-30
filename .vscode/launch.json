@@ -20,6 +20,13 @@
       }
     },
     {
+      "command": "pnpm run dev collections-graphql",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev GraphQL",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
@@ -44,6 +51,13 @@
       "command": "pnpm run dev localization",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Localization",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev field-error-states",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Field Error States",
       "request": "launch",
       "type": "node-terminal"
     },

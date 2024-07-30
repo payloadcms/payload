@@ -20,10 +20,13 @@ export async function updateVersion<T extends TypeWithID>(
     where: whereArg,
   }: UpdateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(collection)}_v`
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { where } = await buildQuery({
@@ -41,9 +44,9 @@ export async function updateVersion<T extends TypeWithID>(
     db,
     fields,
     operation: 'update',
+    req,
     tableName,
     where,
-    req,
   })
 
   return result

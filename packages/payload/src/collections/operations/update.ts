@@ -75,6 +75,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       overwriteExistingFiles = false,
       req: {
+        fallbackLocale,
         locale,
         payload: { config },
         payload,
@@ -156,6 +157,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data: bulkUpdateData,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -176,7 +178,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           context: req.context,
           depth: 0,
           doc,
+          draft: draftArg,
+          fallbackLocale,
           global: null,
+          locale,
           overrideAccess: true,
           req,
           showHiddenFields: true,
@@ -265,14 +270,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           global: null,
           operation: 'update',
           req,
-          skipValidation: shouldSaveDraft || data._status === 'draft',
+          skipValidation:
+            shouldSaveDraft &&
+            collectionConfig.versions.drafts &&
+            !collectionConfig.versions.drafts.validate &&
+            data._status !== 'published',
         })
 
         // /////////////////////////////////////
         // Update
         // /////////////////////////////////////
 
-        if (!shouldSaveDraft) {
+        if (!shouldSaveDraft || data._status === 'published') {
           result = await req.payload.db.updateOne({
             id,
             collection: collectionConfig.slug,
@@ -294,7 +303,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
@@ -309,7 +317,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           context: req.context,
           depth,
           doc: result,
+          draft: draftArg,
+          fallbackLocale: null,
           global: null,
+          locale,
           overrideAccess,
           req,
           showHiddenFields,

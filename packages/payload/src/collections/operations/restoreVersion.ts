@@ -34,7 +34,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     depth,
     overrideAccess = false,
     req,
-    req: { locale, payload, t },
+    req: { fallbackLocale, locale, payload, t },
     showHiddenFields,
   } = args
 
@@ -140,7 +140,10 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

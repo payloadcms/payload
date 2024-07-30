@@ -27,6 +27,7 @@ type MenuButtonProps = {
   active?: boolean
   children: React.ReactNode
   className?: string
+  disabled?: boolean
   id?: string
   onClick?: () => void
   to?: LinkProps['to']
@@ -36,6 +37,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   active,
   children,
   className,
+  disabled,
   onClick,
   to,
 }) => {
@@ -64,6 +66,7 @@ export const Button: React.FC<MenuButtonProps> = ({
     return (
       <button
         className={classes}
+        disabled={disabled}
         id={id}
         onClick={() => {
           if (onClick) {

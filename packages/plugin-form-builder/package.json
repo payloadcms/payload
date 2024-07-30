@@ -1,9 +1,13 @@
 {
   "name": "@payloadcms/plugin-form-builder",
   "description": "Form builder plugin for Payload CMS",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-form-builder.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-form-builder"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -31,9 +35,8 @@
     "@types/react": "18.2.15",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "nodemon": "^3.0.2",
+    "nodemon": "3.0.3",
     "payload": "workspace:*",
-    "react": "^18.0.0",
     "ts-node": "10.9.1"
   },
   "files": [

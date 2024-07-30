@@ -6,10 +6,12 @@ import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { SanitizedConfig } from '../exports/config'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { Payload } from '../payload'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types'
 import { deepCopyObject } from './deepCopyObject'
 import { toWords } from './formatLabels'
+import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -58,10 +60,10 @@ function generateEntitySchemas(
   }, {})
 
   return {
+    type: 'object',
     additionalProperties: false,
     properties,
     required: Object.keys(properties),
-    type: 'object',
   }
 }
 
@@ -79,12 +81,19 @@ export function withNullableJSONSchemaType(
 }
 
 export function fieldsToJSONSchema(
+  /**
+   * Used for relationship fields, to determine whether to use a string or number type for the ID.
+   * While there is a default ID field type set by the db adapter, they can differ on a collection-level
+   * if they have custom ID fields.
+   */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
   fields: Field[],
   /**
    * Allows you to define new top-level interfaces that can be re-used in the output schema.
    */
   interfaceNameDefinitions: Map<string, JSONSchema4>,
+  payload?: Payload,
+  config?: SanitizedConfig,
 ): {
   properties: {
     [k: string]: JSONSchema4
@@ -104,8 +113,8 @@ export function fieldsToJSONSchema(
           case 'text':
             if (field.hasMany === true) {
               fieldSchema = {
-                items: { type: 'string' },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'string' },
               }
             } else {
               fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
@@ -122,8 +131,8 @@ export function fieldsToJSONSchema(
           case 'number': {
             if (field.hasMany === true) {
               fieldSchema = {
-                items: { type: 'number' },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'number' },
               }
             } else {
               fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
@@ -146,17 +155,20 @@ export function fieldsToJSONSchema(
           case 'richText': {
             if (field.editor.outputSchema) {
               fieldSchema = field.editor.outputSchema({
+                collectionIDFieldTypes,
+                config: config || payload?.config,
                 field,
                 interfaceNameDefinitions,
                 isRequired,
+                payload,
               })
             } else {
               // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   type: 'object',
                 },
-                type: withNullableJSONSchemaType('array', isRequired),
               }
             }
 
@@ -165,8 +177,8 @@ export function fieldsToJSONSchema(
 
           case 'radio': {
             fieldSchema = {
-              enum: buildOptionEnums(field.options),
               type: withNullableJSONSchemaType('string', isRequired),
+              enum: buildOptionEnums(field.options),
             }
 
             break
@@ -177,16 +189,16 @@ export function fieldsToJSONSchema(
 
             if (field.hasMany) {
               fieldSchema = {
-                items: {
-                  enum: optionEnums,
-                  type: 'string',
-                },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  type: 'string',
+                  enum: optionEnums,
+                },
               }
             } else {
               fieldSchema = {
-                enum: optionEnums,
                 type: withNullableJSONSchemaType('string', isRequired),
+                enum: optionEnums,
               }
             }
 
@@ -195,6 +207,7 @@ export function fieldsToJSONSchema(
 
           case 'point': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: [
                 {
                   type: 'number',
@@ -205,7 +218,6 @@ export function fieldsToJSONSchema(
               ],
               maxItems: 2,
               minItems: 2,
-              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -214,9 +226,11 @@ export function fieldsToJSONSchema(
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
                   items: {
                     oneOf: field.relationTo.map((relation) => {
                       return {
+                        type: 'object',
                         additionalProperties: false,
                         properties: {
                           relationTo: {
@@ -234,16 +248,15 @@ export function fieldsToJSONSchema(
                           },
                         },
                         required: ['value', 'relationTo'],
-                        type: 'object',
                       }
                     }),
                   },
-                  type: withNullableJSONSchemaType('array', isRequired),
                 }
               } else {
                 fieldSchema = {
                   oneOf: field.relationTo.map((relation) => {
                     return {
+                      type: withNullableJSONSchemaType('object', isRequired),
                       additionalProperties: false,
                       properties: {
                         relationTo: {
@@ -261,13 +274,13 @@ export function fieldsToJSONSchema(
                         },
                       },
                       required: ['value', 'relationTo'],
-                      type: withNullableJSONSchemaType('object', isRequired),
                     }
                   }),
                 }
               }
             } else if (field.hasMany) {
               fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   oneOf: [
                     {
@@ -278,7 +291,6 @@ export function fieldsToJSONSchema(
                     },
                   ],
                 },
-                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
@@ -316,15 +328,19 @@ export function fieldsToJSONSchema(
 
           case 'blocks': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: {
                 oneOf: field.blocks.map((block) => {
                   const blockFieldSchemas = fieldsToJSONSchema(
                     collectionIDFieldTypes,
                     block.fields,
                     interfaceNameDefinitions,
+                    payload,
+                    config,
                   )
 
                   const blockSchema: JSONSchema4 = {
+                    type: 'object',
                     additionalProperties: false,
                     properties: {
                       ...blockFieldSchemas.properties,
@@ -333,7 +349,6 @@ export function fieldsToJSONSchema(
                       },
                     },
                     required: ['blockType', ...blockFieldSchemas.required],
-                    type: 'object',
                   }
 
                   if (block.interfaceName) {
@@ -347,23 +362,24 @@ export function fieldsToJSONSchema(
                   return blockSchema
                 }),
               },
-              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
 
           case 'array': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: {
-                additionalProperties: false,
                 type: 'object',
+                additionalProperties: false,
                 ...fieldsToJSONSchema(
                   collectionIDFieldTypes,
                   field.fields,
                   interfaceNameDefinitions,
+                  payload,
+                  config,
                 ),
               },
-              type: withNullableJSONSchemaType('array', isRequired),
             }
 
             if (field.interfaceName) {
@@ -382,6 +398,8 @@ export function fieldsToJSONSchema(
               collectionIDFieldTypes,
               field.fields,
               interfaceNameDefinitions,
+              payload,
+              config,
             )
             Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
               fieldSchemas.set(propName, propSchema)
@@ -398,12 +416,14 @@ export function fieldsToJSONSchema(
                 collectionIDFieldTypes,
                 tab.fields,
                 interfaceNameDefinitions,
+                payload,
+                config,
               )
               if (tabHasName(tab)) {
                 // could have interface
                 fieldSchemas.set(tab.name, {
-                  additionalProperties: false,
                   type: 'object',
+                  additionalProperties: false,
                   ...childSchema,
                 })
                 requiredFieldNames.add(tab.name)
@@ -421,9 +441,15 @@ export function fieldsToJSONSchema(
 
           case 'group': {
             fieldSchema = {
-              additionalProperties: false,
               type: 'object',
-              ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
+              additionalProperties: false,
+              ...fieldsToJSONSchema(
+                collectionIDFieldTypes,
+                field.fields,
+                interfaceNameDefinitions,
+                payload,
+                config,
+              ),
             }
 
             if (field.interfaceName) {
@@ -458,13 +484,14 @@ export function entityToJSONSchema(
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
+  payload?: Payload,
 ): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
-  const idField: FieldAffectingData = { name: 'id', required: true, type: defaultIDType as 'text' }
+  const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
   const customIdField = entity.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   ) as FieldAffectingData
@@ -495,29 +522,20 @@ export function entityToJSONSchema(
     })
   }
 
-  // used for relationship fields, to determine whether to use a string or number type for the ID
-  const collectionIDFieldTypes: { [key: string]: 'number' | 'string' } = config.collections.reduce(
-    (acc, collection) => {
-      const customCollectionIdField = collection.fields.find(
-        (field) => 'name' in field && field.name === 'id',
-      )
-
-      acc[collection.slug] = defaultIDType === 'text' ? 'string' : 'number'
-
-      if (customCollectionIdField) {
-        acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
-      }
-
-      return acc
-    },
-    {},
-  )
+  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
 
   return {
+    type: 'object',
     additionalProperties: false,
     title,
-    type: 'object',
-    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions),
+    ...fieldsToJSONSchema(
+      collectionIDFieldTypes,
+      entity.fields,
+      interfaceNameDefinitions,
+      payload,
+      config,
+    ),
   }
 }
 
@@ -527,6 +545,7 @@ export function entityToJSONSchema(
 export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',
+  payload?: Payload,
 ): JSONSchema4 {
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
@@ -537,7 +556,13 @@ export function configToJSONSchema(
     ...config.globals,
     ...config.collections,
   ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
+    acc[entity.slug] = entityToJSONSchema(
+      config,
+      entity,
+      interfaceNameDefinitions,
+      defaultIDType,
+      payload,
+    )
     return acc
   }, {})
 
@@ -545,12 +570,12 @@ export function configToJSONSchema(
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
+    type: 'object',
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
     },
     required: ['collections', 'globals'],
     title: 'Config',
-    type: 'object',
   }
 }

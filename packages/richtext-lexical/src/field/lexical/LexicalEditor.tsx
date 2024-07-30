@@ -36,7 +36,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
 
   useEffect(() => {
     const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport = window.matchMedia('(max-width: 1025px)').matches
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
 
       if (isNextSmallWidthViewport !== isSmallWidthViewport) {
         setIsSmallWidthViewport(isNextSmallWidthViewport)

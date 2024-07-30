@@ -8,10 +8,11 @@ import { findMany } from './find/findMany'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
-  { locale, req, slug, where },
+  { slug, locale, req, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = toSnakeCase(slug)
+
+  const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
   const {
     docs: [doc],

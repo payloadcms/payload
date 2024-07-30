@@ -28,8 +28,25 @@ const databaseAdapters = {
   mongoose: mongooseAdapter({
     migrationDir,
     url: 'mongodb://127.0.0.1/payloadtests',
+    collation: {
+      strength: 1,
+    },
   }),
   postgres: postgresAdapter({
+    migrationDir,
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
+  'postgres-custom-schema': postgresAdapter({
+    migrationDir,
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+    schemaName: 'custom',
+  }),
+  'postgres-uuid': postgresAdapter({
+    idType: 'uuid',
     migrationDir,
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',

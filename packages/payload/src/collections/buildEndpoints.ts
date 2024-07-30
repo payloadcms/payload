@@ -11,6 +11,7 @@ import registerFirstUserHandler from '../auth/requestHandlers/registerFirstUser'
 import resetPassword from '../auth/requestHandlers/resetPassword'
 import unlock from '../auth/requestHandlers/unlock'
 import verifyEmail from '../auth/requestHandlers/verifyEmail'
+import count from './requestHandlers/count'
 import create from './requestHandlers/create'
 import deleteHandler from './requestHandlers/delete'
 import deleteByID from './requestHandlers/deleteByID'
@@ -123,6 +124,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       handler: create,
       method: 'post',
       path: '/',
+    },
+    {
+      handler: count,
+      method: 'get',
+      path: '/count',
     },
     {
       handler: docAccessRequestHandler,

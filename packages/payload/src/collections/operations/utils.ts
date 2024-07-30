@@ -3,6 +3,7 @@ import type login from '../../auth/operations/login'
 import type refresh from '../../auth/operations/refresh'
 import type { PayloadRequest } from '../../express/types'
 import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types'
+import type countOperation from './count'
 import type create from './create'
 import type deleteOperation from './delete'
 import type deleteByID from './deleteByID'
@@ -12,6 +13,7 @@ import type update from './update'
 import type updateByID from './updateByID'
 
 export type AfterOperationMap<T extends TypeWithID> = {
+  count: typeof countOperation
   create: typeof create // todo: pass correct generic
   delete: typeof deleteOperation // todo: pass correct generic
   deleteByID: typeof deleteByID // todo: pass correct generic
@@ -28,6 +30,11 @@ export type AfterOperationArg<T extends TypeWithID> = {
   collection: SanitizedCollectionConfig
   req: PayloadRequest
 } & (
+  | {
+      args: Parameters<AfterOperationMap<T>['count']>[0]
+      operation: 'count'
+      result: Awaited<ReturnType<AfterOperationMap<T>['count']>>
+    }
   | {
       args: Parameters<AfterOperationMap<T>['create']>[0]
       operation: 'create'

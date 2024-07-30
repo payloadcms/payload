@@ -116,10 +116,22 @@ const BlockFields: CollectionConfig = {
   fields: [
     getBlocksField(),
     {
+      ...getBlocksField(),
+      name: 'duplicate',
+    },
+    {
       ...getBlocksField('localized'),
       name: 'collapsedByDefaultBlocks',
       admin: {
         initCollapsed: true,
+      },
+      localized: true,
+    },
+    {
+      ...getBlocksField('localized'),
+      name: 'disableSort',
+      admin: {
+        isSortable: false,
       },
       localized: true,
     },

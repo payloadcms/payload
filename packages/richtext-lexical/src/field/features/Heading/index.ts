@@ -2,7 +2,7 @@ import type { HeadingTagType, SerializedHeadingNode } from '@lexical/rich-text'
 
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $INTERNAL_isPointSelection, $getSelection } from 'lexical'
+import { $getSelection } from 'lexical'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
@@ -14,9 +14,7 @@ import { MarkdownTransformer } from './markdownTransformer'
 
 const setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
-  if ($INTERNAL_isPointSelection(selection)) {
-    $setBlocksType(selection, () => $createHeadingNode(headingSize))
-  }
+  $setBlocksType(selection, () => $createHeadingNode(headingSize))
 }
 
 type Props = {
@@ -67,6 +65,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [
           {
+            type: HeadingNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -85,7 +84,6 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
               } as HTMLConverter<SerializedHeadingNode>,
             },
             node: HeadingNode,
-            type: HeadingNode.getType(),
           },
         ],
         props,

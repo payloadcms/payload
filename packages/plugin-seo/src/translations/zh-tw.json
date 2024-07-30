@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "自動生成",
+    "imageAutoGenerationTip": "自動生成將擷取所選的主頁圖片。",
+    "bestPractices": "最佳實踐",
+    "lengthTipTitle": "網站標題應介於 {{minLength}} 到 {{maxLength}} 字之間。關於如何撰寫良好的網站標題，請參閱 ",
+    "lengthTipDescription": "網站描述應介於 {{minLength}} 到 {{maxLength}} 字元之間。關於如何撰寫良好的網站描述，請參閱 ",
+    "good": "良好",
+    "tooLong": "過長",
+    "tooShort": "過短",
+    "almostThere": "快將完成",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} 字，",
+    "charactersToGo": "還差 {{characters}} 字",
+    "charactersLeftOver": "剩下 {{characters}} 字",
+    "charactersTooMany": "超過 {{characters}} 字",
+    "noImage": "沒有圖片",
+    "checksPassing": "通過 {{current}}/{{max}} 項檢查",
+    "preview": "預覽",
+    "previewDescription": "實際結果可能因內容和搜尋相關性而不同。"
+  }
+}

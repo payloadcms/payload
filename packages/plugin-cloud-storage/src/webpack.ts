@@ -41,6 +41,16 @@ export const extendWebpackConfig =
           if (adapter.webpack) {
             return adapter.webpack(resultingWebpackConfig)
           }
+        } else {
+          if (!matchedCollection) {
+            throw new Error(
+              `plugin-cloud-storage: The collection "${slug}" which you specified in your plugin options does not exist. You can not run payload with this plugin enabled while there are collections specified that do not exist.`,
+            )
+          } else {
+            throw new Error(
+              `plugin-cloud-storage: The adapter you specified in your plugin options for collection ${slug} is not a valid function. You can not run payload with this plugin enabled while there are collections specified without a valid adapter`,
+            )
+          }
         }
 
         return resultingWebpackConfig

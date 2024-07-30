@@ -1,13 +1,14 @@
 import { GraphQLClient } from 'graphql-request'
 import jwtDecode from 'jwt-decode'
+import { v4 as uuid } from 'uuid'
 
 import type { User } from '../../packages/payload/src/auth'
 
 import payload from '../../packages/payload/src'
-import configPromise from '../collections-graphql/config'
+import configPromise from '../auth/config'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 require('isomorphic-fetch')
 
@@ -510,10 +511,39 @@ describe('Auth', () => {
           await tryLogin()
           await tryLogin()
 
-          await payload.update({
+          const loginAfterLimit = await fetch(`${apiUrl}/${slug}/login`, {
+            body: JSON.stringify({
+              email: userEmail,
+              password,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'post',
+          }).then((res) => res.json())
+
+          expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
+
+          const lockedUser = await payload.find({
+            showHiddenFields: true,
+            collection: slug,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          expect(lockedUser.docs[0].loginAttempts).toBe(2)
+          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+
+          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000)
+          const userLockElapsed = await payload.update({
+            showHiddenFields: true,
             collection: slug,
             data: {
-              lockUntil: Date.now() - 605 * 1000,
+              lockUntil: manuallyReleaseLock,
             },
             where: {
               email: {
@@ -521,6 +551,8 @@ describe('Auth', () => {
               },
             },
           })
+
+          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock.toISOString())
 
           // login
           await fetch(`${apiUrl}/${slug}/login`, {
@@ -679,6 +711,97 @@ describe('Auth', () => {
       })
 
       expect(fail.status).toStrictEqual(404)
+    })
+
+    it('should not remove an API key from a user when updating other fields', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: 'api-keys',
+        data: {
+          enableAPIKey: true,
+        },
+      })
+
+      const userResult = await payload.find({
+        collection: 'api-keys',
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
+
+      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
+      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+    })
+
+    it('should disable api key after updating apiKey: null', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          apiKey: null,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await fetch(`${apiUrl}/${apiKeysSlug}/me`, {
+        headers: {
+          ...headers,
+          Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+        },
+      }).then((res) => res.json())
+
+      expect(updatedUser.apiKey).toBeNull()
+      expect(response.user).toBeNull()
+    })
+
+    it('should disable api key after updating with enableAPIKey:false', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: false,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await fetch(`${apiUrl}/${apiKeysSlug}/me`, {
+        headers: {
+          ...headers,
+          Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+        },
+      }).then((res) => res.json())
+
+      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(response.user).toBeNull()
     })
   })
 })

@@ -22,9 +22,19 @@ const baseClass = 'where-builder'
 
 const reduceFields = (fields, i18n) =>
   flattenTopLevelFields(fields).reduce((reduced, field) => {
+    let operators = []
+
     if (typeof fieldTypes[field.type] === 'object') {
+      if (typeof fieldTypes[field.type].operators === 'function') {
+        operators = fieldTypes[field.type].operators(
+          'hasMany' in field && field.hasMany ? true : false,
+        )
+      } else {
+        operators = fieldTypes[field.type].operators
+      }
+
       const operatorKeys = new Set()
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      const reducedOperators = operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           return [
@@ -42,11 +52,14 @@ const reduceFields = (fields, i18n) =>
         label: getTranslation(field.label || field.name, i18n),
         value: field.name,
         ...fieldTypes[field.type],
-        operators,
+        operators: reducedOperators,
         props: {
           ...field,
         },
       }
+
+      if (field.admin && 'disableListFilter' in field.admin && field.admin?.disableListFilter)
+        return reduced
 
       return [...reduced, formattedField]
     }
@@ -122,6 +135,26 @@ const WhereBuilder: React.FC<Props> = (props) => {
         or: [...conditions, ...paramsToKeep],
       }
 
+      const reducedQuery = {
+        or: newWhereQuery.or.map((orCondition) => {
+          const andConditions = (orCondition.and || []).map((andCondition) => {
+            const reducedCondition = {}
+            Object.entries(andCondition).forEach(([fieldName, fieldValue]) => {
+              Object.entries(fieldValue).forEach(([operatorKey, operatorValue]) => {
+                reducedCondition[fieldName] = {}
+                reducedCondition[fieldName][operatorKey] = !operatorValue
+                  ? undefined
+                  : operatorValue
+              })
+            })
+            return reducedCondition
+          })
+          return {
+            and: andConditions,
+          }
+        }),
+      }
+
       if (handleChange) handleChange(newWhereQuery as Where)
 
       const hasExistingConditions =
@@ -136,7 +169,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             {
               ...currentParams,
               page: 1,
-              where: newWhereQuery,
+              where: reducedQuery,
             },
             { addQueryPrefix: true },
           ),
@@ -185,7 +218,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('or')}
@@ -203,7 +236,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('addFilter')}

@@ -168,7 +168,7 @@ import * as React from 'react'
 import {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomPreviewButtonProps,
 } from 'payload/types'
 
@@ -185,7 +185,7 @@ export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
   return <DefaultButton label={label} disabled={disabled} saveDraft={saveDraft} />
 }
 
-export const CustomPublishButton: CustomPublishButtonProps = ({
+export const CustomPublishButton: CustomPublishButtonType = ({
   DefaultButton,
   disabled,
   label,
@@ -491,7 +491,7 @@ As an alternative to replacing the entire Field component, you may want to keep 
 | Component         | Description                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- |
 | **`Label`**       | Override the default Label in the Field Component. [More](#label-component)                                     |
-| **`Error`**       | Override the default Label in the Field Component. [More](#error-component)                                     |
+| **`Error`**       | Override the default Error in the Field Component. [More](#error-component)                                     |
 | **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
 | **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
 
@@ -648,7 +648,7 @@ export default titleField;
 
 ## Custom providers
 
-As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
+As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
 <Banner type="warning">
   <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider
@@ -657,7 +657,7 @@ As your admin customizations gets more complex you may want to share state betwe
 
 ### Styling Custom Components
 
-Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling, so it blends more thoroughly into the existing admin UI.
+Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-in styling, so it blends more thoroughly into the existing admin UI.
 
 To make use of Payload SCSS variables / mixins to use directly in your own components, you can import them as follows:
 

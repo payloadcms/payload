@@ -1,5 +1,6 @@
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 
+import { APIError } from '../../packages/payload/src/errors'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import AfterOperation from './collections/AfterOperation'
 import ChainingHooks from './collections/ChainingHooks'
@@ -24,6 +25,18 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
   ],
   globals: [DataHooksGlobal],
+  endpoints: [
+    {
+      path: '/throw-to-after-error',
+      method: 'get',
+      handler: () => {
+        throw new APIError("I'm a teapot", 418)
+      },
+    },
+  ],
+  hooks: {
+    afterError: () => console.log('Running afterError hook'),
+  },
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({

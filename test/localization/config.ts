@@ -2,11 +2,15 @@ import type { LocalizedPost } from './payload-types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import { englishLocale } from '../globals/config'
 import { ArrayCollection } from './collections/Array'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
+import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
 import {
+  blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -45,6 +49,18 @@ export default buildConfigWithDefaults({
           relationTo: localizedPostsSlug,
           type: 'relationship',
         },
+        {
+          name: 'assignedLocales',
+          type: 'select',
+          hasMany: true,
+          options: [defaultLocale, spanishLocale, portugueseLocale, 'ar'],
+        },
+        {
+          type: 'select',
+          name: 'roles',
+          options: ['admin', 'editor'],
+          defaultValue: 'admin',
+        },
       ],
       slug: 'users',
     },
@@ -63,6 +79,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -231,6 +252,38 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: blocksWithLocalizedSameName,
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block_first',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+            {
+              slug: 'block_second',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    RestrictedByLocaleCollection,
   ],
   globals: [
     {
@@ -274,6 +327,11 @@ export default buildConfigWithDefaults({
         label: 'Arabic',
         rtl: true,
       },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
+      },
     ],
   },
   onInit: async (payload) => {
@@ -299,6 +357,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
         relation: localizedPost.id,
+        assignedLocales: [englishLocale, spanishLocale],
       },
     })
 
@@ -333,6 +392,7 @@ export default buildConfigWithDefaults({
         title: relationEnglishTitle2,
       },
     })
+
     await payload.update({
       id: localizedPost.id,
       collection,

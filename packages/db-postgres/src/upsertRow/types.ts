@@ -9,8 +9,8 @@ type BaseArgs = {
   db: DrizzleDB
   fields: Field[]
   path?: string
-  tableName: string
   req: PayloadRequest
+  tableName: string
 }
 
 type CreateArgs = BaseArgs & {

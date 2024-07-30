@@ -5,6 +5,7 @@ import type { Props } from './types'
 
 import { checkbox } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
+import { useEditDepth } from '../../../utilities/EditDepth'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import useField from '../../useField'
@@ -41,6 +42,8 @@ const Checkbox: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
+  const editDepth = useEditDepth()
+
   const memoizedValidate = useCallback(
     (value, options) => {
       return validate(value, { ...options, required })
@@ -62,7 +65,7 @@ const Checkbox: React.FC<Props> = (props) => {
     }
   }, [onChange, readOnly, setValue, value])
 
-  const fieldID = `field-${path.replace(/\./g, '__')}`
+  const fieldID = `field-${path.replace(/\./g, '__')}${editDepth > 1 ? `-${editDepth}` : ''}`
 
   return (
     <div

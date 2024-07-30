@@ -10,7 +10,7 @@ import { Users } from './collections/Users'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { seed } from './seed'
-import { mobileBreakpoint } from './shared'
+import { desktopBreakpoint, mobileBreakpoint } from './shared'
 import { formatLivePreviewURL } from './utilities/formatLivePreviewURL'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
@@ -21,7 +21,7 @@ export default buildConfigWithDefaults({
       // You can define any of these properties on a per collection or global basis
       // The Live Preview config cascades from the top down, properties are inherited from here
       url: formatLivePreviewURL,
-      breakpoints: [mobileBreakpoint],
+      breakpoints: [mobileBreakpoint, desktopBreakpoint],
       collections: ['pages', 'posts'],
       globals: ['header', 'footer'],
     },

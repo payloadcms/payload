@@ -1,4 +1,8 @@
+import ObjectID from 'bson-objectid'
+
 export const deepCopyObject = (inObject) => {
+  if (ObjectID.isValid(inObject)) return inObject
+
   if (inObject instanceof Date) return inObject
 
   if (inObject instanceof Set) return new Set(inObject)

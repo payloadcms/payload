@@ -2,7 +2,7 @@ import type { SerializedQuoteNode } from '@lexical/rich-text'
 
 import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $INTERNAL_isPointSelection, $getSelection } from 'lexical'
+import { $getSelection } from 'lexical'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
@@ -31,9 +31,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                 onClick: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
-                    if ($INTERNAL_isPointSelection(selection)) {
-                      $setBlocksType(selection, () => $createQuoteNode())
-                    }
+                    $setBlocksType(selection, () => $createQuoteNode())
                   })
                 },
                 order: 20,
@@ -44,6 +42,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
         markdownTransformers: [MarkdownTransformer],
         nodes: [
           {
+            type: QuoteNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -62,7 +61,6 @@ export const BlockQuoteFeature = (): FeatureProvider => {
               } as HTMLConverter<SerializedQuoteNode>,
             },
             node: QuoteNode,
-            type: QuoteNode.getType(),
           },
         ],
         props: null,
@@ -82,9 +80,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                   keywords: ['quote', 'blockquote'],
                   onSelect: () => {
                     const selection = $getSelection()
-                    if ($INTERNAL_isPointSelection(selection)) {
-                      $setBlocksType(selection, () => $createQuoteNode())
-                    }
+                    $setBlocksType(selection, () => $createQuoteNode())
                   },
                 }),
               ],

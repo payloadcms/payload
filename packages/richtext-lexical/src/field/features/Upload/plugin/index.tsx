@@ -37,28 +37,35 @@ export function UploadPlugin(): JSX.Element | null {
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
           editor.update(() => {
-            const uploadNode = $createUploadNode({
-              data: {
-                fields: payload.fields,
-                relationTo: payload.relationTo,
-                value: {
-                  id: payload.id,
-                },
-              },
-            })
-
             const selection = $getSelection() || $getPreviousSelection()
 
             if ($isRangeSelection(selection)) {
+              const uploadNode = $createUploadNode({
+                data: {
+                  fields: payload.fields,
+                  relationTo: payload.relationTo,
+                  value: {
+                    id: payload.id,
+                  },
+                },
+              })
+              $insertNodeToNearestRoot(uploadNode)
+
               const { focus } = selection
               const focusNode = focus.getNode()
 
-              // First, delete currently selected node if it's an empty paragraph
-              if ($isParagraphNode(focusNode) && focusNode.getTextContentSize() === 0) {
+              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
+              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
+              if (
+                $isParagraphNode(focusNode) &&
+                focusNode.getTextContentSize() === 0 &&
+                focusNode
+                  .getParent()
+                  .getChildren()
+                  .filter((node) => $isParagraphNode(node)).length > 1
+              ) {
                 focusNode.remove()
               }
-
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

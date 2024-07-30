@@ -1,8 +1,12 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-search.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-search"
+  },
   "description": "Search plugin for Payload",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,8 +40,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/react": "18.0.21",
-    "payload": "workspace:*",
-    "react": "^18.0.0"
+    "payload": "workspace:*"
   },
   "exports": {
     ".": {

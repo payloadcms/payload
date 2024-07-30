@@ -1,5 +1,5 @@
 import { $setBlocksType } from '@lexical/selection'
-import { $INTERNAL_isPointSelection, $createParagraphNode, $getSelection } from 'lexical'
+import { $createParagraphNode, $getSelection } from 'lexical'
 
 import type { FeatureProvider } from '../types'
 
@@ -23,9 +23,7 @@ export const ParagraphFeature = (): FeatureProvider => {
                 onClick: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
-                    if ($INTERNAL_isPointSelection(selection)) {
-                      $setBlocksType(selection, () => $createParagraphNode())
-                    }
+                    $setBlocksType(selection, () => $createParagraphNode())
                   })
                 },
                 order: 1,
@@ -49,9 +47,7 @@ export const ParagraphFeature = (): FeatureProvider => {
                   onSelect: ({ editor }) => {
                     editor.update(() => {
                       const selection = $getSelection()
-                      if ($INTERNAL_isPointSelection(selection)) {
-                        $setBlocksType(selection, () => $createParagraphNode())
-                      }
+                      $setBlocksType(selection, () => $createParagraphNode())
                     })
                   },
                 }),

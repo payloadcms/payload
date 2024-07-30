@@ -17,7 +17,7 @@
 <hr/>
 
 > [!IMPORTANT]
-> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+> 🎉 <strong>Payload 3.0 beta released!</strong> You can now deploy Payload fully in any Next.js app folder. Read more in the <a target="_blank" href="https://payloadcms.com/blog/30-beta-install-payload-into-any-nextjs-app-with-one-line" rel="dofollow"><strong>announcement post</strong></a>.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>

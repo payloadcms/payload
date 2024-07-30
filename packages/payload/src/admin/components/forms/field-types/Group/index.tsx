@@ -33,7 +33,7 @@ const Group: React.FC<Props> = (props) => {
     permissions,
   } = props
 
-  const isWithinCollapsible = useCollapsible()
+  const { withinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
@@ -43,7 +43,7 @@ const Group: React.FC<Props> = (props) => {
   const groupHasErrors = submitted && errorCount > 0
 
   const path = pathFromProps || name
-  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+  const isTopLevel = !(withinCollapsible || isWithinGroup || isWithinRow)
 
   return (
     <div
@@ -51,7 +51,7 @@ const Group: React.FC<Props> = (props) => {
         fieldBaseClass,
         baseClass,
         isTopLevel && `${baseClass}--top-level`,
-        isWithinCollapsible && `${baseClass}--within-collapsible`,
+        withinCollapsible && `${baseClass}--within-collapsible`,
         isWithinGroup && `${baseClass}--within-group`,
         isWithinRow && `${baseClass}--within-row`,
         isWithinTab && `${baseClass}--within-tab`,

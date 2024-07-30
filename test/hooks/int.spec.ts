@@ -327,6 +327,32 @@ describe('Hooks', () => {
   })
 
   describe('auth collection hooks', () => {
+    let hookUser
+    let hookUserToken
+
+    beforeAll(async () => {
+      const email = 'dontrefresh@payloadcms.com'
+
+      hookUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email,
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
+
+      const { token } = await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email: hookUser.email,
+          password: devUser.password,
+        },
+      })
+
+      hookUserToken = token
+    })
+
     it('should call afterLogin hook', async () => {
       const { user } = await payload.login({
         collection: hooksUsersSlug,
@@ -353,6 +379,32 @@ describe('Hooks', () => {
           data: { email: regularUser.email, password: regularUser.password },
         }),
       ).rejects.toThrow(AuthenticationError)
+    })
+
+    it('should respect refresh hooks', async () => {
+      const response = await fetch(`${apiUrl}/${hooksUsersSlug}/refresh-token`, {
+        method: 'POST',
+        headers: {
+          Authorization: `JWT ${hookUserToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(1)
+      expect(data.refreshedToken).toStrictEqual('fake')
+    })
+
+    it('should respect me hooks', async () => {
+      const response = await fetch(`${apiUrl}/${hooksUsersSlug}/me`, {
+        headers: {
+          Authorization: `JWT ${hookUserToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.exp).toStrictEqual(10000)
     })
   })
 
@@ -460,6 +512,15 @@ describe('Hooks', () => {
       const globalAndFieldString = globalString + fieldString
 
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
+    })
+  })
+
+  describe('config level after error hook', () => {
+    it('should handle error', async () => {
+      const response = await fetch(`${apiUrl}/throw-to-after-error`)
+      const body = await response.json()
+      expect(response.status).toEqual(418)
+      expect(body).toEqual({ errors: [{ message: "I'm a teapot" }] })
     })
   })
 })

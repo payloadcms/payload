@@ -63,4 +63,15 @@ export const anotherArrayDoc: Partial<ArrayField> = {
       text: 'second row',
     },
   ],
+  disableSort: [
+    {
+      text: 'un-sortable item 1',
+    },
+    {
+      text: 'un-sortable item 2',
+    },
+    {
+      text: 'un-sortable item 3',
+    },
+  ],
 }

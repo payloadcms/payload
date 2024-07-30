@@ -2,6 +2,8 @@
 
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { dataHooksGlobalSlug } from '../../globals/Data'
+
 export const dataHooksSlug = 'data-hooks'
 
 export const DataHooks: CollectionConfig = {
@@ -22,9 +24,11 @@ export const DataHooks: CollectionConfig = {
     ],
 
     beforeChange: [
-      ({ context, data, collection }) => {
+      async ({ req, context, data, collection }) => {
         context['collection_beforeChange_collection'] = JSON.stringify(collection)
-
+        await req.payload.findGlobal({
+          slug: dataHooksGlobalSlug,
+        })
         return data
       },
     ],

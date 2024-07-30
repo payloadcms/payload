@@ -9,10 +9,12 @@ import { upsertRow } from './upsertRow'
 
 export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug }: CreateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: CreateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
+
+  const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
   const result = await upsertRow<T>({
     adapter: this,
@@ -20,8 +22,8 @@ export async function createGlobal<T extends TypeWithID>(
     db,
     fields: globalConfig.fields,
     operation: 'create',
-    tableName: toSnakeCase(slug),
     req,
+    tableName,
   })
 
   return result

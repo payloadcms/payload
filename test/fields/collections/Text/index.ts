@@ -41,6 +41,16 @@ const TextFields: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'defaultString',
+      defaultValue: defaultText,
+      type: 'text',
+    },
+    {
+      name: 'defaultEmptyString',
+      defaultValue: '',
+      type: 'text',
+    },
+    {
       name: 'defaultFunction',
       defaultValue: () => defaultText,
       type: 'text',
@@ -139,6 +149,22 @@ const TextFields: CollectionConfig = {
       type: 'text',
       hasMany: true,
       maxRows: 4,
+    },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+        disableListFilter: false,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListColumn: false,
+        disableListFilter: true,
+      },
     },
   ],
   slug: textFieldsSlug,

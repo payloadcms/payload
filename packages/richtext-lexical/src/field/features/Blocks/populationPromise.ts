@@ -33,12 +33,19 @@ export const blockPopulationPromiseHOC = (
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
     const payloadConfig = req.payload.config
     const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
+
     blocks.forEach((block) => {
-      block.fields = sanitizeFields({
-        config: payloadConfig,
-        fields: block.fields,
-        validRelationships,
-      })
+      // @ts-expect-error
+      if (!block._sanitized) {
+        block.fields = sanitizeFields({
+          config: payloadConfig,
+          fields: block.fields,
+          requireFieldLevelRichTextEditor: true,
+          validRelationships,
+        })
+        // @ts-expect-error
+        block._sanitized = true
+      }
     })
 
     // find block used in this node
@@ -52,6 +59,7 @@ export const blockPopulationPromiseHOC = (
       currentDepth,
       data: blockFieldData,
       depth,
+      draft: false,
       editorPopulationPromises,
       fields: block.fields,
       findMany,

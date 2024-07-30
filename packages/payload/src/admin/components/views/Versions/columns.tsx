@@ -8,10 +8,10 @@ import type { SanitizedCollectionConfig } from '../../../../collections/config/t
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 import type { Column } from '../../elements/Table/types'
 
-import { Pill } from '../..'
 import { formatDate } from '../../../utilities/formatDate'
 import SortColumn from '../../elements/SortColumn'
 import { useConfig } from '../../utilities/Config'
+import { AutosaveCell } from './cells/AutosaveCell'
 
 type CreatedAtCellProps = {
   collection?: SanitizedCollectionConfig
@@ -45,6 +45,8 @@ export const buildVersionColumns = (
   collection: SanitizedCollectionConfig,
   global: SanitizedGlobalConfig,
   t: TFunction,
+  latestDraftVersion?: string,
+  latestPublishedVersion?: string,
 ): Column[] => [
   {
     name: '',
@@ -73,24 +75,16 @@ export const buildVersionColumns = (
     accessor: 'autosave',
     active: true,
     components: {
-      Heading: <SortColumn disable label={t('type')} name="autosave" />,
-      renderCell: (row) => (
-        <TextCell>
-          {row?.autosave && (
-            <React.Fragment>
-              <Pill>{t('autosave')}</Pill>
-              &nbsp;&nbsp;
-            </React.Fragment>
-          )}
-          {row?.version._status === 'published' && (
-            <React.Fragment>
-              <Pill pillStyle="success">{t('published')}</Pill>
-              &nbsp;&nbsp;
-            </React.Fragment>
-          )}
-          {row?.version._status === 'draft' && <Pill>{t('draft')}</Pill>}
-        </TextCell>
-      ),
+      Heading: <SortColumn disable label={t('status')} name="autosave" />,
+      renderCell: (row) => {
+        return (
+          <AutosaveCell
+            latestDraftVersion={latestDraftVersion}
+            latestPublishedVersion={latestPublishedVersion}
+            rowData={row}
+          />
+        )
+      },
     },
     label: '',
   },

@@ -4,7 +4,7 @@ import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { AuthDebug } from './AuthDebug'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -171,11 +171,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'api-keys',
-      labels: {
-        singular: 'API Key',
-        plural: 'API Keys',
-      },
+      slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
           if (user.collection === 'api-keys') {
@@ -193,6 +189,10 @@ export default buildConfigWithDefaults({
         useAPIKey: true,
       },
       fields: [],
+      labels: {
+        plural: 'API Keys',
+        singular: 'API Key',
+      },
     },
     {
       slug: 'public-users',
@@ -212,14 +212,20 @@ export default buildConfigWithDefaults({
       },
     })
 
-    await mapAsync([...Array(2)], async () => {
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
     })
   },
 })

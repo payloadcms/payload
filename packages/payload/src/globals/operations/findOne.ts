@@ -23,14 +23,14 @@ type Args = {
 
 async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
+    slug,
     depth,
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
-    req: { locale, payload },
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
-    slug,
   } = args
 
   try {
@@ -51,9 +51,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     let doc = await req.payload.db.findGlobal({
+      slug,
       locale,
       req,
-      slug,
       where: overrideAccess ? undefined : (accessResult as Where),
     })
     if (!doc) {
@@ -100,7 +100,10 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       context: req.context,
       depth,
       doc,
+      draft: draftEnabled,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

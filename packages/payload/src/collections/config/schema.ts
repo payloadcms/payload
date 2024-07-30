@@ -13,6 +13,7 @@ const strategyBaseSchema = joi.object().keys({
 })
 
 const collectionSchema = joi.object().keys({
+  slug: joi.string().required(),
   access: joi.object({
     admin: joi.func(),
     create: joi.func(),
@@ -117,6 +118,7 @@ const collectionSchema = joi.object().keys({
     joi.boolean(),
   ),
   custom: joi.object().pattern(joi.string(), joi.any()),
+  dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultSort: joi.string(),
   endpoints: endpointsSchema,
   fields: joi.array(),
@@ -143,6 +145,8 @@ const collectionSchema = joi.object().keys({
     beforeOperation: joi.array().items(joi.func()),
     beforeRead: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
+    me: joi.array().items(joi.func()),
+    refresh: joi.array().items(joi.func()),
   }),
   indexes: joi.array().items(
     joi.object().keys({
@@ -158,7 +162,6 @@ const collectionSchema = joi.object().keys({
       .alternatives()
       .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
   }),
-  slug: joi.string().required(),
   timestamps: joi.boolean(),
   typescript: joi.object().keys({
     interface: joi.string(),
@@ -168,6 +171,7 @@ const collectionSchema = joi.object().keys({
       adminThumbnail: joi.alternatives().try(joi.string(), joi.func()),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
+      externalFileHeaderFilter: joi.func(),
       filesRequiredOnCreate: joi.bool(),
       focalPoint: joi.bool(),
       formatOptions: joi.object().keys({
@@ -213,6 +217,7 @@ const collectionSchema = joi.object().keys({
         joi.number(),
       ),
       useTempFiles: joi.bool(),
+      withMetadata: joi.alternatives().try(joi.boolean(), joi.func()),
     }),
     joi.boolean(),
   ),
@@ -226,6 +231,7 @@ const collectionSchema = joi.object().keys({
               interval: joi.number(),
             }),
           ),
+          validate: joi.boolean(),
         }),
         joi.boolean(),
       ),

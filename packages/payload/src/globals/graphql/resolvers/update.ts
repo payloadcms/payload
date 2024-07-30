@@ -26,18 +26,32 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty<PayloadRequest>(req, 'locale')
+    req = isolateObjectProperty<PayloadRequest>(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    if (!req.query) req.query = {}
 
-    const { slug } = globalConfig
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+          ? true
+          : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
+      slug: globalConfig.slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
-      slug,
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await update<TSlug>(options)

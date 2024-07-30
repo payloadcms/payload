@@ -56,6 +56,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   inlineImage: 'LexicalEditor__inline-image',
   link: 'LexicalEditorTheme__link',
   list: {
+    checklist: 'LexicalEditorTheme__checklist',
     listitem: 'LexicalEditorTheme__listItem',
     listitemChecked: 'LexicalEditorTheme__listItemChecked',
     listitemUnchecked: 'LexicalEditorTheme__listItemUnchecked',

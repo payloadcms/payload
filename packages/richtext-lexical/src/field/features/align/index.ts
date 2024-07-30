@@ -56,6 +56,22 @@ export const AlignFeature = (): FeatureProvider => {
                 order: 3,
               },
             ]),
+            AlignDropdownSectionWithEntries([
+              {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/AlignJustify').then(
+                    (module) => module.AlignJustifyIcon,
+                  ),
+                isActive: () => false,
+                key: 'align-justify',
+                label: `Align Justify`,
+                onClick: ({ editor }) => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')
+                },
+                order: 4,
+              },
+            ]),
           ],
         },
         props: null,

@@ -20,12 +20,16 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(global)}_v`
+
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionGlobalFields(globalConfig)
 
   const { where } = await buildQuery({
@@ -43,9 +47,9 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     db,
     fields,
     operation: 'update',
+    req,
     tableName,
     where,
-    req,
   })
 
   return result

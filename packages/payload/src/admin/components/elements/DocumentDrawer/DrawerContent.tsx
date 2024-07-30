@@ -1,5 +1,4 @@
 import { useModal } from '@faceless-ui/modal'
-import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
@@ -18,7 +17,6 @@ import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo'
-import { useFormQueryParams } from '../../utilities/FormQueryParams'
 import { useLocale } from '../../utilities/Locale'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import DefaultEdit from '../../views/collections/Edit/Default'
@@ -45,28 +43,14 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const config = useConfig()
-  const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = queryString.stringify(formQueryParams)
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
-  const { id, docPermissions, getDocPreferences } = useDocumentInfo()
+  const { id, action, docPermissions, getDocPreferences } = useDocumentInfo()
 
-  // The component definition could come from multiple places in the config
-  // we need to cascade into the proper component from the top-down
-  // 1. "components.Edit"
-  // 2. "components.Edit.Default"
-  // 3. "components.Edit.Default.Component"
-  const CustomEditView =
-    typeof Edit === 'function'
-      ? Edit
-      : typeof Edit === 'object' && typeof Edit.Default === 'function'
-      ? Edit.Default
-      : typeof Edit?.Default === 'object' &&
-        'Component' in Edit.Default &&
-        typeof Edit.Default.Component === 'function'
-      ? Edit.Default.Component
-      : undefined
+  // If they are replacing the entire edit view, use that.
+  // Else let the DefaultEdit determine what to render.
+  const CustomEditView = typeof Edit === 'function' ? Edit : undefined
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true))
 
@@ -102,7 +86,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       setInternalState(state)
     }
 
-    awaitInitialState()
+    void awaitInitialState()
     hasInitializedState.current = true
   }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences, config])
 
@@ -122,10 +106,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const isEditing = Boolean(id)
 
   const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null
-
-  const action = `${serverURL}${api}/${collectionSlug}${
-    isEditing ? `/${id}` : ''
-  }?${formattedQueryParams}`
 
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||

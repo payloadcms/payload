@@ -116,6 +116,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         config,
         data: fullData,
         operation,
+        previousValue: data?.[field.name],
         siblingData: data,
         t,
         user,
@@ -197,9 +198,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         // Add values to field state
         if (valueWithDefault === null) {
           fieldState.value = null
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = null
         } else {
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
           if (arrayValue.length > 0) {
@@ -314,9 +317,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         // Add values to field state
         if (valueWithDefault === null) {
           fieldState.value = null
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = null
         } else {
           fieldState.value = forceFullValue ? blocksValue : blocksValue.length
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = forceFullValue ? blocksValue : blocksValue.length
 
           if (blocksValue.length > 0) {
@@ -382,6 +387,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             : undefined
 
           fieldState.value = relationshipValue
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = relationshipValue
         } else if (Array.isArray(field.relationTo)) {
           if (
@@ -401,6 +407,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               value,
             }
             fieldState.value = relationshipValue
+            fieldState.previousValue = fieldState.value
             fieldState.initialValue = relationshipValue
           }
         } else {
@@ -409,6 +416,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               ? valueWithDefault.id
               : valueWithDefault
           fieldState.value = relationshipValue
+          fieldState.previousValue = fieldState.value
           fieldState.initialValue = relationshipValue
         }
 
@@ -425,6 +433,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             ? valueWithDefault.id
             : valueWithDefault
         fieldState.value = relationshipValue
+        fieldState.previousValue = fieldState.value
         fieldState.initialValue = relationshipValue
 
         if (!filter || filter(args)) {
@@ -436,6 +445,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       default: {
         fieldState.value = valueWithDefault
+        fieldState.previousValue = fieldState.value
         fieldState.initialValue = valueWithDefault
 
         // Add field to state
