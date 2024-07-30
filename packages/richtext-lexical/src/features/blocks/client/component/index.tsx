@@ -151,7 +151,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          reducedBlock.LabelComponent?.Component ? (
+          reducedBlock.LabelComponent ? (
             <RenderComponent
               clientProps={{ blockKind: 'lexicalBlock', formData }}
               mappedComponent={reducedBlock.LabelComponent}

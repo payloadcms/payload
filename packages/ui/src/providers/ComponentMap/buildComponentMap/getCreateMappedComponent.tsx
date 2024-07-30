@@ -69,6 +69,9 @@ export function getCreateMappedComponent({
         ),
       }
     } else {
+      if (!resolvedComponent.Component) {
+        return undefined
+      }
       return {
         type: 'client',
         Component: resolvedComponent.Component,

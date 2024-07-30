@@ -4,13 +4,14 @@ import type { Permissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { Payload } from '../../index.js'
 
 export type DocumentTabProps = {
   apiURL?: string
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
+  payload: Payload
   permissions: Permissions
 }
 

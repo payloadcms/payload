@@ -47,7 +47,7 @@ export const getGenerateComponentMap =
                 key: `${resolvedFeature.key}-${componentKey}`,
               })
 
-              if (mappedComponent?.Component) {
+              if (mappedComponent) {
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
                   mappedComponent,

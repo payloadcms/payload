@@ -60,7 +60,7 @@ export const mapCollections = (args: {
 
     const EditView: MappedComponent<ServerSideEditViewProps> = createMappedComponent(
       editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
-        ? (editViewFromConfig.Default?.Component as EditViewComponent)
+        ? (editViewFromConfig.Default as EditViewComponent)
         : null,
       {
         collectionSlug: collectionConfig.slug,

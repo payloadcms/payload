@@ -13,7 +13,7 @@ export const EditViewClient: React.FC = () => {
     globalSlug,
   })
 
-  if (!Edit?.Component) {
+  if (!Edit) {
     return null
   }
 

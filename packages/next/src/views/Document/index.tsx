@@ -255,12 +255,12 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialState={formState}
       isEditing={isEditing}
     >
-      {!ViewOverride?.Component && (
+      {!ViewOverride && (
         <DocumentHeader
           collectionConfig={collectionConfig}
-          config={payload.config}
           globalConfig={globalConfig}
           i18n={i18n}
+          payload={payload}
           permissions={permissions}
         />
       )}
@@ -269,17 +269,11 @@ export const Document: React.FC<AdminViewProps> = async ({
         depth={1}
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
-        {ErrorView?.Component ? (
+        {ErrorView ? (
           <RenderComponent mappedComponent={ErrorView} />
         ) : (
           <RenderComponent
-            mappedComponent={
-              ViewOverride?.Component
-                ? ViewOverride
-                : CustomView?.Component
-                  ? CustomView
-                  : DefaultView
-            }
+            mappedComponent={ViewOverride ? ViewOverride : CustomView ? CustomView : DefaultView}
           />
         )}
       </EditDepthProvider>

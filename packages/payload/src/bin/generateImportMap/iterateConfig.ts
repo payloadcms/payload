@@ -1,3 +1,4 @@
+import type { AdminViewConfig } from '../../admin/views/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
@@ -54,7 +55,12 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.providers)
 
   if (config.admin?.components?.views) {
-    addToImportMap(Object.values(config.admin?.components?.views))
+    if (Object.keys(config.admin?.components?.views)?.length) {
+      for (const key in config.admin?.components?.views) {
+        const adminViewConfig: AdminViewConfig = config.admin?.components?.views[key]
+        addToImportMap(adminViewConfig?.Component)
+      }
+    }
   }
 
   if (config?.admin?.importMap?.generators?.length) {
