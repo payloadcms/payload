@@ -303,3 +303,5 @@ $RECYCLE.BIN/
 .swc
 /app/(payload)/admin/importMap.js
 app/(payload)/admin/importMap.js
+app/\(payload\)/admin/importMap.js
+/app/\(payload\)/admin/importMap.js
