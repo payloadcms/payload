@@ -2,6 +2,9 @@ import type { ImportMap, PayloadComponent, ResolvedComponent } from 'payload'
 
 import { parsePayloadComponent } from 'payload/shared'
 
+/**
+ * Gets th resolved React component from `PayloadComponent` from the importMap
+ */
 export const getComponent = <
   TComponentServerProps extends object,
   TComponentClientProps extends object,
