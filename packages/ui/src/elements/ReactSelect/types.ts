@@ -7,6 +7,9 @@ type CustomSelectProps = {
   disableMouseDown?: boolean
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
+  onCreate?: DocumentDrawerProps['onCreate']
+  onDelete?: DocumentDrawerProps['onDelete']
+  onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
   setDrawerIsOpen?: (isOpen: boolean) => void
 }

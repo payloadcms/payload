@@ -3,6 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useEditDepth } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
 import './index.scss'
@@ -43,6 +45,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { title } = useDocumentInfo()
+  const drawerDepth = useEditDepth()
 
   const titleToRender = titleFromProps || title || id
 
@@ -126,7 +129,13 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         >
           {t('general:delete')}
         </PopupList.Button>
-        <Modal className={baseClass} slug={modalSlug}>
+        <Modal
+          className={baseClass}
+          slug={modalSlug}
+          style={{
+            zIndex: drawerZBase + drawerDepth,
+          }}
+        >
           <div className={`${baseClass}__template`}>
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
@@ -151,7 +160,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               >
                 {t('general:cancel')}
               </Button>
-              <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
+              <Button id="confirm-delete" onClick={deleting ? undefined : void handleDelete}>
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>

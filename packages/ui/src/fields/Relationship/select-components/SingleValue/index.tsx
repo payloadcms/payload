@@ -19,8 +19,10 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const {
     children,
     data: { label, relationTo, value },
-    // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
-    selectProps: { customProps: { onSave, setDrawerIsOpen } = {} } = {},
+    selectProps: {
+      // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
+      customProps: { onCreate, onDelete, onDuplicate, onSave, setDrawerIsOpen } = {},
+    } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
@@ -71,7 +73,14 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
             )}
           </div>
         </div>
-        {relationTo && hasReadPermission && <DocumentDrawer onSave={onSave} />}
+        {relationTo && hasReadPermission && (
+          <DocumentDrawer
+            onCreate={onCreate}
+            onDelete={onDelete}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
+          />
+        )}
       </SelectComponents.SingleValue>
     </React.Fragment>
   )
