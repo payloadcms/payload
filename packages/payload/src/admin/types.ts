@@ -3,7 +3,12 @@ import type React from 'react'
 import type { JsonObject } from '../types/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
-export type { RichTextAdapter, RichTextAdapterProvider, RichTextFieldProps } from './RichText.js'
+export type {
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextFieldProps,
+  RichTextHooks,
+} from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'

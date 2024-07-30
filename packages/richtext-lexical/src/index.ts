@@ -209,18 +209,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       },
       hooks: {
         afterChange: [
-          async ({
-            collection,
-            context: _context,
-            global,
-            operation,
-            path,
-            req,
-            schemaPath,
-            value,
-          }) => {
+          async (args) => {
+            const { collection, context: _context, global, operation, path, req, schemaPath } = args
+            let { value } = args
+            if (finalSanitizedEditorConfig?.features?.hooks?.afterChange?.length) {
+              for (const hook of finalSanitizedEditorConfig.features.hooks.afterChange) {
+                value = await hook(args)
+              }
+            }
             if (
-              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.afterChange.size &&
               !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
@@ -248,7 +246,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
-              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+              const afterChangeHooks = finalSanitizedEditorConfig.features.nodeHooks.afterChange
               if (afterChangeHooks?.has(node.type)) {
                 for (const hook of afterChangeHooks.get(node.type)) {
                   if (!originalNodeIDMap[id]) {
@@ -310,30 +308,38 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           /**
            * afterRead hooks do not receive the originalNode. Thus, they can run on all nodes, not just nodes with an ID.
            */
-          async ({
-            collection,
-            context: context,
-            currentDepth,
-            depth,
-            draft,
-            fallbackLocale,
-            fieldPromises,
-            findMany,
-            flattenLocales,
-            global,
-            locale,
-            overrideAccess,
-            path,
-            populationPromises,
-            req,
-            schemaPath,
-            showHiddenFields,
-            triggerAccessControl,
-            triggerHooks,
-            value,
-          }) => {
+          async (args) => {
+            const {
+              collection,
+              context: context,
+              currentDepth,
+              depth,
+              draft,
+              fallbackLocale,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              global,
+              locale,
+              overrideAccess,
+              path,
+              populationPromises,
+              req,
+              schemaPath,
+              showHiddenFields,
+              triggerAccessControl,
+              triggerHooks,
+            } = args
+            let { value } = args
+
+            if (finalSanitizedEditorConfig?.features?.hooks?.afterRead?.length) {
+              for (const hook of finalSanitizedEditorConfig.features.hooks.afterRead) {
+                value = await hook(args)
+              }
+            }
+
             if (
-              !finalSanitizedEditorConfig.features.hooks.afterRead.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.afterRead.size &&
               !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
@@ -346,7 +352,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             })
 
             for (let node of flattenedNodes) {
-              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+              const afterReadHooks = finalSanitizedEditorConfig.features.nodeHooks.afterRead
               if (afterReadHooks?.has(node.type)) {
                 for (const hook of afterReadHooks.get(node.type)) {
                   node = await hook({
@@ -413,25 +419,33 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeChange: [
-          async ({
-            collection,
-            context: _context,
-            duplicate,
-            errors,
-            field,
-            global,
-            mergeLocaleActions,
-            operation,
-            path,
-            req,
-            schemaPath,
-            siblingData,
-            siblingDocWithLocales,
-            skipValidation,
-            value,
-          }) => {
+          async (args) => {
+            const {
+              collection,
+              context: _context,
+              duplicate,
+              errors,
+              field,
+              global,
+              mergeLocaleActions,
+              operation,
+              path,
+              req,
+              schemaPath,
+              siblingData,
+              siblingDocWithLocales,
+              skipValidation,
+            } = args
+            let { value } = args
+
+            if (finalSanitizedEditorConfig?.features?.hooks?.beforeChange?.length) {
+              for (const hook of finalSanitizedEditorConfig.features.hooks.beforeChange) {
+                value = await hook(args)
+              }
+            }
+
             if (
-              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.beforeChange.size &&
               !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
@@ -473,7 +487,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
-              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.nodeHooks.beforeChange
               if (beforeChangeHooks?.has(node.type)) {
                 for (const hook of beforeChangeHooks.get(node.type)) {
                   if (!originalNodeIDMap[id]) {
@@ -581,23 +595,30 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         ],
         beforeValidate: [
-          async ({
-            collection,
-            context,
-            global,
-            operation,
-            overrideAccess,
-            path,
-            previousValue,
-            req,
-            schemaPath,
-            value,
-          }) => {
+          async (args) => {
+            const {
+              collection,
+              context,
+              global,
+              operation,
+              overrideAccess,
+              path,
+              previousValue,
+              req,
+              schemaPath,
+            } = args
+            let { value } = args
+            if (finalSanitizedEditorConfig?.features?.hooks?.beforeValidate?.length) {
+              for (const hook of finalSanitizedEditorConfig.features.hooks.beforeValidate) {
+                value = await hook(args)
+              }
+            }
+
             // return value if there are NO hooks
             if (
-              !finalSanitizedEditorConfig.features.hooks.beforeValidate.size &&
-              !finalSanitizedEditorConfig.features.hooks.afterChange.size &&
-              !finalSanitizedEditorConfig.features.hooks.beforeChange.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.beforeValidate.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.afterChange.size &&
+              !finalSanitizedEditorConfig.features.nodeHooks.beforeChange.size &&
               !finalSanitizedEditorConfig.features.getSubFields.size
             ) {
               return value
@@ -651,7 +672,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             /**
              * Now that the maps for all hooks are set up, we can run the validate hook
              */
-            if (!finalSanitizedEditorConfig.features.hooks.beforeValidate.size) {
+            if (!finalSanitizedEditorConfig.features.nodeHooks.beforeValidate.size) {
               return value
             }
             const nodeIDMap: {
@@ -665,7 +686,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
-              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+              const beforeValidateHooks =
+                finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
               if (beforeValidateHooks?.has(node.type)) {
                 for (const hook of beforeValidateHooks.get(node.type)) {
                   if (!originalNodeIDMap[id]) {
@@ -856,16 +878,16 @@ export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
 export { LexicalPluginToLexicalFeature } from './features/migrations/lexicalPluginToLexical/feature.server.js'
-export { SlateBlockquoteConverter } from './features/migrations/slateToLexical/converter/converters/blockquote/index.js'
-export { SlateHeadingConverter } from './features/migrations/slateToLexical/converter/converters/heading/index.js'
-export { SlateIndentConverter } from './features/migrations/slateToLexical/converter/converters/indent/index.js'
-export { SlateLinkConverter } from './features/migrations/slateToLexical/converter/converters/link/index.js'
-export { SlateListItemConverter } from './features/migrations/slateToLexical/converter/converters/listItem/index.js'
-export { SlateOrderedListConverter } from './features/migrations/slateToLexical/converter/converters/orderedList/index.js'
-export { SlateRelationshipConverter } from './features/migrations/slateToLexical/converter/converters/relationship/index.js'
-export { SlateUnknownConverter } from './features/migrations/slateToLexical/converter/converters/unknown/index.js'
-export { SlateUnorderedListConverter } from './features/migrations/slateToLexical/converter/converters/unorderedList/index.js'
-export { SlateUploadConverter } from './features/migrations/slateToLexical/converter/converters/upload/index.js'
+export { SlateBlockquoteConverter } from './features/migrations/slateToLexical/converter/converters/blockquote/converter.js'
+export { SlateHeadingConverter } from './features/migrations/slateToLexical/converter/converters/heading/converter.js'
+export { SlateIndentConverter } from './features/migrations/slateToLexical/converter/converters/indent/converter.js'
+export { SlateLinkConverter } from './features/migrations/slateToLexical/converter/converters/link/converter.js'
+export { SlateListItemConverter } from './features/migrations/slateToLexical/converter/converters/listItem/converter.js'
+export { SlateOrderedListConverter } from './features/migrations/slateToLexical/converter/converters/orderedList/converter.js'
+export { SlateRelationshipConverter } from './features/migrations/slateToLexical/converter/converters/relationship/converter.js'
+export { SlateUnknownConverter } from './features/migrations/slateToLexical/converter/converters/unknown/converter.js'
+export { SlateUnorderedListConverter } from './features/migrations/slateToLexical/converter/converters/unorderedList/converter.js'
+export { SlateUploadConverter } from './features/migrations/slateToLexical/converter/converters/upload/converter.js'
 export { defaultSlateConverters } from './features/migrations/slateToLexical/converter/defaultConverters.js'
 
 export {

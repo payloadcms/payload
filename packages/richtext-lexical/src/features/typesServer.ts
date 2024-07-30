@@ -17,6 +17,7 @@ import type {
   ReplaceAny,
   RequestContext,
   RichTextField,
+  RichTextHooks,
   SanitizedConfig,
   ValidateOptions,
 } from 'payload'
@@ -328,6 +329,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.
    *
@@ -411,7 +413,8 @@ export type SanitizedServerFeatures = {
     (args: { node: SerializedLexicalNode; req: PayloadRequest }) => JsonObject
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
-  hooks?: {
+  hooks: RichTextHooks
+  nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>

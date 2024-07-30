@@ -5,7 +5,7 @@ import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _LinkConverter: LexicalPluginNodeConverter = {
+export const LinkConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       type: 'link',

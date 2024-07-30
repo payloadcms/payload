@@ -3,7 +3,7 @@ import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateHeadingConverter: SlateNodeConverter = {
+export const SlateHeadingConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'heading',

@@ -3,7 +3,7 @@ import type { LexicalPluginNodeConverter } from '../../types.js'
 
 import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
-export const _UnknownConverter: LexicalPluginNodeConverter = {
+export const UnknownConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       type: 'unknownConverted',

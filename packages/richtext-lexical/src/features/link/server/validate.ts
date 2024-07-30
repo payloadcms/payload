@@ -3,8 +3,8 @@ import type { Field } from 'payload'
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { LinkFeatureServerProps } from './feature.server.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
+import type { LinkFeatureServerProps } from './index.js'
 
 export const linkValidation = (
   props: LinkFeatureServerProps,

@@ -1,5 +1,4 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type { PayloadComponent } from 'payload'
 
 export type LexicalPluginNodeConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   converter: ({
@@ -24,14 +23,4 @@ export type PayloadPluginLexicalData = {
   markdown?: string
   preview: string
   words: number
-}
-
-export type LexicalPluginNodeConverterProps = {
-  componentKey: string
-  featureKey: string
-}
-
-export type LexicalPluginNodeConverterProvider = {
-  ClientConverter: PayloadComponent<LexicalPluginNodeConverterProps>
-  converter: LexicalPluginNodeConverter
 }
