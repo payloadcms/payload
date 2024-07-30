@@ -121,7 +121,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             : undefined
         }
         header={
-          LabelComponent?.Component ? (
+          LabelComponent ? (
             <RenderComponent
               clientProps={{ blockKind: 'block', formData: row }}
               mappedComponent={LabelComponent}

@@ -239,7 +239,7 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {componentMap.Upload?.Component ? (
+                      {componentMap.Upload ? (
                         <RenderComponent mappedComponent={componentMap.Upload} />
                       ) : (
                         <Upload

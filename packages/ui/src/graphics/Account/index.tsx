@@ -25,7 +25,7 @@ export const Account = () => {
   const pathname = usePathname()
   const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute })
 
-  if (componentMap.CustomAvatar?.Component) {
+  if (componentMap.CustomAvatar) {
     return (
       <RenderComponent
         clientProps={{

@@ -91,9 +91,9 @@ export const Account: React.FC<AdminViewProps> = async ({
       >
         <DocumentHeader
           collectionConfig={collectionConfig}
-          config={payload.config}
           hideTabs
           i18n={i18n}
+          payload={payload}
           permissions={permissions}
         />
         <HydrateClientUser permissions={permissions} user={user} />

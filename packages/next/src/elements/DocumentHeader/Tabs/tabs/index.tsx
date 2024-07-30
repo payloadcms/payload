@@ -1,4 +1,5 @@
 import type { DocumentTabConfig } from 'payload'
+import type React from 'react'
 
 import { VersionsPill } from './VersionsPill/index.js'
 
@@ -17,6 +18,7 @@ export type DocumentViewKey = (typeof documentViewKeys)[number]
 export const tabs: Record<
   DocumentViewKey,
   {
+    Pill_Component?: React.FC
     order?: number // TODO: expose this to the globalConfig config
   } & DocumentTabConfig
 > = {
@@ -67,7 +69,7 @@ export const tabs: Record<
     condition: () => false,
   },
   Versions: {
-    Pill: VersionsPill,
+    Pill_Component: VersionsPill,
     condition: ({ collectionConfig, globalConfig, permissions }) =>
       Boolean(
         (collectionConfig?.versions &&

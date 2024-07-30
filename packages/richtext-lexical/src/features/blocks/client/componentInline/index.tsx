@@ -122,7 +122,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {LabelComponent?.Component ? (
+      {LabelComponent ? (
         <RenderComponent
           clientProps={{ blockKind: 'lexicalInlineBlock', formData }}
           mappedComponent={LabelComponent}
