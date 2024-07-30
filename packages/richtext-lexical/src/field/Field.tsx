@@ -21,7 +21,7 @@ import './index.scss'
 
 const baseClass = 'rich-text-lexical'
 
-const _RichText: React.FC<
+const RichTextComponent: React.FC<
   {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
@@ -151,4 +151,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(_RichText)
+export const RichText = withCondition(RichTextComponent)
