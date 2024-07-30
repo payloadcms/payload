@@ -33,25 +33,20 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   const { className = '', doc: { filename, mimeType } = {}, fileSrc, imageCacheTag, size } = props
   const [fileExists, setFileExists] = React.useState(undefined)
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
-  const [type, setType] = React.useState<'audio' | 'document' | 'image' | 'unknown' | 'video'>(
-    undefined,
-  )
+  const fileType: 'audio' | 'document' | 'image' | 'unknown' | 'video' | false =
+    mimeType?.split('/')[0]
 
   React.useEffect(() => {
-    if (mimeType) setType(mimeType.split('/')[0])
-  }, [mimeType])
-
-  React.useEffect(() => {
-    if (!fileSrc || !type) {
+    if (!fileSrc || !fileType) {
       setFileExists(false)
       return
     }
-    if (type === 'image') {
+    if (fileType === 'image') {
       const img = new Image()
       img.src = fileSrc
       img.onload = () => setFileExists(true)
       img.onerror = () => setFileExists(false)
-    } else if (type === 'video') {
+    } else if (fileType === 'video') {
       const video = document.createElement('video')
       video.src = fileSrc
       video.crossOrigin = 'anonymous'
@@ -60,18 +55,15 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     } else {
       setFileExists(false)
     }
-  }, [fileSrc, type])
+  }, [fileSrc])
 
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && type === 'image' && (
-        <img
-          alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
-        />
+      {fileExists && fileType === 'image' && (
+        <img alt={filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
       )}
-      {fileExists && type === 'video' && (
+      {fileExists && fileType === 'video' && (
         <video
           autoPlay={false}
           controls={false}
