@@ -5,7 +5,6 @@ dist
 !/.idea/runConfigurations
 !/.idea/payload.iml
 
-app/(payload)/admin/importMap.js
 
 test-results
 .devcontainer
@@ -302,3 +301,4 @@ $RECYCLE.BIN/
 
 /build
 .swc
+/app/(payload)/admin/importMap.js
