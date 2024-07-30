@@ -134,7 +134,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           >
             {t('general:cancel')}
           </Button>
-          <Button id="confirm-delete" onClick={deleting ? undefined : void handleDelete}>
+          <Button id="confirm-delete" onClick={deleting ? undefined : () => void handleDelete()}>
             {deleting ? t('general:deleting') : t('general:confirm')}
           </Button>
         </div>
