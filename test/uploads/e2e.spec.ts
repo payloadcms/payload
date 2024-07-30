@@ -563,16 +563,22 @@ describe('uploads', () => {
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
 
+    // collection's displayPreview: true, field's displayPreview: unset
     const relationPreview1 = page.locator('.cell-imageWithPreview1 img')
     await expect(relationPreview1).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: true
     const relationPreview2 = page.locator('.cell-imageWithPreview2 img')
     await expect(relationPreview2).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: false
     const relationPreview3 = page.locator('.cell-imageWithoutPreview1 img')
     await expect(relationPreview3).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: unset
     const relationPreview4 = page.locator('.cell-imageWithoutPreview2 img')
     await expect(relationPreview4).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: true
     const relationPreview5 = page.locator('.cell-imageWithPreview3 img')
     await expect(relationPreview5).toBeVisible()
+    // collection's displayPreview: false, field's displayPreview: false
     const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
     await expect(relationPreview6).toBeHidden()
   })
