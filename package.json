@@ -94,6 +94,7 @@
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
+    "@aws-sdk/token-providers": "3.614.0",
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.6.2",
     "@next/bundle-analyzer": "15.0.0-canary.53",
@@ -158,7 +159,7 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^8.15.7"
+    "pnpm": "^9.6.0"
   },
   "pnpm": {
     "allowedDeprecatedVersions": {
