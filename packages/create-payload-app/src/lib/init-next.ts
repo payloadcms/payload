@@ -240,25 +240,63 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
 export async function getNextAppDetails(projectDir: string): Promise<NextAppDetails> {
   const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
 
+  // Match next.config.js, next.config.ts, next.config.mjs, next.config.cjs
   const nextConfigPath: string | undefined = (
-    await globby('next.config.*(t|j)s', { absolute: true, cwd: projectDir })
+    await globby('next.config.(\\w)?(t|j)s', { absolute: true, cwd: projectDir })
   )?.[0]
 
   if (!nextConfigPath || nextConfigPath.length === 0) {
     return {
       hasTopLevelLayout: false,
       isSrcDir,
+      isSupportedNextVersion: false,
       nextConfigPath: undefined,
+      nextVersion: null,
     }
   }
 
   const packageObj = await fse.readJson(path.resolve(projectDir, 'package.json'))
+  // Check if Next.js version is new enough
+  let nextVersion = null
+  if (packageObj.dependencies?.next) {
+    nextVersion = packageObj.dependencies.next
+    // Match versions using regex matching groups
+    const versionMatch = /(?<major>\d+)/.exec(nextVersion)
+    if (!versionMatch) {
+      p.log.warn(`Could not determine Next.js version from ${nextVersion}`)
+      return {
+        hasTopLevelLayout: false,
+        isSrcDir,
+        isSupportedNextVersion: false,
+        nextConfigPath,
+        nextVersion,
+      }
+    }
+
+    const { major } = versionMatch.groups as { major: string }
+    const majorVersion = parseInt(major)
+    if (majorVersion < 15) {
+      return {
+        hasTopLevelLayout: false,
+        isSrcDir,
+        isSupportedNextVersion: false,
+        nextConfigPath,
+        nextVersion,
+      }
+    }
+  }
+
+  const isSupportedNextVersion = true
+
+  // Check if Payload already installed
   if (packageObj.dependencies?.payload) {
     return {
       hasTopLevelLayout: false,
       isPayloadInstalled: true,
       isSrcDir,
+      isSupportedNextVersion,
       nextConfigPath,
+      nextVersion,
     }
   }
 
@@ -281,7 +319,15 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
     ? fs.existsSync(path.resolve(nextAppDir, 'layout.tsx'))
     : false
 
-  return { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigPath, nextConfigType: configType }
+  return {
+    hasTopLevelLayout,
+    isSrcDir,
+    isSupportedNextVersion,
+    nextAppDir,
+    nextConfigPath,
+    nextConfigType: configType,
+    nextVersion,
+  }
 }
 
 function getProjectType(args: {

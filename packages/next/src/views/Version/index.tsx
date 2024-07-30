@@ -100,9 +100,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   const localeOptions: OptionObject[] =
     localization &&
-    localization?.locales &&
     localization.locales.map(({ code, label }) => ({
-      label: typeof label === 'string' ? label : '',
+      label,
       value: code,
     }))
 
