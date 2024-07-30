@@ -166,7 +166,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 >
                   {reducedBlock && typeof reducedBlock.labels.singular === 'string'
                     ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : '[Singular Label]'}
+                    : reducedBlock.slug}
                 </Pill>
                 <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
               </div>

@@ -55,7 +55,9 @@ function ToolbarGroupComponent({
   index: number
 }): React.ReactNode {
   const { i18n } = useTranslation()
-
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
   const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
 
@@ -82,7 +84,8 @@ function ToolbarGroupComponent({
 
     let label = item.key
     if (item.label) {
-      label = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+      label =
+        typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
     }
     // Crop title to max. 25 characters
     if (label.length > 25) {

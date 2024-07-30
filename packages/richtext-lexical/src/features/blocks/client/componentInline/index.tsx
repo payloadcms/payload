@@ -111,7 +111,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const LabelComponent = reducedBlock?.LabelComponent
 
-  const blockDisplayName = reducedBlock.labels.singular
+  const blockDisplayName = reducedBlock?.labels?.singular
     ? getTranslation(reducedBlock.labels.singular, i18n)
     : reducedBlock.slug
 
@@ -132,7 +132,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           component={LabelComponent}
         />
       ) : (
-        <div>{getTranslation(reducedBlock.labels.singular, i18n)}</div>
+        <div>{getTranslation(reducedBlock.labels?.singular, i18n)}</div>
       )}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>

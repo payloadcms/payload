@@ -207,7 +207,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                 >
                   {typeof reducedBlock?.labels.singular === 'string'
                     ? getTranslation(reducedBlock?.labels.singular, i18n)
-                    : '[Singular Label]'}
+                    : reducedBlock.slug}
                 </Pill>
                 <SectionTitle path="blockName" readOnly={field?.readOnly} />
                 {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

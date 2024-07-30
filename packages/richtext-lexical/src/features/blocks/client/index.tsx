@@ -1,10 +1,11 @@
 'use client'
 
-import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { BlocksFieldProps } from '@payloadcms/ui'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { ToolbarGroup } from '../../toolbars/types.js'
+import type { SlashMenuItem } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { ToolbarGroup, ToolbarGroupItem } from '../../toolbars/types.js'
 
 import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.js'
@@ -14,11 +15,9 @@ import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 
-export type ClientBlock = Pick<ReducedBlock, 'labels' | 'slug'>
-
 export type BlocksFeatureClientProps = {
-  reducedBlocks: ClientBlock[]
-  reducedInlineBlocks: ClientBlock[]
+  reducedBlockSlugs: string[]
+  reducedInlineBlockSlugs: string[]
 }
 
 export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(({ props }) => ({
@@ -32,28 +31,40 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
   sanitizedClientFeatureProps: props,
   slashMenu: {
     groups: [
-      props.reducedBlocks?.length
+      props.reducedBlockSlugs?.length
         ? {
-            items: props.reducedBlocks.map((block) => {
+            items: props.reducedBlockSlugs.map((blockSlug) => {
               return {
                 Icon: BlockIcon,
-                key: 'block-' + block.slug,
-                keywords: ['block', 'blocks', block.slug],
-                label: ({ i18n }) => {
-                  if (!block.labels.singular) {
-                    return block.slug
-                  }
+                key: 'block-' + blockSlug,
+                keywords: ['block', 'blocks', blockSlug],
+                label: ({ i18n, richTextComponentMap }) => {
+                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
+                  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  return getTranslation(block.labels.singular, i18n)
+                  const blockFieldComponentProps: Omit<
+                    BlocksFieldProps,
+                    'indexPath' | 'permissions'
+                  > = mappedBlock.fieldComponentProps
+
+                  const reducedBlock = blockFieldComponentProps.blocks.find(
+                    (_block) => _block.slug === blockSlug,
+                  )
+
+                  const blockDisplayName = reducedBlock.labels.singular
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : reducedBlock.slug
+
+                  return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
                     id: null,
                     blockName: '',
-                    blockType: block.slug,
+                    blockType: blockSlug,
                   })
                 },
-              }
+              } as SlashMenuItem
             }),
             key: 'blocks',
             label: ({ i18n }) => {
@@ -61,30 +72,42 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
             },
           }
         : null,
-      props.reducedInlineBlocks?.length
+      props.reducedInlineBlockSlugs?.length
         ? {
-            items: props.reducedInlineBlocks.map((inlineBlock) => {
+            items: props.reducedInlineBlockSlugs.map((inlineBlockSlug) => {
               return {
                 Icon: InlineBlocksIcon,
-                key: 'inlineBlocks-' + inlineBlock.slug,
-                keywords: ['inlineBlock', 'inline block', inlineBlock.slug],
-                label: ({ i18n }) => {
-                  if (!inlineBlock.labels.singular) {
-                    return inlineBlock.slug
-                  }
+                key: 'inlineBlocks-' + inlineBlockSlug,
+                keywords: ['inlineBlock', 'inline block', inlineBlockSlug],
+                label: ({ i18n, richTextComponentMap }) => {
+                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+                  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  return getTranslation(inlineBlock.labels.singular, i18n)
+                  const blockFieldComponentProps: Omit<
+                    BlocksFieldProps,
+                    'indexPath' | 'permissions'
+                  > = mappedBlock.fieldComponentProps
+
+                  const reducedBlock = blockFieldComponentProps.blocks.find(
+                    (_block) => _block.slug === inlineBlockSlug,
+                  )
+
+                  const blockDisplayName = reducedBlock.labels.singular
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : reducedBlock.slug
+
+                  return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                     fields: {
                       id: null,
                       blockName: '',
-                      blockType: inlineBlock.slug,
+                      blockType: inlineBlockSlug,
                     },
                   })
                 },
-              }
+              } as SlashMenuItem
             }),
             key: 'inlineBlocks',
             label: ({ i18n }) => {
@@ -96,61 +119,85 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
   },
   toolbarFixed: {
     groups: [
-      props.reducedBlocks?.length
+      props.reducedBlockSlugs?.length
         ? {
             type: 'dropdown',
             ChildComponent: BlockIcon,
-            items: props.reducedBlocks.map((block, index) => {
+            items: props.reducedBlockSlugs.map((blockSlug, index) => {
               return {
                 ChildComponent: BlockIcon,
                 isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
-                key: 'block-' + block.slug,
-                label: ({ i18n }) => {
-                  if (!block.labels.singular) {
-                    return block.slug
-                  }
+                key: 'block-' + blockSlug,
+                label: ({ i18n, richTextComponentMap }) => {
+                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
+                  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  return getTranslation(block.labels.singular, i18n)
+                  const blockFieldComponentProps: Omit<
+                    BlocksFieldProps,
+                    'indexPath' | 'permissions'
+                  > = mappedBlock.fieldComponentProps
+
+                  const reducedBlock = blockFieldComponentProps.blocks.find(
+                    (_block) => _block.slug === blockSlug,
+                  )
+
+                  const blockDisplayName = reducedBlock.labels.singular
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : reducedBlock.slug
+
+                  return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
                     id: null,
                     blockName: '',
-                    blockType: block.slug,
+                    blockType: blockSlug,
                   })
                 },
                 order: index,
-              }
+              } as ToolbarGroupItem
             }),
             key: 'blocks',
             order: 20,
           }
         : null,
-      props.reducedInlineBlocks?.length
+      props.reducedInlineBlockSlugs?.length
         ? {
             type: 'dropdown',
             ChildComponent: InlineBlocksIcon,
-            items: props.reducedInlineBlocks.map((inlineBlock, index) => {
+            items: props.reducedInlineBlockSlugs.map((inlineBlockSlug, index) => {
               return {
                 ChildComponent: InlineBlocksIcon,
                 isActive: undefined,
-                key: 'inlineBlock-' + inlineBlock.slug,
-                label: ({ i18n }) => {
-                  if (!inlineBlock.labels.singular) {
-                    return inlineBlock.slug
-                  }
+                key: 'inlineBlock-' + inlineBlockSlug,
+                label: ({ i18n, richTextComponentMap }) => {
+                  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+                  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-                  return getTranslation(inlineBlock.labels.singular, i18n)
+                  const blockFieldComponentProps: Omit<
+                    BlocksFieldProps,
+                    'indexPath' | 'permissions'
+                  > = mappedBlock.fieldComponentProps
+
+                  const reducedBlock = blockFieldComponentProps.blocks.find(
+                    (_block) => _block.slug === inlineBlockSlug,
+                  )
+
+                  const blockDisplayName = reducedBlock.labels.singular
+                    ? getTranslation(reducedBlock.labels.singular, i18n)
+                    : reducedBlock.slug
+
+                  return blockDisplayName
                 },
                 onSelect: ({ editor }) => {
                   editor.dispatchCommand(OPEN_INLINE_BLOCK_DRAWER_COMMAND, {
                     fields: {
-                      blockType: inlineBlock.slug,
+                      blockType: inlineBlockSlug,
                     },
                   })
                 },
                 order: index,
-              }
+              } as ToolbarGroupItem
             }),
             key: 'inlineBlocks',
             order: 25,

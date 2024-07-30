@@ -1,4 +1,4 @@
-import type { Block, BlockField, Config, Field, PayloadComponent } from 'payload'
+import type { Block, BlockField, Config, Field } from 'payload'
 
 import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } from 'payload'
 
@@ -23,12 +23,10 @@ export const BlocksFeature = createServerFeature<
   BlocksFeatureClientProps
 >({
   feature: async ({ config: _config, isRoot, props }) => {
-    const componentImports: PayloadComponent[] = []
-
     // Build clientProps
     const clientProps: BlocksFeatureClientProps = {
-      reducedBlocks: [],
-      reducedInlineBlocks: [],
+      reducedBlockSlugs: [],
+      reducedInlineBlockSlugs: [],
     }
 
     if (props?.blocks?.length || props?.inlineBlocks?.length) {
@@ -44,16 +42,9 @@ export const BlocksFeature = createServerFeature<
             fields: block.fields,
             requireFieldLevelRichTextEditor: isRoot,
             validRelationships,
-          })
+          }) // TODO: Do I need to sanitize fields?
 
-          clientProps.reducedBlocks.push({
-            slug: block.slug,
-            labels: block.labels,
-          })
-
-          if (block?.admin?.components?.Label) {
-            componentImports.push(block?.admin?.components?.Label)
-          }
+          clientProps.reducedBlockSlugs.push(block.slug)
         }
       }
       if (props?.inlineBlocks?.length) {
@@ -66,16 +57,9 @@ export const BlocksFeature = createServerFeature<
             fields: block.fields,
             requireFieldLevelRichTextEditor: isRoot,
             validRelationships,
-          })
+          }) // TODO: Do I need to sanitize fields?
 
-          clientProps.reducedInlineBlocks.push({
-            slug: block.slug,
-            labels: block.labels,
-          })
-
-          if (block?.admin?.components?.Label) {
-            componentImports.push(block?.admin?.components?.Label)
-          }
+          clientProps.reducedInlineBlockSlugs.push(block.slug)
         }
       }
     }
@@ -83,7 +67,6 @@ export const BlocksFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
       clientFeatureProps: clientProps,
-      componentImports,
       generateSchemaMap: ({ props }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
