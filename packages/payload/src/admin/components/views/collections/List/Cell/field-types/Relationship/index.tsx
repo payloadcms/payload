@@ -71,7 +71,7 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField | UploadFi
 
         let fileField = null
         if (field.type === 'upload') {
-          const relatedCollectionPreview = !!relatedCollection.upload?.displayPreview
+          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
           const fieldPreview = field.displayPreview
           const previewAllowed =
             fieldPreview || (relatedCollectionPreview && fieldPreview !== false)
