@@ -28,7 +28,7 @@ import type {
   OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Field, JoinField } from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -498,6 +498,12 @@ export type Collection = {
     updateMutationInputType: GraphQLNonNull<any>
     versionType: GraphQLObjectType
     whereInputType: GraphQLInputObjectType
+  }
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins: {
+    [key: string]: JoinField[]
   }
 }
 

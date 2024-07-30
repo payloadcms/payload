@@ -498,9 +498,19 @@ export class BasePayload {
     }
 
     this.config.collections.forEach((collection) => {
-      const customID = flattenFields(collection.fields).find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
+      const joins = {}
+      const flattenedFields = flattenFields(collection.fields)
+      let customID
+
+      for (const field of flattenedFields) {
+        if (!fieldAffectsData(field)) {
+          continue
+        }
+        if (field.type === 'join') {
+          joins[field.collection] = field
+        }
+        if (field.name === 'id') customID = field
+      }
 
       let customIDType
 
@@ -509,6 +519,7 @@ export class BasePayload {
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
+        joins,
       }
     })
 
@@ -891,6 +902,7 @@ export type {
   GroupField,
   HookName,
   JSONField,
+  JoinField,
   Labels,
   NamedTab,
   NonPresentationalField,
