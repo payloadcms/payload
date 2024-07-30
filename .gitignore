@@ -301,4 +301,5 @@ $RECYCLE.BIN/
 
 /build
 .swc
+app/(payload)/admin/importMap.js
 
