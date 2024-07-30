@@ -1,10 +1,12 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  EditViewComponent,
   EditViewProps,
   ImportMap,
   MappedComponent,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  ServerSideEditViewProps,
 } from 'payload'
 import type React from 'react'
 
@@ -65,9 +67,9 @@ export const mapGlobals = ({
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
-    const Edit: MappedComponent<EditViewProps> = createMappedComponent(
+    const Edit: MappedComponent<ServerSideEditViewProps> = createMappedComponent(
       editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
-        ? editViewFromConfig.Default
+        ? (editViewFromConfig.Default.Component as EditViewComponent)
         : undefined,
       { globalSlug: globalConfig.slug },
       DefaultEditView,
