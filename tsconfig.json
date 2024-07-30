@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/plugin-seo/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -65,6 +65,9 @@
       ],
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
+      ],
+      "@payloadcms/plugin-seo/client": [
+        "./packages/plugin-seo/src/exports/client.ts"
       ],
       "@payloadcms/richtext-lexical/generateComponentMap": [
         "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"

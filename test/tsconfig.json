@@ -38,7 +38,10 @@
       "@payloadcms/richtext-lexical/generateComponentMap": [
         "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
       ],
-      "@payload-config": ["./_community/config.ts"]
+      "@payload-config": ["./_community/config.ts"],
+      "@payloadcms/plugin-seo/client": [
+        "./packages/plugin-seo/src/exports/client.ts"
+      ]
     }
   },
   "exclude": [
