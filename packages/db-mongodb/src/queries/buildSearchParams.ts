@@ -56,9 +56,7 @@ export async function buildSearchParam({
   let hasCustomID = false
 
   if (sanitizedPath === '_id') {
-    const customIDfield = payload.collections[collectionSlug]?.config.fields.find(
-      (field) => fieldAffectsData(field) && field.name === 'id',
-    )
+    const customIDfield = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
 
     let idFieldType: 'number' | 'text' = 'text'
 
