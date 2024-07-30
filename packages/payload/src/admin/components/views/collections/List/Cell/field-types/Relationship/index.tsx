@@ -70,10 +70,16 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField | UploadFi
         })
 
         let fileField = null
-        if (field.type === 'upload' && document) {
-          fileField = (
-            <File collection={relatedCollection} data={label} field={field} rowData={document} />
-          )
+        if (field.type === 'upload') {
+          const relatedCollectionPreview = !!relatedCollection.upload?.displayPreview
+          const fieldPreview = field.displayPreview
+          const previewAllowed =
+            fieldPreview || (relatedCollectionPreview && fieldPreview !== false)
+          if (previewAllowed && document) {
+            fileField = (
+              <File collection={relatedCollection} data={label} field={field} rowData={document} />
+            )
+          }
         }
 
         return (

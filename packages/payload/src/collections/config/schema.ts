@@ -171,6 +171,7 @@ const collectionSchema = joi.object().keys({
       adminThumbnail: joi.alternatives().try(joi.string(), joi.func()),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
+      displayPreview: joi.bool().default(false),
       externalFileHeaderFilter: joi.func(),
       filesRequiredOnCreate: joi.bool(),
       focalPoint: joi.bool(),

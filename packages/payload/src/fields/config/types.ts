@@ -408,6 +408,7 @@ export type UploadField = FieldBase & {
       Label?: React.ComponentType<LabelProps>
     }
   }
+  displayPreview?: boolean
   filterOptions?: FilterOptions
   maxDepth?: number
   relationTo: string
