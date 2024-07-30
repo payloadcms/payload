@@ -11,10 +11,10 @@ const DraftGlobal: GlobalConfig = {
       views: {
         Edit: {
           Version: {
-            actions: ['/elements/GlobalVersionButton/index.js#GlobalVersionButton'],
+            actions: ['/elements/GlobalVersionButton/index.js'],
           },
           Versions: {
-            actions: ['/elements/GlobalVersionsButton/index.js#GlobalVersionsButton'],
+            actions: ['/elements/GlobalVersionsButton/index.js'],
           },
         },
       },

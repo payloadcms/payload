@@ -35,10 +35,10 @@ const DraftPosts: CollectionConfig = {
       views: {
         Edit: {
           Version: {
-            actions: ['/elements/CollectionVersionButton/index.js#CollectionVersionButton'],
+            actions: ['/elements/CollectionVersionButton/index.js'],
           },
           Versions: {
-            actions: ['/elements/CollectionVersionsButton/index.js#CollectionVersionsButton'],
+            actions: ['/elements/CollectionVersionsButton/index.js'],
           },
         },
       },
