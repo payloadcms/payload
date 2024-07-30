@@ -1,13 +1,12 @@
 import type { Config, RichTextAdapterProvider } from 'payload'
 
-import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
+import { genImportMapIterateFields, sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
-import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
 export function slateEditor(
@@ -44,9 +43,17 @@ export function slateEditor(
     }
 
     return {
-      CellComponent: './cell/index.js#RichTextCell',
-      FieldComponent: './field/index.js#RichTextField',
-      generateComponentMap: getGenerateComponentMap(args),
+      CellComponent: '@payloadcms/richtext-slate/client#RichTextCell',
+      FieldComponent: '@payloadcms/richtext-slate/client#RichTextField',
+      generateComponentMap: {
+        path: '@payloadcms/richtext-slate/generateComponentMap#getGenerateComponentMap',
+        serverProps: args,
+      },
+      generateImportMap: ({ addToImportMap }) => {
+        addToImportMap('@payloadcms/richtext-slate/client#RichTextCell')
+        addToImportMap('@payloadcms/richtext-slate/client#RichTextField')
+        addToImportMap('@payloadcms/richtext-slate/generateComponentMap#getGenerateComponentMap')
+      },
       generateSchemaMap: getGenerateSchemaMap(args),
       graphQLPopulationPromises({
         context,
@@ -143,12 +150,6 @@ export function slateEditor(
   }
 }
 
-export { ElementButton } from './field/elements/Button.js'
-
-export { toggleElement } from './field/elements/toggle.js'
-export { LeafButton } from './field/leaves/Button.js'
-export { useLeaf } from './field/providers/LeafProvider.js'
-
 export type {
   AdapterArguments,
   ElementNode,
@@ -157,6 +158,8 @@ export type {
   RichTextCustomLeaf,
   RichTextElement,
   RichTextLeaf,
+  RichTextPlugin,
+  RichTextPluginComponent,
   TextNode,
 } from './types.js'
 

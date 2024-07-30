@@ -109,7 +109,11 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
-      "./generateComponentMap": "./dist/utilities/generateComponentMap.js"
+      "./generateComponentMap": {
+        "import": "./dist/utilities/generateComponentMap.js",
+        "types": "./dist/utilities/generateComponentMap.d.ts",
+        "default": "./dist/utilities/generateComponentMap.js"
+      }
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
