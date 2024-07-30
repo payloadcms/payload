@@ -1,7 +1,12 @@
-import type { Block, BlockField } from '../../fields/config/types.js'
+import type { BlockField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type {
+  DescriptionComponent,
+  FormFieldBase,
+  LabelComponent,
+  MappedComponent,
+} from '../types.js'
 
 export type BlocksFieldProps = {
   blocks?: ReducedBlock[]
@@ -16,7 +21,7 @@ export type BlocksFieldProps = {
 } & FormFieldBase
 
 export type ReducedBlock = {
-  LabelComponent: Block['admin']['components']['Label']
+  LabelComponent: MappedComponent
   custom?: Record<any, string>
   fieldMap: FieldMap
   imageAltText?: string

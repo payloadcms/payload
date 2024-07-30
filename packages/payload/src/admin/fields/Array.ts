@@ -1,10 +1,15 @@
 import type { ArrayField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type {
+  DescriptionComponent,
+  FormFieldBase,
+  LabelComponent,
+  MappedComponent,
+} from '../types.js'
 
 export type ArrayFieldProps = {
-  CustomRowLabel?: React.ReactNode
+  CustomRowLabel?: MappedComponent
   fieldMap: FieldMap
   forceRender?: boolean
   isSortable?: boolean

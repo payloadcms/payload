@@ -1,51 +1,51 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  ArrayFieldProps,
+  BlocksFieldProps,
   CellComponentProps,
+  CheckboxFieldProps,
+  CodeFieldProps,
+  CollapsibleFieldProps,
+  DateFieldProps,
+  EmailFieldProps,
+  ErrorProps,
   Field,
+  FieldComponentProps,
   FieldDescriptionProps,
+  FieldMap,
   FieldTypes,
   FieldWithPath,
+  FormFieldBase,
+  GroupFieldProps,
   ImportMap,
+  JSONFieldProps,
   LabelProps,
+  MappedComponent,
+  MappedField,
+  MappedTab,
+  NumberFieldProps,
   Option,
   PayloadComponent,
+  PointFieldProps,
+  RadioFieldProps,
+  ReducedBlock,
+  RelationshipFieldProps,
+  RichTextComponentProps,
+  RowFieldProps,
   SanitizedConfig,
+  SelectFieldProps,
+  TabsFieldProps,
+  TextFieldProps,
+  TextareaFieldProps,
+  UploadFieldProps,
 } from 'payload'
 import type React from 'react'
 
-import { MissingEditorProp } from 'payload'
+import { MissingEditorProp, deepCopyObject } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
-import type { ArrayFieldProps } from '../../../fields/Array/index.js'
-import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
-import type { CheckboxFieldProps } from '../../../fields/Checkbox/index.js'
-import type { CodeFieldProps } from '../../../fields/Code/index.js'
-import type { CollapsibleFieldProps } from '../../../fields/Collapsible/index.js'
-import type { DateFieldProps } from '../../../fields/DateTime/index.js'
-import type { EmailFieldProps } from '../../../fields/Email/index.js'
-import type { GroupFieldProps } from '../../../fields/Group/index.js'
-import type { JSONFieldProps } from '../../../fields/JSON/index.js'
-import type { NumberFieldProps } from '../../../fields/Number/index.js'
-import type { PointFieldProps } from '../../../fields/Point/index.js'
-import type { RadioFieldProps } from '../../../fields/RadioGroup/index.js'
-import type { RelationshipFieldProps } from '../../../fields/Relationship/types.js'
-import type { RichTextFieldProps } from '../../../fields/RichText/index.js'
-import type { RowFieldProps } from '../../../fields/Row/types.js'
-import type { SelectFieldProps } from '../../../fields/Select/index.js'
-import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
-import type { TextFieldProps } from '../../../fields/Text/types.js'
-import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
-import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 import type { FieldTypesComponents } from '../../../fields/index.js'
-import type { FormFieldBase } from '../../../fields/shared/index.js'
 import type { CreateMappedComponent } from './index.js'
-import type {
-  FieldComponentProps,
-  FieldMap,
-  MappedField,
-  MappedTab,
-  ReducedBlock,
-} from './types.js'
 
 import {
   ArrayField,
@@ -122,6 +122,20 @@ function generateFieldPath(parentPath, name) {
   return tabPath
 }
 
+function prepareCustomComponentProps(
+  props: {
+    [key: string]: any
+  } & FieldComponentProps,
+) {
+  return deepCopyObject({
+    ...props,
+    fieldMap: undefined,
+    richTextComponentMap: undefined,
+    rows: undefined,
+    tabs: undefined,
+  })
+}
+
 export const mapFields = (args: {
   config: SanitizedConfig
   createMappedComponent: CreateMappedComponent
@@ -189,7 +203,7 @@ export const mapFields = (args: {
             field.admin.components.beforeInput,
         )
 
-        let label = undefined
+        let label: FormFieldBase['label'] = undefined
         if ('label' in field) {
           if (typeof field.label === 'string' || typeof field.label === 'object') {
             label = field.label
@@ -197,55 +211,6 @@ export const mapFields = (args: {
             label = field.label({ t })
           }
         }
-
-        const labelProps: LabelProps = {
-          label,
-          required: 'required' in field ? field.required : undefined,
-          schemaPath: path,
-        }
-
-        const CustomLabel = createMappedComponent(
-          field?.admin?.components &&
-            'Label' in field.admin.components &&
-            field?.admin?.components?.Label,
-          labelProps,
-        )
-
-        let description = undefined
-        if (field.admin && 'description' in field.admin) {
-          if (
-            typeof field.admin?.description === 'string' ||
-            typeof field.admin?.description === 'object'
-          ) {
-            description = field.admin.description
-          } else if (typeof field.admin?.description === 'function') {
-            description = field.admin?.description({ t })
-          }
-        }
-
-        const descriptionProps: FieldDescriptionProps = {
-          description,
-        }
-
-        const CustomDescription = createMappedComponent(
-          field.admin?.components &&
-            'Description' in field.admin.components &&
-            field.admin?.components?.Description,
-          descriptionProps,
-          FieldDescription,
-        )
-
-        const errorProps = {
-          path,
-        }
-
-        const CustomError = createMappedComponent(
-          field?.admin?.components &&
-            'Error' in field.admin.components &&
-            field.admin?.components?.Error,
-          errorProps,
-          FieldDescription,
-        )
 
         const valueFields: Partial<{
           [key in FieldTypes]: React.FC
@@ -267,20 +232,15 @@ export const mapFields = (args: {
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
-          CustomDescription,
-          CustomError,
-          CustomLabel,
           Filter,
           custom: 'admin' in field && 'custom' in field.admin ? field.admin?.custom : undefined,
-          descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
-          errorProps,
-          label: labelProps?.label,
+          label,
           path,
           required: 'required' in field ? field.required : undefined,
         }
 
-        let fieldComponentProps: FieldComponentProps
+        let fieldComponentPropsBase: Omit<FieldComponentProps, 'type'>
 
         let fieldOptions: Option[]
 
@@ -301,7 +261,7 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,
-          label: labelProps?.label || undefined,
+          label,
           labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
@@ -310,17 +270,9 @@ export const mapFields = (args: {
 
         switch (field.type) {
           case 'array': {
-            const CustomRowLabel = createMappedComponent(
-              field?.admin?.components &&
-                'RowLabel' in field.admin.components &&
-                field?.admin?.components?.RowLabel,
-              labelProps,
-            )
-
-            const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
+            const arrayFieldProps: ArrayFieldProps = {
               ...baseFieldProps,
               name: field.name,
-              CustomRowLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
@@ -344,7 +296,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = arrayFieldProps
+            fieldComponentPropsBase = arrayFieldProps
             break
           }
           case 'blocks': {
@@ -374,7 +326,7 @@ export const mapFields = (args: {
               return reducedBlock
             })
 
-            const blocksField: Omit<BlocksFieldProps, 'indexPath' | 'permissions'> = {
+            const blocksField: BlocksFieldProps = {
               ...baseFieldProps,
               name: field.name,
               blocks,
@@ -390,7 +342,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = blocksField
+            fieldComponentPropsBase = blocksField
 
             cellComponentProps.blocks = field.blocks.map((b) => ({
               slug: b.slug,
@@ -411,7 +363,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = checkboxField
+            fieldComponentPropsBase = checkboxField
             break
           }
           case 'code': {
@@ -428,20 +380,12 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = codeField
+            fieldComponentPropsBase = codeField
             break
           }
           case 'collapsible': {
-            const CustomCollapsibleLabel = createMappedComponent(
-              field?.admin?.components &&
-                'RowLabel' in field.admin.components &&
-                field.admin.components.RowLabel,
-              labelProps,
-            )
-
-            const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
+            const collapsibleField: CollapsibleFieldProps = {
               ...baseFieldProps,
-              CustomLabel: CustomCollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
@@ -462,7 +406,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = collapsibleField as CollapsibleFieldProps // TODO: dunno why this is needed
+            fieldComponentPropsBase = collapsibleField // TODO: dunno why this is needed
             break
           }
           case 'date': {
@@ -479,7 +423,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = dateField
+            fieldComponentPropsBase = dateField
             cellComponentProps.dateDisplayFormat = field.admin?.date?.displayFormat
             break
           }
@@ -496,11 +440,11 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = emailField
+            fieldComponentPropsBase = emailField
             break
           }
           case 'group': {
-            const groupField: Omit<GroupFieldProps, 'indexPath' | 'permissions'> = {
+            const groupField: GroupFieldProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -522,7 +466,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = groupField
+            fieldComponentPropsBase = groupField
             break
           }
           case 'json': {
@@ -539,7 +483,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = jsonField
+            fieldComponentPropsBase = jsonField
             break
           }
           case 'number': {
@@ -559,7 +503,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = numberField
+            fieldComponentPropsBase = numberField
             break
           }
           case 'point': {
@@ -574,7 +518,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = pointField
+            fieldComponentPropsBase = pointField
             break
           }
           case 'relationship': {
@@ -595,7 +539,7 @@ export const mapFields = (args: {
             }
 
             cellComponentProps.relationTo = field.relationTo
-            fieldComponentProps = relationshipField
+            fieldComponentPropsBase = relationshipField
             break
           }
           case 'radio': {
@@ -613,11 +557,11 @@ export const mapFields = (args: {
             }
 
             cellComponentProps.options = fieldOptions
-            fieldComponentProps = radioField
+            fieldComponentPropsBase = radioField
             break
           }
           case 'richText': {
-            const richTextField: RichTextFieldProps = {
+            const richTextField: RichTextComponentProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -665,12 +609,12 @@ export const mapFields = (args: {
               CustomCellComponent = RichTextCellComponent
             }
 
-            fieldComponentProps = richTextField
+            fieldComponentPropsBase = richTextField
 
             break
           }
           case 'row': {
-            const rowField: Omit<RowFieldProps, 'indexPath' | 'permissions'> = {
+            const rowField: Omit<RowFieldProps, 'indexPath'> = {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
@@ -691,7 +635,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = rowField
+            fieldComponentPropsBase = rowField
             break
           }
           case 'tabs': {
@@ -718,7 +662,7 @@ export const mapFields = (args: {
               return reducedTab
             })
 
-            const tabsField: Omit<TabsFieldProps, 'indexPath' | 'permissions'> = {
+            const tabsField: Omit<TabsFieldProps, 'indexPath'> = {
               ...baseFieldProps,
               name: 'name' in field ? (field.name as string) : undefined,
               className: field.admin?.className,
@@ -730,7 +674,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = tabsField
+            fieldComponentPropsBase = tabsField
             break
           }
           case 'text': {
@@ -749,7 +693,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = textField
+            fieldComponentPropsBase = textField
             break
           }
           case 'textarea': {
@@ -768,11 +712,11 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = textareaField
+            fieldComponentPropsBase = textareaField
             break
           }
           case 'ui': {
-            fieldComponentProps = baseFieldProps
+            fieldComponentPropsBase = baseFieldProps
             break
           }
           case 'upload': {
@@ -790,7 +734,7 @@ export const mapFields = (args: {
             }
 
             cellComponentProps.relationTo = field.relationTo
-            fieldComponentProps = uploadField
+            fieldComponentPropsBase = uploadField
             break
           }
           case 'select': {
@@ -809,12 +753,107 @@ export const mapFields = (args: {
             }
 
             cellComponentProps.options = fieldOptions
-            fieldComponentProps = selectField
+            fieldComponentPropsBase = selectField
             break
           }
           default: {
             break
           }
+        }
+
+        const labelProps: Omit<LabelProps, 'type'> = prepareCustomComponentProps({
+          ...fieldComponentPropsBase,
+          type: undefined,
+          schemaPath: path,
+        })
+
+        let CustomLabel: MappedComponent = createMappedComponent(
+          field?.admin?.components &&
+            'Label' in field.admin.components &&
+            field?.admin?.components?.Label,
+          labelProps,
+        )
+
+        switch (field.type) {
+          case 'array': {
+            const CustomRowLabel = createMappedComponent(
+              field?.admin?.components &&
+                'RowLabel' in field.admin.components &&
+                field?.admin?.components?.RowLabel,
+              labelProps,
+            )
+
+            // @ts-expect-error
+            fieldComponentPropsBase.CustomRowLabel = CustomRowLabel
+
+            break
+          }
+
+          case 'collapsible': {
+            CustomLabel = createMappedComponent(
+              field?.admin?.components &&
+                'RowLabel' in field.admin.components &&
+                field?.admin?.components?.RowLabel,
+              labelProps,
+            )
+
+            break
+          }
+
+          default:
+            break
+        }
+
+        let description = undefined
+
+        if (field.admin && 'description' in field.admin) {
+          if (
+            typeof field.admin?.description === 'string' ||
+            typeof field.admin?.description === 'object'
+          ) {
+            description = field.admin.description
+          } else if (typeof field.admin?.description === 'function') {
+            description = field.admin?.description({ t })
+          }
+        }
+
+        const descriptionProps: FieldDescriptionProps = prepareCustomComponentProps({
+          ...fieldComponentPropsBase,
+          type: undefined,
+          description,
+        })
+
+        const CustomDescription = createMappedComponent(
+          field.admin?.components &&
+            'Description' in field.admin.components &&
+            field.admin?.components?.Description,
+          descriptionProps,
+          FieldDescription,
+        )
+
+        const errorProps: ErrorProps = prepareCustomComponentProps({
+          ...fieldComponentPropsBase,
+          type: undefined,
+          path,
+        })
+
+        const CustomError = createMappedComponent(
+          field?.admin?.components &&
+            'Error' in field.admin.components &&
+            field.admin?.components?.Error,
+          errorProps,
+          FieldDescription,
+        )
+
+        const fieldComponentProps: FieldComponentProps = {
+          ...fieldComponentPropsBase,
+          type: undefined,
+          CustomDescription,
+          CustomError,
+          CustomLabel,
+          descriptionProps,
+          errorProps,
+          labelProps,
         }
 
         const DefaultField = isHidden ? HiddenField : fieldComponents[field.type]
@@ -823,7 +862,7 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
           Cell: createMappedComponent(CustomCellComponent, cellComponentProps, DefaultCell),
-          Field: createMappedComponent(CustomFieldComponent, fieldComponentProps, DefaultField),
+          Field: createMappedComponent(CustomFieldComponent, fieldComponentPropsBase, DefaultField),
           cellComponentProps,
           custom: field?.admin?.custom,
           disableBulkEdit:
@@ -853,7 +892,7 @@ export const mapFields = (args: {
     result.findIndex((f) => 'name' in f && f.isFieldAffectingData && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
-    // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
+    // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentPropsBase.name AND .name. This can probably be improved
     result.push({
       name: 'id',
       type: 'text',
@@ -865,6 +904,7 @@ export const mapFields = (args: {
       disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
+        type: undefined,
         label: 'ID',
       },
       fieldIsPresentational: false,
