@@ -9,6 +9,7 @@ import type {
 } from 'drizzle-orm/pg-core'
 import type { Field } from 'payload'
 
+import { createTableName } from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
 import {
   foreignKey,
@@ -24,7 +25,6 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
 
-import { createTableName } from './createTableName.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'

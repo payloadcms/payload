@@ -1,8 +1,8 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, MappedField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { type MappedField, useConfig } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'

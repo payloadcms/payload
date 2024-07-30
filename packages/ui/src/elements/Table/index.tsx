@@ -1,13 +1,10 @@
 'use client'
-import type { CellComponentProps, FieldBase, FieldTypes, MappedComponent } from 'payload'
+import type { CellComponentProps, FieldBase, FieldMap, FieldTypes, MappedComponent } from 'payload'
 
 import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'

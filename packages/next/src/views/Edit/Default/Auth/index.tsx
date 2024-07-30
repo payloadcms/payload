@@ -7,13 +7,14 @@ import {
   EmailField,
   PasswordField,
   TextField,
+  useAuth,
   useConfig,
   useDocumentInfo,
   useFormFields,
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
@@ -34,9 +35,11 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly,
     requirePassword,
     useAPIKey,
+    username,
     verify,
   } = props
 
+  const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
@@ -48,6 +51,23 @@ export const Auth: React.FC<Props> = (props) => {
     routes: { api },
     serverURL,
   } = useConfig()
+
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      const unlock = 'unlock' in collection ? collection.unlock : undefined
+
+      if (unlock) {
+        // current types for permissions do not include auth permissions, this will be fixed in another branch soon, for now we need to ignore the types
+        // @todo: fix types
+        // @ts-expect-error
+        return unlock.permission
+      }
+    }
+
+    return false
+  }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
     (state: boolean) => {
@@ -64,9 +84,8 @@ export const Auth: React.FC<Props> = (props) => {
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${collectionSlug}/unlock`
     const response = await fetch(url, {
-      body: JSON.stringify({
-        email,
-      }),
+      body:
+        loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -80,7 +99,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, t])
+  }, [i18n, serverURL, api, collectionSlug, email, username, t])
 
   useEffect(() => {
     if (!modified) {
@@ -98,6 +117,15 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
+          {Boolean(loginWithUsername) && (
+            <TextField
+              disabled={disabled}
+              label={t('authentication:username')}
+              name="username"
+              readOnly={readOnly}
+              required
+            />
+          )}
           {(!loginWithUsername ||
             loginWithUsername?.allowEmailLogin ||
             loginWithUsername?.requireEmail) && (
@@ -108,15 +136,6 @@ export const Auth: React.FC<Props> = (props) => {
               name="email"
               readOnly={readOnly}
               required={!loginWithUsername || loginWithUsername?.requireEmail}
-            />
-          )}
-          {loginWithUsername && (
-            <TextField
-              disabled={disabled}
-              label={t('authentication:username')}
-              name="username"
-              readOnly={readOnly}
-              required
             />
           )}
           {(changingPassword || requirePassword) && (
@@ -153,11 +172,11 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('authentication:changePassword')}
               </Button>
             )}
-            {operation === 'update' && (
+            {operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
-                onClick={() => unlock()}
+                onClick={() => void unlock()}
                 size="small"
               >
                 {t('authentication:forceUnlock')}

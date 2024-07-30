@@ -1,6 +1,6 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
 import type { SerializedEditorState } from 'lexical'
+import type { FormFieldBase } from 'payload'
 
 import {
   FieldDescription,

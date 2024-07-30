@@ -13,7 +13,7 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../helpers.js'
@@ -49,7 +49,7 @@ const createFirstUser = async ({
       routes: { createFirstUser: createFirstUserRoute },
     },
     routes: { admin: adminRoute },
-  } = getAdminRoutes({
+  } = getRoutes({
     customAdminRoutes,
     customRoutes,
   })

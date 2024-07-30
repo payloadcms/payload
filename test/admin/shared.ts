@@ -1,3 +1,5 @@
+import type { Config } from 'payload'
+
 export const slugSingularLabel = 'Post'
 
 export const slugPluralLabel = 'Posts'
@@ -35,7 +37,7 @@ export const customCollectionParamViewPathBase = '/custom-param'
 
 export const customCollectionParamViewPath = `${customCollectionParamViewPathBase}/:slug`
 
-export const customAdminRoutes = {
+export const customAdminRoutes: Config['admin']['routes'] = {
   inactivity: '/custom-inactivity',
   logout: '/custom-logout',
 }

@@ -26,7 +26,7 @@ export type Props = {
   header?: React.ReactNode
   initCollapsed?: boolean
   isCollapsed?: boolean
-  onToggle?: (collapsed: boolean) => void
+  onToggle?: (collapsed: boolean) => Promise<void> | void
 }
 
 export const Collapsible: React.FC<Props> = ({
@@ -48,7 +48,7 @@ export const Collapsible: React.FC<Props> = ({
   const isCollapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
 
   const toggleCollapsible = React.useCallback(() => {
-    if (typeof onToggle === 'function') onToggle(!isCollapsed)
+    if (typeof onToggle === 'function') void onToggle(!isCollapsed)
     setCollapsedLocal(!isCollapsed)
   }, [onToggle, isCollapsed])
 

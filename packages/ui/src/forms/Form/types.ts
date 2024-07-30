@@ -1,4 +1,4 @@
-import type { Data, Field, FormField, FormState, User } from 'payload'
+import type { Data, Field, FormField, FormState, Row, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -141,18 +141,15 @@ export type ADD_SERVER_ERRORS = {
 }
 
 export type SET_ROW_COLLAPSED = {
-  collapsed: boolean
   path: string
-  rowID: string
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   type: 'SET_ROW_COLLAPSED'
+  updatedRows: Row[]
 }
 
 export type SET_ALL_ROWS_COLLAPSED = {
-  collapsed: boolean
   path: string
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   type: 'SET_ALL_ROWS_COLLAPSED'
+  updatedRows: Row[]
 }
 
 export type FieldAction =

@@ -498,6 +498,8 @@ export type LocalizationConfig = Prettify<
 
 export type LabelFunction = ({ t }: { t: TFunction }) => string
 
+export type LabelStatic = Record<string, string> | string
+
 export type SharpDependency = (
   input?:
     | ArrayBuffer
@@ -816,7 +818,10 @@ export type Config = {
   plugins?: Plugin[]
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
-    /** @default "/admin" */
+    /** The route for the admin panel.
+     * @example "/my-admin"
+     * @default "/admin"
+     */
     admin?: string
     /** @default "/api"  */
     api?: string

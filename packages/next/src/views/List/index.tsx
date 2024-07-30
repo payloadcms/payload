@@ -6,7 +6,7 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
@@ -66,7 +66,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   } catch (error) {} // eslint-disable-line no-empty
 
   const {
-    routes: { admin },
+    routes: { admin: adminRoute },
   } = config
 
   if (collectionConfig) {
@@ -121,7 +121,10 @@ export const ListView: React.FC<AdminViewProps> = async ({
         listPreferences,
         listSearchableFields: collectionConfig.admin.listSearchableFields,
         locale: fullLocale,
-        newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
+        newDocumentURL: formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/create`,
+        }),
         params,
         payload,
         permissions,
@@ -142,7 +145,10 @@ export const ListView: React.FC<AdminViewProps> = async ({
           })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
+          newDocumentURL={formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/create`,
+          })}
         >
           <ListQueryProvider
             data={data}

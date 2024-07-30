@@ -1,12 +1,10 @@
 'use client'
-
 import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { DefaultAccountIcon } from './Default/index.js'
 import { GravatarAccountIcon } from './Gravatar/index.js'
 
@@ -23,8 +21,7 @@ export const Account = () => {
 
   const { user } = useAuth()
   const pathname = usePathname()
-
-  const isOnAccountPage = pathname === `${adminRoute}${accountRoute}`
+  const isOnAccountPage = pathname === formatAdminURL({ adminRoute, path: accountRoute })
 
   if (componentMap.CustomAvatar?.Component) {
     return (

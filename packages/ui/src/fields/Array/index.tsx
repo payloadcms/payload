@@ -1,11 +1,8 @@
 'use client'
-import type { ArrayField as ArrayFieldType, MappedComponent } from 'payload'
+import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -31,19 +28,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export type ArrayFieldProps = {
-  CustomRowLabel?: MappedComponent
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayFieldType['labels']
-  maxRows?: ArrayFieldType['maxRows']
-  minRows?: ArrayFieldType['minRows']
-  name?: string
-  width?: string
-} & FormFieldBase
-
-export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -73,6 +58,7 @@ export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
     permissions,
     readOnly: readOnlyFromContext,
   } = useFieldProps()
+
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -132,7 +118,7 @@ export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
+    async (rowIndex: number): Promise<void> => {
       await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
@@ -173,16 +159,27 @@ export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = toggleAllRows({
+        collapsed,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
+        collapsed,
+        rowID,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -317,7 +314,9 @@ export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value || 0)}
+          onClick={() => {
+            void addRow(value || 0)
+          }}
         >
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
@@ -326,4 +325,4 @@ export const ArrayField_: React.FC<ArrayFieldProps> = (props) => {
   )
 }
 
-export const ArrayField = withCondition(ArrayField_)
+export const ArrayField = withCondition(ArrayFieldComponent)

@@ -6,10 +6,7 @@ desc: The Radio field type allows for the selection of one value from a predefin
 keywords: radio, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Radio Group field type allows for the selection of one value from a predefined set of possible
-  values and presents a radio group-style set of inputs to the Admin Panel.
-</Banner>
+The Radio Field allows for the selection of one value from a predefined set of possible values and presents a radio group-style set of inputs to the [Admin Panel](../admin/overview).
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/radio.png"
@@ -18,7 +15,23 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
   caption="Admin Panel screenshot of a Radio field"
 />
 
-## Config
+To add a Radio Field, set the `type` to `radio` in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyRadioField: Field = {
+  // ...
+  // highlight-start
+  type: 'radio',
+  options: [
+    // ...
+  ]
+  // highlight-end
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -34,7 +47,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 | **`defaultValue`**     | Provide data to be used for this field's default value. The default value must exist within provided values in `options`. [More](/docs/fields/overview#default-values)      |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                   |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                   |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`enumName`**         | Custom enum name for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                             |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
@@ -50,13 +63,26 @@ _\* An asterisk denotes that a property is required._
   being used as a GraphQL enum.
 </Banner>
 
-## Admin config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the Radio Group field type allows for the specification of the following `admin` properties:
+The customize the appearance and behavior of the Radio Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
-**`layout`**
+```ts
+import type { Field } from 'payload/types'
 
-The `layout` property allows for the radio group to be styled as a horizonally or vertically distributed list. The default value is `horizontal`.
+export const MyRadioField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The Radio Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+
+| Property                       | Description                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **`layout`**                   | Allows for the radio group to be styled as a horizonally or vertically distributed list. The default value is `horizontal`.          |
 
 ## Example
 

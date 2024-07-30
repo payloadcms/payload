@@ -39,6 +39,7 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
     'date-fields': DateField;
+    'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
     'row-fields': RowField;
@@ -701,9 +702,6 @@ export interface TextField {
   overrideLength?: string | null;
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
-  customLabel?: string | null;
-  customError?: string | null;
-  beforeAndAfterInput?: string | null;
   hasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -807,6 +805,28 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-fields".
+ */
+export interface EmailField {
+  id: string;
+  email: string;
+  localizedEmail?: string | null;
+  emailWithAutocomplete?: string | null;
+  i18nEmail?: string | null;
+  defaultEmail?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  customLabel?: string | null;
+  customError?: string | null;
+  beforeAndAfterInput?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
 }

@@ -1,8 +1,8 @@
 'use client'
-import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps, FieldMap, MappedField, SanitizedCollectionConfig } from 'payload'
+
 import React from 'react'
 
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 

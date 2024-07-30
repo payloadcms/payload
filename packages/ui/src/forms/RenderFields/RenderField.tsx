@@ -1,15 +1,9 @@
 'use client'
 
-import type { FieldPermissions, FieldTypes } from 'payload'
+import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } from 'payload'
 
 import React from 'react'
 
-import type {
-  FieldComponentProps,
-  MappedField,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
-
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
@@ -17,7 +11,9 @@ type Props = {
   Field: MappedField['Field']
   custom?: Record<any, string>
   disabled: boolean
-  fieldComponentProps?: FieldComponentProps
+  fieldComponentProps?: {
+    forceRender?: boolean
+  } & FieldComponentProps
   indexPath?: string
   isHidden?: boolean
   name?: string

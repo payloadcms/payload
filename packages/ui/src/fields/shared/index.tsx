@@ -1,44 +1,6 @@
-import type {
-  DocumentPreferences,
-  ErrorProps,
-  FieldDescriptionProps,
-  LabelProps,
-  Locale,
-  MappedComponent,
-  SanitizedLabelProps,
-  SanitizedLocalizationConfig,
-  User,
-  Validate,
-} from 'payload'
-import type React from 'react'
+import type { Locale, SanitizedLocalizationConfig } from 'payload'
 
 export const fieldBaseClass = 'field-type'
-
-export type FormFieldBase = {
-  AfterInput?: MappedComponent[]
-  BeforeInput?: MappedComponent[]
-  CustomDescription?: MappedComponent
-  CustomError?: MappedComponent
-  CustomLabel?: MappedComponent
-  Filter?: MappedComponent
-  className?: string
-  custom?: Record<string, any>
-  descriptionProps?: FieldDescriptionProps
-  disabled?: boolean
-  docPreferences?: DocumentPreferences
-  errorProps?: ErrorProps
-  label?: LabelProps['label']
-  labelProps?: SanitizedLabelProps
-  locale?: Locale
-  localized?: boolean
-  path?: string
-  readOnly?: boolean
-  required?: boolean
-  rtl?: boolean
-  style?: React.CSSProperties
-  user?: User
-  validate?: Validate
-}
 
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.

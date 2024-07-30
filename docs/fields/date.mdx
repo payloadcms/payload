@@ -6,21 +6,27 @@ desc: The Date field type stores a Date in the database. Learn how to use and cu
 keywords: date, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Date field type saves a Date in the database and provides the Admin Panel with a customizable
-  time picker interface.
-</Banner>
+The Date Field saves a Date in the database and provides the [Admin Panel](../admin/overview) with a customizable time picker interface.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/date.png"
   srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
   alt="Shows a Date field in the Payload Admin Panel"
-  caption="Admin Panel screenshot of a Date field"
+  caption="This field is using the `react-datepicker` component for UI."
 />
 
-This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin Panel component.
+To add a Date Field, set the `type` to `date` in your [Field Config](./overview):
 
-## Config
+```ts
+import type { Field } from 'payload/types'
+
+export const MyDateField: Field = {
+  // ...
+  type: 'date', // highlight-line
+}
+```
+
+## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,15 +41,28 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                   |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                   |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 
 _\* An asterisk denotes that a property is required._
 
-## Admin Config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the Admin Panel via the `date` property.
+The customize the appearance and behavior of the Date Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+
+```ts
+import type { Field } from 'payload/types'
+
+export const MyDateField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The Date Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
 | Property                       | Description                                                                                                                            |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |

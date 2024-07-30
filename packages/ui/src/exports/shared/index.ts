@@ -9,6 +9,7 @@ export { getComponent } from '../../providers/ComponentMap/buildComponentMap/get
 export { getCreateMappedComponent } from '../../providers/ComponentMap/buildComponentMap/getCreateMappedComponent.js'
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
+export { formatAdminURL } from '../../utilities/formatAdminURL.js'
 export { formatDate } from '../../utilities/formatDate.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle.js'
 export { getFormState } from '../../utilities/getFormState.js'

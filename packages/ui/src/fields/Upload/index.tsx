@@ -1,13 +1,15 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import type { UploadFieldProps } from 'payload'
+
+import React, { useCallback, useMemo } from 'react'
 
 import type { UploadInputProps } from './Input.js'
-import type { UploadFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
@@ -15,7 +17,7 @@ import './index.scss'
 export { UploadFieldProps, UploadInput }
 export type { UploadInputProps }
 
-const Upload_: React.FC<UploadFieldProps> = (props) => {
+const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomError,
@@ -36,9 +38,11 @@ const Upload_: React.FC<UploadFieldProps> = (props) => {
 
   const {
     collections,
-    routes: { api },
+    routes: { api: apiRoute },
     serverURL,
   } = useConfig()
+
+  const { permissions } = useAuth()
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
@@ -52,6 +56,17 @@ const Upload_: React.FC<UploadFieldProps> = (props) => {
   )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+
+  // Checks if the user has permissions to create a new document in the related collection
+  const canCreate = useMemo(() => {
+    if (permissions?.collections && permissions.collections?.[relationTo]?.create) {
+      if (permissions.collections[relationTo].create?.permission === true) {
+        return true
+      }
+    }
+
+    return false
+  }, [relationTo, permissions])
 
   const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
     useField<string>({
@@ -75,7 +90,8 @@ const Upload_: React.FC<UploadFieldProps> = (props) => {
         CustomDescription={CustomDescription}
         CustomError={CustomError}
         CustomLabel={CustomLabel}
-        api={api}
+        allowNewUpload={canCreate}
+        api={apiRoute}
         className={className}
         collection={collection}
         descriptionProps={descriptionProps}
@@ -100,4 +116,4 @@ const Upload_: React.FC<UploadFieldProps> = (props) => {
   return null
 }
 
-export const UploadField = withCondition(Upload_)
+export const UploadField = withCondition(UploadComponent)

@@ -8,19 +8,19 @@ import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is r
 import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
+import type { ErrorComponent } from '../../admin/forms/Error.js'
 import type {
   ConditionalDateProps,
   Description,
   DescriptionComponent,
-  ErrorProps,
-  LabelProps,
+  LabelComponent,
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { CustomComponent, LabelFunction, PayloadComponent } from '../../config/types.js'
+import type { CustomComponent, LabelFunction, LabelStatic, PayloadComponent } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -122,6 +122,10 @@ export type FilterOptionsProps<TData = any> = {
   user: Partial<PayloadRequest['user']>
 }
 
+export type FilterOptionsFunc<TData = any> = (
+  options: FilterOptionsProps<TData>,
+) => Promise<Where | boolean> | Where | boolean
+
 export type FilterOptions<TData = any> =
   | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
   | Where
@@ -166,24 +170,26 @@ type Admin = {
 }
 
 export type Labels = {
-  plural: LabelFunction | Record<string, string> | string
-  singular: LabelFunction | Record<string, string> | string
+  plural: LabelFunction | LabelStatic
+  singular: LabelFunction | LabelStatic
 }
 
-export type BaseValidateOptions<TData, TSiblingData> = {
+export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   data: Partial<TData>
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
+  previousValue?: TValue
   req: PayloadRequest
   siblingData: Partial<TSiblingData>
 }
 
-export type ValidateOptions<TData, TSiblingData, TFieldConfig extends object> = BaseValidateOptions<
+export type ValidateOptions<
   TData,
-  TSiblingData
-> &
-  TFieldConfig
+  TSiblingData,
+  TFieldConfig extends object,
+  TValue,
+> = BaseValidateOptions<TData, TSiblingData, TValue> & TFieldConfig
 
 export type Validate<
   TValue = any,
@@ -192,13 +198,13 @@ export type Validate<
   TFieldConfig extends object = object,
 > = (
   value: TValue,
-  options: ValidateOptions<TData, TSiblingData, TFieldConfig>,
+  options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
 export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
-  label: LabelFunction | Record<string, string> | string
+  label: LabelFunction | LabelStatic
   value: string
 }
 
@@ -226,7 +232,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: LabelFunction | Record<string, string> | false | string
+  label?: LabelFunction | LabelStatic | false
   localized?: boolean
   /**
    * The name of the field. Must be alphanumeric and cannot contain ' . '
@@ -251,8 +257,8 @@ export type NumberField = {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -261,11 +267,12 @@ export type NumberField = {
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   } & Admin
-  /** Maximum value accepted. Used in the default `validation` function. */
+  /** Maximum value accepted. Used in the default `validate` function. */
   max?: number
-  /** Minimum value accepted. Used in the default `validation` function. */
+  /** Minimum value accepted. Used in the default `validate` function. */
   min?: number
   type: 'number'
+  validate?: Validate<number | number[], unknown, unknown, NumberField>
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -290,8 +297,8 @@ export type TextField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -301,6 +308,7 @@ export type TextField = {
   maxLength?: number
   minLength?: number
   type: 'text'
+  validate?: Validate<string | string[], unknown, unknown, TextField>
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -325,21 +333,22 @@ export type EmailField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'email'
+  validate?: Validate<string, unknown, unknown, EmailField>
 } & FieldBase
 
 export type TextareaField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -350,25 +359,27 @@ export type TextareaField = {
   maxLength?: number
   minLength?: number
   type: 'textarea'
+  validate?: Validate<string, unknown, unknown, TextareaField>
 } & FieldBase
 
 export type CheckboxField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
   } & Admin
   type: 'checkbox'
+  validate?: Validate<unknown, unknown, unknown, CheckboxField>
 } & FieldBase
 
 export type DateField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     }
@@ -376,6 +387,7 @@ export type DateField = {
     placeholder?: Record<string, string> | string
   } & Admin
   type: 'date'
+  validate?: Validate<unknown, unknown, unknown, DateField>
 } & FieldBase
 
 export type GroupField = {
@@ -391,7 +403,8 @@ export type GroupField = {
    */
   interfaceName?: string
   type: 'group'
-} & Omit<FieldBase, 'required' | 'validation'>
+  validate?: Validate<unknown, unknown, unknown, GroupField>
+} & Omit<FieldBase, 'required'>
 
 export type RowAdmin = Omit<Admin, 'description'>
 
@@ -399,7 +412,7 @@ export type RowField = {
   admin?: RowAdmin
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name'>
+} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate'>
 
 export type CollapsibleField = {
   fields: Field[]
@@ -421,7 +434,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name'>
+  Omit<FieldBase, 'label' | 'name' | 'validate'>
 
 export type TabsAdmin = Omit<Admin, 'description'>
 
@@ -430,7 +443,7 @@ type TabBase = {
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-} & Omit<FieldBase, 'required' | 'validation'>
+} & Omit<FieldBase, 'required' | 'validate'>
 
 export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
@@ -503,8 +516,8 @@ export type UIField = {
 export type UploadField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
   }
   filterOptions?: FilterOptions
@@ -516,12 +529,13 @@ export type UploadField = {
   maxDepth?: number
   relationTo: CollectionSlug
   type: 'upload'
+  validate?: Validate<unknown, unknown, unknown, UploadField>
 } & FieldBase
 
 type CodeAdmin = {
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   editorOptions?: EditorProps['options']
   language?: string
@@ -532,12 +546,13 @@ export type CodeField = {
   maxLength?: number
   minLength?: number
   type: 'code'
+  validate?: Validate<string, unknown, unknown, CodeField>
 } & Omit<FieldBase, 'admin'>
 
 type JSONAdmin = {
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   editorOptions?: EditorProps['options']
 } & Admin
@@ -550,13 +565,14 @@ export type JSONField = {
     uri: string
   }
   type: 'json'
+  validate?: Validate<Record<string, unknown>, unknown, unknown, JSONField>
 } & Omit<FieldBase, 'admin'>
 
 export type SelectField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
     isClearable?: boolean
     isSortable?: boolean
@@ -572,6 +588,7 @@ export type SelectField = {
   hasMany?: boolean
   options: Option[]
   type: 'select'
+  validate?: Validate<string, unknown, unknown, SelectField>
 } & FieldBase
 
 type SharedRelationshipProperties = {
@@ -584,6 +601,7 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
+  validate?: Validate<unknown, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
@@ -617,17 +635,19 @@ type SharedRelationshipProperties = {
 type RelationshipAdmin = {
   allowCreate?: boolean
   components?: {
-    Error?: CustomComponent<ErrorProps>
-    Label?: CustomComponent<LabelProps>
+    Error?: ErrorComponent
+    Label?: LabelComponent
   }
   isSortable?: boolean
 } & Admin
+
 export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
+
 export type SingleRelationshipField = {
   admin?: {
     sortOptions?: string
@@ -658,8 +678,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
   } & Admin
   editor?:
@@ -702,13 +722,14 @@ export type ArrayField = {
   maxRows?: number
   minRows?: number
   type: 'array'
+  validate?: Validate<unknown[], unknown, unknown, ArrayField>
 } & FieldBase
 
 export type RadioField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ErrorProps>
-      Label?: CustomComponent<LabelProps>
+      Error?: ErrorComponent
+      Label?: LabelComponent
     }
     layout?: 'horizontal' | 'vertical'
   } & Admin
@@ -722,6 +743,7 @@ export type RadioField = {
   enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
+  validate?: Validate<string, unknown, unknown, RadioField>
 } & FieldBase
 
 export type Block = {
@@ -779,10 +801,12 @@ export type BlockField = {
   maxRows?: number
   minRows?: number
   type: 'blocks'
+  validate?: Validate<string, unknown, unknown, BlockField>
 } & FieldBase
 
 export type PointField = {
   type: 'point'
+  validate?: Validate<unknown, unknown, unknown, PointField>
 } & FieldBase
 
 export type Field =

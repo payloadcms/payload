@@ -1,8 +1,9 @@
+import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { Field, Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
-import type { DrizzleTransaction, PostgresAdapter } from '../../types.js'
+import type { PostgresAdapter } from '../../types.js'
 import type { DocsToResave, PathsToQuery } from './types.js'
 
 import { fetchAndResave } from './fetchAndResave/index.js'
@@ -10,7 +11,7 @@ import { fetchAndResave } from './fetchAndResave/index.js'
 type Args = {
   adapter: PostgresAdapter
   collectionSlug?: string
-  db: DrizzleTransaction
+  db: TransactionPg
   debug: boolean
   fields: Field[]
   globalSlug?: string

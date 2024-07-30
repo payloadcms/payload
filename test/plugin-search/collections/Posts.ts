@@ -26,5 +26,10 @@ export const Posts: CollectionConfig = {
       label: 'Excerpt',
       type: 'text',
     },
+    {
+      type: 'text',
+      name: 'slug',
+      localized: true,
+    },
   ],
 }

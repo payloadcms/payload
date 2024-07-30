@@ -120,8 +120,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc={doc}
       docPermissions={docPermissions}
       initialComparisonDoc={latestVersion}
-      latestDraftVersion={latestDraftVersion.id}
-      latestPublishedVersion={latestPublishedVersion.id}
+      latestDraftVersion={latestDraftVersion?.id}
+      latestPublishedVersion={latestPublishedVersion?.id}
       localeOptions={localeOptions}
       versionID={versionID}
     />

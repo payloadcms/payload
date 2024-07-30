@@ -1,10 +1,9 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { CheckboxFieldProps, ClientValidate } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
-import type { CheckboxFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
@@ -22,7 +21,7 @@ const baseClass = 'checkbox'
 
 export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxField_: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     name,
@@ -120,4 +119,4 @@ const CheckboxField_: React.FC<CheckboxFieldProps> = (props) => {
   )
 }
 
-export const CheckboxField = withCondition(CheckboxField_)
+export const CheckboxField = withCondition(CheckboxFieldComponent)

@@ -8,6 +8,7 @@ import type {
 } from 'payload'
 
 import { HydrateClientUser } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -60,7 +61,7 @@ export const NotFoundPage = async ({
     config,
     importMap,
     redirectUnauthenticatedUser: true,
-    route: `${adminRoute}/not-found`,
+    route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
   })
 
