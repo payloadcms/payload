@@ -8,11 +8,14 @@ import fs from 'node:fs'
 import chalk from 'chalk'
 
 import { createTestHooks } from './testHooks.js'
+import { initImportMap } from './initImportMap.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 process.env.PAYLOAD_DROP_DATABASE = 'true'
+
+await initImportMap()
 
 const {
   _: [testSuiteArg],
