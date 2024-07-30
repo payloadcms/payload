@@ -5,7 +5,7 @@ export const migrationTableExists = async (adapter: DrizzleAdapter): Promise<boo
 
   if (adapter.name === 'postgres') {
     const prependSchema = adapter.schemaName ? `"${adapter.schemaName}".` : ''
-    statement = `SELECT to_regclass('${prependSchema}"payload_migrations"') exists;`
+    statement = `SELECT to_regclass('${prependSchema}"payload_migrations"') AS exists;`
   }
 
   if (adapter.name === 'sqlite') {

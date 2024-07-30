@@ -150,7 +150,7 @@
     "tempy": "1.0.1",
     "tsx": "4.16.2",
     "turbo": "^1.13.3",
-    "typescript": "5.5.3"
+    "typescript": "5.5.4"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
