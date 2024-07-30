@@ -1,5 +1,6 @@
 import type { MappedComponent } from 'payload'
-import type React from 'react'
+
+import React from 'react'
 
 export const RenderMappedComponent: React.FC<{
   readonly clientProps?: object

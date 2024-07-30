@@ -36,6 +36,7 @@ import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
 import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
+import type { FieldTypesComponents } from '../../../fields/index.js'
 import type { FormFieldBase } from '../../../fields/shared/index.js'
 import type { CreateMappedComponent } from './index.js'
 import type {
@@ -46,18 +47,69 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
-import { DateField } from '../../../elements/WhereBuilder/Condition/Date/index.js'
-import { NumberField } from '../../../elements/WhereBuilder/Condition/Number/index.js'
-import { RelationshipField } from '../../../elements/WhereBuilder/Condition/Relationship/index.js'
-import { Select } from '../../../elements/WhereBuilder/Condition/Select/index.js'
-import Text from '../../../elements/WhereBuilder/Condition/Text/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../../exports/client/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { HiddenField } from '../../../exports/client/index.js'
-import { fieldComponents } from '../../../fields/index.js'
+import {
+  ArrayField,
+  BlocksField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  ConfirmPasswordField,
+  DateCondition,
+  DateTimeField,
+  DefaultCell,
+  EmailField,
+  FieldDescription,
+  GroupField,
+  HiddenField,
+  JSONField,
+  NumberCondition,
+  NumberField,
+  PasswordField,
+  PointField,
+  RadioGroupField,
+  RelationshipCondition,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectCondition,
+  SelectField,
+  TabsField,
+  TextCondition,
+  TextField,
+  TextareaField,
+  UIField,
+  UploadField,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir
+} from '../../../exports/client/index.js'
 import { getComponent } from './getComponent.js'
+
+// Need to recreate fieldComponents here, as we cannot access it from the client bundle ("cannot "dot" into "fieldComponents")
+const fieldComponents: FieldTypesComponents = {
+  array: ArrayField,
+  blocks: BlocksField,
+  checkbox: CheckboxField,
+  code: CodeField,
+  collapsible: CollapsibleField,
+  confirmPassword: ConfirmPasswordField,
+  date: DateTimeField,
+  email: EmailField,
+  group: GroupField,
+  hidden: HiddenField,
+  json: JSONField,
+  number: NumberField,
+  password: PasswordField,
+  point: PointField,
+  radio: RadioGroupField,
+  relationship: RelationshipField,
+  richText: RichTextField,
+  row: RowField,
+  select: SelectField,
+  tabs: TabsField,
+  text: TextField,
+  textarea: TextareaField,
+  ui: UIField,
+  upload: UploadField,
+}
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -198,11 +250,11 @@ export const mapFields = (args: {
         const valueFields: Partial<{
           [key in FieldTypes]: React.FC
         }> = {
-          date: DateField,
-          number: NumberField,
-          relationship: RelationshipField,
-          select: Select,
-          text: Text,
+          date: DateCondition,
+          number: NumberCondition,
+          relationship: RelationshipCondition,
+          select: SelectCondition,
+          text: TextCondition,
         }
         const Filter = createMappedComponent(
           field?.admin?.components &&

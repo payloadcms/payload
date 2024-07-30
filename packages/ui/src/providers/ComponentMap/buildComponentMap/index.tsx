@@ -14,7 +14,8 @@ import React from 'react'
 
 import type { ComponentMap } from './types.js'
 
-import { PayloadIcon } from '../../../graphics/Icon/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { PayloadIcon } from '../../../exports/client/index.js'
 import { mapCollections } from './collections.js'
 import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'

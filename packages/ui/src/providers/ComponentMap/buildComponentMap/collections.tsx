@@ -11,8 +11,6 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import { PayloadComponent } from 'payload'
-
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
 import type { CreateMappedComponent } from './index.js'
 import type { CollectionComponentMap } from './types.js'

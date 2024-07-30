@@ -22,7 +22,8 @@
       "import": "./src/exports/client/index.ts",
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
-    }
+    },
+    "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -107,7 +108,8 @@
         "import": "./dist/exports/client/index.js",
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
-      }
+      },
+      "./generateComponentMap": "./dist/utilities/generateComponentMap.js"
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
