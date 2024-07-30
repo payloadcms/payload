@@ -54,6 +54,10 @@ export function addPayloadComponentToImportMap({
   }
   const { exportName, path: componentPath } = parsePayloadComponent(payloadComponent)
 
+  if (importMap[componentPath + '#' + exportName]) {
+    return
+  }
+
   const importIdentifier = exportName + '_' + Object.keys(imports).length
   imports[importIdentifier] = {
     path:
