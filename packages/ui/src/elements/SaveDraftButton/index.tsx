@@ -74,7 +74,7 @@ export const DefaultSaveDraftButton: React.FC = () => {
       buttonStyle="secondary"
       className={baseClass}
       disabled={forceDisable}
-      onClick={saveDraft}
+      onClick={void saveDraft}
       ref={ref}
       size="medium"
       type="button"
