@@ -33,6 +33,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  siblingDocKeys: Set<string>
 }
 
 // This function is responsible for the following actions, in order:
@@ -57,6 +58,7 @@ export const promise = async <T>({
   req,
   siblingData,
   siblingDoc,
+  siblingDocKeys,
 }: Args<T>): Promise<void> => {
   const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
     field,
@@ -65,6 +67,15 @@ export const promise = async <T>({
   })
 
   if (fieldAffectsData(field)) {
+    // Remove the key from siblingDocKeys
+    // the goal is to keep any existing data present
+    // before updating, for users that want to maintain
+    // external data in the same collections as Payload manages,
+    // without having fields defined for them
+    if (siblingDocKeys.has(field.name)) {
+      siblingDocKeys.delete(field.name)
+    }
+
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
         const value = siblingData[field.name] as string
@@ -308,6 +319,7 @@ export const promise = async <T>({
         schemaPath: fieldSchemaPath,
         siblingData: groupData as JsonObject,
         siblingDoc: groupDoc as JsonObject,
+        siblingDocKeys,
       })
 
       break
@@ -335,6 +347,7 @@ export const promise = async <T>({
               schemaPath: fieldSchemaPath,
               siblingData: row as JsonObject,
               siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
+              siblingDocKeys,
             }),
           )
         })
@@ -372,6 +385,7 @@ export const promise = async <T>({
                 schemaPath: fieldSchemaPath,
                 siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
+                siblingDocKeys,
               }),
             )
           }
@@ -399,6 +413,7 @@ export const promise = async <T>({
         schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       })
 
       break
@@ -407,7 +422,10 @@ export const promise = async <T>({
     case 'tab': {
       let tabSiblingData
       let tabSiblingDoc
-      if (tabHasName(field)) {
+
+      const isNamedTab = tabHasName(field)
+
+      if (isNamedTab) {
         if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
         if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
 
@@ -433,6 +451,7 @@ export const promise = async <T>({
         schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
+        siblingDocKeys: isNamedTab ? undefined : siblingDocKeys,
       })
 
       break
@@ -454,6 +473,7 @@ export const promise = async <T>({
         schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       })
 
       break
