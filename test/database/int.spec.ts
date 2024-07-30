@@ -89,11 +89,10 @@ describe('database', () => {
     })
 
     it('should allow createdAt to be set in create', async () => {
-      const createdAt = new Date('2021-01-01T00:00:00.000Z')
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: 'posts',
         data: {
-          // TODO: createdAt should be optional on RequiredDataFromCollectionSlug
           createdAt,
           title: 'hello',
         },
@@ -104,8 +103,8 @@ describe('database', () => {
         collection: 'posts',
       })
 
-      expect(result.createdAt).toStrictEqual(createdAt.toISOString())
-      expect(doc.createdAt).toStrictEqual(createdAt.toISOString())
+      expect(result.createdAt).toStrictEqual(createdAt)
+      expect(doc.createdAt).toStrictEqual(createdAt)
     })
 
     it('updatedAt cannot be set in create', async () => {
@@ -459,6 +458,26 @@ describe('database', () => {
           }),
         ).rejects.toThrow('Not Found')
       })
+    })
+  })
+
+  describe('defaultValue', () => {
+    it('should set default value from db.create', async () => {
+      // call the db adapter create directly to bypass Payload's default value assignment
+      const result = await payload.db.create({
+        collection: 'default-values',
+        data: {
+          // for drizzle DBs, we need to pass an array of objects to test subfields
+          array: [{ id: 1 }],
+          title: 'hello',
+        },
+        req: undefined,
+      })
+
+      expect(result.defaultValue).toStrictEqual('default value from database')
+      expect(result.array[0].defaultValue).toStrictEqual('default value from database')
+      expect(result.group.defaultValue).toStrictEqual('default value from database')
+      expect(result.select).toStrictEqual('default')
     })
   })
 })
