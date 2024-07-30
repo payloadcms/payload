@@ -4,7 +4,7 @@ import React from 'react'
 import type { RowLabelProps } from './types.js'
 export type { RowLabelProps }
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { RowLabelProvider } from '../RowLabel/Context/index.js'
 
 const baseClass = 'row-label'
@@ -15,7 +15,7 @@ export const RowLabel: React.FC<RowLabelProps> = (props) => {
   if (RowLabelComponent) {
     return (
       <RowLabelProvider path={path} rowNumber={rowNumber}>
-        <RenderMappedComponent component={RowLabelComponent} />
+        <RenderComponent mappedComponent={RowLabelComponent} />
       </RowLabelProvider>
     )
   }

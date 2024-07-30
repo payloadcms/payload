@@ -38,42 +38,45 @@ import {
 
 export default buildConfigWithDefaults({
   admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     components: {
-      actions: ['./components/AdminButton/index.js#AdminButton'],
-      afterDashboard: ['./components/AfterDashboard/index.js#AfterDashboard'],
-      afterNavLinks: ['./components/AfterNavLinks/index.js#AfterNavLinks'],
-      beforeLogin: ['./components/BeforeLogin/index.js#BeforeLogin'],
+      actions: ['/components/AdminButton/index.js#AdminButton'],
+      afterDashboard: ['/components/AfterDashboard/index.js#AfterDashboard'],
+      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       logout: {
-        Button: './components/Logout/index.js#Logout',
+        Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        './components/CustomProvider/index.js#CustomProvider',
-        './components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
         CustomDefaultView: {
-          Component: './components/views/CustomDefault/index.js#CustomDefaultView',
+          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
         },
         CustomMinimalView: {
-          Component: './components/views/CustomMinimal/index.js#CustomMinimalView',
+          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
           path: '/custom-minimal-view',
         },
         CustomNestedView: {
-          Component: './components/views/CustomViewNested/index.js#CustomNestedView',
+          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
           exact: true,
           path: customNestedViewPath,
         },
         CustomView: {
-          Component: './components/views/CustomView/index.js#CustomView',
+          Component: '/components/views/CustomView/index.js#CustomView',
           exact: true,
           path: customViewPath,
           strict: true,
         },
         CustomViewWithParam: {
-          Component: './components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
           path: customParamViewPath,
         },
       },

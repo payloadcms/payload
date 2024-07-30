@@ -13,7 +13,7 @@ import './index.scss'
 const baseClass = 'point'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -109,7 +109,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
           <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('longitude')} />
 
           <div className="input-wrapper">
-            <RenderMappedComponent component={BeforeInput} />
+            <RenderComponent mappedComponent={BeforeInput} />
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
@@ -122,14 +122,14 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            <RenderMappedComponent component={AfterInput} />
+            <RenderComponent mappedComponent={AfterInput} />
           </div>
         </li>
         <li>
           <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('latitude')} />
           <div className="input-wrapper">
             <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-            <RenderMappedComponent component={BeforeInput} />
+            <RenderComponent mappedComponent={BeforeInput} />
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
@@ -142,7 +142,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            <RenderMappedComponent component={AfterInput} />
+            <RenderComponent mappedComponent={AfterInput} />
           </div>
         </li>
       </ul>

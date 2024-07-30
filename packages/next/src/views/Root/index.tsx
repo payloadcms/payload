@@ -2,11 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
 
-import {
-  RenderMappedComponent,
-  formatAdminURL,
-  getCreateMappedComponent,
-} from '@payloadcms/ui/shared'
+import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -117,7 +113,7 @@ export const RootPage = async ({
     DefaultView.Component,
   )
 
-  const RenderedView = <RenderMappedComponent component={MappedDefaultView} />
+  const RenderedView = <RenderComponent mappedComponent={MappedDefaultView} />
 
   return (
     <Fragment>

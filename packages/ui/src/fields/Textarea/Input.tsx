@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -63,7 +63,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderMappedComponent component={BeforeInput} />
+        <RenderComponent mappedComponent={BeforeInput} />
 
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
@@ -81,7 +81,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        <RenderMappedComponent component={AfterInput} />
+        <RenderComponent mappedComponent={AfterInput} />
         <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>

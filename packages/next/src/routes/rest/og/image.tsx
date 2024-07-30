@@ -1,6 +1,6 @@
 import type { MappedComponent } from 'payload'
 
-import { RenderMappedComponent } from '@payloadcms/ui/shared'
+import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const OGImage: React.FC<{
@@ -85,11 +85,11 @@ export const OGImage: React.FC<{
           width: '38px',
         }}
       >
-        <RenderMappedComponent
+        <RenderComponent
           clientProps={{
             fill: 'white',
           }}
-          component={Icon}
+          mappedComponent={Icon}
         />
       </div>
     </div>

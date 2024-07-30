@@ -1,7 +1,7 @@
 import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
@@ -61,7 +61,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           </NavToggler>
         </div>
         <Wrapper baseClass={baseClass} className={className}>
-          <RenderMappedComponent component={MappedDefaultNav} />
+          <RenderComponent mappedComponent={MappedDefaultNav} />
 
           <div className={`${baseClass}__wrap`}>
             <AppHeader />

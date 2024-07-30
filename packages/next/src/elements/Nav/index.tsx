@@ -1,7 +1,7 @@
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
-import { RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'
@@ -46,9 +46,9 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        <RenderMappedComponent component={mappedBeforeNavLinks} />
+        <RenderComponent mappedComponent={mappedBeforeNavLinks} />
         <DefaultNavClient />
-        <RenderMappedComponent component={mappedAfterNavLinks} />
+        <RenderComponent mappedComponent={mappedAfterNavLinks} />
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>

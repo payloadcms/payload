@@ -1,7 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
 import {
-  RenderMappedComponent,
+  RenderComponent,
   WithServerSideProps,
   getCreateMappedComponent,
 } from '@payloadcms/ui/shared'
@@ -86,7 +86,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      <RenderMappedComponent component={mappedBeforeLogins} />
+      <RenderComponent mappedComponent={mappedBeforeLogins} />
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -95,7 +95,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      <RenderMappedComponent component={mappedAfterLogins} />
+      <RenderComponent mappedComponent={mappedAfterLogins} />
     </Fragment>
   )
 }

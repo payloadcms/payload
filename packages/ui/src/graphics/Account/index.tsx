@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -27,11 +27,11 @@ export const Account = () => {
 
   if (componentMap.CustomAvatar?.Component) {
     return (
-      <RenderMappedComponent
+      <RenderComponent
         clientProps={{
           active: isOnAccountPage,
         }}
-        component={componentMap.CustomAvatar}
+        mappedComponent={componentMap.CustomAvatar}
       />
     )
   }

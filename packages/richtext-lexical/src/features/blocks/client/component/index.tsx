@@ -6,7 +6,7 @@ import {
   Collapsible,
   Form,
   Pill,
-  RenderMappedComponent,
+  RenderComponent,
   SectionTitle,
   ShimmerEffect,
   useConfig,
@@ -152,9 +152,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
         collapsibleStyle="default"
         header={
           reducedBlock.LabelComponent?.Component ? (
-            <RenderMappedComponent
+            <RenderComponent
               clientProps={{ blockKind: 'lexicalBlock', formData }}
-              component={reducedBlock.LabelComponent}
+              mappedComponent={reducedBlock.LabelComponent}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>

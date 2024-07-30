@@ -7,7 +7,7 @@ import type {
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
 import {
-  RenderMappedComponent,
+  RenderComponent,
   formatAdminURL,
   getCreateMappedComponent,
   isEditing as getIsEditing,
@@ -270,10 +270,10 @@ export const Document: React.FC<AdminViewProps> = async ({
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
         {ErrorView?.Component ? (
-          <RenderMappedComponent component={ErrorView} />
+          <RenderComponent mappedComponent={ErrorView} />
         ) : (
-          <RenderMappedComponent
-            component={
+          <RenderComponent
+            mappedComponent={
               ViewOverride?.Component
                 ? ViewOverride
                 : CustomView?.Component

@@ -6,7 +6,7 @@ import {
   Form,
   type FormProps,
   OperationProvider,
-  RenderMappedComponent,
+  RenderComponent,
   Upload,
   useAuth,
   useComponentMap,
@@ -240,7 +240,7 @@ export const DefaultEditView: React.FC = () => {
                   {upload && (
                     <React.Fragment>
                       {componentMap.Upload?.Component ? (
-                        <RenderMappedComponent component={componentMap.Upload} />
+                        <RenderComponent mappedComponent={componentMap.Upload} />
                       ) : (
                         <Upload
                           collectionSlug={collectionConfig.slug}

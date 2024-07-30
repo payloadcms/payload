@@ -5,7 +5,7 @@ import React from 'react'
 
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
@@ -55,7 +55,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         .join(' ')}
     >
       <div className={`${inputBaseClass}__input`}>
-        <RenderMappedComponent component={BeforeInput} />
+        <RenderComponent mappedComponent={BeforeInput} />
         <input
           aria-label=""
           defaultChecked={Boolean(checked)}
@@ -75,7 +75,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {checked && <CheckIcon />}
           {!checked && partialChecked && <LineIcon />}
         </span>
-        <RenderMappedComponent component={AfterInput} />
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
       <FieldLabel
         CustomLabel={CustomLabel}

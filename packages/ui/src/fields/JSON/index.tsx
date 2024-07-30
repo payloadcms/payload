@@ -13,7 +13,7 @@ import './index.scss'
 const baseClass = 'json-field'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
@@ -131,7 +131,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderMappedComponent component={BeforeInput} />
+        <RenderComponent mappedComponent={BeforeInput} />
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -140,7 +140,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        <RenderMappedComponent component={AfterInput} />
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
       <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>

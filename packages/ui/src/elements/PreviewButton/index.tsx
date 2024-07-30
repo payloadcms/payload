@@ -3,7 +3,7 @@ import type { MappedComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { Button } from '../Button/index.js'
 import { usePreviewURL } from './usePreviewURL.js'
 
@@ -35,7 +35,7 @@ type Props = {
 
 export const PreviewButton: React.FC<Props> = ({ CustomComponent }) => {
   if (CustomComponent) {
-    return <RenderMappedComponent component={CustomComponent} />
+    return <RenderComponent mappedComponent={CustomComponent} />
   }
 
   return <DefaultPreviewButton />

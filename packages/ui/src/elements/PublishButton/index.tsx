@@ -7,7 +7,7 @@ import React, { useCallback } from 'react'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -62,6 +62,6 @@ type Props = {
 }
 
 export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return <RenderMappedComponent component={CustomComponent} />
+  if (CustomComponent) return <RenderComponent mappedComponent={CustomComponent} />
   return <DefaultPublishButton />
 }

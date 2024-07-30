@@ -15,7 +15,7 @@ const baseClass = 'date-time-field'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
@@ -86,7 +86,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderMappedComponent component={BeforeInput} />
+        <RenderComponent mappedComponent={BeforeInput} />
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
@@ -96,7 +96,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
           readOnly={disabled}
           value={value}
         />
-        <RenderMappedComponent component={AfterInput} />
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
       <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>

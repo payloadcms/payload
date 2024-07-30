@@ -32,7 +32,8 @@ export function getCreateMappedComponent({
       if (isReactServerComponentOrFunction(Fallback)) {
         return {
           type: 'server',
-          Component: <Fallback key={key} {...serverProps} {...props} />,
+          Component: null,
+          RenderedComponent: <Fallback key={key} {...serverProps} {...props} />,
         }
       } else {
         return {
@@ -62,7 +63,8 @@ export function getCreateMappedComponent({
       const Component: React.FC<any> = resolvedComponent.Component
       return {
         type: 'server',
-        Component: (
+        Component: null,
+        RenderedComponent: (
           <Component key={key} {...serverProps} {...resolvedComponent.serverProps} {...props} />
         ),
       }

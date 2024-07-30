@@ -15,7 +15,7 @@ import {
   Pill,
   PublishMany,
   RelationshipProvider,
-  RenderMappedComponent,
+  RenderComponent,
   SelectionProvider,
   SetViewActions,
   StaggeredShimmers,
@@ -101,7 +101,7 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={baseClass}>
       <SetViewActions actions={actionsMap?.List} />
-      <RenderMappedComponent component={BeforeList} />
+      <RenderComponent mappedComponent={BeforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
@@ -123,14 +123,14 @@ export const DefaultListView: React.FC = () => {
                 )}
                 {Description && (
                   <div className={`${baseClass}__sub-header`}>
-                    <RenderMappedComponent component={Description} />
+                    <RenderComponent mappedComponent={Description} />
                   </div>
                 )}
               </Fragment>
             )}
           </header>
           <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
-          <RenderMappedComponent component={BeforeListTable} />
+          <RenderComponent mappedComponent={BeforeListTable} />
 
           {!data.docs && (
             <StaggeredShimmers
@@ -162,7 +162,7 @@ export const DefaultListView: React.FC = () => {
               )}
             </div>
           )}
-          <RenderMappedComponent component={AfterListTable} />
+          <RenderComponent mappedComponent={AfterListTable} />
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
@@ -210,7 +210,7 @@ export const DefaultListView: React.FC = () => {
           )}
         </Gutter>
       </SelectionProvider>
-      <RenderMappedComponent component={AfterList} />
+      <RenderComponent mappedComponent={AfterList} />
     </div>
   )
 }

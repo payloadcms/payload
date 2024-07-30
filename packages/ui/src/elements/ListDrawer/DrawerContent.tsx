@@ -11,7 +11,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
@@ -301,7 +301,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           collectionSlug={selectedCollectionConfig.slug}
           preferenceKey={preferenceKey}
         >
-          <RenderMappedComponent component={List} />
+          <RenderComponent mappedComponent={List} />
           <DocumentDrawer onSave={onCreateNew} />
         </TableColumnsProvider>
       </ListQueryProvider>

@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
 import {
   EntityType,
-  RenderMappedComponent,
+  RenderComponent,
   formatAdminURL,
   getCreateMappedComponent,
 } from '@payloadcms/ui/shared'
@@ -66,7 +66,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
       <SetStepNav nav={[]} />
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
-        <RenderMappedComponent component={mappedBeforeDashboards} />
+        <RenderComponent mappedComponent={mappedBeforeDashboards} />
         <Fragment>
           <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
@@ -148,7 +148,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        <RenderMappedComponent component={mappedAfterDashboards} />
+        <RenderComponent mappedComponent={mappedAfterDashboards} />
       </Gutter>
     </div>
   )

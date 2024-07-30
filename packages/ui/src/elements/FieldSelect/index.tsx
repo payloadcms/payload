@@ -6,7 +6,7 @@ import React, { Fragment, type JSX, useState } from 'react'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -63,7 +63,7 @@ export const combineLabel = ({
         </Fragment>
       )}
       <span style={{ display: 'inline-block' }}>
-        <RenderMappedComponent component={LabelToRender} />
+        <RenderComponent mappedComponent={LabelToRender} />
       </span>
     </Fragment>
   )

@@ -4,7 +4,7 @@ import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } f
 
 import React from 'react'
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
@@ -80,7 +80,7 @@ export const RenderField: React.FC<Props> = ({
       siblingPermissions={siblingPermissions}
       type={type}
     >
-      <RenderMappedComponent clientProps={fieldComponentProps} component={Field} />
+      <RenderComponent clientProps={fieldComponentProps} mappedComponent={Field} />
     </FieldPropsProvider>
   )
 }

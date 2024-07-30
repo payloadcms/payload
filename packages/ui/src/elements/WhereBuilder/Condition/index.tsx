@@ -42,7 +42,7 @@ import type { MappedComponent, Operator } from 'payload'
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
-import { RenderMappedComponent } from '../../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
@@ -146,7 +146,7 @@ export const Condition: React.FC<Props> = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <RenderMappedComponent
+            <RenderComponent
               clientProps={{
                 ...internalField?.props,
                 disabled: !internalOperatorOption,
@@ -162,7 +162,7 @@ export const Condition: React.FC<Props> = (props) => {
                     : undefined,
                 value: internalQueryValue ?? '',
               }}
-              component={ValueComponent}
+              mappedComponent={ValueComponent}
             />
           </div>
         </div>

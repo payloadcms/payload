@@ -14,8 +14,8 @@ import {
   Collapsible,
   ErrorPill,
   Pill,
+  RenderComponent,
   RenderFields,
-  RenderMappedComponent,
   SectionTitle,
   useDocumentInfo,
   useFormSubmitted,
@@ -199,9 +199,9 @@ export const BlockContent: React.FC<Props> = (props) => {
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
           reducedBlock?.LabelComponent?.Component ? (
-            <RenderMappedComponent
+            <RenderComponent
               clientProps={{ blockKind: 'lexicalBlock', formData }}
-              component={reducedBlock.LabelComponent}
+              mappedComponent={reducedBlock.LabelComponent}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>

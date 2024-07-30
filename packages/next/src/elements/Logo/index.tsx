@@ -1,6 +1,6 @@
 import type { ServerProps } from 'payload'
 
-import { PayloadLogo, RenderMappedComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { PayloadLogo, RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const Logo: React.FC<ServerProps> = (props) => {
@@ -31,5 +31,5 @@ export const Logo: React.FC<ServerProps> = (props) => {
 
   const mappedCustomLogo = createMappedComponent(CustomLogo, undefined, PayloadLogo)
 
-  return <RenderMappedComponent component={mappedCustomLogo} />
+  return <RenderComponent mappedComponent={mappedCustomLogo} />
 }

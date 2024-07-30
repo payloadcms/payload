@@ -4,7 +4,7 @@ import type { AdminViewProps } from 'payload'
 import { HydrateClientUser } from '@payloadcms/ui'
 import {
   EntityType,
-  RenderMappedComponent,
+  RenderComponent,
   getCreateMappedComponent,
   groupNavItems,
 } from '@payloadcms/ui/shared'
@@ -92,12 +92,12 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
   return (
     <Fragment>
       <HydrateClientUser permissions={permissions} user={user} />
-      <RenderMappedComponent
+      <RenderComponent
         clientProps={{
           Link,
           locale,
         }}
-        component={mappedDashboardComponent}
+        mappedComponent={mappedDashboardComponent}
       />
     </Fragment>
   )

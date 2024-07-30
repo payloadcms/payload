@@ -54,7 +54,7 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: './components/CustomSelect.js',
+          Field: '/components/CustomSelect.js',
         },
       },
     },

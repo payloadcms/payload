@@ -10,7 +10,7 @@ import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 
 const baseClass = 'step-nav'
@@ -43,7 +43,7 @@ const StepNav: React.FC<{
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
             <span title={t('general:dashboard')}>
-              <RenderMappedComponent component={Icon} />
+              <RenderComponent mappedComponent={Icon} />
             </span>
           </LinkElement>
           <span>/</span>
@@ -75,7 +75,7 @@ const StepNav: React.FC<{
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
           <div className={`${baseClass}__home`}>
             <span title={t('general:dashboard')}>
-              <RenderMappedComponent component={Icon} />
+              <RenderComponent mappedComponent={Icon} />
             </span>
           </div>
         </div>

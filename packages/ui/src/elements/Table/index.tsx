@@ -5,7 +5,7 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
@@ -72,7 +72,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
                         customCellContext={customCellContext}
                         rowData={row}
                       >
-                        <RenderMappedComponent component={col.components.Cell} />
+                        <RenderComponent mappedComponent={col.components.Cell} />
                       </TableCellProvider>
                     </td>
                   )

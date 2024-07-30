@@ -6,11 +6,7 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import {
-  RenderMappedComponent,
-  formatAdminURL,
-  getCreateMappedComponent,
-} from '@payloadcms/ui/shared'
+import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
@@ -167,12 +163,12 @@ export const ListView: React.FC<AdminViewProps> = async ({
               listPreferences={listPreferences}
               preferenceKey={preferenceKey}
             >
-              <RenderMappedComponent
+              <RenderComponent
                 clientProps={{
                   collectionSlug,
                   listSearchableFields: collectionConfig.admin.listSearchableFields,
                 }}
-                component={mappedListView}
+                mappedComponent={mappedListView}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

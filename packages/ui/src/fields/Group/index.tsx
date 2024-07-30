@@ -16,7 +16,7 @@ import {
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
@@ -86,7 +86,7 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
               {(CustomLabel || CustomDescription || label) && (
                 <header>
                   {CustomLabel !== undefined ? (
-                    <RenderMappedComponent clientProps={{ label }} component={CustomLabel} />
+                    <RenderComponent clientProps={{ label }} mappedComponent={CustomLabel} />
                   ) : label ? (
                     <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                   ) : null}

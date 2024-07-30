@@ -9,7 +9,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, RenderMappedComponent, useTranslation } from '@payloadcms/ui'
+import { Button, RenderComponent, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getSelection,
@@ -123,9 +123,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       ref={inlineBlockElemElemRef}
     >
       {LabelComponent?.Component ? (
-        <RenderMappedComponent
+        <RenderComponent
           clientProps={{ blockKind: 'lexicalInlineBlock', formData }}
-          component={LabelComponent}
+          mappedComponent={LabelComponent}
         />
       ) : (
         <div>{getTranslation(reducedBlock.labels?.singular, i18n)}</div>

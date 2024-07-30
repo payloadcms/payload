@@ -224,12 +224,14 @@ export type {
 export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
   | {
       Component: React.ComponentType<TComponentClientProps>
+      RenderedComponent: React.ReactNode
+      props?: Partial<any>
+      type: 'server'
+    }
+  | {
+      Component: React.ComponentType<TComponentClientProps>
       RenderedComponent?: React.ReactNode
       props?: Partial<TComponentClientProps>
       type: 'client'
-    }
-  | {
-      Component: React.ReactNode
-      type: 'server'
     }
   | undefined

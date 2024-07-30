@@ -11,7 +11,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RenderMappedComponent } from '../../providers/ComponentMap/RenderMappedComponent.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -122,9 +122,9 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         }
         header={
           LabelComponent?.Component ? (
-            <RenderMappedComponent
+            <RenderComponent
               clientProps={{ blockKind: 'block', formData: row }}
-              component={LabelComponent}
+              mappedComponent={LabelComponent}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>
