@@ -1,7 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import GlobalVersionButton from '../elements/GlobalVersionButton/index.js'
-import GlobalVersionsButton from '../elements/GlobalVersionsButton/index.js'
 import { draftGlobalSlug } from '../slugs.js'
 
 const DraftGlobal: GlobalConfig = {
@@ -13,10 +11,10 @@ const DraftGlobal: GlobalConfig = {
       views: {
         Edit: {
           Version: {
-            actions: [GlobalVersionButton],
+            actions: ['/elements/GlobalVersionButton/index.js#GlobalVersionButton'],
           },
           Versions: {
-            actions: [GlobalVersionsButton],
+            actions: ['/elements/GlobalVersionsButton/index.js#GlobalVersionsButton'],
           },
         },
       },

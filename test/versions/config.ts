@@ -17,6 +17,11 @@ import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     DisablePublish,
     Posts,
