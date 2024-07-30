@@ -121,7 +121,7 @@ export const promise = async ({
     }
 
     // Validate
-    if (!skipValidationFromHere && field.validate) {
+    if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
       let jsonError: object
 
@@ -140,9 +140,10 @@ export const promise = async ({
         jsonError,
         operation,
         preferences: { fields: {} },
+        previousValue: siblingDoc[field.name],
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }>)
+      } as ValidateOptions<any, any, { jsonError: object }, any>)
 
       if (typeof validationResult === 'string') {
         errors.push({

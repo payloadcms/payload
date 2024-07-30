@@ -156,6 +156,7 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
     drizzle: PostgresDB
     enums: Record<string, GenericEnum>
     /**

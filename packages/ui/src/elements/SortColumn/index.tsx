@@ -37,8 +37,8 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   if (sort === desc) descClasses.push(`${baseClass}--active`)
 
   const setSort = useCallback(
-    (newSort) => {
-      refineListData({
+    async (newSort: string) => {
+      await refineListData({
         sort: newSort,
       })
     },
@@ -56,7 +56,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => setSort(asc)}
+            onClick={() => void setSort(asc)}
             type="button"
           >
             <ChevronIcon direction="up" />
@@ -67,7 +67,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => setSort(desc)}
+            onClick={() => void setSort(desc)}
             type="button"
           >
             <ChevronIcon />
