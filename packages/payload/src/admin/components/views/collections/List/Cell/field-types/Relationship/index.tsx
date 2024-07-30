@@ -16,7 +16,7 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props) => {
+const RelationshipCell: React.FC<CellComponentProps<RelationshipField | UploadField>> = (props) => {
   const { data: cellData, field } = props
   const config = useConfig()
   const { collections, routes } = config
@@ -70,7 +70,7 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
         })
 
         let fileField = null
-        if ((field as unknown as UploadField).type === 'upload' && document) {
+        if (field.type === 'upload' && document) {
           fileField = (
             <File collection={relatedCollection} data={label} field={field} rowData={document} />
           )
