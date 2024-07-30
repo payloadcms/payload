@@ -1,7 +1,7 @@
 'use client'
 
-import type { FormFieldBase, FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { FormProps } from '@payloadcms/ui'
+import type { ClientCollectionConfig, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {

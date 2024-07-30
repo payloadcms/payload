@@ -18,7 +18,7 @@ import {
   closeNav,
   ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   login,
   openDocControls,
@@ -99,7 +99,7 @@ describe('access control', () => {
         routes: { logout: logoutRoute },
       },
       routes: { admin: adminRoute },
-    } = getAdminRoutes({})
+    } = getRoutes({})
 
     logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })

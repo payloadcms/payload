@@ -455,7 +455,11 @@ const DocumentInfo: React.FC<
     }
 
     return () => {
-      abortController.abort()
+      try {
+        abortController.abort()
+      } catch (error) {
+        // swallow error
+      }
     }
   }, [
     api,

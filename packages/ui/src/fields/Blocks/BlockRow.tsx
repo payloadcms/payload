@@ -1,11 +1,10 @@
 'use client'
-import type { FieldPermissions, Labels, Row } from 'payload'
+import type { FieldPermissions, Labels, ReducedBlock, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -19,7 +18,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 const baseClass = 'blocks-field'
 
 type BlockFieldProps = {
-  addRow: (rowIndex: number, blockType: string) => void
+  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ReducedBlock
   blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number) => void

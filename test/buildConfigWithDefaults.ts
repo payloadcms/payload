@@ -37,12 +37,16 @@ import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
-// process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payload'
+// process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 // process.env.PAYLOAD_DATABASE = 'sqlite'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
+  options?: {
+    dbType?: 'mongodb' | 'postgres' | 'sqlite'
+    disableAutoLogin?: boolean
+  },
 ): Promise<SanitizedConfig> {
   const databaseAdapters = {
     mongodb: mongooseAdapter({
@@ -85,7 +89,7 @@ export async function buildConfigWithDefaults(
   }
 
   const config: Config = {
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || options?.dbType || 'mongodb'],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
@@ -195,7 +199,7 @@ export async function buildConfigWithDefaults(
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',

@@ -1,11 +1,8 @@
 'use client'
-import type { BlockField } from 'payload'
+import type { BlocksFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
-
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -16,6 +13,7 @@ import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
+import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -34,19 +32,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-export type BlocksFieldProps = {
-  blocks?: ReducedBlock[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: BlockField['labels']
-  maxRows?: number
-  minRows?: number
-  name?: string
-  slug?: string
-  width?: string
-} & FormFieldBase
-
-const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -132,7 +118,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string) => {
+    async (rowIndex: number, blockType: string): Promise<void> => {
       await addFieldRow({
         data: { blockType },
         path,
@@ -183,16 +169,27 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = toggleAllRows({
+        collapsed,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
+        collapsed,
+        rowID,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -353,4 +350,4 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   )
 }
 
-export const BlocksField = withCondition(_BlocksField)
+export const BlocksField = withCondition(BlocksFieldComponent)

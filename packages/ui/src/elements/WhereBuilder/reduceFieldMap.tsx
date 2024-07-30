@@ -1,9 +1,8 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
+import type { FieldMap } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
@@ -26,9 +25,11 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
 
     if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
       const tabs = field.fieldComponentProps.tabs
+
       tabs.forEach((tab) => {
         if (typeof tab.label !== 'boolean') {
           const localizedTabLabel = getTranslation(tab.label, i18n)
+
           const labelWithPrefix = labelPrefix
             ? labelPrefix + ' > ' + localizedTabLabel
             : localizedTabLabel
@@ -69,7 +70,8 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
     }
 
     if (field.type === 'collapsible' && 'fieldMap' in field.fieldComponentProps) {
-      const localizedTabLabel = getTranslation(field.fieldComponentProps.label, i18n)
+      const localizedTabLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
+
       const labelWithPrefix = labelPrefix
         ? labelPrefix + ' > ' + localizedTabLabel
         : localizedTabLabel
@@ -86,7 +88,7 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
     }
 
     if (field.type === 'group' && 'fieldMap' in field.fieldComponentProps) {
-      const translatedLabel = getTranslation(field.fieldComponentProps.label, i18n)
+      const translatedLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
 
       const labelWithPrefix = labelPrefix
         ? translatedLabel
@@ -126,7 +128,7 @@ export const reduceFieldMap = ({ fieldMap, i18n, labelPrefix, pathPrefix }: Redu
         return acc
       }, [])
 
-      const localizedLabel = getTranslation(field.fieldComponentProps.label, i18n)
+      const localizedLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
 
       const formattedLabel = labelPrefix
         ? combineLabel({

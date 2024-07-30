@@ -1,9 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { AfterInput } from './AfterInput.js'
-import { BeforeInput } from './BeforeInput.js'
-import CustomError from './CustomError.js'
-import CustomLabel from './CustomLabel.js'
 import { defaultText, textFieldsSlug } from './shared.js'
 
 const TextFields: CollectionConfig = {
@@ -91,35 +87,6 @@ const TextFields: CollectionConfig = {
             return data?.fieldWithDefaultValue || ''
           },
         ],
-      },
-    },
-    {
-      name: 'customLabel',
-      type: 'text',
-      admin: {
-        components: {
-          Label: CustomLabel,
-        },
-      },
-    },
-    {
-      name: 'customError',
-      type: 'text',
-      admin: {
-        components: {
-          Error: CustomError,
-        },
-      },
-      minLength: 3,
-    },
-    {
-      name: 'beforeAndAfterInput',
-      type: 'text',
-      admin: {
-        components: {
-          afterInput: [AfterInput],
-          beforeInput: [BeforeInput],
-        },
       },
     },
     {

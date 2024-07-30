@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 

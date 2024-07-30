@@ -220,7 +220,13 @@ export const Autosave: React.FC<Props> = ({
 
     return () => {
       if (autosaveTimeout) clearTimeout(autosaveTimeout)
-      if (abortController.signal) abortController.abort()
+      if (abortController.signal) {
+        try {
+          abortController.abort()
+        } catch (error) {
+          // swallow error
+        }
+      }
       setSaving(false)
     }
   }, [

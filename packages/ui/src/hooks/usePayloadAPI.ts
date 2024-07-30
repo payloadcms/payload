@@ -89,7 +89,11 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     }
 
     return () => {
-      abortController.abort()
+      try {
+        abortController.abort()
+      } catch (error) {
+        // swallow error
+      }
     }
   }, [url, locale, search, i18n.language, initialData])
 

@@ -1,5 +1,5 @@
 'use client'
-import type { FieldDescriptionProps } from 'payload'
+import type { GenericDescriptionProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -10,7 +10,7 @@ import './index.scss'
 
 const baseClass = 'field-description'
 
-const DefaultFieldDescription: React.FC<FieldDescriptionProps> = (props) => {
+const DefaultFieldDescription: React.FC<GenericDescriptionProps> = (props) => {
   const { className, description, marginPlacement } = props
 
   const { path } = useFieldProps()
@@ -37,7 +37,7 @@ const DefaultFieldDescription: React.FC<FieldDescriptionProps> = (props) => {
   return null
 }
 
-export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
+export const FieldDescription: React.FC<GenericDescriptionProps> = (props) => {
   const { CustomDescription } = props
 
   if (CustomDescription !== undefined) {

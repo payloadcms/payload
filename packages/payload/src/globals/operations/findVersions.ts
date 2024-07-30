@@ -7,8 +7,6 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -44,8 +42,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const versionFields = buildVersionGlobalFields(globalConfig)
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -146,8 +142,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       ...result,
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

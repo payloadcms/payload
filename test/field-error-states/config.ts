@@ -5,6 +5,8 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ErrorFieldsCollection } from './collections/ErrorFields/index.js'
+import { PrevValue } from './collections/PrevValue/index.js'
+import { PrevValueRelation } from './collections/PrevValueRelation/index.js'
 import Uploads from './collections/Upload/index.js'
 import { ValidateDraftsOff } from './collections/ValidateDraftsOff/index.js'
 import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
@@ -18,6 +20,8 @@ export default buildConfigWithDefaults({
     ValidateDraftsOn,
     ValidateDraftsOff,
     ValidateDraftsOnAndAutosave,
+    PrevValue,
+    PrevValueRelation,
   ],
   globals: [GlobalValidateDraftsOn],
   onInit: async (payload) => {

@@ -13,12 +13,19 @@ import { useSearchParams } from '../SearchParams/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
-type Handlers = {
-  handlePageChange?: (page: number) => void
-  handlePerPageChange?: (limit: number) => void
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+type PropHandlers = {
+  handlePageChange?: (page: number) => Promise<void> | void
+  handlePerPageChange?: (limit: number) => Promise<void> | void
+  handleSearchChange?: (search: string) => Promise<void> | void
+  handleSortChange?: (sort: string) => Promise<void> | void
+  handleWhereChange?: (where: Where) => Promise<void> | void
+}
+type ContextHandlers = {
+  handlePageChange?: (page: number) => Promise<void>
+  handlePerPageChange?: (limit: number) => Promise<void>
+  handleSearchChange?: (search: string) => Promise<void>
+  handleSortChange?: (sort: string) => Promise<void>
+  handleWhereChange?: (where: Where) => Promise<void>
 }
 
 export type ListQueryProps = {
@@ -28,14 +35,14 @@ export type ListQueryProps = {
   defaultSort?: string
   modifySearchParams?: boolean
   preferenceKey?: string
-} & Handlers
+} & PropHandlers
 
 export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: string
-  refineListData: (args: RefineOverrides) => void
-} & Handlers
+  refineListData: (args: RefineOverrides) => Promise<void>
+} & ContextHandlers
 
 const Context = createContext({} as ListQueryContext)
 
@@ -71,6 +78,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     async (query: RefineOverrides) => {
       if (!modifySearchParams) return
 
+      let pageQuery = 'page' in query ? query.page : currentQuery?.page
+      if ('where' in query || 'search' in query) pageQuery = '1'
+
       const updatedPreferences: Record<string, unknown> = {}
       let updatePreferences = false
 
@@ -88,7 +98,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       const params = {
         limit: 'limit' in query ? query.limit : currentQuery?.limit,
-        page: 'page' in query ? query.page : currentQuery?.page,
+        page: pageQuery,
         search: 'search' in query ? query.search : currentQuery?.search,
         sort: 'sort' in query ? query.sort : currentQuery?.sort,
         where: 'where' in query ? query.where : currentQuery?.where,
@@ -102,7 +112,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handlePageChange = React.useCallback(
     async (arg: number) => {
       if (typeof handlePageChangeFromProps === 'function') {
-        handlePageChangeFromProps(arg)
+        await handlePageChangeFromProps(arg)
       }
       await refineListData({ page: String(arg) })
     },
@@ -111,7 +121,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handlePerPageChange = React.useCallback(
     async (arg: number) => {
       if (typeof handlePerPageChangeFromProps === 'function') {
-        handlePerPageChangeFromProps(arg)
+        await handlePerPageChangeFromProps(arg)
       }
       await refineListData({ limit: String(arg) })
     },
@@ -120,7 +130,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handleSearchChange = React.useCallback(
     async (arg: string) => {
       if (typeof handleSearchChangeFromProps === 'function') {
-        handleSearchChangeFromProps(arg)
+        await handleSearchChangeFromProps(arg)
       }
       await refineListData({ search: arg })
     },
@@ -129,7 +139,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handleSortChange = React.useCallback(
     async (arg: string) => {
       if (typeof handleSortChangeFromProps === 'function') {
-        handleSortChangeFromProps(arg)
+        await handleSortChangeFromProps(arg)
       }
       await refineListData({ sort: arg })
     },
@@ -138,7 +148,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handleWhereChange = React.useCallback(
     async (arg: Where) => {
       if (typeof handleWhereChangeFromProps === 'function') {
-        handleWhereChangeFromProps(arg)
+        await handleWhereChangeFromProps(arg)
       }
       await refineListData({ where: arg })
     },
