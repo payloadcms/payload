@@ -30,18 +30,17 @@ type Args = {
     }
 )
 
-const flattenWhere = (query: Where, sanitizePath: (path: string) => string): WhereField[] =>
+const flattenWhere = (query: Where): WhereField[] =>
   Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
     if ((key === 'and' || key === 'or') && Array.isArray(val)) {
       const subWhereConstraints: Where[] = val.reduce((acc, subVal) => {
-        const subWhere = flattenWhere(subVal, sanitizePath)
+        const subWhere = flattenWhere(subVal)
         return [...acc, ...subWhere]
       }, [])
       return [...flattenedConstraints, ...subWhereConstraints]
     }
 
-    const sanitizedKey = sanitizePath(key)
-    return [...flattenedConstraints, { [sanitizedKey]: val }]
+    return [...flattenedConstraints, { [key]: val }]
   }, [])
 
 export async function validateQueryPaths({
@@ -57,24 +56,12 @@ export async function validateQueryPaths({
   versionFields,
   where,
 }: Args): Promise<void> {
-  let fields = flattenFields((globalConfig || collectionConfig).fields) as FieldAffectingData[]
-
-  if (versionFields) {
-    const versionField = versionFields.find((field) => field.name === 'version')
-    if (versionField && versionField.type === 'group' && versionField.fields) {
-      fields = flattenFields(versionField.fields) as FieldAffectingData[]
-    }
-  }
-
-  const sanitizePath = (path: string): string => {
-    if (path.startsWith('version.')) {
-      return path.replace(/^version\./, '')
-    }
-    return path
-  }
+  const fields = flattenFields(
+    versionFields || (globalConfig || collectionConfig).fields,
+  ) as FieldAffectingData[]
 
   if (typeof where === 'object') {
-    const whereFields = flattenWhere(where, sanitizePath)
+    const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
     whereFields.map(async (constraint) => {
