@@ -32,6 +32,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
+import { type PgSchema, pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -62,11 +63,18 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing
     let rejectInitializing
+    let adapterSchema: PostgresAdapter['pgSchema']
 
     const initializing = new Promise<void>((res, rej) => {
       resolveInitializing = res
       rejectInitializing = rej
     })
+
+    if (args.schemaName) {
+      adapterSchema = pgSchema(args.schemaName)
+    } else {
+      adapterSchema = { enum: pgEnum, table: pgTable }
+    }
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
@@ -83,7 +91,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators: operatorMap,
-      pgSchema: undefined,
+      pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,

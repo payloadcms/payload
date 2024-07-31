@@ -21,6 +21,7 @@ import type {
   PgSchema,
   PgTableWithColumns,
   PgTransactionConfig,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
@@ -106,6 +107,13 @@ type PostgresDrizzleAdapter = Omit<
   | 'relations'
 >
 
+type Schema =
+  | {
+      enum: typeof pgEnum
+      table: PgTableFn
+    }
+  | PgSchema
+
 export type PostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
@@ -125,7 +133,7 @@ export type PostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: { table: PgTableFn } | PgSchema
+  pgSchema?: Schema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -133,7 +141,7 @@ export type PostgresAdapter = {
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schema: DrizzleConfig
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {

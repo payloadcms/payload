@@ -7,10 +7,11 @@ export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
+  sequences: {},
   tables: {},
-  version: '5',
+  version: '7',
 }

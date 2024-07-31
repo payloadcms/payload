@@ -120,6 +120,7 @@ export type RequireDrizzleKit = () => {
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
+    filterSchema?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
 }
 

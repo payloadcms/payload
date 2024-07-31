@@ -105,7 +105,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction: args.transactionOptions ? beginTransaction : undefined,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
