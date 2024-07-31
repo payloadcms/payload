@@ -1,4 +1,4 @@
-import type { Field, RichTextAdapter } from 'payload'
+import type { Field, RichTextGenerateComponentMap } from 'payload'
 
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'
@@ -11,8 +11,8 @@ import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
-  (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
-  ({ WithServerSideProps, config, i18n }) => {
+  (args: AdapterArguments): RichTextGenerateComponentMap =>
+  ({ config, createMappedComponent, i18n, importMap }) => {
     const componentMap = new Map()
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
@@ -63,10 +63,11 @@ export const getGenerateComponentMap =
         switch (element.name) {
           case 'link': {
             const mappedFields = mapFields({
-              WithServerSideProps,
               config,
+              createMappedComponent,
               fieldSchema: args.admin?.link?.fields as Field[],
               i18n,
+              importMap,
               readOnly: false,
             })
 
@@ -89,10 +90,11 @@ export const getGenerateComponentMap =
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
                 const mappedFields = mapFields({
-                  WithServerSideProps,
                   config,
+                  createMappedComponent,
                   fieldSchema: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
+                  importMap,
                   readOnly: false,
                 })
 

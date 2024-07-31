@@ -458,11 +458,7 @@ const RichTextField: React.FC<
             </div>
           </div>
         </Slate>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

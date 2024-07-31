@@ -6,6 +6,7 @@ import type {
   CheckboxFieldProps,
   CodeFieldProps,
   CollapsibleFieldProps,
+  CreateMappedComponent,
   DateFieldProps,
   EmailFieldProps,
   ErrorProps,
@@ -31,6 +32,7 @@ import type {
   ReducedBlock,
   RelationshipFieldProps,
   RichTextComponentProps,
+  RichTextGenerateComponentMap,
   RowFieldProps,
   SanitizedConfig,
   SelectFieldProps,
@@ -45,7 +47,6 @@ import { MissingEditorProp, deepCopyObject } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import type { FieldTypesComponents } from '../../../fields/index.js'
-import type { CreateMappedComponent } from './index.js'
 
 import {
   ArrayField,
@@ -587,7 +588,9 @@ export const mapFields = (args: {
                 payloadComponent: field.editor.generateComponentMap,
               })
 
-              const actualGenerateComponentMap = (generateComponentMap as any)(serverProps)
+              const actualGenerateComponentMap: RichTextGenerateComponentMap = (
+                generateComponentMap as any
+              )(serverProps)
 
               const result = actualGenerateComponentMap({
                 config,

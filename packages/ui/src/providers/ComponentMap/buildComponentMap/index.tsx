@@ -21,20 +21,6 @@ import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'
 import { mapGlobals } from './globals.js'
 
-export type CreateMappedComponent = {
-  <T extends JsonObject>(
-    component: { ReactComponent: React.FC<T> } | PayloadComponent<T> | null,
-    props?: object,
-    fallback?: React.FC,
-  ): MappedComponent<T>
-
-  <T extends JsonObject>(
-    components: ({ ReactComponent: React.FC<T> } | PayloadComponent<T>)[],
-    props?: object,
-    fallback?: React.FC,
-  ): MappedComponent<T>[]
-}
-
 export const buildComponentMap = (args: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>

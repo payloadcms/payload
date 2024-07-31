@@ -1,10 +1,15 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ImportMap, JsonObject, MappedComponent, Payload, PayloadComponent } from 'payload'
+import type {
+  CreateMappedComponent,
+  ImportMap,
+  JsonObject,
+  MappedComponent,
+  Payload,
+  PayloadComponent,
+} from 'payload'
 
 import { isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
-
-import type { CreateMappedComponent } from './index.js'
 
 import { getComponent } from './getComponent.js'
 

@@ -1,4 +1,4 @@
-import type { MappedComponent, MappedField } from 'payload'
+import type { MappedComponent, MappedField, RichTextGenerateComponentMap } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -8,7 +8,7 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
-  (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): any =>
+  (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextGenerateComponentMap =>
   ({ config, createMappedComponent, field, i18n, importMap, schemaPath }) => {
     const componentMap: Map<
       string,

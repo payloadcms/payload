@@ -1,11 +1,11 @@
 import type {
+  CreateMappedComponent,
   EditConfig,
   ImportMap,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
-import type { CreateMappedComponent } from './index.js'
 import type { ActionMap } from './types.js'
 
 export const mapActions = (args: {

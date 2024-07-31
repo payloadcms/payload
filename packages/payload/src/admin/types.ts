@@ -1,5 +1,6 @@
 import type React from 'react'
 
+import type { PayloadComponent } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
@@ -7,6 +8,7 @@ export type {
   RichTextAdapter,
   RichTextAdapterProvider,
   RichTextFieldProps,
+  RichTextGenerateComponentMap,
   RichTextHooks,
 } from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
@@ -234,3 +236,17 @@ export type MappedComponent<TComponentClientProps extends JsonObject = JsonObjec
       type: 'client'
     }
   | undefined
+
+export type CreateMappedComponent = {
+  <T extends JsonObject>(
+    component: { ReactComponent: React.FC<T> } | PayloadComponent<T> | null,
+    props?: object,
+    fallback?: React.FC,
+  ): MappedComponent<T>
+
+  <T extends JsonObject>(
+    components: ({ ReactComponent: React.FC<T> } | PayloadComponent<T>)[],
+    props?: object,
+    fallback?: React.FC,
+  ): MappedComponent<T>[]
+}

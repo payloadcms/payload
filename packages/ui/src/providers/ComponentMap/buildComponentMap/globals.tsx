@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  CreateMappedComponent,
   EditViewComponent,
   EditViewProps,
   ImportMap,
@@ -11,7 +12,6 @@ import type {
 import type React from 'react'
 
 import type { ViewDescriptionProps } from '../../../elements/ViewDescription/index.js'
-import type { CreateMappedComponent } from './index.js'
 import type { GlobalComponentMap } from './types.js'
 
 // Need to import from client barrel file
