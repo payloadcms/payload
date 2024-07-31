@@ -84,28 +84,38 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
+    const global = await payload.db.findGlobal({
+      slug: globalConfig.slug,
+      req,
+    })
+
     let result = rawVersion.version
 
-    result = await payload.db.updateGlobal({
-      slug: globalConfig.slug,
-      data: result,
-      req,
-    })
+    if (global) {
+      result = await payload.db.updateGlobal({
+        slug: globalConfig.slug,
+        data: result,
+        req,
+      })
 
-    // /////////////////////////////////////
-    // Create version
-    // /////////////////////////////////////
-    const now = new Date().toISOString()
+      const now = new Date().toISOString()
 
-    result = await payload.db.createGlobalVersion({
-      autosave: false,
-      createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-      globalSlug: globalConfig.slug,
-      parent: id,
-      req,
-      updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-      versionData: result,
-    })
+      result = await payload.db.createGlobalVersion({
+        autosave: false,
+        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+        globalSlug: globalConfig.slug,
+        parent: id,
+        req,
+        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+        versionData: result,
+      })
+    } else {
+      result = await payload.db.createGlobal({
+        slug: globalConfig.slug,
+        data: result,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
