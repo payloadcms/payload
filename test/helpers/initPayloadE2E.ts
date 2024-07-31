@@ -22,7 +22,7 @@ type Result = {
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = path.basename(dirname)
 
-  await spawnInitProcess(testSuiteName)
+  await spawnInitProcess(testSuiteName, true)
 
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()

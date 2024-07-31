@@ -5,13 +5,16 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export async function spawnInitProcess(testSuiteArg: string) {
+export async function spawnInitProcess(
+  testSuiteArg: string,
+  writeDBAdapter: boolean,
+): Promise<void> {
   // Now use tsx to execute initDevAndTest and wait until it console logs "Done". use child_process
   // 1. execute
   // 2. wait until console.log("Done")
   const child = child_process.spawn(
     path.resolve(dirname, '..', 'node_modules/.bin/tsx'),
-    ['test/initDevAndTest.ts', testSuiteArg],
+    ['test/initDevAndTest.ts', testSuiteArg, writeDBAdapter ? 'true' : 'false'],
     {
       stdio: 'pipe',
       cwd: path.resolve(dirname, '..'),
@@ -38,7 +41,7 @@ export async function spawnInitProcess(testSuiteArg: string) {
   })
 
   // wait for done to be true
-  return new Promise((resolve) => {
+  await new Promise((resolve) => {
     const interval = setInterval(() => {
       if (done) {
         clearInterval(interval)

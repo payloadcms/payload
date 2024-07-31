@@ -36,7 +36,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg)
 
-await spawnInitProcess(testSuiteArg)
+await spawnInitProcess(testSuiteArg, true)
 
 // Open the admin if the -o flag is passed
 if (args.o) {

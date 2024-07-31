@@ -32,7 +32,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 }: Args): Promise<Result<T>> {
   const testSuiteName = path.basename(dirname)
 
-  await spawnInitProcess(testSuiteName)
+  await spawnInitProcess(testSuiteName, true)
 
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()

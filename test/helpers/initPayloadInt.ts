@@ -14,8 +14,8 @@ export async function initPayloadInt(
   testSuiteNameOverride?: string,
 ): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
-  await spawnInitProcess(testSuiteName)
-  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
+  await spawnInitProcess(testSuiteName, false)
+  const { default: config } = await eval('import(path.resolve(dirname, "config.ts"))')
 
   const payload = await getPayloadHMR({ config })
   const restClient = new NextRESTClient(payload.config)
