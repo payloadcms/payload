@@ -108,7 +108,10 @@ export async function initDevAndTest() {
 
   const config = await load(pathWithConfig)
 
-  process.env.ROOT_DIR = testSuiteArg === 'live-preview' ? testDir : path.resolve(dirname, '..')
+  process.env.ROOT_DIR =
+    testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root'
+      ? testDir
+      : path.resolve(dirname, '..')
 
   await generateImportMap(config, { log: true, force: true })
 
