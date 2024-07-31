@@ -20,43 +20,46 @@ async function autoLogin({
   user: User | null
 }> {
   if (
-    typeof payload?.config?.admin?.autoLogin === 'object' &&
-    !payload.config.admin?.autoLogin.prefillOnly
+    typeof payload?.config?.admin?.autoLogin !== 'object' ||
+    payload.config.admin?.autoLogin.prefillOnly ||
+    !payload?.config?.admin?.autoLogin ||
+    (!payload.config.admin?.autoLogin.email && !payload.config.admin?.autoLogin.username)
   ) {
-    const collection = payload.collections[payload.config.admin.user]
-
-    const where: Where = {
-      or: [],
-    }
-    if (payload.config.admin?.autoLogin.email) {
-      where.or.push({
-        email: {
-          equals: payload.config.admin?.autoLogin.email,
-        },
-      })
-    } else if (payload.config.admin?.autoLogin.username) {
-      where.or.push({
-        username: {
-          equals: payload.config.admin?.autoLogin.username,
-        },
-      })
-    }
-
-    const user = (
-      await payload.find({
-        collection: collection.config.slug,
-        depth: isGraphQL ? 0 : collection.config.auth.depth,
-        where,
-      })
-    ).docs[0]
-    user.collection = collection.config.slug
-    user._strategy = 'local-jwt'
-
-    return {
-      user: user as User,
-    }
+    return { user: null }
   }
-  return { user: null }
+
+  const collection = payload.collections[payload.config.admin.user]
+
+  const where: Where = {
+    or: [],
+  }
+  if (payload.config.admin?.autoLogin.email) {
+    where.or.push({
+      email: {
+        equals: payload.config.admin?.autoLogin.email,
+      },
+    })
+  } else if (payload.config.admin?.autoLogin.username) {
+    where.or.push({
+      username: {
+        equals: payload.config.admin?.autoLogin.username,
+      },
+    })
+  }
+
+  const user = (
+    await payload.find({
+      collection: collection.config.slug,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      where,
+    })
+  ).docs[0]
+  user.collection = collection.config.slug
+  user._strategy = 'local-jwt'
+
+  return {
+    user: user as User,
+  }
 }
 
 export const JWTAuthentication: AuthStrategyFunction = async ({
