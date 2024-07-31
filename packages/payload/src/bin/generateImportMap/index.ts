@@ -75,7 +75,9 @@ export async function generateImportMap(
   config: SanitizedConfig,
   options?: { force?: boolean; log: boolean },
 ): Promise<void> {
-  console.log('Generating import map')
+  if (options?.log) {
+    console.log('Generating import map')
+  }
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 
@@ -144,7 +146,7 @@ export async function writeImportMap({
   )
 
   if (!force) {
-    // Read current component map and check in the IMPORTS if there are any new imports. If not, don't write the file.
+    // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
     const currentImportMap = await fs.promises.readFile(outputFile, 'utf-8')
     const currentImportMapImports = currentImportMap
       .split('\n')
@@ -164,8 +166,8 @@ export async function writeImportMap({
       }
     }
 
-    if (hasAllImports) {
-      console.log('No new imports found, skipping writing component map')
+    if (log && hasAllImports) {
+      console.log('No new imports found, skipping writing import map')
       return
     }
   }
@@ -188,9 +190,8 @@ ${mapKeys.join(',\n')}
 `
 
   if (log) {
-    console.log(importMapFile)
+    console.log('Writing import map to', outputFile)
   }
 
-  console.log('Writing component map to', outputFile)
   await fs.promises.writeFile(outputFile, importMapFile)
 }
