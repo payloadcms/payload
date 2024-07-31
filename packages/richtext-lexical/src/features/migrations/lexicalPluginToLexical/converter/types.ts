@@ -11,6 +11,7 @@ export type LexicalPluginNodeConverter<T extends SerializedLexicalNode = Seriali
     converters: LexicalPluginNodeConverter[]
     lexicalPluginNode: { children?: SerializedLexicalNode[] } & SerializedLexicalNode
     parentNodeType: string
+    quiet?: boolean
   }) => T
   nodeTypes: string[]
 }

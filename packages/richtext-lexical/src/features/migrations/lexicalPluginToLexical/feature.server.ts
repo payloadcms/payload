@@ -13,6 +13,7 @@ export type LexicalPluginToLexicalFeatureProps = {
         defaultConverters: LexicalPluginNodeConverter[]
       }) => LexicalPluginNodeConverter[])
     | LexicalPluginNodeConverter[]
+  quiet?: boolean
 }
 
 export const LexicalPluginToLexicalFeature =
@@ -48,6 +49,7 @@ export const LexicalPluginToLexicalFeature =
               return convertLexicalPluginToLexical({
                 converters: props.converters as LexicalPluginNodeConverter[],
                 lexicalPluginData: value as PayloadPluginLexicalData,
+                quiet: props?.quiet,
               })
             },
           ],
