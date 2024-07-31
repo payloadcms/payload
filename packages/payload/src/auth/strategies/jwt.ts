@@ -70,11 +70,11 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
   try {
     const token = extractJWT({ headers, payload })
 
-    if (!token && headers.get('DisableAutologin') !== 'true') {
-      const autoLoginResult = await autoLogin({ isGraphQL, payload })
-      if (autoLoginResult.user) {
-        return autoLoginResult
+    if (!token) {
+      if (headers.get('DisableAutologin') !== 'true') {
+        return await autoLogin({ isGraphQL, payload })
       }
+      return { user: null }
     }
 
     const decodedPayload = jwt.verify(token, payload.secret) as JWTToken & jwt.JwtPayload
