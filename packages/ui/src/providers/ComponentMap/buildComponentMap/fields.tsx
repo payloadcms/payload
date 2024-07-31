@@ -226,6 +226,7 @@ export const mapFields = (args: {
           field?.admin?.components &&
             'Filter' in field.admin.components &&
             field.admin?.components?.Filter,
+          undefined,
           valueFields[field.type] || valueFields.text,
         )
 
