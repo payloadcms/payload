@@ -54,13 +54,15 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const mappedBlock = richTextComponentMap.has(componentMapRenderedBlockPath)
+    ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+    : null
 
-  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
+  const blockFieldComponentProps: BlocksFieldProps = mappedBlock?.fieldComponentProps
 
-  const reducedBlock = blockFieldComponentProps.blocks.find(
-    (block) => block.slug === blockFields?.blockType,
-  )
+  const reducedBlock = blockFieldComponentProps
+    ? blockFieldComponentProps.blocks.find((block) => block.slug === blockFields?.blockType)
+    : null
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -158,6 +160,10 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
       ),
     )
   }, [editor, targetNodeKey, toggleModal])
+
+  if (!mappedBlock) {
+    return null
+  }
 
   const blockDisplayName = reducedBlock?.labels?.singular
     ? getTranslation(reducedBlock?.labels?.singular, i18n)
