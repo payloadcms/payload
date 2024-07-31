@@ -49,6 +49,12 @@ export const createMigration: CreateMigration = async function createMigration(
 
   let drizzleJsonBefore = defaultDrizzleSnapshot
 
+  if (this.schemaName) {
+    drizzleJsonBefore.schemas = {
+      [this.schemaName]: this.schemaName,
+    }
+  }
+
   if (!upSQL) {
     // Get latest migration snapshot
     const latestSnapshot = fs

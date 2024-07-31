@@ -107,6 +107,13 @@ type PostgresDrizzleAdapter = Omit<
   | 'relations'
 >
 
+type Schema =
+  | {
+      enum: typeof pgEnum
+      table: PgTableFn
+    }
+  | PgSchema
+
 export type PostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
@@ -126,12 +133,7 @@ export type PostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?:
-    | {
-        enum: typeof pgEnum
-        table: PgTableFn
-      }
-    | PgSchema
+  pgSchema?: Schema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -139,7 +141,7 @@ export type PostgresAdapter = {
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schema: DrizzleConfig
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
