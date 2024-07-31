@@ -54,6 +54,10 @@ async function autoLogin({
       where,
     })
   ).docs[0]
+
+  if (!user) {
+    return { user: null }
+  }
   user.collection = collection.config.slug
   user._strategy = 'local-jwt'
 
