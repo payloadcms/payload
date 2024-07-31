@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 
 describe('Remove token from auth responses', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/removed-token'))
 
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),

@@ -6,7 +6,6 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AuthDebug } from './AuthDebug.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -168,7 +167,7 @@ export default buildConfigWithDefaults({
           type: 'ui',
           admin: {
             components: {
-              Field: AuthDebug,
+              Field: '/AuthDebug.js',
             },
           },
           label: 'Auth Debug',
