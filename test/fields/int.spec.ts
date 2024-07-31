@@ -1278,6 +1278,26 @@ describe('Fields', () => {
       expect(equalsMissResult).toBeUndefined()
       expect(inMissResult).toBeUndefined()
     })
+
+    it('should allow localized array of blocks', async () => {
+      const result = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocksWithLocalizedArray: [
+            {
+              blockType: 'localizedArray',
+              array: [
+                {
+                  text: 'localized',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
+    })
   })
 
   describe('json', () => {
