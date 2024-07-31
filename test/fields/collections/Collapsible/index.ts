@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { collapsibleFieldsSlug } from '../../slugs.js'
-import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -82,11 +81,13 @@ const CollapsibleFields: CollectionConfig = {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
         components: {
-          RowLabel: getCustomLabel({
-            path: 'functionTitleField',
-            fallback: 'Custom Collapsible Label',
-            style: {},
-          }),
+          RowLabel: {
+            clientProps: {
+              path: 'functionTitleField',
+              fallback: 'Custom Collapsible Label',
+            },
+            path: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
+          },
         },
       },
       fields: [
@@ -101,7 +102,12 @@ const CollapsibleFields: CollectionConfig = {
       admin: {
         description: 'Collapsible label rendered as a react component.',
         components: {
-          RowLabel: getCustomLabel({ path: 'componentTitleField', style: {} }),
+          RowLabel: {
+            clientProps: {
+              path: 'componentTitleField',
+            },
+            path: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
+          },
         },
       },
       fields: [
@@ -113,11 +119,13 @@ const CollapsibleFields: CollectionConfig = {
           type: 'collapsible',
           admin: {
             components: {
-              RowLabel: getCustomLabel({
-                path: 'nestedTitle',
-                fallback: 'Nested Collapsible',
-                style: {},
-              }),
+              RowLabel: {
+                clientProps: {
+                  path: 'nestedTitle',
+                  fallback: 'Nested Collapsible',
+                },
+                path: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
+              },
             },
           },
           fields: [

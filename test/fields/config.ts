@@ -102,6 +102,9 @@ export default buildConfigWithDefaults({
         'new-value': 'client available',
       },
     },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   localization: {
     defaultLocale: 'en',

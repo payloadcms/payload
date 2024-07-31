@@ -8,7 +8,6 @@ import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { TestButton } from './TestButton.js'
 import { Disabled } from './collections/Disabled/index.js'
 import {
   createNotUpdateCollectionSlug,
@@ -485,7 +484,7 @@ export default buildConfigWithDefaults({
       admin: {
         components: {
           elements: {
-            SaveButton: TestButton,
+            SaveButton: '/TestButton.js#TestButton',
           },
         },
       },
