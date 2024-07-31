@@ -59,7 +59,7 @@ export const VersionsViewClient: React.FC<{
               limit={data.limit}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
-              onChange={handlePageChange}
+              onChange={() => handlePageChange}
               page={data.page}
               prevPage={data.prevPage}
               totalPages={data.totalPages}
@@ -74,7 +74,7 @@ export const VersionsViewClient: React.FC<{
                   {i18n.t('general:of')} {data.totalDocs}
                 </div>
                 <PerPage
-                  handleChange={handlePerPageChange}
+                  handleChange={() => handlePerPageChange}
                   limit={limit ? Number(limit) : 10}
                   limits={paginationLimits}
                 />
