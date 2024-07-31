@@ -7,7 +7,7 @@ export const usernameField: Field = {
   type: 'text',
   admin: {
     components: {
-      Field: '',
+      Field: '@payloadcms/ui/shared#emptyComponent',
     },
   },
   hooks: {

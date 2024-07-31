@@ -21,3 +21,5 @@ export {
 } from '../../utilities/groupNavItems.js'
 export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isEditing } from '../../utilities/isEditing.js'
+
+export const emptyComponent = () => null
