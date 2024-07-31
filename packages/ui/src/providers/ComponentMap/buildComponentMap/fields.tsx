@@ -893,14 +893,18 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentPropsBase.name AND .name. This can probably be improved
+
+    const idCellComponentProps = {
+      name: 'id',
+      schemaPath: 'id',
+    }
+
     result.push({
       name: 'id',
       type: 'text',
+      Cell: createMappedComponent(undefined, idCellComponentProps, DefaultCell),
       Field: null,
-      cellComponentProps: {
-        name: 'id',
-        schemaPath: 'id',
-      },
+      cellComponentProps: idCellComponentProps,
       disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
