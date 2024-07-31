@@ -59,10 +59,15 @@ export function addPayloadComponentToImportMap({
   }
 
   const importIdentifier = exportName + '_' + Object.keys(imports).length
+
+  // e.g. if baseDir is /test/fields and componentPath is /components/Field.tsx
+  // then path needs to be /test/fields/components/Field.tsx NOT /users/username/project/test/fields/components/Field.tsx
+  // so we need to append baseDir to componentPath
+
   imports[importIdentifier] = {
     path:
       componentPath.startsWith('.') || componentPath.startsWith('/')
-        ? path.resolve(baseDir, componentPath.slice(1))
+        ? path.join(baseDir, componentPath.slice(1))
         : componentPath,
     specifier: exportName,
   }
@@ -81,6 +86,28 @@ export async function generateImportMap(
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 
+  const rootDir = process.env.ROOT_DIR ?? process.cwd()
+
+  // get componentsBaseDir.
+  // E.g.:
+  // config.admin.importMap.baseDir = /test/fields/
+  // rootDir: /
+  // componentsBaseDir = /test/fields/
+
+  // or
+
+  // E.g.:
+  // config.admin.importMap.baseDir = /test/fields/
+  // rootDir: /test
+  // componentsBaseDir = /fields/
+
+  // or
+  // config.admin.importMap.baseDir = /
+  // rootDir: /
+  // componentsBaseDir = /
+
+  const componentsBaseDir = path.relative(rootDir, config.admin.importMap.baseDir)
+
   const addToImportMap: AddToImportMap = (payloadComponent) => {
     if (!payloadComponent) {
       return
@@ -94,7 +121,7 @@ export async function generateImportMap(
     if (Array.isArray(payloadComponent)) {
       for (const component of payloadComponent) {
         addPayloadComponentToImportMap({
-          baseDir: config.admin.importMap.baseDir,
+          baseDir: componentsBaseDir,
           importMap,
           imports,
           payloadComponent: component,
@@ -102,7 +129,7 @@ export async function generateImportMap(
       }
     } else {
       addPayloadComponentToImportMap({
-        baseDir: config.admin.importMap.baseDir,
+        baseDir: componentsBaseDir,
         importMap,
         imports,
         payloadComponent,
@@ -124,6 +151,7 @@ export async function generateImportMap(
     force: options?.force,
     importMap: imports,
     log: options?.log,
+    rootDir,
   })
 }
 
@@ -133,16 +161,15 @@ export async function writeImportMap({
   force,
   importMap,
   log,
+  rootDir,
 }: {
   componentMap: InternalImportMap
   fileName: string
   force?: boolean
   importMap: Imports
   log?: boolean
+  rootDir: string
 }) {
-  const rootDir = process.env.ROOT_DIR || process.cwd()
-  process.env.ROOT_DIR = rootDir
-
   let importMapFolderPath = ''
   if (fs.existsSync(path.resolve(rootDir, 'app/(payload)/admin/'))) {
     importMapFolderPath = path.resolve(rootDir, 'app/(payload)/admin/')
