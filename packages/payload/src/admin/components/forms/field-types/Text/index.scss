@@ -10,6 +10,12 @@
   }
 }
 
+.has-many {
+  .rs__input-container {
+    overflow: hidden;
+  }
+}
+
 html[data-theme='light'] {
   .field-type.text {
     &.error {
