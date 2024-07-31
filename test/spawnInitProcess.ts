@@ -1,17 +1,27 @@
 import child_process from 'node:child_process'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export async function spawnInitProcess(testSuiteArg: string) {
   // Now use tsx to execute initDevAndTest and wait until it console logs "Done". use child_process
   // 1. execute
   // 2. wait until console.log("Done")
-  const child = child_process.spawn('tsx', ['test/initDevAndTest.ts', testSuiteArg], {
-    stdio: 'pipe',
-  })
+  const child = child_process.spawn(
+    path.resolve(dirname, '..', 'node_modules/.bin/tsx'),
+    ['test/initDevAndTest.ts', testSuiteArg],
+    {
+      stdio: 'pipe',
+      cwd: path.resolve(dirname, '..'),
+    },
+  )
 
   let done = false
   // Wait until the child process logs "Done"
   child.stdout.on('data', (data) => {
-    console.log(data.toString())
+    console.log('initDevAndTest data', data.toString())
     if (data.toString().includes('Done')) {
       child.kill()
       done = true
@@ -20,7 +30,7 @@ export async function spawnInitProcess(testSuiteArg: string) {
 
   // on error
   child.stderr.on('data', (data) => {
-    console.error(data.toString())
+    console.error('initDevAndTest error', data.toString())
   })
 
   child.on('close', (code) => {
