@@ -15,6 +15,9 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     user: 'users',
     importMap: {
       baseDir: path.resolve(dirname),
