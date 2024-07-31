@@ -26,7 +26,10 @@ async function run() {
 
     setTestEnvPaths(testDir)
 
-    process.env.ROOT_DIR = testConfigDir === 'live-preview' ? testDir : path.resolve(dirname, '..')
+    process.env.ROOT_DIR =
+      testConfigDir === 'live-preview' || testConfigDir === 'admin-root'
+        ? testDir
+        : path.resolve(dirname, '..')
 
     await generateImportMap(config, { log: true, force: true })
   }

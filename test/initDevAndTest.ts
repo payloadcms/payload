@@ -71,7 +71,7 @@ const databaseAdapters = {
 
 export async function initDevAndTest() {
   // create a new importMap.js with contents export const importMap = {} in app/(payload)/admin/importMap.js - delete existing file:
-  if (testSuiteArg === 'live-preview') {
+  if (testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root') {
     fs.writeFileSync(
       'test/live-preview/app/(payload)/admin/importMap.js',
       'export const importMap = {}',
