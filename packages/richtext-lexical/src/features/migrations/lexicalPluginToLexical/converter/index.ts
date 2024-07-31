@@ -85,6 +85,7 @@ export function convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNode,
         parentNodeType,
+        quiet,
       })
     }) || []
   )
