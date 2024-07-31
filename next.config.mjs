@@ -21,8 +21,8 @@ export default withBundleAnalyzer(
       ignoreBuildErrors: true,
     },
     env: {
-      NEXT_PUBLIC_PAYLOAD_CORE_DEV: 'true',
-      NEXT_PUBLIC_ROOT_DIR: path.resolve(dirname),
+      PAYLOAD_CORE_DEV: 'true',
+      ROOT_DIR: path.resolve(dirname),
     },
     async redirects() {
       return [
