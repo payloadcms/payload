@@ -143,22 +143,22 @@ export async function writeImportMap({
   const rootDir = process.env.ROOT_DIR || process.cwd()
   process.env.ROOT_DIR = rootDir
 
-  let importMapFilePath = ''
+  let importMapFolderPath = ''
   if (fs.existsSync(path.resolve(rootDir, 'app/(payload)/admin/'))) {
-    importMapFilePath = path.resolve(rootDir, 'app/(payload)/admin/')
+    importMapFolderPath = path.resolve(rootDir, 'app/(payload)/admin/')
   } else if (fs.existsSync(path.resolve(rootDir, 'src/app/(payload)/admin/'))) {
-    importMapFilePath = path.resolve(rootDir, 'src/app/(payload)/admin/')
+    importMapFolderPath = path.resolve(rootDir, 'src/app/(payload)/admin/')
   } else {
     throw new Error(
       `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, 'app/(payload)/admin/')} and ${path.resolve(rootDir, 'src/app/(payload)/admin/')}`,
     )
   }
 
-  const importMapFile = path.resolve(importMapFilePath, fileName)
+  const importMapFilePath = path.resolve(importMapFolderPath, fileName)
 
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.promises.readFile(importMapFile, 'utf-8')
+    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
     const currentImportMapImports = currentImportMap
       .split('\n')
       .filter((line) => line.startsWith('import'))

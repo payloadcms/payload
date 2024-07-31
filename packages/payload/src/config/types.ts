@@ -653,7 +653,10 @@ export type Config = {
        */
       autoGenerate?: boolean
 
-      /** The base directory for normal paths */
+      /** The base directory for component paths starting with /.
+       *
+       * By default, this is process.cwd()
+       **/
       baseDir?: string
       /**
        * You can use generators to add custom components to the component import map.
