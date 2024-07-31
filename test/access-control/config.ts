@@ -63,6 +63,9 @@ export default buildConfigWithDefaults({
   admin: {
     autoLogin: false,
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {

@@ -40,6 +40,11 @@ export const customIdNumberSlug = 'custom-id-number'
 export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug,

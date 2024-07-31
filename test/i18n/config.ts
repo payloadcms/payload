@@ -33,6 +33,11 @@ export type CustomTranslationsObject = typeof customTranslationsObject.en
 export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'collection1',

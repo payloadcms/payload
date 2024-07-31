@@ -17,6 +17,9 @@ export default buildConfigWithDefaults({
       prefillOnly: true,
     },
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {

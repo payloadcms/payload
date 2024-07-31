@@ -54,6 +54,11 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
 ]
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       admin: {

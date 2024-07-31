@@ -28,6 +28,11 @@ const colorField: Block = {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Pages, Users],
   editor: slateEditor({}),
   localization: {
