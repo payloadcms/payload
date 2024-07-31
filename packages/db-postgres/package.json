@@ -26,8 +26,8 @@
   "dependencies": {
     "@libsql/client": "^0.3.1",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.20.14-1f2c838",
-    "drizzle-orm": "0.29.3",
+    "drizzle-kit": "0.23.1-7816536",
+    "drizzle-orm": "0.32.1",
     "pg": "8.11.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",

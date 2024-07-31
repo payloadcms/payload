@@ -13,6 +13,7 @@ import type {
   PgSchema,
   PgTableWithColumns,
   PgTransaction,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload } from 'payload'
@@ -60,6 +61,13 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
+type Schema =
+  | {
+      enum: typeof pgEnum
+      table: PgTableFn
+    }
+  | PgSchema
+
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
@@ -71,13 +79,13 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   idType: Args['idType']
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  pgSchema?: { table: PgTableFn } | PgSchema
+  pgSchema: Schema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schema: Record<string, unknown>
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
@@ -116,7 +124,7 @@ declare module 'payload' {
     push: boolean
     relations: Record<string, GenericRelation>
     relationshipsSuffix?: string
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+    schema: Record<string, unknown>
     sessions: {
       [id: string]: {
         db: DrizzleTransaction

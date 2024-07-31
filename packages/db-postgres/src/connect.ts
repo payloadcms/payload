@@ -48,6 +48,7 @@ const connectWithReconnect = async function ({
 
 export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
   this.schema = {
+    pgSchema: this.pgSchema,
     ...this.tables,
     ...this.relations,
     ...this.enums,
@@ -89,6 +90,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
     this.schema,
     this.drizzle,
+    this.schemaName ? [this.schemaName] : undefined,
   )
 
   if (warnings.length) {

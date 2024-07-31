@@ -2,7 +2,6 @@
 import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 
 import type { PostgresAdapter } from './types'
@@ -11,14 +10,8 @@ import { buildTable } from './schema/build'
 import { createTableName } from './schema/createTableName'
 
 export const init: Init = async function init(this: PostgresAdapter) {
-  if (this.schemaName) {
-    this.pgSchema = pgSchema(this.schemaName)
-  } else {
-    this.pgSchema = { table: pgTable }
-  }
-
   if (this.payload.config.localization) {
-    this.enums.enum__locales = pgEnum(
+    this.enums.enum__locales = this.pgSchema.enum(
       '_locales',
       this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],
     )

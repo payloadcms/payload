@@ -37,12 +37,20 @@ import { updateOne } from './update'
 import { updateGlobal } from './updateGlobal'
 import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
+import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  let adapterSchema: PostgresAdapter['pgSchema']
+
+  if (args.schemaName) {
+    adapterSchema = pgSchema(args.schemaName)
+  } else {
+    adapterSchema = { enum: pgEnum, table: pgTable }
+  }
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -55,7 +63,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       idType: postgresIDType,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      pgSchema: undefined,
+      pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,

@@ -46,9 +46,10 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
   dialect: 'pg',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
+  sequences: {},
   schemas: {},
   tables: {},
-  version: '5',
+  version: '7',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
@@ -75,6 +76,12 @@ export const createMigration: CreateMigration = async function createMigration(
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+
+  if (this.schemaName) {
+    drizzleJsonBefore.schemas = {
+      [this.schemaName]: this.schemaName,
+    }
+  }
 
   // Get latest migration snapshot
   const latestSnapshot = fs
