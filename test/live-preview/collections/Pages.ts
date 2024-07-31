@@ -7,7 +7,6 @@ import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
-import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton/index.js'
 import { hero } from '../fields/hero.js'
 import { pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
 
@@ -26,7 +25,9 @@ export const Pages: CollectionConfig = {
       views: {
         Edit: {
           LivePreview: {
-            actions: [CollectionLivePreviewButton],
+            actions: [
+              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
+            ],
           },
         },
       },

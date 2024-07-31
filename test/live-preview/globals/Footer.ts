@@ -1,6 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import GlobalLivePreviewButton from '../components/GlobalLivePreviewButton/index.js'
 import link from '../fields/link.js'
 
 export const Footer: GlobalConfig = {
@@ -14,7 +13,7 @@ export const Footer: GlobalConfig = {
       views: {
         Edit: {
           LivePreview: {
-            actions: [GlobalLivePreviewButton],
+            actions: ['/components/GlobalLivePreviewButton/index.js#GlobalLivePreviewButton'],
           },
         },
       },

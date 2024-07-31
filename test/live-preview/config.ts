@@ -26,6 +26,9 @@ import { formatLivePreviewURL } from './utilities/formatLivePreviewURL.js'
 
 export default buildConfigWithDefaults({
   admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     livePreview: {
       // You can define any of these properties on a per collection or global basis
       // The Live Preview config cascades from the top down, properties are inherited from here
