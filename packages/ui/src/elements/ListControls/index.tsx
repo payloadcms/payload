@@ -135,7 +135,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <SearchIcon />
         <SearchFilter
           fieldName={titleField?.name}
-          handleChange={void handleSearchChange}
+          handleChange={(search) => {
+            return void handleSearchChange(search)
+          }}
           initialParams={searchParams}
           key={collectionSlug}
           label={searchLabelTranslated.current}
