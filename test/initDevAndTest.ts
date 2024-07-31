@@ -79,8 +79,11 @@ export async function initDevAndTest() {
     fs.writeFileSync('app/(payload)/admin/importMap.js', 'export const importMap = {}')
   }
 
+  const dbAdapter: keyof typeof databaseAdapters =
+    (process.env.PAYLOAD_DATABASE as keyof typeof databaseAdapters) || 'mongodb'
+
   // Generate databaseAdapter.ts
-  const databaseAdapter = databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb']
+  const databaseAdapter = databaseAdapters[dbAdapter]
 
   // Write to databaseAdapter.ts
   fs.writeFileSync(
@@ -91,6 +94,8 @@ export async function initDevAndTest() {
   ${databaseAdapter}
   `,
   )
+
+  console.log('Wrote', dbAdapter, 'db adapter')
 
   // Generate importMap
   const testDir = path.resolve(dirname, testSuiteArg)
