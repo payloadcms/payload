@@ -551,9 +551,7 @@ jobs:
 
   publish-canary:
     name: Publish Canary
-    if: |
-      github.ref == 'refs/heads/beta' &&
-      github.repository == 'payloadcms/payload'
+    if: github.ref == 'refs/heads/beta'
     runs-on: ubuntu-latest
     needs:
       - all-green
