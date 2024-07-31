@@ -19,6 +19,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         label={t('general:email')}
         labelProps={{ htmlFor: 'field-email', required }}
         name="email"
+        path="email"
         required={required}
         validate={(value) =>
           email(value, {
@@ -40,6 +41,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         label={t('authentication:username')}
         name="username"
+        path="username"
         required
         validate={(value) =>
           username(value, {
@@ -66,6 +68,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         label={t('authentication:emailOrUsername')}
         name="username"
+        path="username"
         required
         validate={(value) => {
           const passesUsername = username(value, {
