@@ -11,8 +11,9 @@ import { NextRESTClient } from './NextRESTClient.js'
  */
 export async function initPayloadInt(
   dirname: string,
+  testSuiteNameOverride?: string,
 ): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
-  const testSuiteName = path.basename(dirname)
+  const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
   await spawnInitProcess(testSuiteName)
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 

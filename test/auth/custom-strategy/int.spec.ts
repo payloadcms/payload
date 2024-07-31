@@ -22,7 +22,7 @@ const dirname = path.dirname(filename)
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/custom-strategy'))
   })
 
   afterAll(async () => {

@@ -103,8 +103,6 @@ export async function initDevAndTest() {
   process.env.NEXT_PUBLIC_ROOT_DIR =
     testSuiteArg === 'live-preview' ? testDir : path.resolve(dirname, '..')
 
-  console.log('process.env.NEXT_PUBLIC_ROOT_DIR', process.env.NEXT_PUBLIC_ROOT_DIR, testSuiteArg)
-
   await generateImportMap(config, { log: true, force: true })
 
   console.log('Done')
