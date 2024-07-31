@@ -70,7 +70,14 @@ const databaseAdapters = {
 
 export async function initDevAndTest() {
   // create a new importMap.js with contents export const importMap = {} in app/(payload)/admin/importMap.js - delete existing file:
-  fs.writeFileSync('app/(payload)/admin/importMap.js', 'export const importMap = {}')
+  if (testSuiteArg === 'live-preview') {
+    fs.writeFileSync(
+      'test/live-preview/app/(payload)/admin/importMap.js',
+      'export const importMap = {}',
+    )
+  } else {
+    fs.writeFileSync('app/(payload)/admin/importMap.js', 'export const importMap = {}')
+  }
 
   // Generate databaseAdapter.ts
   const databaseAdapter = databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb']
@@ -93,7 +100,10 @@ export async function initDevAndTest() {
 
   const config = await load(pathWithConfig)
 
-  process.env.NEXT_PUBLIC_ROOT_DIR = path.resolve(dirname, '..')
+  process.env.NEXT_PUBLIC_ROOT_DIR =
+    testSuiteArg === 'live-preview' ? testDir : path.resolve(dirname, '..')
+
+  console.log('process.env.NEXT_PUBLIC_ROOT_DIR', process.env.NEXT_PUBLIC_ROOT_DIR, testSuiteArg)
 
   await generateImportMap(config, { log: true, force: true })
 
