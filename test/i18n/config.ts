@@ -18,8 +18,6 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { ComponentWithCustomI18n } from './ComponentWithCustomI18n.js'
-import { ComponentWithDefaultI18n } from './ComponentWithDefaultI18n.js'
 
 const customTranslationsObject = {
   en: {
@@ -36,6 +34,12 @@ export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      afterDashboard: [
+        '/ComponentWithDefaultI18n.js#ComponentWithDefaultI18n',
+        '/ComponentWithCustomI18n.js#ComponentWithCustomI18n',
+      ],
     },
   },
   collections: [
@@ -75,11 +79,6 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-  admin: {
-    components: {
-      afterDashboard: [ComponentWithDefaultI18n, ComponentWithCustomI18n],
-    },
-  },
   i18n: {
     translations: customTranslationsObject,
   },
