@@ -13,6 +13,7 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
+  exactText,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -34,8 +35,6 @@ const headers = {
 }
 
 const createFirstUser = async ({
-  customAdminRoutes,
-  customRoutes,
   page,
   serverURL,
 }: {
@@ -49,19 +48,35 @@ const createFirstUser = async ({
       routes: { createFirstUser: createFirstUserRoute },
     },
     routes: { admin: adminRoute },
-  } = getRoutes({
-    customAdminRoutes,
-    customRoutes,
-  })
+  } = getRoutes({})
 
+  // wait for create first user route
   await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+
+  // forget to fill out confirm password
+  await page.locator('#field-email').fill(devUser.email)
+  await page.locator('#field-password').fill(devUser.password)
+  await wait(500)
+  await page.locator('.form-submit > button').click()
+  await expect(page.locator('.field-type.confirm-password .field-error')).toHaveText(
+    'This field is required.',
+  )
+
+  // make them match, but does not pass password validation
+  await page.locator('#field-email').fill(devUser.email)
+  await page.locator('#field-password').fill('12')
+  await page.locator('#field-confirm-password').fill('12')
+  await wait(500)
+  await page.locator('.form-submit > button').click()
+  await expect(page.locator('.field-type.password .field-error')).toHaveText(
+    'This value must be longer than the minimum length of 3 characters.',
+  )
+
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)
   await page.locator('#field-custom').fill('Hello, world!')
-
   await wait(500)
-
   await page.locator('.form-submit > button').click()
 
   await expect
@@ -109,7 +124,7 @@ describe('auth', () => {
   })
 
   describe('authenticated users', () => {
-    beforeAll(({ browser }) => {
+    beforeAll(() => {
       url = new AdminUrlUtil(serverURL, slug)
     })
 
@@ -118,15 +133,35 @@ describe('auth', () => {
       const emailBeforeSave = await page.locator('#field-email').inputValue()
       await page.locator('#change-password').click()
       await page.locator('#field-password').fill('password')
+      // should fail to save without confirm password
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('This field is required.'),
+        }),
+      ).toBeVisible()
+
+      // should fail to save with incorrect confirm password
+      await page.locator('#field-confirm-password').fill('wrong password')
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('Passwords do not match.'),
+        }),
+      ).toBeVisible()
+
+      // should succeed with matching confirm password
       await page.locator('#field-confirm-password').fill('password')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save')
+
+      // should still have the same email
       await expect(page.locator('#field-email')).toHaveValue(emailBeforeSave)
     })
 
     test('should have up-to-date user in `useAuth` hook', async () => {
       await page.goto(url.account)
       await page.waitForURL(url.account)
-      await expect(page.locator('#users-api-result')).toHaveText('Hello, world!')
+      await expect(page.locator('#users-api-result')).toHaveText('')
       await expect(page.locator('#use-auth-result')).toHaveText('Hello, world!')
       const field = page.locator('#field-custom')
       await field.fill('Goodbye, world!')
