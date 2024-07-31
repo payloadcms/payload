@@ -71,7 +71,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     })
 
     if (args.schemaName) {
-      adapterSchema = pgSchema(this.schemaName)
+      adapterSchema = pgSchema(args.schemaName)
     } else {
       adapterSchema = { enum: pgEnum, table: pgTable }
     }

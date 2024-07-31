@@ -126,10 +126,12 @@ export type PostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: {
-    enum: typeof pgEnum
-    table: PgTableFn
-  }
+  pgSchema?:
+    | {
+        enum: typeof pgEnum
+        table: PgTableFn
+      }
+    | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
