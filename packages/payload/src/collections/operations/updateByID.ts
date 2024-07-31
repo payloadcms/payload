@@ -263,6 +263,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       const { hash, salt } = await generatePasswordSaltHash({
         collection: collectionConfig,
         password,
+        req,
       })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash

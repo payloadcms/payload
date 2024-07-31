@@ -87,7 +87,7 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   value,
   {
     maxLength: fieldMaxLength,
-    minLength,
+    minLength = 3,
     req: {
       payload: { config },
       t,

@@ -15,8 +15,11 @@ export const getDocumentData = async (args: {
   id?: number | string
   locale: Locale
   req: PayloadRequest
+  schemaPath?: string
 }): Promise<Data> => {
-  const { id, collectionConfig, globalConfig, locale, req } = args
+  const { id, collectionConfig, globalConfig, locale, req, schemaPath: schemaPathFromProps } = args
+
+  const schemaPath = schemaPathFromProps || collectionConfig?.slug || globalConfig?.slug
 
   try {
     const formState = await buildFormState({
@@ -28,7 +31,7 @@ export const getDocumentData = async (args: {
           globalSlug: globalConfig?.slug,
           locale: locale?.code,
           operation: (collectionConfig && id) || globalConfig ? 'update' : 'create',
-          schemaPath: collectionConfig?.slug || globalConfig?.slug,
+          schemaPath,
         },
       },
     })

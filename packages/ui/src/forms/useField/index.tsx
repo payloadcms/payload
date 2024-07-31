@@ -220,6 +220,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       user,
       validate,
       field?.rows,
+      field?.valid,
     ],
   )
 

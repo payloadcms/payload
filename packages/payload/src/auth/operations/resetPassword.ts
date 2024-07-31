@@ -70,6 +70,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     const { hash, salt } = await generatePasswordSaltHash({
       collection: collectionConfig,
       password: data.password,
+      req,
     })
 
     user.salt = salt

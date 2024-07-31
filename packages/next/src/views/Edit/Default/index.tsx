@@ -81,8 +81,6 @@ export const DefaultEditView: React.FC = () => {
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
-  const [schemaPath, setSchemaPath] = useState(collectionSlug)
-
   const componentMap = getComponentMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
@@ -103,6 +101,9 @@ export const DefaultEditView: React.FC = () => {
     !disableLeaveWithoutSaving
 
   const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+
+  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(false)
 
   const onSave = useCallback(
     (json) => {
@@ -160,7 +161,6 @@ export const DefaultEditView: React.FC = () => {
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-
       return getFormState({
         apiRoute,
         body: {
@@ -175,7 +175,7 @@ export const DefaultEditView: React.FC = () => {
         serverURL,
       })
     },
-    [apiRoute, collectionSlug, getDocPreferences, globalSlug, id, operation, schemaPath, serverURL],
+    [apiRoute, collectionSlug, schemaPath, getDocPreferences, globalSlug, id, operation, serverURL],
   )
 
   return (
@@ -184,7 +184,7 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit={!collectionConfig?.auth}
+          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isInitializing || !hasSavePermission}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
@@ -234,6 +234,7 @@ export const DefaultEditView: React.FC = () => {
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
                       setSchemaPath={setSchemaPath}
+                      setValidateBeforeSubmit={setValidateBeforeSubmit}
                       useAPIKey={auth.useAPIKey}
                       username={data?.username}
                       verify={auth.verify}

@@ -14,6 +14,7 @@ import {
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
+import { email as emailValidation } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -35,6 +36,7 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly,
     requirePassword,
     setSchemaPath,
+    setValidateBeforeSubmit,
     useAPIKey,
     username,
     verify,
@@ -43,6 +45,7 @@ export const Auth: React.FC<Props> = (props) => {
   const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
+  const forceOpenChangePassword = useFormFields(([fields]) => (fields && fields?.password) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
@@ -73,8 +76,22 @@ export const Auth: React.FC<Props> = (props) => {
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
+        setValidateBeforeSubmit(true)
         setSchemaPath(`_${collectionSlug}.auth`)
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'password',
+          valid: false,
+        })
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'confirm-password',
+          valid: false,
+        })
       } else {
+        setValidateBeforeSubmit(false)
         setSchemaPath(collectionSlug)
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
@@ -82,7 +99,7 @@ export const Auth: React.FC<Props> = (props) => {
 
       setChangingPassword(showPasswordFields)
     },
-    [collectionSlug, dispatchFields, setSchemaPath],
+    [dispatchFields, t, collectionSlug, setSchemaPath, setValidateBeforeSubmit],
   )
 
   const unlock = useCallback(async () => {
@@ -117,6 +134,8 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing
 
+  const showPasswordFields = changingPassword || forceOpenChangePassword
+
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
@@ -140,22 +159,33 @@ export const Auth: React.FC<Props> = (props) => {
               name="email"
               readOnly={readOnly}
               required={!loginWithUsername || loginWithUsername?.requireEmail}
+              validate={(value) =>
+                emailValidation(value, {
+                  name: 'email',
+                  type: 'email',
+                  data: {},
+                  preferences: { fields: {} },
+                  req: { t } as any,
+                  required: true,
+                  siblingData: {},
+                })
+              }
             />
           )}
-          {(changingPassword || requirePassword) && (
+          {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                autoComplete="off"
                 disabled={disabled}
                 label={t('authentication:newPassword')}
                 name="password"
+                path="password"
                 required
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>
-            {changingPassword && !requirePassword && (
+            {showPasswordFields && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -165,7 +195,7 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && (
+            {!showPasswordFields && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}

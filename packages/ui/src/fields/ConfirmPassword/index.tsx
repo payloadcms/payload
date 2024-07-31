@@ -56,6 +56,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError path={path} />
         <input
+          aria-label={t('authentication:confirmPassword')}
           autoComplete="off"
           disabled={!!disabled}
           id="field-confirm-password"
