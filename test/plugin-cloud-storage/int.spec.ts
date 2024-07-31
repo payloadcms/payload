@@ -8,7 +8,6 @@ import type { Config } from './payload-types.js'
 
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -19,7 +18,7 @@ let payload: Payload
 
 describe('@payloadcms/plugin-cloud-storage', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

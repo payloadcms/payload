@@ -1,13 +1,15 @@
 import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import config, {
+import {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -16,12 +18,15 @@ import config, {
   slug,
 } from './config.js'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 let restClient: NextRESTClient
 let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     // Wait for indexes to be created,
     // as we need them to query by point
