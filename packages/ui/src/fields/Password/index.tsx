@@ -28,7 +28,10 @@ export type PasswordFieldProps = {
   style?: React.CSSProperties
   validate?: Validate
   width?: string
-} & Pick<FormFieldBase, 'AfterInput' | 'BeforeInput' | 'CustomDescription' | 'CustomError' | 'CustomLabel' | >
+} & Pick<
+  FormFieldBase,
+  'AfterInput' | 'BeforeInput' | 'CustomDescription' | 'CustomError' | 'CustomLabel'
+>
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {

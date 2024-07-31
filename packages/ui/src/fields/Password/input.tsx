@@ -5,6 +5,7 @@ import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -62,7 +63,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         <div>
-          {BeforeInput !== undefined && BeforeInput}
+          <RenderComponent mappedComponent={BeforeInput} />
           <input
             aria-label={label}
             autoComplete={autoComplete}
@@ -77,9 +78,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             type="password"
             value={value || ''}
           />
-          {AfterInput !== undefined && AfterInput}
+          <RenderComponent mappedComponent={AfterInput} />
         </div>
-        {CustomDescription !== undefined && CustomDescription}
+        <RenderComponent mappedComponent={CustomDescription} />
       </div>
     </div>
   )
