@@ -75,9 +75,9 @@ export function iterateConfig({
     }
   }
 
-  if (config?.admin?.adminDependencies) {
-    for (const key in config.admin.adminDependencies) {
-      const dependency = config.admin.adminDependencies[key]
+  if (config?.admin?.dependencies) {
+    for (const key in config.admin.dependencies) {
+      const dependency = config.admin.dependencies[key]
       addToImportMap(dependency.path)
     }
   }

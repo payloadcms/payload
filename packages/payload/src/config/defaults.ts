@@ -2,11 +2,11 @@ import type { Config } from './types.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
-    adminDependencies: {},
     avatar: 'gravatar',
     components: {},
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
+    dependencies: {},
     disable: false,
     importMap: {
       baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,

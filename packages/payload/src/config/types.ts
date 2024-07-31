@@ -538,8 +538,6 @@ export interface AdminDependencies {
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
-    adminDependencies?: AdminDependencies
-
     /** Automatically log in as a user */
     autoLogin?:
       | {
@@ -559,6 +557,7 @@ export type Config = {
           username?: string
         }
       | false
+
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -639,6 +638,12 @@ export type Config = {
     custom?: Record<string, any>
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
+    /**
+     * Each entry in this map generates an entry in the importMap,
+     * as well as an entry in the componentMap if the type of the
+     * dependency is 'component'
+     */
+    dependencies?: AdminDependencies
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
     importMap?: {

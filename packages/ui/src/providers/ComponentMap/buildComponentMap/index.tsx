@@ -98,8 +98,8 @@ export const buildComponentMap = (args: {
   )
 
   const custom = {}
-  if (config?.admin?.adminDependencies) {
-    for (const [key, dependency] of Object.entries(config.admin.adminDependencies)) {
+  if (config?.admin?.dependencies) {
+    for (const [key, dependency] of Object.entries(config.admin.dependencies)) {
       if (dependency.type === 'component') {
         const CustomComponent = importMap[dependency.path]
 
