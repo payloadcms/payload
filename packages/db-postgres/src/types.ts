@@ -21,6 +21,7 @@ import type {
   PgSchema,
   PgTableWithColumns,
   PgTransactionConfig,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
@@ -125,7 +126,10 @@ export type PostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: { table: PgTableFn } | PgSchema
+  pgSchema?: {
+    enum: typeof pgEnum
+    table: PgTableFn
+  }
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
