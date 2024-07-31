@@ -20,7 +20,7 @@ async function run() {
     testDir = path.resolve(dirname, testConfigDir)
 
     const pathWithConfig = path.resolve(testDir, 'config.ts')
-    console.log('Generating import map for config:', pathWithConfig)
+    console.log('Generating ad-hoc import map for config:', pathWithConfig)
 
     const config: SanitizedConfig = (await load(pathWithConfig)) as unknown as SanitizedConfig
 

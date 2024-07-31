@@ -83,6 +83,12 @@ export async function generateImportMap(
     if (!payloadComponent) {
       return
     }
+
+    if (typeof payloadComponent !== 'object' && typeof payloadComponent !== 'string') {
+      console.error(payloadComponent)
+      throw new Error('addToImportMap > Payload component must be an object or a string')
+    }
+
     if (Array.isArray(payloadComponent)) {
       for (const component of payloadComponent) {
         addPayloadComponentToImportMap({
