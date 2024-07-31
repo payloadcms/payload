@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Dev Fields" type="NodeJSConfigurationType" application-parameters="--no-deprecation fields" path-to-js-file="$PROJECT_DIR$/test/dev.ts" working-dir="$PROJECT_DIR$">
-    <envs>
-      <env name="NODE_OPTIONS" value="--no-deprecation" />
-    </envs>
-    <method v="2" />
-  </configuration>
-</component>
