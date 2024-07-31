@@ -62,6 +62,10 @@ export const RenderComponent: React.FC<{
     return mappedComponent.RenderedComponent
   }
 
+  if (!mappedComponent.Component) {
+    return null
+  }
+
   if (mappedComponent.type === 'server') {
     if (mappedComponent.props) {
       return (
