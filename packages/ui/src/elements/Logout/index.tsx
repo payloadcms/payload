@@ -23,6 +23,7 @@ const DefaultLogout: React.FC<{
     routes: { admin: adminRoute },
   } = config
 
+  const basePath = process.env.NEXT_BASE_PATH ?? ''
   const LinkElement = Link || 'a'
 
   return (
@@ -31,6 +32,7 @@ const DefaultLogout: React.FC<{
       className={`${baseClass}__log-out`}
       href={formatAdminURL({
         adminRoute,
+        basePath,
         path: logoutRoute,
       })}
       tabIndex={tabIndex}
