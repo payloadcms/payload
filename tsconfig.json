@@ -84,6 +84,9 @@
       "@payloadcms/plugin-search/client": [
         "./packages/plugin-search/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-form-builder/client": [
+        "./packages/plugin-form-builder/src/exports/client.ts"
+      ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"
       ]
