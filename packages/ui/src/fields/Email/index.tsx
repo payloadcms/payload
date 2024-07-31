@@ -77,6 +77,8 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={BeforeInput} />
+        {/* disable eslint here because the label is dynamic */}
+        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
           disabled={disabled}
@@ -84,6 +86,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           name={path}
           onChange={setValue}
           placeholder={getTranslation(placeholder, i18n)}
+          required={required}
           type="email"
           value={(value as string) || ''}
         />

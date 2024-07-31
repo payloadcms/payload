@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Description, FormFieldBase , Validate } from 'payload'
+import type { ClientValidate, Description, FormFieldBase, Validate } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -81,12 +81,15 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        {/* ignore this eslint problem because the label is dynamic */}
+        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
           disabled={disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}
+          required={required}
           type="password"
           value={(value as string) || ''}
         />
