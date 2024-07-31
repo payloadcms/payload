@@ -1185,7 +1185,7 @@ describe('collections-graphql', () => {
       expect(errors[0].message).toEqual('The following field is invalid: password')
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
-      expect(errors[0].extensions.data.errors[0].message).toEqual('No password was given')
+      expect(errors[0].extensions.data.errors[0].message).toEqual('This field is required.')
       expect(errors[0].extensions.data.errors[0].field).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)

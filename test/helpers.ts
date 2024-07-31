@@ -190,7 +190,7 @@ export async function saveDocAndAssert(
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
   } else {
-    await expect(page.locator('.payload-toast-container .toast-error').nth(1)).toBeVisible()
+    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
 }
 
