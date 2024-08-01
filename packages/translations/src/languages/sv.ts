@@ -402,6 +402,7 @@ export const svTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publicera ändringar',
     published: 'Publicerad',
     publishing: 'Publicering',
+    restoreAsDraft: 'Återställ som utkast',
     restoreThisVersion: 'Återställ den här versionen',
     restoredSuccessfully: 'Återställd framgångsrikt.',
     restoring: 'Återställer...',

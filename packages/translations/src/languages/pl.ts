@@ -403,6 +403,7 @@ export const plTranslations: DefaultTranslationsObject = {
     publishChanges: 'Opublikuj zmiany',
     published: 'Opublikowano',
     publishing: 'Publikacja',
+    restoreAsDraft: 'Przywróć jako szkic',
     restoreThisVersion: 'Przywróć tę wersję',
     restoredSuccessfully: 'Przywrócono pomyślnie.',
     restoring: 'Przywracanie...',

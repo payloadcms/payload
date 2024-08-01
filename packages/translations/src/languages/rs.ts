@@ -398,6 +398,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     publishChanges: 'Објави промене',
     published: 'Објављено',
     publishing: 'Objavljivanje',
+    restoreAsDraft: 'Vrati kao nacrt',
     restoreThisVersion: 'Врати ову верзију',
     restoredSuccessfully: 'Успешно враћено.',
     restoring: 'Враћање...',

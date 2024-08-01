@@ -394,6 +394,7 @@ export const thTranslations: DefaultTranslationsObject = {
     publishChanges: 'เผยแพร่การแก้ไข',
     published: 'เผยแพร่แล้ว',
     publishing: 'การเผยแพร่',
+    restoreAsDraft: 'เรียกคืนเป็นร่าง',
     restoreThisVersion: 'กู้คืนเวอร์ชันนี้',
     restoredSuccessfully: 'กู้คืนเวอร์ชันสำเร็จ',
     restoring: 'กำลังกู้คืน...',
