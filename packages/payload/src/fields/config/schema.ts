@@ -342,6 +342,7 @@ export const upload = baseField.keys({
     }),
   }),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
+  displayPreview: joi.boolean().default(false),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
   maxDepth: joi.number(),
   relationTo: joi.string().required(),

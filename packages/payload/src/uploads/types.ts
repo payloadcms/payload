@@ -77,6 +77,7 @@ export type IncomingUploadType = {
   adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
+  displayPreview?: boolean
   /**
    * Accepts existing headers and can filter/modify them.
    *
@@ -102,6 +103,7 @@ export type Upload = {
   adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
+  displayPreview?: boolean
   filesRequiredOnCreate?: boolean
   focalPoint?: boolean
   formatOptions?: ImageUploadFormatOptions
