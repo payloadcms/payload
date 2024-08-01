@@ -42,6 +42,7 @@
   --doc-controls-height: calc(var(--base) * 3);
   --nav-width: 275px;
   --nav-trans-time: 150ms;
+  --all-trans-timing: .3s ease;
 
   @include mid-break {
     --gutter-h: #{base(2)};
@@ -161,6 +162,7 @@ ol {
 
 a {
   color: currentColor;
+  transition: all var(--all-trans-timing);
 
   &:focus {
     &:not(:focus-visible) {
