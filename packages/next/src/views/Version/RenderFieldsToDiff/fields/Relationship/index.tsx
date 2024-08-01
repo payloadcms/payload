@@ -26,9 +26,17 @@ const generateLabelFromValue = (
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
 ): string => {
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => generateLabelFromValue(collections, field, locale, v))
+      .filter(Boolean) // Filters out any undefined or empty values
+      .join(', ')
+  }
+
   let relation: string
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
+  const relatedDocValue = value?.value
 
   const relationTo =
     'relationTo' in field.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
@@ -44,7 +52,7 @@ const generateLabelFromValue = (
     }
   } else {
     relation = relationTo
-    relatedDoc = value
+    relatedDoc = relatedDocValue
   }
 
   const relatedCollection = collections.find((c) => c.slug === relation)
@@ -63,6 +71,8 @@ const generateLabelFromValue = (
       valueToReturn = relatedDoc[useAsTitle]
     } else if (typeof relatedDoc?.id !== 'undefined') {
       valueToReturn = relatedDoc.id
+    } else {
+      valueToReturn = relatedDoc
     }
 
     if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
@@ -70,31 +80,38 @@ const generateLabelFromValue = (
     }
   }
 
+  if (typeof valueToReturn === 'object' && valueToReturn !== null) {
+    valueToReturn = JSON.stringify(valueToReturn)
+  }
+
   return valueToReturn
 }
 
 const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
-  let placeholder = ''
+  const placeholder = `[${i18n.t('general:noValue')}]`
 
   const { collections } = useConfig()
 
-  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
+  let versionToRender: string | undefined = version
+    ? generateLabelFromValue(collections, field, locale, version)
+    : placeholder
 
-  let versionToRender = version
-  let comparisonToRender = comparison
+  let comparisonToRender: string | undefined = comparison
+    ? generateLabelFromValue(collections, field, locale, comparison)
+    : placeholder
 
   if ('hasMany' in field && field.hasMany) {
-    if (Array.isArray(version))
-      versionToRender = version
-        .map((val) => generateLabelFromValue(collections, field, locale, val))
-        .join(', ')
-    if (Array.isArray(comparison))
-      comparisonToRender = comparison
-        .map((val) => generateLabelFromValue(collections, field, locale, val))
-        .join(', ')
-  } else {
-    versionToRender = generateLabelFromValue(collections, field, locale, version)
-    comparisonToRender = generateLabelFromValue(collections, field, locale, comparison)
+    if (Array.isArray(version)) {
+      versionToRender =
+        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
+        placeholder
+    }
+    if (Array.isArray(comparison)) {
+      comparisonToRender =
+        comparison
+          .map((val) => generateLabelFromValue(collections, field, locale, val))
+          .join(', ') || placeholder
+    }
   }
 
   const label =
@@ -112,10 +129,8 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
       </Label>
       <ReactDiffViewer
         hideLineNumbers
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        oldValue={
-          typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder
-        }
+        newValue={versionToRender}
+        oldValue={comparisonToRender}
         showDiffOnly={false}
         splitView
         styles={diffStyles}
