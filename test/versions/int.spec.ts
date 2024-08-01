@@ -1323,14 +1323,14 @@ describe('Versions', () => {
           slug: globalSlug,
         })
 
-        expect(restore.title).toBeDefined()
+        expect(restore.version.title).toBeDefined()
 
         const restoredGlobal = await payload.findGlobal({
           slug: globalSlug,
           draft: true,
         })
 
-        expect(restoredGlobal.title).toBe(restore.title)
+        expect(restoredGlobal.title).toBe(restore.version.title.en)
       })
     })
 
@@ -1537,7 +1537,7 @@ describe('Versions', () => {
             },
           })
           .then((res) => res.json())
-        expect(data.AutosaveGlobal.title).toStrictEqual(globalGraphQLOriginalTitle)
+        expect(data.AutosaveGlobal).toEqual({ title: globalGraphQLOriginalTitle })
       })
     })
   })

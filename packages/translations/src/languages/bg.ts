@@ -402,6 +402,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     publishChanges: 'Публикувай промените',
     published: 'Публикувано',
     publishing: 'Публикуване',
+    restoreAsDraft: 'Възстанови като чернова',
     restoreThisVersion: 'Възстанови тази версия',
     restoredSuccessfully: 'Успешно възстановяване.',
     restoring: 'Възстановяване...',

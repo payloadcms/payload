@@ -404,6 +404,7 @@ export const trTranslations: DefaultTranslationsObject = {
     publishChanges: 'Değişiklikleri yayınla',
     published: 'Yayınlandı',
     publishing: 'Yayınlama',
+    restoreAsDraft: 'Taslak olarak geri yükle',
     restoreThisVersion: 'Bu sürüme geri döndür',
     restoredSuccessfully: 'Geri getirme başarılı.',
     restoring: 'Geri döndürülüyor...',

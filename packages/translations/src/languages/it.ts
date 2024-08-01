@@ -406,6 +406,7 @@ export const itTranslations: DefaultTranslationsObject = {
     publishChanges: 'Pubblica modifiche',
     published: 'Pubblicato',
     publishing: 'Pubblicazione',
+    restoreAsDraft: 'Ripristina come bozza',
     restoreThisVersion: 'Ripristina questa versione',
     restoredSuccessfully: 'Ripristinato con successo.',
     restoring: 'Ripristino...',
