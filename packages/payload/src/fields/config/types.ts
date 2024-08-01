@@ -521,6 +521,7 @@ export type UploadField = {
       Label?: LabelComponent
     }
   }
+  displayPreview?: boolean
   filterOptions?: FilterOptions
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
