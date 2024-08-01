@@ -24,6 +24,29 @@ export const findOne: FindOne = async function findOne(
 
   const doc = await Model.findOne(query, {}, options)
 
+  const joins = this.payload.collections[collection].joins
+
+  for (const slug of Object.keys(joins)) {
+    // fetch docs and add to the keys by path
+    const joinModel = this.collections[slug]
+
+    for (const join of joins[slug]) {
+      const joinData = await joinModel
+        .find(
+          { [join.path]: { $eq: doc?._id.toString() } },
+          {
+            _id: 1,
+          },
+          options,
+        )
+        .limit(10)
+
+      // TODO: handle assigning join data to nested paths
+      // iterate path and assign object
+      doc[join.name] = joinData.map((a) => a._id.toString())
+    }
+  }
+
   if (!doc) {
     return null
   }

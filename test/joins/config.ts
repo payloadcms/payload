@@ -18,6 +18,11 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: 'categories',
+        },
       ],
     },
     {

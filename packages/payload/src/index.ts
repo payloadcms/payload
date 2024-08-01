@@ -507,7 +507,8 @@ export class BasePayload {
           continue
         }
         if (field.type === 'join') {
-          joins[field.collection] = field
+          joins[field.collection] = joins[field.collection] || []
+          joins[field.collection].push(field)
         }
         if (field.name === 'id') customID = field
       }

@@ -304,6 +304,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     })
   },
+  join: (): void => {
+    // TODO: what is this going to look like?
+    //  it maybe just be virtual and not actually added to the schema
+  },
   json: (
     field: JSONField,
     schema: Schema,

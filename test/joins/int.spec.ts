@@ -4,7 +4,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { postsSlug } from './collections/Posts/index.js'
 import configPromise from './config.js'
 
 let payload: Payload
@@ -39,29 +38,42 @@ describe('Joins Field Tests', () => {
     }
   })
 
-  it('local API example', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
+  it('should populate joins', async () => {
+    const category = await payload.create({
+      collection: 'categories',
       data: {
-        text: 'LOCAL API EXAMPLE',
+        name: 'example',
       },
     })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
-  })
+    const post1 = await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        title: 'test',
+      },
+    })
+    const post2 = await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        title: 'test',
+      },
+    })
+    const post3 = await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        title: 'test',
+      },
+    })
 
-  it('rest API example', async () => {
-    const data = await restClient
-      .POST(`/${postsSlug}`, {
-        body: JSON.stringify({
-          text: 'REST API EXAMPLE',
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      })
-      .then((res) => res.json())
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: 'categories',
+    })
 
-    expect(data.doc.text).toEqual('REST API EXAMPLE')
+    // TODO: add types for joins (same as relationship with hasMany)
+    expect(categoryWithPosts.posts).toHaveLength(3)
   })
 })

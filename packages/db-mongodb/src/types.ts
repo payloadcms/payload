@@ -10,6 +10,7 @@ import type {
   Field,
   GroupField,
   JSONField,
+  JoinField,
   NumberField,
   Payload,
   PointField,
@@ -108,6 +109,7 @@ export type FieldToSchemaMap<TSchema> = {
   date: FieldGeneratorFunction<TSchema, DateField>
   email: FieldGeneratorFunction<TSchema, EmailField>
   group: FieldGeneratorFunction<TSchema, GroupField>
+  join: FieldGeneratorFunction<TSchema, JoinField>
   json: FieldGeneratorFunction<TSchema, JSONField>
   number: FieldGeneratorFunction<TSchema, NumberField>
   point: FieldGeneratorFunction<TSchema, PointField>
