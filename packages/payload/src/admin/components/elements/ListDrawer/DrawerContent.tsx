@@ -198,6 +198,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     setPreference(preferenceKey, newPreferences, true)
   }, [sort, limit, setPreference, preferenceKey])
 
+  useEffect(() => {
+    setPage(1)
+  }, [search])
+
   const onCreateNew = useCallback(
     ({ doc }) => {
       if (typeof onSelect === 'function') {
