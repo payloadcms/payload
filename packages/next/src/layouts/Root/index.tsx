@@ -2,12 +2,11 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui'
+import { RootProvider, createClientConfig } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
-import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { createClientConfig, parseCookies } from 'payload'
+import { parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -63,7 +62,7 @@ export const RootLayout = async ({
     language: languageCode,
   })
 
-  const clientConfig = await createClientConfig({ config, t: i18n.t })
+  const { clientConfig, render } = await createClientConfig({ children, config, i18n, payload })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -93,20 +92,10 @@ export const RootLayout = async ({
     })
   }
 
-  const { componentMap, wrappedChildren } = buildComponentMap({
-    DefaultEditView,
-    DefaultListView,
-    children,
-    i18n,
-    importMap,
-    payload,
-  })
-
   return (
     <html className={merriweather.variable} data-theme={theme} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
-          componentMap={componentMap}
           config={clientConfig}
           dateFNSKey={i18n.dateFNSKey}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
@@ -116,7 +105,7 @@ export const RootLayout = async ({
           theme={theme}
           translations={i18n.translations}
         >
-          {wrappedChildren}
+          {render}
         </RootProvider>
         <div id="portal" />
       </body>

@@ -188,6 +188,7 @@ export type {
   GlobalComponentMap,
 } from '../../providers/ComponentMap/buildComponentMap/types.js'
 export { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+export { createClientConfig } from '../../providers/Config/createClientConfig/index.js'
 
 export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
