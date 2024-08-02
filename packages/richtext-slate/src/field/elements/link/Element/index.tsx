@@ -67,7 +67,7 @@ export const LinkElement = () => {
   const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
 
   const editor = useSlate()
-  const config = useConfig()
+  const { config } = useConfig()
   const { user } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()

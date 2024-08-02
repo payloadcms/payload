@@ -61,7 +61,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
   const hasImage = Boolean(value)
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { collections, routes: { api } = {}, serverURL } = config
 

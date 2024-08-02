@@ -45,7 +45,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   listPreferences,
   preferenceKey,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { componentMap } = useComponentMap()
 

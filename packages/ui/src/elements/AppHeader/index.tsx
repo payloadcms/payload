@@ -22,11 +22,13 @@ export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {
-    admin: {
-      routes: { account: accountRoute },
+    config: {
+      admin: {
+        routes: { account: accountRoute },
+      },
+      localization,
+      routes: { admin: adminRoute },
     },
-    localization,
-    routes: { admin: adminRoute },
   } = useConfig()
 
   const { actions } = useActions()

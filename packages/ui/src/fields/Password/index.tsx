@@ -59,7 +59,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   const { t } = useTranslation()
   const locale = useLocale()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {

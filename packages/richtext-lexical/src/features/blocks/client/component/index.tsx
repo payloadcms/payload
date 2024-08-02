@@ -38,7 +38,7 @@ type Props = {
 
 export const BlockComponent: React.FC<Props> = (props) => {
   const { formData, nodeKey } = props
-  const config = useConfig()
+  const { config } = useConfig()
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
   const { path, schemaPath } = useFieldProps()

@@ -8,7 +8,7 @@ import { email, text } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 export const ForgotPasswordForm: React.FC = () => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: { user: userSlug },

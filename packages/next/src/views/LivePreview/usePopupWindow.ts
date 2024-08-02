@@ -25,7 +25,9 @@ export const usePopupWindow = (props: {
   const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
-  const { serverURL } = useConfig()
+  const {
+    config: { serverURL },
+  } = useConfig()
   const popupRef = useRef<Window | null>(null)
 
   // Optionally broadcast messages back out to the parent component

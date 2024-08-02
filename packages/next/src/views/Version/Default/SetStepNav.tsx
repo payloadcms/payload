@@ -16,7 +16,7 @@ export const SetStepNav: React.FC<{
   globalSlug?: string
   id?: number | string
 }> = ({ id, collectionConfig, collectionSlug, doc, fieldMap, globalConfig, globalSlug }) => {
-  const config = useConfig()
+  const { config } = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
   const locale = useLocale()

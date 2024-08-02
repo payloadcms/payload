@@ -101,8 +101,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const { permissions } = useAuth()
   const { closeModal } = useModal()
   const {
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()

@@ -52,8 +52,10 @@ export const Auth: React.FC<Props> = (props) => {
   const { isInitializing } = useDocumentInfo()
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const hasPermissionToUnlock: boolean = useMemo(() => {

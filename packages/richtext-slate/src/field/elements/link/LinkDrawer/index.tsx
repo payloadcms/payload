@@ -34,7 +34,7 @@ export const LinkDrawer: React.FC<Props> = ({
   const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {

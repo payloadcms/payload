@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname()
   const router = useRouter()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {

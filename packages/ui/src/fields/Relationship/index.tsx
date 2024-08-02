@@ -57,7 +57,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     width,
   } = props
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     collections,

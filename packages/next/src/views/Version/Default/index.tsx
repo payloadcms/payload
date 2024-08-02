@@ -34,7 +34,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   localeOptions,
   versionID,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()

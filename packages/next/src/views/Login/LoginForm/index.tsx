@@ -22,7 +22,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {

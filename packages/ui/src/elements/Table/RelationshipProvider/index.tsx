@@ -34,7 +34,7 @@ const Context = createContext({} as ListRelationshipContext)
 export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [documents, dispatchDocuments] = useReducer(reducer, {})
   const debouncedDocuments = useDebounce(documents, 100)
-  const config = useConfig()
+  const { config } = useConfig()
   const { i18n } = useTranslation()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)

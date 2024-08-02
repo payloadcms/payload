@@ -37,11 +37,13 @@ export const APIViewClient: React.FC = () => {
   const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const {
-    collections,
-    globals,
-    localization,
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      globals,
+      localization,
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const collectionConfig =

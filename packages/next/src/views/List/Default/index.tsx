@@ -45,7 +45,7 @@ export const DefaultListView: React.FC = () => {
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { getComponentMap } = useComponentMap()
 

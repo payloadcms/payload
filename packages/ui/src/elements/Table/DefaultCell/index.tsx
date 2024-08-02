@@ -28,7 +28,9 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const { i18n } = useTranslation()
 
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const cellContext = useTableCell()

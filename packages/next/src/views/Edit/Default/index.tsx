@@ -57,7 +57,7 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const config = useConfig()
+  const { config } = useConfig()
   const router = useRouter()
   const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()

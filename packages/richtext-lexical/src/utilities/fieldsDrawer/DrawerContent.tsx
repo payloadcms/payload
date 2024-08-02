@@ -30,7 +30,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const config = useConfig()
+  const { config } = useConfig()
   const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
     field: { richTextComponentMap },

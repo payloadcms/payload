@@ -47,7 +47,9 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,

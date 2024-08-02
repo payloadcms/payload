@@ -26,7 +26,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   onSave: onSaveFromProps,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: { api: apiRoute },

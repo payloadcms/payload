@@ -25,7 +25,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 

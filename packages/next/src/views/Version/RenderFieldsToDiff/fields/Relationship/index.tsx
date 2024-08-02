@@ -76,7 +76,9 @@ const generateLabelFromValue = (
 const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
   let placeholder = ''
 
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 

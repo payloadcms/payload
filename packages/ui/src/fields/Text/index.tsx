@@ -49,7 +49,9 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   const locale = useLocale()
 
-  const { localization: localizationConfig } = useConfig()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {

@@ -15,7 +15,7 @@ const DefaultLogout: React.FC<{
   tabIndex?: number
 }> = ({ Link, tabIndex }) => {
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {

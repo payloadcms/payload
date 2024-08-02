@@ -19,8 +19,10 @@ const baseClass = 'save-draft'
 
 export const DefaultSaveDraftButton: React.FC = () => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const modified = useFormModified()

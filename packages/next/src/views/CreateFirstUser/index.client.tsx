@@ -26,8 +26,10 @@ export const CreateFirstUserClient: React.FC<{
   const { getFieldMap } = useComponentMap()
 
   const {
-    routes: { admin, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin, api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { t } = useTranslation()

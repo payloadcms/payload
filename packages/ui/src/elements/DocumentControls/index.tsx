@@ -48,7 +48,7 @@ export const DocumentControls: React.FC<{
 
   const { i18n } = useTranslation()
 
-  const config = useConfig()
+  const { config } = useConfig()
   const { getComponentMap } = useComponentMap()
 
   const collectionConfig = config.collections.find((coll) => coll.slug === slug)

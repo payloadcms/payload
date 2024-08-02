@@ -61,7 +61,7 @@ export const LinkButton: React.FC = () => {
 
   const { t } = useTranslation()
   const editor = useSlate()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')

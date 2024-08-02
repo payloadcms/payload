@@ -23,7 +23,7 @@ const StepNav: React.FC<{
 
   const { stepNav } = useStepNav()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: { admin },

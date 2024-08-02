@@ -36,12 +36,14 @@ const initialState: FormState = {
 export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
-    admin: {
-      routes: { login: loginRoute },
-      user: userSlug,
+    config: {
+      admin: {
+        routes: { login: loginRoute },
+        user: userSlug,
+      },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = useConfig()
 
   const history = useRouter()

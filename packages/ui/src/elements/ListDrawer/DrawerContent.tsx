@@ -63,9 +63,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const { componentMap } = useComponentMap()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const enabledCollectionConfigs = collections.filter(({ slug }) => {

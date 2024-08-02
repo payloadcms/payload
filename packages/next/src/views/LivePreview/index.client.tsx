@@ -81,7 +81,9 @@ const PreviewView: React.FC<Props> = ({
   const operation = id ? 'update' : 'create'
 
   const {
-    admin: { user: userSlug },
+    config: {
+      admin: { user: userSlug },
+    },
   } = useConfig()
   const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
@@ -216,7 +218,7 @@ export const LivePreviewClient: React.FC<{
   const { breakpoints, url } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',

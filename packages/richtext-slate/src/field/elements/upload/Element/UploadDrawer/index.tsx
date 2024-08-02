@@ -51,7 +51,7 @@ export const UploadDrawer: React.FC<{
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
   const fieldMap = richTextComponentMap.get(relatedFieldSchemaPath)
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {

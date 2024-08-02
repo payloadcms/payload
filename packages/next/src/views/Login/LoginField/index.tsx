@@ -10,7 +10,7 @@ export type LoginFieldProps = {
 }
 export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   if (type === 'email') {
     return (

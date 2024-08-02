@@ -48,7 +48,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   }))
 
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const modified = useFormModified()

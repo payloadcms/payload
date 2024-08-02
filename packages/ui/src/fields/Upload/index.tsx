@@ -37,9 +37,11 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   } = props
 
   const {
-    collections,
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { permissions } = useAuth()

@@ -12,11 +12,13 @@ import { GravatarAccountIcon } from './Gravatar/index.js'
 
 export const Account = () => {
   const {
-    admin: {
-      avatar,
-      routes: { account: accountRoute },
+    config: {
+      admin: {
+        avatar,
+        routes: { account: accountRoute },
+      },
+      routes: { admin: adminRoute },
     },
-    routes: { admin: adminRoute },
   } = useConfig()
 
   const { componentMap } = useComponentMap()
@@ -36,6 +38,5 @@ export const Account = () => {
     )
   }
 
-  if (!user?.email || avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
   if (avatar === 'gravatar') return <GravatarAccountIcon />
 }

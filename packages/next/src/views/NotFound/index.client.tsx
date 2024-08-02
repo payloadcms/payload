@@ -18,7 +18,9 @@ export const NotFoundClient: React.FC<{
   const { t } = useTranslation()
 
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   useEffect(() => {

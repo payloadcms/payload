@@ -12,7 +12,9 @@ export const DateCell: React.FC<DefaultCellComponentProps<Date | number | string
   dateDisplayFormat,
 }) => {
   const {
-    admin: { dateFormat: dateFormatFromConfig },
+    config: {
+      admin: { dateFormat: dateFormatFromConfig },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()
