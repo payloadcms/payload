@@ -6,11 +6,11 @@ export type ClientFieldConfig = {
     components: {
       Field: MappedComponent
       Cell: MappedComponent
-      Label: MappedComponent
-      Description: MappedComponent
-      Error: MappedComponent
-      beforeInput: MappedComponent
-      afterInput: MappedComponent
+      Label?: MappedComponent
+      Description?: MappedComponent
+      Error?: MappedComponent
+      beforeInput?: MappedComponent[]
+      afterInput?: MappedComponent[]
     }
   }
 } & Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate' | 'admin'>
@@ -26,5 +26,5 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<
   FieldBase['admin'],
-  'components' | 'condition' | 'description'
+  'condition' | 'description'
 >

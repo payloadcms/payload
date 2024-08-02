@@ -1,6 +1,9 @@
 import type { TFunction } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
+  CreateMappedComponent,
+  EditViewComponent,
+  EditViewProps,
   Field,
   SanitizedConfig,
   ServerOnlyGlobalAdminProperties,
@@ -12,15 +15,20 @@ import { createClientFieldConfigs } from './fields.js'
 export const createClientGlobalConfig = ({
   global,
   t,
+  createMappedComponent,
+  DefaultEditView,
 }: {
   global: SanitizedConfig['globals'][0]
   t: TFunction
+  createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
 }): ClientGlobalConfig => {
   const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
     fields: sanitized.fields as any as Field[], // invert the type
     t,
+    createMappedComponent,
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
@@ -51,6 +59,37 @@ export const createClientGlobalConfig = ({
       }
     })
 
+    const editViewFromConfig = global?.admin?.components?.views?.Edit
+
+    sanitized.admin.components = {
+      views: {
+        Edit: {
+          Default: {
+            Component: createMappedComponent(
+              editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
+                ? (editViewFromConfig.Default.Component as EditViewComponent)
+                : null,
+              {
+                collectionSlug: global.slug,
+              },
+              DefaultEditView,
+            ),
+            ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
+              ? {
+                  actions: editViewFromConfig?.Default?.actions?.map((Component) =>
+                    createMappedComponent(Component),
+                  ),
+                }
+              : {}),
+          },
+        },
+      },
+      SaveButton: createMappedComponent(global?.admin?.components?.elements?.SaveButton),
+      SaveDraftButton: createMappedComponent(global?.admin?.components?.elements?.SaveDraftButton),
+      PreviewButton: createMappedComponent(global?.admin?.components?.elements?.PreviewButton),
+      PublishButton: createMappedComponent(global?.admin?.components?.elements?.PublishButton),
+    }
+
     if ('livePreview' in sanitized.admin) {
       sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
       delete sanitized.admin.livePreview.url
@@ -63,7 +102,14 @@ export const createClientGlobalConfig = ({
 export const createClientGlobalConfigs = ({
   globals,
   t,
+  createMappedComponent,
+  DefaultEditView,
 }: {
   globals: SanitizedConfig['globals']
   t: TFunction
-}): ClientGlobalConfig[] => globals.map((global) => createClientGlobalConfig({ global, t }))
+  createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
+}): ClientGlobalConfig[] =>
+  globals.map((global) =>
+    createClientGlobalConfig({ global, t, createMappedComponent, DefaultEditView }),
+  )

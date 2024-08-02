@@ -1,5 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import {
+  AdminViewProps,
+  EditViewProps,
   serverOnlyConfigProperties,
   type ClientConfig,
   type Payload,
@@ -12,7 +14,7 @@ import { createClientCollectionConfigs } from './collections.js'
 import { createClientGlobalConfigs } from './globals.js'
 import type { ImportMap } from 'packages/payload/src/bin/generateImportMap/index.js'
 import { PayloadIcon } from '@payloadcms/ui'
-import { getCreateMappedComponent, PayloadLogo } from '@payloadcms/ui/shared'
+import { getComponent, getCreateMappedComponent, PayloadLogo } from '@payloadcms/ui/shared'
 
 export const createClientConfig = async ({
   children,
@@ -20,12 +22,17 @@ export const createClientConfig = async ({
   i18n,
   payload,
   importMap,
+  DefaultListView,
+  DefaultEditView,
 }: {
   children: React.ReactNode
   config: SanitizedConfig
   i18n: I18nClient
   payload: Payload
   importMap: ImportMap
+  DefaultListView: React.FC<AdminViewProps>
+  DefaultEditView: React.FC<EditViewProps>
+
   // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
   const clientConfig: ClientConfig = { ...(config as any as ClientConfig) } // invert the type
@@ -55,31 +62,31 @@ export const createClientConfig = async ({
   if ('admin' in clientConfig) {
     clientConfig.admin = { ...clientConfig.admin }
 
-    clientConfig.admin.components.graphics.Icon = createMappedComponent(
-      config.admin?.components?.graphics?.Icon,
-      undefined,
-      PayloadIcon,
-    )
-
-    clientConfig.admin.components.graphics.Logo = createMappedComponent(
-      config.admin?.components?.graphics?.Logo,
-      undefined,
-      PayloadLogo,
-    )
-
-    clientConfig.admin.components.actions = createMappedComponent(config.admin?.components?.actions)
-
-    clientConfig.admin.components.LogoutButton = createMappedComponent(
-      config.admin?.components?.logout?.Button,
-    )
-
-    clientConfig.admin.components.Avatar = createMappedComponent(
-      config.admin?.avatar &&
-        typeof config.admin?.avatar === 'object' &&
+    clientConfig.admin.components = {
+      actions: config.admin?.components?.actions?.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      Avatar: createMappedComponent(
         config.admin?.avatar &&
-        'Component' in config.admin?.avatar &&
-        config.admin?.avatar.Component,
-    )
+          typeof config.admin?.avatar === 'object' &&
+          config.admin?.avatar &&
+          'Component' in config.admin?.avatar &&
+          config.admin?.avatar.Component,
+      ),
+      graphics: {
+        Icon: createMappedComponent(
+          config.admin?.components?.graphics?.Icon,
+          undefined,
+          PayloadIcon,
+        ),
+        Logo: createMappedComponent(
+          config.admin?.components?.graphics?.Logo,
+          undefined,
+          PayloadLogo,
+        ),
+      },
+      LogoutButton: createMappedComponent(config.admin?.components?.logout?.Button),
+    }
 
     if ('livePreview' in clientConfig.admin) {
       clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
@@ -91,11 +98,16 @@ export const createClientConfig = async ({
   clientConfig.collections = createClientCollectionConfigs({
     collections: clientConfig.collections as any as SanitizedCollectionConfig[], // invert the type
     t: i18n.t,
+    createMappedComponent,
+    DefaultListView,
+    DefaultEditView,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
     globals: clientConfig.globals as any as SanitizedGlobalConfig[], // invert the type
     t: i18n.t,
+    createMappedComponent,
+    DefaultEditView,
   })
 
   const NestProviders = ({

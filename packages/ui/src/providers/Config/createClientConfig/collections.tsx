@@ -1,6 +1,10 @@
 import type { TFunction } from '@payloadcms/translations'
 import type {
+  AdminViewProps,
   ClientCollectionConfig,
+  CreateMappedComponent,
+  EditViewComponent,
+  EditViewProps,
   Field,
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
@@ -12,15 +16,22 @@ import { createClientFieldConfigs } from './fields.js'
 export const createClientCollectionConfig = ({
   collection,
   t,
+  createMappedComponent,
+  DefaultEditView,
+  DefaultListView,
 }: {
   collection: SanitizedCollectionConfig
   t: TFunction
+  createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<AdminViewProps>
 }): ClientCollectionConfig => {
   const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
     fields: sanitized.fields as any as Field[], // invert the type
     t,
+    createMappedComponent,
   })
 
   const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -77,6 +88,62 @@ export const createClientCollectionConfig = ({
       }
     })
 
+    const editViewFromConfig = collection?.admin?.components?.views?.Edit
+
+    const listViewFromConfig = collection?.admin?.components?.views?.List
+
+    sanitized.admin.components = {
+      views: {
+        Edit: {
+          Default: {
+            Component: createMappedComponent(
+              editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
+                ? (editViewFromConfig.Default.Component as EditViewComponent)
+                : null,
+              {
+                collectionSlug: collection.slug,
+              },
+              DefaultEditView,
+            ),
+            ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
+              ? {
+                  actions: editViewFromConfig?.Default?.actions?.map((Component) =>
+                    createMappedComponent(Component),
+                  ),
+                }
+              : {}),
+          },
+        },
+        List: {
+          Component: createMappedComponent(
+            listViewFromConfig?.Component,
+            {
+              collectionSlug: collection.slug,
+            },
+            DefaultListView,
+          ),
+          actions: createMappedComponent(collection.admin.components.views.List?.actions),
+        },
+      },
+      SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
+      SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
+      PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
+      PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
+      Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
+      beforeList: collection?.admin?.components?.beforeList.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      beforeListTable: collection?.admin?.components?.beforeListTable.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      afterList: collection?.admin?.components?.afterList.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      afterListTable: collection?.admin?.components?.afterListTable.map((Component) =>
+        createMappedComponent(Component),
+      ),
+    }
+
     if ('livePreview' in sanitized.admin) {
       sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
       // @ts-expect-error
@@ -90,8 +157,22 @@ export const createClientCollectionConfig = ({
 export const createClientCollectionConfigs = ({
   collections,
   t,
+  createMappedComponent,
+  DefaultListView,
+  DefaultEditView,
 }: {
   collections: SanitizedCollectionConfig[]
   t: TFunction
+  createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<AdminViewProps>
 }): ClientCollectionConfig[] =>
-  collections.map((collection) => createClientCollectionConfig({ collection, t }))
+  collections.map((collection) =>
+    createClientCollectionConfig({
+      collection,
+      t,
+      createMappedComponent,
+      DefaultEditView,
+      DefaultListView,
+    }),
+  )

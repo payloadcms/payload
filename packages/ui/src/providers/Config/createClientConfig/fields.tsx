@@ -5,14 +5,17 @@ import type {
   ClientFieldConfig,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
+  CreateMappedComponent,
 } from 'payload'
 
 export const createClientFieldConfig = ({
   field: incomingField,
   t,
+  createMappedComponent,
 }: {
   field: Field
   t: TFunction
+  createMappedComponent: CreateMappedComponent
 }): ClientFieldConfig => {
   const field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
 
@@ -58,13 +61,18 @@ export const createClientFieldConfig = ({
     field.fields = createClientFieldConfigs({
       fields: field.fields as any as Field[], // invert the type
       t,
+      createMappedComponent,
     })
   }
 
   if ('blocks' in field) {
     field.blocks = field.blocks.map((block) => {
       const sanitized = { ...block }
-      sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
+      sanitized.fields = createClientFieldConfigs({
+        fields: sanitized.fields,
+        t,
+        createMappedComponent,
+      })
       return sanitized
     })
   }
@@ -78,7 +86,6 @@ export const createClientFieldConfig = ({
     field.admin = { ...field.admin }
 
     const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
-      'components',
       'condition',
       'description',
     ]
@@ -88,15 +95,52 @@ export const createClientFieldConfig = ({
         delete field.admin[key]
       }
     })
-  }
 
-  return field
+    field.admin.components = {
+      Field: createMappedComponent(incomingField.admin?.components?.Field),
+      Cell: createMappedComponent(incomingField.admin?.components?.Cell),
+      ...('Label' in incomingField.admin?.components
+        ? {
+            Label: createMappedComponent(incomingField.admin?.components?.Label),
+          }
+        : {}),
+      ...('Description' in incomingField.admin?.components
+        ? {
+            Description: createMappedComponent(incomingField.admin?.components?.Description),
+          }
+        : {}),
+      ...('Error' in incomingField.admin?.components
+        ? {
+            Error: createMappedComponent(incomingField.admin?.components?.Error),
+          }
+        : {}),
+      ...('beforeInput' in incomingField.admin?.components
+        ? {
+            beforeInputL: incomingField.admin?.components?.beforeInput.map((Component) =>
+              createMappedComponent(Component),
+            ),
+          }
+        : {}),
+      ...('afterInput' in incomingField.admin?.components
+        ? {
+            afterInput: incomingField.admin?.components?.afterInput.map((Component) =>
+              createMappedComponent(Component),
+            ),
+          }
+        : {}),
+    }
+
+    return field
+  }
 }
 
 export const createClientFieldConfigs = ({
   fields,
   t,
+  createMappedComponent,
 }: {
   fields: Field[]
   t: TFunction
-}): ClientFieldConfig[] => fields.map((field) => createClientFieldConfig({ field, t }))
+  createMappedComponent: CreateMappedComponent
+}): ClientFieldConfig[] =>
+  fields.map((field) => createClientFieldConfig({ field, t, createMappedComponent }))
