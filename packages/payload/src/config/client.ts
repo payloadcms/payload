@@ -30,17 +30,17 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     components: {
-      actions: MappedComponent[]
+      Avatar: MappedComponent
       LogoutButton: MappedComponent
+      actions: MappedComponent[]
       graphics: {
         Icon: MappedComponent
         Logo: MappedComponent
       }
-      Avatar: MappedComponent
     }
-  } & Omit<SanitizedConfig['admin'], 'livePreview' | 'components'>
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'livePreview'>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]

@@ -1,6 +1,6 @@
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { BlockField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type {
   DescriptionComponent,
   FormFieldBase,
@@ -23,7 +23,7 @@ export type BlocksFieldProps = {
 export type ReducedBlock = {
   LabelComponent: MappedComponent
   custom?: Record<any, string>
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   imageAltText?: string
   imageURL?: string
   labels: BlockField['labels']

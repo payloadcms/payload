@@ -4,10 +4,10 @@ import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],
-  field: ClientFieldConfig,
+  fields: ClientFieldConfig[],
 ): ClientFieldConfig[] => {
   if (listSearchableFields) {
-    const flattenedFields = flattenFieldMap(field)
+    const flattenedFields = flattenFieldMap(fields)
     return flattenedFields.filter(
       (field) => field.isFieldAffectingData && listSearchableFields.includes(field.name),
     )

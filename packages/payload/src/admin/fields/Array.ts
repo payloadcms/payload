@@ -1,6 +1,6 @@
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { ArrayField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type {
   DescriptionComponent,
   FormFieldBase,
@@ -10,7 +10,7 @@ import type {
 
 export type ArrayFieldProps = {
   CustomRowLabel?: MappedComponent
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   forceRender?: boolean
   isSortable?: boolean
   labels?: ArrayField['labels']

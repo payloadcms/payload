@@ -98,7 +98,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               blockType={row.blockType}
               blocks={blocks}
               duplicateRow={duplicateRow}
-              fieldMap={block.fieldMap}
+              fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
@@ -148,7 +148,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={block.fieldMap}
+          fields={block.fields}
           forceRender={forceRender}
           margins="small"
           path={path}

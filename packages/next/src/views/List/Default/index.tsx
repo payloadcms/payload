@@ -44,7 +44,7 @@ export const DefaultListView: React.FC = () => {
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
-  const { config, getEntityConfig } = useConfig()
+  const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
@@ -127,9 +127,8 @@ export const DefaultListView: React.FC = () => {
               </Fragment>
             )}
           </header>
-          <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
+          <ListControls collectionConfig={collectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
-
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -144,7 +143,7 @@ export const DefaultListView: React.FC = () => {
                   uploadConfig: collectionConfig.upload,
                 }}
                 data={docs}
-                fieldMap={fieldMap}
+                fields={fields}
               />
             </RelationshipProvider>
           )}

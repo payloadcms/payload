@@ -1,7 +1,7 @@
 import type {
+  ClientFieldConfig,
   CollapsedPreferences,
   Data,
-  FieldMap,
   FormFieldBase,
   FormState,
   ReducedBlock,
@@ -40,7 +40,7 @@ type Props = {
     richTextComponentMap: Map<string, React.ReactNode>
   } & FormFieldBase
   formData: BlockFields
-  formSchema: FieldMap
+  formSchema: ClientFieldConfig[]
   nodeKey: string
   path: string
   reducedBlock: ReducedBlock
@@ -243,7 +243,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={Array.isArray(formSchema) ? formSchema : []}
+          fields={Array.isArray(formSchema) ? formSchema : []}
           forceRender
           margins="small"
           path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?

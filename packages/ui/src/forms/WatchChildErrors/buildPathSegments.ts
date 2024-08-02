@@ -1,31 +1,30 @@
-import type { FieldMap } from 'payload'
+import type { ClientFieldConfig } from 'payload'
 
-export const buildPathSegments = (parentPath: string, fieldMap: FieldMap): string[] => {
-  const pathNames = fieldMap.reduce((acc, field) => {
-    const fieldMap =
-      'fieldMap' in field.fieldComponentProps ? field.fieldComponentProps.fieldMap : undefined
+export const buildPathSegments = (parentPath: string, fields: ClientFieldConfig[]): string[] => {
+  const pathNames = fields.reduce((acc, field) => {
+    const fields = 'fields' in field ? field.fields : undefined
 
-    if (fieldMap) {
-      if (field.isFieldAffectingData) {
+    if (fields) {
+      if (field._isFieldAffectingData) {
         // group, block, array
         const name = 'name' in field ? field.name : 'unnamed'
         acc.push(parentPath ? `${parentPath}.${name}.` : `${name}.`)
       } else {
         // rows, collapsibles, unnamed-tab
-        acc.push(...buildPathSegments(parentPath, fieldMap))
+        acc.push(...buildPathSegments(parentPath, fields))
       }
     } else if (field.type === 'tabs') {
       // tabs
-      if ('tabs' in field.fieldComponentProps) {
-        field.fieldComponentProps.tabs?.forEach((tab) => {
+      if ('tabs' in field) {
+        field.tabs?.forEach((tab) => {
           let tabPath = parentPath
           if ('name' in tab) {
             tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
           }
-          acc.push(...buildPathSegments(tabPath, tab.fieldMap))
+          acc.push(...buildPathSegments(tabPath, tab.fields))
         })
       }
-    } else if (field.isFieldAffectingData) {
+    } else if (field._isFieldAffectingData) {
       // text, number, date, etc.
       const name = 'name' in field ? field.name : 'unnamed'
       acc.push(parentPath ? `${parentPath}.${name}` : name)

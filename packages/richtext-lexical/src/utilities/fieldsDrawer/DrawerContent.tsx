@@ -1,6 +1,6 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { FieldMap, FormState } from 'payload'
+import type { ClientFieldConfig, FormState } from 'payload'
 
 import {
   Form,
@@ -42,7 +42,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
   const fieldMap: any =
-    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as FieldMap) // Field Schema
+    fieldMapOverride ??
+    (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientFieldConfig[]) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {
@@ -95,7 +96,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       uuid={uuid()}
     >
       <RenderFields
-        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+        fields={Array.isArray(fieldMap) ? fieldMap : []}
         forceRender
         path="" // See Blocks feature path for details as for why this is empty
         readOnly={false}

@@ -1,5 +1,5 @@
 'use client'
-import type { Data, FieldMap, FormState, JsonObject } from 'payload'
+import type { ClientFieldConfig, Data, FormState, JsonObject } from 'payload'
 
 import { Drawer } from '@payloadcms/ui'
 import React from 'react'
@@ -7,15 +7,15 @@ import React from 'react'
 import { DrawerContent } from './DrawerContent.js'
 
 export type FieldsDrawerProps = {
-  className?: string
-  data?: Data
-  drawerSlug: string
-  drawerTitle?: string
-  featureKey: string
-  fieldMapOverride?: FieldMap
-  handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
-  schemaFieldsPathOverride?: string
-  schemaPathSuffix?: string
+  readonly className?: string
+  readonly data?: Data
+  readonly drawerSlug: string
+  readonly drawerTitle?: string
+  readonly featureKey: string
+  readonly fieldMapOverride?: ClientFieldConfig[]
+  readonly handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
+  readonly schemaFieldsPathOverride?: string
+  readonly schemaPathSuffix?: string
 }
 
 /**

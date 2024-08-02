@@ -1,6 +1,6 @@
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { TabsField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TabsFieldProps = {
@@ -12,7 +12,7 @@ export type TabsFieldProps = {
 } & FormFieldBase
 
 export type MappedTab = {
-  fieldMap?: FieldMap
+  fields?: ClientFieldConfig[]
   label: TabsField['tabs'][0]['label']
   name?: string
 }

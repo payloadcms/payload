@@ -1,6 +1,6 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
-import type { FieldMap } from 'payload'
+import type { ClientFieldConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -11,7 +11,7 @@ import { combineLabel } from '../FieldSelect/index.js'
 import fieldTypes from './field-types.js'
 
 export type ReduceFieldMapArgs = {
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   i18n: I18nClient
   labelPrefix?: string
   pathPrefix?: string
@@ -22,12 +22,12 @@ export type ReduceFieldMapArgs = {
  * Used in the WhereBuilder component to render the fields in the dropdown.
  */
 export const reduceFieldMap = ({
-  fieldMap,
+  fields,
   i18n,
   labelPrefix,
   pathPrefix,
 }: ReduceFieldMapArgs): FieldCondition[] => {
-  return fieldMap.reduce((reduced, field) => {
+  return fields.reduce((reduced, field) => {
     if (field.disableListFilter) return reduced
 
     if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
@@ -51,7 +51,7 @@ export const reduceFieldMap = ({
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
               ...reduceFieldMap({
-                fieldMap: tab.fieldMap,
+                fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
                 pathPrefix: tabPathPrefix,
@@ -64,10 +64,10 @@ export const reduceFieldMap = ({
     }
 
     // Rows cant have labels, so we need to handle them differently
-    if (field.type === 'row' && 'fieldMap' in field.fieldComponentProps) {
+    if (field.type === 'row' && 'fields' in field) {
       reduced.push(
         ...reduceFieldMap({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           i18n,
           labelPrefix,
           pathPrefix,
@@ -76,8 +76,8 @@ export const reduceFieldMap = ({
       return reduced
     }
 
-    if (field.type === 'collapsible' && 'fieldMap' in field.fieldComponentProps) {
-      const localizedTabLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
+    if (field.type === 'collapsible' && 'fields' in field) {
+      const localizedTabLabel = getTranslation(field.label || '', i18n)
 
       const labelWithPrefix = labelPrefix
         ? labelPrefix + ' > ' + localizedTabLabel
@@ -85,7 +85,7 @@ export const reduceFieldMap = ({
 
       reduced.push(
         ...reduceFieldMap({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
           pathPrefix,
@@ -112,7 +112,7 @@ export const reduceFieldMap = ({
 
       reduced.push(
         ...reduceFieldMap({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
           pathPrefix: pathWithPrefix,
@@ -135,7 +135,7 @@ export const reduceFieldMap = ({
         return acc
       }, [])
 
-      const localizedLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
+      const localizedLabel = getTranslation(field.label || '', i18n)
 
       const formattedLabel = labelPrefix
         ? combineLabel({
@@ -149,7 +149,7 @@ export const reduceFieldMap = ({
         : field.name
 
       const formattedField: FieldCondition = {
-        Filter: field.fieldComponentProps.Filter,
+        Filter: field.admin?.components?.Filter,
         label: formattedLabel,
         value: formattedValue,
         ...fieldTypes[field.type],

@@ -2,6 +2,9 @@ import type { MappedComponent } from '../../admin/types.js'
 import type { Field, FieldBase } from '../../fields/config/types.js'
 
 export type ClientFieldConfig = {
+  _fieldIsPresentational: boolean
+  _isFieldAffectingData: boolean
+  _isSidebar: boolean
   admin: {
     components: {
       Cell: MappedComponent
@@ -13,7 +16,6 @@ export type ClientFieldConfig = {
       beforeInput?: MappedComponent[]
     }
   }
-  isSidebar: boolean
 } & Omit<Field, 'access' | 'admin' | 'defaultValue' | 'hooks' | 'validate'>
 
 export type ServerOnlyFieldProperties =

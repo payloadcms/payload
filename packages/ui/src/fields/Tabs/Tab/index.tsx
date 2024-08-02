@@ -12,10 +12,10 @@ import './index.scss'
 const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
-  isActive?: boolean
-  parentPath: string
-  setIsActive: () => void
-  tab: MappedTab
+  readonly isActive?: boolean
+  readonly parentPath: string
+  readonly setIsActive: () => void
+  readonly tab: MappedTab
 }
 
 export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
@@ -30,7 +30,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
 
   return (
     <React.Fragment>
-      <WatchChildErrors fieldMap={tab.fieldMap} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,

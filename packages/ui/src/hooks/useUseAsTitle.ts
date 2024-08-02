@@ -4,12 +4,12 @@ import { flattenFieldMap } from '../utilities/flattenFieldMap.js'
 
 export const useUseTitleField = (
   collection: ClientCollectionConfig,
-  field: ClientFieldConfig,
+  fields: ClientFieldConfig[],
 ): ClientFieldConfig => {
   const {
     admin: { useAsTitle },
   } = collection
 
-  const topLevelFields = flattenFieldMap(field)
+  const topLevelFields = flattenFieldMap(fields)
   return topLevelFields.find((field) => field.name === useAsTitle)
 }

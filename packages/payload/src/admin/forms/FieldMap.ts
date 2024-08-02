@@ -1,8 +1,9 @@
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { BlockField, FieldTypes, TabsField } from '../../fields/config/types.js'
 import type { CellComponentProps, FieldComponentProps, MappedComponent } from '../types.js'
 
 export type MappedTab = {
-  fieldMap?: FieldMap
+  fields?: ClientFieldConfig[]
   label: TabsField['tabs'][0]['label']
   name?: string
 }
@@ -10,7 +11,7 @@ export type MappedTab = {
 export type ReducedBlock = {
   LabelComponent: MappedComponent
   custom?: Record<any, string>
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   imageAltText?: string
   imageURL?: string
   labels: BlockField['labels']

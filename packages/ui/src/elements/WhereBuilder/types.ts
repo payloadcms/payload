@@ -1,6 +1,6 @@
 import type {
+  ClientFieldConfig,
   Field,
-  FieldMap,
   MappedComponent,
   Operator,
   SanitizedCollectionConfig,
@@ -8,9 +8,9 @@ import type {
 } from 'payload'
 
 export type WhereBuilderProps = {
-  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
-  collectionSlug: SanitizedCollectionConfig['slug']
-  fieldMap?: FieldMap
+  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly fields?: ClientFieldConfig[]
 }
 
 export type FieldCondition = {

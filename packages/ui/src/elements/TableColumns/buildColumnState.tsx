@@ -22,6 +22,7 @@ type Args = {
   fields: ClientFieldConfig[]
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
+
 export const buildColumnState = (args: Args): Column[] => {
   const { cellProps, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
 

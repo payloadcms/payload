@@ -95,7 +95,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs' && 'fieldMap' in field.fieldComponentProps) {
+          if (field.type === 'tabs' && 'fields' in field) {
             const Tabs = diffComponents.tabs
 
             return (
@@ -103,7 +103,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 comparison={comparison}
                 diffComponents={diffComponents}
                 field={field}
-                fieldMap={field.fieldComponentProps.fieldMap}
+                fields={field.fields}
                 i18n={i18n}
                 key={i}
                 locales={locales}

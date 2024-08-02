@@ -15,7 +15,7 @@ export { RowProvider, useRow }
 const baseClass = 'row'
 
 const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
-  const { className, fieldMap, forceRender = false } = props
+  const { className, fields, forceRender = false } = props
 
   const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
@@ -23,9 +23,8 @@ const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
         <RenderFields
-          {...{ fieldMap, forceRender, path, readOnly, schemaPath }}
+          {...{ fields, forceRender, path, readOnly, schemaPath }}
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
           forceRender={forceRender}
           indexPath={indexPath}
           margins={false}

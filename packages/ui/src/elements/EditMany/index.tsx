@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientFieldConfig, FieldMap, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientFieldConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -29,11 +29,14 @@ import './index.scss'
 const baseClass = 'edit-many'
 
 export type EditManyProps = {
-  collection: ClientCollectionConfig
-  fields: ClientFieldConfig[]
+  readonly collection: ClientCollectionConfig
+  readonly fields: ClientFieldConfig[]
 }
 
-const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const Submit: React.FC<{
+  readonly action: string
+  readonly disabled: boolean
+}> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -207,9 +210,9 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 onChange={[onChange]}
                 onSuccess={onSuccess}
               >
-                <FieldSelect fieldMap={fields} setSelected={setSelected} />
+                <FieldSelect fields={fields} setSelected={setSelected} />
                 {selected.length === 0 ? null : (
-                  <RenderFields fieldMap={selected} path="" readOnly={false} schemaPath={slug} />
+                  <RenderFields fields={selected} path="" readOnly={false} schemaPath={slug} />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>

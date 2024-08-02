@@ -1,8 +1,8 @@
 import type { ClientFieldConfig, FieldPermissions, Operation } from 'payload'
 
 export type Props = {
-  className?: string
-  fields: ClientFieldConfig[]
+  readonly className?: string
+  readonly fields: ClientFieldConfig[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *
@@ -10,14 +10,14 @@ export type Props = {
    *
    * If a number is provided, will immediately render fields _up to that index_.
    */
-  forceRender?: boolean | number
-  indexPath?: string
-  margins?: 'small' | false
-  operation?: Operation
-  path: string
-  permissions?: {
+  readonly forceRender?: boolean | number
+  readonly indexPath?: string
+  readonly margins?: 'small' | false
+  readonly operation?: Operation
+  readonly path: string
+  readonly permissions?: {
     [fieldName: string]: FieldPermissions
   }
-  readOnly: boolean
-  schemaPath: string
+  readonly readOnly: boolean
+  readonly schemaPath: string
 }

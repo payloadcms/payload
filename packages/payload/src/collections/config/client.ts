@@ -17,6 +17,7 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 export type ClientCollectionConfig = {
   admin: {
     components: {
+      Description: MappedComponent
       PreviewButton: MappedComponent
       PublishButton: MappedComponent
       SaveButton: MappedComponent

@@ -4,6 +4,7 @@ import type {
   BlocksFieldProps,
   CellComponentProps,
   CheckboxFieldProps,
+  ClientFieldConfig,
   CodeFieldProps,
   CollapsibleFieldProps,
   CreateMappedComponent,
@@ -128,7 +129,7 @@ function prepareCustomComponentProps(
 ) {
   return deepCopyObject({
     ...props,
-    fieldMap: undefined,
+    fields: undefined,
     richTextComponentMap: undefined,
     rows: undefined,
     tabs: undefined,
@@ -148,7 +149,7 @@ export const mapFields = (args: {
   importMap: ImportMap
   parentPath?: string
   readOnly?: boolean
-}): FieldMap => {
+}): ClientFieldConfig[] => {
   const {
     config,
     createMappedComponent,
@@ -162,7 +163,7 @@ export const mapFields = (args: {
     readOnly: readOnlyOverride,
   } = args
 
-  const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
+  const result: ClientFieldConfig[] = fieldSchema.reduce((acc, field): ClientFieldConfig[] => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let CustomFieldComponent: { ReactComponent: React.FC } | PayloadComponent =
       field.admin?.components?.Field
@@ -275,7 +276,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: mapFields({
+              fields: mapFields({
                 config,
                 createMappedComponent,
                 fieldSchema: field.fields,
@@ -317,7 +318,7 @@ export const mapFields = (args: {
                 slug: block.slug,
                 LabelComponent: createMappedComponent(block.admin?.components?.Label),
                 custom: block.admin?.custom,
-                fieldMap: blockFieldMap,
+                fields: blockFieldMap,
                 imageAltText: block.imageAltText,
                 imageURL: block.imageURL,
                 labels: block.labels,
@@ -388,7 +389,7 @@ export const mapFields = (args: {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: mapFields({
+              fields: mapFields({
                 config,
                 createMappedComponent,
                 disableAddingID: true,
@@ -449,7 +450,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: mapFields({
+              fields: mapFields({
                 config,
                 createMappedComponent,
                 disableAddingID: true,
@@ -620,7 +621,7 @@ export const mapFields = (args: {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: mapFields({
+              fields: mapFields({
                 config,
                 createMappedComponent,
                 disableAddingID: true,
@@ -657,7 +658,7 @@ export const mapFields = (args: {
 
               const reducedTab: MappedTab = {
                 name: 'name' in tab ? tab.name : undefined,
-                fieldMap: tabFieldMap,
+                fields: tabFieldMap,
                 label: tab.label,
               }
 
@@ -861,7 +862,7 @@ export const mapFields = (args: {
 
         const DefaultField = isHidden ? HiddenField : fieldComponents[field.type]
 
-        const reducedField: MappedField = {
+        const reducedField: ClientFieldConfig = {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
           Cell: createMappedComponent(CustomCellComponent, cellComponentProps, DefaultCell),

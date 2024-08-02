@@ -1,8 +1,8 @@
-import type { FieldMap, FormState } from 'payload'
+import type { ClientFieldConfig, FormState } from 'payload'
 
 export type Props = {
   drawerSlug: string
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   handleClose: () => void
   handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
   initialState?: FormState

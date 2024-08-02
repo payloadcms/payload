@@ -13,10 +13,10 @@ export type ClientConfigContext = {
 
 const Context = createContext<ClientConfigContext | undefined>(undefined)
 
-export const ConfigProvider: React.FC<{ children: React.ReactNode; config: ClientConfig }> = ({
-  children,
-  config,
-}) => {
+export const ConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly config: ClientConfig
+}> = ({ children, config }) => {
   const getEntityConfig = useCallback(
     ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
       if (collectionSlug) {

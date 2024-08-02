@@ -27,7 +27,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
     CustomLabel,
     className,
     descriptionProps,
-    fieldMap,
+    fields,
     initCollapsed = false,
     label,
     path: pathFromProps,
@@ -114,7 +114,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
@@ -139,7 +139,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           onToggle={onToggle}
         >
           <RenderFields
-            fieldMap={fieldMap}
+            fields={fields}
             forceRender
             indexPath={indexPath}
             margins="small"

@@ -10,27 +10,27 @@ import type { FieldDescriptionProps } from './FieldDescription.js'
 import type { SanitizedLabelProps } from './Label.js'
 
 export type FormFieldBase = {
-  AfterInput?: MappedComponent[]
-  BeforeInput?: MappedComponent[]
-  CustomDescription?: MappedComponent
-  CustomError?: MappedComponent
-  CustomLabel?: MappedComponent
-  Filter?: MappedComponent
-  className?: string
-  custom?: Record<string, any>
-  descriptionProps?: Omit<FieldDescriptionProps, 'type'>
-  disabled?: boolean
-  docPreferences?: DocumentPreferences
-  errorProps?: Omit<ErrorProps, 'type'>
-  label?: LabelStatic | false
-  labelProps?: SanitizedLabelProps
-  locale?: Locale
-  localized?: boolean
-  path?: string
-  readOnly?: boolean
-  required?: boolean
-  rtl?: boolean
-  style?: React.CSSProperties
-  user?: User
-  validate?: Validate
+  readonly AfterInput?: MappedComponent[]
+  readonly BeforeInput?: MappedComponent[]
+  readonly CustomDescription?: MappedComponent
+  readonly CustomError?: MappedComponent
+  readonly CustomLabel?: MappedComponent
+  readonly Filter?: MappedComponent
+  readonly className?: string
+  readonly custom?: Record<string, any>
+  readonly descriptionProps?: Omit<FieldDescriptionProps, 'type'>
+  readonly disabled?: boolean
+  readonly docPreferences?: DocumentPreferences
+  readonly errorProps?: Omit<ErrorProps, 'type'>
+  readonly label?: LabelStatic | false
+  readonly labelProps?: SanitizedLabelProps
+  readonly locale?: Locale
+  readonly localized?: boolean
+  readonly path?: string
+  readonly readOnly?: boolean
+  readonly required?: boolean
+  readonly rtl?: boolean
+  readonly style?: React.CSSProperties
+  readonly user?: User
+  readonly validate?: Validate
 }
