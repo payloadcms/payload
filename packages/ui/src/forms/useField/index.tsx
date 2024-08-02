@@ -166,7 +166,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                 data: getData(),
                 operation,
                 req: {
-                  config,
+                  payload: {
+                    config,
+                  },
                   t,
                 },
                 siblingData: getSiblingData(path),
