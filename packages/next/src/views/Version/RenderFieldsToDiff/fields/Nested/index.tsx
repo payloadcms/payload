@@ -14,7 +14,7 @@ const Nested: React.FC<Props> = ({
   diffComponents,
   disableGutter = false,
   field,
-  fieldMap,
+  fields,
   i18n,
   locale,
   locales,
@@ -39,8 +39,8 @@ const Nested: React.FC<Props> = ({
         <RenderFieldsToDiff
           comparison={comparison}
           diffComponents={diffComponents}
-          fieldMap={fieldMap}
           fieldPermissions={permissions}
+          fields={fields}
           i18n={i18n}
           locales={locales}
           version={version}

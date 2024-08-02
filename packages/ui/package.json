@@ -24,10 +24,10 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/buildComponentMap": {
-      "import": "./src/utilities/buildComponentMap.ts",
-      "types": "./src/utilities/buildComponentMap.ts",
-      "default": "./src/utilities/buildComponentMap.ts"
+    "./utilities/createClientConfig": {
+      "import": "./src/providers/Config/createClientConfig/index.tsx",
+      "types": "./src/providers/Config/createClientConfig/index.tsx",
+      "default": "./src/providers/Config/createClientConfig/index.tsx"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",

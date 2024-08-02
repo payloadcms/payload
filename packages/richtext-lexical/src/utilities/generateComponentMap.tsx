@@ -1,10 +1,10 @@
 import type { MappedComponent, MappedField, RichTextGenerateComponentMap } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
+import { createClientFieldConfigs } from 'packages/ui/src/providers/Config/createClientConfig/fields.js'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
-import { createClientFieldConfigs } from 'packages/ui/src/providers/Config/createClientConfig/fields.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextGenerateComponentMap =>

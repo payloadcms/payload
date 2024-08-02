@@ -1,7 +1,8 @@
-import type { SanitizedGlobalConfig } from './types.js'
+import type { MappedComponent } from '../../admin/types.js'
+import type { MappedView } from '../../admin/views/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
 import type { ClientFieldConfig } from '../../fields/config/client.js'
-import { MappedComponent } from '../../admin/types.js'
+import type { SanitizedGlobalConfig } from './types.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
@@ -13,26 +14,27 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
 >
 
 export type ClientGlobalConfig = {
-  isPreviewEnabled: boolean
   admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     components: {
-      views: {
-        Edit: {
-          Default: {
-            Component: MappedComponent
-            actions?: MappedComponent[]
-          }
-        }
-      }
-      SaveButton: MappedComponent
-      SaveDraftButton: MappedComponent
       PreviewButton: MappedComponent
       PublishButton: MappedComponent
+      SaveButton: MappedComponent
+      SaveDraftButton: MappedComponent
+      views: {
+        Edit: {
+          API: MappedView
+          Default: MappedView
+          LivePreview: MappedView
+          Version: MappedView
+          Versions: MappedView
+        }
+      }
     }
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedGlobalConfig['admin'],
-    'livePreview' | 'components' | ServerOnlyGlobalAdminProperties
+    'components' | 'livePreview' | ServerOnlyGlobalAdminProperties
   >
   fields: ClientFieldConfig[]
+  isPreviewEnabled: boolean
 } & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>

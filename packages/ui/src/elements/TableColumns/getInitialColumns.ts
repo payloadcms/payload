@@ -1,13 +1,13 @@
-import type { FieldMap, MappedField } from 'payload'
+import type { ClientFieldConfig } from 'payload'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
-export function fieldAffectsData(field: MappedField): boolean {
+export function fieldAffectsData(field: ClientFieldConfig): boolean {
   return 'name' in field && field.type !== 'ui'
 }
 
-const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPreferences =>
-  fieldMap.reduce((remaining, field) => {
+const getRemainingColumns = (fields: ClientFieldConfig[], useAsTitle: string): ColumnPreferences =>
+  fields.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }
@@ -33,7 +33,7 @@ const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPref
   }, [])
 
 export const getInitialColumns = (
-  fieldMap: FieldMap,
+  fields: ClientFieldConfig[],
   useAsTitle: string,
   defaultColumns: string[],
 ): ColumnPreferences => {
@@ -46,7 +46,7 @@ export const getInitialColumns = (
       initialColumns.push(useAsTitle)
     }
 
-    const remainingColumns = getRemainingColumns(fieldMap, useAsTitle)
+    const remainingColumns = getRemainingColumns(fields, useAsTitle)
 
     initialColumns = initialColumns.concat(remainingColumns)
     initialColumns = initialColumns.slice(0, 4)

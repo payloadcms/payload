@@ -181,7 +181,6 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 export { RenderComponent } from '../../providers/Config/RenderComponent.js'
-export { createClientConfig } from '../../providers/Config/createClientConfig/index.js'
 
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'

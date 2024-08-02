@@ -14,15 +14,15 @@ const baseClass = 'render-field-diffs'
 const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
   diffComponents,
-  fieldMap,
   fieldPermissions,
+  fields,
   i18n,
   locales,
   version,
 }) => {
   return (
     <div className={baseClass}>
-      {fieldMap?.map((field, i) => {
+      {fields?.map((field, i) => {
         if ('name' in field && field.name === 'id') return null
 
         const Component = diffComponents[field.type]
@@ -54,11 +54,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               diffComponents,
               diffMethod,
               field,
-              fieldMap:
-                'fieldMap' in field.fieldComponentProps
-                  ? field.fieldComponentProps?.fieldMap
-                  : fieldMap,
               fieldPermissions: subFieldPermissions,
+              fields:
+                'fields' in field.fieldComponentProps ? field.fieldComponentProps?.fields : fields,
               i18n,
               isRichText,
               locales,

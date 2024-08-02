@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -33,7 +35,6 @@ import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import './index.scss'
-import { ClientCollectionConfig } from 'packages/payload/src/index.js'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -48,20 +49,20 @@ export const DefaultListView: React.FC = () => {
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const {
-    labels,
     admin: {
       components: {
+        Description,
         afterList,
         afterListTable,
         beforeList,
         beforeListTable,
-        Description,
         views: {
           List: { actions },
         },
       },
     },
     fields,
+    labels,
   } = collectionConfig
 
   const { i18n } = useTranslation()

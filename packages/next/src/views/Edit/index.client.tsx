@@ -1,17 +1,20 @@
 'use client'
 
-import { RenderComponent, SetViewActions, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
+import { RenderComponent, SetViewActions, useConfig, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const EditViewClient: React.FC = () => {
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
-  const { getComponentMap } = useComponentMap()
+  const { getEntityConfig } = useConfig()
 
-  const { Edit, actionsMap } = getComponentMap({
-    collectionSlug,
-    globalSlug,
-  })
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+
+  const Edit = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Default
+    ?.Component
 
   if (!Edit) {
     return null
@@ -19,7 +22,11 @@ export const EditViewClient: React.FC = () => {
 
   return (
     <Fragment>
-      <SetViewActions actions={actionsMap?.Edit?.Default} />
+      <SetViewActions
+        actions={
+          (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Default?.actions
+        }
+      />
       <RenderComponent mappedComponent={Edit} />
     </Fragment>
   )

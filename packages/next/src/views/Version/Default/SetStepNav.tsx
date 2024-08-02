@@ -1,5 +1,5 @@
 import type { StepNavItem } from '@payloadcms/ui'
-import type { ClientCollectionConfig, ClientGlobalConfig, FieldMap } from 'payload'
+import type { ClientCollectionConfig, ClientFieldConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -8,14 +8,14 @@ import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
-  collectionConfig?: ClientCollectionConfig
-  collectionSlug?: string
-  doc: any
-  fieldMap: FieldMap
-  globalConfig?: ClientGlobalConfig
-  globalSlug?: string
-  id?: number | string
-}> = ({ id, collectionConfig, collectionSlug, doc, fieldMap, globalConfig, globalSlug }) => {
+  readonly collectionConfig?: ClientCollectionConfig
+  readonly collectionSlug?: string
+  readonly doc: any
+  readonly fields: ClientFieldConfig[]
+  readonly globalConfig?: ClientGlobalConfig
+  readonly globalSlug?: string
+  readonly id?: number | string
+}> = ({ id, collectionConfig, collectionSlug, doc, fields, globalConfig, globalSlug }) => {
   const { config } = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
@@ -38,7 +38,7 @@ export const SetStepNav: React.FC<{
 
       if (formattedDoc) {
         if (useAsTitle !== 'id') {
-          const titleField = fieldMap.find((f) => {
+          const titleField = fields.find((f) => {
             const { isFieldAffectingData } = f
             const fieldName = 'name' in f ? f.name : undefined
             return Boolean(isFieldAffectingData && fieldName === useAsTitle)
@@ -118,7 +118,7 @@ export const SetStepNav: React.FC<{
     t,
     i18n,
     collectionConfig,
-    fieldMap,
+    fields,
     globalConfig,
   ])
 

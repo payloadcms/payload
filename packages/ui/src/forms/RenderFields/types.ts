@@ -1,8 +1,8 @@
-import type { FieldMap, FieldPermissions, Operation } from 'payload'
+import type { ClientFieldConfig, FieldPermissions, Operation } from 'payload'
 
 export type Props = {
   className?: string
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *

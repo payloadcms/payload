@@ -13,22 +13,22 @@ import type {
 import { createClientFieldConfigs } from './fields.js'
 
 export const createClientGlobalConfig = ({
+  DefaultEditView,
+  createMappedComponent,
   global,
   t,
-  createMappedComponent,
-  DefaultEditView,
 }: {
+  DefaultEditView: React.FC<EditViewProps>
+  createMappedComponent: CreateMappedComponent
   global: SanitizedConfig['globals'][0]
   t: TFunction
-  createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
 }): ClientGlobalConfig => {
   const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
+    createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
     t,
-    createMappedComponent,
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
@@ -62,6 +62,10 @@ export const createClientGlobalConfig = ({
     const editViewFromConfig = global?.admin?.components?.views?.Edit
 
     sanitized.admin.components = {
+      PreviewButton: createMappedComponent(global?.admin?.components?.elements?.PreviewButton),
+      PublishButton: createMappedComponent(global?.admin?.components?.elements?.PublishButton),
+      SaveButton: createMappedComponent(global?.admin?.components?.elements?.SaveButton),
+      SaveDraftButton: createMappedComponent(global?.admin?.components?.elements?.SaveDraftButton),
       views: {
         Edit: {
           Default: {
@@ -84,10 +88,6 @@ export const createClientGlobalConfig = ({
           },
         },
       },
-      SaveButton: createMappedComponent(global?.admin?.components?.elements?.SaveButton),
-      SaveDraftButton: createMappedComponent(global?.admin?.components?.elements?.SaveDraftButton),
-      PreviewButton: createMappedComponent(global?.admin?.components?.elements?.PreviewButton),
-      PublishButton: createMappedComponent(global?.admin?.components?.elements?.PublishButton),
     }
 
     if ('livePreview' in sanitized.admin) {
@@ -101,16 +101,16 @@ export const createClientGlobalConfig = ({
 }
 
 export const createClientGlobalConfigs = ({
+  DefaultEditView,
+  createMappedComponent,
   globals,
   t,
-  createMappedComponent,
-  DefaultEditView,
 }: {
+  DefaultEditView: React.FC<EditViewProps>
+  createMappedComponent: CreateMappedComponent
   globals: SanitizedConfig['globals']
   t: TFunction
-  createMappedComponent: CreateMappedComponent
-  DefaultEditView: React.FC<EditViewProps>
 }): ClientGlobalConfig[] =>
   globals.map((global) =>
-    createClientGlobalConfig({ global, t, createMappedComponent, DefaultEditView }),
+    createClientGlobalConfig({ DefaultEditView, createMappedComponent, global, t }),
   )

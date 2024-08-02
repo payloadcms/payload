@@ -1,10 +1,5 @@
 'use client'
-import type {
-  CellComponentProps,
-  ClientFieldConfig,
-  MappedField,
-  SanitizedCollectionConfig,
-} from 'payload'
+import type { CellComponentProps, ClientFieldConfig, SanitizedCollectionConfig } from 'payload'
 
 import React from 'react'
 
@@ -16,9 +11,8 @@ import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
-import { DefaultCell } from '../Table/DefaultCell/index.js'
 
-const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
+const fieldIsPresentationalOnly = (field: ClientFieldConfig): boolean => field.type === 'ui'
 
 type Args = {
   cellProps: Partial<CellComponentProps>[]

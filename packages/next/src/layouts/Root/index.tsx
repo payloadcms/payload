@@ -2,8 +2,9 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
-import { RootProvider, createClientConfig } from '@payloadcms/ui'
+import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
+import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { Merriweather } from 'next/font/google'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload'
@@ -62,7 +63,15 @@ export const RootLayout = async ({
     language: languageCode,
   })
 
-  const { clientConfig, render } = await createClientConfig({ children, config, i18n, payload })
+  const { clientConfig, render } = await createClientConfig({
+    DefaultEditView,
+    DefaultListView,
+    children,
+    config,
+    i18n,
+    importMap,
+    payload,
+  })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -105,7 +114,8 @@ export const RootLayout = async ({
           theme={theme}
           translations={i18n.translations}
         >
-          {render}
+          Hello, world!
+          {/* {render} */}
         </RootProvider>
         <div id="portal" />
       </body>

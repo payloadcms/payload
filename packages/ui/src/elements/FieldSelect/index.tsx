@@ -1,11 +1,5 @@
 'use client'
-import type {
-  ClientFieldConfig,
-  FieldMap,
-  FieldWithPath,
-  MappedComponent,
-  MappedField,
-} from 'payload'
+import type { ClientFieldConfig, FieldWithPath, MappedComponent } from 'payload'
 
 import React, { Fragment, type JSX, useState } from 'react'
 
@@ -30,7 +24,7 @@ export const combineLabel = ({
   prefix,
 }: {
   customLabel?: string
-  field?: MappedField
+  field?: ClientFieldConfig
   prefix?: JSX.Element | string
 }): JSX.Element => {
   const CustomLabelToRender: MappedComponent =

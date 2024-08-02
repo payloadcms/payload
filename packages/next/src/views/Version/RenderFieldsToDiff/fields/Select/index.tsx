@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { MappedField, OptionObject, SelectField, SelectFieldProps } from 'payload'
+import type { ClientFieldConfig, OptionObject, SelectField, SelectFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -46,7 +46,7 @@ const getTranslatedOptions = (
 
 const Select: React.FC<
   {
-    field: MappedField & SelectFieldProps
+    field: ClientFieldConfig & SelectFieldProps
   } & Omit<Props, 'field'>
 > = ({ comparison, diffMethod, field, i18n, locale, version }) => {
   let placeholder = ''

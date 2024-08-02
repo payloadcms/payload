@@ -1,8 +1,8 @@
 'use client'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import type { MappedComponent } from 'payload'
 
 import { useConfig } from '@payloadcms/ui'
-import { MappedComponent } from 'packages/payload/src/index.js'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 export { SetViewActions } from './SetViewActions/index.js'
 

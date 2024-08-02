@@ -198,10 +198,6 @@ export type {
   GenericDescriptionProps,
 } from './forms/FieldDescription.js'
 
-export type { MappedField } from './forms/FieldMap.js'
-
-export type { FieldMap } from './forms/FieldMap.js'
-
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
 export type {

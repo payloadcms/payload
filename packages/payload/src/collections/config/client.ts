@@ -1,7 +1,8 @@
-import type { SanitizedCollectionConfig } from './types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { MappedComponent } from '../../admin/types.js'
+import type { MappedView } from '../../admin/views/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
-import { MappedComponent } from '../../admin/types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { SanitizedCollectionConfig } from './types.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
@@ -14,35 +15,36 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 >
 
 export type ClientCollectionConfig = {
-  isPreviewEnabled: boolean
   admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     components: {
+      PreviewButton: MappedComponent
+      PublishButton: MappedComponent
+      SaveButton: MappedComponent
+      SaveDraftButton: MappedComponent
+      Upload: MappedComponent
+      afterList: MappedComponent[]
+      afterListTable: MappedComponent[]
+      beforeList: MappedComponent[]
+      beforeListTable: MappedComponent[]
       views: {
         Edit: {
-          Default: {
-            Component: MappedComponent
-            actions?: MappedComponent[]
-          }
+          API: MappedView
+          Default: MappedView
+          LivePreview: MappedView
+          Version: MappedView
+          Versions: MappedView
         }
         List: {
           Component: MappedComponent
           actions: MappedComponent[]
         }
       }
-      SaveButton: MappedComponent
-      SaveDraftButton: MappedComponent
-      PreviewButton: MappedComponent
-      PublishButton: MappedComponent
-      Upload: MappedComponent
-      beforeList: MappedComponent[]
-      beforeListTable: MappedComponent[]
-      afterList: MappedComponent[]
-      afterListTable: MappedComponent[]
     }
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedCollectionConfig['admin'],
-    'livePreview' | 'components' | ServerOnlyCollectionAdminProperties
+    'components' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientFieldConfig[]
+  isPreviewEnabled: boolean
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>

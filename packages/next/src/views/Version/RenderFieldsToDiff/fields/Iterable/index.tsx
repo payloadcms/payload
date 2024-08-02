@@ -1,4 +1,4 @@
-import type { MappedField } from 'payload'
+import type { ClientFieldConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getUniqueListBy } from 'payload/shared'
@@ -42,13 +42,13 @@ const Iterable: React.FC<Props> = ({
             const versionRow = version?.[i] || {}
             const comparisonRow = comparison?.[i] || {}
 
-            let fieldMap: MappedField[] = []
+            let fields: ClientFieldConfig[] = []
 
-            if (field.type === 'array' && 'fieldMap' in field.fieldComponentProps)
-              fieldMap = field.fieldComponentProps.fieldMap
+            if (field.type === 'array' && 'fields' in field.fieldComponentProps)
+              fields = field.fieldComponentProps.fields
 
             if (field.type === 'blocks') {
-              fieldMap = [
+              fields = [
                 // {
                 //   name: 'blockType',
                 //   label: i18n.t('fields:blockType'),
@@ -64,28 +64,24 @@ const Iterable: React.FC<Props> = ({
                   fieldMap: [],
                 }
 
-                fieldMap = [...fieldMap, ...matchedBlock.fieldMap]
+                fields = [...fields, ...matchedBlock.fields]
               } else {
                 const matchedVersionBlock = ('blocks' in field.fieldComponentProps &&
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === versionRow?.blockType,
                   )) || {
-                  fieldMap: [],
+                  fields: [],
                 }
 
                 const matchedComparisonBlock = ('blocks' in field.fieldComponentProps &&
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === comparisonRow?.blockType,
                   )) || {
-                  fieldMap: [],
+                  fields: [],
                 }
 
-                fieldMap = getUniqueListBy<MappedField>(
-                  [
-                    ...fieldMap,
-                    ...matchedVersionBlock.fieldMap,
-                    ...matchedComparisonBlock.fieldMap,
-                  ],
+                fields = getUniqueListBy<ClientFieldConfig>(
+                  [...fields, ...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
                   'name',
                 )
               }
@@ -96,8 +92,8 @@ const Iterable: React.FC<Props> = ({
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
                   diffComponents={diffComponents}
-                  fieldMap={fieldMap}
                   fieldPermissions={permissions}
+                  fields={fields}
                   i18n={i18n}
                   locales={locales}
                   version={versionRow}

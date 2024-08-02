@@ -1,5 +1,11 @@
 'use client'
-import type { CellComponentProps, FieldBase, FieldMap, FieldTypes, MappedComponent } from 'payload'
+import type {
+  CellComponentProps,
+  ClientFieldConfig,
+  FieldBase,
+  FieldTypes,
+  MappedComponent,
+} from 'payload'
 
 import React from 'react'
 
@@ -29,10 +35,10 @@ export type Column = {
 }
 
 export type Props = {
-  columns?: Column[]
-  customCellContext?: Record<string, unknown>
-  data: Record<string, unknown>[]
-  fieldMap: FieldMap
+  readonly columns?: Column[]
+  readonly customCellContext?: Record<string, unknown>
+  readonly data: Record<string, unknown>[]
+  readonly fields: ClientFieldConfig[]
 }
 
 export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {

@@ -8,17 +8,16 @@ import {
 } from '@payloadcms/ui'
 import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
+import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { ListPreferences } from './Default/types.js'
 
-import { DefaultListView } from './Default/index.js'
-
 export { generateListMetadata } from './meta.js'
 
 export const ListView: React.FC<AdminViewProps> = async ({
+  clientConfig,
   initPageResult,
   params,
   searchParams,
@@ -70,9 +69,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
   } = config
 
   if (collectionConfig) {
-    const {
-      admin: { components: { views: { List: CustomList } = {} } = {} },
-    } = collectionConfig
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     if (!visibleEntities.collections.includes(collectionSlug)) {
       return notFound()
@@ -133,16 +130,11 @@ export const ListView: React.FC<AdminViewProps> = async ({
       },
     })
 
-    const mappedListView = createMappedComponent(CustomList?.Component, undefined, DefaultListView)
-
     return (
       <Fragment>
         <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
-          collectionConfig={createClientCollectionConfig({
-            collection: collectionConfig,
-            t: initPageResult.req.i18n.t,
-          })}
+          collectionConfig={clientCollectionConfig}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           newDocumentURL={formatAdminURL({
@@ -168,7 +160,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
                   collectionSlug,
                   listSearchableFields: collectionConfig.admin.listSearchableFields,
                 }}
-                mappedComponent={mappedListView}
+                mappedComponent={clientCollectionConfig.admin.components.views.List.Component}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

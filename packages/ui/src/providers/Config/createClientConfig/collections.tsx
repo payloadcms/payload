@@ -14,24 +14,24 @@ import type {
 import { createClientFieldConfigs } from './fields.js'
 
 export const createClientCollectionConfig = ({
-  collection,
-  t,
-  createMappedComponent,
   DefaultEditView,
   DefaultListView,
+  collection,
+  createMappedComponent,
+  t,
 }: {
-  collection: SanitizedCollectionConfig
-  t: TFunction
-  createMappedComponent: CreateMappedComponent
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
+  collection: SanitizedCollectionConfig
+  createMappedComponent: CreateMappedComponent
+  t: TFunction
 }): ClientCollectionConfig => {
   const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
+    createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
     t,
-    createMappedComponent,
   })
 
   const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -93,6 +93,23 @@ export const createClientCollectionConfig = ({
     const listViewFromConfig = collection?.admin?.components?.views?.List
 
     sanitized.admin.components = {
+      PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
+      PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
+      SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
+      SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
+      Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
+      afterList: collection?.admin?.components?.afterList?.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      afterListTable: collection?.admin?.components?.afterListTable?.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      beforeList: collection?.admin?.components?.beforeList?.map((Component) =>
+        createMappedComponent(Component),
+      ),
+      beforeListTable: collection?.admin?.components?.beforeListTable?.map((Component) =>
+        createMappedComponent(Component),
+      ),
       views: {
         Edit: {
           Default: {
@@ -122,26 +139,9 @@ export const createClientCollectionConfig = ({
             },
             DefaultListView,
           ),
-          actions: createMappedComponent(collection.admin.components.views.List?.actions),
+          actions: createMappedComponent(collection.admin?.components?.views?.List?.actions),
         },
       },
-      SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
-      SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
-      PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
-      PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
-      Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
-      beforeList: collection?.admin?.components?.beforeList.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      beforeListTable: collection?.admin?.components?.beforeListTable.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      afterList: collection?.admin?.components?.afterList.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      afterListTable: collection?.admin?.components?.afterListTable.map((Component) =>
-        createMappedComponent(Component),
-      ),
     }
 
     if ('livePreview' in sanitized.admin) {
@@ -155,24 +155,24 @@ export const createClientCollectionConfig = ({
 }
 
 export const createClientCollectionConfigs = ({
-  collections,
-  t,
-  createMappedComponent,
-  DefaultListView,
   DefaultEditView,
+  DefaultListView,
+  collections,
+  createMappedComponent,
+  t,
 }: {
-  collections: SanitizedCollectionConfig[]
-  t: TFunction
-  createMappedComponent: CreateMappedComponent
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
+  collections: SanitizedCollectionConfig[]
+  createMappedComponent: CreateMappedComponent
+  t: TFunction
 }): ClientCollectionConfig[] =>
   collections.map((collection) =>
     createClientCollectionConfig({
-      collection,
-      t,
-      createMappedComponent,
       DefaultEditView,
       DefaultListView,
+      collection,
+      createMappedComponent,
+      t,
     }),
   )

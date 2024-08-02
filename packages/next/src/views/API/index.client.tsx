@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   CheckboxField,
   CopyToClipboard,
@@ -8,7 +10,6 @@ import {
   MinimizeMaximizeIcon,
   NumberField as NumberInput,
   SetViewActions,
-  useComponentMap,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -32,24 +33,17 @@ export const APIViewClient: React.FC = () => {
   const { i18n, t } = useTranslation()
   const { code } = useLocale()
 
-  const { getComponentMap } = useComponentMap()
-
-  const componentMap = getComponentMap({ collectionSlug, globalSlug })
-
   const {
     config: {
-      collections,
-      globals,
       localization,
       routes: { api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+  const collectionClientConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const globalClientConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const localeOptions =
     localization &&
@@ -58,13 +52,13 @@ export const APIViewClient: React.FC = () => {
   let draftsEnabled: boolean = false
   let docEndpoint: string = ''
 
-  if (collectionConfig) {
-    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
+  if (collectionClientConfig) {
+    draftsEnabled = Boolean(collectionClientConfig.versions?.drafts)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
-  if (globalConfig) {
-    draftsEnabled = Boolean(globalConfig.versions?.drafts)
+  if (globalClientConfig) {
+    draftsEnabled = Boolean(globalClientConfig.versions?.drafts)
     docEndpoint = `/globals/${globalSlug}`
   }
 
@@ -99,11 +93,11 @@ export const APIViewClient: React.FC = () => {
           setData(json)
         } catch (error) {
           toast.error('Error parsing response')
-          console.error(error)
+          console.error(error) // eslint-disable-line no-console
         }
       } catch (error) {
         toast.error('Error making request')
-        console.error(error)
+        console.error(error) // eslint-disable-line no-console
       }
     }
 
@@ -117,14 +111,19 @@ export const APIViewClient: React.FC = () => {
     >
       <SetDocumentStepNav
         collectionSlug={collectionSlug}
-        globalLabel={globalConfig?.label}
+        globalLabel={globalClientConfig?.label}
         globalSlug={globalSlug}
         id={id}
-        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
-        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
+        pluralLabel={collectionClientConfig ? collectionClientConfig?.labels?.plural : undefined}
+        useAsTitle={collectionClientConfig ? collectionClientConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <SetViewActions actions={componentMap?.actionsMap?.Edit?.API} />
+      <SetViewActions
+        actions={
+          (collectionClientConfig || globalClientConfig)?.admin?.components?.views?.Edit?.API
+            ?.actions
+        }
+      />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

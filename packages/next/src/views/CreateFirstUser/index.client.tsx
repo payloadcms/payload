@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -8,7 +8,6 @@ import {
   FormSubmit,
   PasswordField,
   RenderFields,
-  useComponentMap,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
@@ -18,23 +17,22 @@ import React, { useMemo } from 'react'
 import { LoginField } from '../Login/LoginField/index.js'
 
 export const CreateFirstUserClient: React.FC<{
-  initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
-  userSlug: string
+  readonly initialState: FormState
+  readonly loginType: 'email' | 'emailOrUsername' | 'username'
+  readonly requireEmail?: boolean
+  readonly userSlug: string
 }> = ({ initialState, loginType, requireEmail: requireEmailFromProps = true, userSlug }) => {
-  const { getFieldMap } = useComponentMap()
-
   const {
     config: {
       routes: { admin, api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const { t } = useTranslation()
 
-  const fieldMap = getFieldMap({ collectionSlug: userSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const requireEmail = useMemo(() => {
     if (loginType === 'email') {
@@ -81,7 +79,7 @@ export const CreateFirstUserClient: React.FC<{
       />
       <ConfirmPasswordField />
       <RenderFields
-        fieldMap={fieldMap}
+        fields={collectionConfig.fields}
         forceRender
         operation="create"
         path=""

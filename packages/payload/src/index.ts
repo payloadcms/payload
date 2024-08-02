@@ -671,6 +671,7 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export type * from './admin/types.js'
+export type { MappedView } from './admin/views/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
@@ -702,10 +703,14 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
-export type { ImportMap } from './bin/generateImportMap/index.js'
 
+export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
+export type {
+  ServerOnlyCollectionAdminProperties,
+  ServerOnlyCollectionProperties,
+} from './collections/config/client.js'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -755,9 +760,10 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export type { ClientConfig } from './config/client.js'
+
+export { serverOnlyConfigProperties } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
-
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -860,6 +866,8 @@ export {
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export type { ClientFieldConfig } from './fields/config/client.js'
+export type { ServerOnlyFieldProperties } from './fields/config/client.js'
+export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
 export type {
   ArrayField,
@@ -927,6 +935,10 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type { ClientGlobalConfig } from './globals/config/client.js'
 export type {
+  ServerOnlyGlobalAdminProperties,
+  ServerOnlyGlobalProperties,
+} from './globals/config/client.js'
+export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
@@ -990,23 +1002,12 @@ export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
+export { getDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
-export { getDependencies }
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
-export type {
-  ServerOnlyCollectionProperties,
-  ServerOnlyCollectionAdminProperties,
-} from './collections/config/client.js'
-export type {
-  ServerOnlyGlobalProperties,
-  ServerOnlyGlobalAdminProperties,
-} from './globals/config/client.js'
-export type { ServerOnlyFieldProperties } from './fields/config/client.js'
-export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
-export { serverOnlyConfigProperties } from './config/client.js'

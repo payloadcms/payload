@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   DocumentControls,
   DocumentFields,
@@ -9,7 +11,6 @@ import {
   RenderComponent,
   Upload,
   useAuth,
-  useComponentMap,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
@@ -57,9 +58,18 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const { config } = useConfig()
+
+  const {
+    config,
+    config: {
+      admin: { user: userSlug },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
+
   const router = useRouter()
-  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
@@ -67,37 +77,21 @@ export const DefaultEditView: React.FC = () => {
 
   const locale = params.get('locale')
 
-  const {
-    admin: { user: userSlug },
-    collections,
-    globals,
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
-  } = config
+  const collectionClientConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
-
-  const entitySlug = collectionConfig?.slug || globalConfig?.slug
-
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
+  const entitySlug = collectionClientConfig?.slug || globalConfig?.slug
 
   const operation = collectionSlug && !id ? 'create' : 'update'
 
-  const auth = collectionConfig ? collectionConfig.auth : undefined
-  const upload = collectionConfig ? collectionConfig.upload : undefined
+  const auth = collectionClientConfig ? collectionClientConfig.auth : undefined
+  const upload = collectionClientConfig ? collectionClientConfig.upload : undefined
 
   const preventLeaveWithoutSaving =
-    (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+    (!(
+      collectionClientConfig?.versions?.drafts && collectionClientConfig?.versions?.drafts?.autosave
+    ) ||
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
 
@@ -196,14 +190,14 @@ export const DefaultEditView: React.FC = () => {
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetDocumentStepNav
-            collectionSlug={collectionConfig?.slug}
+            collectionSlug={collectionClientConfig?.slug}
             globalSlug={globalConfig?.slug}
             id={id}
-            pluralLabel={collectionConfig?.labels?.plural}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
+            pluralLabel={collectionClientConfig?.labels?.plural}
+            useAsTitle={collectionClientConfig?.admin?.useAsTitle}
           />
           <SetDocumentTitle
-            collectionConfig={collectionConfig}
+            collectionConfig={collectionClientConfig}
             config={config}
             fallback={depth <= 1 ? id?.toString() : undefined}
             globalConfig={globalConfig}
@@ -217,7 +211,7 @@ export const DefaultEditView: React.FC = () => {
             id={id}
             isEditing={isEditing}
             permissions={docPermissions}
-            slug={collectionConfig?.slug || globalConfig?.slug}
+            slug={collectionClientConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields
             AfterFields={AfterFields}
@@ -227,8 +221,8 @@ export const DefaultEditView: React.FC = () => {
                   {auth && (
                     <Auth
                       className={`${baseClass}__auth`}
-                      collectionSlug={collectionConfig.slug}
-                      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                      collectionSlug={collectionClientConfig.slug}
+                      disableLocalStrategy={collectionClientConfig.auth?.disableLocalStrategy}
                       email={data?.email}
                       loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
@@ -243,11 +237,13 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {componentMap.Upload ? (
-                        <RenderComponent mappedComponent={componentMap.Upload} />
+                      {collectionClientConfig?.admin?.components?.Upload ? (
+                        <RenderComponent
+                          mappedComponent={collectionClientConfig.admin.components.Upload}
+                        />
                       ) : (
                         <Upload
-                          collectionSlug={collectionConfig.slug}
+                          collectionSlug={collectionClientConfig.slug}
                           initialState={initialState}
                           uploadConfig={upload}
                         />
@@ -258,7 +254,7 @@ export const DefaultEditView: React.FC = () => {
               )
             }
             docPermissions={docPermissions}
-            fieldMap={fieldMap}
+            fields={(collectionClientConfig || globalConfig)?.fields}
             readOnly={!hasSavePermission}
             schemaPath={schemaPath}
           />
