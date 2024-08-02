@@ -1,12 +1,18 @@
 'use client'
-import type { FieldMap, FieldWithPath, MappedComponent, MappedField } from 'payload'
+import type {
+  ClientFieldConfig,
+  FieldMap,
+  FieldWithPath,
+  MappedComponent,
+  MappedField,
+} from 'payload'
 
 import React, { Fragment, type JSX, useState } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -14,7 +20,7 @@ import './index.scss'
 const baseClass = 'field-select'
 
 export type FieldSelectProps = {
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   setSelected: (fields: FieldWithPath[]) => void
 }
 
@@ -70,19 +76,19 @@ export const combineLabel = ({
 }
 
 const reduceFields = ({
-  fieldMap,
+  fields,
   labelPrefix = null,
   path = '',
 }: {
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   labelPrefix?: JSX.Element | string
   path?: string
 }): { Label: JSX.Element; value: FieldWithPath }[] => {
-  if (!fieldMap) {
+  if (!fields) {
     return []
   }
 
-  return fieldMap?.reduce((fieldsToUse, field) => {
+  return fields?.reduce((fieldsToUse, field) => {
     const { isFieldAffectingData } = field
     // escape for a variety of reasons
     if (
@@ -140,9 +146,9 @@ const reduceFields = ({
   }, [])
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { t } = useTranslation()
-  const [options] = useState(() => reduceFields({ fieldMap }))
+  const [options] = useState(() => reduceFields({ fields }))
 
   const { dispatchFields, getFields } = useForm()
 

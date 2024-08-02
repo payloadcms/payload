@@ -1,11 +1,10 @@
 import type { MappedComponent, MappedField, RichTextGenerateComponentMap } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
-import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
-import React from 'react'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
+import { createClientFieldConfigs } from 'packages/ui/src/providers/Config/createClientConfig/fields.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextGenerateComponentMap =>
@@ -74,7 +73,7 @@ export const getGenerateComponentMap =
 
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
-                const mappedFields = mapFields({
+                const fields = createClientFieldConfigs({
                   config,
                   createMappedComponent,
                   disableAddingID: true,
@@ -87,7 +86,7 @@ export const getGenerateComponentMap =
 
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
-                  mappedFields,
+                  fields,
                 )
               }
             }

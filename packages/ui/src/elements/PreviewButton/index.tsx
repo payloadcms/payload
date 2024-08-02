@@ -3,7 +3,7 @@ import type { MappedComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { Button } from '../Button/index.js'
 import { usePreviewURL } from './usePreviewURL.js'
 

@@ -42,7 +42,7 @@ import type { MappedComponent, Operator } from 'payload'
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
-import { RenderComponent } from '../../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'

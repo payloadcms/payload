@@ -14,6 +14,7 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 >
 
 export type ClientCollectionConfig = {
+  isPreviewEnabled: boolean
   admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     components: {

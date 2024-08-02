@@ -11,8 +11,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
@@ -60,8 +59,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [where, setWhere] = useState<Where>(null)
   const [search, setSearch] = useState<string>('')
 
-  const { componentMap } = useComponentMap()
-
   const {
     config: {
       collections,
@@ -83,7 +80,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
   )
 
-  const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
+  const List = selectedCollectionConfig?.admin?.components.views.List.Component
 
   const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig

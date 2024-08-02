@@ -1,15 +1,14 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
-
-import { useComponentMap } from '../ComponentMap/index.js'
+import { useConfig } from '@payloadcms/ui'
+import { MappedComponent } from 'packages/payload/src/index.js'
 
 export { SetViewActions } from './SetViewActions/index.js'
 
 type ActionsContextType = {
-  actions: ActionMap['Edit'][string]
-  setViewActions: (actions: ActionMap['Edit'][string]) => void
+  actions: MappedComponent[]
+  setViewActions: (actions: MappedComponent[]) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
@@ -24,8 +23,12 @@ export const ActionsProvider = ({ children }) => {
   const [adminActions, setAdminActions] = useState([])
 
   const {
-    componentMap: { actions },
-  } = useComponentMap()
+    config: {
+      admin: {
+        components: { actions },
+      },
+    },
+  } = useConfig()
 
   useEffect(() => {
     setAdminActions(actions || [])

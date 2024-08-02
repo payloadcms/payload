@@ -13,6 +13,7 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
 >
 
 export type ClientGlobalConfig = {
+  isPreviewEnabled: boolean
   admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     components: {

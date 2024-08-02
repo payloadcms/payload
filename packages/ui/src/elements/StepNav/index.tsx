@@ -10,8 +10,7 @@ import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 import type { StepNavItem } from './types.js'
 
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 
 const baseClass = 'step-nav'
 
@@ -23,15 +22,16 @@ const StepNav: React.FC<{
 
   const { stepNav } = useStepNav()
 
-  const { config } = useConfig()
-
   const {
-    routes: { admin },
-  } = config
-
-  const {
-    componentMap: { Icon },
-  } = useComponentMap()
+    config: {
+      routes: { admin },
+      admin: {
+        components: {
+          graphics: { Icon },
+        },
+      },
+    },
+  } = useConfig()
 
   const { t } = useTranslation()
 

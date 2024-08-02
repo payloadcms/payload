@@ -82,7 +82,7 @@ import {
   UploadField,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../../exports/client/index.js'
-import { getComponent } from './getComponent.js'
+import { getComponent } from '../../Config/createClientConfig/getComponent.js'
 
 // Need to recreate fieldComponents here, as we cannot access it from the client bundle ("cannot "dot" into "fieldComponents")
 const fieldComponents: FieldTypesComponents = {

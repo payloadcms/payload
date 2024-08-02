@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldMap, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientFieldConfig, FieldMap, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -30,7 +30,7 @@ const baseClass = 'edit-many'
 
 export type EditManyProps = {
   collection: ClientCollectionConfig
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
 }
 
 const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
@@ -96,7 +96,7 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
   )
 }
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, labels: { plural } } = {}, collection, fieldMap } = props
+  const { collection: { slug, labels: { plural } } = {}, collection, fields } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -207,7 +207,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 onChange={[onChange]}
                 onSuccess={onSuccess}
               >
-                <FieldSelect fieldMap={fieldMap} setSelected={setSelected} />
+                <FieldSelect fieldMap={fields} setSelected={setSelected} />
                 {selected.length === 0 ? null : (
                   <RenderFields fieldMap={selected} path="" readOnly={false} schemaPath={slug} />
                 )}

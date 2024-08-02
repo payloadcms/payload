@@ -1,5 +1,10 @@
 'use client'
-import type { CellComponentProps, FieldMap, MappedField, SanitizedCollectionConfig } from 'payload'
+import type {
+  CellComponentProps,
+  ClientFieldConfig,
+  MappedField,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import React from 'react'
 
@@ -20,13 +25,13 @@ type Args = {
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 export const buildColumnState = (args: Args): Column[] => {
-  const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
+  const { cellProps, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
 
-  let sortedFieldMap = flattenFieldMap(fieldMap)
+  let sortedFieldMap = flattenFieldMap(fields)
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field

@@ -1,10 +1,15 @@
 'use client'
-import type { CollectionPermission, GlobalPermission, SanitizedCollectionConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  CollectionPermission,
+  GlobalPermission,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -48,16 +53,10 @@ export const DocumentControls: React.FC<{
 
   const { i18n } = useTranslation()
 
-  const { config } = useConfig()
-  const { getComponentMap } = useComponentMap()
+  const { config, getEntityConfig } = useConfig()
 
-  const collectionConfig = config.collections.find((coll) => coll.slug === slug)
-  const globalConfig = config.globals.find((global) => global.slug === slug)
-
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
+  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
 
   const {
     admin: { dateFormat },
@@ -160,8 +159,10 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {componentMap?.isPreviewEnabled && (
-              <PreviewButton CustomComponent={componentMap.PreviewButton} />
+            {(collectionConfig?.isPreviewEnabled || globalConfig?.isPreviewEnabled) && (
+              <PreviewButton
+                CustomComponent={(collectionConfig || globalConfig).admin.components.PreviewButton}
+              />
             )}
             {hasSavePermission && (
               <React.Fragment>
@@ -172,12 +173,22 @@ export const DocumentControls: React.FC<{
                       unsavedDraftWithValidations ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraftButton CustomComponent={componentMap.SaveDraftButton} />
+                      <SaveDraftButton
+                        CustomComponent={
+                          (collectionConfig || globalConfig).admin.components.SaveDraftButton
+                        }
+                      />
                     )}
-                    <PublishButton CustomComponent={componentMap.PublishButton} />
+                    <PublishButton
+                      CustomComponent={
+                        (collectionConfig || globalConfig).admin.components.PublishButton
+                      }
+                    />
                   </React.Fragment>
                 ) : (
-                  <SaveButton CustomComponent={componentMap.SaveButton} />
+                  <SaveButton
+                    CustomComponent={(collectionConfig || globalConfig).admin.components.SaveButton}
+                  />
                 )}
               </React.Fragment>
             )}

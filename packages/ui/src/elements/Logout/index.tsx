@@ -2,8 +2,7 @@
 import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -48,8 +47,12 @@ export const Logout: React.FC<{
   tabIndex?: number
 }> = ({ Link, tabIndex = 0 }) => {
   const {
-    componentMap: { LogoutButton: CustomLogout },
-  } = useComponentMap()
+    config: {
+      admin: {
+        components: { LogoutButton: CustomLogout },
+      },
+    },
+  } = useConfig()
 
   if (CustomLogout) {
     return <RenderComponent mappedComponent={CustomLogout} />

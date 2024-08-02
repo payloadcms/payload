@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import {
-  AdminViewProps,
-  EditViewProps,
+  type AdminViewProps,
+  type EditViewProps,
   serverOnlyConfigProperties,
   type ClientConfig,
   type Payload,
@@ -13,8 +13,10 @@ import {
 import { createClientCollectionConfigs } from './collections.js'
 import { createClientGlobalConfigs } from './globals.js'
 import type { ImportMap } from 'packages/payload/src/bin/generateImportMap/index.js'
-import { PayloadIcon } from '@payloadcms/ui'
-import { getComponent, getCreateMappedComponent, PayloadLogo } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent } from './getCreateMappedComponent.js'
+import { PayloadIcon } from '../../../graphics/Icon/index.js'
+import { PayloadLogo } from '../../../graphics/Logo/index.js'
+import { getComponent } from './getComponent.js'
 
 export const createClientConfig = async ({
   children,

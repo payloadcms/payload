@@ -180,17 +180,9 @@ export { ActionsProvider, SetViewActions, useActions } from '../../providers/Act
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
-export type {
-  ActionMap,
-  CollectionComponentMap,
-  ComponentMap,
-  ConfigComponentMapBase,
-  GlobalComponentMap,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
-export { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+export { RenderComponent } from '../../providers/Config/RenderComponent.js'
 export { createClientConfig } from '../../providers/Config/createClientConfig/index.js'
 
-export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'

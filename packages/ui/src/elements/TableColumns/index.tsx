@@ -6,7 +6,6 @@ import React, { createContext, useCallback, useContext, useState } from 'react'
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { buildColumnState } from './buildColumnState.js'
@@ -45,25 +44,24 @@ export const TableColumnsProvider: React.FC<Props> = ({
   listPreferences,
   preferenceKey,
 }) => {
-  const { config } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
-  const { componentMap } = useComponentMap()
-
-  const { fieldMap } = componentMap.collections[collectionSlug]
-
-  const collectionConfig = config.collections.find(
+  const collectionConfig = collections.find(
     (collectionConfig) => collectionConfig.slug === collectionSlug,
   )
 
   const {
     admin: { defaultColumns, useAsTitle },
+    fields,
   } = collectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
 
   const [initialColumns] = useState<ColumnPreferences>(() =>
-    getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
+    getInitialColumns(filterFields(fields), useAsTitle, defaultColumns),
   )
 
   const [tableColumns, setTableColumns] = React.useState(() =>
@@ -72,7 +70,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       enableRowSelections,
-      fieldMap,
+      fields,
       useAsTitle,
     }),
   )
@@ -174,7 +172,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
               enableRowSelections: true,
-              fieldMap,
+              fields,
               useAsTitle,
             }),
           )
@@ -187,7 +185,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     preferenceKey,
     getPreference,
     collectionSlug,
-    fieldMap,
+    fields,
     cellProps,
     defaultColumns,
     useAsTitle,

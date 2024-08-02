@@ -4,7 +4,7 @@ import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } f
 
 import React from 'react'
 
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 

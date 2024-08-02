@@ -1010,4 +1010,3 @@ export type {
 export type { ServerOnlyFieldProperties } from './fields/config/client.js'
 export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
 export { serverOnlyConfigProperties } from './config/client.js'
-export type { ActionMap } from './admin/types.js'

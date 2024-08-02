@@ -92,6 +92,7 @@ export const createClientGlobalConfig = ({
 
     if ('livePreview' in sanitized.admin) {
       sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+      // @ts-expect-error
       delete sanitized.admin.livePreview.url
     }
   }
