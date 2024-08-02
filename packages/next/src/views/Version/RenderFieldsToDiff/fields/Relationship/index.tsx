@@ -33,10 +33,8 @@ const generateLabelFromValue = (
       .join(', ')
   }
 
-  let relation: string
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
-  const relatedDocValue = value?.value
 
   const relationTo =
     'relationTo' in field.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
@@ -45,17 +43,20 @@ const generateLabelFromValue = (
     return String(value)
   }
 
-  if (Array.isArray(relationTo)) {
-    if (typeof value === 'object') {
-      relation = value.relationTo
-      relatedDoc = value.value
-    }
+  if (typeof value === 'object' && 'relationTo' in value) {
+    relatedDoc = value.value
   } else {
-    relation = relationTo
-    relatedDoc = relatedDocValue
+    // Non-polymorphic relationship
+    relatedDoc = value
   }
 
-  const relatedCollection = collections.find((c) => c.slug === relation)
+  const relatedCollection = relationTo
+    ? collections.find(
+        (c) =>
+          c.slug ===
+          (typeof value === 'object' && 'relationTo' in value ? value.relationTo : relationTo),
+      )
+    : null
 
   if (relatedCollection) {
     const useAsTitle = relatedCollection?.admin?.useAsTitle
@@ -64,8 +65,9 @@ const generateLabelFromValue = (
     )
     let titleFieldIsLocalized = false
 
-    if (useAsTitleField && fieldAffectsData(useAsTitleField))
+    if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
       titleFieldIsLocalized = useAsTitleField.localized
+    }
 
     if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
       valueToReturn = relatedDoc[useAsTitle]
@@ -77,6 +79,13 @@ const generateLabelFromValue = (
 
     if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
       valueToReturn = valueToReturn[locale]
+    }
+  } else if (relatedDoc) {
+    // Handle non-polymorphic `hasMany` relationships or fallback
+    if (typeof relatedDoc.id !== 'undefined') {
+      valueToReturn = relatedDoc.id
+    } else {
+      valueToReturn = relatedDoc
     }
   }
 
