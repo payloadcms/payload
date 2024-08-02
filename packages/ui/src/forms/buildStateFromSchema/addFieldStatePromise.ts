@@ -122,12 +122,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       validationResult = await validate(data?.[field.name], {
         ...field,
         id,
+        collectionSlug,
         data: fullData,
         operation,
         req,
         siblingData: data,
         // @ts-expect-error-next-line
-        collectionSlug,
         jsonError,
         preferences,
       })
