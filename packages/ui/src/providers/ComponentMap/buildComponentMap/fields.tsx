@@ -9,7 +9,6 @@ import type {
   CustomComponent,
   DateFieldProps,
   EmailFieldProps,
-  ErrorProps,
   Field,
   FieldComponentProps,
   FieldDescriptionProps,
@@ -38,7 +37,7 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObject, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { WithServerSidePropsPrePopulated } from './index.js'
@@ -55,20 +54,6 @@ function generateFieldPath(parentPath, name) {
   }
 
   return tabPath
-}
-
-function prepareCustomComponentProps(
-  props: {
-    [key: string]: any
-  } & FieldComponentProps,
-) {
-  return deepCopyObject({
-    ...props,
-    fieldMap: undefined,
-    richTextComponentMap: undefined,
-    rows: undefined,
-    tabs: undefined,
-  })
 }
 
 export const mapFields = (args: {
@@ -675,11 +660,12 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: Omit<LabelProps, 'type'> = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const labelProps: LabelProps = {
+          type: field.type,
+          label,
+          required: 'required' in field ? field.required : undefined,
           schemaPath: path,
-        })
+        }
 
         const CustomLabelComponent =
           ('admin' in field &&
@@ -756,11 +742,10 @@ export const mapFields = (args: {
           }
         }
 
-        const descriptionProps: FieldDescriptionProps = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const descriptionProps: FieldDescriptionProps = {
+          type: field.type,
           description,
-        })
+        }
 
         let CustomDescriptionComponent = undefined
 
@@ -782,11 +767,9 @@ export const mapFields = (args: {
             />
           ) : undefined
 
-        const errorProps: ErrorProps = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const errorProps = {
           path,
-        })
+        }
 
         const CustomErrorComponent =
           ('admin' in field &&

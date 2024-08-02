@@ -1,5 +1,4 @@
 import type { CustomComponent, ServerProps } from '../../config/types.js'
-import type { FieldComponentProps } from '../fields/index.js'
 import type { FormFieldBase } from './Field.js'
 import type { FieldTypes } from './FieldTypes.js'
 
@@ -11,11 +10,11 @@ export type GenericLabelProps = {
 } & FormFieldBase
 
 export type LabelProps<T extends keyof FieldTypes = any> = {
+  label?: FormFieldBase['label']
+  required?: boolean
+} & {
   type: T
-} & FieldComponentProps &
-  GenericLabelProps &
-  Partial<ServerProps>
-
+} & GenericLabelProps
 export type SanitizedLabelProps<T extends keyof FieldTypes = any> = Omit<
   LabelProps<T>,
   'label' | 'required'
