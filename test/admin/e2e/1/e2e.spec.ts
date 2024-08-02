@@ -31,6 +31,7 @@ import {
   customTabViewTitle,
   customViewPath,
   customViewTitle,
+  deeplyNestedFieldsSlug,
   slugPluralLabel,
 } from '../../shared.js'
 import {
@@ -117,6 +118,31 @@ describe('admin1', () => {
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+  })
+
+  describe('html size', () => {
+    let size: number // in bytes
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    beforeAll(async () => {
+      page.on('response', (response) => {
+        void (async () => {
+          const url = response.url()
+          if (response.request().resourceType() === 'document') {
+            // Check if it's the main document
+            const buffer = await response.body()
+            size = buffer.length
+          }
+        })()
+      })
+    })
+
+    test('should not exceed 1MB', async () => {
+      const deeplyNestedFieldsURL = new AdminUrlUtil(serverURL, deeplyNestedFieldsSlug)
+      await page.goto(deeplyNestedFieldsURL.create)
+      const byteLimit = 1000000 // 1MB
+      expect(size <= byteLimit).toBe(true)
+    })
   })
 
   describe('metadata', () => {
