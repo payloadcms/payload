@@ -397,6 +397,7 @@ export const koTranslations: DefaultTranslationsObject = {
     publishChanges: '변경 사항 게시',
     published: '게시됨',
     publishing: '게시',
+    restoreAsDraft: '임시 저장으로 복원',
     restoreThisVersion: '이 버전 복원',
     restoredSuccessfully: '복원이 완료되었습니다.',
     restoring: '복원 중...',

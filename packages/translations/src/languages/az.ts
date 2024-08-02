@@ -403,6 +403,7 @@ export const azTranslations: DefaultTranslationsObject = {
     publishChanges: 'Dəyişiklikləri dərc et',
     published: 'Dərc edilmiş',
     publishing: 'Nəşr',
+    restoreAsDraft: 'Qaralamalar kimi bərpa et',
     restoreThisVersion: 'Bu versiyanı bərpa et',
     restoredSuccessfully: 'Uğurla bərpa edildi.',
     restoring: 'Bərpa olunur...',

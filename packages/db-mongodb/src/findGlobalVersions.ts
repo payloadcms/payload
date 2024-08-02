@@ -64,7 +64,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    offset: skip,
+    limit,
     options,
     page,
     pagination,

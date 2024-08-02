@@ -141,7 +141,6 @@ export type PostgresAdapter = {
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: DrizzleConfig
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
@@ -183,7 +182,7 @@ declare module 'payload' {
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+    schema: Record<string, unknown>
     schemaName?: Args['schemaName']
     tableNameMap: Map<string, string>
     versionsSuffix?: string
