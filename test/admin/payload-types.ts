@@ -27,6 +27,7 @@ export interface Config {
     customIdTab: CustomIdTab;
     customIdRow: CustomIdRow;
     'disable-duplicate': DisableDuplicate;
+    deeplyNestedFields: DeeplyNestedField;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -268,6 +269,55 @@ export interface DisableDuplicate {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deeplyNestedFields".
+ */
+export interface DeeplyNestedField {
+  id: string;
+  content?: LayoutBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LayoutBlock".
+ */
+export interface LayoutBlock {
+  gridBx?:
+    | {
+        gridBx?: (LayoutBlock | RichTextBlock)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'layout';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock".
+ */
+export interface RichTextBlock {
+  richTextContent: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'rich-text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -370,6 +420,21 @@ export interface GroupGlobalsTwo {
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextLayoutBlock".
+ */
+export interface RichTextLayoutBlock {
+  gridBx?:
+    | {
+        gridBx?: RichTextBlock[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'layout';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -4,6 +4,8 @@ export const slugSingularLabel = 'Post'
 
 export const slugPluralLabel = 'Posts'
 
+export const deeplyNestedFieldsSlug = 'deeplyNestedFields'
+
 export const customViewPath = '/custom-view'
 
 export const customParamViewPathBase = '/custom-param'
@@ -23,6 +25,7 @@ export const customEditLabel = 'Custom Edit Label'
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'
+
 export const customTabViewTitle = 'Custom View With Tab Component'
 
 export const customTabLabelViewTitle = 'Custom Tab Label View'

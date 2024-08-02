@@ -64,11 +64,6 @@ function prepareCustomComponentProps(
 ) {
   return {
     ...props,
-    ...('options' in props && Array.isArray(props.options)
-      ? {
-          ...props.options,
-        }
-      : {}),
     fieldMap: undefined,
     richTextComponentMap: undefined,
     rows: undefined,
