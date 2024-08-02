@@ -60,6 +60,7 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
+  posts?: (string | Post)[] | null;
   updatedAt: string;
   createdAt: string;
 }

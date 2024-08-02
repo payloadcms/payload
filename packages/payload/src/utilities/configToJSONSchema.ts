@@ -291,6 +291,23 @@ export function fieldsToJSONSchema(
             break
           }
 
+          case 'join': {
+            fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
+              items: {
+                oneOf: [
+                  {
+                    type: collectionIDFieldTypes[field.collection],
+                  },
+                  {
+                    $ref: `#/definitions/${field.collection}`,
+                  },
+                ],
+              },
+            }
+            break
+          }
+
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
