@@ -647,6 +647,7 @@ export const mapFields = (args: {
             }
 
             cellComponentProps.relationTo = field.relationTo
+            cellComponentProps.displayPreview = field.displayPreview
             fieldComponentPropsBase = uploadField
             break
           }
