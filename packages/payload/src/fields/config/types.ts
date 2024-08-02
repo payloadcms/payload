@@ -176,6 +176,7 @@ export type Labels = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  collectionSlug?: string
   data: Partial<TData>
   id?: number | string
   operation?: Operation

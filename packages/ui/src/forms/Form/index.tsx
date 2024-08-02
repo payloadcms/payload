@@ -127,6 +127,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
             validationResult = await field.validate(valueToValidate, {
               id,
+              collectionSlug,
               config,
               data,
               operation,
@@ -621,11 +622,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <form
-      action={action}
+      action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
       noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
+      onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

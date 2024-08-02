@@ -39,7 +39,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { user } = useAuth()
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
   const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
@@ -161,11 +161,15 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
+                collectionSlug,
                 config,
                 data: getData(),
                 operation,
+                req: {
+                  config,
+                  t,
+                },
                 siblingData: getSiblingData(path),
-                t,
                 user,
               })
             : true
@@ -220,7 +224,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       user,
       validate,
       field?.rows,
-      field?.valid,
+      collectionSlug,
     ],
   )
 

@@ -115,32 +115,47 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   return true
 }
 
-export const confirmPassword: Validate<string, unknown, unknown, TextField> = (
+export const confirmPassword: Validate<string, unknown, { password: string }, TextField> = (
   value,
-  { req: { data, t }, required },
+  { req: { t }, required, siblingData },
 ) => {
   if (required && !value) {
     return t('validation:required')
   }
 
-  if (
-    value &&
-    typeof data.formState === 'object' &&
-    'password' in data.formState &&
-    typeof data.formState.password === 'object' &&
-    'value' in data.formState.password &&
-    value !== data.formState.password.value
-  ) {
+  if (value && value !== siblingData.password) {
     return t('fields:passwordsDoNotMatch')
   }
 
   return true
 }
 
-export const email: Validate<string, unknown, unknown, EmailField> = (
+export const email: Validate<string, unknown, { username?: string }, EmailField> = (
   value,
-  { req: { t }, required },
+  {
+    collectionSlug,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+    siblingData,
+  },
 ) => {
+  if (collectionSlug) {
+    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+
+    if (
+      collection.auth.loginWithUsername &&
+      !collection.auth.loginWithUsername?.requireUsername &&
+      !collection.auth.loginWithUsername?.requireEmail
+    ) {
+      if (!value && !siblingData?.username) {
+        return t('validation:required')
+      }
+    }
+  }
+
   if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
@@ -148,17 +163,33 @@ export const email: Validate<string, unknown, unknown, EmailField> = (
   return true
 }
 
-export const username: Validate<string, unknown, unknown, TextField> = (
+export const username: Validate<string, unknown, { email?: string }, TextField> = (
   value,
   {
+    collectionSlug,
     req: {
       payload: { config },
       t,
     },
     required,
+    siblingData,
   },
 ) => {
   let maxLength: number
+
+  if (collectionSlug) {
+    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+
+    if (
+      collection.auth.loginWithUsername &&
+      !collection.auth.loginWithUsername?.requireUsername &&
+      !collection.auth.loginWithUsername?.requireEmail
+    ) {
+      if (!value && !siblingData?.email) {
+        return t('validation:required')
+      }
+    }
+  }
 
   if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
 

@@ -121,6 +121,7 @@ export type AuthStrategy = {
 export type LoginWithUsernameOptions = {
   allowEmailLogin?: boolean
   requireEmail?: boolean
+  requireUsername?: boolean
 }
 
 export interface IncomingAuthType {

@@ -23,6 +23,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  collectionSlug?: string
   data: Data
   field: Field
   fieldIndex: number
@@ -47,8 +48,8 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
-  preferences: DocumentPreferences
 
+  preferences: DocumentPreferences
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -74,6 +75,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    collectionSlug,
     data,
     field,
     fieldIndex,
@@ -125,6 +127,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         req,
         siblingData: data,
         // @ts-expect-error-next-line
+        collectionSlug,
         jsonError,
         preferences,
       })
