@@ -38,7 +38,7 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObject, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { WithServerSidePropsPrePopulated } from './index.js'
@@ -62,13 +62,18 @@ function prepareCustomComponentProps(
     [key: string]: any
   } & FieldComponentProps,
 ) {
-  return deepCopyObject({
+  return {
     ...props,
+    ...('options' in props && Array.isArray(props.options)
+      ? {
+          ...props.options,
+        }
+      : {}),
     fieldMap: undefined,
     richTextComponentMap: undefined,
     rows: undefined,
     tabs: undefined,
-  })
+  }
 }
 
 export const mapFields = (args: {
