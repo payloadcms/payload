@@ -1,32 +1,13 @@
 import type { TFunction } from '@payloadcms/translations'
 import type {
-  ClientFieldConfig,
-  LivePreviewConfig,
+  ClientCollectionConfig,
+  Field,
   SanitizedCollectionConfig,
-  ServerOnlyLivePreviewProperties,
+  ServerOnlyCollectionAdminProperties,
+  ServerOnlyCollectionProperties,
 } from 'payload'
 
 import { createClientFieldConfigs } from './fields.js'
-
-export type ServerOnlyCollectionProperties = keyof Pick<
-  SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'hooks'
->
-
-export type ServerOnlyCollectionAdminProperties = keyof Pick<
-  SanitizedCollectionConfig['admin'],
-  'components' | 'hidden' | 'preview'
->
-
-export type ClientCollectionConfig = {
-  admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<
-    SanitizedCollectionConfig['admin'],
-    'fields' | 'livePreview' | ServerOnlyCollectionAdminProperties
-  >
-  fields: ClientFieldConfig[]
-} & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
 
 export const createClientCollectionConfig = ({
   collection,
@@ -34,9 +15,13 @@ export const createClientCollectionConfig = ({
 }: {
   collection: SanitizedCollectionConfig
   t: TFunction
-}): SanitizedCollectionConfig => {
-  const sanitized = { ...collection }
-  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
+}): ClientCollectionConfig => {
+  const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
+
+  sanitized.fields = createClientFieldConfigs({
+    fields: sanitized.fields as any as Field[], // invert the type
+    t,
+  })
 
   const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
     'hooks',
@@ -81,7 +66,6 @@ export const createClientCollectionConfig = ({
     sanitized.admin = { ...sanitized.admin }
 
     const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-      'components',
       'hidden',
       'preview',
       // `livePreview` is handled separately
@@ -95,6 +79,7 @@ export const createClientCollectionConfig = ({
 
     if ('livePreview' in sanitized.admin) {
       sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+      // @ts-expect-error
       delete sanitized.admin.livePreview.url
     }
   }

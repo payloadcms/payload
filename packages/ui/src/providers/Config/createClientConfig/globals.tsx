@@ -1,32 +1,13 @@
 import type { TFunction } from '@payloadcms/translations'
 import type {
-  ClientFieldConfig,
-  LivePreviewConfig,
+  ClientGlobalConfig,
+  Field,
   SanitizedConfig,
-  SanitizedGlobalConfig,
-  ServerOnlyLivePreviewProperties,
+  ServerOnlyGlobalAdminProperties,
+  ServerOnlyGlobalProperties,
 } from 'payload'
 
 import { createClientFieldConfigs } from './fields.js'
-
-export type ServerOnlyGlobalProperties = keyof Pick<
-  SanitizedGlobalConfig,
-  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'hooks'
->
-export type ServerOnlyGlobalAdminProperties = keyof Pick<
-  SanitizedGlobalConfig['admin'],
-  'components' | 'hidden' | 'preview'
->
-
-export type ClientGlobalConfig = {
-  admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<
-    SanitizedGlobalConfig['admin'],
-    'fields' & 'livePreview' & ServerOnlyGlobalAdminProperties
-  >
-  fields: ClientFieldConfig[]
-} & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>
 
 export const createClientGlobalConfig = ({
   global,
@@ -35,8 +16,12 @@ export const createClientGlobalConfig = ({
   global: SanitizedConfig['globals'][0]
   t: TFunction
 }): ClientGlobalConfig => {
-  const sanitized = { ...global }
-  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
+  const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
+
+  sanitized.fields = createClientFieldConfigs({
+    fields: sanitized.fields as any as Field[], // invert the type
+    t,
+  })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
     'hooks',
@@ -56,7 +41,6 @@ export const createClientGlobalConfig = ({
     sanitized.admin = { ...sanitized.admin }
 
     const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
-      'components',
       'hidden',
       'preview',
     ]

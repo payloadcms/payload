@@ -1,14 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  LivePreviewConfig,
-  MappedComponent,
-  Payload,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-  ServerOnlyLivePreviewProperties,
+import {
+  serverOnlyConfigProperties,
+  type ClientConfig,
+  type Payload,
+  type SanitizedCollectionConfig,
+  type SanitizedConfig,
+  type SanitizedGlobalConfig,
 } from 'payload'
 
 import { createClientCollectionConfigs } from './collections.js'
@@ -16,64 +13,6 @@ import { createClientGlobalConfigs } from './globals.js'
 import type { ImportMap } from 'packages/payload/src/bin/generateImportMap/index.js'
 import { PayloadIcon } from '@payloadcms/ui'
 import { getCreateMappedComponent, PayloadLogo } from '@payloadcms/ui/shared'
-
-export type ServerOnlyRootProperties = keyof Pick<
-  SanitizedConfig,
-  | 'bin'
-  | 'cors'
-  | 'csrf'
-  | 'custom'
-  | 'db'
-  | 'editor'
-  | 'email'
-  | 'endpoints'
-  | 'graphQL'
-  | 'hooks'
-  | 'onInit'
-  | 'plugins'
-  | 'secret'
-  | 'sharp'
-  | 'typescript'
->
-
-export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
-
-export type ClientConfig = {
-  admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-    components: {
-      actions: MappedComponent[]
-      LogoutButton: MappedComponent
-      graphics: {
-        Icon: MappedComponent
-        Logo: MappedComponent
-      }
-      Avatar: MappedComponent
-    }
-  } & Omit<SanitizedConfig['admin'], 'livePreview' | 'components'>
-  collections: ClientCollectionConfig[]
-  custom?: Record<string, any>
-  globals: ClientGlobalConfig[]
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | ServerOnlyRootProperties>
-
-const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
-  'endpoints',
-  'db',
-  'editor',
-  'plugins',
-  'sharp',
-  'onInit',
-  'secret',
-  'hooks',
-  'bin',
-  'typescript',
-  'cors',
-  'csrf',
-  'email',
-  'custom',
-  'graphQL',
-  // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
-]
 
 export const createClientConfig = async ({
   children,
@@ -89,7 +28,7 @@ export const createClientConfig = async ({
   importMap: ImportMap
   // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
-  const clientConfig: ClientConfig = { ...config }
+  const clientConfig: ClientConfig = { ...(config as any as ClientConfig) } // invert the type
 
   const createMappedComponent = getCreateMappedComponent({
     importMap,
@@ -144,17 +83,18 @@ export const createClientConfig = async ({
 
     if ('livePreview' in clientConfig.admin) {
       clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
+      // @ts-expect-error
       delete clientConfig.admin.livePreview.url
     }
   }
 
   clientConfig.collections = createClientCollectionConfigs({
-    collections: clientConfig.collections as SanitizedCollectionConfig[],
+    collections: clientConfig.collections as any as SanitizedCollectionConfig[], // invert the type
     t: i18n.t,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
-    globals: clientConfig.globals as SanitizedGlobalConfig[],
+    globals: clientConfig.globals as any as SanitizedGlobalConfig[], // invert the type
     t: i18n.t,
   })
 

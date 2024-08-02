@@ -706,7 +706,6 @@ export type { ImportMap } from './bin/generateImportMap/index.js'
 
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
-export { createClientCollectionConfig } from './collections/config/client.js'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -756,7 +755,6 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export type { ClientConfig } from './config/client.js'
-export { createClientConfig } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 
@@ -862,7 +860,6 @@ export {
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export type { ClientFieldConfig } from './fields/config/client.js'
-export { createClientFieldConfig } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
 export type {
   ArrayField,
@@ -929,7 +926,6 @@ export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/bef
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type { ClientGlobalConfig } from './globals/config/client.js'
-export { createClientGlobalConfig } from './globals/config/client.js'
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1003,3 +999,14 @@ export { saveVersion } from './versions/saveVersion.js'
 export { getDependencies }
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
+export type {
+  ServerOnlyCollectionProperties,
+  ServerOnlyCollectionAdminProperties,
+} from './collections/config/client.js'
+export type {
+  ServerOnlyGlobalProperties,
+  ServerOnlyGlobalAdminProperties,
+} from './globals/config/client.js'
+export type { ServerOnlyFieldProperties } from './fields/config/client.js'
+export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
+export { serverOnlyConfigProperties } from './config/client.js'

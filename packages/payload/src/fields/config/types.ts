@@ -17,7 +17,12 @@ import type {
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { CustomComponent, LabelFunction, LabelStatic, PayloadComponent } from '../../config/types.js'
+import type {
+  CustomComponent,
+  LabelFunction,
+  LabelStatic,
+  PayloadComponent,
+} from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'

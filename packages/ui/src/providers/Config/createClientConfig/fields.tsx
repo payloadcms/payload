@@ -1,21 +1,11 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { Field, FieldBase } from 'payload'
 
-export type ClientFieldConfig = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
-
-export type ServerOnlyFieldProperties =
-  | 'dbName' // can be a function
-  | 'editor' // This is a `richText` only property
-  | 'enumName' // can be a function
-  | 'filterOptions' // This is a `relationship` and `upload` only property
-  | 'label'
-  | 'typescriptSchema'
-  | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks' | 'validate'>
-
-export type ServerOnlyFieldAdminProperties = keyof Pick<
-  FieldBase['admin'],
-  'components' | 'condition' | 'description'
->
+import type {
+  Field,
+  ClientFieldConfig,
+  ServerOnlyFieldAdminProperties,
+  ServerOnlyFieldProperties,
+} from 'payload'
 
 export const createClientFieldConfig = ({
   field: incomingField,
@@ -24,7 +14,7 @@ export const createClientFieldConfig = ({
   field: Field
   t: TFunction
 }): ClientFieldConfig => {
-  const field = { ...incomingField }
+  const field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
 
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -65,7 +55,10 @@ export const createClientFieldConfig = ({
   }
 
   if ('fields' in field) {
-    field.fields = createClientFieldConfigs({ fields: field.fields, t })
+    field.fields = createClientFieldConfigs({
+      fields: field.fields as any as Field[], // invert the type
+      t,
+    })
   }
 
   if ('blocks' in field) {
