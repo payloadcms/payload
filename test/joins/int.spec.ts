@@ -73,7 +73,14 @@ describe('Joins Field Tests', () => {
       collection: 'categories',
     })
 
+    const joinedIDs = categoryWithPosts.posts.map((post) => post.id)
+
     // TODO: add types for joins (same as relationship with hasMany)
     expect(categoryWithPosts.posts).toHaveLength(3)
+    expect(categoryWithPosts.posts[0]).toHaveProperty('title')
+    expect(categoryWithPosts.posts[0].title).toBe('test')
+    expect(joinedIDs).toContain(categoryWithPosts.posts[0].id)
+    expect(joinedIDs).toContain(categoryWithPosts.posts[1].id)
+    expect(joinedIDs).toContain(categoryWithPosts.posts[2].id)
   })
 })
