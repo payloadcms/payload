@@ -126,13 +126,18 @@ export const Form: React.FC<FormProps> = (props) => {
             }
 
             validationResult = await field.validate(valueToValidate, {
+              ...field,
               id,
               collectionSlug,
-              config,
               data,
               operation,
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+              },
               siblingData: contextRef.current.getSiblingData(path),
-              t,
               user,
             })
 
@@ -161,7 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {

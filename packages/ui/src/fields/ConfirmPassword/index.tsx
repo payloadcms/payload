@@ -21,7 +21,9 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
 
   const { setValue, showError, value } = useField({
     path,
-    validate: confirmPassword,
+    validate: (value, options) => {
+      return confirmPassword(value, { required: true, ...options })
+    },
   })
 
   return (

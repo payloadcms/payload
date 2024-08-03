@@ -196,7 +196,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
             path,
             rows: field?.rows,
             valid,
-            // validate,
+            validate,
             value,
           }
 
