@@ -154,8 +154,6 @@ export type {
   SelectFieldProps,
 } from './fields/Select.js'
 
-export type { MappedTab } from './fields/Tabs.js'
-
 export type {
   TabsFieldDescriptionComponent,
   TabsFieldErrorComponent,
@@ -218,19 +216,23 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
+export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent: React.ReactNode
+  props?: Partial<any>
+  type: 'server'
+}
+
+export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent?: React.ReactNode
+  props?: Partial<TComponentClientProps>
+  type: 'client'
+}
+
 export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
-  | {
-      Component: React.ComponentType<TComponentClientProps>
-      RenderedComponent: React.ReactNode
-      props?: Partial<any>
-      type: 'server'
-    }
-  | {
-      Component: React.ComponentType<TComponentClientProps>
-      RenderedComponent?: React.ReactNode
-      props?: Partial<TComponentClientProps>
-      type: 'client'
-    }
+  | MappedClientComponent<TComponentClientProps>
+  | MappedServerComponent<TComponentClientProps>
   | undefined
 
 export type CreateMappedComponent = {

@@ -3,63 +3,11 @@ import type {
   ClientFieldConfig,
   CreateMappedComponent,
   Field,
-  FieldTypes,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
 } from 'payload'
 
-import {
-  ArrayField,
-  BlocksField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  DefaultCell,
-  EmailField,
-  GroupField,
-  HiddenField,
-  JSONField,
-  NumberField,
-  PointField,
-  RadioGroupField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TabsField,
-  TextField,
-  TextareaField,
-  UIField,
-  UploadField,
-} from '@payloadcms/ui'
-import { DateField } from 'packages/ui/src/elements/WhereBuilder/Condition/Date/index.js'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
-
-const fieldComponents: {
-  [key in FieldTypes]: React.FC<any>
-} = {
-  array: ArrayField,
-  blocks: BlocksField,
-  checkbox: CheckboxField,
-  code: CodeField,
-  collapsible: CollapsibleField,
-  date: DateField,
-  email: EmailField,
-  group: GroupField,
-  json: JSONField,
-  number: NumberField,
-  point: PointField,
-  radio: RadioGroupField,
-  relationship: RelationshipField,
-  richText: RichTextField,
-  row: RowField,
-  select: SelectField,
-  tabs: TabsField,
-  text: TextField,
-  textarea: TextareaField,
-  ui: UIField,
-  upload: UploadField,
-}
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -191,46 +139,42 @@ export const createClientFieldConfig = ({
       }
     })
 
-    const DefaultFieldComponent = isHiddenFromAdmin ? HiddenField : fieldComponents[field.type]
-
     field.admin.components = {
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
-      Cell: createMappedComponent(incomingField.admin?.components?.Cell, null, DefaultCell),
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
-      Field: createMappedComponent(
-        incomingField.admin?.components?.Field,
-        null,
-        DefaultFieldComponent,
-      ),
       ...(incomingField?.admin?.components
         ? {
+            ...('Cell' in incomingField.admin.components
+              ? {
+                  Cell: createMappedComponent(incomingField?.admin?.components?.Cell),
+                }
+              : {}),
+            ...('Field' in incomingField.admin.components
+              ? {
+                  Field: createMappedComponent(incomingField?.admin?.components?.Field),
+                }
+              : {}),
             ...('Label' in incomingField.admin.components
               ? {
-                  Label: createMappedComponent(incomingField.admin?.components?.Label),
+                  Label: createMappedComponent(incomingField?.admin?.components?.Label),
                 }
               : {}),
             ...('Description' in incomingField.admin.components
               ? {
-                  Description: createMappedComponent(incomingField.admin?.components?.Description),
+                  Description: createMappedComponent(incomingField?.admin?.components?.Description),
                 }
               : {}),
             ...('Error' in incomingField.admin.components
               ? {
-                  Error: createMappedComponent(incomingField.admin?.components?.Error),
+                  Error: createMappedComponent(incomingField?.admin?.components?.Error),
                 }
               : {}),
             ...('beforeInput' in incomingField.admin.components
               ? {
-                  beforeInputL: incomingField.admin?.components?.beforeInput.map((Component) =>
-                    createMappedComponent(Component),
-                  ),
+                  beforeInput: createMappedComponent(incomingField.admin?.components?.beforeInput),
                 }
               : {}),
             ...('afterInput' in incomingField.admin.components
               ? {
-                  afterInput: incomingField.admin?.components?.afterInput.map((Component) =>
-                    createMappedComponent(Component),
-                  ),
+                  afterInput: createMappedComponent(incomingField.admin?.components?.afterInput),
                 }
               : {}),
           }

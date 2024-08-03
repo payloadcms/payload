@@ -34,6 +34,7 @@ export function getCreateMappedComponent({
       if (!Fallback) {
         return undefined
       }
+
       if (isReactServerComponentOrFunction(Fallback)) {
         return {
           type: 'server',
@@ -48,6 +49,7 @@ export function getCreateMappedComponent({
         }
       }
     }
+
     const resolvedComponent =
       payloadComponent &&
       typeof payloadComponent === 'object' &&
@@ -66,6 +68,7 @@ export function getCreateMappedComponent({
 
     if (isReactServerComponentOrFunction(resolvedComponent.Component)) {
       const Component: React.FC<any> = resolvedComponent.Component
+
       return {
         type: 'server',
         Component: null,
@@ -77,6 +80,7 @@ export function getCreateMappedComponent({
       if (!resolvedComponent.Component) {
         return undefined
       }
+
       return {
         type: 'client',
         Component: resolvedComponent.Component,
@@ -92,6 +96,7 @@ export function getCreateMappedComponent({
     if (!payloadComponent && !fallback) {
       return undefined as any
     }
+
     if (payloadComponent && Array.isArray(payloadComponent)) {
       const mappedComponents: MappedComponent[] = []
       for (let i = 0; i < payloadComponent.length; i++) {
