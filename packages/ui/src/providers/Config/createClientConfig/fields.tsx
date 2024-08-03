@@ -3,12 +3,63 @@ import type {
   ClientFieldConfig,
   CreateMappedComponent,
   Field,
+  FieldTypes,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
 } from 'payload'
 
-import { DefaultCell } from '@payloadcms/ui'
+import {
+  ArrayField,
+  BlocksField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DefaultCell,
+  EmailField,
+  GroupField,
+  HiddenField,
+  JSONField,
+  NumberField,
+  PointField,
+  RadioGroupField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  TabsField,
+  TextField,
+  TextareaField,
+  UIField,
+  UploadField,
+} from '@payloadcms/ui'
+import { DateField } from 'packages/ui/src/elements/WhereBuilder/Condition/Date/index.js'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
+
+const fieldComponents: {
+  [key in FieldTypes]: React.FC<any>
+} = {
+  array: ArrayField,
+  blocks: BlocksField,
+  checkbox: CheckboxField,
+  code: CodeField,
+  collapsible: CollapsibleField,
+  date: DateField,
+  email: EmailField,
+  group: GroupField,
+  json: JSONField,
+  number: NumberField,
+  point: PointField,
+  radio: RadioGroupField,
+  relationship: RelationshipField,
+  richText: RichTextField,
+  row: RowField,
+  select: SelectField,
+  tabs: TabsField,
+  text: TextField,
+  textarea: TextareaField,
+  ui: UIField,
+  upload: UploadField,
+}
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -140,11 +191,17 @@ export const createClientFieldConfig = ({
       }
     })
 
+    const DefaultFieldComponent = isHiddenFromAdmin ? HiddenField : fieldComponents[field.type]
+
     field.admin.components = {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
       Cell: createMappedComponent(incomingField.admin?.components?.Cell, null, DefaultCell),
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
-      Field: createMappedComponent(incomingField.admin?.components?.Field),
+      Field: createMappedComponent(
+        incomingField.admin?.components?.Field,
+        null,
+        DefaultFieldComponent,
+      ),
       ...(incomingField?.admin?.components
         ? {
             ...('Label' in incomingField.admin.components
