@@ -183,7 +183,7 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   operation?: Operation
   preferences: DocumentPreferences
   previousValue?: TValue
-  req: DeepPartial<PayloadRequest>
+  req: PayloadRequest
   required?: boolean
   siblingData: Partial<TSiblingData>
 }
@@ -204,8 +204,6 @@ export type Validate<
   value: TValue,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
-
-export type ClientValidate = Validate
 
 export type OptionObject = {
   label: LabelFunction | LabelStatic

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Option, OptionObject, SelectFieldProps } from 'payload'
+import type { Option, OptionObject, SelectFieldProps } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -51,7 +51,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function')
         return validate(value, { ...validationOptions, hasMany, options, required })

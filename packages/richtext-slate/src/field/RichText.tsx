@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientValidate, FormFieldBase } from 'payload'
+import type { FormFieldBase, PayloadRequest, RichTextFieldValidation } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -56,6 +56,7 @@ const RichTextField: React.FC<
     placeholder?: string
     plugins: RichTextPlugin[]
     richTextComponentMap: Map<string, React.ReactNode>
+    validate?: RichTextFieldValidation
     width?: string
   } & FormFieldBase
 > = (props) => {
@@ -88,14 +89,14 @@ const RichTextField: React.FC<
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
         return validate(value, {
           ...validationOptions,
           req: {
             t: i18n.t,
-          },
+          } as PayloadRequest,
           required,
         })
       }

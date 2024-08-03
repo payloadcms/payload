@@ -1,4 +1,6 @@
 'use client'
+import type { PayloadRequest } from 'payload'
+
 import { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
@@ -167,11 +169,11 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                 preferences: {} as any,
                 req: {
                   payload: {
-                    config: config as any,
+                    config,
                   },
                   t,
                   user,
-                },
+                } as PayloadRequest,
                 siblingData: getSiblingData(path),
               })
             : true

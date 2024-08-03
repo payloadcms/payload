@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, PayloadRequest } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
@@ -134,11 +134,11 @@ export const Form: React.FC<FormProps> = (props) => {
               preferences: {} as any,
               req: {
                 payload: {
-                  config: config as any,
+                  config,
                 },
                 t,
                 user,
-              },
+              } as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
             })
 
