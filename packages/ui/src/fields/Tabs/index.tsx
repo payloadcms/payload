@@ -158,7 +158,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 {...(descriptionProps || {})}
               />
               <RenderFields
-                fieldMap={activeTabConfig.fieldMap}
+                fields={activeTabConfig.fields}
                 forceRender={forceRender}
                 key={
                   activeTabConfig.label

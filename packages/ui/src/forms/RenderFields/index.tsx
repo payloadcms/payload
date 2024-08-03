@@ -65,8 +65,7 @@ export const RenderFields: React.FC<Props> = (props) => {
               },
               custom,
               disabled,
-              fieldComponentProps,
-              fieldComponentProps: { readOnly },
+              readOnly,
             } = f
 
             const forceRenderChildren =
@@ -79,7 +78,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 Field={Field}
                 custom={custom}
                 disabled={disabled}
-                fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
+                fieldComponentProps={{ ...f, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 key={fieldIndex}
                 name={name}

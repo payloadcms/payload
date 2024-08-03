@@ -26,7 +26,7 @@ const baseClass = 'rich-text-link-edit-modal'
 
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,
-  fieldMap,
+  fields,
   handleModalSubmit,
   initialState,
 }) => {
@@ -62,7 +62,7 @@ export const LinkDrawer: React.FC<Props> = ({
         onChange={[onChange]}
         onSubmit={handleModalSubmit}
       >
-        <RenderFields fieldMap={fieldMap} forceRender path="" readOnly={false} schemaPath="" />
+        <RenderFields fields={fields} forceRender path="" readOnly={false} schemaPath="" />
         <LinkSubmit />
       </Form>
     </Drawer>

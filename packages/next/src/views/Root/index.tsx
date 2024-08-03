@@ -26,12 +26,12 @@ export const RootPage = async ({
   params,
   searchParams,
 }: {
-  config: Promise<SanitizedConfig>
-  importMap: ImportMap
-  params: {
+  readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
+  readonly params: {
     segments: string[]
   }
-  searchParams: {
+  readonly searchParams: {
     [key: string]: string | string[]
   }
 }) => {
@@ -63,7 +63,7 @@ export const RootPage = async ({
 
   let dbHasUser = false
 
-  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
+  if (!DefaultView?.Component && !DefaultView?.PayloadComponent) {
     notFound()
   }
 
@@ -95,7 +95,7 @@ export const RootPage = async ({
     }
   }
 
-  const createMappedComponent = getCreateMappedComponent({
+  const createMappedView = getCreateMappedComponent({
     importMap,
     serverProps: {
       i18n: initPageResult?.req.i18n,
@@ -107,13 +107,13 @@ export const RootPage = async ({
     },
   })
 
-  const MappedDefaultView: MappedComponent = createMappedComponent(
-    DefaultView.payloadComponent,
+  const MappedView: MappedComponent = createMappedView(
+    DefaultView.PayloadComponent,
     undefined,
     DefaultView.Component,
   )
 
-  const RenderedView = <RenderComponent mappedComponent={MappedDefaultView} />
+  const RenderedView = <RenderComponent mappedComponent={MappedView} />
 
   return (
     <Fragment>

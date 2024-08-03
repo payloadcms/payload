@@ -61,7 +61,7 @@ const Iterable: React.FC<Props> = ({
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === versionRow?.blockType,
                   )) || {
-                  fieldMap: [],
+                  fields: [],
                 }
 
                 fields = [...fields, ...matchedBlock.fields]

@@ -5,18 +5,20 @@ export type ClientFieldConfig = {
   _fieldIsPresentational: boolean
   _isFieldAffectingData: boolean
   _isSidebar: boolean
+  _path: string
   admin: {
     components: {
       Cell: MappedComponent
       Description?: MappedComponent
       Error?: MappedComponent
       Field: MappedComponent
+      Filter?: MappedComponent
       Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
     }
-  }
-} & Omit<Field, 'access' | 'admin' | 'defaultValue' | 'hooks' | 'validate'>
+  } & Omit<Field['admin'], 'components' | ServerOnlyFieldAdminProperties> // TODO: for some reason the `components` property is not omitted
+} & Omit<Field, ServerOnlyFieldProperties> // TODO: the <Omit> breaks the field type inference
 
 export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function

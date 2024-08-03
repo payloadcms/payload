@@ -113,14 +113,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           }
 
           // At this point, we are dealing with a `row`, etc
-          if ('fieldMap' in field.fieldComponentProps) {
+          if ('fields' in field) {
             return (
               <Nested
                 comparison={comparison}
                 diffComponents={diffComponents}
                 disableGutter
                 field={field}
-                fieldMap={field.fieldComponentProps.fieldMap}
+                fields={field.fields}
                 i18n={i18n}
                 key={i}
                 locales={locales}

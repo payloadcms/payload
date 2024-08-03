@@ -20,14 +20,14 @@ export const ConfigProvider: React.FC<{
   const getEntityConfig = useCallback(
     ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
       if (collectionSlug) {
-        return config.collections[collectionSlug]
+        return config.collections.find((collection) => collection.slug === collectionSlug)
       }
 
       if (globalSlug) {
-        return config.globals[globalSlug]
+        return config.globals.find((global) => global.slug === globalSlug)
       }
 
-      return config
+      return null
     },
     [config],
   )

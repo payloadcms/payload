@@ -30,9 +30,9 @@ export const DocumentFields: React.FC<Args> = ({
   readOnly,
   schemaPath,
 }) => {
-  const mainFields = fields.filter(({ isSidebar }) => !isSidebar)
+  const mainFields = fields.filter(({ _isSidebar }) => !_isSidebar)
 
-  const sidebarFields = fields.filter(({ isSidebar }) => isSidebar)
+  const sidebarFields = fields.filter(({ _isSidebar }) => _isSidebar)
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 

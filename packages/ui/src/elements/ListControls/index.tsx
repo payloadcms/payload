@@ -63,9 +63,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField.fieldComponentProps &&
-          typeof titleField.fieldComponentProps.label === 'string'
-          ? titleField.fieldComponentProps.label
+        'label' in titleField && typeof titleField.label === 'string'
+          ? titleField.label
           : titleField.name,
         i18n,
       )) ??
@@ -101,10 +100,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
           const label =
-            'fieldComponentProps' in field &&
-            'label' in field.fieldComponentProps &&
-            field.fieldComponentProps.label
-              ? field.fieldComponentProps.label
+            'fieldComponentProps' in field && 'label' in field && field.label
+              ? field.label
               : field.name
 
           if (i === 0) {

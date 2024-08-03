@@ -73,82 +73,80 @@ export const createClientCollectionConfig = ({
     })
   }
 
-  if ('admin' in sanitized) {
-    sanitized.admin = { ...sanitized.admin }
+  sanitized.admin = { ...(sanitized.admin || ({} as any)) }
 
-    const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-      'hidden',
-      'preview',
-      // `livePreview` is handled separately
-    ]
+  const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
+    'hidden',
+    'preview',
+    // `livePreview` is handled separately
+  ]
 
-    serverOnlyCollectionAdminProperties.forEach((key) => {
-      if (key in sanitized.admin) {
-        delete sanitized.admin[key]
-      }
-    })
+  serverOnlyCollectionAdminProperties.forEach((key) => {
+    if (key in sanitized.admin) {
+      delete sanitized.admin[key]
+    }
+  })
 
-    const editViewFromConfig = collection?.admin?.components?.views?.Edit
+  const editViewFromConfig = collection?.admin?.components?.views?.Edit
 
-    const listViewFromConfig = collection?.admin?.components?.views?.List
+  const listViewFromConfig = collection?.admin?.components?.views?.List
 
-    sanitized.admin.components = {
-      PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
-      PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
-      SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
-      SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
-      Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
-      afterList: collection?.admin?.components?.afterList?.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      afterListTable: collection?.admin?.components?.afterListTable?.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      beforeList: collection?.admin?.components?.beforeList?.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      beforeListTable: collection?.admin?.components?.beforeListTable?.map((Component) =>
-        createMappedComponent(Component),
-      ),
-      views: {
-        Edit: {
-          Default: {
-            Component: createMappedComponent(
-              editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
-                ? (editViewFromConfig.Default.Component as EditViewComponent)
-                : null,
-              {
-                collectionSlug: collection.slug,
-              },
-              DefaultEditView,
-            ),
-            ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
-              ? {
-                  actions: editViewFromConfig?.Default?.actions?.map((Component) =>
-                    createMappedComponent(Component),
-                  ),
-                }
-              : {}),
-          },
-        },
-        List: {
+  sanitized.admin.components = {
+    PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
+    PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
+    SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
+    SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
+    Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
+    afterList: collection?.admin?.components?.afterList?.map((Component) =>
+      createMappedComponent(Component),
+    ),
+    afterListTable: collection?.admin?.components?.afterListTable?.map((Component) =>
+      createMappedComponent(Component),
+    ),
+    beforeList: collection?.admin?.components?.beforeList?.map((Component) =>
+      createMappedComponent(Component),
+    ),
+    beforeListTable: collection?.admin?.components?.beforeListTable?.map((Component) =>
+      createMappedComponent(Component),
+    ),
+    views: {
+      Edit: {
+        Default: {
           Component: createMappedComponent(
-            listViewFromConfig?.Component,
+            editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
+              ? (editViewFromConfig.Default.Component as EditViewComponent)
+              : null,
             {
               collectionSlug: collection.slug,
             },
-            DefaultListView,
+            DefaultEditView,
           ),
-          actions: createMappedComponent(collection.admin?.components?.views?.List?.actions),
+          ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
+            ? {
+                actions: editViewFromConfig?.Default?.actions?.map((Component) =>
+                  createMappedComponent(Component),
+                ),
+              }
+            : {}),
         },
       },
-    }
+      List: {
+        Component: createMappedComponent(
+          listViewFromConfig?.Component,
+          {
+            collectionSlug: collection.slug,
+          },
+          DefaultListView,
+        ),
+        actions: createMappedComponent(collection.admin?.components?.views?.List?.actions),
+      },
+    },
+  }
 
-    if ('livePreview' in sanitized.admin) {
-      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-      // @ts-expect-error
-      delete sanitized.admin.livePreview.url
-    }
+  if ('livePreview' in sanitized.admin) {
+    sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+    // @ts-expect-error
+    delete sanitized.admin.livePreview.url
   }
 
   return sanitized

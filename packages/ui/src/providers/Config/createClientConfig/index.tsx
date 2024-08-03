@@ -70,7 +70,7 @@ export const createClientConfig = async ({
         config.admin?.avatar &&
           typeof config.admin?.avatar === 'object' &&
           config.admin?.avatar &&
-          'Component' in config.admin?.avatar &&
+          'Component' in config.admin.avatar &&
           config.admin?.avatar.Component,
       ),
       LogoutButton: createMappedComponent(config.admin?.components?.logout?.Button),
@@ -117,8 +117,8 @@ export const createClientConfig = async ({
     children,
     providers,
   }: {
-    children: React.ReactNode
-    providers: React.FC<{ children?: React.ReactNode }>[]
+    readonly children: React.ReactNode
+    readonly providers: React.FC<{ children?: React.ReactNode }>[]
   }) => {
     const Component = providers[0]
     if (providers.length > 1) {

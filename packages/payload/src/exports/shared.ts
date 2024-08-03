@@ -11,6 +11,7 @@ export {
   fieldIsGroupType,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
+  fieldIsSidebar,
   fieldSupportsMany,
   optionIsObject,
   optionIsValue,

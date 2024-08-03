@@ -31,9 +31,9 @@ import { BlockContent } from './BlockContent.js'
 import './index.scss'
 
 type Props = {
-  children?: React.ReactNode
-  formData: BlockFields
-  nodeKey?: string
+  readonly children?: React.ReactNode
+  readonly formData: BlockFields
+  readonly nodeKey?: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
@@ -59,7 +59,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const reducedBlock = blockFieldComponentProps.blocks.find(
     (block) => block.slug === formData.blockType,
   )
-  const fieldMap = reducedBlock.fieldMap
+  const fields = reducedBlock.fields
 
   // Field Schema
   useEffect(() => {
@@ -91,7 +91,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id])
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, formData])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -129,7 +129,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Form
         beforeSubmit={[onChange]}
         // @ts-expect-error TODO: Fix this
-        fields={fieldMap}
+        fields={fields}
         initialState={initialState}
         onChange={[onChange]}
         submitted={submitted}
@@ -139,7 +139,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           baseClass={baseClass}
           field={parentLexicalRichTextField}
           formData={formData}
-          formSchema={Array.isArray(fieldMap) ? fieldMap : []}
+          formSchema={Array.isArray(fields) ? fields : []}
           nodeKey={nodeKey}
           path={`${path}.lexical_internal_feature.blocks.${formData.blockType}`}
           reducedBlock={reducedBlock}
@@ -179,17 +179,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
     )
   }, [
     classNames,
-    fieldMap,
+    fields,
     parentLexicalRichTextField,
     nodeKey,
     i18n,
-    reducedBlock.LabelComponent,
     submitted,
     initialState,
     reducedBlock,
     onChange,
     schemaFieldsPath,
     path,
+    formData,
   ]) // Adding formData to the dependencies here might break it
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }

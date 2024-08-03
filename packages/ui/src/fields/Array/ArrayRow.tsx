@@ -18,26 +18,26 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  CustomRowLabel?: MappedComponent
-  addRow: (rowIndex: number) => Promise<void> | void
-  duplicateRow: (rowIndex: number) => void
-  errorCount: number
-  fields: ClientFieldConfig[]
-  forceRender?: boolean
-  hasMaxRows?: boolean
-  indexPath: string
-  isSortable?: boolean
-  labels: ArrayField['labels']
-  moveRow: (fromIndex: number, toIndex: number) => void
-  path: string
-  permissions: FieldPermissions
-  readOnly?: boolean
-  removeRow: (rowIndex: number) => void
-  row: Row
-  rowCount: number
-  rowIndex: number
-  schemaPath: string
-  setCollapse: (rowID: string, collapsed: boolean) => void
+  readonly CustomRowLabel?: MappedComponent
+  readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly duplicateRow: (rowIndex: number) => void
+  readonly errorCount: number
+  readonly fields: ClientFieldConfig[]
+  readonly forceRender?: boolean
+  readonly hasMaxRows?: boolean
+  readonly indexPath: string
+  readonly isSortable?: boolean
+  readonly labels: ArrayField['labels']
+  readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly path: string
+  readonly permissions: FieldPermissions
+  readonly readOnly?: boolean
+  readonly removeRow: (rowIndex: number) => void
+  readonly row: Row
+  readonly rowCount: number
+  readonly rowIndex: number
+  readonly schemaPath: string
+  readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
@@ -46,7 +46,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   attributes,
   duplicateRow,
   errorCount,
-  fieldMap,
+  fields,
   forceRender = false,
   hasMaxRows,
   indexPath,
@@ -136,7 +136,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
+          fields={fields}
           forceRender={forceRender}
           indexPath={indexPath}
           margins="small"

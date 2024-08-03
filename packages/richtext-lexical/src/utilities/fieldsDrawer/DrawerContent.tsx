@@ -41,7 +41,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fieldMap: any =
+  const fields: any =
     fieldMapOverride ??
     (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientFieldConfig[]) // Field Schema
 
@@ -89,14 +89,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     <Form
       beforeSubmit={[onChange]}
       disableValidationOnSubmit
-      fields={Array.isArray(fieldMap) ? fieldMap : []}
+      fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
       onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}
     >
       <RenderFields
-        fields={Array.isArray(fieldMap) ? fieldMap : []}
+        fields={Array.isArray(fields) ? fields : []}
         forceRender
         path="" // See Blocks feature path for details as for why this is empty
         readOnly={false}

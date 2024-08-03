@@ -12,17 +12,17 @@ const getRemainingColumns = (fields: ClientFieldConfig[], useAsTitle: string): C
       return remaining
     }
 
-    if (!fieldAffectsData(field) && 'fieldMap' in field.fieldComponentProps) {
-      return [...remaining, ...getRemainingColumns(field.fieldComponentProps.fieldMap, useAsTitle)]
+    if (!fieldAffectsData(field) && 'fields' in field) {
+      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...remaining,
-        ...field.fieldComponentProps.tabs.reduce(
+        ...field.tabs.reduce(
           (tabFieldColumns, tab) => [
             ...tabFieldColumns,
-            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fieldMap, useAsTitle)),
+            ...('name' in tab ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
           ],
           [],
         ),

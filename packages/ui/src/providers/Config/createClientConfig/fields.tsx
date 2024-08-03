@@ -7,13 +7,29 @@ import type {
   ServerOnlyFieldProperties,
 } from 'payload'
 
+import { DefaultCell } from '@payloadcms/ui'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
+
+function generateFieldPath(parentPath, name) {
+  let tabPath = parentPath || ''
+  if (parentPath && name) {
+    tabPath = `${parentPath}.${name}`
+  } else if (!parentPath && name) {
+    tabPath = name
+  }
+
+  return tabPath
+}
+
 export const createClientFieldConfig = ({
   createMappedComponent,
   field: incomingField,
+  parentPath,
   t,
 }: {
   createMappedComponent: CreateMappedComponent
   field: Field
+  parentPath?: string
   t: TFunction
 }): ClientFieldConfig => {
   const field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
@@ -30,11 +46,11 @@ export const createClientFieldConfig = ({
     'typescriptSchema',
     'dbName', // can be a function
     'enumName', // can be a function
+    // the following props are handled separately (see below):
     // `fields`
     // `blocks`
     // `tabs`
     // `admin`
-    // are all handled separately
   ]
 
   serverOnlyFieldProperties.forEach((key) => {
@@ -43,46 +59,75 @@ export const createClientFieldConfig = ({
     }
   })
 
-  if ('options' in field && Array.isArray(field.options)) {
-    field.options = field.options.map((option) => {
-      if (typeof option === 'object' && typeof option.label === 'function') {
-        return {
-          label: option.label({ t }),
-          value: option.value,
+  field._fieldIsPresentational = fieldIsPresentationalOnly(field)
+  field._isFieldAffectingData = fieldAffectsData(field)
+  field._isSidebar = fieldIsSidebar(field)
+
+  const isHidden = 'hidden' in field && field?.hidden
+  const isHiddenFromAdmin = field?.admin && 'hidden' in field.admin && field.admin.hidden
+  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
+
+  if (
+    field._fieldIsPresentational ||
+    (field._isFieldAffectingData && !(isHidden || disabledFromAdmin))
+  ) {
+    if (isHiddenFromAdmin) {
+      // TODO: set to Hidden field
+    }
+
+    field._path = generateFieldPath(
+      parentPath,
+      field._isFieldAffectingData && 'name' in field ? field.name : '',
+    )
+
+    if ('options' in field && Array.isArray(field.options)) {
+      field.options = field.options.map((option) => {
+        if (typeof option === 'object' && typeof option.label === 'function') {
+          return {
+            label: option.label({ t }),
+            value: option.value,
+          }
         }
-      }
 
-      return option
-    })
-  }
+        return option
+      })
+    }
 
-  if ('fields' in field) {
-    field.fields = createClientFieldConfigs({
-      createMappedComponent,
-      fields: field.fields as any as Field[], // invert the type
-      t,
-    })
-  }
-
-  if ('blocks' in field) {
-    field.blocks = field.blocks?.map((block) => {
-      const sanitized = { ...block }
-      sanitized.fields = createClientFieldConfigs({
+    if (field.type === 'array') {
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      field.fields = createClientFieldConfigs({
         createMappedComponent,
-        fields: sanitized.fields,
+        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+        fields: field.fields as any as Field[], // invert the type
+        parentPath: field._path,
         t,
       })
-      return sanitized
-    })
-  }
+    }
 
-  if ('tabs' in field) {
-    // @ts-expect-error
-    field.tabs = field.tabs.map((tab) => createClientFieldConfig({ field: tab, t }))
-  }
+    if ('blocks' in field) {
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      field.blocks = field.blocks?.map((block) => {
+        const sanitized = { ...block }
+        sanitized.fields = createClientFieldConfigs({
+          createMappedComponent,
+          fields: sanitized.fields as Field[], // invert the type
+          parentPath: field._path,
+          t,
+        })
+        return sanitized
+      })
+    }
 
-  if ('admin' in field) {
-    field.admin = { ...field.admin }
+    if ('tabs' in field) {
+      field.tabs = createClientFieldConfigs({
+        createMappedComponent,
+        fields: field.tabs as any as Field[], // invert the type
+        parentPath: field._path,
+        t,
+      })
+    }
+
+    field.admin = { ...(field.admin || ({} as any)) }
 
     const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
       'condition',
@@ -96,7 +141,9 @@ export const createClientFieldConfig = ({
     })
 
     field.admin.components = {
-      Cell: createMappedComponent(incomingField.admin?.components?.Cell),
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
+      Cell: createMappedComponent(incomingField.admin?.components?.Cell, null, DefaultCell),
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about this property not being omitted
       Field: createMappedComponent(incomingField.admin?.components?.Field),
       ...(incomingField?.admin?.components
         ? {
@@ -135,15 +182,21 @@ export const createClientFieldConfig = ({
 
     return field
   }
+
+  return null
 }
 
 export const createClientFieldConfigs = ({
   createMappedComponent,
   fields,
+  parentPath,
   t,
 }: {
   createMappedComponent: CreateMappedComponent
   fields: Field[]
+  parentPath?: string
   t: TFunction
 }): ClientFieldConfig[] =>
-  fields.map((field) => createClientFieldConfig({ createMappedComponent, field, t }))
+  fields
+    .map((field) => createClientFieldConfig({ createMappedComponent, field, parentPath, t }))
+    .filter(Boolean)

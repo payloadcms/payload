@@ -114,8 +114,7 @@ export const RootLayout = async ({
           theme={theme}
           translations={i18n.translations}
         >
-          Hello, world!
-          {/* {render} */}
+          {render}
         </RootProvider>
         <div id="portal" />
       </body>

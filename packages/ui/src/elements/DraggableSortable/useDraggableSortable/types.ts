@@ -2,9 +2,9 @@ import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import type { HTMLAttributes } from 'react'
 
 export type UseDraggableSortableReturn = {
-  attributes: HTMLAttributes<unknown>
-  isDragging?: boolean
-  listeners: SyntheticListenerMap
-  setNodeRef: (node: HTMLElement | null) => void
-  transform: string
+  readonly attributes: HTMLAttributes<unknown>
+  readonly isDragging?: boolean
+  readonly listeners: SyntheticListenerMap
+  readonly setNodeRef: (node: HTMLElement | null) => void
+  readonly transform: string
 }

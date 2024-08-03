@@ -33,7 +33,7 @@ type OneSegmentViews = {
 
 export type ViewFromConfig = {
   Component?: React.FC<AdminViewProps>
-  payloadComponent?: AdminViewComponent
+  PayloadComponent?: AdminViewComponent
 }
 
 const oneSegmentViews: OneSegmentViews = {

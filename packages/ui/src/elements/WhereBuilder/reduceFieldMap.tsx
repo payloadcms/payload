@@ -94,8 +94,8 @@ export const reduceFieldMap = ({
       return reduced
     }
 
-    if (field.type === 'group' && 'fieldMap' in field.fieldComponentProps) {
-      const translatedLabel = getTranslation(field.fieldComponentProps.label || '', i18n)
+    if (field.type === 'group' && 'fields' in field) {
+      const translatedLabel = getTranslation(field.label || '', i18n)
 
       const labelWithPrefix = labelPrefix
         ? translatedLabel
@@ -156,7 +156,7 @@ export const reduceFieldMap = ({
         operators,
         props: {
           ...field,
-          ...(field?.cellComponentProps || {}),
+          ...(field?.admin?.components?.Cell || {}),
         },
       }
 

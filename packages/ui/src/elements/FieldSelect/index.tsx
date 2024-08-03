@@ -14,8 +14,8 @@ import './index.scss'
 const baseClass = 'field-select'
 
 export type FieldSelectProps = {
-  fields: ClientFieldConfig[]
-  setSelected: (fields: FieldWithPath[]) => void
+  readonly fields: ClientFieldConfig[]
+  readonly setSelected: (fields: FieldWithPath[]) => void
 }
 
 export const combineLabel = ({
@@ -29,18 +29,19 @@ export const combineLabel = ({
 }): JSX.Element => {
   const CustomLabelToRender: MappedComponent =
     field &&
-    'CustomLabel' in field.fieldComponentProps &&
-    field.fieldComponentProps.CustomLabel !== undefined
-      ? field.fieldComponentProps.CustomLabel
+    'CustomLabel' in field.admin.components &&
+    field.admin.components.CustomLabel !== undefined
+      ? field.admin.components.CustomLabel
       : null
+
   const DefaultLabelToRender: MappedComponent =
-    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label
+    field && 'label' in field && field.label
       ? {
           type: 'client',
           Component: FieldLabel,
           props: {
-            label: field.fieldComponentProps.label,
-            ...(field.fieldComponentProps.labelProps || {}),
+            label: field.label,
+            ...(field.labelProps || {}),
           },
         }
       : null
@@ -83,42 +84,39 @@ const reduceFields = ({
   }
 
   return fields?.reduce((fieldsToUse, field) => {
-    const { isFieldAffectingData } = field
+    const { _isFieldAffectingData } = field
     // escape for a variety of reasons
     if (
-      isFieldAffectingData &&
+      _isFieldAffectingData &&
       (field.disableBulkEdit ||
         field.unique ||
         field.isHidden ||
-        ('readOnly' in field.fieldComponentProps && field.fieldComponentProps.readOnly))
+        ('readOnly' in field && field.readOnly))
     ) {
       return fieldsToUse
     }
 
-    if (
-      !(field.type === 'array' || field.type === 'blocks') &&
-      'fieldMap' in field.fieldComponentProps
-    ) {
+    if (!(field.type === 'array' || field.type === 'blocks') && 'fields' in field) {
       return [
         ...fieldsToUse,
         ...reduceFields({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           labelPrefix: combineLabel({ field, prefix: labelPrefix }),
           path: createNestedClientFieldPath(path, field),
         }),
       ]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...fieldsToUse,
-        ...field.fieldComponentProps.tabs.reduce((tabFields, tab) => {
-          if ('fieldMap' in tab) {
+        ...field.tabs.reduce((tabFields, tab) => {
+          if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
             return [
               ...tabFields,
               ...reduceFields({
-                fieldMap: tab.fieldMap,
+                fields: tab.fields,
                 labelPrefix,
                 path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
               }),

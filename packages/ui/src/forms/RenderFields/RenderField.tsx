@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientFieldConfig, FieldComponentProps, FieldPermissions, FieldTypes } from 'payload'
+import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
 
 import React from 'react'
 
@@ -14,7 +14,7 @@ type Props = {
   readonly disabled: boolean
   readonly fieldComponentProps?: {
     forceRender?: boolean
-  } & FieldComponentProps
+  } & ClientFieldConfig[]
   readonly indexPath?: string
   readonly isHidden?: boolean
   readonly name?: string

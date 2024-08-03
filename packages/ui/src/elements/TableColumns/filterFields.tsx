@@ -14,14 +14,14 @@ export const filterFields = (incomingFields: ClientFieldConfig[]): ClientFieldCo
     }
 
     const formattedField: ClientFieldConfig =
-      field.type === 'tabs' && 'tabs' in field.fieldComponentProps
+      field.type === 'tabs' && 'tabs' in field
         ? {
             ...field,
             fieldComponentProps: {
               ...field.fieldComponentProps,
               tabs: field.fieldComponentProps.tabs.map((tab) => ({
                 ...tab,
-                fieldMap: tab.fieldMap.filter((tabField) => !shouldSkipField(tabField)),
+                fields: tab.fields.filter((tabField) => !shouldSkipField(tabField)),
               })),
             },
           }

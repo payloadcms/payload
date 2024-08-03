@@ -572,9 +572,11 @@ export const mapFields = (args: {
               style: field.admin?.style,
               width: field.admin?.width,
             }
+
             if (!field?.editor) {
               throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
             }
+
             if (typeof field?.editor === 'function') {
               throw new Error('Attempted to access unsanitized rich text editor.')
             }

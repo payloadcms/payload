@@ -25,11 +25,11 @@ export type MappedView = {
 }
 
 export type AdminViewProps = {
-  clientConfig?: ClientConfig
-  importMap: ImportMap
-  initPageResult: InitPageResult
-  params?: { [key: string]: string | string[] | undefined }
-  searchParams: { [key: string]: string | string[] | undefined }
+  readonly clientConfig: ClientConfig
+  readonly importMap: ImportMap
+  readonly initPageResult: InitPageResult
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>

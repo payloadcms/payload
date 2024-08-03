@@ -39,7 +39,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
-    fieldMap,
+    fields,
     forceRender = false,
     isSortable = true,
     label,
@@ -67,7 +67,10 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
-  const { localization } = useConfig()
+
+  const {
+    config: { localization },
+  } = useConfig()
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
@@ -266,7 +269,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
-                    fieldMap={fieldMap}
+                    fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     indexPath={indexPath}

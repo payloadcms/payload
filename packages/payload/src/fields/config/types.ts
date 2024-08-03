@@ -945,6 +945,10 @@ export function fieldIsPresentationalOnly(
   return field.type === 'ui'
 }
 
+export function fieldIsSidebar(field: ClientFieldConfig | Field | TabAsField): boolean {
+  return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
+}
+
 export function fieldAffectsData(
   field: ClientFieldConfig | Field | TabAsField,
 ): field is FieldAffectingData {

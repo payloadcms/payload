@@ -9,15 +9,15 @@ import type {
 } from '../types.js'
 
 export type ArrayFieldProps = {
-  CustomRowLabel?: MappedComponent
-  fields: ClientFieldConfig[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayField['labels']
-  maxRows?: ArrayField['maxRows']
-  minRows?: ArrayField['minRows']
-  name?: string
-  width?: string
+  readonly CustomRowLabel?: MappedComponent
+  readonly fields: ClientFieldConfig[]
+  readonly forceRender?: boolean
+  readonly isSortable?: boolean
+  readonly labels?: ArrayField['labels']
+  readonly maxRows?: ArrayField['maxRows']
+  readonly minRows?: ArrayField['minRows']
+  readonly name?: string
+  readonly width?: string
 } & FormFieldBase
 
 export type ArrayFieldLabelComponent = LabelComponent<'array'>

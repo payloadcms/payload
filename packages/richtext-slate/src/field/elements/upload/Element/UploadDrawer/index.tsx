@@ -27,14 +27,14 @@ import type { UploadElementType } from '../../types.js'
 import { uploadFieldsSchemaPath } from '../../shared.js'
 
 export const UploadDrawer: React.FC<{
-  drawerSlug: string
-  element: UploadElementType
-  fieldProps: {
+  readonly drawerSlug: string
+  readonly element: UploadElementType
+  readonly fieldProps: {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   } & FormFieldBase
-  relatedCollection: ClientCollectionConfig
-  schemaPath: string
+  readonly relatedCollection: ClientCollectionConfig
+  readonly schemaPath: string
 }> = (props) => {
   const editor = useSlateStatic()
 
@@ -49,7 +49,7 @@ export const UploadDrawer: React.FC<{
   const { richTextComponentMap } = fieldProps
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const fieldMap = richTextComponentMap.get(relatedFieldSchemaPath)
+  const fields = richTextComponentMap.get(relatedFieldSchemaPath)
 
   const { config } = useConfig()
 
@@ -131,7 +131,7 @@ export const UploadDrawer: React.FC<{
         onSubmit={handleUpdateEditData}
       >
         <RenderFields
-          fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+          fields={Array.isArray(fields) ? fields : []}
           path=""
           readOnly={false}
           schemaPath=""
