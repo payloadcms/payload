@@ -162,17 +162,17 @@ export const useField = <T,>(options: Options): FieldType<T> => {
             ? await validate(valueToValidate, {
                 id,
                 collectionSlug,
-                config,
                 data: getData(),
                 operation,
+                preferences: {} as any,
                 req: {
                   payload: {
-                    config,
+                    config: config as any,
                   },
                   t,
+                  user,
                 },
                 siblingData: getSiblingData(path),
-                user,
               })
             : true
 

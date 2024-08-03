@@ -131,14 +131,15 @@ export const Form: React.FC<FormProps> = (props) => {
               collectionSlug,
               data,
               operation,
+              preferences: {} as any,
               req: {
                 payload: {
-                  config,
+                  config: config as any,
                 },
                 t,
+                user,
               },
               siblingData: contextRef.current.getSiblingData(path),
-              user,
             })
 
             if (typeof validationResult === 'string') {
