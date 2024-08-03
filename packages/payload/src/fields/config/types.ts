@@ -20,8 +20,8 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type {
   CustomComponent,
   LabelFunction,
-  LabelStatic,
   PayloadComponent,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -175,8 +175,8 @@ type Admin = {
 }
 
 export type Labels = {
-  plural: LabelFunction | LabelStatic
-  singular: LabelFunction | LabelStatic
+  plural: LabelFunction | StaticLabel
+  singular: LabelFunction | StaticLabel
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
@@ -209,7 +209,7 @@ export type Validate<
 export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
-  label: LabelFunction | LabelStatic
+  label: LabelFunction | StaticLabel
   value: string
 }
 
@@ -237,7 +237,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: LabelFunction | LabelStatic | false
+  label?: LabelFunction | StaticLabel | false
   localized?: boolean
   /**
    * The name of the field. Must be alphanumeric and cannot contain ' . '

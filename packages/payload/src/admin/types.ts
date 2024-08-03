@@ -194,6 +194,7 @@ export type {
   DescriptionFunction,
   FieldDescriptionProps,
   GenericDescriptionProps,
+  StaticDescription,
 } from './forms/FieldDescription.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'

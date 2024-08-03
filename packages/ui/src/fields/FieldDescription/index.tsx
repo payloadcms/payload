@@ -39,10 +39,10 @@ const DefaultFieldDescription: React.FC<GenericDescriptionProps> = (props) => {
 }
 
 export const FieldDescription: React.FC<GenericDescriptionProps> = (props) => {
-  const { CustomDescription, ...rest } = props
+  const { Description, ...rest } = props
 
-  if (CustomDescription) {
-    return <RenderComponent clientProps={rest} mappedComponent={CustomDescription} />
+  if (Description) {
+    return <RenderComponent clientProps={rest} mappedComponent={Description} />
   }
 
   return <DefaultFieldDescription {...rest} />

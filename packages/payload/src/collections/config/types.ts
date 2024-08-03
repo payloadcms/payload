@@ -23,10 +23,10 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
-  LabelStatic,
   LivePreviewConfig,
   OpenGraphConfig,
   PayloadComponent,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -438,8 +438,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Label configuration
    */
   labels?: {
-    plural?: LabelFunction | LabelStatic
-    singular?: LabelFunction | LabelStatic
+    plural?: LabelFunction | StaticLabel
+    singular?: LabelFunction | StaticLabel
   }
   slug: string
   /**

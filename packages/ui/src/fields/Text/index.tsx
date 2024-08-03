@@ -20,31 +20,27 @@ export { TextInput, TextInputProps }
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      rtl,
+      style,
+      width,
+    },
     hasMany,
     inputRef,
     label,
-    labelProps,
     localized,
     maxLength,
     maxRows,
     minLength,
     minRows,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
-    rtl,
-    style,
     validate,
-    width,
   } = props
 
   const locale = useLocale()
@@ -120,18 +116,16 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
       hasMany={hasMany}
       inputRef={inputRef}
       label={label}
-      labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

@@ -13,6 +13,7 @@ export const PostsCollection: CollectionConfig = {
         components: {
           Label: '/collections/Posts/MyComponent.js#MyComponent',
         },
+        description: 'This is a description',
       },
       name: 'text',
       type: 'text',

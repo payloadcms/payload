@@ -2,7 +2,7 @@
 
 import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
 
-import { HiddenField, useFieldComponents } from '@payloadcms/ui'
+import { HiddenField } from '@payloadcms/ui'
 import React from 'react'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -45,7 +45,6 @@ export const RenderField: React.FC<Props> = ({
 }) => {
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
-  const fieldComponents = useFieldComponents()
 
   const path = [pathFromProps, name].filter(Boolean).join('.')
   const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
@@ -71,6 +70,7 @@ export const RenderField: React.FC<Props> = ({
     return <HiddenField />
   }
 
+  console.log(Field)
   return (
     <FieldPropsProvider
       custom={custom}
@@ -82,11 +82,7 @@ export const RenderField: React.FC<Props> = ({
       siblingPermissions={siblingPermissions}
       type={type}
     >
-      <RenderComponent
-        Component={fieldComponents?.[type]}
-        clientProps={fieldComponentProps}
-        mappedComponent={Field}
-      />
+      <RenderComponent clientProps={fieldComponentProps} mappedComponent={Field} />
     </FieldPropsProvider>
   )
 }

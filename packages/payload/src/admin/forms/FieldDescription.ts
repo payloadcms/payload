@@ -8,12 +8,14 @@ export type DescriptionComponent<T extends 'hidden' | FieldTypes = any> = Custom
   FieldDescriptionProps<T>
 >
 
-export type Description = DescriptionFunction | Record<string, string> | string
+export type StaticDescription = Record<string, string> | string
+
+export type Description = DescriptionFunction | StaticDescription
 export type GenericDescriptionProps = {
-  CustomDescription?: MappedComponent
-  className?: string
-  description?: Record<string, string> | string
-  marginPlacement?: 'bottom' | 'top'
+  readonly Description?: MappedComponent
+  readonly className?: string
+  readonly description?: StaticDescription
+  readonly marginPlacement?: 'bottom' | 'top'
 }
 export type FieldDescriptionProps<T extends 'hidden' | FieldTypes = any> = {
   type: T

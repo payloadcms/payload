@@ -17,18 +17,16 @@ import './index.scss'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
-    descriptionProps,
-    errorProps,
+    description,
     hasMany,
     inputRef,
     label,
-    labelProps,
     maxRows,
     onChange,
     onKeyDown,
@@ -63,15 +61,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError CustomError={Error} path={path} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -99,8 +91,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={BeforeInput} />
-
+            <RenderComponent mappedComponent={beforeInput} />
             <input
               data-rtl={rtl}
               disabled={readOnly}
@@ -113,10 +104,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
               type="text"
               value={value || ''}
             />
-            <RenderComponent mappedComponent={AfterInput} />
+            <RenderComponent mappedComponent={afterInput} />
           </div>
         )}
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} description={description} />
       </div>
     </div>
   )

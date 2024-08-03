@@ -4,10 +4,10 @@ import type { FieldComponentProps } from '../fields/index.js'
 import type { FormFieldBase } from './Field.js'
 
 export type GenericLabelProps = {
-  as?: 'label' | 'span'
-  htmlFor?: string
-  schemaPath?: string
-  unstyled?: boolean
+  readonly as?: 'label' | 'span'
+  readonly htmlFor?: string
+  readonly schemaPath?: string
+  readonly unstyled?: boolean
 } & FormFieldBase
 
 export type LabelProps<T extends 'hidden' | FieldTypes = any> = {

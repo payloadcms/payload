@@ -1,4 +1,4 @@
-import type { TextFieldProps } from 'payload'
+import type { FormFieldBase } from 'payload'
 import type { ChangeEvent } from 'react'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -21,5 +21,6 @@ export type TextInputProps = {
   showError?: boolean
   value?: string
   valueToRender?: Option[]
-} & Omit<TextFieldProps, 'type'> &
+  width?: string
+} & FormFieldBase &
   SharedTextFieldProps

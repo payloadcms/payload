@@ -1,4 +1,4 @@
-import type { MappedComponent } from '../../admin/types.js'
+import type { Description, MappedComponent, StaticDescription } from '../../admin/types.js'
 import type { Field, FieldBase } from '../../fields/config/types.js'
 
 export type ClientFieldConfig = {
@@ -21,6 +21,7 @@ export type ClientFieldConfig = {
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
     }
+    description?: MappedComponent | StaticDescription
   } & Omit<Field['admin'], 'components' | ServerOnlyFieldAdminProperties>
 } & Omit<Field, 'admin' | ServerOnlyFieldProperties> // TODO: the <Omit> breaks the field type inference
 

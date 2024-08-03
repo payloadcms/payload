@@ -42,10 +42,10 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
 }
 
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
-  const { CustomLabel, ...rest } = props
+  const { Label, ...rest } = props
 
-  if (CustomLabel) {
-    return <RenderComponent clientProps={rest} mappedComponent={CustomLabel} />
+  if (Label) {
+    return <RenderComponent clientProps={rest} mappedComponent={Label} />
   }
 
   return <DefaultFieldLabel {...rest} />

@@ -1,20 +1,11 @@
-import type { TextField } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldProps } from '../forms/Field.js'
+import type { DescriptionComponent, LabelComponent } from '../types.js'
 
 export type TextFieldProps = {
-  hasMany?: boolean
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  maxLength?: number
-  maxRows?: number
-  minLength?: number
-  minRows?: number
-  name?: string
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  path?: string
-  placeholder?: TextField['admin']['placeholder']
-  width?: string
-} & FormFieldBase
+  readonly inputRef?: React.MutableRefObject<HTMLInputElement>
+  readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+} & FieldProps<'text'>
 
 export type TextFieldLabelComponent = LabelComponent<'text'>
 
