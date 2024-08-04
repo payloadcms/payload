@@ -179,6 +179,7 @@ export const createClientFieldConfig = ({
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.fields = createClientFieldConfigs({
         createMappedComponent,
+        disableAddingID: field.type !== 'array',
         // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
         fields: field.fields as any as Field[], // invert the type
         parentPath: field._path,
@@ -205,6 +206,7 @@ export const createClientFieldConfig = ({
       field.tabs = createClientFieldConfigs({
         createMappedComponent,
         // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference
+        disableAddingID: true,
         fields: field.tabs as any as Field[], // invert the type
         parentPath: field._path,
         t,
@@ -305,15 +307,41 @@ export const createClientFieldConfig = ({
 
 export const createClientFieldConfigs = ({
   createMappedComponent,
+  disableAddingID,
   fields,
   parentPath,
   t,
 }: {
   createMappedComponent: CreateMappedComponent
+  disableAddingID?: boolean
   fields: Field[]
   parentPath?: string
   t: TFunction
-}): ClientFieldConfig[] =>
-  fields
+}): ClientFieldConfig[] => {
+  const result = fields
     .map((field) => createClientFieldConfig({ createMappedComponent, field, parentPath, t }))
     .filter(Boolean)
+
+  const hasID =
+    result.findIndex((f) => 'name' in f && f._isFieldAffectingData && f.name === 'id') > -1
+
+  if (!disableAddingID && !hasID) {
+    result.push({
+      name: 'id',
+      type: 'text',
+      _fieldIsPresentational: false,
+      _isFieldAffectingData: true,
+      admin: {
+        components: {
+          Cell: createMappedComponent(undefined, undefined, DefaultCell),
+          Field: null,
+        },
+        disableBulkEdit: true,
+      },
+      hidden: true,
+      localized: undefined,
+    })
+  }
+
+  return result
+}

@@ -10,6 +10,7 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       maxLength: 100,
       admin: {
+        placeholder: 'This is a placeholder',
         components: {
           afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
           beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
