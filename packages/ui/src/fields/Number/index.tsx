@@ -21,28 +21,30 @@ import './index.scss'
 
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      placeholder,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        placeholder,
+        style,
+        width,
+      },
+      hasMany = false,
+      label,
+      max = Infinity,
+      maxRows = Infinity,
+      min = -Infinity,
+      required,
+      step = 1,
     },
     descriptionProps,
     errorProps,
-    hasMany = false,
-    label,
     labelProps,
-    max = Infinity,
-    maxRows = Infinity,
-    min = -Infinity,
     onChange: onChangeFromProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    step = 1,
     validate,
   } = props
 
@@ -143,7 +145,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {hasMany ? (
@@ -195,7 +197,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           </div>
         )}
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

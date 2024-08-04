@@ -29,16 +29,19 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
-    admin: {
-      className,
-      components: { Description, Label },
-      style,
-      width,
+    clientFieldConfig: {
+      admin: {
+        className,
+        components: { Description, Label },
+        description,
+        style,
+        width,
+      },
+      fields,
+      hideGutter,
+      label,
     },
     descriptionProps,
-    fields,
-    hideGutter,
-    label,
     readOnly: readOnlyFromProps,
   } = props
 
@@ -90,7 +93,11 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
                 ) : label ? (
                   <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                 ) : null}
-                <FieldDescription CustomDescription={Description} {...(descriptionProps || {})} />
+                <FieldDescription
+                  Description={Description}
+                  description={description}
+                  {...(descriptionProps || {})}
+                />
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

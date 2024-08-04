@@ -23,23 +23,25 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        editorOptions = {},
+        language = 'javascript',
+        style,
+        width,
+      },
+      label,
+      required,
     },
     descriptionProps,
-    editorOptions = {},
     errorProps,
-    label,
     labelProps,
-    language = 'javascript',
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -77,7 +79,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
@@ -91,7 +93,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldDescription
-        CustomDescription={Description}
+        Description={Description}
         description={description}
         {...(descriptionProps || {})}
       />

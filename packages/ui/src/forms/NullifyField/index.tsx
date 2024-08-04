@@ -10,9 +10,9 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useForm } from '../Form/context.js'
 
 type NullifyLocaleFieldProps = {
-  fieldValue?: [] | null | number
-  localized: boolean
-  path: string
+  readonly fieldValue?: [] | null | number
+  readonly localized: boolean
+  readonly path: string
 }
 
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
@@ -62,8 +62,10 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
     <Banner>
       <CheckboxField
         checked={checked}
+        clientFieldConfig={{
+          label: t('general:fallbackToDefaultLocale'),
+        }}
         id={`field-${path.replace(/\./g, '__')}`}
-        label={t('general:fallbackToDefaultLocale')}
         // onToggle={onChange}
       />
     </Banner>

@@ -19,23 +19,25 @@ import { FieldError } from '../FieldError/index.js'
 
 const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        editorOptions,
+        style,
+        width,
+      },
+      jsonSchema,
+      label,
+      required,
     },
     descriptionProps,
-    editorOptions,
     errorProps,
-    jsonSchema,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -122,7 +124,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
@@ -137,7 +139,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldDescription
-        CustomDescription={Description}
+        Description={Description}
         description={description}
         {...(descriptionProps || {})}
       />

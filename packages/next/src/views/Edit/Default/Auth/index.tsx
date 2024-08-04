@@ -156,11 +156,13 @@ export const Auth: React.FC<Props> = (props) => {
             loginWithUsername?.requireEmail) && (
             <EmailField
               autoComplete="email"
-              disabled={disabled}
-              label={t('general:email')}
-              name="email"
+              clientFieldConfig={{
+                name: 'email',
+                disabled,
+                label: t('general:email'),
+                required: !loginWithUsername || loginWithUsername?.requireEmail,
+              }}
               readOnly={readOnly}
-              required={!loginWithUsername || loginWithUsername?.requireEmail}
               validate={(value) =>
                 emailValidation(value, {
                   name: 'email',
@@ -177,11 +179,13 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                disabled={disabled}
-                label={t('authentication:newPassword')}
-                name="password"
-                path="password"
-                required
+                clientFieldConfig={{
+                  name: 'password',
+                  _path: 'password',
+                  disabled,
+                  label: t('authentication:newPassword'),
+                  required: true,
+                }}
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>
@@ -224,9 +228,11 @@ export const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <CheckboxField
-            disabled={disabled}
-            label={t('authentication:enableAPIKey')}
-            name="enableAPIKey"
+            clientFieldConfig={{
+              name: 'enableAPIKey',
+              disabled,
+              label: t('authentication:enableAPIKey'),
+            }}
             readOnly={readOnly}
           />
           <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
@@ -234,9 +240,11 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {verify && (
         <CheckboxField
-          disabled={disabled}
-          label={t('authentication:verified')}
-          name="_verified"
+          clientFieldConfig={{
+            name: '_verified',
+            disabled,
+            label: t('authentication:verified'),
+          }}
           readOnly={readOnly}
         />
       )}

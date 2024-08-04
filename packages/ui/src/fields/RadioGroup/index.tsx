@@ -20,24 +20,26 @@ import { FieldError } from '../FieldError/index.js'
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label },
-      description,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        description,
+        layout = 'horizontal',
+        style,
+        width,
+      },
+      label,
+      options = [],
+      required,
     },
     descriptionProps,
     errorProps,
-    label,
     labelProps,
-    layout = 'horizontal',
     onChange: onChangeFromProps,
-    options = [],
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
     value: valueFromProps,
   } = props
@@ -88,7 +90,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -128,7 +130,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
           })}
         </ul>
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

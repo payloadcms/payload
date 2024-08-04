@@ -35,26 +35,28 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label },
-      description,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        allowCreate = true,
+        className,
+        components: { Description, Error, Label },
+        description,
+        isSortable = true,
+        sortOptions,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      relationTo,
+      required,
     },
-    allowCreate = true,
     descriptionProps,
     errorProps,
-    hasMany,
-    isSortable = true,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    sortOptions,
     validate,
   } = props
 
@@ -482,7 +484,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {!errorLoading && (
@@ -590,7 +592,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

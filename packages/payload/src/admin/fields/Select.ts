@@ -1,17 +1,11 @@
-import type { Option } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type SelectFieldProps = {
-  hasMany?: boolean
-  isClearable?: boolean
-  isSortable?: boolean
-  name?: string
-  onChange?: (e: string | string[]) => void
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'select'>
+  readonly onChange?: (e: string | string[]) => void
+  readonly value?: string
 } & FormFieldBase
 
 export type SelectFieldLabelComponent = LabelComponent<'select'>

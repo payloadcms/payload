@@ -1,13 +1,14 @@
-import type { DescriptionComponent, FormFieldBase, LabelComponent, UploadField } from 'payload'
+import type {
+  DescriptionComponent,
+  FormFieldBase,
+  GenericClientFieldConfig,
+  LabelComponent,
+} from 'payload'
 
 import type { ErrorComponent } from '../forms/Error.js'
 
 export type UploadFieldProps = {
-  filterOptions?: UploadField['filterOptions']
-  name?: string
-  path?: string
-  relationTo?: UploadField['relationTo']
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'upload'>
 } & FormFieldBase
 
 export type UploadFieldLabelComponent = LabelComponent<'upload'>

@@ -116,7 +116,6 @@ export const createClientFieldConfig = ({
     'access',
     'validate',
     'defaultValue',
-    'label',
     'filterOptions', // This is a `relationship` and `upload` only property
     'editor', // This is a `richText` only property
     'custom',
@@ -124,6 +123,7 @@ export const createClientFieldConfig = ({
     'dbName', // can be a function
     'enumName', // can be a function
     // the following props are handled separately (see below):
+    // `label`
     // `fields`
     // `blocks`
     // `tabs`
@@ -148,14 +148,14 @@ export const createClientFieldConfig = ({
     field._fieldIsPresentational ||
     (field._isFieldAffectingData && !(isHidden || disabledFromAdmin))
   ) {
-    if (isHiddenFromAdmin) {
-      // TODO: set to Hidden field
-    }
-
     field._path = generateFieldPath(
       parentPath,
       field._isFieldAffectingData && 'name' in field ? field.name : '',
     )
+
+    if ('label' in field && typeof field.label === 'function') {
+      field.label = field.label({ t })
+    }
 
     if ('options' in field && Array.isArray(field.options)) {
       field.options = field.options.map((option) => {
@@ -205,15 +205,13 @@ export const createClientFieldConfig = ({
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.tabs = createClientFieldConfigs({
         createMappedComponent,
-        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference
         disableAddingID: true,
+        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference
         fields: field.tabs as any as Field[], // invert the type
         parentPath: field._path,
         t,
       })
     }
-
-    field.admin = { ...(field.admin || ({} as any)) }
 
     const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
 
@@ -222,6 +220,8 @@ export const createClientFieldConfig = ({
         delete field.admin[key]
       }
     })
+
+    field.admin = { ...(field.admin || ({} as any)) }
 
     if (incomingField.admin && 'description' in incomingField.admin) {
       if (
@@ -265,7 +265,7 @@ export const createClientFieldConfig = ({
           'Field' in incomingField.admin.components &&
           incomingField.admin.components.Field,
         undefined,
-        fieldComponents[incomingField.type],
+        fieldComponents[isHiddenFromAdmin ? 'hidden' : incomingField.type],
       ),
       Filter: createMappedComponent(
         'admin' in incomingField &&

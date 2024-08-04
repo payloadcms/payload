@@ -2,7 +2,6 @@
 
 import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
 
-import { HiddenField } from '@payloadcms/ui'
 import React from 'react'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -14,8 +13,9 @@ type Props = {
   readonly custom?: Record<any, string>
   readonly disabled: boolean
   readonly fieldComponentProps?: {
+    clientFieldConfig: ClientFieldConfig
     forceRender?: boolean
-  } & ClientFieldConfig[]
+  }[]
   readonly indexPath?: string
   readonly isHidden?: boolean
   readonly name?: string
@@ -64,10 +64,6 @@ export const RenderField: React.FC<Props> = ({
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {
     readOnly = true
-  }
-
-  if (fieldComponentProps?.admin?.hidden) {
-    return <HiddenField />
   }
 
   return (

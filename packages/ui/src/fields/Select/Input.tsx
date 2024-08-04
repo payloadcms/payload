@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, SelectFieldProps } from 'payload'
+import type { MappedComponent, OptionObject, StaticDescription } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -16,25 +16,31 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectInputProps = {
-  onChange?: ReactSelectAdapterProps['onChange']
-  options?: OptionObject[]
-  showError?: boolean
-  value?: string | string[]
-} & Omit<
-  SelectFieldProps,
-  | 'custom'
-  | 'disabled'
-  | 'docPreferences'
-  | 'locale'
-  | 'localized'
-  | 'onChange'
-  | 'options'
-  | 'rtl'
-  | 'type'
-  | 'user'
-  | 'validate'
-  | 'value'
->
+  readonly Description?: MappedComponent
+  readonly Error?: MappedComponent
+  readonly Label?: MappedComponent
+  readonly afterInput?: MappedComponent[]
+  readonly beforeInput?: MappedComponent[]
+  readonly className?: string
+  readonly description?: StaticDescription
+  readonly descriptionProps?: Record<string, unknown>
+  readonly errorProps?: Record<string, unknown>
+  readonly hasMany?: boolean
+  readonly isClearable?: boolean
+  readonly isSortable?: boolean
+  readonly label: string
+  readonly labelProps?: Record<string, unknown>
+  readonly name: string
+  readonly onChange?: ReactSelectAdapterProps['onChange']
+  readonly options?: OptionObject[]
+  readonly path: string
+  readonly readOnly?: boolean
+  readonly required?: boolean
+  readonly showError?: boolean
+  readonly style?: React.CSSProperties
+  readonly value?: string | string[]
+  readonly width?: string
+}
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
@@ -100,9 +106,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError Error={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
         <ReactSelect
           disabled={readOnly}

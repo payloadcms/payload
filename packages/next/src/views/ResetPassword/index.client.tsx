@@ -76,10 +76,12 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       onSuccess={onSuccess}
     >
       <PasswordField
-        label={i18n.t('authentication:newPassword')}
-        name="password"
-        path="password"
-        required
+        clientFieldConfig={{
+          name: 'password',
+          _path: 'password',
+          label: i18n.t('authentication:newPassword'),
+          required: true,
+        }}
       />
       <ConfirmPasswordField />
       <HiddenField forceUsePathFromProps name="token" value={token} />

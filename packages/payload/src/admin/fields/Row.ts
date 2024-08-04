@@ -1,18 +1,12 @@
-import type {
-  ClientFieldConfig,
-  DescriptionComponent,
-  FormFieldBase,
-  LabelComponent,
-} from 'payload'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from 'payload'
 
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 
 export type RowFieldProps = {
-  readonly fields: ClientFieldConfig[]
+  readonly clientFieldConfig: GenericClientFieldConfig<'row'>
   readonly forceRender?: boolean
   readonly indexPath: string
-  readonly path?: string
-  readonly width?: string
 } & FormFieldBase
 
 export type RowFieldLabelComponent = LabelComponent<'row'>

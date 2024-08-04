@@ -20,24 +20,25 @@ import { FieldLabel } from '../FieldLabel/index.js'
 
 export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      placeholder,
-      rtl,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        placeholder,
+        step,
+        style,
+        width,
+      },
+      label,
+      required,
     },
     descriptionProps,
     errorProps,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    step,
     validate,
   } = props
 
@@ -106,7 +107,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          <FieldLabel CustomLabel={Label} {...getCoordinateFieldLabel('longitude')} />
+          <FieldLabel Label={Label} {...getCoordinateFieldLabel('longitude')} />
           <div className="input-wrapper">
             <RenderComponent mappedComponent={beforeInput} />
             {/* disable eslint rule because the label is dynamic */}
@@ -125,7 +126,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          <FieldLabel CustomLabel={Label} {...getCoordinateFieldLabel('latitude')} />
+          <FieldLabel Label={Label} {...getCoordinateFieldLabel('latitude')} />
           <div className="input-wrapper">
             <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
             <RenderComponent mappedComponent={beforeInput} />
@@ -146,7 +147,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         </li>
       </ul>
       <FieldDescription
-        CustomDescription={Description}
+        Description={Description}
         description={description}
         {...(descriptionProps || {})}
       />

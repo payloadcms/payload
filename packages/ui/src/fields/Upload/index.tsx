@@ -19,17 +19,19 @@ export type { UploadInputProps }
 
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
-    admin: {
-      className,
-      components: { Description, Error, Label },
-      style,
-      width,
+    clientFieldConfig: {
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        style,
+        width,
+      },
+      label,
+      path: pathFromProps,
+      relationTo,
+      required,
     },
-    label,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    relationTo,
-    required,
     validate,
   } = props
 

@@ -21,23 +21,25 @@ import { FieldError } from '../FieldError/index.js'
 
 const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      placeholder,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        date: datePickerProps,
+        description,
+        placeholder,
+        style,
+        width,
+      },
+      label,
+      required,
     },
-    date: datePickerProps,
     descriptionProps,
     errorProps,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -77,7 +79,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
@@ -93,7 +95,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldDescription
-        CustomDescription={Description}
+        Description={Description}
         description={description}
         {...(descriptionProps || {})}
       />

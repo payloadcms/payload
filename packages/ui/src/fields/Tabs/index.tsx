@@ -24,15 +24,17 @@ export { TabsProvider }
 
 const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description },
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description },
+      },
+      tabs = [],
     },
     forceRender = false,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    tabs = [],
   } = props
 
   const {

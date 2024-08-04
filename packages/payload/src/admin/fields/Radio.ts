@@ -1,15 +1,11 @@
-import type { Option } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RadioFieldProps = {
-  layout?: 'horizontal' | 'vertical'
-  name?: string
-  onChange?: OnChange
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'radio'>
+  readonly onChange?: OnChange
+  readonly value?: string
 } & FormFieldBase
 
 export type OnChange<T = string> = (value: T) => void

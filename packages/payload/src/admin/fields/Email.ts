@@ -1,13 +1,10 @@
-import type { EmailField } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type EmailFieldProps = {
-  autoComplete?: string
-  name?: string
-  path?: string
-  placeholder?: EmailField['admin']['placeholder']
-  width?: string
+  readonly autoComplete?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'email'>
 } & FormFieldBase
 
 export type EmailFieldLabelComponent = LabelComponent<'email'>

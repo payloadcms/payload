@@ -31,26 +31,28 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
-    name,
-    CustomRowLabel,
-    admin: {
-      className,
-      components: { Description, Error, Label },
-      description,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      CustomRowLabel,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        description,
+      },
+      fields,
+      isSortable = true,
+      label,
+      localized,
+      maxRows,
+      minRows: minRowsProp,
+      required,
     },
     descriptionProps,
     errorProps,
-    fields,
     forceRender = false,
-    isSortable = true,
-    label,
     labelProps,
-    localized,
-    maxRows,
-    minRows: minRowsProp,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -213,7 +215,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                CustomLabel={Label}
+                Label={Label}
                 as="span"
                 label={label}
                 required={required}
@@ -249,7 +251,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           )}
         </div>
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

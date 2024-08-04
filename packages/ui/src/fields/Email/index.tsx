@@ -17,23 +17,31 @@ import './index.scss'
 
 const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      placeholder,
-      style,
-      width,
-    },
     autoComplete,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: {
+          Description,
+          Error,
+          Label,
+          afterInput,
+          beforeInput,
+        } = {} as EmailFieldProps['clientFieldConfig']['admin']['components'],
+        description,
+        placeholder,
+        style,
+        width,
+      } = {} as EmailFieldProps['clientFieldConfig']['admin'],
+      label,
+      required,
+    } = {} as EmailFieldProps['clientFieldConfig'],
     descriptionProps,
     errorProps,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -67,7 +75,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
@@ -87,7 +95,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldDescription
-        CustomDescription={Description}
+        Description={Description}
         description={description}
         {...(descriptionProps || {})}
       />

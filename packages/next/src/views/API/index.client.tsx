@@ -8,7 +8,7 @@ import {
   Form,
   Gutter,
   MinimizeMaximizeIcon,
-  NumberField as NumberInput,
+  NumberField,
   SetViewActions,
   useConfig,
   useDocumentInfo,
@@ -161,28 +161,36 @@ export const APIViewClient: React.FC = () => {
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
                 <CheckboxField
-                  label={t('version:draft')}
-                  name="draft"
+                  clientFieldConfig={{
+                    name: 'draft',
+                    _path: 'draft',
+                    label: t('version:draft'),
+                  }}
                   onChange={() => setDraft(!draft)}
-                  path="draft"
                 />
               )}
               <CheckboxField
-                label={t('authentication:authenticated')}
-                name="authenticated"
+                clientFieldConfig={{
+                  name: 'authenticated',
+                  _path: 'authenticated',
+                  label: t('authentication:authenticated'),
+                }}
                 onChange={() => setAuthenticated(!authenticated)}
-                path="authenticated"
               />
             </div>
             {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
-            <NumberInput
-              label={t('general:depth')}
-              max={10}
-              min={0}
-              name="depth"
+            <NumberField
+              clientFieldConfig={{
+                name: 'depth',
+                _path: 'depth',
+                admin: {
+                  max: 10,
+                  min: 0,
+                  step: 1,
+                },
+                label: t('general:depth'),
+              }}
               onChange={(value) => setDepth(value?.toString())}
-              path="depth"
-              step={1}
             />
           </div>
         </Form>

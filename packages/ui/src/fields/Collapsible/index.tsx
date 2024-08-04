@@ -23,16 +23,18 @@ import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
-    admin: {
-      className,
-      components: { Description, Label },
-      description,
+    clientFieldConfig: {
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Label },
+        description,
+      },
+      fields,
+      initCollapsed = false,
+      label,
     },
     descriptionProps,
-    fields,
-    initCollapsed = false,
-    label,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
   } = props
 
@@ -152,7 +154,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           />
         </CollapsibleElement>
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

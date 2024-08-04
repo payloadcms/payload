@@ -71,11 +71,13 @@ export const CreateFirstUserClient: React.FC<{
         <LoginField required={requireEmail} type="email" />
       )}
       <PasswordField
-        label={t('authentication:newPassword')}
+        clientFieldConfig={{
+          name: 'password',
+          _path: 'password',
+          label: t('authentication:newPassword'),
+          required: true,
+        }}
         labelProps={{ htmlFor: 'field-password' }}
-        name="password"
-        path="password"
-        required
       />
       <ConfirmPasswordField />
       <RenderFields

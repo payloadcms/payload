@@ -19,27 +19,29 @@ export { TextInput, TextInputProps }
 
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label, afterInput, beforeInput },
-      description,
-      placeholder,
-      rtl,
-      style,
-      width,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        placeholder,
+        rtl,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      localized,
+      maxLength,
+      maxRows,
+      minLength,
+      minRows,
+      required,
     },
-    hasMany,
     inputRef,
-    label,
-    localized,
-    maxLength,
-    maxRows,
-    minLength,
-    minRows,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 

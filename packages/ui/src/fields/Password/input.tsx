@@ -54,7 +54,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={Label}
+        Label={Label}
         htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}

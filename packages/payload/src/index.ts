@@ -865,7 +865,7 @@ export {
 } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export type { ClientFieldConfig } from './fields/config/client.js'
+export type { ClientFieldConfig, GenericClientFieldConfig } from './fields/config/client.js'
 export type { ServerOnlyFieldProperties } from './fields/config/client.js'
 export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'

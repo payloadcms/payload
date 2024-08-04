@@ -1,12 +1,9 @@
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'point'>
 } & FormFieldBase
 
 export type PointFieldLabelComponent = LabelComponent<'point'>

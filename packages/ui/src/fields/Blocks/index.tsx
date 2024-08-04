@@ -36,26 +36,28 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    name,
-    admin: {
-      className,
-      components: { Description, Error, Label },
-      description,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        description,
+      },
+      blocks,
+      isSortable = true,
+      label,
+      labels: labelsFromProps,
+      localized,
+      maxRows,
+      minRows: minRowsProp,
+      required,
     },
-    blocks,
     descriptionProps,
     errorProps,
     forceRender = false,
-    isSortable = true,
-    label,
     labelProps,
-    labels: labelsFromProps,
-    localized,
-    maxRows,
-    minRows: minRowsProp,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -221,7 +223,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
               <FieldLabel
-                CustomLabel={Label}
+                Label={Label}
                 as="span"
                 label={label}
                 required={required}
@@ -257,7 +259,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
           )}
         </div>
         <FieldDescription
-          CustomDescription={Description}
+          Description={Description}
           description={description}
           {...(descriptionProps || {})}
         />

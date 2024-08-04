@@ -16,8 +16,10 @@ const baseClass = 'row'
 
 const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
   const {
-    admin: { className },
-    fields,
+    clientFieldConfig: {
+      admin: { className },
+      fields,
+    },
     forceRender = false,
   } = props
 

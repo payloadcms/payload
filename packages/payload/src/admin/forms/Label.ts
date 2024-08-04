@@ -1,14 +1,16 @@
-import type { CustomComponent, ServerProps } from '../../config/types.js'
+import type { CustomComponent, ServerProps, StaticLabel } from '../../config/types.js'
 import type { FieldTypes } from '../../fields/config/types.js'
 import type { FieldComponentProps } from '../fields/index.js'
-import type { FormFieldBase } from './Field.js'
+import type { MappedComponent } from '../types.js'
 
 export type GenericLabelProps = {
+  readonly Label?: MappedComponent
   readonly as?: 'label' | 'span'
   readonly htmlFor?: string
-  readonly schemaPath?: string
+  readonly label?: StaticLabel
+  readonly required?: boolean
   readonly unstyled?: boolean
-} & FormFieldBase
+}
 
 export type LabelProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
