@@ -31,7 +31,6 @@ const initialParams = {
 }
 
 type Props = {
-  children?: React.ReactNode
   className?: string
   data: RelationshipData
   format?: ElementFormatType
@@ -40,7 +39,6 @@ type Props = {
 
 const Component: React.FC<Props> = (props) => {
   const {
-    children,
     data: { relationTo, value: id },
     nodeKey,
   } = props
@@ -189,7 +187,6 @@ const Component: React.FC<Props> = (props) => {
       )}
 
       {id && <DocumentDrawer onSave={updateRelationship} />}
-      {children}
     </div>
   )
 }

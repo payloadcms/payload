@@ -3,6 +3,7 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
+import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
@@ -108,6 +109,25 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
 
   return {
     oneOf: properties,
+  }
+}
+
+/**
+ * Generates the JSON Schema for database configuration
+ *
+ * @example { db: idType: string }
+ */
+function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
+  const defaultIDType: JSONSchema4 =
+    config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      defaultIDType,
+    },
+    required: ['defaultIDType'],
   }
 }
 
@@ -588,60 +608,115 @@ export function entityToJSONSchema(
   }
 }
 
-function generateOperationJSONSchema(
-  config: SanitizedCollectionConfig,
-  operation: 'forgotPassword' | 'login' | 'registerFirstUser',
-): JSONSchema4 {
-  const usernameLogin = config.auth?.loginWithUsername
-  const fieldType: JSONSchema4 = {
-    type: 'string',
-  }
-
-  let properties: JSONSchema4['properties'] = {}
-  switch (operation) {
-    case 'login': {
-      properties = {
-        password: fieldType,
-        [usernameLogin ? 'username' : 'email']: fieldType,
-      }
-      break
-    }
-    case 'forgotPassword': {
-      properties = {
-        [usernameLogin ? 'username' : 'email']: fieldType,
-      }
-      break
-    }
-    case 'registerFirstUser': {
-      properties = {
-        email: fieldType,
-        password: fieldType,
-      }
-      if (usernameLogin) properties.username = fieldType
-      break
-    }
-  }
-
-  return {
+const fieldType: JSONSchema4 = {
+  type: 'string',
+  required: false,
+}
+const generateAuthFieldTypes = ({
+  type,
+  loginWithUsername,
+}: {
+  loginWithUsername: Auth['loginWithUsername']
+  type: 'forgotOrUnlock' | 'login' | 'register'
+}): JSONSchema4 => {
+  const emailAuthFields = {
     additionalProperties: false,
-    properties,
-    required: Object.keys(properties),
+    properties: { email: fieldType },
+    required: ['email'],
   }
+  const usernameAuthFields = {
+    additionalProperties: false,
+    properties: { username: fieldType },
+    required: ['username'],
+  }
+
+  if (['login', 'register'].includes(type)) {
+    emailAuthFields.properties['password'] = fieldType
+    emailAuthFields.required.push('password')
+    usernameAuthFields.properties['password'] = fieldType
+    usernameAuthFields.required.push('password')
+  }
+
+  if (loginWithUsername) {
+    switch (type) {
+      case 'login': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow username or email and require password for login
+          return {
+            additionalProperties: false,
+            oneOf: [emailAuthFields, usernameAuthFields],
+          }
+        } else {
+          // allow only username and password for login
+          return usernameAuthFields
+        }
+      }
+
+      case 'register': {
+        if (loginWithUsername.requireEmail) {
+          // require username, email and password for registration
+          return {
+            additionalProperties: false,
+            properties: {
+              ...usernameAuthFields.properties,
+              ...emailAuthFields.properties,
+            },
+            required: [...usernameAuthFields.required, ...emailAuthFields.required],
+          }
+        } else if (loginWithUsername.allowEmailLogin) {
+          // allow both but only require username for registration
+          return {
+            additionalProperties: false,
+            properties: {
+              ...usernameAuthFields.properties,
+              ...emailAuthFields.properties,
+            },
+            required: usernameAuthFields.required,
+          }
+        } else {
+          // require only username and password for registration
+          return usernameAuthFields
+        }
+      }
+
+      case 'forgotOrUnlock': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow email or username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            oneOf: [emailAuthFields, usernameAuthFields],
+          }
+        } else {
+          // allow only username for unlock/forgot-password
+          return usernameAuthFields
+        }
+      }
+    }
+  }
+
+  // default email (and password for login/register)
+  return emailAuthFields
 }
 
 export function authCollectionToOperationsJSONSchema(
   config: SanitizedCollectionConfig,
 ): JSONSchema4 {
-  const properties = {
-    forgotPassword: {
-      ...generateOperationJSONSchema(config, 'forgotPassword'),
-    },
-    login: {
-      ...generateOperationJSONSchema(config, 'login'),
-    },
-    registerFirstUser: {
-      ...generateOperationJSONSchema(config, 'registerFirstUser'),
-    },
+  const loginWithUsername = config.auth?.loginWithUsername
+  const loginUserFields: JSONSchema4 = generateAuthFieldTypes({ type: 'login', loginWithUsername })
+  const forgotOrUnlockUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'forgotOrUnlock',
+    loginWithUsername,
+  })
+  const registerUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'register',
+    loginWithUsername,
+  })
+
+  const properties: JSONSchema4['properties'] = {
+    forgotPassword: forgotOrUnlockUserFields,
+    login: loginUserFields,
+    registerFirstUser: registerUserFields,
+    unlock: forgotOrUnlockUserFields,
   }
 
   return {
@@ -713,11 +788,12 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
   }
 

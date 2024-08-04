@@ -18,9 +18,9 @@ const removeCSSImports = {
   },
 }
 
-// Bundle only the .scss files into a single css file
-await esbuild
-  .build({
+async function build() {
+  // Bundle only the .scss files into a single css file
+  await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
@@ -30,18 +30,18 @@ await esbuild
     //external: ['*.svg'],
     plugins: [sassPlugin({ css: 'external' })],
   })
-  .then(() => {
-    fs.rename('dist/field/index.css', 'dist/exports/client/bundled.css', (err) => {
-      if (err) console.error(`Error while renaming index.css: ${err}`)
-    })
 
-    console.log('dist/field/bundled.css bundled successfully')
-  })
-  .catch(() => process.exit(1))
+  try {
+    fs.renameSync('dist/field/index.css', 'dist/exports/client/bundled.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
 
-// Bundle `client.ts`
-const resultClient = await esbuild
-  .build({
+  console.log('dist/field/bundled.css bundled successfully')
+
+  // Bundle `client.ts`
+  const resultClient = await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     platform: 'browser',
@@ -90,15 +90,14 @@ const resultClient = await esbuild
     plugins: [
       removeCSSImports,
       /*commonjs({
-        ignore: ['date-fns', '@floating-ui/react'],
-      }),*/
+          ignore: ['date-fns', '@floating-ui/react'],
+        }),*/
     ],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('client/index.ts bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
+  console.log('client/index.ts bundled successfully')
 
-fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+  fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+}
+
+await build()

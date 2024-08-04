@@ -74,12 +74,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
     initialData: initialComparisonDoc,
-    initialParams: { depth: 1, draft: 'true', locale: '*' },
+    initialParams: { depth: 1, draft: 'true', locale: 'all' },
   })
 
   const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
   const canUpdate = docPermissions?.update?.permission
+
+  const localeValues = locales.map((locale) => locale.value)
 
   return (
     <main className={baseClass}>
@@ -109,6 +111,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 globalSlug={globalSlug}
                 label={collectionConfig?.labels.singular || globalConfig?.label}
                 originalDocID={id}
+                status={doc?.version?._status}
                 versionDate={versionCreatedAt}
                 versionID={versionID}
               />
@@ -136,11 +139,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             fieldMap={fieldMap}
             fieldPermissions={docPermissions?.fields}
             i18n={i18n}
-            locales={
-              locales
-                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
-                : []
-            }
+            locales={localeValues}
             version={
               globalConfig
                 ? {

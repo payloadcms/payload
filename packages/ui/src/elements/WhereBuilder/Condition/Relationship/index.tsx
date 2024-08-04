@@ -152,7 +152,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               options.forEach((opt) => {
                 if (opt.options) {
                   opt.options.some((subOpt) => {
-                    if (subOpt?.value === val.value) {
+                    if (subOpt?.value == val.value) {
                       matchedOption = subOpt
                       return true
                     }
@@ -165,7 +165,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               return matchedOption
             }
 
-            return options.find((opt) => opt.value === val)
+            return options.find((opt) => opt.value == val)
           })
         }
 
@@ -180,7 +180,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         options.forEach((opt) => {
           if (opt?.options) {
             opt.options.some((subOpt) => {
-              if (subOpt?.value === valueWithRelation.value) {
+              if (subOpt?.value == valueWithRelation.value) {
                 matchedOption = subOpt
                 return true
               }
@@ -192,7 +192,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         return matchedOption
       }
 
-      return options.find((opt) => opt.value === value)
+      return options.find((opt) => opt.value == value)
     }
 
     return undefined
@@ -248,7 +248,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
     return () => {
       abortControllers.forEach((controller) => {
-        if (controller.signal) controller.abort()
+        if (controller.signal) {
+          try {
+            controller.abort()
+          } catch (error) {
+            // swallow error
+          }
+        }
       })
     }
   }, [i18n, loadRelationOptions, relationTo])

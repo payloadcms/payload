@@ -1,12 +1,12 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, JsonValue, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import getValueWithDefault from '../../getDefaultValue.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
@@ -28,11 +28,11 @@ type Args<T> = {
   parentPath: (number | string)[]
   parentSchemaPath: string[]
   req: PayloadRequest
-  siblingData: Record<string, unknown>
+  siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
    */
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
 }
 
 // This function is responsible for the following actions, in order:
@@ -149,7 +149,7 @@ export const promise = async <T>({
 
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(value)) {
-            value.forEach((relatedDoc: { relationTo: string; value: unknown }, i) => {
+            value.forEach((relatedDoc: { relationTo: string; value: JsonValue }, i) => {
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
@@ -270,11 +270,11 @@ export const promise = async <T>({
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name] as any)
 
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getValueWithDefault({
+        siblingData[field.name] = await getDefaultValue({
           defaultValue: field.defaultValue,
           locale: req.locale,
           user: req.user,
@@ -306,8 +306,8 @@ export const promise = async <T>({
         path: fieldPath,
         req,
         schemaPath: fieldSchemaPath,
-        siblingData: groupData,
-        siblingDoc: groupDoc,
+        siblingData: groupData as JsonObject,
+        siblingDoc: groupDoc as JsonObject,
       })
 
       break
@@ -333,8 +333,8 @@ export const promise = async <T>({
               path: [...fieldPath, i],
               req,
               schemaPath: fieldSchemaPath,
-              siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+              siblingData: row as JsonObject,
+              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
             }),
           )
         })
@@ -349,12 +349,12 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
-          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
-          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
+          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
+          const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
 
           if (block) {
-            row.blockType = blockTypeToMatch
+            ;(row as JsonObject).blockType = blockTypeToMatch
 
             promises.push(
               traverseFields({
@@ -370,7 +370,7 @@ export const promise = async <T>({
                 path: [...fieldPath, i],
                 req,
                 schemaPath: fieldSchemaPath,
-                siblingData: row,
+                siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
               }),
             )

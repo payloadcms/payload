@@ -30,7 +30,7 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
-  const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
+  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 
   const incomingUserSlug = req.user?.collection
@@ -67,7 +67,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   const fieldSchemaMap = getFieldSchemaMap(req)
 
   const id = collectionSlug ? reqData.id : undefined
-  const schemaPathSegments = schemaPath.split('.')
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fieldSchema: Field[]
 
@@ -193,8 +193,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
       req.payload.collections[collectionSlug]?.config?.auth &&
       !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
     ) {
-      if (formState.password) result.password = formState.password
-      if (formState['confirm-password']) result['confirm-password'] = formState['confirm-password']
+      if (formState.username) result.username = formState.username
       if (formState.email) result.email = formState.email
     }
   }

@@ -87,7 +87,7 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   value,
   {
     maxLength: fieldMaxLength,
-    minLength,
+    minLength = 3,
     req: {
       payload: { config },
       t,
@@ -115,12 +115,59 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   return true
 }
 
+export const confirmPassword: Validate<string, unknown, unknown, TextField> = (
+  value,
+  { req: { data, t }, required },
+) => {
+  if (required && !value) {
+    return t('validation:required')
+  }
+
+  if (
+    value &&
+    typeof data.formState === 'object' &&
+    'password' in data.formState &&
+    typeof data.formState.password === 'object' &&
+    'value' in data.formState.password &&
+    value !== data.formState.password.value
+  ) {
+    return t('fields:passwordsDoNotMatch')
+  }
+
+  return true
+}
+
 export const email: Validate<string, unknown, unknown, EmailField> = (
   value,
   { req: { t }, required },
 ) => {
   if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
+  }
+
+  return true
+}
+
+export const username: Validate<string, unknown, unknown, TextField> = (
+  value,
+  {
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
+) => {
+  let maxLength: number
+
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+
+  if (value && maxLength && value.length > maxLength) {
+    return t('validation:shorterThanMax', { maxLength })
+  }
+
+  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
+    return t('validation:username')
   }
 
   return true
@@ -666,6 +713,7 @@ export default {
   blocks,
   checkbox,
   code,
+  confirmPassword,
   date,
   email,
   json,

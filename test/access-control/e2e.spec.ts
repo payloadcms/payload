@@ -16,9 +16,9 @@ import type {
 
 import {
   closeNav,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   login,
   openDocControls,
@@ -92,14 +92,14 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
 
     const {
       admin: {
         routes: { logout: logoutRoute },
       },
       routes: { admin: adminRoute },
-    } = getAdminRoutes({})
+    } = getRoutes({})
 
     logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })

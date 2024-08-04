@@ -8,6 +8,7 @@ import type {
   RelationshipField,
   SelectField,
 } from '../../fields/config/types.js'
+import type { FormFieldBase } from '../types.js'
 
 export type RowData = Record<string, any>
 
@@ -18,9 +19,10 @@ export type CellComponentProps = {
   }[]
   className?: string
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
+  displayPreview?: boolean
   fieldType?: Field['type']
   isFieldAffectingData?: boolean
-  label?: Record<string, string> | string
+  label?: FormFieldBase['label']
   labels?: Labels
   link?: boolean
   name: FieldBase['name']

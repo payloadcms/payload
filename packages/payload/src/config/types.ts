@@ -423,6 +423,8 @@ export type LocalizationConfig = Prettify<
 
 export type LabelFunction = ({ t }: { t: TFunction }) => string
 
+export type LabelStatic = Record<string, string> | string
+
 export type SharpDependency = (
   input?:
     | ArrayBuffer
@@ -440,6 +442,11 @@ export type SharpDependency = (
   options?: sharp.SharpOptions,
 ) => sharp.Sharp
 
+export type CORSConfig = {
+  headers?: string[]
+  origins: '*' | string[]
+}
+
 /**
  * This is the central configuration
  *
@@ -448,16 +455,15 @@ export type SharpDependency = (
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
-    /** Automatically log in as a user when visiting the admin dashboard. */
+    /** Automatically log in as a user */
     autoLogin?:
       | {
           /**
            * The email address of the user to login as
-           *
            */
           email?: string
-          /** The password of the user to login as */
-          password: string
+          /** The password of the user to login as. This is only needed if `prefillOnly` is set to true */
+          password?: string
           /**
            * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
            *
@@ -468,9 +474,9 @@ export type Config = {
           username?: string
         }
       | false
+
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
-
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -592,7 +598,7 @@ export type Config = {
    */
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
-  cors?: '*' | string[]
+  cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
@@ -695,7 +701,10 @@ export type Config = {
   plugins?: Plugin[]
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
-    /** @default "/admin" */
+    /** The route for the admin panel.
+     * @example "/my-admin"
+     * @default "/admin"
+     */
     admin?: string
     /** @default "/api"  */
     api?: string

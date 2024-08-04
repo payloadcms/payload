@@ -5,8 +5,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode, headers } from 'next/headers'
-import { notFound } from 'next/navigation'
-import React from 'react'
+import React, { cache } from 'react'
 import RichText from 'src/app/components/RichText'
 
 import type { Post } from '../../../../payload-types'
@@ -53,7 +52,7 @@ export default async function Post({ params: { slug = '' } }) {
 
         <RelatedPosts
           className="mt-12"
-          docs={post.relatedPosts.filter((post) => typeof post !== 'string')}
+          docs={post.relatedPosts.filter((post) => typeof post === 'object')}
         />
       </div>
     </article>
@@ -66,20 +65,16 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
   return generateMeta({ doc: post })
 }
 
-const queryPostBySlug = async ({ slug }: { slug: string }) => {
+const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = draftMode()
 
   const payload = await getPayloadHMR({ config: configPromise })
-  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
-
-  const user = authResult?.user
 
   const result = await payload.find({
     collection: 'posts',
     draft,
     limit: 1,
-    overrideAccess: false,
-    user,
+    overrideAccess: true,
     where: {
       slug: {
         equals: slug,
@@ -88,4 +83,4 @@ const queryPostBySlug = async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
-}
+})

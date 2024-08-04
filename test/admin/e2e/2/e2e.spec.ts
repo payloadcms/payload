@@ -8,9 +8,9 @@ import * as qs from 'qs-esm'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocDrawer,
   openNav,
@@ -44,7 +44,7 @@ describe('admin2', () => {
   let postsUrl: AdminUrlUtil
 
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let adminRoutes: ReturnType<typeof getRoutes>
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = Boolean(process.env.CI)
@@ -67,9 +67,9 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    adminRoutes = getAdminRoutes({ customAdminRoutes })
+    adminRoutes = getRoutes({ customAdminRoutes })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -77,7 +77,7 @@ describe('admin2', () => {
       snapshotKey: 'adminTests2',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ customAdminRoutes, page, serverURL })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('custom CSS', () => {
@@ -149,6 +149,23 @@ describe('admin2', () => {
 
         await page.locator('.search-filter__input').fill('this is fun')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('search should not persist between navigation', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=test`
+        await page.goto(url)
+        await page.waitForURL(url)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('test')
+
+        await page.locator('.nav-toggler.template-default__nav-toggler').click()
+        await expect(page.locator('#nav-uploads')).toContainText('Uploads')
+
+        const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
+        await page.goto(serverURL + uploadsUrl)
+        await page.waitForURL(serverURL + uploadsUrl)
+
+        await expect(page.locator('#search-filter-input')).toHaveValue('')
       })
 
       test('should toggle columns', async () => {
@@ -403,6 +420,42 @@ describe('admin2', () => {
 
         await expect(page.getByPlaceholder('Enter a value')).toHaveValue('[object Object]')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('should reset page when filters are applied', async () => {
+        await deleteAllPosts()
+        await mapAsync([...Array(6)], async () => {
+          await createPost()
+        })
+        await page.reload()
+        await mapAsync([...Array(6)], async () => {
+          await createPost({ title: 'test' })
+        })
+        await page.reload()
+
+        const pageInfo = page.locator('.collection-list__page-info')
+        const perPage = page.locator('.per-page')
+        const tableItems = page.locator(tableRowLocator)
+
+        await expect(tableItems).toHaveCount(10)
+        await expect(pageInfo).toHaveText('1-10 of 12')
+        await expect(perPage).toContainText('Per Page: 10')
+
+        // go to page 2
+        await page.goto(`${postsUrl.list}?limit=10&page=2`)
+
+        // add filter
+        await page.locator('.list-controls__toggle-where').click()
+        await page.locator('.where-builder__add-first-filter').click()
+        await page.locator('.condition__field .rs__control').click()
+        const options = page.locator('.rs__option')
+        await options.locator('text=Tab 1 > Title').click()
+        await page.locator('.condition__operator .rs__control').click()
+        await options.locator('text=equals').click()
+        await page.locator('.condition__value input').fill('test')
+
+        // expect to be on page 1
+        await expect(pageInfo).toHaveText('1-6 of 6')
       })
     })
 
@@ -763,29 +816,6 @@ describe('admin2', () => {
           }),
         ).toHaveText('Title')
       })
-    })
-  })
-
-  describe('field descriptions', () => {
-    test('should render static field description', async () => {
-      await page.goto(postsUrl.create)
-      await expect(page.locator('.field-description-descriptionAsString')).toContainText(
-        'Static field description.',
-      )
-    })
-    test('should render functional field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsFunction').fill('functional')
-      await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
-        'Function description',
-      )
-    })
-    test('should render component field description', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-descriptionAsComponent').fill('component')
-      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
-        'Component description: descriptionAsComponent - component',
-      )
     })
   })
 })

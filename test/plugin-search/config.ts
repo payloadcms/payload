@@ -31,10 +31,13 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     searchPlugin({
-      beforeSync: ({ originalDoc, searchDoc }) => ({
-        ...searchDoc,
-        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
-      }),
+      beforeSync: ({ originalDoc, searchDoc }) => {
+        return {
+          ...searchDoc,
+          excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
+          slug: originalDoc.slug,
+        }
+      },
       collections: ['pages', 'posts'],
       defaultPriorities: {
         pages: 10,
@@ -49,6 +52,12 @@ export default buildConfigWithDefaults({
             admin: {
               position: 'sidebar',
             },
+          },
+          {
+            name: 'slug',
+            required: false,
+            type: 'text',
+            localized: true,
           },
         ],
       },

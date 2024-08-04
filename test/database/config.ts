@@ -2,8 +2,16 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { TextField } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+
+const defaultValueField: TextField = {
+  name: 'defaultValue',
+  type: 'text',
+  defaultValue: 'default value from database',
+}
 
 export default buildConfigWithDefaults({
   collections: [
@@ -47,16 +55,45 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'relation-a',
+      slug: 'default-values',
       fields: [
         {
           name: 'title',
           type: 'text',
         },
+        defaultValueField,
         {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
+          name: 'array',
+          type: 'array',
+          // default array with one object to test subfield defaultValue properties for Mongoose
+          defaultValue: [{}],
+          fields: [defaultValueField],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          // we need to have to use as default in order to have subfield defaultValue properties directly for Mongoose
+          defaultValue: {},
+          fields: [defaultValueField],
+        },
+        {
+          name: 'select',
+          type: 'select',
+          defaultValue: 'default',
+          options: [
+            { value: 'option0', label: 'Option 0' },
+            { value: 'option1', label: 'Option 1' },
+            { value: 'default', label: 'Default' },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relation-a',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
         },
         {
           name: 'richText',

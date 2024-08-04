@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JsonObject } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
@@ -184,7 +184,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<Record<string, unknown>>({
+    const resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -214,10 +214,6 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     let doc
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      if (data.email) {
-        resultWithLocales.email = (data.email as string).toLowerCase()
-      }
-
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
         resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
@@ -260,7 +256,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // Send verification email if applicable
     // /////////////////////////////////////
 
-    if (collectionConfig.auth && collectionConfig.auth.verify) {
+    if (collectionConfig.auth && collectionConfig.auth.verify && result.email) {
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,

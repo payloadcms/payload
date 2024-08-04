@@ -36,6 +36,8 @@ async function main() {
     'ui',
     'next',
     'db-mongodb',
+    'drizzle',
+    'db-sqlite',
     'db-postgres',
     'richtext-lexical',
     'translations',

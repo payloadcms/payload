@@ -1,3 +1,4 @@
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 
@@ -21,7 +22,7 @@ export const handleAuthRedirect = ({
     routes: { admin: adminRoute },
   } = config
 
-  if (!isAdminAuthRoute(config, route, adminRoute)) {
+  if (!isAdminAuthRoute({ adminRoute, config, route })) {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const redirectRoute = encodeURIComponent(
@@ -30,12 +31,12 @@ export const handleAuthRedirect = ({
         : undefined,
     )
 
-    const adminLoginRoute = `${adminRoute}${loginRouteFromConfig}`
+    const adminLoginRoute = formatAdminURL({ adminRoute, path: loginRouteFromConfig })
 
     const customLoginRoute =
       typeof redirectUnauthenticatedUser === 'string' ? redirectUnauthenticatedUser : undefined
 
-    const loginRoute = isAdminRoute(route, adminRoute)
+    const loginRoute = isAdminRoute({ adminRoute, config, route })
       ? adminLoginRoute
       : customLoginRoute || loginRouteFromConfig
 

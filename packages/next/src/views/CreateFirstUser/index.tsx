@@ -1,8 +1,10 @@
-import type { AdminViewProps, Field } from 'payload'
+import type { AdminViewProps } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import React from 'react'
 
+import type { LoginFieldProps } from '../Login/LoginField/index.js'
+
+import { getDocumentData } from '../Document/getDocumentData.js'
 import { CreateFirstUserClient } from './index.client.js'
 import './index.scss'
 
@@ -10,49 +12,45 @@ export { generateCreateFirstUserMetadata } from './meta.js'
 
 export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
+    locale,
     req,
     req: {
       payload: {
         config: {
           admin: { user: userSlug },
         },
+        config,
       },
     },
   } = initPageResult
 
-  const fields: Field[] = [
-    {
-      name: 'email',
-      type: 'email',
-      label: req.t('general:emailAddress'),
-      required: true,
-    },
-    {
-      name: 'password',
-      type: 'text',
-      label: req.t('general:password'),
-      required: true,
-    },
-    {
-      name: 'confirm-password',
-      type: 'text',
-      label: req.t('authentication:confirmPassword'),
-      required: true,
-    },
-  ]
+  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const { auth: authOptions } = collectionConfig
+  const loginWithUsername = authOptions.loginWithUsername
+  const emailRequired = loginWithUsername && loginWithUsername.requireEmail
 
-  const formState = await buildStateFromSchema({
-    fieldSchema: fields,
-    operation: 'create',
-    preferences: { fields: {} },
+  let loginType: LoginFieldProps['type'] = loginWithUsername ? 'username' : 'email'
+  if (loginWithUsername && (loginWithUsername.allowEmailLogin || loginWithUsername.requireEmail)) {
+    loginType = 'emailOrUsername'
+  }
+
+  const { formState } = await getDocumentData({
+    collectionConfig,
+    locale,
     req,
+    schemaPath: `_${collectionConfig.slug}.auth`,
   })
 
   return (
     <div className="create-first-user">
       <h1>{req.t('general:welcome')}</h1>
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
-      <CreateFirstUserClient initialState={formState} userSlug={userSlug} />
+      <CreateFirstUserClient
+        initialState={formState}
+        loginType={loginType}
+        requireEmail={emailRequired}
+        userSlug={userSlug}
+      />
     </div>
   )
 }

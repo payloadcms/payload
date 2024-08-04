@@ -11,12 +11,24 @@
     "test:int": "pnpm -C \"../\" run test:int",
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
+  },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
     "@lexical/headless": "0.16.1",
     "@lexical/markdown": "0.16.1",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
+    "@payloadcms/db-sqlite": "workspace:*",
+    "@payloadcms/drizzle": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
@@ -56,14 +68,14 @@
     "file-type": "17.1.6",
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
-    "lexical": "0.15.0",
+    "lexical": "0.16.1",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
     "server-only": "^0.0.1",
     "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
-    "typescript": "5.5.3",
+    "typescript": "5.5.4",
     "uploadthing": "^6.10.1",
     "uuid": "10.0.0"
   },

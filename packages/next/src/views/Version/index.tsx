@@ -99,9 +99,8 @@ export const VersionView: EditViewComponent = async (props) => {
 
   const localeOptions: OptionObject[] =
     localization &&
-    localization?.locales &&
     localization.locales.map(({ code, label }) => ({
-      label: typeof label === 'string' ? label : '',
+      label,
       value: code,
     }))
 
@@ -119,8 +118,8 @@ export const VersionView: EditViewComponent = async (props) => {
       doc={doc}
       docPermissions={docPermissions}
       initialComparisonDoc={latestVersion}
-      latestDraftVersion={latestDraftVersion.id}
-      latestPublishedVersion={latestPublishedVersion.id}
+      latestDraftVersion={latestDraftVersion?.id}
+      latestPublishedVersion={latestPublishedVersion?.id}
       localeOptions={localeOptions}
       versionID={versionID}
     />

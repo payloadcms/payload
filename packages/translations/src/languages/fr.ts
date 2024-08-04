@@ -18,6 +18,7 @@ export const frTranslations: DefaultTranslationsObject = {
     confirmPassword: 'Confirmez le mot de passe',
     createFirstUser: 'Créer le premier utilisateur',
     emailNotValid: 'L’adresse e-mail fournie n’est pas valide',
+    emailOrUsername: "Email ou Nom d'utilisateur",
     emailSent: 'E-mail envoyé',
     emailVerified: 'E-mail vérifié avec succès.',
     enableAPIKey: 'Activer la clé API',
@@ -304,6 +305,7 @@ export const frTranslations: DefaultTranslationsObject = {
     updating: 'Mise à jour',
     uploading: 'Téléchargement',
     user: 'Utilisateur',
+    username: "Nom d'utilisateur",
     users: 'Utilisateurs',
     value: 'Valeur',
     welcome: 'Bienvenue',
@@ -325,7 +327,7 @@ export const frTranslations: DefaultTranslationsObject = {
     within: 'dans',
   },
   upload: {
-    addImage: 'Ajouter une image',
+    addFile: 'Ajouter un fichier',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',
@@ -340,7 +342,7 @@ export const frTranslations: DefaultTranslationsObject = {
     height: 'Hauteur',
     lessInfo: 'Moins d’infos',
     moreInfo: 'Plus d’infos',
-    pasteURL: `Coller l'URL`,
+    pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',
     selectFile: 'Sélectionnez un fichier',
@@ -370,6 +372,8 @@ export const frTranslations: DefaultTranslationsObject = {
     shorterThanMax:
       'Cette valeur doit être inférieure à la longueur maximale de {{maxLength}} caractères.',
     trueOrFalse: 'Ce champ ne peut être égal qu’à vrai ou faux.',
+    username:
+      "Veuillez entrer un nom d'utilisateur valide. Il peut contenir des lettres, des chiffres, des tirets, des points et des tirets bas.",
     validUploadID: 'Ce champ n’est pas un valide identifiant de fichier.',
   },
   version: {
@@ -410,6 +414,7 @@ export const frTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publier les modifications',
     published: 'Publié',
     publishing: 'Publication',
+    restoreAsDraft: 'Restaurer comme brouillon',
     restoreThisVersion: 'Restaurer cette version',
     restoredSuccessfully: 'Restauré(e) avec succès.',
     restoring: 'Restauration en cours...',

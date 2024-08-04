@@ -77,7 +77,7 @@
 
   &__tableCellEditing {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-    border-radius: 3px;
+    border-radius: $style-radius-m;
   }
 
   &__tableAddColumns {

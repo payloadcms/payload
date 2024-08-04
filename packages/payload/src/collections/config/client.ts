@@ -58,6 +58,7 @@ export const createClientCollectionConfig = ({
     delete sanitized.upload.handlers
     delete sanitized.upload.adminThumbnail
     delete sanitized.upload.externalFileHeaderFilter
+    delete sanitized.upload.withMetadata
   }
 
   if ('auth' in sanitized && typeof sanitized.auth === 'object') {

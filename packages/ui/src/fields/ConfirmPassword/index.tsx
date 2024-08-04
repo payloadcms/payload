@@ -13,10 +13,11 @@ import './index.scss'
 
 export type ConfirmPasswordFieldProps = {
   disabled?: boolean
+  path?: string
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
-  const { disabled } = props
+  const { disabled, path = 'confirm-password' } = props
 
   const password = useFormFields<FormField>(([fields]) => fields?.password)
   const { t } = useTranslation()
@@ -36,10 +37,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
     [password, t],
   )
 
-  const path = 'confirm-password'
-
   const { setValue, showError, value } = useField({
-    disableFormData: true,
     path,
     validate,
   })
@@ -58,6 +56,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError path={path} />
         <input
+          aria-label={t('authentication:confirmPassword')}
           autoComplete="off"
           disabled={!!disabled}
           id="field-confirm-password"

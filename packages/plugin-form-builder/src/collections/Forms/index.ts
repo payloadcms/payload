@@ -1,8 +1,8 @@
 import type { Block, CollectionConfig, Field } from 'payload'
 
-import merge from 'deepmerge'
+import { deepMergeWithSourceArrays } from 'payload'
 
-import type { FieldConfig, FormBuilderPluginConfig } from '../../types.js'
+import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { fields } from './fields.js'
 
@@ -84,9 +84,7 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'object' && typeof fieldConfig === 'object') {
-              return merge<FieldConfig>(block, fieldConfig, {
-                arrayMerge: (_, sourceArray) => sourceArray,
-              })
+              return deepMergeWithSourceArrays(block, fieldConfig)
             }
 
             if (typeof block === 'function') {
@@ -159,7 +157,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
               name: 'cc',
               type: 'text',
               admin: {
-                width: '50%',
+                style: {
+                  maxWidth: '50%',
+                },
               },
               label: 'CC',
             },
@@ -167,7 +167,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
               name: 'bcc',
               type: 'text',
               admin: {
-                width: '50%',
+                style: {
+                  maxWidth: '50%',
+                },
               },
               label: 'BCC',
             },

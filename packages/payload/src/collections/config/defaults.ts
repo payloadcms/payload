@@ -1,6 +1,9 @@
+import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { CollectionConfig } from './types.js'
+
 import defaultAccess from '../../auth/defaultAccess.js'
 
-export const defaults = {
+export const defaults: Partial<CollectionConfig> = {
   access: {
     create: defaultAccess,
     delete: defaultAccess,
@@ -47,7 +50,7 @@ export const defaults = {
   versions: false,
 }
 
-export const authDefaults = {
+export const authDefaults: IncomingAuthType = {
   cookies: {
     sameSite: 'Lax',
     secure: false,
@@ -58,4 +61,9 @@ export const authDefaults = {
   maxLoginAttempts: 5,
   tokenExpiration: 7200,
   verify: false,
+}
+
+export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
+  allowEmailLogin: false,
+  requireEmail: false,
 }

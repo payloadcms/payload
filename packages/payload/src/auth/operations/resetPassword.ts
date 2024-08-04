@@ -59,7 +59,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: new Date() },
+        resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
     })
@@ -70,6 +70,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     const { hash, salt } = await generatePasswordSaltHash({
       collection: collectionConfig,
       password: data.password,
+      req,
     })
 
     user.salt = salt
@@ -120,5 +121,3 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     throw error
   }
 }
-
-export default resetPasswordOperation

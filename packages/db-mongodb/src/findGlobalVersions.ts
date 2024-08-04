@@ -64,12 +64,20 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    offset: skip,
+    limit,
     options,
     page,
     pagination,
     sort,
     useEstimatedCount,
+  }
+
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {

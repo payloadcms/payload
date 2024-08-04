@@ -7,6 +7,7 @@ import type { Context } from '../types.js'
 type Resolver = (
   _: unknown,
   args: {
+    draft?: boolean
     id: number | string
   },
   context: {
@@ -18,6 +19,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
     const options = {
       id: args.id,
       depth: 0,
+      draft: args.draft,
       globalConfig,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }

@@ -1,4 +1,4 @@
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap, MappedField } from 'payload'
 
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 

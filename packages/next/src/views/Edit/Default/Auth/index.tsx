@@ -7,13 +7,15 @@ import {
   EmailField,
   PasswordField,
   TextField,
+  useAuth,
   useConfig,
   useDocumentInfo,
   useFormFields,
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useState } from 'react'
+import { email as emailValidation } from 'payload/shared'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
@@ -33,12 +35,17 @@ export const Auth: React.FC<Props> = (props) => {
     operation,
     readOnly,
     requirePassword,
+    setSchemaPath,
+    setValidateBeforeSubmit,
     useAPIKey,
+    username,
     verify,
   } = props
 
+  const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
+  const forceOpenChangePassword = useFormFields(([fields]) => (fields && fields?.password) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
@@ -49,24 +56,57 @@ export const Auth: React.FC<Props> = (props) => {
     serverURL,
   } = useConfig()
 
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      const unlock = 'unlock' in collection ? collection.unlock : undefined
+
+      if (unlock) {
+        // current types for permissions do not include auth permissions, this will be fixed in another branch soon, for now we need to ignore the types
+        // @todo: fix types
+        // @ts-expect-error
+        return unlock.permission
+      }
+    }
+
+    return false
+  }, [permissions, collectionSlug])
+
   const handleChangePassword = useCallback(
-    (state: boolean) => {
-      if (!state) {
+    (showPasswordFields: boolean) => {
+      if (showPasswordFields) {
+        setValidateBeforeSubmit(true)
+        setSchemaPath(`_${collectionSlug}.auth`)
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'password',
+          valid: false,
+        })
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'confirm-password',
+          valid: false,
+        })
+      } else {
+        setValidateBeforeSubmit(false)
+        setSchemaPath(collectionSlug)
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
-      setChangingPassword(state)
+      setChangingPassword(showPasswordFields)
     },
-    [dispatchFields],
+    [dispatchFields, t, collectionSlug, setSchemaPath, setValidateBeforeSubmit],
   )
 
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${collectionSlug}/unlock`
     const response = await fetch(url, {
-      body: JSON.stringify({
-        email,
-      }),
+      body:
+        loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -80,7 +120,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, t])
+  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
 
   useEffect(() => {
     if (!modified) {
@@ -94,21 +134,13 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing
 
+  const showPasswordFields = changingPassword || forceOpenChangePassword
+
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          {!loginWithUsername && (
-            <EmailField
-              autoComplete="email"
-              disabled={disabled}
-              label={t('general:email')}
-              name="email"
-              readOnly={readOnly}
-              required
-            />
-          )}
-          {loginWithUsername && (
+          {Boolean(loginWithUsername) && (
             <TextField
               disabled={disabled}
               label={t('authentication:username')}
@@ -117,20 +149,43 @@ export const Auth: React.FC<Props> = (props) => {
               required
             />
           )}
-          {(changingPassword || requirePassword) && (
+          {(!loginWithUsername ||
+            loginWithUsername?.allowEmailLogin ||
+            loginWithUsername?.requireEmail) && (
+            <EmailField
+              autoComplete="email"
+              disabled={disabled}
+              label={t('general:email')}
+              name="email"
+              readOnly={readOnly}
+              required={!loginWithUsername || loginWithUsername?.requireEmail}
+              validate={(value) =>
+                emailValidation(value, {
+                  name: 'email',
+                  type: 'email',
+                  data: {},
+                  preferences: { fields: {} },
+                  req: { t } as any,
+                  required: true,
+                  siblingData: {},
+                })
+              }
+            />
+          )}
+          {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                autoComplete="off"
                 disabled={disabled}
                 label={t('authentication:newPassword')}
                 name="password"
+                path="password"
                 required
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>
           )}
           <div className={`${baseClass}__controls`}>
-            {changingPassword && !requirePassword && (
+            {showPasswordFields && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -140,7 +195,7 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && (
+            {!showPasswordFields && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -151,11 +206,11 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('authentication:changePassword')}
               </Button>
             )}
-            {operation === 'update' && (
+            {operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
-                onClick={() => unlock()}
+                onClick={() => void unlock()}
                 size="small"
               >
                 {t('authentication:forceUnlock')}

@@ -1,24 +1,24 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
-type Args<T> = {
+type Args<T extends JsonObject> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   /**
    * The data before hooks
    */
-  data: Record<string, unknown> | T
+  data: T
   /**
    * The data after hooks
    */
-  doc: Record<string, unknown> | T
+  doc: T
   global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
-  previousDoc: Record<string, unknown> | T
+  previousDoc: T
   req: PayloadRequest
 }
 
@@ -26,7 +26,7 @@ type Args<T> = {
  * This function is responsible for the following actions, in order:
  * - Execute field hooks
  */
-export const afterChange = async <T extends Record<string, unknown>>({
+export const afterChange = async <T extends JsonObject>({
   collection,
   context,
   data,
@@ -36,7 +36,7 @@ export const afterChange = async <T extends Record<string, unknown>>({
   previousDoc,
   req,
 }: Args<T>): Promise<T> => {
-  const doc = deepCopyObject(incomingDoc)
+  const doc = deepCopyObjectSimple(incomingDoc)
 
   await traverseFields({
     collection,

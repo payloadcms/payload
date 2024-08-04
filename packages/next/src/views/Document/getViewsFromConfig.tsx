@@ -126,7 +126,12 @@ export const getViewsFromConfig = ({
               }
 
               default: {
-                const baseRoute = [adminRoute, 'collections', collectionSlug, segment3]
+                const baseRoute = [
+                  adminRoute !== '/' && adminRoute,
+                  'collections',
+                  collectionSlug,
+                  segment3,
+                ]
                   .filter(Boolean)
                   .join('/')
 
@@ -155,7 +160,12 @@ export const getViewsFromConfig = ({
                 ErrorView = UnauthorizedView
               }
             } else {
-              const baseRoute = [adminRoute, collectionEntity, collectionSlug, segment3]
+              const baseRoute = [
+                adminRoute !== '/' && adminRoute,
+                collectionEntity,
+                collectionSlug,
+                segment3,
+              ]
                 .filter(Boolean)
                 .join('/')
 
@@ -185,7 +195,6 @@ export const getViewsFromConfig = ({
     }
 
     if (!EditOverride) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
       if (!docPermissions?.read?.permission) {
@@ -228,7 +237,19 @@ export const getViewsFromConfig = ({
 
               default: {
                 if (docPermissions?.read?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Default')
+                  const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
+                    .filter(Boolean)
+                    .join('/')
+
+                  const currentRoute = [baseRoute, segment3, ...remainingSegments]
+                    .filter(Boolean)
+                    .join('/')
+
+                  CustomView = getCustomViewByRoute({
+                    baseRoute,
+                    currentRoute,
+                    views,
+                  })
                   DefaultView = DefaultEditView
                 } else {
                   ErrorView = UnauthorizedView
@@ -249,7 +270,9 @@ export const getViewsFromConfig = ({
                 ErrorView = UnauthorizedView
               }
             } else {
-              const baseRoute = [adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
+              const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
+                .filter(Boolean)
+                .join('/')
 
               const currentRoute = [baseRoute, segment3, ...remainingSegments]
                 .filter(Boolean)

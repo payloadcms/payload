@@ -2,8 +2,6 @@ import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
-import { migratePostgresV2toV3 } from '@payloadcms/db-postgres/migration-utils'
-import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload'
@@ -76,17 +74,58 @@ describe('database', () => {
     })
   })
 
+  describe('timestamps', () => {
+    it('should have createdAt and updatedAt timetstamps to the millisecond', async () => {
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const createdAtDate = new Date(result.createdAt)
+
+      expect(createdAtDate.getMilliseconds()).toBeDefined()
+    })
+
+    it('should allow createdAt to be set in create', async () => {
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          createdAt,
+          title: 'hello',
+        },
+      })
+
+      const doc = await payload.findByID({
+        id: result.id,
+        collection: 'posts',
+      })
+
+      expect(result.createdAt).toStrictEqual(createdAt)
+      expect(doc.createdAt).toStrictEqual(createdAt)
+    })
+
+    it('updatedAt cannot be set in create', async () => {
+      const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
+      const result = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'hello',
+          updatedAt,
+        },
+      })
+
+      expect(result.updatedAt).not.toStrictEqual(updatedAt)
+    })
+  })
+
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
-        const drizzle = db.drizzle
-        const schemaName = db.schemaName || 'public'
-
-        await drizzle.execute(
-          sql.raw(`drop schema ${schemaName} cascade;
-        create schema ${schemaName};`),
-        )
+        await db.dropDatabase({ adapter: db })
       }
     })
 
@@ -107,15 +146,18 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
+      let error
       try {
         await payload.db.migrate()
       } catch (e) {
         console.error(e)
+        error = e
       }
       const { docs } = await payload.find({
         collection: 'payload-migrations',
       })
       const migration = docs[0]
+      expect(error).toBeUndefined()
       expect(migration?.name).toContain('_test')
       expect(migration?.batch).toStrictEqual(1)
     })
@@ -210,8 +252,10 @@ describe('database', () => {
         expect(db.tables.customBlocks_locales).toBeDefined()
 
         // enum names
-        expect(db.enums.selectEnum).toBeDefined()
-        expect(db.enums.radioEnum).toBeDefined()
+        if (db.enums) {
+          expect(db.enums.selectEnum).toBeDefined()
+          expect(db.enums.radioEnum).toBeDefined()
+        }
       }
     })
 
@@ -266,304 +310,174 @@ describe('database', () => {
 
   describe('transactions', () => {
     describe('local api', () => {
-      it('should commit multiple operations in isolation', async () => {
-        const req = {
-          payload,
-          user,
-        } as PayloadRequest
+      // sqlite cannot handle concurrent write transactions
+      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+        it('should commit multiple operations in isolation', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
 
-        await initTransaction(req)
+          await initTransaction(req)
 
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        await expect(() =>
-          payload.findByID({
-            id: first.id,
-            collection,
-            // omitting req for isolation
-          }),
-        ).rejects.toThrow('Not Found')
-
-        const second = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
-
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
-
-      it('should commit multiple operations async', async () => {
-        const req = {
-          payload,
-          user,
-        } as PayloadRequest
-
-        let first
-        let second
-
-        const firstReq = payload
-          .create({
+          const first = await payload.create({
             collection,
             data: {
               title,
             },
             req,
           })
-          .then((res) => {
-            first = res
-          })
 
-        const secondReq = payload
-          .create({
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              // omitting req for isolation
+            }),
+          ).rejects.toThrow('Not Found')
+
+          const second = await payload.create({
             collection,
             data: {
               title,
             },
             req,
           })
-          .then((res) => {
-            second = res
-          })
 
-        await Promise.all([firstReq, secondReq])
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
 
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
-
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
-
-      it('should rollback operations on failure', async () => {
-        const req = {
-          payload,
-          user,
-        } as PayloadRequest
-
-        await initTransaction(req)
-
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        try {
-          await payload.create({
-            collection,
-            data: {
-              throwAfterChange: true,
-              title,
-            },
-            req,
-          })
-        } catch (error: unknown) {
-          // catch error and carry on
-        }
-
-        expect(req.transactionID).toBeFalsy()
-
-        // this should not do anything but is needed to be certain about the next assertion
-        await commitTransaction(req)
-
-        await expect(() =>
-          payload.findByID({
+          const firstResult = await payload.findByID({
             id: first.id,
             collection,
             req,
-          }),
-        ).rejects.toThrow('Not Found')
-      })
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
+
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
+        })
+
+        it('should commit multiple operations async', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          let first
+          let second
+
+          const firstReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              first = res
+            })
+
+          const secondReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              second = res
+            })
+
+          await Promise.all([firstReq, secondReq])
+
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
+
+          const firstResult = await payload.findByID({
+            id: first.id,
+            collection,
+            req,
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
+
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
+        })
+
+        it('should rollback operations on failure', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const first = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          try {
+            await payload.create({
+              collection,
+              data: {
+                throwAfterChange: true,
+                title,
+              },
+              req,
+            })
+          } catch (error: unknown) {
+            // catch error and carry on
+          }
+
+          expect(req.transactionID).toBeFalsy()
+
+          // this should not do anything but is needed to be certain about the next assertion
+          await commitTransaction(req)
+
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+        })
+      }
     })
   })
 
-  describe('postgres v2 - v3 migration', () => {
-    it.skip('should collect relations to migrate', async () => {
-      expect(payload.db).toBeDefined()
+  describe('defaultValue', () => {
+    it('should set default value from db.create', async () => {
+      // call the db adapter create directly to bypass Payload's default value assignment
+      const result = await payload.db.create({
+        collection: 'default-values',
+        data: {
+          // for drizzle DBs, we need to pass an array of objects to test subfields
+          array: [{ id: 1 }],
+          title: 'hello',
+        },
+        req: undefined,
+      })
 
-      if (payload.db.name === 'postgres') {
-        const relationA1 = await payload.create({
-          collection: 'relation-a',
-          data: {
-            title: 'hello A 1',
-          },
-        })
-
-        const relationB1 = await payload.create({
-          collection: 'relation-b',
-          data: {
-            title: 'hello B 1',
-          },
-        })
-
-        const relationA2 = await payload.create({
-          collection: 'relation-a',
-          data: {
-            title: 'hello A 2',
-          },
-        })
-
-        const relationB2 = await payload.create({
-          collection: 'relation-b',
-          data: {
-            title: 'hello B 2',
-          },
-        })
-
-        const enDoc = {
-          myArray: [
-            {
-              mySubArray: [
-                {
-                  relation3: relationB1.id,
-                },
-                {
-                  relation3: relationB2.id,
-                },
-              ],
-              relation2: relationB1.id,
-            },
-            {
-              mySubArray: [
-                {
-                  relation3: relationB2.id,
-                },
-                {
-                  relation3: relationB1.id,
-                },
-              ],
-              relation2: relationB2.id,
-            },
-          ],
-          myBlocks: [
-            {
-              blockType: 'myBlock',
-              relation5: relationA1.id,
-              relation6: relationB1.id,
-            },
-            {
-              blockType: 'myBlock',
-              relation5: relationA2.id,
-              relation6: relationB2.id,
-            },
-          ],
-          myGroup: {
-            relation4: relationB1.id,
-          },
-          relation1: relationA1.id,
-        }
-
-        const migrationDoc = await payload.create({
-          collection: 'pg-migrations',
-          data: enDoc,
-          locale: 'en',
-        })
-
-        const esDoc = {
-          myArray: [
-            {
-              id: migrationDoc.myArray[0].id,
-              mySubArray: [
-                {
-                  id: migrationDoc.myArray[0].mySubArray[0].id,
-                  relation3: relationB2.id,
-                },
-                {
-                  id: migrationDoc.myArray[0].mySubArray[1].id,
-                  relation3: relationB1.id,
-                },
-              ],
-              relation2: relationB2.id,
-            },
-            {
-              id: migrationDoc.myArray[1].id,
-              mySubArray: [
-                {
-                  id: migrationDoc.myArray[1].mySubArray[0].id,
-                  relation3: relationB1.id,
-                },
-                {
-                  id: migrationDoc.myArray[1].mySubArray[1].id,
-                  relation3: relationB2.id,
-                },
-              ],
-              relation2: relationB1.id,
-            },
-          ],
-          myBlocks: [
-            {
-              id: migrationDoc.myBlocks[0].id,
-              blockType: 'myBlock',
-              relation5: relationA2.id,
-              relation6: relationB2.id,
-            },
-            {
-              id: migrationDoc.myBlocks[1].id,
-              blockType: 'myBlock',
-              relation5: relationA1.id,
-              relation6: relationB1.id,
-            },
-          ],
-          myGroup: {
-            relation4: relationB2.id,
-          },
-          relation1: relationA2.id,
-        }
-
-        const updated = await payload.update({
-          id: migrationDoc.id,
-          collection: 'pg-migrations',
-          data: esDoc,
-          fallbackLocale: null,
-          locale: 'es',
-        })
-
-        const req: PayloadRequest = {} as PayloadRequest
-        await initTransaction(req)
-
-        await migratePostgresV2toV3({
-          debug: true,
-          payload,
-          req,
-        })
-      }
+      expect(result.defaultValue).toStrictEqual('default value from database')
+      expect(result.array[0].defaultValue).toStrictEqual('default value from database')
+      expect(result.group.defaultValue).toStrictEqual('default value from database')
+      expect(result.select).toStrictEqual('default')
     })
   })
 })

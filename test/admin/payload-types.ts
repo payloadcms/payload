@@ -30,6 +30,9 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {
     'hidden-global': HiddenGlobal;
     'global-no-api-view': GlobalNoApiView;
@@ -49,12 +52,15 @@ export interface UserAuthOperations {
     email: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
     email: string;
     password: string;
+  };
+  unlock: {
+    email: string;
   };
 }
 /**
@@ -96,9 +102,6 @@ export interface Post {
   relationship?: (string | null) | Post;
   customCell?: string | null;
   sidebarField?: string | null;
-  descriptionAsString?: string | null;
-  descriptionAsFunction?: string | null;
-  descriptionAsComponent?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -167,6 +170,10 @@ export interface CustomViewsTwo {
  */
 export interface CustomField {
   id: string;
+  customTextField?: string | null;
+  descriptionAsString?: string | null;
+  descriptionAsFunction?: string | null;
+  descriptionAsComponent?: string | null;
   customSelectField?: string | null;
   updatedAt: string;
   createdAt: string;

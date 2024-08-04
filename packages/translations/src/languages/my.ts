@@ -18,6 +18,7 @@ export const myTranslations: DefaultTranslationsObject = {
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',
+    emailOrUsername: 'E-mel atau Nama Pengguna',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
     emailVerified: 'အီးမေးလ်အတည်ပြုခဲ့ပါပြီ။',
     enableAPIKey: 'API Key ကိုဖွင့်ရန်',
@@ -299,6 +300,7 @@ export const myTranslations: DefaultTranslationsObject = {
     updating: 'ပြင်ဆင်ရန်',
     uploading: 'တင်ပေးနေသည်',
     user: 'အသုံးပြုသူ',
+    username: 'Nama pengguna',
     users: 'အသုံးပြုသူများ',
     value: 'တန်ဖိုး',
     welcome: 'ကြိုဆိုပါတယ်။',
@@ -320,7 +322,7 @@ export const myTranslations: DefaultTranslationsObject = {
     within: 'အတွင်း',
   },
   upload: {
-    addImage: 'ပုံ ထည့်ပါ',
+    addFile: 'ဖိုင်ထည့်ပါ',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -366,6 +368,8 @@ export const myTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'ဤအကွက်သည် နံပါတ်နှစ်ခု လိုအပ်ပါသည်။',
     shorterThanMax: 'ဤတန်ဖိုးသည် စာလုံး {{maxLength}} လုံး၏ အမြင့်ဆုံးအရှည်ထက် ပိုတိုရပါမည်။',
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
+    username:
+      'Sila masukkan nama pengguna yang sah. Boleh mengandungi huruf, nombor, tanda hubung, titik dan garis bawah.',
     validUploadID: "'ဤအကွက်သည် မှန်ကန်သော အပ်လုဒ် ID မဟုတ်ပါ။'",
   },
   version: {
@@ -405,6 +409,7 @@ export const myTranslations: DefaultTranslationsObject = {
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',
     published: 'တင်ပြီးပြီ။',
     publishing: 'ထုတ်ဝေခြင်း',
+    restoreAsDraft: 'Pulihkan sebagai draf',
     restoreThisVersion: 'ဤဗားရှင်းကိုကို ပြန်ယူမည်။',
     restoredSuccessfully: 'အောင်မြင်စွာ ပြန်လည်ရယူခဲ့သည်။',
     restoring: 'ပြန်ယူနေဆဲ...',

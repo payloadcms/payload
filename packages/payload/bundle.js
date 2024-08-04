@@ -4,10 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
-const resultIndex = await esbuild
-  .build({
+async function build() {
+  const resultIndex = await esbuild.build({
     entryPoints: ['src/exports/index.ts'],
     bundle: true,
     platform: 'node',
@@ -16,7 +15,6 @@ const resultIndex = await esbuild
     splitting: false,
     external: [
       'lodash',
-      //'joi',
       '*.scss',
       '*.css',
       '@payloadcms/translations',
@@ -24,7 +22,6 @@ const resultIndex = await esbuild
       'pino-pretty',
       'pino',
       //'ajv',
-      //'conf',
       //'image-size',
     ],
     minify: true,
@@ -33,14 +30,9 @@ const resultIndex = await esbuild
     // plugins: [commonjs()],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('payload server bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
+  console.log('payload server bundled successfully')
 
-const resultShared = await esbuild
-  .build({
+  const resultShared = await esbuild.build({
     entryPoints: ['src/exports/shared.ts'],
     bundle: true,
     platform: 'node',
@@ -56,7 +48,6 @@ const resultShared = await esbuild
       'pino-pretty',
       'pino',
       //'ajv',
-      //'conf',
       //'image-size',
     ],
     minify: true,
@@ -65,11 +56,10 @@ const resultShared = await esbuild
     // plugins: [commonjs()],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('payload shared bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
+  console.log('payload shared bundled successfully')
 
-fs.writeFileSync('meta_index.json', JSON.stringify(resultIndex.metafile))
-fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
+  fs.writeFileSync('meta_index.json', JSON.stringify(resultIndex.metafile))
+  fs.writeFileSync('meta_shared.json', JSON.stringify(resultShared.metafile))
+}
+
+await build()

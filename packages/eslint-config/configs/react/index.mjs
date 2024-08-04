@@ -10,6 +10,9 @@ import { deepMerge } from '../../deepMerge.js'
 export const index = deepMerge(
   react.configs['recommended-type-checked'],
   {
+    rules: reactHooks.configs.recommended.rules,
+  },
+  {
     rules: reactRules,
   },
   {
@@ -34,6 +37,9 @@ export const index = deepMerge(
       react: {
         version: 'detect',
       },
+    },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
     },
   },
 )

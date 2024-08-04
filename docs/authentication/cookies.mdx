@@ -1,0 +1,87 @@
+---
+title: Cookie Strategy
+label: Cookie Strategy
+order: 40
+desc: Enable HTTP Cookie based authentication to interface with Payload.
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload offers the ability to [Authenticate](./overview) via HTTP-only cookies. These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
+</Banner>
+
+### Automatic browser inclusion
+
+Modern browsers automatically include `http-only` cookies when making requests directly to URLs—meaning that if you are running your API on `https://example.com`, and you have logged in and visit `https://example.com/test-page`, your browser will automatically include the Payload authentication cookie for you.
+
+### HTTP Authentication
+
+However, if you use `fetch` or similar APIs to retrieve Payload resources from its REST or GraphQL API, you must specify to include credentials (cookies).
+
+Fetch example, including credentials:
+
+```ts
+const response = await fetch('http://localhost:3000/api/pages', {
+  credentials: 'include',
+})
+
+const pages = await response.json()
+```
+
+For more about including cookies in requests from your app to your Payload API, [read the MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  To make sure you have a Payload cookie set properly in your browser after logging in, you can use
+  the browsers Developer Tools > Application > Cookies > [your-domain-here]. The Developer tools
+  will still show HTTP-only cookies.
+</Banner>
+
+### CSRF Attacks
+
+CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes many XSS vulnerabilities, however, CSRF attacks can still be possible.
+
+For example, let's say you have a popular app `https://payload-finances.com` that allows users to manage finances, send and receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - <strong>no matter what page created the request</strong>.
+
+So, if a user of `https://payload-finances.com` is logged in and is browsing around on the internet, they might stumble onto a page with malicious intent. Let's look at an example:
+
+```ts
+// malicious-intent.com
+// makes an authenticated request as on your behalf
+
+const maliciousRequest = await fetch(`https://payload-finances.com/api/me`, {
+  credentials: 'include'
+}).then(res => await res.json())
+```
+
+In this scenario, if your cookie was still valid, malicious-intent.com would be able to make requests like the one above on your behalf. This is a CSRF attack.
+
+### CSRF Prevention
+
+Define domains that your trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  serverURL: 'https://my-payload-instance.com',
+  // highlight-start
+  csrf: [
+    // whitelist of domains to allow cookie auth from
+    'https://your-frontend-app.com',
+    'https://your-other-frontend-app.com',
+    // `config.serverURL` is added by default if defined
+  ],
+  // highlight-end
+  collections: [
+    // collections here
+  ],
+})
+
+export default config
+```

@@ -1,7 +1,7 @@
 ---
 title: Swap in your own React components
 label: Custom Components
-order: 20
+order: 40
 desc: Fully customize your Admin Panel by swapping in your own React components. Add fields, remove views, update routes and change functions to sculpt your perfect Dashboard.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -18,8 +18,8 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 There are four main types of Custom Components in Payload:
 
 - [Root Components](#root-components)
-- [Collection Components](#collection-components)
-- [Global Components](#global-components)
+- [Collection Components](./collections#components)
+- [Global Components](./globals#components)
 - [Field Components](./fields)
 
 To swap in your own Custom Component, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
@@ -38,11 +38,11 @@ import { MyCustomLogo } from './MyCustomLogo'
 export default buildConfig({
   // ...
   admin: {
+    // highlight-start
     components: {
-      graphics: {
-        Logo: MyCustomLogo, // highlight-line
-      },
+      // ...
     },
+    // highlight-end
   },
 })
 ```
@@ -63,17 +63,18 @@ The following options are available:
 | **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
 | **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
 | **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
-| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire [Admin Panel](./overview). [More details](#custom-providers).                                       |
-| **`actions`**         | An array of Custom Components to be rendered in the header of the [Admin Panel](./overview), providing additional interactivity and functionality.                                                                  |
-| **`views`**           | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                                                                                                                 |
+| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](#custom-providers).                                       |
+| **`actions`**         | An array of Custom Components to be rendered in the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
+| **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
-  <strong>Note:</strong> You can also use the `admin.components` property in your _[Collection](#collection-components) or [Global](#global-components)_.
+  <strong>Note:</strong>
+  You can also use set [Collection Components](./collections#components) and [Global Components](./globals#components) in their respective configs.
 </Banner>
 
 ### Custom Providers
 
-As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app where you can export your own custom hooks, etc.
+As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
 
 To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../getting-started/overview):
 
@@ -114,80 +115,6 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 <Banner type="warning">
   <strong>Reminder:</strong> Custom Providers are by definition Client Components. This means they must include the `use client` directive at the top of their files and cannot use server-only code.
 </Banner>
-
-## Collection Components
-
-Collection Components are those that effect [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview), such as the save button or the List View.
-
-To override Collection Components, use the `admin.components` property in your [Collection Config](../configuration/collections):
-
-```ts
-import type { SanitizedCollectionConfig } from 'payload'
-import { CustomSaveButton } from './CustomSaveButton'
-
-export const MyCollection: SanitizedCollectionConfig = {
-  slug: 'my-collection',
-  admin: {
-    components: {
-      edit: {
-        SaveButton: CustomSaveButton, // highlight-line
-      },
-    },
-  },
-  // ...
-}
-```
-
-_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
-
-The following options are available:
-
-| Path                       | Description                                                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`beforeList`**           | An array of components to inject _before_ the built-in List View                                                          |
-| **`beforeListTable`**      | An array of components to inject _before_ the built-in List View's table                                                  |
-| **`afterList`**            | An array of components to inject _after_ the built-in List View                                                           |
-| **`afterListTable`**       | An array of components to inject _after_ the built-in List View's table                                                   |
-| **`edit.SaveButton`**      | Replace the default `Save` button with a Custom Component. Drafts must be disabled                                     |
-| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
-| **`edit.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
-| **`views`**                | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
-
-## Global Components
-
-Global Components are those that effect [Global](../configuration/globals)-specific UI within the [Admin Panel](./overview), such as the save button or the Edit View.
-
-To override Global Components, use the `admin.components` property in your [Global Config](../configuration/globals):
-
-```ts
-import type { SanitizedGlobalConfig } from 'payload'
-import { CustomSaveButton } from './CustomSaveButton'
-
-export const MyGlobal: SanitizedGlobalConfig = {
-  slug: 'my-global',
-  admin: {
-    components: {
-      elements: {
-        SaveButton: CustomSaveButton, // highlight-line
-      },
-    },
-  },
-  // ...
-}
-```
-
-_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
-
-The following options are available:
-
-| Path                           | Description                                                                                                            |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **`elements.SaveButton`**      | Replace the default `Save` button with a Custom Component. Drafts must be disabled.                                    |
-| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a Custom Component. Drafts must be enabled and autosave must be disabled. |
-| **`elements.PublishButton`**   | Replace the default `Publish` button with a Custom Component. Drafts must be enabled.                                  |
-| **`elements.PreviewButton`**   | Replace the default `Preview` button with a Custom Component.                                                          |
-| **`views`**                    | Override or create new views within the [Admin Panel](./overview). [More details](./views).                                     |
 
 ## Building Custom Components
 

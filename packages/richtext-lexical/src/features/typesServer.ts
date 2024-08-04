@@ -10,6 +10,7 @@ import type {
 } from 'lexical'
 import type {
   Field,
+  JsonObject,
   PayloadRequest,
   ReplaceAny,
   RequestContext,
@@ -61,7 +62,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
 }) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
@@ -72,7 +73,7 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   node: T
   nodeValidations: Map<string, Array<NodeValidation>>
   validation: {
-    options: ValidateOptions<unknown, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
   }
 }) => Promise<string | true> | string | true
@@ -241,7 +242,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   getSubFieldsData?: (args: {
     node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
     req: PayloadRequest
-  }) => Record<string, unknown>
+  }) => JsonObject
   /**
    * Allows you to run population logic when a node's data was requested from graphQL.
    * While `getSubFields` and `getSubFieldsData` automatically handle populating sub-fields (since they run hooks on them), those are only populated in the Rest API.
@@ -397,7 +398,7 @@ export type SanitizedServerFeatures = {
   >
   getSubFieldsData?: Map<
     string,
-    (args: { node: SerializedLexicalNode; req: PayloadRequest }) => Record<string, unknown>
+    (args: { node: SerializedLexicalNode; req: PayloadRequest }) => JsonObject
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks?: {

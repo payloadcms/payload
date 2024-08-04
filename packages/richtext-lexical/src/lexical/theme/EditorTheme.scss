@@ -1,3 +1,5 @@
+@import '../../scss/styles.scss';
+
 .LexicalEditorTheme {
   &__ltr {
     text-align: left;
@@ -229,17 +231,17 @@
   &__listItemUnchecked:focus:before,
   &__listItemChecked:focus:before {
     box-shadow: 0 0 0 2px #a6cdfe;
-    border-radius: 2px;
+    border-radius: $style-radius-m;
   }
 
   &__listItemUnchecked:before {
     border: 1px solid #999;
-    border-radius: 2px;
+    border-radius: $style-radius-m;
   }
 
   &__listItemChecked:before {
     border: 1px solid rgb(61, 135, 245);
-    border-radius: 2px;
+    border-radius: $style-radius-m;
     background-color: #3d87f5;
     background-repeat: no-repeat;
   }

@@ -1,6 +1,6 @@
 import type { Field } from '../../fields/config/types.js'
 
-export default [
+export const accountLockFields: Field[] = [
   {
     name: 'loginAttempts',
     type: 'number',

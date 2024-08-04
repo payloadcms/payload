@@ -1,16 +1,15 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig } from 'payload'
+import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { useForm, useUploadEdits } from '@payloadcms/ui'
 import { isImage, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
-import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
@@ -92,14 +91,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { dispatchFormQueryParams, formQueryParams } = useFormQueryParams()
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
-  const [_crop, setCrop] = useState({ x: 0, y: 0 })
 
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
@@ -167,31 +165,16 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setFileSrc('')
     setFileUrl('')
     setDoc({})
+    resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange])
+  }, [handleFileChange, resetUploadEdits])
 
   const onEditsSave = useCallback(
-    ({ crop, focalPosition }) => {
-      setCrop({
-        x: crop.x || 0,
-        y: crop.y || 0,
-      })
-
+    (args: UploadEdits) => {
       setModified(true)
-      dispatchFormQueryParams({
-        type: 'SET',
-        params: {
-          uploadEdits:
-            crop || focalPosition
-              ? {
-                  crop: crop || null,
-                  focalPoint: focalPosition ? focalPosition : null,
-                }
-              : null,
-        },
-      })
+      updateUploadEdits(args)
     },
-    [dispatchFormQueryParams, setModified],
+    [setModified, updateUploadEdits],
   )
 
   const handlePasteUrlClick = () => {
@@ -285,7 +268,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     onClick={handleUrlSubmit}
                     type="button"
                   >
-                    {t('upload:addImage')}
+                    {t('upload:addFile')}
                   </button>
                 </div>
               </div>
@@ -342,10 +325,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
             fileName={value?.name || doc?.filename}
             fileSrc={doc?.url || fileSrc}
             imageCacheTag={doc.updatedAt}
-            initialCrop={formQueryParams?.uploadEdits?.crop ?? {}}
+            initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
-              x: formQueryParams?.uploadEdits?.focalPoint.x || doc.focalX || 50,
-              y: formQueryParams?.uploadEdits?.focalPoint.y || doc.focalY || 50,
+              x: uploadEdits?.focalPoint?.x || doc.focalX || 50,
+              y: uploadEdits?.focalPoint?.y || doc.focalY || 50,
             }}
             onSave={onEditsSave}
             showCrop={showCrop}

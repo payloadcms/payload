@@ -133,6 +133,7 @@ function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         type: graphqlResult.globals.graphQL[slug].versionType,
         args: {
           id: { type: idType },
+          draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
                 fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -171,6 +172,7 @@ function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         type: graphqlResult.globals.graphQL[slug].type,
         args: {
           id: { type: idType },
+          draft: { type: GraphQLBoolean },
         },
         resolve: restoreVersionResolver(global),
       }

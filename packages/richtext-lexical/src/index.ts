@@ -13,6 +13,7 @@ import {
   afterReadTraverseFields,
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
+  deepCopyObject,
   getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
@@ -35,7 +36,6 @@ import {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
-import { cloneDeep } from './lexical/utils/cloneDeep.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { getGenerateComponentMap } from './utilities/generateComponentMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
@@ -93,10 +93,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           defaultEditorConfig,
           config,
         )
-        features = cloneDeep(defaultEditorFeatures)
+        features = deepCopyObject(defaultEditorFeatures)
       }
 
-      finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
+      finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
@@ -109,12 +109,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       features =
         props.features && typeof props.features === 'function'
           ? props.features({
-              defaultFeatures: cloneDeep(defaultEditorFeatures),
+              defaultFeatures: deepCopyObject(defaultEditorFeatures),
               rootFeatures: rootEditorFeatures,
             })
           : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
-        features = cloneDeep(defaultEditorFeatures)
+        features = deepCopyObject(defaultEditorFeatures)
       }
 
       const lexical: LexicalEditorConfig = props.lexical
@@ -463,8 +463,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
-                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
-                  [],
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root
+                    ?.children ?? [],
               })
             }
 
@@ -812,16 +812,17 @@ export { AlignFeature } from './features/align/feature.server.js'
 export { BlockquoteFeature } from './features/blockquote/feature.server.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/feature.server.js'
 export { type BlockFields, BlockNode } from './features/blocks/nodes/BlocksNode.js'
-export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 
+export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
+
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
-
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './features/converters/html/converter/index.js'
+
 export type { HTMLConverter } from './features/converters/html/converter/types.js'
 export {
   HTMLConverterFeature,
@@ -833,16 +834,16 @@ export { TreeViewFeature } from './features/debug/treeView/feature.server.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/feature.server.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
-
 export { ItalicFeature } from './features/format/italic/feature.server.js'
+
 export { StrikethroughFeature } from './features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './features/format/underline/feature.server.js'
 export { HeadingFeature, type HeadingFeatureProps } from './features/heading/feature.server.js'
 export { HorizontalRuleFeature } from './features/horizontalRule/feature.server.js'
-
 export { IndentFeature } from './features/indent/feature.server.js'
+
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/feature.server.js'
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'

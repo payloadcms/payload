@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { LexicalEditor, Spread } from 'lexical'
-import type { MutableRefObject } from 'react'
 import type React from 'react'
+import type { RefObject } from 'react'
 
 export type SlashMenuItem = {
   /** The icon which is rendered in your slash menu item. */
@@ -34,7 +34,7 @@ export type SlashMenuGroup = {
 }
 
 export type SlashMenuItemInternal = {
-  ref: MutableRefObject<HTMLButtonElement | null>
+  ref: RefObject<HTMLButtonElement | null>
 } & SlashMenuItem
 
 export type SlashMenuGroupInternal = Spread<

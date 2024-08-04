@@ -2,7 +2,7 @@
 title: Fields Overview
 label: Overview
 order: 10
-desc: Fields are the building blocks of Payload, find out how to add or remove a field, change field type, add hooks, define access control and validation.
+desc: Fields are the building blocks of Payload, find out how to add or remove a field, change field type, add hooks, define Access Control and Validation.
 keywords: overview, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
@@ -205,7 +205,9 @@ export const MyField: Field = {
 }
 ```
 
-Default values can be defined as a static string or a function that returns a string. Functions are called with the following arguments:
+Default values can be defined as a static value or a function that returns a value. When a `defaultValue` is defined statically, Payload's DB adapters will apply it to the database schema or models.
+
+Functions can be written to make use of the following argument properties:
 
 - `user` - the authenticated user object
 - `locale` - the currently selected locale string
@@ -294,7 +296,7 @@ When using custom validation functions, Payload will use yours in place of the d
 To reuse default field validations, call them from within your custom validation function:
 
 ```ts
-import { text } from 'payload/fields/validations'
+import { text } from 'payload/shared'
 
 const field: Field = {
   name: 'notBad',
@@ -375,6 +377,8 @@ export const MyCollection: CollectionConfig = {
 <Banner type="warning">
   <strong>Reminder:</strong>
   The Custom ID Fields can only be of type [`Number`](./number) or [`Text`](./text).
+
+  Custom ID fields with type `text` must not contain `/` or `.` characters.
 </Banner>
 
 ## TypeScript

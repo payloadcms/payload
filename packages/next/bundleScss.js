@@ -1,14 +1,11 @@
 import * as esbuild from 'esbuild'
 import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+
 import { sassPlugin } from 'esbuild-sass-plugin'
 
-// Bundle only the .scss files into a single css file
-await esbuild
-  .build({
+async function build() {
+  // Bundle only the .scss files into a single css file
+  await esbuild.build({
     entryPoints: ['src/esbuildEntry.ts'],
     bundle: true,
     minify: true,
@@ -16,30 +13,34 @@ await esbuild
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
-  .then(() => {
-    fs.rename('dist/prod/esbuildEntry.css', 'dist/prod/styles.css', (err) => {
-      if (err) console.error(`Error while renaming index.css: ${err}`)
-    })
 
-    fs.unlink('dist/esbuildEntry.js', (err) => {
-      if (err) console.error(`Error while deleting dist/esbuildEntry.js: ${err}`)
-    })
+  try {
+    fs.renameSync('dist/prod/esbuildEntry.css', 'dist/prod/styles.css')
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
 
-    fs.unlink('dist/prod/esbuildEntry.js', (err) => {
-      if (err) console.error(`Error while deleting dist/prod/esbuildEntry.js: ${err}`)
-    })
+  console.log('styles.css bundled successfully')
 
-    fs.unlink('dist/esbuildEntry.d.ts', (err) => {
-      if (err) console.error(`Error while deleting dist/esbuildEntry.d.ts: ${err}`)
-    })
-    fs.unlink('dist/esbuildEntry.d.ts.map', (err) => {
-      if (err) console.error(`Error while deleting dist/esbuildEntry.d.ts.map: ${err}`)
-    })
-    fs.unlink('dist/esbuildEntry.js.map', (err) => {
-      if (err) console.error(`Error while deleting dist/esbuildEntry.js.map: ${err}`)
-    })
-    console.log('styles.css bundled successfully')
-  })
-  .catch((e) => {
-    throw e
-  })
+  const filesToDelete = [
+    'dist/esbuildEntry.js',
+    'dist/prod/esbuildEntry.js',
+    'dist/esbuildEntry.d.ts',
+    'dist/esbuildEntry.d.ts.map',
+    'dist/esbuildEntry.js.map',
+  ]
+
+  for (const file of filesToDelete) {
+    try {
+      fs.unlinkSync(file)
+    } catch (err) {
+      console.error(`Error while deleting ${file}: ${err}`)
+      throw err
+    }
+  }
+
+  console.log('Files renamed and deleted successfully')
+}
+
+await build()

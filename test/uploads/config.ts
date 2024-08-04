@@ -16,7 +16,10 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
+  mediaWithRelationPreviewSlug,
+  mediaWithoutRelationPreviewSlug,
   reduceSlug,
+  relationPreviewSlug,
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -131,6 +134,60 @@ export default buildConfigWithDefaults({
         ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './object-fit'),
+      },
+    },
+    {
+      slug: 'with-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './with-meta-data'),
+        withMetadata: true,
+      },
+    },
+    {
+      slug: 'without-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './without-meta-data'),
+        withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
       },
     },
     {
@@ -500,6 +557,67 @@ export default buildConfigWithDefaults({
       },
     },
     CustomUploadFieldCollection,
+    {
+      slug: mediaWithRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        displayPreview: true,
+      },
+    },
+    {
+      slug: mediaWithoutRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: true,
+    },
+    {
+      slug: relationPreviewSlug,
+      fields: [
+        {
+          name: 'imageWithPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview2',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: false,
+        },
+        {
+          name: 'imageWithoutPreview2',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: false,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -619,6 +737,31 @@ export default buildConfigWithDefaults({
       file: {
         ...imageFile,
         name: `function-image-${imageFile.name}`,
+      },
+    })
+
+    // Create media with and without relation preview
+    const { id: uploadedImageWithPreview } = await payload.create({
+      collection: mediaWithRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    const { id: uploadedImageWithoutPreview } = await payload.create({
+      collection: mediaWithoutRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    await payload.create({
+      collection: relationPreviewSlug,
+      data: {
+        imageWithPreview1: uploadedImageWithPreview,
+        imageWithPreview2: uploadedImageWithPreview,
+        imageWithoutPreview1: uploadedImageWithPreview,
+        imageWithoutPreview2: uploadedImageWithoutPreview,
+        imageWithPreview3: uploadedImageWithoutPreview,
+        imageWithoutPreview3: uploadedImageWithoutPreview,
       },
     })
   },

@@ -2,7 +2,7 @@ import type { Where } from 'payload'
 
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { headers as getHeaders } from 'next/headers.js'
+import { headers as getHeaders } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import React from 'react'
 

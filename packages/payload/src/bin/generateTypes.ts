@@ -4,13 +4,13 @@ import { compile } from 'json-schema-to-typescript'
 import type { SanitizedConfig } from '../config/types.js'
 
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
-import Logger from '../utilities/logger.js'
+import { getLogger } from '../utilities/logger.js'
 
 export async function generateTypes(
   config: SanitizedConfig,
   options?: { log: boolean },
 ): Promise<void> {
-  const logger = Logger()
+  const logger = getLogger()
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   const shouldLog = options?.log ?? true

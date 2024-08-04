@@ -185,6 +185,28 @@ const BlockFields: CollectionConfig = {
       },
     },
     {
+      name: 'blocksWithLocalizedArray',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'localizedArray',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              localized: true,
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'blocksWithSimilarConfigs',
       type: 'blocks',
       blocks: [
