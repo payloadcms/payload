@@ -70,7 +70,6 @@ export const RenderField: React.FC<Props> = ({
     return <HiddenField />
   }
 
-  console.log(Field)
   return (
     <FieldPropsProvider
       custom={custom}

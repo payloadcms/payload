@@ -89,19 +89,12 @@ export const buildColumnState = (args: Args): Column[] => {
     const CustomLabelToRender =
       field &&
       'fieldComponentProps' in field &&
-      'CustomLabel' in field.fieldComponentProps &&
-      field.fieldComponentProps.CustomLabel !== undefined
-        ? field.fieldComponentProps.CustomLabel
+      'Label' in field.admin.components &&
+      field.admin.components.Label !== undefined
+        ? field.admin.components.Label
         : undefined
 
-    const Label = (
-      <FieldLabel
-        CustomLabel={CustomLabelToRender}
-        label={field.fieldComponentProps?.label}
-        {...(field.fieldComponentProps?.labelProps || {})}
-        unstyled
-      />
-    )
+    const Label = <FieldLabel Label={CustomLabelToRender} {...field} unstyled />
 
     const fieldAffectsDataSubFields =
       field &&
@@ -112,11 +105,7 @@ export const buildColumnState = (args: Args): Column[] => {
       <SortColumn
         Label={Label}
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
-        label={
-          'fieldComponentProps' in field && 'label' in field.fieldComponentProps
-            ? field.fieldComponentProps.label
-            : undefined
-        }
+        label={'label' in field ? field.label : undefined}
         name={'name' in field ? field.name : undefined}
       />
     )
@@ -129,20 +118,18 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: name,
         active,
         admin: {
-          disableListColumn: field.disableListColumn,
-          disableListFilter: field.disableListFilter,
+          disableListColumn: field.admin?.disableListColumn,
+          disableListFilter: field.admin?.disableListFilter,
         },
         cellProps: {
-          ...field.cellComponentProps,
+          ...field,
           ...cellProps?.[index],
           link: isFirstActiveColumn,
           relationTo:
-            field.type === 'relationship' && 'relationTo' in field.fieldComponentProps
-              ? field.fieldComponentProps.relationTo
-              : undefined,
+            field.type === 'relationship' && 'relationTo' in field ? field.relationTo : undefined,
         },
         components: {
-          Cell: field.Cell,
+          Cell: field.admin.components.Cell,
           Heading,
         },
       }

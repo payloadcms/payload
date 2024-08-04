@@ -170,7 +170,12 @@ export const createClientFieldConfig = ({
       })
     }
 
-    if (field.type === 'array') {
+    if (
+      field.type === 'array' ||
+      field.type === 'group' ||
+      field.type === 'collapsible' ||
+      field.type === 'row'
+    ) {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.fields = createClientFieldConfigs({
         createMappedComponent,
@@ -181,7 +186,7 @@ export const createClientFieldConfig = ({
       })
     }
 
-    if ('blocks' in field) {
+    if (field.type === 'blocks') {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.blocks = field.blocks?.map((block) => {
         const sanitized = { ...block }
@@ -195,9 +200,11 @@ export const createClientFieldConfig = ({
       })
     }
 
-    if ('tabs' in field) {
+    if (field.type === 'tabs') {
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.tabs = createClientFieldConfigs({
         createMappedComponent,
+        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference
         fields: field.tabs as any as Field[], // invert the type
         parentPath: field._path,
         t,
