@@ -23,9 +23,11 @@ import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
-    CustomDescription,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Label },
+      description,
+    },
     descriptionProps,
     fields,
     initCollapsed = false,
@@ -131,7 +133,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel RowLabelComponent={CustomLabel} i18n={i18n} path={path} rowLabel={label} />
+              <RowLabel RowLabelComponent={Label} i18n={i18n} path={path} rowLabel={label} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -149,7 +151,11 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
             schemaPath={schemaPath}
           />
         </CollapsibleElement>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          CustomDescription={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </Fragment>
   )

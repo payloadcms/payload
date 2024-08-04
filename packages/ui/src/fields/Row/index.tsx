@@ -15,7 +15,11 @@ export { RowProvider, useRow }
 const baseClass = 'row'
 
 const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
-  const { className, fields, forceRender = false } = props
+  const {
+    admin: { className },
+    fields,
+    forceRender = false,
+  } = props
 
   const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 

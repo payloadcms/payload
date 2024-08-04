@@ -36,11 +36,14 @@ const baseClass = 'relationship'
 const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    admin: {
+      className,
+      components: { Description, Error, Label },
+      description,
+      style,
+      width,
+    },
     allowCreate = true,
-    className,
     descriptionProps,
     errorProps,
     hasMany,
@@ -52,9 +55,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     relationTo,
     required,
     sortOptions,
-    style,
     validate,
-    width,
   } = props
 
   const { config } = useConfig()
@@ -481,15 +482,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -594,7 +589,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          CustomDescription={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

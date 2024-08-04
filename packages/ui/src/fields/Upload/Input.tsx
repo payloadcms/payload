@@ -44,9 +44,9 @@ export type UploadInputProps = {
 
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
     allowNewUpload,
     api = '/api',
     className,
@@ -144,14 +144,9 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
+        <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
         <div className={`${fieldBaseClass}__wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+          <FieldError CustomError={Error} {...(errorProps || {})} />
 
           {collection?.upload && (
             <React.Fragment>
@@ -193,10 +188,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                   </div>
                 </div>
               )}
-              <FieldDescription
-                CustomDescription={CustomDescription}
-                {...(descriptionProps || {})}
-              />
+              <FieldDescription CustomDescription={Description} {...(descriptionProps || {})} />
             </React.Fragment>
           )}
           {!readOnly && <DocumentDrawer onSave={onSave} />}

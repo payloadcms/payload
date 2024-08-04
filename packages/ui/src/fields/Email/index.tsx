@@ -18,24 +18,23 @@ import './index.scss'
 const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      style,
+      width,
+    },
     autoComplete,
-    className,
     descriptionProps,
     errorProps,
     label,
     labelProps,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -68,15 +67,10 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={BeforeInput} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
@@ -90,9 +84,13 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={AfterInput} />
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        CustomDescription={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

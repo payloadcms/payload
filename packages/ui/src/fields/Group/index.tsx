@@ -29,16 +29,17 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
-    CustomDescription,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Label },
+      style,
+      width,
+    },
     descriptionProps,
     fields,
     hideGutter,
     label,
     readOnly: readOnlyFromProps,
-    style,
-    width,
   } = props
 
   const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
@@ -82,17 +83,14 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(CustomLabel || CustomDescription || label) && (
+            {(Label || Description || label) && (
               <header>
-                {CustomLabel !== undefined ? (
-                  <RenderComponent clientProps={{ label }} mappedComponent={CustomLabel} />
+                {Label !== undefined ? (
+                  <RenderComponent clientProps={{ label }} mappedComponent={Label} />
                 ) : label ? (
                   <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                 ) : null}
-                <FieldDescription
-                  CustomDescription={CustomDescription}
-                  {...(descriptionProps || {})}
-                />
+                <FieldDescription CustomDescription={Description} {...(descriptionProps || {})} />
               </header>
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

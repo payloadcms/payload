@@ -21,10 +21,13 @@ import { FieldError } from '../FieldError/index.js'
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label },
+      description,
+      style,
+      width,
+    },
     descriptionProps,
     errorProps,
     label,
@@ -35,10 +38,8 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
     path: pathFromProps,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
     value: valueFromProps,
-    width,
   } = props
 
   const { uuid } = useForm()
@@ -86,13 +87,8 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -131,7 +127,11 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
             )
           })}
         </ul>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          CustomDescription={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

@@ -32,11 +32,12 @@ const baseClass = 'array-field'
 export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     CustomRowLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label },
+      description,
+    },
     descriptionProps,
     errorProps,
     fields,
@@ -206,13 +207,13 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
+      {showError && <FieldError CustomError={Error} path={path} {...(errorProps || {})} />}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                CustomLabel={CustomLabel}
+                CustomLabel={Label}
                 as="span"
                 label={label}
                 required={required}
@@ -247,7 +248,11 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          CustomDescription={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

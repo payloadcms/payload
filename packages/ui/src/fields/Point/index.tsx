@@ -21,24 +21,24 @@ import { FieldLabel } from '../FieldLabel/index.js'
 export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      rtl,
+      style,
+      width,
+    },
     descriptionProps,
     errorProps,
     label,
     labelProps,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
     step,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
@@ -106,10 +106,9 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('longitude')} />
-
+          <FieldLabel CustomLabel={Label} {...getCoordinateFieldLabel('longitude')} />
           <div className="input-wrapper">
-            <RenderComponent mappedComponent={BeforeInput} />
+            <RenderComponent mappedComponent={beforeInput} />
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
@@ -122,14 +121,14 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            <RenderComponent mappedComponent={AfterInput} />
+            <RenderComponent mappedComponent={afterInput} />
           </div>
         </li>
         <li>
-          <FieldLabel CustomLabel={CustomLabel} {...getCoordinateFieldLabel('latitude')} />
+          <FieldLabel CustomLabel={Label} {...getCoordinateFieldLabel('latitude')} />
           <div className="input-wrapper">
-            <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-            <RenderComponent mappedComponent={BeforeInput} />
+            <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+            <RenderComponent mappedComponent={beforeInput} />
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
@@ -142,11 +141,15 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            <RenderComponent mappedComponent={AfterInput} />
+            <RenderComponent mappedComponent={afterInput} />
           </div>
         </li>
       </ul>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        CustomDescription={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

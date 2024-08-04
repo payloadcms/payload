@@ -24,9 +24,12 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     beforeInput,
     className,
     description,
+    descriptionProps,
+    errorProps,
     hasMany,
     inputRef,
     label,
+    labelProps,
     maxRows,
     onChange,
     onKeyDown,
@@ -61,9 +64,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -107,7 +110,11 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             <RenderComponent mappedComponent={afterInput} />
           </div>
         )}
-        <FieldDescription Description={Description} description={description} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

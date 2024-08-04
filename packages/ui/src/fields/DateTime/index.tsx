@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, DateField, DateFieldProps } from 'payload'
+import type { ClientValidate, DateFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -22,24 +22,23 @@ import { FieldError } from '../FieldError/index.js'
 const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      style,
+      width,
+    },
     date: datePickerProps,
     descriptionProps,
     errorProps,
     label,
     labelProps,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -78,15 +77,10 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={BeforeInput} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
@@ -96,9 +90,13 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
           readOnly={disabled}
           value={value}
         />
-        <RenderComponent mappedComponent={AfterInput} />
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        CustomDescription={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

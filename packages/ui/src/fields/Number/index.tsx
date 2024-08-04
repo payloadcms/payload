@@ -22,12 +22,14 @@ import './index.scss'
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      style,
+      width,
+    },
     descriptionProps,
     errorProps,
     hasMany = false,
@@ -38,13 +40,10 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     min = -Infinity,
     onChange: onChangeFromProps,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
     step = 1,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
@@ -144,14 +143,9 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -180,7 +174,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={BeforeInput} />
+            <RenderComponent mappedComponent={beforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -197,10 +191,14 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            <RenderComponent mappedComponent={AfterInput} />
+            <RenderComponent mappedComponent={afterInput} />
           </div>
         )}
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          CustomDescription={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

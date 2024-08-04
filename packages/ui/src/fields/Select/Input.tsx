@@ -38,12 +38,13 @@ export type SelectInputProps = {
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
+    description,
     descriptionProps,
     errorProps,
     hasMany = false,
@@ -99,15 +100,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={BeforeInput} />
+        <FieldError Error={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <ReactSelect
           disabled={readOnly}
           isClearable={isClearable}
@@ -121,9 +117,13 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           showError={showError}
           value={valueToRender as OptionObject}
         />
-        <RenderComponent mappedComponent={AfterInput} />
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        Description={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

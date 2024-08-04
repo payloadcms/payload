@@ -25,13 +25,14 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      style,
+      width,
+    },
     checked: checkedFromProps,
-    className,
     descriptionProps,
     disableFormData,
     errorProps,
@@ -42,9 +43,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     path: pathFromProps,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
-    width,
   } = props
 
   const { uuid } = useForm()
@@ -98,11 +97,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
       <CheckboxInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        CustomLabel={CustomLabel}
+        AfterInput={afterInput}
+        BeforeInput={beforeInput}
+        CustomLabel={Label}
         checked={checked}
         id={fieldID}
         inputRef={null}
@@ -114,7 +113,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        CustomDescription={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

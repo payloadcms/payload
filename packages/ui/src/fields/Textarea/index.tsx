@@ -20,29 +20,25 @@ export { TextAreaInputProps, TextareaInput }
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      rtl,
+      style,
+      width,
+    },
     label,
-    labelProps,
     locale,
     localized,
     maxLength,
     minLength,
     path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
     required,
     rows,
-    rtl,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -77,16 +73,14 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   return (
     <TextareaInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
       label={label}
-      labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)
       }}

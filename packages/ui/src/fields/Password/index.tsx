@@ -36,25 +36,24 @@ export type PasswordFieldProps = {
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      placeholder,
+      rtl,
+      style,
+      width,
+    },
     autoComplete,
-    className,
     disabled: disabledFromProps,
     errorProps,
     inputRef,
     label,
     labelProps,
     path: pathFromProps,
-    placeholder,
     required,
-    rtl,
-    style,
     validate,
-    width,
   } = props
 
   const { t } = useTranslation()
@@ -101,13 +100,14 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   return (
     <PasswordInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
       autoComplete={autoComplete}
+      beforeInput={beforeInput}
       className={className}
+      description={description}
       errorProps={errorProps}
       inputRef={inputRef}
       label={label}

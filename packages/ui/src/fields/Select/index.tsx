@@ -26,27 +26,23 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      style,
+      width,
+    },
     hasMany = false,
     isClearable = true,
     isSortable = true,
     label,
-    labelProps,
     onChange: onChangeFromProps,
     options: optionsFromProps = [],
     path: pathFromProps,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
-    width,
   } = props
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
@@ -94,19 +90,17 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   return (
     <SelectInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
       label={label}
-      labelProps={labelProps}
       name={name}
       onChange={onChange}
       options={options}

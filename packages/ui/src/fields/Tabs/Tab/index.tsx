@@ -1,5 +1,6 @@
 'use client'
-import type { MappedTab } from 'payload'
+
+import type { ClientFieldConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
@@ -15,7 +16,7 @@ type TabProps = {
   readonly isActive?: boolean
   readonly parentPath: string
   readonly setIsActive: () => void
-  readonly tab: MappedTab
+  readonly tab: ClientFieldConfig
 }
 
 export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {

@@ -24,12 +24,13 @@ const baseClass = 'code-field'
 const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    admin: {
+      className,
+      components: { Description, Error, Label, afterInput, beforeInput },
+      description,
+      style,
+      width,
+    },
     descriptionProps,
     editorOptions = {},
     errorProps,
@@ -39,9 +40,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
     path: pathFromProps,
     readOnly: readOnlyFromProps,
     required,
-    style,
     validate,
-    width,
   } = props
 
   const memoizedValidate = useCallback(
@@ -78,15 +77,10 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={BeforeInput} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={disabled ? () => null : (val) => setValue(val)}
@@ -94,9 +88,13 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
           readOnly={disabled}
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={AfterInput} />
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        CustomDescription={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }
