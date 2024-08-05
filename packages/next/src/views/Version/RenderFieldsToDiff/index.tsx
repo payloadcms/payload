@@ -31,7 +31,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
         if (Component) {
-          if (field.isFieldAffectingData && 'name' in field) {
+          if (field._isFieldAffectingData && 'name' in field) {
             const fieldName = field.name
             const valueIsObject = field.type === 'code' || field.type === 'json'
 
@@ -55,8 +55,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               diffMethod,
               field,
               fieldPermissions: subFieldPermissions,
-              fields:
-                'fields' in field.fieldComponentProps ? field.fieldComponentProps?.fields : fields,
+              fields: 'fields' in field ? field?.fields : fields,
               i18n,
               isRichText,
               locales,

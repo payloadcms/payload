@@ -53,7 +53,7 @@ const Select: React.FC<
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
-  const options = 'options' in field.fieldComponentProps && field.fieldComponentProps.options
+  const options = 'options' in field && field.options
 
   const comparisonToRender =
     typeof comparison !== 'undefined'
