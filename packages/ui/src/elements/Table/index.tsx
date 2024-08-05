@@ -78,7 +78,10 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
                         customCellContext={customCellContext}
                         rowData={row}
                       >
-                        <RenderComponent mappedComponent={col.components.Cell} />
+                        <RenderComponent
+                          clientProps={{ ...col?.cellProps }}
+                          mappedComponent={col.components.Cell}
+                        />
                       </TableCellProvider>
                     </td>
                   )
