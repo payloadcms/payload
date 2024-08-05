@@ -1,22 +1,22 @@
 'use client'
 
+import type { LoginWithUsernameOptions } from 'payload'
+
 import { EmailField, TextField, useTranslation } from '@payloadcms/ui'
 import { email, username } from 'payload/shared'
 import React from 'react'
 
 type Props = {
-  requireEmail?: boolean
-  requireUsername?: boolean
-  showEmailField?: boolean
-  showUsernameField?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | false
 }
-export const EmailAndUsernameFields: React.FC<Props> = ({
-  requireEmail = true,
-  requireUsername = false,
-  showEmailField = true,
-  showUsernameField = true,
-}) => {
+export const EmailAndUsernameFields: React.FC<Props> = ({ loginWithUsername }) => {
   const { t } = useTranslation()
+
+  const requireEmail = !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail)
+  const requireUsername = loginWithUsername && loginWithUsername.requireUsername
+  const showEmailField =
+    !loginWithUsername || loginWithUsername?.requireEmail || loginWithUsername?.allowEmailLogin
+  const showUsernameField = Boolean(loginWithUsername)
 
   return (
     <React.Fragment>

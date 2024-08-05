@@ -138,18 +138,7 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <EmailAndUsernameFields
-            requireEmail={
-              !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail)
-            }
-            requireUsername={loginWithUsername && loginWithUsername.requireUsername}
-            showEmailField={
-              !loginWithUsername ||
-              loginWithUsername?.requireEmail ||
-              loginWithUsername?.allowEmailLogin
-            }
-            showUsernameField={Boolean(loginWithUsername)}
-          />
+          <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField

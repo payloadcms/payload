@@ -57,16 +57,7 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <EmailAndUsernameFields
-        requireEmail={!loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail)}
-        requireUsername={loginWithUsername && loginWithUsername.requireUsername}
-        showEmailField={
-          !loginWithUsername ||
-          loginWithUsername?.requireEmail ||
-          loginWithUsername?.allowEmailLogin
-        }
-        showUsernameField={Boolean(loginWithUsername)}
-      />
+      <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
         label={t('authentication:newPassword')}
         name="password"
