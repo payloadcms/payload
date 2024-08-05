@@ -47,8 +47,8 @@ export const VersionView: EditViewComponent = async (props) => {
       doc = await payload.findVersionByID({
         id: versionID,
         collection: slug,
-        depth: 3,
-        locale: 'all',
+        depth: 1,
+        locale: '*',
         overrideAccess: false,
         req,
         user,
