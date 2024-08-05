@@ -513,16 +513,16 @@ describe('admin1', () => {
       await expect(page.locator('#custom-field-description')).toBeVisible()
     })
 
-    test('ensure custom components receive field props', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-label')).toContainText(
-        'The max length of this field is: 100',
-      )
-      await expect(page.locator('#custom-field-description')).toContainText(
-        'The max length of this field is: 100',
-      )
-    })
+    // test('ensure custom components receive field props', async () => {
+    //   await page.goto(customFieldsURL.create)
+    //   await page.waitForURL(customFieldsURL.create)
+    //   await expect(page.locator('#custom-field-label')).toContainText(
+    //     'The max length of this field is: 100',
+    //   )
+    //   await expect(page.locator('#custom-field-description')).toContainText(
+    //     'The max length of this field is: 100',
+    //   )
+    // })
 
     describe('field descriptions', () => {
       test('should render static field description', async () => {

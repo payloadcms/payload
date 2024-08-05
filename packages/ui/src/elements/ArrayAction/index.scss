@@ -30,17 +30,4 @@
       }
     }
   }
-
-  &__move-up {
-    margin-bottom: 2px;
-  }
-
-  &__move-down {
-    margin-top: 6px;
-    margin-bottom: 2px;
-  }
-
-  &__action-chevron {
-    padding: 0 calc(var(--base) / 4);
-  }
 }

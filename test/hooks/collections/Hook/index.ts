@@ -11,8 +11,8 @@ const Hooks: CollectionConfig = {
   },
   hooks: {
     beforeOperation: [
-      ({ req, operation }) => {
-        if (!req.transactionID && ['create', 'delete', 'update'].includes(operation)) {
+      ({ operation, req }) => {
+        if (typeof req.payload.db.beginTransaction === 'function' && !req.transactionID && ['create', 'delete', 'update'].includes(operation)) {
           throw new Error('transactionID is missing in beforeOperation hook')
         }
       },

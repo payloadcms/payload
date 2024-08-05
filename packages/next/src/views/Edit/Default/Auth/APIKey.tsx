@@ -78,7 +78,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
     if (!apiKeyValue && enabled) {
       setValue(initialAPIKey)
     }
-    if (!enabled) {
+    if (!enabled && apiKeyValue) {
       setValue(null)
     }
   }, [apiKeyValue, enabled, setValue, initialAPIKey])
@@ -100,6 +100,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
         <FieldLabel CustomLabel={APIKeyLabel} htmlFor={path} />
         <input
+          aria-label="API Key"
           className={highlightedField ? 'highlight' : undefined}
           disabled
           id="apiKey"

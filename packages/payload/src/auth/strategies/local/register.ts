@@ -55,7 +55,7 @@ export const registerLocalStrategy = async ({
     })
   }
 
-  const { hash, salt } = await generatePasswordSaltHash({ collection, password })
+  const { hash, salt } = await generatePasswordSaltHash({ collection, password, req })
 
   const sanitizedDoc = { ...doc }
   if (sanitizedDoc.password) delete sanitizedDoc.password

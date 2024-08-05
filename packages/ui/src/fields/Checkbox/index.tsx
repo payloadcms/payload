@@ -1,5 +1,5 @@
 'use client'
-import type { CheckboxFieldProps, ClientValidate } from 'payload'
+import type { CheckboxFieldProps, CheckboxFieldValidation } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -51,7 +51,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
 
   const editDepth = useEditDepth()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: CheckboxFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

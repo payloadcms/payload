@@ -870,7 +870,6 @@ export type {
   Block,
   BlockField,
   CheckboxField,
-  ClientValidate,
   CodeField,
   CollapsibleField,
   Condition,
@@ -928,6 +927,27 @@ export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterR
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export type {
+  ArrayFieldValidation,
+  BlockFieldValidation,
+  CheckboxFieldValidation,
+  CodeFieldValidation,
+  ConfirmPasswordFieldValidation,
+  DateFieldValidation,
+  EmailFieldValidation,
+  JSONFieldValidation,
+  NumberFieldValidation,
+  PasswordFieldValidation,
+  PointFieldValidation,
+  RadioFieldValidation,
+  RelationshipFieldValidation,
+  RichTextFieldValidation,
+  SelectFieldValidation,
+  TextFieldValidation,
+  TextareaFieldValidation,
+  UploadFieldValidation,
+  UsernameFieldValidation,
+} from './fields/validations.js'
 export type { ClientGlobalConfig } from './globals/config/client.js'
 export { createClientGlobalConfig } from './globals/config/client.js'
 export type {
@@ -999,7 +1019,8 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { saveVersion } from './versions/saveVersion.js'
 export { getDependencies }
+export { saveVersion } from './versions/saveVersion.js'
 export type { TypeWithVersion } from './versions/types.js'
+
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

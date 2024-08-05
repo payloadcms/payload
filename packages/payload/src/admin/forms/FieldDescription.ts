@@ -19,6 +19,5 @@ export type GenericDescriptionProps = {
 }
 export type FieldDescriptionProps<T extends keyof FieldTypes = any> = {
   type: T
-} & FieldComponentProps &
-  GenericDescriptionProps &
+} & GenericDescriptionProps &
   Partial<ServerProps>

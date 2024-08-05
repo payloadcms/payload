@@ -700,9 +700,18 @@ describe('Fields', () => {
         uniqueRequiredText: 'a',
         // uniqueText omitted on purpose
       }
-      await payload.create({
+      const doc = await payload.create({
         collection: 'indexed-fields',
         data,
+      })
+      // Update spanish so we do not run into the unique constraint for other locales
+      await payload.update({
+        id: doc.id,
+        collection: 'indexed-fields',
+        data: {
+          localizedUniqueRequiredText: 'es1',
+        },
+        locale: 'es',
       })
       data.uniqueRequiredText = 'b'
       const result = await payload.create({
@@ -1268,6 +1277,26 @@ describe('Fields', () => {
       expect(inHitResult.id).toStrictEqual(hit.id)
       expect(equalsMissResult).toBeUndefined()
       expect(inMissResult).toBeUndefined()
+    })
+
+    it('should allow localized array of blocks', async () => {
+      const result = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocksWithLocalizedArray: [
+            {
+              blockType: 'localizedArray',
+              array: [
+                {
+                  text: 'localized',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
     })
   })
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type {
   ForeignKeyBuilder,

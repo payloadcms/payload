@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -15,14 +15,13 @@ import {
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { LoginField } from '../Login/LoginField/index.js'
+import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
-}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -35,18 +34,17 @@ export const CreateFirstUserClient: React.FC<{
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
-      return getFormState({
+    async ({ formState: prevFormState }) =>
+      getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
-          schemaPath: userSlug,
+          schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      })
-    },
+      }),
     [apiRoute, userSlug, serverURL],
   )
 
@@ -59,25 +57,23 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
-        autoComplete="off"
         label={t('authentication:newPassword')}
         name="password"
+        path="password"
         required
       />
       <ConfirmPasswordField />
       <RenderFields
         fieldMap={fieldMap}
+        forceRender
         operation="create"
         path=""
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

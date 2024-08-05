@@ -89,11 +89,10 @@ describe('database', () => {
     })
 
     it('should allow createdAt to be set in create', async () => {
-      const createdAt = new Date('2021-01-01T00:00:00.000Z')
+      const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: 'posts',
         data: {
-          // TODO: createdAt should be optional on RequiredDataFromCollectionSlug
           createdAt,
           title: 'hello',
         },
@@ -104,8 +103,8 @@ describe('database', () => {
         collection: 'posts',
       })
 
-      expect(result.createdAt).toStrictEqual(createdAt.toISOString())
-      expect(doc.createdAt).toStrictEqual(createdAt.toISOString())
+      expect(result.createdAt).toStrictEqual(createdAt)
+      expect(doc.createdAt).toStrictEqual(createdAt)
     })
 
     it('updatedAt cannot be set in create', async () => {
@@ -362,103 +361,123 @@ describe('database', () => {
           expect(firstResult.id).toStrictEqual(first.id)
           expect(secondResult.id).toStrictEqual(second.id)
         })
-      }
 
-      it('should commit multiple operations async', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
+        it('should commit multiple operations async', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
 
-        let first
-        let second
+          let first
+          let second
 
-        const firstReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            first = res
-          })
+          const firstReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              first = res
+            })
 
-        const secondReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            second = res
-          })
+          const secondReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              second = res
+            })
 
-        await Promise.all([firstReq, secondReq])
+          await Promise.all([firstReq, secondReq])
 
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
 
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
-
-      it('should rollback operations on failure', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
-
-        await initTransaction(req)
-
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        try {
-          await payload.create({
-            collection,
-            data: {
-              throwAfterChange: true,
-              title,
-            },
-            req,
-          })
-        } catch (error: unknown) {
-          // catch error and carry on
-        }
-
-        expect(req.transactionID).toBeFalsy()
-
-        // this should not do anything but is needed to be certain about the next assertion
-        await commitTransaction(req)
-
-        await expect(() =>
-          payload.findByID({
+          const firstResult = await payload.findByID({
             id: first.id,
             collection,
             req,
-          }),
-        ).rejects.toThrow('Not Found')
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
+
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
+        })
+
+        it('should rollback operations on failure', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const first = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          try {
+            await payload.create({
+              collection,
+              data: {
+                throwAfterChange: true,
+                title,
+              },
+              req,
+            })
+          } catch (error: unknown) {
+            // catch error and carry on
+          }
+
+          expect(req.transactionID).toBeFalsy()
+
+          // this should not do anything but is needed to be certain about the next assertion
+          await commitTransaction(req)
+
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+        })
+      }
+    })
+  })
+
+  describe('defaultValue', () => {
+    it('should set default value from db.create', async () => {
+      // call the db adapter create directly to bypass Payload's default value assignment
+      const result = await payload.db.create({
+        collection: 'default-values',
+        data: {
+          // for drizzle DBs, we need to pass an array of objects to test subfields
+          array: [{ id: 1 }],
+          title: 'hello',
+        },
+        req: undefined,
       })
+
+      expect(result.defaultValue).toStrictEqual('default value from database')
+      expect(result.array[0].defaultValue).toStrictEqual('default value from database')
+      expect(result.group.defaultValue).toStrictEqual('default value from database')
+      expect(result.select).toStrictEqual('default')
     })
   })
 })

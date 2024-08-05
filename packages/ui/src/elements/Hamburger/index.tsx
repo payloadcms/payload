@@ -1,4 +1,5 @@
 'use client'
+import { CloseMenuIcon, MenuIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -16,34 +17,25 @@ export const Hamburger: React.FC<{
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__icon`}>
-          {!isActive && (
-            <div className={`${baseClass}__lines`} title={t('general:open')}>
-              <div className={`${baseClass}__line ${baseClass}__top`} />
-              <div className={`${baseClass}__line ${baseClass}__middle`} />
-              <div className={`${baseClass}__line ${baseClass}__bottom`} />
-            </div>
-          )}
-          {isActive && (
-            <div
-              aria-label={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
-              className={`${baseClass}__close-icon`}
-              title={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
-            >
-              {closeIcon === 'x' && (
-                <React.Fragment>
-                  <div className={`${baseClass}__line ${baseClass}__x-left`} />
-                  <div className={`${baseClass}__line ${baseClass}__x-right`} />
-                </React.Fragment>
-              )}
-              {closeIcon === 'collapse' && (
-                <ChevronIcon className={`${baseClass}__collapse-chevron`} direction="left" />
-              )}
-            </div>
-          )}
+      {!isActive && (
+        <div
+          aria-label={t('general:open')}
+          className={`${baseClass}__open-icon`}
+          title={t('general:open')}
+        >
+          <MenuIcon />
         </div>
-      </div>
+      )}
+      {isActive && (
+        <div
+          aria-label={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
+          className={`${baseClass}__close-icon`}
+          title={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
+        >
+          {closeIcon === 'x' && <CloseMenuIcon />}
+          {closeIcon === 'collapse' && <ChevronIcon direction="left" />}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import type { NumberField } from '../../fields/config/types.js'
+import type { NumberFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
@@ -12,6 +13,7 @@ export type NumberFieldProps = {
   path?: string
   placeholder?: NumberField['admin']['placeholder']
   step?: number
+  validate?: NumberFieldValidation
   width?: string
 } & FormFieldBase
 

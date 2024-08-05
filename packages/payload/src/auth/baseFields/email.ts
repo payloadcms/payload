@@ -1,8 +1,8 @@
-import type { Field } from '../../fields/config/types.js'
+import type { EmailField } from '../../fields/config/types.js'
 
 import { email } from '../../fields/validations.js'
 
-export const emailField = ({ required = true }: { required?: boolean }): Field => ({
+export const emailFieldConfig: EmailField = {
   name: 'email',
   type: 'email',
   admin: {
@@ -20,7 +20,7 @@ export const emailField = ({ required = true }: { required?: boolean }): Field =
     ],
   },
   label: ({ t }) => t('general:email'),
-  required,
+  required: true,
   unique: true,
   validate: email,
-})
+}

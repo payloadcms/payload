@@ -7,6 +7,7 @@ import type { CSSProperties } from 'react'
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
+import type { DeepPartial } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type { ErrorComponent } from '../../admin/forms/Error.js'
@@ -175,20 +176,24 @@ export type Labels = {
   singular: LabelFunction | LabelStatic
 }
 
-export type BaseValidateOptions<TData, TSiblingData> = {
+export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  collectionSlug?: string
   data: Partial<TData>
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
+  previousValue?: TValue
   req: PayloadRequest
+  required?: boolean
   siblingData: Partial<TSiblingData>
 }
 
-export type ValidateOptions<TData, TSiblingData, TFieldConfig extends object> = BaseValidateOptions<
+export type ValidateOptions<
   TData,
-  TSiblingData
-> &
-  TFieldConfig
+  TSiblingData,
+  TFieldConfig extends object,
+  TValue,
+> = BaseValidateOptions<TData, TSiblingData, TValue> & TFieldConfig
 
 export type Validate<
   TValue = any,
@@ -197,10 +202,8 @@ export type Validate<
   TFieldConfig extends object = object,
 > = (
   value: TValue,
-  options: ValidateOptions<TData, TSiblingData, TFieldConfig>,
+  options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
-
-export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
   label: LabelFunction | LabelStatic
@@ -519,6 +522,7 @@ export type UploadField = {
       Label?: LabelComponent
     }
   }
+  displayPreview?: boolean
   filterOptions?: FilterOptions
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.

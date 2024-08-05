@@ -136,13 +136,15 @@ export const promise = async ({
       const validationResult = await field.validate(valueToValidate, {
         ...field,
         id,
+        collectionSlug: collection?.slug,
         data: deepMergeWithSourceArrays(doc, data),
         jsonError,
         operation,
         preferences: { fields: {} },
+        previousValue: siblingDoc[field.name],
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      } as ValidateOptions<any, any, { jsonError: object }>)
+      } as ValidateOptions<any, any, { jsonError: object }, any>)
 
       if (typeof validationResult === 'string') {
         errors.push({

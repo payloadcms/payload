@@ -7,4 +7,5 @@ export type UseDraggableSortableReturn = {
   listeners: SyntheticListenerMap
   setNodeRef: (node: HTMLElement | null) => void
   transform: string
+  transition: string
 }

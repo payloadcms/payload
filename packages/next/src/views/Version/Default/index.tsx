@@ -81,6 +81,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const canUpdate = docPermissions?.update?.permission
 
+  const localeValues = locales && locales.map((locale) => locale.value)
+
   return (
     <main className={baseClass}>
       <SetViewActions actions={componentMap?.actionsMap?.Edit?.Version} />
@@ -109,6 +111,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 globalSlug={globalSlug}
                 label={collectionConfig?.labels.singular || globalConfig?.label}
                 originalDocID={id}
+                status={doc?.version?._status}
                 versionDate={versionCreatedAt}
                 versionID={versionID}
               />
@@ -136,11 +139,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             fieldMap={fieldMap}
             fieldPermissions={docPermissions?.fields}
             i18n={i18n}
-            locales={
-              locales
-                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
-                : []
-            }
+            locales={localeValues}
             version={
               globalConfig
                 ? {

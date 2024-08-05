@@ -37,6 +37,9 @@ export interface Config {
     'required-file': RequiredFile;
     versions: Version;
     'custom-upload-field': CustomUploadField;
+    'media-with-relation-preview': MediaWithRelationPreview;
+    'media-without-relation-preview': MediaWithoutRelationPreview;
+    'relation-preview': RelationPreview;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -948,6 +951,59 @@ export interface CustomUploadField {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-relation-preview".
+ */
+export interface MediaWithRelationPreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-relation-preview".
+ */
+export interface MediaWithoutRelationPreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-preview".
+ */
+export interface RelationPreview {
+  id: string;
+  imageWithPreview1?: string | MediaWithRelationPreview | null;
+  imageWithPreview2?: string | MediaWithRelationPreview | null;
+  imageWithoutPreview1?: string | MediaWithRelationPreview | null;
+  imageWithoutPreview2?: string | MediaWithoutRelationPreview | null;
+  imageWithPreview3?: string | MediaWithoutRelationPreview | null;
+  imageWithoutPreview3?: string | MediaWithoutRelationPreview | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -81,7 +81,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     disabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
-    iconPosition && `${baseClass}--icon-position-${iconPosition}`,
+    icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
   ]
     .filter(Boolean)

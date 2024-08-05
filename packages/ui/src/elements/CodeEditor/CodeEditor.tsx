@@ -21,6 +21,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     baseClass,
     className,
     rest?.defaultLanguage ? `language--${rest.defaultLanguage}` : '',
+    readOnly && 'read-only',
   ]
     .filter(Boolean)
     .join(' ')

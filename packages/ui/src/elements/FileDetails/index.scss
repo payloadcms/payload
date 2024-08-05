@@ -1,27 +1,46 @@
 @import '../../scss/styles.scss';
 
 .file-details {
-  background-color: var(--theme-elevation-50);
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-border-color);
+  border-radius: var(--style-radius-m);
+  @include inputShadow;
 
   header {
     display: flex;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--theme-elevation-0);
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   &__remove {
-    margin: $baseline $baseline $baseline 0;
+    position: absolute;
+    margin: 0;
+    top: $baseline;
+    right: $baseline;
+
+    & .btn__icon {
+      border: 1px solid var(--theme-border-color);
+      background: var(--theme-input-bg);
+      @include inputShadow;
+      transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
+
+      &:hover {
+        border: 1px solid var(--theme-elevation-400);
+      }
+    }
   }
 
   &__main-detail {
-    padding: $baseline base(1.5);
+    padding: base(0.8) base(1.2);
     width: auto;
     flex-grow: 1;
-    min-width: 0;
+    min-width: 280px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
-    align-self: center;
-    gap: base(0.25);
+    justify-content: center;
+    align-self: stretch;
+    gap: base(0.2);
   }
 
   &__toggle-more-info {
@@ -66,7 +85,7 @@
     cursor: pointer;
     background-color: var(--theme-elevation-150);
     border: none;
-    border-radius: $style-radius-s;
+    border-radius: $style-radius-m;
     padding: base(0.25) base(0.5);
 
     &:hover {
@@ -102,12 +121,9 @@
 
     &__remove {
       order: 2;
-      margin-left: auto;
-      margin-right: $baseline;
     }
 
     &__main-detail {
-      border-top: $style-stroke-width-m solid var(--theme-elevation-0);
       order: 3;
       width: 100%;
     }

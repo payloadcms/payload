@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, DateField, DateFieldProps } from 'payload'
+import type { DateFieldProps, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -43,7 +43,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: DateFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

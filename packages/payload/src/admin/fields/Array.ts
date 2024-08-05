@@ -1,4 +1,5 @@
 import type { ArrayField } from '../../fields/config/types.js'
+import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
@@ -12,6 +13,7 @@ export type ArrayFieldProps = {
   maxRows?: ArrayField['maxRows']
   minRows?: ArrayField['minRows']
   name?: string
+  validate?: ArrayFieldValidation
   width?: string
 } & FormFieldBase
 

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, PointFieldProps } from 'payload'
+import type { PointFieldProps, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -42,7 +42,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
 
   const { i18n, t } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: PointFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
