@@ -17,6 +17,7 @@ import {
   relationWithTitleSlug,
   slug,
 } from './collectionSlugs'
+import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField'
 
 export interface FieldsRelationship {
   createdAt: Date
@@ -301,6 +302,9 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: collection1Slug,
+      admin: {
+        useAsTitle: 'name',
+      },
     },
     {
       fields: [
@@ -311,7 +315,13 @@ export default buildConfigWithDefaults({
       ],
       slug: collection2Slug,
     },
+    VersionedRelationshipFieldCollection,
   ],
+  localization: {
+    locales: ['en'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
