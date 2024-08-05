@@ -171,11 +171,14 @@ export const createClientFieldConfig = ({
     case 'collapsible':
     case 'row': {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      field.fields = [...(incomingField.fields as Field[])]
+
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.fields = createClientFieldConfigs({
         createMappedComponent,
         disableAddingID: field.type !== 'array',
         // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-        fields: field.fields as any as Field[], // invert the type
+        fields: field.fields,
         parentPath: field._path,
         t,
       })
@@ -199,13 +202,15 @@ export const createClientFieldConfig = ({
     case 'blocks': {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.blocks = field.blocks?.map((block) => {
-        const sanitized = { ...block }
+        const sanitized = { ...block, fields: [...block.fields] }
+
         sanitized.fields = createClientFieldConfigs({
           createMappedComponent,
-          fields: sanitized.fields as Field[], // invert the type
+          fields: sanitized.fields,
           parentPath: field._path,
           t,
         })
+
         return sanitized
       })
 
@@ -214,17 +219,20 @@ export const createClientFieldConfig = ({
 
     case 'tabs': {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-      field.tabs = [] as ClientFieldConfig[] // TODO: I don't know why this is necessary here and not elsewhere
+      field.tabs = field.tabs?.map((tab) => {
+        const sanitized = { ...tab, fields: [...tab.fields] }
 
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-      field.tabs = createClientFieldConfigs({
-        createMappedComponent,
-        disableAddingID: true,
-        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference
-        fields: field.tabs as any as Field[], // invert the type
-        parentPath: field._path,
-        t,
+        sanitized.fields = createClientFieldConfigs({
+          createMappedComponent,
+          disableAddingID: true,
+          fields: sanitized.fields,
+          parentPath: field._path,
+          t,
+        })
+
+        return sanitized
       })
+
       break
     }
 
