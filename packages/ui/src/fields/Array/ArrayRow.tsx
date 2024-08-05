@@ -122,7 +122,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel
-              RowLabelComponent={CustomRowLabel}
+              RowLabel={CustomRowLabel}
               i18n={i18n}
               path={path}
               rowLabel={fallbackLabel}

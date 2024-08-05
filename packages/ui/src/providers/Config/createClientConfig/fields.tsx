@@ -4,6 +4,8 @@ import type {
   CreateMappedComponent,
   Field,
   FieldTypes,
+  LabelComponent,
+  RowLabelComponent,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
 } from 'payload'
@@ -157,6 +159,12 @@ export const createClientFieldConfig = ({
     field.label = field.label({ t })
   }
 
+  let CustomLabel: LabelComponent | RowLabelComponent =
+    'admin' in incomingField &&
+    'components' in incomingField.admin &&
+    'Label' in incomingField.admin.components &&
+    incomingField.admin.components.Label
+
   switch (field.type) {
     case 'array':
     case 'group':
@@ -171,6 +179,19 @@ export const createClientFieldConfig = ({
         parentPath: field._path,
         t,
       })
+
+      if (field.type === 'array') {
+        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+        field.RowLabel = createMappedComponent(CustomLabel, undefined, FieldLabel)
+      }
+
+      if (field.type === 'collapsible') {
+        CustomLabel =
+          'admin' in incomingField &&
+          'components' in incomingField.admin &&
+          'RowLabel' in incomingField.admin.components &&
+          incomingField.admin.components.RowLabel
+      }
 
       break
     }
@@ -288,14 +309,7 @@ export const createClientFieldConfig = ({
       undefined,
       valueFields[field.type] || valueFields.text,
     ),
-    Label: createMappedComponent(
-      'admin' in incomingField &&
-        'components' in incomingField.admin &&
-        'Label' in incomingField.admin.components &&
-        incomingField.admin.components.Label,
-      undefined,
-      FieldLabel,
-    ),
+    Label: createMappedComponent(CustomLabel, undefined, FieldLabel),
     ...('admin' in incomingField &&
     'components' in incomingField.admin &&
     'beforeInput' in incomingField.admin.components

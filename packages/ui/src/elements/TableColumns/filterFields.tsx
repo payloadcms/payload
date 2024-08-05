@@ -17,13 +17,10 @@ export const filterFields = (incomingFields: ClientFieldConfig[]): ClientFieldCo
       field.type === 'tabs' && 'tabs' in field
         ? {
             ...field,
-            fieldComponentProps: {
-              ...field.fieldComponentProps,
-              tabs: field.fieldComponentProps.tabs.map((tab) => ({
-                ...tab,
-                fields: tab.fields.filter((tabField) => !shouldSkipField(tabField)),
-              })),
-            },
+            tabs: field.tabs.map((tab) => ({
+              ...tab,
+              fields: tab.fields.filter((tabField) => !shouldSkipField(tabField)),
+            })),
           }
         : field
 

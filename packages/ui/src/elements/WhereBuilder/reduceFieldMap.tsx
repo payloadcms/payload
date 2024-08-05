@@ -30,8 +30,8 @@ export const reduceFieldMap = ({
   return fields.reduce((reduced, field) => {
     if (field.disableListFilter) return reduced
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
-      const tabs = field.fieldComponentProps.tabs
+    if (field.type === 'tabs' && 'tabs' in field) {
+      const tabs = field.tabs
 
       tabs.forEach((tab) => {
         if (typeof tab.label !== 'boolean') {

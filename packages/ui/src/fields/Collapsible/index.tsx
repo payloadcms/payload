@@ -135,7 +135,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel RowLabelComponent={Label} i18n={i18n} path={path} rowLabel={label} />
+              <RowLabel RowLabel={Label} i18n={i18n} path={path} rowLabel={label} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
