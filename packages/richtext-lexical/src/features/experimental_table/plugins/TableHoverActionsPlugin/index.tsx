@@ -104,7 +104,6 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
 
         if (hoveredRowNode) {
           setShownColumn(false)
-
           setShownRow(true)
           setPosition({
             height: BUTTON_WIDTH_PX,
