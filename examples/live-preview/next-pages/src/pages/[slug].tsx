@@ -10,11 +10,11 @@ import type { MainMenu, Page as PageType } from '../payload-types'
 
 import classes from './[slug].module.scss'
 
-const Page: React.FC<
-  PageType & {
+const Page = (
+  initialPage: PageType & {
     mainMenu: MainMenu
-  }
-> = initialPage => {
+  },
+) => {
   const { data } = useLivePreview({
     serverURL: process.env.NEXT_PUBLIC_PAYLOAD_URL || '',
     depth: 2,

@@ -14,7 +14,7 @@ type HeaderBarProps = {
   children?: React.ReactNode
 }
 
-export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
+export const HeaderBar = ({ children }: HeaderBarProps) => {
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
@@ -32,7 +32,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   )
 }
 
-export const Header: React.FC = () => {
+export const Header = () => {
   const {
     mainMenu: { navItems },
   } = useGlobals()

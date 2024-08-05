@@ -18,7 +18,7 @@ type FormData = {
   passwordConfirm: string
 }
 
-export const CreateAccountForm: React.FC = () => {
+export function CreateAccountForm() {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()

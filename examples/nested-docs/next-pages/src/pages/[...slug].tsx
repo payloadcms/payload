@@ -8,12 +8,12 @@ import type { MainMenu, Page, Page as PageType } from '../payload-types'
 
 import classes from './[...slug].module.scss'
 
-const Page: React.FC<
-  PageType & {
+const Page = (
+  props: PageType & {
     mainMenu: MainMenu
     preview?: boolean
-  }
-> = props => {
+  },
+) => {
   const { title, richText } = props
 
   return (

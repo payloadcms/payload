@@ -17,7 +17,7 @@ type FormData = {
   password: string
 }
 
-export const LoginForm: React.FC = () => {
+export function LoginForm() {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const redirect = useRef(searchParams.get('redirect'))

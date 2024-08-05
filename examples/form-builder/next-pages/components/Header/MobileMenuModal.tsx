@@ -12,7 +12,7 @@ type Props = {
 
 export const slug = 'menu-modal'
 
-export const MobileMenuModal: React.FC<Props> = ({ navItems }) => {
+export const MobileMenuModal = ({ navItems }: Props) => {
   return (
     <Modal slug={slug} className={classes.mobileMenuModal}>
       <HeaderBar />

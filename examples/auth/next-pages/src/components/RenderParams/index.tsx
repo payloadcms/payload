@@ -2,11 +2,17 @@ import { useRouter } from 'next/router'
 
 import { Message } from '../Message'
 
-export const RenderParams: React.FC<{
+type RenderParamsProps = {
   params?: string[]
   message?: string
   className?: string
-}> = ({ params = ['error', 'message', 'success'], message, className }) => {
+}
+
+export function RenderParams({
+  params = ['error', 'message', 'success'],
+  message,
+  className,
+}: RenderParamsProps) {
   const router = useRouter()
   const searchParams = new URLSearchParams(router.query as any)
   const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)

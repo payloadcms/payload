@@ -18,7 +18,7 @@ type FormData = {
   passwordConfirm: string
 }
 
-const CreateAccount: React.FC = () => {
+function CreateAccount() {
   const router = useRouter()
   const searchParams = useMemo(() => new URLSearchParams(router.query as any), [router.query])
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''

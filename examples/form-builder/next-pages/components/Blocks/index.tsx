@@ -8,9 +8,7 @@ const blockComponents = {
   formBlock: FormBlock,
 }
 
-const Blocks: React.FC<{
-  blocks: Page['layout']
-}> = props => {
+const Blocks = (props: { blocks: Page['layout'] }) => {
   const { blocks } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0

@@ -6,7 +6,7 @@ import { useAuth } from '../../providers/Auth'
 
 import classes from './index.module.scss'
 
-const Logout: React.FC = () => {
+function Logout() {
   const { logout } = useAuth()
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')

@@ -16,8 +16,8 @@ type Leaf = {
   [key: string]: unknown
 }
 
-const serialize = (children: Children): React.ReactNode[] =>
-  children.map((node, i) => {
+function serialize(children: Children): React.ReactNode[] {
+  return children.map((node, i) => {
     if (Text.isText(node)) {
       let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
 
@@ -88,5 +88,6 @@ const serialize = (children: Children): React.ReactNode[] =>
         return <p key={i}>{serialize(node.children)}</p>
     }
   })
+}
 
 export default serialize

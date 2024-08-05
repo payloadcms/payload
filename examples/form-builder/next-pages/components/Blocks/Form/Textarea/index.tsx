@@ -6,17 +6,23 @@ import { Width } from '../Width'
 
 import classes from './index.module.scss'
 
-export const Textarea: React.FC<
-  TextField & {
-    register: UseFormRegister<FieldValues & any>
-    rows?: number
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
-  }
-> = ({ name, label, width, rows = 3, register, required: requiredFromProps, errors }) => {
+export const Textarea = ({
+  name,
+  label,
+  width,
+  rows = 3,
+  register,
+  required: requiredFromProps,
+  errors,
+}: TextField & {
+  register: UseFormRegister<FieldValues & any>
+  rows?: number
+  errors: Partial<
+    FieldErrorsImpl<{
+      [x: string]: any
+    }>
+  >
+}) => {
   return (
     <Width width={width}>
       <div className={classes.wrap}>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BeforeLogin: React.FC = () => {
+function BeforeLogin() {
   if (process.env.PAYLOAD_PUBLIC_SEED === 'true') {
     return (
       <p>

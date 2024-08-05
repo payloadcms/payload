@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 import { useAuth } from '../../_providers/Auth'
 
-export const LogoutPage: React.FC = props => {
+export function LogoutPage(props: any) {
   const { logout } = useAuth()
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')

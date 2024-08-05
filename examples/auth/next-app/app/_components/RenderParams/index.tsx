@@ -4,11 +4,17 @@ import { useSearchParams } from 'next/navigation'
 
 import { Message } from '../Message'
 
-export const RenderParams: React.FC<{
+type RenderParamsProps = {
   params?: string[]
   message?: string
   className?: string
-}> = ({ params = ['error', 'message', 'success'], message, className }) => {
+}
+
+export function RenderParams({
+  params = ['error', 'message', 'success'],
+  message,
+  className,
+}: RenderParamsProps) {
   const searchParams = useSearchParams()
   const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Logo: React.FC = () => {
+export const Logo = () => {
   return (
     <svg
       width="123"

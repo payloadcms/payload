@@ -6,16 +6,21 @@ import { Width } from '../Width'
 
 import classes from './index.module.scss'
 
-export const Email: React.FC<
-  EmailField & {
-    register: UseFormRegister<FieldValues & any>
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
-  }
-> = ({ name, width, label, register, required: requiredFromProps, errors }) => {
+export const Email = ({
+  name,
+  width,
+  label,
+  register,
+  required: requiredFromProps,
+  errors,
+}: EmailField & {
+  register: UseFormRegister<FieldValues & any>
+  errors: Partial<
+    FieldErrorsImpl<{
+      [x: string]: any
+    }>
+  >
+}) => {
   return (
     <Width width={width}>
       <div className={classes.wrap}>

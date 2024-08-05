@@ -2,13 +2,15 @@ import React from 'react'
 
 import classes from './index.module.scss'
 
-export const Message: React.FC<{
+type MessageProps = {
   message?: React.ReactNode
   error?: React.ReactNode
   success?: React.ReactNode
   warning?: React.ReactNode
   className?: string
-}> = ({ message, error, success, warning, className }) => {
+}
+
+export function Message({ message, error, success, warning, className }: MessageProps) {
   const messageToRender = message || error || success || warning
 
   if (messageToRender) {

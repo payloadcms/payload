@@ -13,7 +13,7 @@ type FormData = {
   email: string
 }
 
-const RecoverPassword: React.FC = () => {
+function RecoverPassword() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 

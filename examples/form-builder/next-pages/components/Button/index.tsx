@@ -19,7 +19,7 @@ const elements = {
   button: 'button',
 }
 
-export const Button: React.FC<Props> = ({
+export const Button = ({
   el = 'button',
   label,
   newTab,
@@ -27,7 +27,7 @@ export const Button: React.FC<Props> = ({
   form,
   appearance,
   className: classNameFromProps,
-}) => {
+}: Props) => {
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
   const Element = elements[el]
   const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button]

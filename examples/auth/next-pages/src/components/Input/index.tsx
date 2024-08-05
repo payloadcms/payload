@@ -3,7 +3,7 @@ import { FieldValues, UseFormRegister, Validate } from 'react-hook-form'
 
 import classes from './index.module.scss'
 
-type Props = {
+type InputProps = {
   name: string
   label: string
   register: UseFormRegister<FieldValues & any>
@@ -13,7 +13,7 @@ type Props = {
   validate?: (value: string) => boolean | string
 }
 
-export const Input: React.FC<Props> = ({
+export function Input({
   name,
   label,
   required,
@@ -21,7 +21,7 @@ export const Input: React.FC<Props> = ({
   error,
   type = 'text',
   validate,
-}) => {
+}: InputProps) {
   return (
     <div className={classes.inputWrap}>
       <label htmlFor="name" className={classes.label}>

@@ -5,13 +5,13 @@ import { Gutter } from '../Gutter'
 
 import classes from './index.module.scss'
 
-const Title: React.FC = () => <span>Dashboard</span>
+const Title = () => <span>Dashboard</span>
 
-export const AdminBar: React.FC<{
+export const AdminBar = (props: {
   adminBarProps?: PayloadAdminBarProps
   user?: PayloadMeUser
-  setUser?: (user: PayloadMeUser) => void // eslint-disable-line no-unused-vars
-}> = props => {
+  setUser?: (user: PayloadMeUser) => void // eslint-disable-line no-unused-vars;
+}) => {
   const { adminBarProps, user, setUser } = props
 
   return (

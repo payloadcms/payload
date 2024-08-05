@@ -7,16 +7,22 @@ import { Width } from '../Width'
 
 import classes from './index.module.scss'
 
-export const Select: React.FC<
-  SelectField & {
-    control: Control<FieldValues, any>
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
-  }
-> = ({ name, label, width, options, control, required, errors }) => {
+export const Select = ({
+  name,
+  label,
+  width,
+  options,
+  control,
+  required,
+  errors,
+}: SelectField & {
+  control: Control<FieldValues, any>
+  errors: Partial<
+    FieldErrorsImpl<{
+      [x: string]: any
+    }>
+  >
+}) => {
   return (
     <Width width={width}>
       <div className={classes.select}>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import classes from './index.module.scss'
 
-export type Props = {
+export type ButtonProps = {
   label?: string
   appearance?: 'default' | 'primary' | 'secondary'
   el?: 'button' | 'link' | 'a'
@@ -16,7 +16,7 @@ export type Props = {
   invert?: boolean
 }
 
-export const Button: React.FC<Props> = ({
+export function Button({
   el: elFromProps = 'link',
   label,
   newTab,
@@ -27,7 +27,7 @@ export const Button: React.FC<Props> = ({
   type = 'button',
   disabled,
   invert,
-}) => {
+}: ButtonProps) {
   let el = elFromProps
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 

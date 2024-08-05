@@ -17,7 +17,7 @@ type FormData = {
   password: string
 }
 
-const Login: React.FC = () => {
+function Login() {
   const router = useRouter()
   const searchParams = useMemo(() => new URLSearchParams(router.query as any), [router.query])
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''

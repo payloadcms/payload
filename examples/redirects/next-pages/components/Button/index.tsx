@@ -19,14 +19,14 @@ const elements = {
   button: 'button',
 }
 
-export const Button: React.FC<Props> = ({
+export const Button = ({
   el = 'button',
   label,
   newTab,
   href,
   appearance,
   className: classNameFromProps,
-}) => {
+}: Props) => {
   const Element = elements[el]
   const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button]
     .filter(Boolean)

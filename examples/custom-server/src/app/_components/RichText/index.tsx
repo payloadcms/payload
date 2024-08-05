@@ -6,11 +6,13 @@ import { CustomRenderers, Serialize as SerializeContent } from './Serialize'
 
 import classes from './index.module.scss'
 
-export const RichText: React.FC<{
+type RichTextProps = {
   className?: string
   content: any
   customRenderers?: CustomRenderers
-}> = ({ className, content, customRenderers }) => {
+}
+
+export function RichText({ className, content, customRenderers }: RichTextProps) {
   if (!content) {
     return null
   }

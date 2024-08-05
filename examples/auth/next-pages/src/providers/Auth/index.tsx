@@ -7,10 +7,12 @@ import { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } fro
 
 const Context = createContext({} as AuthContext)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 'gql' }> = ({
-  children,
-  api = 'rest',
-}) => {
+type AuthProviderProps = {
+  children: React.ReactNode
+  api?: 'rest' | 'gql'
+}
+
+export function AuthProvider({ children, api = 'rest' }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>()
 
   const create = useCallback<Create>(

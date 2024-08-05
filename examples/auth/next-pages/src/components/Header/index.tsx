@@ -7,7 +7,7 @@ import { HeaderNav } from './Nav'
 
 import classes from './index.module.scss'
 
-export const Header: React.FC = () => {
+export function Header() {
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>

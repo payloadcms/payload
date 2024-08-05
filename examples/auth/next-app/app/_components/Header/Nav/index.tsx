@@ -7,7 +7,7 @@ import { useAuth } from '../../../_providers/Auth'
 
 import classes from './index.module.scss'
 
-export const HeaderNav: React.FC = () => {
+export function HeaderNav() {
   const { user } = useAuth()
 
   return (

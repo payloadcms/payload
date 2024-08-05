@@ -8,7 +8,7 @@ import RichText from '../_components/RichText'
 
 import classes from './index.module.scss'
 
-export const PageTemplate: React.FC<{ page: Page | null | undefined }> = ({ page }) => {
+export const PageTemplate = ({ page }: { page: Page | null | undefined }) => {
   const { data } = useLivePreview({
     serverURL: process.env.NEXT_PUBLIC_PAYLOAD_URL || '',
     depth: 2,

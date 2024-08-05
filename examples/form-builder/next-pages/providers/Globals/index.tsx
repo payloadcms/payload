@@ -10,11 +10,11 @@ export interface IGlobals {
 export const GlobalsContext = createContext<IGlobals>({} as IGlobals)
 export const useGlobals = (): IGlobals => useContext(GlobalsContext)
 
-export const GlobalsProvider: React.FC<
-  IGlobals & {
+export const GlobalsProvider = (
+  props: IGlobals & {
     children: React.ReactNode
-  }
-> = props => {
+  },
+) => {
   const { mainMenu, children } = props
 
   return (

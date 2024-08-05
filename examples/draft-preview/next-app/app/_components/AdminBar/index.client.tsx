@@ -7,9 +7,9 @@ import { Gutter } from '../Gutter'
 
 import classes from './index.module.scss'
 
-const Title: React.FC = () => <span>Dashboard</span>
+const Title = () => <span>Dashboard</span>
 
-export const AdminBarClient: React.FC<PayloadAdminBarProps> = props => {
+export const AdminBarClient = (props: PayloadAdminBarProps) => {
   const [user, setUser] = useState<PayloadMeUser>()
 
   return (

@@ -7,18 +7,7 @@ import { Width } from '../Width'
 
 import classes from './index.module.scss'
 
-export const Checkbox: React.FC<
-  CheckboxField & {
-    register: UseFormRegister<FieldValues & any>
-    setValue: any
-    getValues: any
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
-  }
-> = ({
+export const Checkbox = ({
   name,
   label,
   width,
@@ -27,6 +16,15 @@ export const Checkbox: React.FC<
   getValues,
   required: requiredFromProps,
   errors,
+}: CheckboxField & {
+  register: UseFormRegister<FieldValues & any>
+  setValue: any
+  getValues: any
+  errors: Partial<
+    FieldErrorsImpl<{
+      [x: string]: any
+    }>
+  >
 }) => {
   const [checked, setChecked] = useState(false)
 

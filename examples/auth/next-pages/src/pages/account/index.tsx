@@ -19,7 +19,7 @@ type FormData = {
   passwordConfirm: string
 }
 
-const Account: React.FC = () => {
+function Account() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { user, setUser } = useAuth()

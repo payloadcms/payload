@@ -18,7 +18,7 @@ type FormData = {
   passwordConfirm: string
 }
 
-export const AccountForm: React.FC = () => {
+export function AccountForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { user, setUser } = useAuth()

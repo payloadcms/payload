@@ -13,7 +13,7 @@ interface PageParams {
   params: { slug: string }
 }
 
-export const PageTemplate: React.FC<{ page: Page | null | undefined }> = ({ page }) => (
+export const PageTemplate = ({ page }: { page: Page | null | undefined }) => (
   <main className={classes.page}>
     <Gutter>
       <h1>{page?.title}</h1>

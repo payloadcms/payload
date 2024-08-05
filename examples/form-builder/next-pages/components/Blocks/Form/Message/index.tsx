@@ -5,7 +5,7 @@ import { Width } from '../Width'
 
 import classes from './index.module.scss'
 
-export const Message: React.FC<MessageField> = ({ message }) => {
+export const Message = ({ message }: MessageField) => {
   return (
     <Width width="100">
       <RichText content={message} className={classes.message} />

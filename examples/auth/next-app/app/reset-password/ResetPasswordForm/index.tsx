@@ -16,7 +16,7 @@ type FormData = {
   token: string
 }
 
-export const ResetPasswordForm: React.FC = () => {
+export function ResetPasswordForm() {
   const [error, setError] = useState('')
   const { login } = useAuth()
   const router = useRouter()

@@ -14,7 +14,7 @@ type FormData = {
   email: string
 }
 
-export const RecoverPasswordForm: React.FC = () => {
+export function RecoverPasswordForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 

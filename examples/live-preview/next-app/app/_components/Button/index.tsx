@@ -15,7 +15,7 @@ export type Props = {
   disabled?: boolean
 }
 
-export const Button: React.FC<Props> = ({
+export const Button = ({
   el: elFromProps = 'link',
   label,
   newTab,
@@ -25,7 +25,7 @@ export const Button: React.FC<Props> = ({
   onClick,
   type = 'button',
   disabled,
-}) => {
+}: Props) => {
   let el = elFromProps
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
   const className = [

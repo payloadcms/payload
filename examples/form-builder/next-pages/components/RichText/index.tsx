@@ -3,7 +3,7 @@ import serialize from './serialize'
 
 import classes from './index.module.scss'
 
-const RichText: React.FC<{ className?: string; content: any }> = ({ className, content }) => {
+const RichText = ({ className, content }: { className?: string; content: any }) => {
   if (!content) {
     return null
   }
