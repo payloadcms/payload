@@ -32,8 +32,8 @@ export type ClientConfig = {
   admin: {
     components: {
       Avatar: MappedComponent
-      LogoutButton: MappedComponent
-      actions: MappedComponent[]
+      LogoutButton?: MappedComponent
+      actions?: MappedComponent[]
       graphics: {
         Icon: MappedComponent
         Logo: MappedComponent

@@ -80,10 +80,18 @@ export const createClientConfig = async ({
           'Component' in config.admin.avatar &&
           config.admin?.avatar.Component,
       ),
-      LogoutButton: createMappedComponent(config.admin?.components?.logout?.Button),
-      actions: config.admin?.components?.actions?.map((Component) =>
-        createMappedComponent(Component),
-      ),
+      ...(config.admin?.components?.logout?.Button
+        ? {
+            LogoutButton: createMappedComponent(config.admin?.components?.logout?.Button),
+          }
+        : {}),
+      ...(config.admin?.components?.actions && config.admin?.components?.actions.length > 0
+        ? {
+            actions: config.admin?.components?.actions?.map((Component) =>
+              createMappedComponent(Component),
+            ),
+          }
+        : {}),
       graphics: {
         Icon: createMappedComponent(
           config.admin?.components?.graphics?.Icon,

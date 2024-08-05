@@ -59,13 +59,31 @@ export const createClientGlobalConfig = ({
       }
     })
 
-    const editViewFromConfig = global?.admin?.components?.views?.Edit
+    const components = global?.admin?.components
+
+    const editViewFromConfig = components?.views?.Edit
 
     sanitized.admin.components = {
-      PreviewButton: createMappedComponent(global?.admin?.components?.elements?.PreviewButton),
-      PublishButton: createMappedComponent(global?.admin?.components?.elements?.PublishButton),
-      SaveButton: createMappedComponent(global?.admin?.components?.elements?.SaveButton),
-      SaveDraftButton: createMappedComponent(global?.admin?.components?.elements?.SaveDraftButton),
+      ...(components?.elements?.PreviewButton
+        ? {
+            PreviewButton: createMappedComponent(components?.elements?.PreviewButton),
+          }
+        : {}),
+      ...(components?.elements?.PublishButton
+        ? {
+            PublishButton: createMappedComponent(components?.elements?.PublishButton),
+          }
+        : {}),
+      ...(components?.elements?.SaveButton
+        ? {
+            SaveButton: createMappedComponent(components?.elements?.SaveButton),
+          }
+        : {}),
+      ...(components?.elements?.SaveDraftButton
+        ? {
+            SaveDraftButton: createMappedComponent(components?.elements?.SaveDraftButton),
+          }
+        : {}),
       views: {
         Edit: {
           Default: {
@@ -78,7 +96,9 @@ export const createClientGlobalConfig = ({
               },
               DefaultEditView,
             ),
-            ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
+            ...(editViewFromConfig?.Default &&
+            'actions' in editViewFromConfig.Default &&
+            editViewFromConfig.Default.actions.length > 0
               ? {
                   actions: editViewFromConfig?.Default?.actions?.map((Component) =>
                     createMappedComponent(Component),

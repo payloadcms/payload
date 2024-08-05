@@ -87,28 +87,62 @@ export const createClientCollectionConfig = ({
     }
   })
 
-  const editViewFromConfig = collection?.admin?.components?.views?.Edit
+  const components = collection?.admin?.components
 
-  const listViewFromConfig = collection?.admin?.components?.views?.List
+  const editViewFromConfig = components?.views?.Edit
+
+  const listViewFromConfig = components?.views?.List
 
   sanitized.admin.components = {
-    PreviewButton: createMappedComponent(collection?.admin?.components?.edit?.PreviewButton),
-    PublishButton: createMappedComponent(collection?.admin?.components?.edit?.PublishButton),
-    SaveButton: createMappedComponent(collection?.admin?.components?.edit?.SaveButton),
-    SaveDraftButton: createMappedComponent(collection?.admin?.components?.edit?.SaveDraftButton),
-    Upload: createMappedComponent(collection?.admin?.components?.edit?.Upload),
-    afterList: collection?.admin?.components?.afterList?.map((Component) =>
-      createMappedComponent(Component),
-    ),
-    afterListTable: collection?.admin?.components?.afterListTable?.map((Component) =>
-      createMappedComponent(Component),
-    ),
-    beforeList: collection?.admin?.components?.beforeList?.map((Component) =>
-      createMappedComponent(Component),
-    ),
-    beforeListTable: collection?.admin?.components?.beforeListTable?.map((Component) =>
-      createMappedComponent(Component),
-    ),
+    ...(components?.edit?.PreviewButton
+      ? {
+          PreviewButton: createMappedComponent(components?.edit?.PreviewButton),
+        }
+      : {}),
+    ...(components?.edit?.PublishButton
+      ? {
+          PublishButton: createMappedComponent(components?.edit?.PublishButton),
+        }
+      : {}),
+    ...(components?.edit?.SaveButton
+      ? {
+          SaveButton: createMappedComponent(components?.edit?.SaveButton),
+        }
+      : {}),
+    ...(components?.edit?.SaveDraftButton
+      ? {
+          SaveDraftButton: createMappedComponent(components?.edit?.SaveDraftButton),
+        }
+      : {}),
+    ...(components?.edit?.Upload
+      ? {
+          Upload: createMappedComponent(components?.edit?.Upload),
+        }
+      : {}),
+    ...(components?.afterList
+      ? {
+          afterList: components?.afterList?.map((Component) => createMappedComponent(Component)),
+        }
+      : {}),
+    ...(components?.afterListTable
+      ? {
+          afterListTable: components?.afterListTable?.map((Component) =>
+            createMappedComponent(Component),
+          ),
+        }
+      : {}),
+    ...(components?.beforeList
+      ? {
+          beforeList: components?.beforeList?.map((Component) => createMappedComponent(Component)),
+        }
+      : {}),
+    ...(components?.beforeListTable
+      ? {
+          beforeListTable: components?.beforeListTable?.map((Component) =>
+            createMappedComponent(Component),
+          ),
+        }
+      : {}),
     views: {
       Edit: {
         Default: {
@@ -121,7 +155,9 @@ export const createClientCollectionConfig = ({
             },
             DefaultEditView,
           ),
-          ...(editViewFromConfig?.Default && 'actions' in editViewFromConfig.Default
+          ...(editViewFromConfig?.Default &&
+          'actions' in editViewFromConfig.Default &&
+          editViewFromConfig.Default.actions.length > 0
             ? {
                 actions: editViewFromConfig?.Default?.actions?.map((Component) =>
                   createMappedComponent(Component),
@@ -138,7 +174,11 @@ export const createClientCollectionConfig = ({
           },
           DefaultListView,
         ),
-        actions: createMappedComponent(collection.admin?.components?.views?.List?.actions),
+        ...(listViewFromConfig?.actions && listViewFromConfig?.actions.length > 0
+          ? {
+              actions: createMappedComponent(components?.views?.List?.actions),
+            }
+          : {}),
       },
     },
   }

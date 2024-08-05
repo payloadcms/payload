@@ -42,11 +42,15 @@ export function getCreateMappedComponent({
           RenderedComponent: <Fallback key={key} {...serverProps} {...props} />,
         }
       } else {
-        return {
+        const toReturn: MappedComponent = {
           type: 'client',
           Component: Fallback,
-          props,
         }
+
+        // conditionally set props here to avoid bloating the HTML with `$undefined` props
+        if (props) toReturn.props = props
+
+        return toReturn
       }
     }
 
