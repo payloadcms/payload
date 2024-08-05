@@ -10,6 +10,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
+import { FileCell } from '../File/index.js'
 import './index.scss'
 
 type Value = { relationTo: string; value: number | string }
@@ -23,8 +24,10 @@ export interface RelationshipCellProps extends DefaultCellComponentProps<any> {
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
+  fieldType,
   label,
   relationTo,
+  ...props
 }) => {
   const config = useConfig()
   const { collections, routes } = config
@@ -90,11 +93,30 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
           i18n,
         })
 
+        let fileField = null
+        if (fieldType === 'upload') {
+          const { name, customCellContext, displayPreview, schemaPath } = props
+          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
+          const previewAllowed =
+            displayPreview || (relatedCollectionPreview && displayPreview !== false)
+          if (previewAllowed && document) {
+            fileField = (
+              <FileCell
+                cellData={label}
+                customCellContext={customCellContext}
+                name={name}
+                rowData={document}
+                schemaPath={schemaPath}
+              />
+            )
+          }
+        }
+
         return (
           <React.Fragment key={i}>
             {document === false && `${t('general:untitled')} - ID: ${value}`}
             {document === null && `${t('general:loading')}...`}
-            {document ? label : null}
+            {document ? fileField || label : null}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         )

@@ -94,6 +94,12 @@ export type UploadConfig = {
    */
   disableLocalStorage?: boolean
   /**
+   * Enable displaying preview of the uploaded file in Upload fields related to this Collection.
+   * Can be locally overridden by `displayPreview` option in Upload field.
+   * @default false
+   */
+  displayPreview?: boolean
+  /**
    * Ability to filter/modify Request Headers when fetching a file.
    *
    * Useful for adding custom headers to fetch from external providers.

@@ -10,6 +10,7 @@ import type { Config, Media } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
+  exactText,
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
@@ -25,6 +26,7 @@ import {
   audioSlug,
   focalOnlySlug,
   mediaSlug,
+  relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
@@ -48,6 +50,7 @@ let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
+let relationPreviewURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -70,6 +73,7 @@ describe('uploads', () => {
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
+    relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -593,5 +597,49 @@ describe('uploads', () => {
       // without focal point update this generated size was equal to 1736
       expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
     })
+  })
+
+  test('should see upload previews in relation list if allowed in config', async () => {
+    await page.goto(relationPreviewURL.list)
+
+    await wait(110)
+
+    // Show all columns with relations
+    await page.locator('.list-controls__toggle-columns').click()
+    await expect(page.locator('.column-selector')).toBeVisible()
+    const imageWithoutPreview2Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview2'),
+    })
+    const imageWithPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image With Preview3'),
+    })
+    const imageWithoutPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('Image Without Preview3'),
+    })
+    await imageWithoutPreview2Button.click()
+    await imageWithPreview3Button.click()
+    await imageWithoutPreview3Button.click()
+
+    // Wait for the columns to be displayed
+    await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
+
+    // collection's displayPreview: true, field's displayPreview: unset
+    const relationPreview1 = page.locator('.cell-imageWithPreview1 img')
+    await expect(relationPreview1).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: true
+    const relationPreview2 = page.locator('.cell-imageWithPreview2 img')
+    await expect(relationPreview2).toBeVisible()
+    // collection's displayPreview: true, field's displayPreview: false
+    const relationPreview3 = page.locator('.cell-imageWithoutPreview1 img')
+    await expect(relationPreview3).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: unset
+    const relationPreview4 = page.locator('.cell-imageWithoutPreview2 img')
+    await expect(relationPreview4).toBeHidden()
+    // collection's displayPreview: false, field's displayPreview: true
+    const relationPreview5 = page.locator('.cell-imageWithPreview3 img')
+    await expect(relationPreview5).toBeVisible()
+    // collection's displayPreview: false, field's displayPreview: false
+    const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
+    await expect(relationPreview6).toBeHidden()
   })
 })

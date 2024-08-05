@@ -397,6 +397,7 @@ export const viTranslations: DefaultTranslationsObject = {
     publishChanges: 'Xuất bản tài liệu',
     published: 'Đã xuất bản',
     publishing: 'Xuất bản',
+    restoreAsDraft: 'Khôi phục như bản nháp',
     restoreThisVersion: 'Khôi phục về phiên bản này',
     restoredSuccessfully: 'Đã khôi phục thành công.',
     restoring: 'Đang khôi phục...',

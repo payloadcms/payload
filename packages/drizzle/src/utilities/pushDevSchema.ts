@@ -12,7 +12,11 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { pushSchema } = adapter.requireDrizzleKit()
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hasDataLoss, warnings } = await pushSchema(adapter.schema, adapter.drizzle)
+  const { apply, hasDataLoss, warnings } = await pushSchema(
+    adapter.schema,
+    adapter.drizzle,
+    adapter.schemaName ? [adapter.schemaName] : undefined,
+  )
 
   if (warnings.length) {
     let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`

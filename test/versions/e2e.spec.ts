@@ -323,7 +323,7 @@ describe('versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await page.waitForURL(new RegExp(`${savedDocURL}/versions/${versionID}`))
-      await page.locator('.pill.restore-version').click()
+      await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(new RegExp(savedDocURL))
       await expect(page.locator('#field-title')).toHaveValue('v1')
@@ -559,8 +559,8 @@ describe('versions', () => {
       await payload.create({
         collection: autosaveCollectionSlug,
         data: {
-          title: 'some title',
           description: 'some description',
+          title: 'some title',
         },
         draft: true,
       })
@@ -580,8 +580,8 @@ describe('versions', () => {
       const maxOneCollection = await payload.create({
         collection: draftWithMaxCollectionSlug,
         data: {
-          title: 'initial title',
           description: 'some description',
+          title: 'initial title',
         },
         draft: true,
       })

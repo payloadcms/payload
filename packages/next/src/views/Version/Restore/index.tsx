@@ -1,6 +1,16 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, Modal, Pill, useConfig, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  ChevronIcon,
+  Modal,
+  Pill,
+  Popup,
+  PopupList,
+  useConfig,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
@@ -20,6 +30,7 @@ const Restore: React.FC<Props> = ({
   globalSlug,
   label,
   originalDocID,
+  status,
   versionDate,
   versionID,
 }) => {
@@ -32,6 +43,7 @@ const Restore: React.FC<Props> = ({
   const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const [draft, setDraft] = useState(false)
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
     label: getTranslation(label, i18n),
@@ -40,9 +52,10 @@ const Restore: React.FC<Props> = ({
 
   let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
+  const canRestoreAsDraft = status !== 'draft'
 
   if (collectionSlug) {
-    fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}`
+    fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
     redirectURL = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/${originalDocID}`,
@@ -50,7 +63,7 @@ const Restore: React.FC<Props> = ({
   }
 
   if (globalSlug) {
-    fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}`
+    fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}?draft=${draft}`
     redirectURL = formatAdminURL({
       adminRoute,
       path: `/globals/${globalSlug}`,
@@ -74,15 +87,35 @@ const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [fetchURL, redirectURL, t, i18n, router])
-
   return (
     <Fragment>
-      <Pill
-        className={[baseClass, className].filter(Boolean).join(' ')}
-        onClick={() => toggleModal(modalSlug)}
-      >
-        {t('version:restoreThisVersion')}
-      </Pill>
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        <Pill
+          className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
+          onClick={() => toggleModal(modalSlug)}
+        >
+          {t('version:restoreThisVersion')}
+        </Pill>
+        {canRestoreAsDraft && (
+          <Popup
+            button={
+              <Pill className={`${baseClass}__chevron`}>
+                <ChevronIcon />
+              </Pill>
+            }
+            caret={false}
+            render={() => (
+              <PopupList.ButtonGroup>
+                <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                  {t('version:restoreAsDraft')}
+                </PopupList.Button>
+              </PopupList.ButtonGroup>
+            )}
+            size="large"
+            verticalAlign="bottom"
+          />
+        )}
+      </div>
       <Modal className={`${baseClass}__modal`} slug={modalSlug}>
         <MinimalTemplate className={`${baseClass}__modal-template`}>
           <h1>{t('version:confirmVersionRestoration')}</h1>
@@ -94,7 +127,7 @@ const Restore: React.FC<Props> = ({
           >
             {t('general:cancel')}
           </Button>
-          <Button onClick={processing ? undefined : handleRestore}>
+          <Button onClick={processing ? undefined : () => void handleRestore()}>
             {processing ? t('version:restoring') : t('general:confirm')}
           </Button>
         </MinimalTemplate>

@@ -409,6 +409,7 @@ export const myTranslations: DefaultTranslationsObject = {
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',
     published: 'တင်ပြီးပြီ။',
     publishing: 'ထုတ်ဝေခြင်း',
+    restoreAsDraft: 'Pulihkan sebagai draf',
     restoreThisVersion: 'ဤဗားရှင်းကိုကို ပြန်ယူမည်။',
     restoredSuccessfully: 'အောင်မြင်စွာ ပြန်လည်ရယူခဲ့သည်။',
     restoring: 'ပြန်ယူနေဆဲ...',

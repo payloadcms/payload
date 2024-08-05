@@ -405,6 +405,7 @@ export const enTranslations = {
     publishChanges: 'Publish changes',
     published: 'Published',
     publishing: 'Publishing',
+    restoreAsDraft: 'Restore as draft',
     restoreThisVersion: 'Restore this version',
     restoredSuccessfully: 'Restored Successfully.',
     restoring: 'Restoring...',

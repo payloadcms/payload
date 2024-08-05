@@ -35,18 +35,17 @@ export const CreateFirstUserClient: React.FC<{
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
-      return getFormState({
+    async ({ formState: prevFormState }) =>
+      getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
-          schemaPath: userSlug,
+          schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      })
-    },
+      }),
     [apiRoute, userSlug, serverURL],
   )
 
@@ -64,14 +63,15 @@ export const CreateFirstUserClient: React.FC<{
         <LoginField required={requireEmail} type="email" />
       )}
       <PasswordField
-        autoComplete="off"
         label={t('authentication:newPassword')}
         name="password"
+        path="password"
         required
       />
       <ConfirmPasswordField />
       <RenderFields
         fieldMap={fieldMap}
+        forceRender
         operation="create"
         path=""
         readOnly={false}

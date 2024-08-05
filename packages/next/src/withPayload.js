@@ -25,7 +25,12 @@ export const withPayload = (nextConfig = {}) => {
           ...(nextConfig.experimental?.outputFileTracingExcludes?.['**/*'] || []),
           'drizzle-kit',
           'drizzle-kit/payload',
-          'libsql',
+        ],
+      },
+      outputFileTracingIncludes: {
+        '**/*': [
+          ...(nextConfig.experimental?.outputFileTracingIncludes?.['**/*'] || []),
+          '@libsql/client',
         ],
       },
       turbo: {
@@ -64,8 +69,8 @@ export const withPayload = (nextConfig = {}) => {
       ...(nextConfig?.serverExternalPackages || []),
       'drizzle-kit',
       'drizzle-kit/payload',
-      'libsql',
       'pino',
+      'libsql',
       'pino-pretty',
       'graphql',
     ],

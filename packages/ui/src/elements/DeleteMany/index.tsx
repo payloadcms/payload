@@ -79,7 +79,9 @@ export const DeleteMany: React.FC<Props> = (props) => {
           }
 
           if (json.errors) {
-            toast.error(json.message)
+            toast.error(json.message, {
+              description: json.errors.map((error) => error.message).join('\n'),
+            })
           } else {
             addDefaultError()
           }
@@ -132,7 +134,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           >
             {t('general:cancel')}
           </Button>
-          <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
+          <Button id="confirm-delete" onClick={deleting ? undefined : () => void handleDelete()}>
             {deleting ? t('general:deleting') : t('general:confirm')}
           </Button>
         </div>

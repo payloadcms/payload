@@ -87,7 +87,7 @@ export const password: Validate<string, unknown, unknown, TextField> = (
   value,
   {
     maxLength: fieldMaxLength,
-    minLength,
+    minLength = 3,
     req: {
       payload: { config },
       t,
@@ -110,6 +110,28 @@ export const password: Validate<string, unknown, unknown, TextField> = (
 
   if (required && !value) {
     return t('validation:required')
+  }
+
+  return true
+}
+
+export const confirmPassword: Validate<string, unknown, unknown, TextField> = (
+  value,
+  { req: { data, t }, required },
+) => {
+  if (required && !value) {
+    return t('validation:required')
+  }
+
+  if (
+    value &&
+    typeof data.formState === 'object' &&
+    'password' in data.formState &&
+    typeof data.formState.password === 'object' &&
+    'value' in data.formState.password &&
+    value !== data.formState.password.value
+  ) {
+    return t('fields:passwordsDoNotMatch')
   }
 
   return true
@@ -691,6 +713,7 @@ export default {
   blocks,
   checkbox,
   code,
+  confirmPassword,
   date,
   email,
   json,

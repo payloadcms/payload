@@ -7,6 +7,7 @@ import type { Context } from '../types.js'
 export type Resolver = (
   _: unknown,
   args: {
+    draft?: boolean
     id: number | string
   },
   context: {
@@ -20,6 +21,7 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       id: args.id,
       collection,
       depth: 0,
+      draft: args.draft,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
