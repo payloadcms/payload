@@ -40,10 +40,10 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
     },
   ]
 
-  let icons = payloadIcons
+  let icons = customIcons ?? payloadIcons // TODO: fix this type assertion
 
   if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = customIcons
+    icons = payloadIcons.concat(customIcons) // TODO: fix this type assertion
   }
 
   const metaTitle = `${title} ${titleSuffix}`
