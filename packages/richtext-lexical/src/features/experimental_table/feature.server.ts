@@ -6,6 +6,8 @@ import { sanitizeFields } from 'payload'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { TableFeatureClient } from '../../exports/client/index.js'
 import { createServerFeature } from '../../utilities/createServerFeature.js'
+import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { createNode } from '../typeUtilities.js'
 
 const fields: Field[] = [
   {
@@ -41,15 +43,75 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         return schemaMap
       },
       nodes: [
-        {
+        createNode({
+          converters: {
+            html: {
+              converter: async ({ converters, node, parent, req }) => {
+                const childrenText = await convertLexicalNodesToHTML({
+                  converters,
+                  lexicalNodes: node.children,
+                  parent: {
+                    ...node,
+                    parent,
+                  },
+                  req,
+                })
+                return `<table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table>`
+              },
+              nodeTypes: [TableNode.getType()],
+            },
+          },
           node: TableNode,
-        },
-        {
+        }),
+        createNode({
+          converters: {
+            html: {
+              converter: async ({ converters, node, parent, req }) => {
+                const childrenText = await convertLexicalNodesToHTML({
+                  converters,
+                  lexicalNodes: node.children,
+                  parent: {
+                    ...node,
+                    parent,
+                  },
+                  req,
+                })
+
+                const tagName = node.headerState > 0 ? 'th' : 'td'
+                const headerStateClass = `lexical-table-cell-header-${node.headerState}`
+                const backgroundColor = node.backgroundColor
+                  ? `background-color: ${node.backgroundColor};`
+                  : ''
+                const colSpan = node.colSpan > 1 ? `colspan="${node.colSpan}"` : ''
+                const rowSpan = node.rowSpan > 1 ? `rowspan="${node.rowSpan}"` : ''
+
+                return `<${tagName} class="lexical-table-cell ${headerStateClass}" style="border: 1px solid #ccc; padding: 8px; ${backgroundColor}" ${colSpan} ${rowSpan}>${childrenText}</${tagName}>`
+              },
+              nodeTypes: [TableCellNode.getType()],
+            },
+          },
           node: TableCellNode,
-        },
-        {
+        }),
+        createNode({
+          converters: {
+            html: {
+              converter: async ({ converters, node, parent, req }) => {
+                const childrenText = await convertLexicalNodesToHTML({
+                  converters,
+                  lexicalNodes: node.children,
+                  parent: {
+                    ...node,
+                    parent,
+                  },
+                  req,
+                })
+                return `<tr class="lexical-table-row">${childrenText}</tr>`
+              },
+              nodeTypes: [TableRowNode.getType()],
+            },
+          },
           node: TableRowNode,
-        },
+        }),
       ],
     }
   },
