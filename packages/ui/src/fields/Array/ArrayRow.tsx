@@ -50,6 +50,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   indexPath,
+  isDragging,
   isSortable,
   labels,
   listeners,
@@ -65,6 +66,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  transition,
 }) => {
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
@@ -91,6 +93,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       ref={setNodeRef}
       style={{
         transform,
+        transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible

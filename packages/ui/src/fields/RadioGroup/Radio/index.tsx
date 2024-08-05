@@ -39,7 +39,14 @@ export const Radio: React.FC<{
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
           type="radio"
         />
-        <span className={`${baseClass}__styled-radio`} />
+        <span
+          className={[
+            `${baseClass}__styled-radio`,
+            readOnly && `${baseClass}__styled-radio--disabled`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        />
         <span className={`${baseClass}__label`}>{getTranslation(option.label, i18n)}</span>
       </div>
     </label>

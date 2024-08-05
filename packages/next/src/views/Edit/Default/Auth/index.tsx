@@ -190,7 +190,7 @@ export const Auth: React.FC<Props> = (props) => {
                 buttonStyle="secondary"
                 disabled={disabled}
                 onClick={() => handleChangePassword(false)}
-                size="small"
+                size="medium"
               >
                 {t('general:cancel')}
               </Button>
@@ -201,7 +201,7 @@ export const Auth: React.FC<Props> = (props) => {
                 disabled={disabled}
                 id="change-password"
                 onClick={() => handleChangePassword(true)}
-                size="small"
+                size="medium"
               >
                 {t('authentication:changePassword')}
               </Button>
@@ -211,7 +211,7 @@ export const Auth: React.FC<Props> = (props) => {
                 buttonStyle="secondary"
                 disabled={disabled}
                 onClick={() => void unlock()}
-                size="small"
+                size="medium"
               >
                 {t('authentication:forceUnlock')}
               </Button>

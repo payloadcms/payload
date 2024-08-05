@@ -69,9 +69,16 @@
     }
 
     .toast-icon {
-      svg {
-        width: base(1);
-        height: base(1);
+      width: base(1);
+      height: base(1);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      & > * {
+        width: base(1.2);
+        height: base(1.2);
       }
     }
 

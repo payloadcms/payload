@@ -2,9 +2,12 @@
 
 .thumbnail-card {
   @include btn-reset;
-  @include shadow;
+  @include shadow-m;
   width: 100%;
   background: var(--theme-input-bg);
+  border: 1px solid var(--theme-border-color);
+  border-radius: var(--style-radius-m);
+  transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
 
   &__label {
     padding: base(0.5);
@@ -16,6 +19,12 @@
 
   &--has-on-click {
     cursor: pointer;
+
+    &:hover,
+    &:focus,
+    &:active {
+      border: 1px solid var(--theme-elevation-350);
+    }
   }
 
   &--align-label-center {

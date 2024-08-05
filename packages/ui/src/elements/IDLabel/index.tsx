@@ -12,7 +12,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
 }) => (
   <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
     {prefix}
-    &nbsp;&nbsp;
+    &nbsp;
     {id}
   </div>
 )

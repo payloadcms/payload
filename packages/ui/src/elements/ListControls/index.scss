@@ -5,6 +5,9 @@
     display: flex;
     align-items: center;
     background-color: var(--theme-elevation-50);
+    border-radius: var(--style-radius-m);
+    padding: base(0.6);
+    gap: base(0.6);
   }
 
   .search-filter {
@@ -18,21 +21,13 @@
   &__buttons-wrap {
     display: flex;
     align-items: center;
-    gap: base(0.5);
-
-    [dir='ltr'] & {
-      margin-right: base(0.5);
-    }
-
-    [dir='rtl'] & {
-      margin-left: base(0.5);
-    }
+    gap: base(0.2);
 
     .pill {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--theme-elevation-150);
 
       &:hover {
-        background-color: var(--theme-elevation-150);
+        background-color: var(--theme-elevation-100);
       }
     }
   }
@@ -56,7 +51,6 @@
     }
 
     .search-filter {
-      margin-bottom: base(0.5);
       width: 100%;
     }
 
