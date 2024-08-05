@@ -1,11 +1,5 @@
 'use client'
-import type {
-  CellComponentProps,
-  ClientFieldConfig,
-  FieldBase,
-  FieldTypes,
-  MappedComponent,
-} from 'payload'
+import type { CellComponentProps, ClientFieldConfig, MappedComponent } from 'payload'
 
 import React from 'react'
 
@@ -21,17 +15,14 @@ export { TableCellProvider }
 const baseClass = 'table'
 
 export type Column = {
-  Label: React.ReactNode
-  accessor: string
-  active: boolean
-  admin?: FieldBase['admin']
-  cellProps?: Partial<CellComponentProps>
-  components: {
+  readonly Label: React.ReactNode
+  readonly accessor: string
+  readonly active: boolean
+  readonly cellProps?: Partial<CellComponentProps>
+  readonly components: {
     Cell: MappedComponent
     Heading: React.ReactNode
   }
-  name: FieldBase['name']
-  type: FieldTypes
 }
 
 export type Props = {

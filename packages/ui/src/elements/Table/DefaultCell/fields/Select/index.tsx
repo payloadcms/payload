@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps, OptionObject } from 'payload'
+import type { DefaultCellComponentProps, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { optionsAreObjects } from 'payload/shared'
@@ -7,11 +7,12 @@ import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface SelectCellProps extends DefaultCellComponentProps<any> {
-  options: CellComponentProps['options']
-}
+export interface SelectCellProps extends DefaultCellComponentProps<any> {}
 
-export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options }) => {
+export const SelectCell: React.FC<SelectCellProps> = ({
+  cellData,
+  clientFieldConfig: { options },
+}) => {
   const { i18n } = useTranslation()
 
   const findLabel = (items: string[]) =>

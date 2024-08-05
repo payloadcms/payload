@@ -99,10 +99,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     if (listSearchableFields?.length > 0) {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
-          const label =
-            'fieldComponentProps' in field && 'label' in field && field.label
-              ? field.label
-              : field.name
+          const label = 'label' in field && field.label ? field.label : field.name
 
           if (i === 0) {
             return `${t('general:searchBy', {

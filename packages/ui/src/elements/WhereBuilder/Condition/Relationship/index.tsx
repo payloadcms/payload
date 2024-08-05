@@ -22,9 +22,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const hasMultipleRelations = Array.isArray(relationTo)

@@ -1,16 +1,17 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface ArrayCellProps extends DefaultCellComponentProps<Record<string, unknown>[]> {
-  labels: CellComponentProps['labels']
-}
+export interface ArrayCellProps extends DefaultCellComponentProps<Record<string, unknown>[]> {}
 
-export const ArrayCell: React.FC<ArrayCellProps> = ({ cellData, labels }) => {
+export const ArrayCell: React.FC<ArrayCellProps> = ({
+  cellData,
+  clientFieldConfig: { labels },
+}) => {
   const { i18n } = useTranslation()
 
   const arrayFields = cellData ?? []

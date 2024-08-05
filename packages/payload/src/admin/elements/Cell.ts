@@ -1,47 +1,25 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type {
-  BlockField,
-  DateField,
-  Field,
-  FieldBase,
-  Labels,
-  RelationshipField,
-  SelectField,
-} from '../../fields/config/types.js'
-import type { FormFieldBase } from '../types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 
 export type RowData = Record<string, any>
 
 export type CellComponentProps = {
-  blocks?: {
-    labels: BlockField['labels']
-    slug: string
-  }[]
-  className?: string
-  dateDisplayFormat?: DateField['admin']['date']['displayFormat']
-  displayPreview?: boolean
-  fieldType?: Field['type']
-  isFieldAffectingData?: boolean
-  label?: FormFieldBase['label']
-  labels?: Labels
-  link?: boolean
-  name: FieldBase['name']
-  onClick?: (args: {
+  readonly className?: string
+  readonly clientFieldConfig: ClientFieldConfig
+  readonly link?: boolean
+  readonly onClick?: (args: {
     cellData: unknown
     collectionSlug: SanitizedCollectionConfig['slug']
     rowData: RowData
   }) => void
-  options?: SelectField['options']
-  relationTo?: RelationshipField['relationTo']
-  richTextComponentMap?: Map<string, unknown>
-  schemaPath: string
+  readonly richTextComponentMap?: Map<string, unknown>
 }
 
 export type DefaultCellComponentProps<T = any> = {
-  cellData: T
-  customCellContext?: {
+  readonly cellData: T
+  readonly customCellContext?: {
     collectionSlug?: SanitizedCollectionConfig['slug']
     uploadConfig?: SanitizedCollectionConfig['upload']
   }
-  rowData: RowData
+  readonly rowData: RowData
 } & CellComponentProps

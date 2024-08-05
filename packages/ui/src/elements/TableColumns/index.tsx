@@ -28,12 +28,12 @@ export type ListPreferences = {
 }
 
 type Props = {
-  cellProps?: Partial<CellComponentProps>[]
-  children: React.ReactNode
-  collectionSlug: string
-  enableRowSelections?: boolean
-  listPreferences?: ListPreferences
-  preferenceKey: string
+  readonly cellProps?: Partial<CellComponentProps>[]
+  readonly children: React.ReactNode
+  readonly collectionSlug: string
+  readonly enableRowSelections?: boolean
+  readonly listPreferences?: ListPreferences
+  readonly preferenceKey: string
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({

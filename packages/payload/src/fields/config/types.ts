@@ -660,6 +660,7 @@ export type SingleRelationshipField = {
   } & RelationshipAdmin
   relationTo: CollectionSlug
 } & SharedRelationshipProperties
+
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
