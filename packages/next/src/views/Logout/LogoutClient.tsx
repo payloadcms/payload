@@ -20,7 +20,7 @@ export const LogoutClient: React.FC<{
   useEffect(() => {
     if (!isLoggingOut) {
       setIsLoggingOut(true)
-      logOut()
+      void logOut()
     }
   }, [isLoggingOut, logOut])
 
@@ -33,6 +33,7 @@ export const LogoutClient: React.FC<{
           Link={Link}
           buttonStyle="secondary"
           el="link"
+          size="large"
           url={formatAdminURL({
             adminRoute,
             path: `/login${

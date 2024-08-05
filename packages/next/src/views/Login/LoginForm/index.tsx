@@ -113,7 +113,7 @@ export const LoginForm: React.FC<{
       >
         {t('authentication:forgotPasswordQuestion')}
       </Link>
-      <FormSubmit>{t('authentication:login')}</FormSubmit>
+      <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
     </Form>
   )
 }

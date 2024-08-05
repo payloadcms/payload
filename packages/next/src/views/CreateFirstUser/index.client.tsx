@@ -77,7 +77,7 @@ export const CreateFirstUserClient: React.FC<{
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

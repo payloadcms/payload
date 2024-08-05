@@ -38,7 +38,13 @@ export const NotFoundClient: React.FC<{
       <Gutter className={`${baseClass}__wrap`}>
         <h1>{t('general:nothingFound')}</h1>
         <p>{t('general:sorryNotFound')}</p>
-        <Button Link={Link} className={`${baseClass}__button`} el="link" to={adminRoute}>
+        <Button
+          Link={Link}
+          className={`${baseClass}__button`}
+          el="link"
+          size="large"
+          to={adminRoute}
+        >
           {t('general:backToDashboard')}
         </Button>
       </Gutter>
