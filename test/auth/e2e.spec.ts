@@ -56,7 +56,6 @@ const createFirstUser = async ({
   // forget to fill out confirm password
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
-  await wait(500)
   await page.locator('.form-submit > button').click()
   await expect(page.locator('.field-type.confirm-password .field-error')).toHaveText(
     'This field is required.',
@@ -66,7 +65,6 @@ const createFirstUser = async ({
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill('12')
   await page.locator('#field-confirm-password').fill('12')
-  await wait(500)
   await page.locator('.form-submit > button').click()
   await expect(page.locator('.field-type.password .field-error')).toHaveText(
     'This value must be longer than the minimum length of 3 characters.',
@@ -76,7 +74,6 @@ const createFirstUser = async ({
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)
   await page.locator('#field-custom').fill('Hello, world!')
-  await wait(500)
   await page.locator('.form-submit > button').click()
 
   await expect

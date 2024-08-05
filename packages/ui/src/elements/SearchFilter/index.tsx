@@ -13,7 +13,6 @@ export type SearchFilterProps = {
 import type { ParsedQs } from 'qs-esm'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
-import { SearchIcon } from '../../icons/Search/index.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
@@ -49,7 +48,6 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
         type="text"
         value={value || ''}
       />
-      <SearchIcon />
     </div>
   )
 }

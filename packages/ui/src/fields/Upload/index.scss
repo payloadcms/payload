@@ -6,16 +6,16 @@
 
   &__wrap {
     background: var(--theme-elevation-50);
-    padding: base(1);
+    padding: base(1.6);
+    border-radius: $style-radius-s;
   }
 
   &__buttons {
-    margin: base(-0.25);
     width: calc(100% + #{base(0.5)});
     flex-wrap: wrap;
     display: flex;
     align-items: center;
-    gap: base(0.25);
+    gap: base(0.4);
 
     .btn {
       margin: 0;
@@ -33,6 +33,13 @@
 
     &__toggler {
       width: calc(100% - #{base(0.5)});
+    }
+  }
+
+  &.read-only {
+    .file-details {
+      @include readOnly;
+      color: var(--theme-elevation-600);
     }
   }
 }

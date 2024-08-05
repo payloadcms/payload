@@ -2,7 +2,6 @@
 
 .collection-list {
   width: 100%;
-  margin-top: base(0.5);
 
   &__wrap {
     padding-bottom: var(--spacing-view-bottom);
@@ -14,7 +13,7 @@
 
   &__header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     flex-wrap: wrap;
     gap: base(0.75);
 
@@ -28,14 +27,12 @@
 
     .pill {
       position: relative;
-      top: -14px;
       margin: 0;
     }
   }
 
   &__sub-header {
     flex-basis: 100%;
-    margin-top: base(0.25);
   }
 
   .table {
@@ -57,7 +54,7 @@
       #heading-_select,
       .cell-_select {
         min-width: unset;
-        width: auto;
+        width: base(1);
       }
     }
   }

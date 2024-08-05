@@ -21,8 +21,9 @@
 
   &__input {
     @include formInput;
+    height: auto;
+    padding: 0;
     box-shadow: none;
-    padding-left: base(2);
     background-color: var(--theme-elevation-50);
     border: none;
 

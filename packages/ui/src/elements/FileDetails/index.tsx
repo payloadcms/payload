@@ -42,6 +42,8 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
     <div className={baseClass}>
       <header>
         <Thumbnail
+          // size="small"
+          className={`${baseClass}__thumbnail`}
           collectionSlug={collectionSlug}
           doc={doc}
           fileSrc={thumbnailURL || url}
@@ -60,12 +62,14 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
             width={width as number}
           />
 
-          <UploadActions
-            customActions={customUploadActions}
-            enableAdjustments={enableAdjustments}
-            enablePreviewSizes={hasImageSizes && doc.filename}
-            mimeType={mimeType}
-          />
+          {(enableAdjustments || customUploadActions) && (
+            <UploadActions
+              customActions={customUploadActions}
+              enableAdjustments={enableAdjustments}
+              enablePreviewSizes={hasImageSizes && doc.filename}
+              mimeType={mimeType}
+            />
+          )}
         </div>
         {handleRemove && (
           <Button

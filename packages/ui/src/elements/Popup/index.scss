@@ -9,6 +9,12 @@
   --popup-padding: calc(var(--base) * 0.5);
   position: relative;
 
+  &__trigger-wrap {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+  }
+
   &__content {
     position: absolute;
     background: var(--popup-bg);

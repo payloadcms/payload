@@ -1,4 +1,5 @@
 import type { Block, BlockField } from '../../fields/config/types.js'
+import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
@@ -12,6 +13,7 @@ export type BlocksFieldProps = {
   minRows?: number
   name?: string
   slug?: string
+  validate?: BlockFieldValidation
   width?: string
 } & FormFieldBase
 
