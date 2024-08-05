@@ -7,6 +7,7 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -106,7 +107,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderComponent mappedComponent={BeforeInput} />
         <ReactSelect
           disabled={readOnly}
           isClearable={isClearable}
@@ -120,13 +121,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           showError={showError}
           value={valueToRender as OptionObject}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }

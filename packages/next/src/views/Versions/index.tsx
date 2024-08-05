@@ -1,4 +1,4 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
 import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -13,7 +13,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: EditViewComponent = async (props) => {
+export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {

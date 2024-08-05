@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-duplicate-type-constituents: 0 */ // --> OFF
+
 import type { ArrayFieldProps } from './Array.js'
 import type { BlocksFieldProps } from './Blocks.js'
 import type { CheckboxFieldProps } from './Checkbox.js'

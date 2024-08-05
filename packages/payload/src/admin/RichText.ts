@@ -1,13 +1,18 @@
 import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type React from 'react'
 
+import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
+import type {
+  Config,
+  PayloadComponent,
+  ResolvedComponent,
+  SanitizedConfig,
+} from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
-import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
+import type { CreateMappedComponent } from './types.js'
 
 export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
   path?: string
@@ -180,19 +185,25 @@ export type RichTextHooks = {
   beforeValidate?: BeforeValidateRichTextHook[]
 }
 
+export type RichTextGenerateComponentMap = (args: {
+  config: SanitizedConfig
+  createMappedComponent: CreateMappedComponent
+  field: RichTextField
+  i18n: I18nClient
+  importMap: ImportMap
+  schemaPath: string
+}) => Map<string, unknown>
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentMap: (args: {
-    WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
-    config: SanitizedConfig
-    i18n: I18nClient
-    schemaPath: string
-  }) => Map<string, React.ReactNode>
+  generateComponentMap: PayloadComponent<any, never>
+  generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    field: RichTextField
     i18n: I18n<any, any>
     schemaMap: Map<string, Field[]>
     schemaPath: string
@@ -245,12 +256,15 @@ type RichTextAdapterBase<
 }
 
 export type RichTextAdapter<
-  Value extends object = object,
+  Value extends object = any,
   AdapterProps = any,
-  ExtraFieldProperties = {},
+  ExtraFieldProperties = any,
 > = {
-  CellComponent: React.FC<any>
-  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+  CellComponent: PayloadComponent<never>
+  FieldComponent: PayloadComponent<
+    never,
+    RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>
+  >
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

@@ -14,6 +14,11 @@ const defaultValueField: TextField = {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',

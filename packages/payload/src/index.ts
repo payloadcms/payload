@@ -17,6 +17,7 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
+import type { ImportMap } from './bin/generateImportMap/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -147,11 +148,10 @@ export class BasePayload {
   authStrategies: AuthStrategy[]
 
   collections: {
-    [slug: number | string | symbol]: Collection
+    [slug: string]: Collection
   } = {}
 
   config: SanitizedConfig
-
   /**
    * @description Performs count operation
    * @param options
@@ -175,8 +175,8 @@ export class BasePayload {
     const { create } = localOperations
     return create<TSlug>(this, options)
   }
-  db: DatabaseAdapter
 
+  db: DatabaseAdapter
   decrypt = decrypt
 
   duplicate = async <TSlug extends CollectionSlug>(
@@ -188,10 +188,10 @@ export class BasePayload {
 
   email: InitializedEmailAdapter
 
+  encrypt = encrypt
+
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
-
-  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -290,6 +290,8 @@ export class BasePayload {
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
 
   globals: Globals
+
+  importMap: ImportMap
 
   logger: Logger
 
@@ -479,6 +481,8 @@ export class BasePayload {
       }
     }
 
+    this.importMap = options.importMap
+
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
@@ -666,7 +670,6 @@ interface RequestContext {
 
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export type { FieldTypes } from './admin/forms/FieldTypes.js'
 export type * from './admin/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
@@ -698,6 +701,10 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
+export { generateImportMap } from './bin/generateImportMap/index.js'
+export type { ImportMap } from './bin/generateImportMap/index.js'
+
+export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
 export { createClientCollectionConfig } from './collections/config/client.js'
 export type {
@@ -752,16 +759,8 @@ export type { ClientConfig } from './config/client.js'
 export { createClientConfig } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
-export type {
-  Access,
-  AccessArgs,
-  EditViewComponent,
-  EntityDescription,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
-  SanitizedConfig,
-} from './config/types.js'
-export * from './config/types.js'
+
+export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
@@ -883,6 +882,7 @@ export type {
   FieldHook,
   FieldHookArgs,
   FieldPresentationalOnly,
+  FieldTypes,
   FieldWithMany,
   FieldWithMaxDepth,
   FieldWithPath,

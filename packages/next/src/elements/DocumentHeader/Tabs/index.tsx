@@ -1,11 +1,12 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Payload,
   Permissions,
   SanitizedCollectionConfig,
-  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { isPlainObject } from 'payload'
 import React from 'react'
 
@@ -20,12 +21,13 @@ const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
+  payload: Payload
   permissions: Permissions
 }> = (props) => {
-  const { collectionConfig, config, globalConfig, permissions } = props
+  const { collectionConfig, globalConfig, i18n, payload, permissions } = props
+  const { config } = payload
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
@@ -82,7 +84,29 @@ export const DocumentTabs: React.FC<{
                 }
 
                 if (typeof Tab === 'function') {
-                  return <Tab path={path} {...props} key={`tab-custom-${index}`} />
+                  const createMappedComponent = getCreateMappedComponent({
+                    importMap: payload.importMap,
+                    serverProps: {
+                      i18n,
+                      payload,
+                      permissions,
+                      ...props,
+                      key: `tab-custom-${index}`,
+                      path,
+                    },
+                  })
+
+                  const mappedTab = createMappedComponent(Tab)
+                  return (
+                    <RenderComponent
+                      clientProps={{
+                        key: `tab-custom-${index}`,
+                        path,
+                      }}
+                      key={`tab-custom-${index}`}
+                      mappedComponent={mappedTab}
+                    />
+                  )
                 }
 
                 return (

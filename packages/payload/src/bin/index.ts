@@ -1,9 +1,9 @@
-/* eslint-disable no-console */
 import minimist from 'minimist'
 
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
+import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { loadEnv } from './loadEnv.js'
 import { migrate } from './migrate.js'
@@ -40,6 +40,10 @@ export const bin = async () => {
 
   if (script === 'generate:types') {
     return generateTypes(config)
+  }
+
+  if (script === 'generate:importmap') {
+    return generateImportMap(config)
   }
 
   console.log(`Unknown script: "${script}".`)

@@ -34,13 +34,17 @@ export const buildVersionColumns = ({
       accessor: 'updatedAt',
       active: true,
       components: {
-        Cell: (
-          <CreatedAtCell
-            collectionSlug={collectionConfig?.slug}
-            docID={docID}
-            globalSlug={globalConfig?.slug}
-          />
-        ),
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: (
+            <CreatedAtCell
+              collectionSlug={collectionConfig?.slug}
+              docID={docID}
+              globalSlug={globalConfig?.slug}
+            />
+          ),
+        },
         Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
       },
     },
@@ -51,7 +55,11 @@ export const buildVersionColumns = ({
       accessor: 'id',
       active: true,
       components: {
-        Cell: <IDCell />,
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: <IDCell />,
+        },
         Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
       },
     },
@@ -68,12 +76,17 @@ export const buildVersionColumns = ({
       accessor: '_status',
       active: true,
       components: {
-        Cell: (
-          <AutosaveCell
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-          />
-        ),
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: (
+            <AutosaveCell
+              latestDraftVersion={latestDraftVersion}
+              latestPublishedVersion={latestPublishedVersion}
+            />
+          ),
+        },
+
         Heading: <SortColumn Label={t('version:status')} disable name="status" />,
       },
     })

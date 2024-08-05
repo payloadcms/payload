@@ -1,9 +1,25 @@
-import type { CellComponentProps, FieldComponentProps } from '../types.js'
-import type { FieldTypes } from './FieldTypes.js'
+import type { BlockField, FieldTypes, TabsField } from '../../fields/config/types.js'
+import type { CellComponentProps, FieldComponentProps, MappedComponent } from '../types.js'
+
+export type MappedTab = {
+  fieldMap?: FieldMap
+  label: TabsField['tabs'][0]['label']
+  name?: string
+}
+
+export type ReducedBlock = {
+  LabelComponent: MappedComponent
+  custom?: Record<any, string>
+  fieldMap: FieldMap
+  imageAltText?: string
+  imageURL?: string
+  labels: BlockField['labels']
+  slug: string
+}
 
 export type MappedField = {
-  CustomCell?: React.ReactNode
-  CustomField?: React.ReactNode
+  Cell?: MappedComponent
+  Field?: MappedComponent
   cellComponentProps: CellComponentProps
   custom?: Record<any, string>
   disableBulkEdit?: boolean
@@ -17,7 +33,7 @@ export type MappedField = {
   isSidebar?: boolean
   localized: boolean
   name?: string
-  type: keyof FieldTypes
+  type: FieldTypes
   unique?: boolean
 }
 

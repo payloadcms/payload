@@ -63,7 +63,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const activeColumnsIndices = []
 
-  const sorted = sortedFieldMap.reduce((acc, field, index) => {
+  const sorted: Column[] = sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
       (preference) => 'name' in field && preference.accessor === field.name,
     )
@@ -85,13 +85,6 @@ export const buildColumnState = (args: Args): Column[] => {
     const isFirstActiveColumn = activeColumnsIndices[0] === index
 
     const name = 'name' in field ? field.name : undefined
-
-    const Cell =
-      field.CustomCell !== undefined ? (
-        field.CustomCell
-      ) : (
-        <DefaultCell {...field.cellComponentProps} />
-      )
 
     const CustomLabelToRender =
       field &&
@@ -149,7 +142,7 @@ export const buildColumnState = (args: Args): Column[] => {
               : undefined,
         },
         components: {
-          Cell,
+          Cell: field.Cell,
           Heading,
         },
       }
@@ -163,13 +156,18 @@ export const buildColumnState = (args: Args): Column[] => {
   if (enableRowSelections) {
     sorted.unshift({
       name: '',
+      type: null,
+      Label: null,
       accessor: '_select',
       active: true,
       components: {
-        Cell: <SelectRow />,
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: <SelectRow />,
+        },
         Heading: <SelectAll />,
       },
-      label: null,
     })
   }
 

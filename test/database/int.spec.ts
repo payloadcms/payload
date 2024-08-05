@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +24,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({

@@ -94,10 +94,16 @@ export default buildConfigWithDefaults({
     },
   },
   admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     custom: {
       client: {
         'new-value': 'client available',
       },
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
   },
   localization: {

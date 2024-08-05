@@ -1,9 +1,12 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise, {
+import {
   accessControlSlug,
   arraySlug,
   defaultValueSlug,
@@ -15,9 +18,12 @@ import configPromise, {
 let payload: Payload
 let restClient: NextRESTClient
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('globals', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

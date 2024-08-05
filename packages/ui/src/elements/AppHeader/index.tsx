@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -78,7 +79,7 @@ export const AppHeader: React.FC = () => {
                       }
                       key={i}
                     >
-                      {Action}
+                      <RenderComponent mappedComponent={Action} />
                     </div>
                   ))}
               </div>

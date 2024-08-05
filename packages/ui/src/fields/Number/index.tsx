@@ -11,6 +11,7 @@ import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -179,7 +180,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
+            <RenderComponent mappedComponent={BeforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -196,14 +197,10 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            {AfterInput}
+            <RenderComponent mappedComponent={AfterInput} />
           </div>
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

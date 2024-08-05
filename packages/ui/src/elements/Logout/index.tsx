@@ -1,7 +1,8 @@
 'use client'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -51,7 +52,7 @@ export const Logout: React.FC<{
   } = useComponentMap()
 
   if (CustomLogout) {
-    return <Fragment>{CustomLogout}</Fragment>
+    return <RenderComponent mappedComponent={CustomLogout} />
   }
 
   return <DefaultLogout Link={Link} tabIndex={tabIndex} />

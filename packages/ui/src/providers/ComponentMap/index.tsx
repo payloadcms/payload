@@ -22,8 +22,8 @@ export type IComponentMapContext = {
 const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
 
 export const ComponentMapProvider: React.FC<{
-  children: React.ReactNode
-  componentMap: ComponentMap
+  readonly children: React.ReactNode
+  readonly componentMap: ComponentMap
 }> = ({ children, componentMap }) => {
   const getMappedFieldByPath: IComponentMapContext['getMappedFieldByPath'] = useCallback(
     ({ collectionSlug, globalSlug, path }) => {
@@ -75,7 +75,12 @@ export const ComponentMapProvider: React.FC<{
 
   return (
     <ComponentMapContext.Provider
-      value={{ componentMap, getComponentMap, getFieldMap, getMappedFieldByPath }}
+      value={{
+        componentMap,
+        getComponentMap,
+        getFieldMap,
+        getMappedFieldByPath,
+      }}
     >
       {children}
     </ComponentMapContext.Provider>

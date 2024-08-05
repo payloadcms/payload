@@ -1,9 +1,14 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { Post, Relation } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('Relationship Object IDs Plugin', () => {
   let relations: Relation[]
@@ -11,7 +16,7 @@ describe('Relationship Object IDs Plugin', () => {
   let payload: Payload
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   it('seeds data accordingly', async () => {

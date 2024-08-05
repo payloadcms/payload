@@ -1,16 +1,17 @@
 'use client'
-import type { LabelProps, SanitizedLabelProps } from 'payload'
+import type { LabelProps, MappedComponent, SanitizedLabelProps } from 'payload'
 
 import React from 'react'
 
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
-  AfterInput?: React.ReactNode
-  BeforeInput?: React.ReactNode
-  CustomLabel?: React.ReactNode
+  AfterInput?: MappedComponent[]
+  BeforeInput?: MappedComponent[]
+  CustomLabel?: MappedComponent
   checked?: boolean
   className?: string
   id?: string
@@ -54,7 +55,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         .join(' ')}
     >
       <div className={`${inputBaseClass}__input`}>
-        {BeforeInput}
+        <RenderComponent mappedComponent={BeforeInput} />
         <input
           aria-label=""
           defaultChecked={Boolean(checked)}
@@ -74,7 +75,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {checked && <CheckIcon />}
           {!checked && partialChecked && <LineIcon />}
         </span>
-        {AfterInput}
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
       <FieldLabel
         CustomLabel={CustomLabel}

@@ -16,12 +16,13 @@ import { handleAuthRedirect } from './handleAuthRedirect.js'
 
 export const initPage = async ({
   config: configPromise,
+  importMap,
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise, importMap })
 
   const {
     collections,

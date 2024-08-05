@@ -60,12 +60,11 @@ export const RenderFields: React.FC<Props> = (props) => {
           fieldMap?.map((f, fieldIndex) => {
             const {
               type,
-              CustomField,
+              Field,
               custom,
               disabled,
               fieldComponentProps,
               fieldComponentProps: { readOnly },
-              isHidden,
             } = f
 
             const forceRenderChildren =
@@ -75,12 +74,11 @@ export const RenderFields: React.FC<Props> = (props) => {
 
             return (
               <RenderField
-                CustomField={CustomField}
+                Field={Field}
                 custom={custom}
                 disabled={disabled}
                 fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
-                isHidden={isHidden}
                 key={fieldIndex}
                 name={name}
                 path={path}

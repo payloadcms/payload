@@ -114,11 +114,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }

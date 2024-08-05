@@ -13,7 +13,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { LoginField } from '../Login/LoginField/index.js'
 
@@ -22,7 +22,7 @@ export const CreateFirstUserClient: React.FC<{
   loginType: 'email' | 'emailOrUsername' | 'username'
   requireEmail?: boolean
   userSlug: string
-}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
+}> = ({ initialState, loginType, requireEmail: requireEmailFromProps = true, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -33,6 +33,14 @@ export const CreateFirstUserClient: React.FC<{
   const { t } = useTranslation()
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
+
+  const requireEmail = useMemo(() => {
+    if (loginType === 'email') {
+      return true
+    }
+
+    return requireEmailFromProps
+  }, [loginType, requireEmailFromProps])
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) =>
@@ -64,6 +72,7 @@ export const CreateFirstUserClient: React.FC<{
       )}
       <PasswordField
         label={t('authentication:newPassword')}
+        labelProps={{ htmlFor: 'field-password' }}
         name="password"
         path="password"
         required

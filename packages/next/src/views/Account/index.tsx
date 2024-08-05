@@ -1,7 +1,7 @@
-import type { AdminViewProps, ServerSideEditViewProps } from 'payload'
+import type { AdminViewProps } from 'payload'
 
-import { DocumentInfoProvider, HydrateClientUser } from '@payloadcms/ui'
-import { RenderCustomComponent } from '@payloadcms/ui/shared'
+import { DocumentInfoProvider, HydrateClientUser, RenderComponent } from '@payloadcms/ui'
+import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
@@ -55,12 +55,26 @@ export const Account: React.FC<AdminViewProps> = async ({
       req,
     })
 
-    const viewComponentProps: ServerSideEditViewProps = {
-      initPageResult,
-      params,
-      routeSegments: [],
-      searchParams,
-    }
+    const createMappedComponent = getCreateMappedComponent({
+      importMap: payload.importMap,
+      serverProps: {
+        i18n,
+        initPageResult,
+        locale,
+        params,
+        payload,
+        permissions,
+        routeSegments: [],
+        searchParams,
+        user,
+      },
+    })
+
+    const mappedAccountComponent = createMappedComponent(
+      CustomAccountComponent?.Component,
+      undefined,
+      EditView,
+    )
 
     return (
       <DocumentInfoProvider
@@ -77,28 +91,13 @@ export const Account: React.FC<AdminViewProps> = async ({
       >
         <DocumentHeader
           collectionConfig={collectionConfig}
-          config={payload.config}
           hideTabs
           i18n={i18n}
+          payload={payload}
           permissions={permissions}
         />
         <HydrateClientUser permissions={permissions} user={user} />
-        <RenderCustomComponent
-          CustomComponent={
-            typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
-          }
-          DefaultComponent={EditView}
-          componentProps={viewComponentProps}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
+        <RenderComponent mappedComponent={mappedAccountComponent} />
       </DocumentInfoProvider>
     )
   }

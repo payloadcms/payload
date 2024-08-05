@@ -1,8 +1,9 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Locale } from '../../config/types.js'
+import type { Locale, PayloadComponent } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
@@ -11,20 +12,19 @@ export type AdminViewConfig = {
   Component: AdminViewComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
-  path: string
+  path?: string
   sensitive?: boolean
   strict?: boolean
 }
 
 export type AdminViewProps = {
+  importMap: ImportMap
   initPageResult: InitPageResult
   params?: { [key: string]: string | string[] | undefined }
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export type AdminViewComponent = React.ComponentType<AdminViewProps>
-
-export type AdminView = AdminViewComponent | AdminViewConfig
+export type AdminViewComponent = PayloadComponent<AdminViewProps>
 
 export type EditViewProps = {
   collectionSlug?: string

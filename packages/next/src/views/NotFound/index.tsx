@@ -1,6 +1,11 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { AdminViewComponent, SanitizedConfig } from 'payload'
+import type {
+  AdminViewComponent,
+  ImportMap,
+  PayloadServerReactComponent,
+  SanitizedConfig,
+} from 'payload'
 
 import { HydrateClientUser } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -36,10 +41,12 @@ export type GenerateViewMetadata = (args: {
 
 export const NotFoundPage = async ({
   config: configPromise,
+  importMap,
   params,
   searchParams,
 }: {
   config: Promise<SanitizedConfig>
+  importMap: ImportMap
   params: {
     segments: string[]
   }
@@ -52,6 +59,7 @@ export const NotFoundPage = async ({
 
   const initPageResult = await initPage({
     config,
+    importMap,
     redirectUnauthenticatedUser: true,
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
@@ -76,6 +84,6 @@ export const NotFoundPage = async ({
   )
 }
 
-export const NotFoundView: AdminViewComponent = () => {
+export const NotFoundView: PayloadServerReactComponent<AdminViewComponent> = () => {
   return <NotFoundClient marginTop="large" />
 }

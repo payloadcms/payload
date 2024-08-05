@@ -17,6 +17,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <EmailField
         autoComplete="email"
         label={t('general:email')}
+        labelProps={{ htmlFor: 'field-email', required }}
         name="email"
         path="email"
         required={required}

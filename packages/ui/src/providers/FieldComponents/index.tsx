@@ -1,11 +1,12 @@
 'use client'
-import type { FieldTypes } from 'payload'
 
 import React, { createContext, useContext } from 'react'
 
+import type { FieldTypesComponents } from '../../fields/index.js'
+
 import { fieldComponents } from '../../fields/index.js'
 
-export type IFieldComponentsContext = FieldTypes
+export type IFieldComponentsContext = FieldTypesComponents
 
 const FieldComponentsContext = createContext<IFieldComponentsContext>(fieldComponents)
 

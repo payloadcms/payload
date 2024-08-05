@@ -1,4 +1,11 @@
-import type { Field, FieldMap, Operator, SanitizedCollectionConfig, Where } from 'payload'
+import type {
+  Field,
+  FieldMap,
+  MappedComponent,
+  Operator,
+  SanitizedCollectionConfig,
+  Where,
+} from 'payload'
 
 export type WhereBuilderProps = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
@@ -7,6 +14,7 @@ export type WhereBuilderProps = {
 }
 
 export type FieldCondition = {
+  Filter: MappedComponent
   component?: string
   label: string
   operators: {

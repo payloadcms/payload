@@ -125,7 +125,11 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          CustomError={errorMessage}
+          CustomError={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: errorMessage,
+          }}
           onChange={setValue}
           path={pathFromContext}
           required={required}

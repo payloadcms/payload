@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -62,7 +63,8 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderComponent mappedComponent={BeforeInput} />
+
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
             <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -79,12 +81,8 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        {AfterInput}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <RenderComponent mappedComponent={AfterInput} />
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

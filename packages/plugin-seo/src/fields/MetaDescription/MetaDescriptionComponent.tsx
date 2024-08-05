@@ -124,7 +124,11 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <TextareaInput
-          CustomError={errorMessage}
+          CustomError={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: errorMessage,
+          }}
           onChange={setValue}
           path={pathFromContext}
           required={required}

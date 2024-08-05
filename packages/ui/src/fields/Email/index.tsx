@@ -7,6 +7,7 @@ import React, { useCallback } from 'react'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -75,7 +76,9 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <RenderComponent mappedComponent={BeforeInput} />
+        {/* disable eslint here because the label is dynamic */}
+        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
           disabled={disabled}
@@ -83,16 +86,13 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           name={path}
           onChange={setValue}
           placeholder={getTranslation(placeholder, i18n)}
+          required={required}
           type="email"
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={AfterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
     </div>
   )
 }

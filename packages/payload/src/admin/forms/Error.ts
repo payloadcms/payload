@@ -1,19 +1,19 @@
 import type { CustomComponent, ServerProps } from '../../config/types.js'
-import type { FieldComponentProps } from '../types.js'
-import type { FieldTypes } from './FieldTypes.js'
+import type { FieldTypes } from '../../fields/config/types.js'
+import type { FieldComponentProps, MappedComponent } from '../types.js'
 
 export type GenericErrorProps = {
-  CustomError?: React.ReactNode
+  CustomError?: MappedComponent
   alignCaret?: 'center' | 'left' | 'right'
   message?: string
   path?: string
   showError?: boolean
 }
 
-export type ErrorProps<T extends keyof FieldTypes = any> = {
+export type ErrorProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
 } & FieldComponentProps &
   GenericErrorProps &
   Partial<ServerProps>
 
-export type ErrorComponent<T extends keyof FieldTypes = any> = CustomComponent<ErrorProps<T>>
+export type ErrorComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<ErrorProps<T>>

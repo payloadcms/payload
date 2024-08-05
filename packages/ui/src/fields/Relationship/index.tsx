@@ -594,11 +594,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

@@ -4,13 +4,12 @@ import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } f
 
 import React from 'react'
 
-import { HiddenField } from '../../fields/Hidden/index.js'
-import { useFieldComponents } from '../../providers/FieldComponents/index.js'
+import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
-  CustomField: MappedField['CustomField']
+  Field: MappedField['Field']
   custom?: Record<any, string>
   disabled: boolean
   fieldComponentProps?: {
@@ -26,18 +25,17 @@ type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: keyof FieldTypes
+  type: FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
   name,
   type,
-  CustomField,
+  Field,
   custom,
   disabled,
   fieldComponentProps,
   indexPath,
-  isHidden,
   path: pathFromProps,
   permissions,
   readOnly: readOnlyFromProps,
@@ -46,7 +44,6 @@ export const RenderField: React.FC<Props> = ({
 }) => {
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
-  const fieldComponents = useFieldComponents()
 
   const path = [pathFromProps, name].filter(Boolean).join('.')
   const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
@@ -68,9 +65,7 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
-  const DefaultField = isHidden ? HiddenField : fieldComponents[type]
-
-  if (CustomField === undefined && !DefaultField) {
+  if (Field === undefined) {
     return null
   }
 
@@ -85,7 +80,7 @@ export const RenderField: React.FC<Props> = ({
       siblingPermissions={siblingPermissions}
       type={type}
     >
-      {CustomField !== undefined ? CustomField : <DefaultField {...fieldComponentProps} />}
+      <RenderComponent clientProps={fieldComponentProps} mappedComponent={Field} />
     </FieldPropsProvider>
   )
 }

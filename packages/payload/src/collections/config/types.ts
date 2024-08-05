@@ -26,6 +26,7 @@ import type {
   LabelStatic,
   LivePreviewConfig,
   OpenGraphConfig,
+  PayloadComponent,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -290,12 +291,10 @@ export type CollectionAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?: EditConfig
-      List?:
-        | {
-            Component?: React.ComponentType<any>
-            actions?: CustomComponent[]
-          }
-        | React.ComponentType<any>
+      List?: {
+        Component?: PayloadComponent
+        actions?: CustomComponent[]
+      }
     }
   }
   /** Extension point to add your custom data. Available in server and client. */

@@ -1,13 +1,14 @@
 import type { Payload, User } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 let restClient: NextRESTClient
@@ -15,9 +16,12 @@ let payload: Payload
 
 const { email, password } = devUser
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Auth', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

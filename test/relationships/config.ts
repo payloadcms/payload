@@ -52,6 +52,11 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   localization: {
     locales: ['en', 'de'],
     defaultLocale: 'en',

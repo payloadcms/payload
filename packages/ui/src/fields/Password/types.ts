@@ -1,11 +1,6 @@
-import type { ErrorProps, LabelProps } from 'payload'
+import type { ErrorProps, FormFieldBase, LabelProps } from 'payload'
 import type { ChangeEvent } from 'react'
 export type PasswordInputProps = {
-  AfterInput?: React.ReactElement
-  BeforeInput?: React.ReactElement
-  CustomDescription?: React.ReactElement
-  CustomError?: React.ReactElement
-  CustomLabel?: React.ReactElement
   autoComplete?: string
   className?: string
   errorProps: ErrorProps
@@ -23,4 +18,7 @@ export type PasswordInputProps = {
   style?: React.CSSProperties
   value?: string
   width?: string
-}
+} & Pick<
+  FormFieldBase,
+  'AfterInput' | 'BeforeInput' | 'CustomDescription' | 'CustomError' | 'CustomLabel'
+>

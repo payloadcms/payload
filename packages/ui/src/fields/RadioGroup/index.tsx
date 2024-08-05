@@ -131,11 +131,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
             )
           })}
         </ul>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </div>
   )

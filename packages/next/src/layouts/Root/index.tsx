@@ -1,5 +1,5 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -32,9 +32,11 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  importMap,
 }: {
-  children: React.ReactNode
-  config: Promise<SanitizedConfig>
+  readonly children: React.ReactNode
+  readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
 }) => {
   const config = await configPromise
 
@@ -96,6 +98,7 @@ export const RootLayout = async ({
     DefaultListView,
     children,
     i18n,
+    importMap,
     payload,
   })
 

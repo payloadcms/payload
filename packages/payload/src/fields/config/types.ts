@@ -6,7 +6,6 @@ import type { CSSProperties } from 'react'
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { JSONSchema4 } from 'json-schema'
-import type React from 'react'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type { ErrorComponent } from '../../admin/forms/Error.js'
@@ -18,10 +17,10 @@ import type {
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { CustomComponent, LabelFunction, LabelStatic } from '../../config/types.js'
+import type { CustomComponent, LabelFunction, LabelStatic, PayloadComponent } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -141,7 +140,7 @@ type Admin = {
     /**
      * The Filter component has to be a client component
      */
-    Filter?: React.ComponentType<any>
+    Filter?: PayloadComponent
   }
   /**
    * You can programmatically show / hide fields based on what other fields are doing.
@@ -493,7 +492,7 @@ export type UIField = {
       /**
        * The Filter component has to be a client component
        */
-      Filter?: React.ComponentType<any>
+      Filter?: PayloadComponent
     }
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
@@ -751,13 +750,16 @@ export type RadioField = {
 export type Block = {
   admin?: {
     components?: {
-      Label?: React.FC<{
-        blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
-        /**
-         * May contain the formData
-         */
-        formData: Record<string, any>
-      }>
+      Label?: PayloadComponent<
+        never,
+        {
+          blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
+          /**
+           * May contain the formData
+           */
+          formData: Record<string, any>
+        }
+      >
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
@@ -830,6 +832,10 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
+
+type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
+
+export type FieldTypes = ExtractFieldTypes<Field>
 
 export type FieldAffectingData =
   | ArrayField

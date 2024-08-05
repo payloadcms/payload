@@ -121,7 +121,11 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
-          CustomError={errorMessage}
+          CustomError={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: errorMessage,
+          }}
           api={api}
           collection={collection}
           filterOptions={field.filterOptions}

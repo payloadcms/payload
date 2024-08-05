@@ -28,6 +28,7 @@ export const rootParserOptions = {
   EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
   EXPERIMENTAL_useProjectService: {
     allowDefaultProjectForFiles: ['./src/*.ts', './src/*.tsx'],
+    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100,
   },
   sourceType: 'module',
   ecmaVersion: 'latest',

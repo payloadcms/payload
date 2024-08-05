@@ -2,15 +2,16 @@ import type { I18n } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { SanitizedConfig } from '../../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { Payload } from '../../index.js'
 
 export type DocumentTabProps = {
   apiURL?: string
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
+  payload: Payload
   permissions: Permissions
 }
 
@@ -24,7 +25,8 @@ export type DocumentTabCondition = (args: {
 // Everything is optional because we merge in the defaults
 // i.e. the config may override the `Default` view with a `label` but not an `href`
 export type DocumentTabConfig = {
-  Pill?: React.ComponentType
+  Pill?: PayloadComponent
+  TabComponent?: DocumentTabComponent
   condition?: DocumentTabCondition
   href?:
     | ((args: {
@@ -40,8 +42,6 @@ export type DocumentTabConfig = {
   newTab?: boolean
 }
 
-export type DocumentTabComponent = React.ComponentType<{
+export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>
-
-export type DocumentTab = DocumentTabComponent | DocumentTabConfig

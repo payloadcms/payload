@@ -153,11 +153,10 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              {CustomDescription ? (
-                CustomDescription
-              ) : (
-                <FieldDescription {...(descriptionProps || {})} />
-              )}
+              <FieldDescription
+                CustomDescription={CustomDescription}
+                {...(descriptionProps || {})}
+              />
               <RenderFields
                 fieldMap={activeTabConfig.fieldMap}
                 forceRender={forceRender}

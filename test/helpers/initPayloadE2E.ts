@@ -6,6 +6,7 @@ import { type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { parse } from 'url'
 
+import { spawnInitProcess } from '../spawnInitProcess.js'
 import { createTestHooks } from '../testHooks.js'
 import startMemoryDB from './startMemoryDB.js'
 
@@ -20,6 +21,9 @@ type Result = {
 
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = path.basename(dirname)
+
+  await spawnInitProcess(testSuiteName, true)
+
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
   await startMemoryDB()

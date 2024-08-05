@@ -13,11 +13,11 @@ export type FieldPropsContextType = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: keyof FieldTypes
+  type: FieldTypes
 }
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
-  type: undefined as keyof FieldTypes,
+  type: undefined as FieldTypes,
   custom: {},
   indexPath: undefined,
   path: undefined,
@@ -39,7 +39,7 @@ export type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: keyof FieldTypes
+  type: FieldTypes
 }
 
 export const FieldPropsProvider: React.FC<Props> = ({

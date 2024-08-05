@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Description, PayloadRequest, Validate } from 'payload'
+import type { ClientValidate, Description, FormFieldBase, PayloadRequest, Validate } from 'payload'
 
 import { useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { password } from 'payload/shared'
@@ -12,11 +12,6 @@ import './index.scss'
 import { PasswordInput } from './input.js'
 
 export type PasswordFieldProps = {
-  AfterInput?: React.ReactElement
-  BeforeInput?: React.ReactElement
-  CustomDescription?: React.ReactElement
-  CustomError?: React.ReactElement
-  CustomLabel?: React.ReactElement
   autoComplete?: string
   className?: string
   description?: Description
@@ -33,7 +28,10 @@ export type PasswordFieldProps = {
   style?: React.CSSProperties
   validate?: Validate
   width?: string
-}
+} & Pick<
+  FormFieldBase,
+  'AfterInput' | 'BeforeInput' | 'CustomDescription' | 'CustomError' | 'CustomLabel'
+>
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {

@@ -37,30 +37,17 @@ export type Props = {
   }) => void
 }
 
-import type { Operator } from 'payload'
+import type { MappedComponent, Operator } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 
-import { RenderCustomClientComponent } from '../../../elements/RenderCustomClientComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { RenderComponent } from '../../../providers/ComponentMap/RenderComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { DateField } from './Date/index.js'
-import { NumberField } from './Number/index.js'
-import { RelationshipField } from './Relationship/index.js'
 import { Select } from './Select/index.js'
-import Text from './Text/index.js'
 import './index.scss'
-
-type ComponentType = 'Date' | 'Number' | 'Relationship' | 'Select' | 'Text'
-const valueFields: Record<ComponentType, React.FC> = {
-  Date: DateField,
-  Number: NumberField,
-  Relationship: RelationshipField,
-  Select,
-  Text,
-}
 
 const baseClass = 'condition'
 
@@ -112,9 +99,13 @@ export const Condition: React.FC<Props> = (props) => {
 
   const booleanSelect =
     ['exists'].includes(internalOperatorOption) || internalField?.props?.type === 'checkbox'
-  const ValueComponent = booleanSelect
-    ? Select
-    : valueFields[internalField?.component] || valueFields.Text
+
+  const ValueComponent: MappedComponent = booleanSelect
+    ? {
+        type: 'client',
+        Component: Select,
+      }
+    : internalField.Filter
 
   let valueOptions
   if (booleanSelect) {
@@ -155,10 +146,8 @@ export const Condition: React.FC<Props> = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <RenderCustomClientComponent
-              CustomComponent={internalField?.props?.admin?.components?.Filter}
-              DefaultComponent={ValueComponent}
-              componentProps={{
+            <RenderComponent
+              clientProps={{
                 ...internalField?.props,
                 disabled: !internalOperatorOption,
                 onChange: setInternalQueryValue,
@@ -173,6 +162,7 @@ export const Condition: React.FC<Props> = (props) => {
                     : undefined,
                 value: internalQueryValue ?? '',
               }}
+              mappedComponent={ValueComponent}
             />
           </div>
         </div>

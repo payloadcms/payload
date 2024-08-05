@@ -33,7 +33,7 @@ export type CellComponentProps = {
   }) => void
   options?: SelectField['options']
   relationTo?: RelationshipField['relationTo']
-  richTextComponentMap?: Map<string, React.ReactNode> // any should be MappedField
+  richTextComponentMap?: Map<string, unknown>
   schemaPath: string
 }
 

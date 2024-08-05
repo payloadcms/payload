@@ -1,4 +1,4 @@
-import type { AdminViewComponent } from 'payload'
+import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { Button, Gutter } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
@@ -12,7 +12,9 @@ export { generateUnauthorizedMetadata } from './meta.js'
 
 const baseClass = 'unauthorized'
 
-export const UnauthorizedView: AdminViewComponent = ({ initPageResult }) => {
+export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> = ({
+  initPageResult,
+}) => {
   const {
     req: {
       i18n,
