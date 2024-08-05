@@ -77,8 +77,19 @@ function startsWithSeparator(textContent: string): boolean {
   return isSeparator(textContent[0])
 }
 
-function startsWithFullStop(textContent: string): boolean {
-  return /^\.[a-z\d]+/i.test(textContent)
+/**
+ * Check if the text content starts with a fullstop followed by a top-level domain.
+ * Meaning if the text content can be a beginning of a top level domain.
+ * @param textContent
+ * @param isEmail
+ * @returns boolean
+ */
+function startsWithTLD(textContent: string, isEmail: boolean): boolean {
+  if (isEmail) {
+    return /^\.[a-z]{2,}/i.test(textContent)
+  } else {
+    return /^\.[a-z0-9]+/i.test(textContent)
+  }
 }
 
 function isPreviousNodeValid(node: LexicalNode): boolean {
@@ -343,13 +354,15 @@ function handleBadNeighbors(
   const nextSibling = textNode.getNextSibling()
   const text = textNode.getTextContent()
 
-  if (
-    $isAutoLinkNode(previousSibling) &&
-    (!startsWithSeparator(text) || startsWithFullStop(text))
-  ) {
-    previousSibling.append(textNode)
-    handleLinkEdit(previousSibling, matchers, onChange)
-    onChange(null, previousSibling.getFields()?.url ?? null)
+  if ($isAutoLinkNode(previousSibling)) {
+    const isEmailURI = previousSibling.getFields()?.url
+      ? previousSibling.getFields()?.url?.startsWith('mailto:')
+      : false
+    if (!startsWithSeparator(text) || startsWithTLD(text, isEmailURI)) {
+      previousSibling.append(textNode)
+      handleLinkEdit(previousSibling, matchers, onChange)
+      onChange(null, previousSibling.getFields()?.url ?? null)
+    }
   }
 
   if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {

@@ -594,6 +594,19 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
+  blocksWithLocalizedArray?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedArray';
+      }[]
+    | null;
   blocksWithSimilarConfigs?:
     | (
         | {
