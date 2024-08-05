@@ -40,7 +40,7 @@ export interface UserAuthOperations {
   };
   registerFirstUser: {
     password: string;
-    username?: string;
+    username: string;
   };
   unlock: {
     username: string;
