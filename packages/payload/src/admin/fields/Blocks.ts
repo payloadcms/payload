@@ -1,5 +1,6 @@
 import type { ClientFieldConfig, GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { BlockField } from '../../fields/config/types.js'
+import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type {
   DescriptionComponent,
@@ -12,6 +13,7 @@ export type BlocksFieldProps = {
   readonly clientFieldConfig: GenericClientFieldConfig<'blocks'>
   readonly forceRender?: boolean
   readonly slug?: string
+  readonly validate?: BlockFieldValidation
 } & FormFieldBase
 
 export type ReducedBlock = {

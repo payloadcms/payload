@@ -80,6 +80,7 @@ $transTime: 200;
 
   &__header {
     display: flex;
+    align-items: center;
     margin-top: base(2.5);
     margin-bottom: base(1);
     width: 100%;
@@ -95,19 +96,22 @@ $transTime: 200;
       padding: 0;
       cursor: pointer;
       overflow: hidden;
-      width: base(1);
-      height: base(1);
       direction: ltr;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: base(1.2);
+      height: base(1.2);
 
       svg {
-        width: base(2.75);
-        height: base(2.75);
+        margin: base(-1.2);
+        width: base(2.4);
+        height: base(2.4);
+
         position: relative;
-        left: base(-0.825);
-        top: base(-0.825);
 
         .stroke {
-          stroke-width: 2px;
+          stroke-width: 1px;
           vector-effect: non-scaling-stroke;
         }
       }

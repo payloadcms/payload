@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, DateFieldProps } from 'payload'
+import type { DateFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -12,6 +12,8 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
+
+import type { DateFieldValidation } from 'packages/payload/src/fields/validations.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -45,7 +47,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: DateFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

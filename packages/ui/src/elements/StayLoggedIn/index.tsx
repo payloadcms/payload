@@ -50,6 +50,7 @@ export const StayLoggedInModal: React.FC = () => {
                 }),
               )
             }}
+            size="large"
           >
             {t('authentication:logOut')}
           </Button>
@@ -58,6 +59,7 @@ export const StayLoggedInModal: React.FC = () => {
               refreshCookie()
               toggleModal(stayLoggedInModalSlug)
             }}
+            size="large"
           >
             {t('authentication:stayLoggedIn')}
           </Button>

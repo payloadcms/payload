@@ -3,6 +3,7 @@
 .section-title {
   position: relative;
   min-width: 0;
+  pointer-events: all;
 
   &:after {
     display: block;

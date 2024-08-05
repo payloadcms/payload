@@ -1,6 +1,6 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
-import type { FormFieldBase } from 'payload'
+import type { FormFieldBase, GenericClientFieldConfig } from 'payload'
 
 import {
   FieldDescription,
@@ -21,8 +21,9 @@ import './index.scss'
 
 const baseClass = 'rich-text-lexical'
 
-const RichText_: React.FC<
+const RichTextComponent: React.FC<
   {
+    clientFieldConfig: GenericClientFieldConfig<'richText'>
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
@@ -30,22 +31,24 @@ const RichText_: React.FC<
   } & FormFieldBase
 > = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        width,
+      },
+      label,
+      required,
+      style,
+    },
     descriptionProps,
     editorConfig,
     errorProps,
-    label,
     labelProps,
-    path: pathFromProps,
-    readOnly,
-    required,
-    style,
+    readOnly: readOnlyFromProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
-    width,
   } = props
 
   const memoizedValidate = useCallback(
@@ -59,21 +62,33 @@ const RichText_: React.FC<
     // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
     [validate, required],
   )
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
     path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, path, schemaPath, setValue, showError, value } = fieldType
+  const {
+    errorMessage,
+    formInitializing,
+    formProcessing,
+    initialValue,
+    path,
+    schemaPath,
+    setValue,
+    showError,
+    value,
+  } = fieldType
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
-    readOnly && `${baseClass}--read-only`,
+    disabled && `${baseClass}--read-only`,
     editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
   ]
     .filter(Boolean)
@@ -88,13 +103,8 @@ const RichText_: React.FC<
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
@@ -114,11 +124,11 @@ const RichText_: React.FC<
               setValue(serializedEditorState)
             }}
             path={path}
-            readOnly={readOnly}
+            readOnly={disabled}
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} {...(descriptionProps || {})} />
       </div>
     </div>
   )
@@ -135,4 +145,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(RichText_)
+export const RichText = withCondition(RichTextComponent)

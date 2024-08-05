@@ -27,12 +27,6 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
-  const emailRequired = loginWithUsername && loginWithUsername.requireEmail
-
-  let loginType: LoginFieldProps['type'] = loginWithUsername ? 'username' : 'email'
-  if (loginWithUsername && (loginWithUsername.allowEmailLogin || loginWithUsername.requireEmail)) {
-    loginType = 'emailOrUsername'
-  }
 
   const { formState } = await getDocumentData({
     collectionConfig,
@@ -47,8 +41,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
       <CreateFirstUserClient
         initialState={formState}
-        loginType={loginType}
-        requireEmail={emailRequired}
+        loginWithUsername={loginWithUsername}
         userSlug={userSlug}
       />
     </div>

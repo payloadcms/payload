@@ -1,3 +1,4 @@
+import type { PasswordFieldValidation } from 'packages/payload/src/fields/validations.js'
 import type {
   ErrorProps,
   FormFieldBase,
@@ -12,6 +13,7 @@ export type PasswordFieldProps = {
   readonly autoComplete?: string
   readonly clientFieldConfig: GenericClientFieldConfig<'text'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly validate?: PasswordFieldValidation
 } & FormFieldBase
 
 export type PasswordInputProps = {

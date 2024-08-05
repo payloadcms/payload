@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -12,16 +12,15 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
-import React, { useMemo } from 'react'
+import React from 'react'
 
-import { LoginField } from '../Login/LoginField/index.js'
+import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
-  readonly initialState: FormState
-  readonly loginType: 'email' | 'emailOrUsername' | 'username'
-  readonly requireEmail?: boolean
-  readonly userSlug: string
-}> = ({ initialState, loginType, requireEmail: requireEmailFromProps = true, userSlug }) => {
+  initialState: FormState
+  loginWithUsername?: LoginWithUsernameOptions | false
+  userSlug: string
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const {
     config: {
       routes: { admin, api: apiRoute },
@@ -33,14 +32,6 @@ export const CreateFirstUserClient: React.FC<{
   const { t } = useTranslation()
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
-
-  const requireEmail = useMemo(() => {
-    if (loginType === 'email') {
-      return true
-    }
-
-    return requireEmailFromProps
-  }, [loginType, requireEmailFromProps])
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) =>
@@ -66,18 +57,14 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
         clientFieldConfig={{
           name: 'password',
-          _path: 'password',
           label: t('authentication:newPassword'),
-          required: true,
+          path: 'password',
         }}
-        labelProps={{ htmlFor: 'field-password' }}
+        required
       />
       <ConfirmPasswordField />
       <RenderFields
@@ -88,7 +75,7 @@ export const CreateFirstUserClient: React.FC<{
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

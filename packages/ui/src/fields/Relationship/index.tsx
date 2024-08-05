@@ -475,6 +475,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         showError && 'error',
         errorLoading && 'error-loading',
         readOnly && `${baseClass}--read-only`,
+        !readOnly && allowCreate && `${baseClass}--allow-create`,
       ]
         .filter(Boolean)
         .join(' ')}

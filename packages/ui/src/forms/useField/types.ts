@@ -1,4 +1,4 @@
-import type { ClientValidate, FieldPermissions, FilterOptionsResult, Row } from 'payload'
+import type { FieldPermissions, FilterOptionsResult, Row, Validate } from 'payload'
 
 export type Options = {
   disableFormData?: boolean
@@ -7,7 +7,7 @@ export type Options = {
    * If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.
    **/
   path?: string
-  validate?: ClientValidate
+  validate?: Validate
 }
 
 export type FieldType<T> = {

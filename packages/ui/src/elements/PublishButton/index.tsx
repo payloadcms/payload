@@ -49,7 +49,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       buttonId="action-save"
       disabled={!canPublish}
       onClick={publish}
-      size="small"
+      size="medium"
       type="button"
     >
       {label}

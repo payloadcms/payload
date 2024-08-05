@@ -4,9 +4,7 @@ import {
   Button,
   CheckboxField,
   ConfirmPasswordField,
-  EmailField,
   PasswordField,
-  TextField,
   useAuth,
   useConfig,
   useDocumentInfo,
@@ -14,12 +12,12 @@ import {
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
-import { email as emailValidation } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
+import { EmailAndUsernameFields } from '../../../../elements/EmailAndUsername/index.js'
 import { APIKey } from './APIKey.js'
 import './index.scss'
 
@@ -142,50 +140,17 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          {Boolean(loginWithUsername) && (
-            <TextField
-              disabled={disabled}
-              label={t('authentication:username')}
-              name="username"
-              readOnly={readOnly}
-              required
-            />
-          )}
-          {(!loginWithUsername ||
-            loginWithUsername?.allowEmailLogin ||
-            loginWithUsername?.requireEmail) && (
-            <EmailField
-              autoComplete="email"
-              clientFieldConfig={{
-                name: 'email',
-                disabled,
-                label: t('general:email'),
-                required: !loginWithUsername || loginWithUsername?.requireEmail,
-              }}
-              readOnly={readOnly}
-              validate={(value) =>
-                emailValidation(value, {
-                  name: 'email',
-                  type: 'email',
-                  data: {},
-                  preferences: { fields: {} },
-                  req: { t } as any,
-                  required: true,
-                  siblingData: {},
-                })
-              }
-            />
-          )}
+          <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
                 clientFieldConfig={{
                   name: 'password',
-                  _path: 'password',
                   disabled,
                   label: t('authentication:newPassword'),
-                  required: true,
+                  path: 'password',
                 }}
+                required
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>
@@ -196,7 +161,7 @@ export const Auth: React.FC<Props> = (props) => {
                 buttonStyle="secondary"
                 disabled={disabled}
                 onClick={() => handleChangePassword(false)}
-                size="small"
+                size="medium"
               >
                 {t('general:cancel')}
               </Button>
@@ -207,7 +172,7 @@ export const Auth: React.FC<Props> = (props) => {
                 disabled={disabled}
                 id="change-password"
                 onClick={() => handleChangePassword(true)}
-                size="small"
+                size="medium"
               >
                 {t('authentication:changePassword')}
               </Button>
@@ -217,7 +182,7 @@ export const Auth: React.FC<Props> = (props) => {
                 buttonStyle="secondary"
                 disabled={disabled}
                 onClick={() => void unlock()}
-                size="small"
+                size="medium"
               >
                 {t('authentication:forceUnlock')}
               </Button>

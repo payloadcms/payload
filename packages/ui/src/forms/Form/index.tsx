@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, PayloadRequest } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
@@ -126,13 +126,20 @@ export const Form: React.FC<FormProps> = (props) => {
             }
 
             validationResult = await field.validate(valueToValidate, {
+              ...field,
               id,
-              config,
+              collectionSlug,
               data,
               operation,
+              preferences: {} as any,
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+                user,
+              } as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
-              t,
-              user,
             })
 
             if (typeof validationResult === 'string') {
@@ -160,7 +167,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -621,11 +628,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <form
-      action={action}
+      action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
       noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
+      onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

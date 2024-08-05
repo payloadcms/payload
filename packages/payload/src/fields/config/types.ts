@@ -180,12 +180,14 @@ export type Labels = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  collectionSlug?: string
   data: Partial<TData>
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
   previousValue?: TValue
   req: PayloadRequest
+  required?: boolean
   siblingData: Partial<TSiblingData>
 }
 
@@ -205,8 +207,6 @@ export type Validate<
   value: TValue,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
-
-export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
   label: LabelFunction | StaticLabel

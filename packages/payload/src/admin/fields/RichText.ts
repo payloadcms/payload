@@ -1,4 +1,5 @@
 import type { GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type {
   DescriptionComponent,
@@ -11,6 +12,7 @@ export type RichTextComponentProps = {
   readonly clientFieldConfig: GenericClientFieldConfig<'richText'>
   readonly name: string
   readonly richTextComponentMap?: Map<string, MappedComponent | unknown>
+  readonly validate?: RichTextFieldValidation
   readonly width?: string
 } & FormFieldBase
 

@@ -19,14 +19,23 @@
 
   th,
   td {
-    padding: base(0.75);
+    padding: base(0.8) base(0.6);
     min-width: 150px;
+
+    &:first-child {
+      padding-inline-start: base(0.8);
+    }
+
+    &:last-child {
+      padding-inline-end: base(0.8);
+    }
   }
 
   tbody {
     tr {
       &:nth-child(odd) {
         background: var(--theme-elevation-50);
+        border-radius: $style-radius-s;
       }
     }
   }

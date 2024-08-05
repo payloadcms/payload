@@ -1,10 +1,12 @@
 import type { GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { RadioFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RadioFieldProps = {
   readonly clientFieldConfig: GenericClientFieldConfig<'radio'>
   readonly onChange?: OnChange
+  readonly validate?: RadioFieldValidation
   readonly value?: string
 } & FormFieldBase
 

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, TextareaFieldProps } from 'payload'
+import type { TextareaFieldProps, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -56,7 +56,7 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
     localizationConfig: localization || undefined,
   })
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: TextareaFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, maxLength, minLength, required })
