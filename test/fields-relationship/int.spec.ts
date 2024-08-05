@@ -82,7 +82,7 @@ describe('Relationship Fields', () => {
         .then((res) => res.json())
 
       expect(version2Data.version.title).toEqual('Version 2 Title')
-      expect(version2Data.version.relationshipField.value.name).toEqual(relatedDocName)
+      expect(version2Data.version.relationshipField[0].value.name).toEqual(relatedDocName)
     })
 
     it('should return the correct versioned relationship field via LocalAPI', async () => {
@@ -93,7 +93,7 @@ describe('Relationship Fields', () => {
       })
 
       expect(version2Data.version.title).toEqual('Version 2 Title')
-      expect((version2Data.version.relationshipField.value as Collection1).name).toEqual(
+      expect((version2Data.version.relationshipField[0].value as Collection1).name).toEqual(
         relatedDocName,
       )
     })
