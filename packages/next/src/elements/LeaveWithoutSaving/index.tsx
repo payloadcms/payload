@@ -37,10 +37,12 @@ const Component: React.FC<{
           <p>{t('general:changesNotSaved')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
-          <Button buttonStyle="secondary" onClick={onCancel}>
+          <Button buttonStyle="secondary" onClick={onCancel} size="large">
             {t('general:stayOnThisPage')}
           </Button>
-          <Button onClick={onConfirm}>{t('general:leaveAnyway')}</Button>
+          <Button onClick={onConfirm} size="large">
+            {t('general:leaveAnyway')}
+          </Button>
         </div>
       </div>
     </Modal>

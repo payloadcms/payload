@@ -19,6 +19,7 @@ export type CellComponentProps = {
   }[]
   className?: string
   dateDisplayFormat?: DateField['admin']['date']['displayFormat']
+  displayPreview?: boolean
   fieldType?: Field['type']
   isFieldAffectingData?: boolean
   label?: FormFieldBase['label']

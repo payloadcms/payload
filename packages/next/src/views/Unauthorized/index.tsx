@@ -30,7 +30,13 @@ export const UnauthorizedView: AdminViewComponent = ({ initPageResult }) => {
     <Gutter className={baseClass}>
       <h2>{i18n.t('error:unauthorized')}</h2>
       <p>{i18n.t('error:notAllowedToAccessPage')}</p>
-      <Button Link={Link} className={`${baseClass}__button`} el="link" to={logoutRoute}>
+      <Button
+        Link={Link}
+        className={`${baseClass}__button`}
+        el="link"
+        size="large"
+        to={logoutRoute}
+      >
         {i18n.t('authentication:logOut')}
       </Button>
     </Gutter>

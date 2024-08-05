@@ -1,9 +1,9 @@
-@import './styles.scss';
+@import 'styles';
 @import './toasts.scss';
 @import './colors.scss';
 
 :root {
-  --base-px: 25;
+  --base-px: 20;
   --base-body-size: 13;
   --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);
 
@@ -21,6 +21,7 @@
   --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
+  --font-serif: Georgia, 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
   --font-mono: monospace;
 
   --style-radius-s: #{$style-radius-s};
@@ -67,12 +68,6 @@ html {
   @extend %body;
   background: var(--theme-bg);
   -webkit-font-smoothing: antialiased;
-  opacity: 0;
-
-  &[data-theme='dark'],
-  &[data-theme='light'] {
-    opacity: initial;
-  }
 
   &[data-theme='dark'] {
     --theme-bg: var(--theme-elevation-0);
@@ -111,12 +106,12 @@ body {
 }
 
 ::selection {
-  background: var(--theme-success-500);
+  background: var(--color-success-250);
   color: var(--theme-base-800);
 }
 
 ::-moz-selection {
-  background: var(--theme-success-500);
+  background: var(--color-success-250);
   color: var(--theme-base-800);
 }
 

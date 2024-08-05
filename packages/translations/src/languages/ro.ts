@@ -411,6 +411,7 @@ export const roTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publicați modificările',
     published: 'Publicat',
     publishing: 'Editare',
+    restoreAsDraft: 'Restaurează ca proiect',
     restoreThisVersion: 'Restaurați această versiune',
     restoredSuccessfully: 'Restaurat cu succes.',
     restoring: 'Restaurare...',

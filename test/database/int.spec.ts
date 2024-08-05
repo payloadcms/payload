@@ -361,103 +361,103 @@ describe('database', () => {
           expect(firstResult.id).toStrictEqual(first.id)
           expect(secondResult.id).toStrictEqual(second.id)
         })
-      }
 
-      it('should commit multiple operations async', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
+        it('should commit multiple operations async', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
 
-        let first
-        let second
+          let first
+          let second
 
-        const firstReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            first = res
-          })
+          const firstReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              first = res
+            })
 
-        const secondReq = payload
-          .create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-          .then((res) => {
-            second = res
-          })
+          const secondReq = payload
+            .create({
+              collection,
+              data: {
+                title,
+              },
+              req,
+            })
+            .then((res) => {
+              second = res
+            })
 
-        await Promise.all([firstReq, secondReq])
+          await Promise.all([firstReq, secondReq])
 
-        await commitTransaction(req)
-        expect(req.transactionID).toBeUndefined()
+          await commitTransaction(req)
+          expect(req.transactionID).toBeUndefined()
 
-        const firstResult = await payload.findByID({
-          id: first.id,
-          collection,
-          req,
-        })
-        const secondResult = await payload.findByID({
-          id: second.id,
-          collection,
-          req,
-        })
-
-        expect(firstResult.id).toStrictEqual(first.id)
-        expect(secondResult.id).toStrictEqual(second.id)
-      })
-
-      it('should rollback operations on failure', async () => {
-        const req = {
-          payload,
-          user,
-        } as unknown as PayloadRequest
-
-        await initTransaction(req)
-
-        const first = await payload.create({
-          collection,
-          data: {
-            title,
-          },
-          req,
-        })
-
-        try {
-          await payload.create({
-            collection,
-            data: {
-              throwAfterChange: true,
-              title,
-            },
-            req,
-          })
-        } catch (error: unknown) {
-          // catch error and carry on
-        }
-
-        expect(req.transactionID).toBeFalsy()
-
-        // this should not do anything but is needed to be certain about the next assertion
-        await commitTransaction(req)
-
-        await expect(() =>
-          payload.findByID({
+          const firstResult = await payload.findByID({
             id: first.id,
             collection,
             req,
-          }),
-        ).rejects.toThrow('Not Found')
-      })
+          })
+          const secondResult = await payload.findByID({
+            id: second.id,
+            collection,
+            req,
+          })
+
+          expect(firstResult.id).toStrictEqual(first.id)
+          expect(secondResult.id).toStrictEqual(second.id)
+        })
+
+        it('should rollback operations on failure', async () => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const first = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          try {
+            await payload.create({
+              collection,
+              data: {
+                throwAfterChange: true,
+                title,
+              },
+              req,
+            })
+          } catch (error: unknown) {
+            // catch error and carry on
+          }
+
+          expect(req.transactionID).toBeFalsy()
+
+          // this should not do anything but is needed to be certain about the next assertion
+          await commitTransaction(req)
+
+          await expect(() =>
+            payload.findByID({
+              id: first.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+        })
+      }
     })
   })
 

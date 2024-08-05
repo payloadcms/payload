@@ -6,6 +6,7 @@ export type Props = {
   globalSlug?: SanitizedGlobalConfig['slug']
   label: SanitizedCollectionConfig['labels']['singular']
   originalDocID: number | string
+  status?: string
   versionDate: string
   versionID: string
 }

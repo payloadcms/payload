@@ -387,6 +387,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     publishChanges: '發佈修改',
     published: '已發佈',
     publishing: '發布',
+    restoreAsDraft: '恢復為草稿',
     restoreThisVersion: '回復此版本',
     restoredSuccessfully: '回復成功。',
     restoring: '回復中...',

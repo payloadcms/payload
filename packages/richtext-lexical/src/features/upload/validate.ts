@@ -44,6 +44,7 @@ export const uploadValidation = (
 
     const result = await buildStateFromSchema({
       id,
+      collectionSlug: node.relationTo,
       data: node?.fields ?? {},
       fieldSchema: collection.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',

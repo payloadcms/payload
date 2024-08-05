@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, EmailFieldProps } from 'payload'
+import type { EmailFieldProps, EmailFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -39,7 +39,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: EmailFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

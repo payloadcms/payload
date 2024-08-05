@@ -136,6 +136,7 @@ export const promise = async ({
       const validationResult = await field.validate(valueToValidate, {
         ...field,
         id,
+        collectionSlug: collection?.slug,
         data: deepMergeWithSourceArrays(doc, data),
         jsonError,
         operation,

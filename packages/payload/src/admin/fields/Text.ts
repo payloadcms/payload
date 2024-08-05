@@ -1,4 +1,5 @@
 import type { TextField } from '../../fields/config/types.js'
+import type { TextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
@@ -13,6 +14,7 @@ export type TextFieldProps = {
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   path?: string
   placeholder?: TextField['admin']['placeholder']
+  validate?: TextFieldValidation
   width?: string
 } & FormFieldBase
 

@@ -18,7 +18,6 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
   text,
   timestamp,
   varchar,
@@ -237,7 +236,7 @@ export const traverseFields = ({
           throwValidationError,
         })
 
-        adapter.enums[enumName] = pgEnum(
+        adapter.enums[enumName] = adapter.pgSchema.enum(
           enumName,
           field.options.map((option) => {
             if (optionIsObject(option)) {

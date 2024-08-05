@@ -387,6 +387,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     publishChanges: '发布修改',
     published: '已发布',
     publishing: '发布',
+    restoreAsDraft: '恢复为草稿',
     restoreThisVersion: '恢复此版本',
     restoredSuccessfully: '恢复成功。',
     restoring: '恢复中...',

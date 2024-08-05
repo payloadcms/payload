@@ -29,9 +29,22 @@ const postgresReplacement: DbAdapterReplacement = {
   packageName: '@payloadcms/db-postgres',
 }
 
+const sqliteReplacement: DbAdapterReplacement = {
+  configReplacement: (envName = 'DATABASE_URI') => [
+    '  db: sqliteAdapter({',
+    '    client: {',
+    `      url: process.env.${envName} || '',`,
+    '    },',
+    '  }),',
+  ],
+  importReplacement: "import { sqliteAdapter } from '@payloadcms/db-sqlite'",
+  packageName: '@payloadcms/db-sqlite',
+}
+
 export const dbReplacements: Record<DbType, DbAdapterReplacement> = {
   mongodb: mongodbReplacement,
   postgres: postgresReplacement,
+  sqlite: sqliteReplacement,
 }
 
 type StorageAdapterReplacement = {

@@ -85,9 +85,18 @@ export const DefaultNavClient: React.FC = () => {
 
               const LinkElement = Link || 'a'
 
+              const activeCollection = window?.location?.pathname
+                ?.split('/')
+                .find(
+                  (_, index, arr) =>
+                    arr[index - 1] === 'collections' || arr[index - 1] === 'globals',
+                )
+
               return (
                 <LinkElement
-                  className={`${baseClass}__link`}
+                  className={[`${baseClass}__link`, activeCollection === entity?.slug && `active`]
+                    .filter(Boolean)
+                    .join(' ')}
                   href={href}
                   id={id}
                   key={i}

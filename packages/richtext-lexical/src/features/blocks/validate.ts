@@ -13,7 +13,7 @@ export const blockValidationHOC = (
     const blockFieldData = node.fields ?? ({} as BlockFields)
 
     const {
-      options: { id, operation, preferences, req },
+      options: { id, collectionSlug, operation, preferences, req },
     } = validation
 
     // find block
@@ -30,6 +30,7 @@ export const blockValidationHOC = (
 
     const result = await buildStateFromSchema({
       id,
+      collectionSlug,
       data: blockFieldData,
       fieldSchema: block.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',

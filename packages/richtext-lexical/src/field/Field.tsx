@@ -21,7 +21,7 @@ import './index.scss'
 
 const baseClass = 'rich-text-lexical'
 
-const _RichText: React.FC<
+const RichTextComponent: React.FC<
   {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
@@ -41,7 +41,7 @@ const _RichText: React.FC<
     label,
     labelProps,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
@@ -59,21 +59,33 @@ const _RichText: React.FC<
     // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
     [validate, required],
   )
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
     path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, path, schemaPath, setValue, showError, value } = fieldType
+  const {
+    errorMessage,
+    formInitializing,
+    formProcessing,
+    initialValue,
+    path,
+    schemaPath,
+    setValue,
+    showError,
+    value,
+  } = fieldType
+
+  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
-    readOnly && `${baseClass}--read-only`,
+    disabled && `${baseClass}--read-only`,
     editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
   ]
     .filter(Boolean)
@@ -114,7 +126,7 @@ const _RichText: React.FC<
               setValue(serializedEditorState)
             }}
             path={path}
-            readOnly={readOnly}
+            readOnly={disabled}
             value={value}
           />
         </ErrorBoundary>
@@ -139,4 +151,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(_RichText)
+export const RichText = withCondition(RichTextComponent)
