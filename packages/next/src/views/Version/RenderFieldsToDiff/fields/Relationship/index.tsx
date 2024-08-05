@@ -101,25 +101,28 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
 
   const { collections } = useConfig()
 
-  let versionToRender: string | undefined = version
-    ? generateLabelFromValue(collections, field, locale, version)
-    : placeholder
+  let versionToRender: string | undefined = placeholder
+  let comparisonToRender: string | undefined = placeholder
 
-  let comparisonToRender: string | undefined = comparison
-    ? generateLabelFromValue(collections, field, locale, comparison)
-    : placeholder
-
-  if ('hasMany' in field && field.hasMany) {
-    if (Array.isArray(version)) {
+  if (version) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
       versionToRender =
         version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
         placeholder
+    } else {
+      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
     }
-    if (Array.isArray(comparison)) {
+  }
+
+  if (comparison) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
       comparisonToRender =
         comparison
           .map((val) => generateLabelFromValue(collections, field, locale, val))
           .join(', ') || placeholder
+    } else {
+      comparisonToRender =
+        generateLabelFromValue(collections, field, locale, comparison) || placeholder
     }
   }
 
