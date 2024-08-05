@@ -12,7 +12,7 @@ import { createTestHooks } from './testHooks.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-process.env.PAYLOAD_DROP_DATABASE = 'true'
+process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
 const {
   _: [testSuiteArg],
@@ -27,8 +27,6 @@ if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
 if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
-
-process.env.PAYLOAD_DROP_DATABASE = 'true'
 
 const { beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()

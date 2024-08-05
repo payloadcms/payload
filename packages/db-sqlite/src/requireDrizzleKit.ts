@@ -10,6 +10,6 @@ export const requireDrizzleKit: RequireDrizzleKit = () => {
   const {
     generateSQLiteDrizzleJson: generateDrizzleJson,
     pushSQLiteSchema: pushSchema,
-  } = require('drizzle-kit/payload')
+  } = require('drizzle-kit/api')
   return { generateDrizzleJson, pushSchema }
 }
