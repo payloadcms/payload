@@ -28,13 +28,7 @@
     list-style: none;
     gap: var(--gap);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(auto, 1fr);
-    grid-auto-rows: 1fr;
-
-    li {
-      width: 100%;
-    }
+    grid-template-columns: repeat(var(--cols), 1fr);
 
     .card {
       height: 100%;
@@ -51,10 +45,18 @@
   }
 
   @include small-break {
-    --cols: 1;
+    --cols: 2;
 
     &__wrap {
       gap: var(--base);
     }
+
+    &__card-list {
+      gap: base(0.4);
+    }
+  }
+
+  @include extra-small-break {
+    --cols: 1;
   }
 }

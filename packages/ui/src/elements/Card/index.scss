@@ -2,7 +2,9 @@
 
 .card {
   background: var(--theme-elevation-50);
-  padding: base(0.8) $baseline;
+  padding: base(0.8);
+  width: 100%;
+  min-height: base(4);
   position: relative;
   border-radius: var(--style-radius-m);
   border: 1px solid var(--theme-border-color);
