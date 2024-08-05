@@ -8,7 +8,7 @@
 
   &__toggle-wrap {
     position: relative;
-    padding: base(0.4);
+    padding: base(0.4) base(0.4) base(0.4) base(0.8);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -20,6 +20,10 @@
 
     & > * {
       z-index: 2;
+    }
+
+    &:has(.collapsible__drag) {
+      padding-inline-start: base(0.4);
     }
   }
 
