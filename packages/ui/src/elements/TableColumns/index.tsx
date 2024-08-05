@@ -125,7 +125,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       const toggledColumns = tableColumns.map((col) => {
         return {
           ...col,
-          active: col?.name === column ? !col.active : col.active,
+          active: col?.cellProps?.clientFieldConfig?.name === column ? !col.active : col.active,
         }
       })
 
