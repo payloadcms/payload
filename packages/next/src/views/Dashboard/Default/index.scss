@@ -26,12 +26,14 @@
     padding: 0;
     margin: 0;
     list-style: none;
-    display: flex;
     gap: var(--gap);
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(auto, 1fr);
+    grid-auto-rows: 1fr;
 
     li {
-      width: calc(100% / var(--cols) - var(--gap) / var(--cols) * (var(--cols) - 1));
+      width: 100%;
     }
 
     .card {
