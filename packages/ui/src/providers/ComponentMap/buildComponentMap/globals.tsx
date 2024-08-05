@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type { EditViewProps, Payload, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
 import { isReactComponentOrFunction } from 'payload/shared'
 import React from 'react'
@@ -23,6 +23,7 @@ export const mapGlobals = ({
     config: SanitizedConfig
     globals: SanitizedGlobalConfig[]
     i18n: I18nClient
+    payload: Payload
     readOnly?: boolean
   }
 }): {
@@ -35,6 +36,7 @@ export const mapGlobals = ({
     globals,
     i18n,
     i18n: { t },
+    payload,
     readOnly: readOnlyOverride,
   } = args
 
@@ -122,6 +124,7 @@ export const mapGlobals = ({
         config,
         fieldSchema: fields,
         i18n,
+        payload,
         readOnly: readOnlyOverride,
       }),
       isPreviewEnabled: !!globalConfig?.admin?.preview,

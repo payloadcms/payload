@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
   EditViewProps,
+  Payload,
   SanitizedCollectionConfig,
   SanitizedConfig,
 } from 'payload'
@@ -26,6 +27,7 @@ export const mapCollections = (args: {
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
   i18n: I18nClient
+  payload: Payload
   readOnly?: boolean
 }): {
   [key: SanitizedCollectionConfig['slug']]: CollectionComponentMap
@@ -38,6 +40,7 @@ export const mapCollections = (args: {
     config,
     i18n,
     i18n: { t },
+    payload,
     readOnly: readOnlyOverride,
   } = args
 
@@ -189,6 +192,7 @@ export const mapCollections = (args: {
         config,
         fieldSchema: fields,
         i18n,
+        payload,
         readOnly: readOnlyOverride,
       }),
       isPreviewEnabled: !!collectionConfig?.admin?.preview,
