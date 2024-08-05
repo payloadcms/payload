@@ -81,7 +81,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const canUpdate = docPermissions?.update?.permission
 
-  const localeValues = locales.map((locale) => locale.value)
+  const localeValues = locales && locales.map((locale) => locale.value)
 
   return (
     <main className={baseClass}>
