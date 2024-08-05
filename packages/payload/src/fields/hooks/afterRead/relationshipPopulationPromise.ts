@@ -39,8 +39,6 @@ const populate = async ({
   const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
   const relatedCollection = req.payload.collections[relation]
 
-  console.log('RELATED COLLECTION: ', relatedCollection)
-
   if (relatedCollection) {
     let id = Array.isArray(field.relationTo) ? data.value : data
     let relationshipValue
@@ -56,7 +54,6 @@ const populate = async ({
     }
 
     if (shouldPopulate) {
-      console.log('HELLLLLOOOOOOO')
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
           collectionSlug: relatedCollection.config.slug,
@@ -127,36 +124,27 @@ export const relationshipPopulationPromise = async ({
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth
   const rowPromises = []
 
-  if (depth === 3) {
-    console.log('POPULATE PROMISE: ', {
-      name: field.name,
-      currentDepth,
-      depth,
-      populateDepth,
-      resultingDoc,
-    })
-  }
-
   if (fieldSupportsMany(field) && field.hasMany) {
     if (
+      field.localized &&
       locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null
     ) {
-      Object.keys(siblingDoc[field.name]).forEach((key) => {
-        if (Array.isArray(siblingDoc[field.name][key])) {
-          siblingDoc[field.name][key].forEach((relatedDoc, index) => {
+      Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
+        if (Array.isArray(siblingDoc[field.name][localeKey])) {
+          siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
             const rowPromise = async () => {
               await populate({
                 currentDepth,
-                data: siblingDoc[field.name][key][index],
+                data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
                 draft,
                 fallbackLocale,
                 field,
                 index,
-                key,
+                key: localeKey,
                 locale,
                 overrideAccess,
                 req,
@@ -192,21 +180,22 @@ export const relationshipPopulationPromise = async ({
       })
     }
   } else if (
+    field.localized &&
+    locale === 'all' &&
     typeof siblingDoc[field.name] === 'object' &&
-    siblingDoc[field.name] !== null &&
-    locale === 'all'
+    siblingDoc[field.name] !== null
   ) {
-    Object.keys(siblingDoc[field.name]).forEach((key) => {
+    Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
       const rowPromise = async () => {
         await populate({
           currentDepth,
-          data: siblingDoc[field.name][key],
+          data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
           depth: populateDepth,
           draft,
           fallbackLocale,
           field,
-          key,
+          key: localeKey,
           locale,
           overrideAccess,
           req,
