@@ -81,17 +81,21 @@
   }
 
   &__tableAddColumns {
+    height: 100%;
+  }
+
+  &__tableAddColumns, &__tableAddRows {
     position: absolute;
     background-color: var(--theme-elevation-100);
-    height: 100%;
     animation: table-controls 0.2s ease;
     border: 0;
     cursor: pointer;
+    min-width: 24px;
+    min-height: 24px;
   }
 
   &__tableAddColumns:after, &__tableAddRows:after {
     background-image: url(../../../../lexical/ui/icons/Add/index.svg);
-    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
     display: block;
@@ -109,12 +113,7 @@
   }
 
   &__tableAddRows {
-    position: absolute;
     width: calc(100% - 25px);
-    background-color: var(--theme-elevation-100);
-    animation: table-controls 0.2s ease;
-    border: 0;
-    cursor: pointer;
   }
 
   @keyframes table-controls {
