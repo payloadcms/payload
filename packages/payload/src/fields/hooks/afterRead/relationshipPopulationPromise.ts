@@ -39,6 +39,8 @@ const populate = async ({
   const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
   const relatedCollection = req.payload.collections[relation]
 
+  console.log('RELATED COLLECTION: ', relatedCollection)
+
   if (relatedCollection) {
     let id = Array.isArray(field.relationTo) ? data.value : data
     let relationshipValue
@@ -54,6 +56,7 @@ const populate = async ({
     }
 
     if (shouldPopulate) {
+      console.log('HELLLLLOOOOOOO')
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
           collectionSlug: relatedCollection.config.slug,
@@ -123,6 +126,16 @@ export const relationshipPopulationPromise = async ({
   const resultingDoc = siblingDoc
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth
   const rowPromises = []
+
+  if (depth === 3) {
+    console.log('POPULATE PROMISE: ', {
+      name: field.name,
+      currentDepth,
+      depth,
+      populateDepth,
+      resultingDoc,
+    })
+  }
 
   if (fieldSupportsMany(field) && field.hasMany) {
     if (

@@ -38,6 +38,8 @@ export default async function findVersionByIDLocal<TSlug extends CollectionSlug>
     showHiddenFields,
   } = options
 
+  console.log('Local OPERATION: ', depth)
+
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

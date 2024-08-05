@@ -43,16 +43,20 @@ export const VersionView: EditViewComponent = async (props) => {
     slug = collectionSlug
     docPermissions = permissions.collections[collectionSlug]
 
+    console.log('Hello')
+
     try {
       doc = await payload.findVersionByID({
         id: versionID,
         collection: slug,
-        depth: 1,
+        depth: 3,
         locale: '*',
         overrideAccess: false,
         req,
         user,
       })
+
+      console.log(doc)
 
       if (collectionConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')

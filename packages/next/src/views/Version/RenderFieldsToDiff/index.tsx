@@ -20,6 +20,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   locales,
   version,
 }) => {
+  // console.log(version)
   return (
     <div className={baseClass}>
       {fieldMap?.map((field, i) => {

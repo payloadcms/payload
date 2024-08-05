@@ -15,44 +15,10 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'richText',
-      type: 'richText',
+      name: 'testRelationship',
+      type: 'relationship',
+      relationTo: 'posts',
     },
-    {
-      name: 'richText2',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          BlocksFeature({
-            blocks: [
-              {
-                slug: 'testblock',
-                fields: [
-                  {
-                    name: 'testfield',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
-          }),
-        ],
-      }),
-    },
-    // {
-    //   type: 'row',
-    //   fields: [],
-    // },
-    // {
-    //   name: 'associatedMedia',
-    //   type: 'upload',
-    //   access: {
-    //     create: () => true,
-    //     update: () => false,
-    //   },
-    //   relationTo: mediaSlug,
-    // },
   ],
   versions: {
     drafts: true,

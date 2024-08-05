@@ -54,6 +54,8 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
   const fieldPromises = []
   const populationPromises = []
 
+  console.log('BLAH BLAH BLAH: ', collection.slug, incomingDepth)
+
   let depth =
     incomingDepth || incomingDepth === 0
       ? parseInt(String(incomingDepth), 10)

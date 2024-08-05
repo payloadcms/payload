@@ -36,6 +36,8 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     showHiddenFields,
   } = args
 
+  console.log('TOP LEVEL Depth: ', depth)
+
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
   }
