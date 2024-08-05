@@ -67,6 +67,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -94,7 +95,6 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={beforeInput} />
             <input
               data-rtl={rtl}
               disabled={readOnly}
@@ -107,9 +107,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
               type="text"
               value={value || ''}
             />
-            <RenderComponent mappedComponent={afterInput} />
           </div>
         )}
+        <RenderComponent mappedComponent={afterInput} />
         <FieldDescription
           Description={Description}
           description={description}

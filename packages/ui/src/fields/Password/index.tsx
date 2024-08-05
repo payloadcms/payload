@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequest } from 'payload'
+import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
 import { useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { password } from 'payload/shared'
