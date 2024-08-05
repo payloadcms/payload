@@ -4,7 +4,7 @@ import type {
   DrizzleAdapter,
   TransactionPg,
 } from '@payloadcms/drizzle/types'
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type {
   ColumnBaseConfig,
   ColumnDataType,
