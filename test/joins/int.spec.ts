@@ -43,6 +43,7 @@ describe('Joins Field Tests', () => {
       collection: 'categories',
       data: {
         name: 'example',
+        group: {},
       },
     })
 
@@ -50,6 +51,9 @@ describe('Joins Field Tests', () => {
       collection: 'posts',
       data: {
         category: category.id,
+        group: {
+          category: category.id,
+        },
         title: 'test',
       },
     })
@@ -57,6 +61,9 @@ describe('Joins Field Tests', () => {
       collection: 'posts',
       data: {
         category: category.id,
+        group: {
+          category: category.id,
+        },
         title: 'test',
       },
     })
@@ -64,6 +71,9 @@ describe('Joins Field Tests', () => {
       collection: 'posts',
       data: {
         category: category.id,
+        group: {
+          category: category.id,
+        },
         title: 'test',
       },
     })
@@ -73,14 +83,15 @@ describe('Joins Field Tests', () => {
       collection: 'categories',
     })
 
-    const joinedIDs = categoryWithPosts.posts.map((post) => post.id)
+    expect(Array.isArray(categoryWithPosts.group.posts)).toBeDefined()
+    expect(Array.isArray(categoryWithPosts.posts)).toBeDefined()
+    const joinedIDs = categoryWithPosts.group.posts.map((post) => post.id)
 
-    // TODO: add types for joins (same as relationship with hasMany)
-    expect(categoryWithPosts.posts).toHaveLength(3)
-    expect(categoryWithPosts.posts[0]).toHaveProperty('title')
-    expect(categoryWithPosts.posts[0].title).toBe('test')
-    expect(joinedIDs).toContain(categoryWithPosts.posts[0].id)
-    expect(joinedIDs).toContain(categoryWithPosts.posts[1].id)
-    expect(joinedIDs).toContain(categoryWithPosts.posts[2].id)
+    expect(categoryWithPosts.group.posts).toHaveLength(3)
+    expect(categoryWithPosts.group.posts[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.posts[0].title).toBe('test')
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
   })
 })

@@ -503,7 +503,16 @@ export type Collection = {
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: {
-    [key: string]: JoinField[]
+    [collectionSlug: string]: {
+      /**
+       * The field configuration defining the join
+       */
+      field: JoinField
+      /**
+       * The nested field path in dot notation
+       */
+      path: string
+    }[]
   }
 }
 

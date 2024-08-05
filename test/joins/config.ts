@@ -23,6 +23,17 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'categories',
         },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: 'categories',
+            },
+          ],
+        },
       ],
     },
     {
@@ -40,6 +51,18 @@ export default buildConfigWithDefaults({
           type: 'join',
           collection: 'posts',
           path: 'category',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'posts',
+              type: 'join',
+              collection: 'posts',
+              path: 'group.category',
+            },
+          ],
         },
       ],
     },
