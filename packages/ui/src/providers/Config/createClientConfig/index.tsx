@@ -14,10 +14,17 @@ import {
 
 import { PayloadIcon } from '../../../graphics/Icon/index.js'
 import { PayloadLogo } from '../../../graphics/Logo/index.js'
-import { createClientCollectionConfigs } from './collections.js'
+import { createClientCollectionConfig, createClientCollectionConfigs } from './collections.js'
 import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'
-import { createClientGlobalConfigs } from './globals.js'
+import { createClientGlobalConfig, createClientGlobalConfigs } from './globals.js'
+
+export {
+  createClientCollectionConfig,
+  createClientCollectionConfigs,
+  createClientGlobalConfig,
+  createClientGlobalConfigs,
+}
 
 export const createClientConfig = async ({
   DefaultEditView,

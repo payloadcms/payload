@@ -7,8 +7,8 @@ import {
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig } from 'packages/ui/src/providers/Config/createClientConfig/collections.js'
 import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
