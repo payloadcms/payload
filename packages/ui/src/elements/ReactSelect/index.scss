@@ -7,8 +7,6 @@
 .react-select {
   .rs__control {
     @include formInput;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
     height: auto;
     padding: base(0.4) base(0.6);
     flex-wrap: nowrap;
