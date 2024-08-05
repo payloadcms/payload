@@ -9,7 +9,7 @@ export type PointFieldProps = {
   step?: number
   validate?: PointFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type PointFieldLabelComponent = LabelComponent<'point'>
 

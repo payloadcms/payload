@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-import { EmailAndUsernameFields } from '../../../../elements/EmailAndUsername/index.js'
+import { RenderEmailAndUsernameFields } from '../../../../elements/EmailAndUsername/index.js'
 import { APIKey } from './APIKey.js'
 import './index.scss'
 
@@ -47,7 +47,7 @@ export const Auth: React.FC<Props> = (props) => {
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { isInitializing } = useDocumentInfo()
+  const { docPermissions, isInitializing } = useDocumentInfo()
 
   const {
     routes: { api },
@@ -138,7 +138,12 @@ export const Auth: React.FC<Props> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
         <React.Fragment>
-          <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
+          <RenderEmailAndUsernameFields
+            loginWithUsername={loginWithUsername}
+            operation={operation}
+            permissions={docPermissions?.fields}
+            readOnly={readOnly}
+          />
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField

@@ -58,7 +58,7 @@ const RichTextField: React.FC<
     richTextComponentMap: Map<string, React.ReactNode>
     validate?: RichTextFieldValidation
     width?: string
-  } & FormFieldBase
+  } & Omit<FormFieldBase, 'validate'>
 > = (props) => {
   const {
     name,

@@ -10,7 +10,7 @@ export type CodeFieldProps = {
   path?: string
   validate?: CodeFieldValidation
   width: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type CodeFieldLabelComponent = LabelComponent<'code'>
 

@@ -12,7 +12,7 @@ export type TextareaFieldProps = {
   rows?: number
   validate?: TextareaFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type TextareaFieldLabelComponent = LabelComponent<'textarea'>
 

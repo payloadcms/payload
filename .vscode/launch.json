@@ -57,6 +57,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js login-with-username",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Login-With-Username",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev plugin-cloud-storage",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev - plugin-cloud-storage",

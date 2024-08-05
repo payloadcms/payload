@@ -10,7 +10,7 @@ export type JSONFieldProps = {
   path?: string
   validate?: JSONFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type JSONFieldLabelComponent = LabelComponent<'json'>
 
