@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -15,14 +15,13 @@ import {
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { LoginField } from '../Login/LoginField/index.js'
+import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
-}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -58,10 +57,7 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
         label={t('authentication:newPassword')}
         name="password"
