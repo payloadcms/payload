@@ -21,7 +21,7 @@
     }
 
     &--is-multi {
-      width: calc(100% + base(0.5));
+      width: calc(100% + base(0.25));
 
       &.rs__value-container--has-value {
         padding: 0;
