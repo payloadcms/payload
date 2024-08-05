@@ -102,7 +102,6 @@ const RelationshipFields: CollectionConfig = {
     },
   ],
   slug: relationshipFieldsSlug,
-  versions: true,
 }
 
 export default RelationshipFields
