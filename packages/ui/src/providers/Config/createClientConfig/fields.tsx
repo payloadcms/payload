@@ -144,38 +144,24 @@ export const createClientFieldConfig = ({
   const isHiddenFromAdmin = field?.admin && 'hidden' in field.admin && field.admin.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
-  if (
-    field._fieldIsPresentational ||
-    (field._isFieldAffectingData && !(isHidden || disabledFromAdmin))
-  ) {
-    field._path = generateFieldPath(
-      parentPath,
-      field._isFieldAffectingData && 'name' in field ? field.name : '',
-    )
+  if (field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
+    return null
+  }
 
-    if ('label' in field && typeof field.label === 'function') {
-      field.label = field.label({ t })
-    }
+  field._path = generateFieldPath(
+    parentPath,
+    field._isFieldAffectingData && 'name' in field ? field.name : '',
+  )
 
-    if ('options' in field && Array.isArray(field.options)) {
-      field.options = field.options.map((option) => {
-        if (typeof option === 'object' && typeof option.label === 'function') {
-          return {
-            label: option.label({ t }),
-            value: option.value,
-          }
-        }
+  if ('label' in field && typeof field.label === 'function') {
+    field.label = field.label({ t })
+  }
 
-        return option
-      })
-    }
-
-    if (
-      field.type === 'array' ||
-      field.type === 'group' ||
-      field.type === 'collapsible' ||
-      field.type === 'row'
-    ) {
+  switch (field.type) {
+    case 'array':
+    case 'group':
+    case 'collapsible':
+    case 'row': {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.fields = createClientFieldConfigs({
         createMappedComponent,
@@ -185,9 +171,11 @@ export const createClientFieldConfig = ({
         parentPath: field._path,
         t,
       })
+
+      break
     }
 
-    if (field.type === 'blocks') {
+    case 'blocks': {
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.blocks = field.blocks?.map((block) => {
         const sanitized = { ...block }
@@ -199,9 +187,14 @@ export const createClientFieldConfig = ({
         })
         return sanitized
       })
+
+      break
     }
 
-    if (field.type === 'tabs') {
+    case 'tabs': {
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      field.tabs = [] as ClientFieldConfig[] // TODO: I don't know why this is necessary here and not elsewhere
+
       // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
       field.tabs = createClientFieldConfigs({
         createMappedComponent,
@@ -211,98 +204,115 @@ export const createClientFieldConfig = ({
         parentPath: field._path,
         t,
       })
+      break
     }
 
-    const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
-
-    serverOnlyFieldAdminProperties.forEach((key) => {
-      if (key in field.admin) {
-        delete field.admin[key]
-      }
-    })
-
-    field.admin = { ...(field.admin || ({} as any)) }
-
-    if (incomingField.admin && 'description' in incomingField.admin) {
-      if (
-        typeof incomingField.admin?.description === 'string' ||
-        typeof incomingField.admin?.description === 'object'
-      ) {
-        field.admin.description = incomingField.admin.description
-      } else if (typeof incomingField.admin?.description === 'function') {
-        field.admin.description = incomingField.admin?.description({ t })
-      }
-    }
-
-    field.admin.components = {
-      Cell: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Cell' in incomingField.admin.components &&
-          incomingField.admin.components.Cell,
-        undefined,
-        DefaultCell,
-      ),
-      Description: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Description' in incomingField.admin.components &&
-          incomingField.admin.components.Description,
-        undefined,
-        FieldDescription,
-      ),
-      Error: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Error' in incomingField.admin.components &&
-          incomingField.admin.components.Error,
-        undefined,
-        FieldError,
-      ),
-      Field: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Field' in incomingField.admin.components &&
-          incomingField.admin.components.Field,
-        undefined,
-        fieldComponents[isHiddenFromAdmin ? 'hidden' : incomingField.type],
-      ),
-      Filter: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Filter' in incomingField.admin.components &&
-          incomingField.admin.components.Filter,
-        undefined,
-        valueFields[field.type] || valueFields.text,
-      ),
-      Label: createMappedComponent(
-        'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'Label' in incomingField.admin.components &&
-          incomingField.admin.components.Label,
-        undefined,
-        FieldLabel,
-      ),
-      ...('admin' in incomingField &&
-      'components' in incomingField.admin &&
-      'beforeInput' in incomingField.admin.components
-        ? {
-            beforeInput: createMappedComponent(incomingField.admin?.components?.beforeInput),
+    case 'select': {
+      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      field.options = field.options.map((option) => {
+        if (typeof option === 'object' && typeof option.label === 'function') {
+          return {
+            label: option.label({ t }),
+            value: option.value,
           }
-        : {}),
-      ...('admin' in incomingField &&
-      'components' in incomingField.admin &&
-      'afterInput' in incomingField.admin.components
-        ? {
-            afterInput: createMappedComponent(incomingField.admin?.components?.afterInput),
-          }
-        : {}),
-    }
+        }
 
-    return field
+        return option
+      })
+
+      break
+    }
+    default:
+      break
   }
 
-  return null
+  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+
+  field.admin = { ...(field?.admin || ({} as any)) }
+
+  serverOnlyFieldAdminProperties.forEach((key) => {
+    if (key in field.admin) {
+      delete field.admin[key]
+    }
+  })
+
+  if (incomingField.admin && 'description' in incomingField.admin) {
+    if (
+      typeof incomingField.admin?.description === 'string' ||
+      typeof incomingField.admin?.description === 'object'
+    ) {
+      field.admin.description = incomingField.admin.description
+    } else if (typeof incomingField.admin?.description === 'function') {
+      field.admin.description = incomingField.admin?.description({ t })
+    }
+  }
+
+  field.admin.components = {
+    Cell: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Cell' in incomingField.admin.components &&
+        incomingField.admin.components.Cell,
+      undefined,
+      DefaultCell,
+    ),
+    Description: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Description' in incomingField.admin.components &&
+        incomingField.admin.components.Description,
+      undefined,
+      FieldDescription,
+    ),
+    Error: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Error' in incomingField.admin.components &&
+        incomingField.admin.components.Error,
+      undefined,
+      FieldError,
+    ),
+    Field: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Field' in incomingField.admin.components &&
+        incomingField.admin.components.Field,
+      undefined,
+      fieldComponents[isHiddenFromAdmin ? 'hidden' : incomingField.type],
+    ),
+    Filter: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Filter' in incomingField.admin.components &&
+        incomingField.admin.components.Filter,
+      undefined,
+      valueFields[field.type] || valueFields.text,
+    ),
+    Label: createMappedComponent(
+      'admin' in incomingField &&
+        'components' in incomingField.admin &&
+        'Label' in incomingField.admin.components &&
+        incomingField.admin.components.Label,
+      undefined,
+      FieldLabel,
+    ),
+    ...('admin' in incomingField &&
+    'components' in incomingField.admin &&
+    'beforeInput' in incomingField.admin.components
+      ? {
+          beforeInput: createMappedComponent(incomingField.admin?.components?.beforeInput),
+        }
+      : {}),
+    ...('admin' in incomingField &&
+    'components' in incomingField.admin &&
+    'afterInput' in incomingField.admin.components
+      ? {
+          afterInput: createMappedComponent(incomingField.admin?.components?.afterInput),
+        }
+      : {}),
+  }
+
+  return field
 }
 
 export const createClientFieldConfigs = ({
@@ -318,7 +328,7 @@ export const createClientFieldConfigs = ({
   parentPath?: string
   t: TFunction
 }): ClientFieldConfig[] => {
-  const result = fields
+  const result = [...fields]
     .map((field) => createClientFieldConfig({ createMappedComponent, field, parentPath, t }))
     .filter(Boolean)
 

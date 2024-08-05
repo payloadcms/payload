@@ -15,7 +15,7 @@ type Props = {
   readonly fieldComponentProps?: {
     clientFieldConfig: ClientFieldConfig
     forceRender?: boolean
-  }[]
+  }
   readonly indexPath?: string
   readonly isHidden?: boolean
   readonly name?: string

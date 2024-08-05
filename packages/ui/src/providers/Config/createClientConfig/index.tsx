@@ -101,7 +101,7 @@ export const createClientConfig = async ({
   clientConfig.collections = createClientCollectionConfigs({
     DefaultEditView,
     DefaultListView,
-    collections: clientConfig.collections as any as SanitizedCollectionConfig[], // invert the type
+    collections: [...(clientConfig.collections as any as SanitizedCollectionConfig[])], // invert the type
     createMappedComponent,
     t: i18n.t,
   })
@@ -109,7 +109,7 @@ export const createClientConfig = async ({
   clientConfig.globals = createClientGlobalConfigs({
     DefaultEditView,
     createMappedComponent,
-    globals: clientConfig.globals as any as SanitizedGlobalConfig[], // invert the type
+    globals: [...(clientConfig.globals as any as SanitizedGlobalConfig[])], // invert the type
     t: i18n.t,
   })
 

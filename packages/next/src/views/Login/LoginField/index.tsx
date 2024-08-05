@@ -16,11 +16,13 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
     return (
       <EmailField
         autoComplete="email"
-        label={t('general:email')}
-        labelProps={{ htmlFor: 'field-email', required }}
-        name="email"
-        path="email"
-        required={required}
+        clientFieldConfig={{
+          name: 'email',
+          _path: 'email',
+          label: t('general:email'),
+          labelProps: { htmlFor: 'field-email', required },
+          required,
+        }}
         validate={(value) =>
           email(value, {
             name: 'email',
