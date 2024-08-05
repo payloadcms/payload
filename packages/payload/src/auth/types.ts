@@ -118,11 +118,18 @@ export type AuthStrategy = {
   name: string
 }
 
-export type LoginWithUsernameOptions = {
-  allowEmailLogin?: boolean
-  requireEmail?: boolean
-  requireUsername?: boolean
-}
+export type LoginWithUsernameOptions =
+  | {
+      allowEmailLogin?: false
+      requireEmail?: boolean
+      // If `allowEmailLogin` is false, `requireUsername` must be true (default: true)
+      requireUsername?: true
+    }
+  | {
+      allowEmailLogin?: true
+      requireEmail?: boolean
+      requireUsername?: boolean
+    }
 
 export interface IncomingAuthType {
   cookies?: {

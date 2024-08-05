@@ -9,9 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'login-with-either': LoginWithEitherAuthOperations;
   };
   collections: {
     users: User;
+    'login-with-either': LoginWithEither;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -20,11 +22,31 @@ export interface Config {
   };
   globals: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (LoginWithEither & {
+        collection: 'login-with-either';
+      });
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    username: string;
+  };
+  login: {
+    password: string;
+    username: string;
+  };
+  registerFirstUser: {
+    password: string;
+    username?: string;
+  };
+  unlock: {
+    username: string;
+  };
+}
+export interface LoginWithEitherAuthOperations {
   forgotPassword:
     | {
         email: string;
@@ -38,8 +60,8 @@ export interface UserAuthOperations {
         password: string;
       }
     | {
-        username: string;
         password: string;
+        username: string;
       };
   registerFirstUser: {
     password: string;
@@ -60,7 +82,24 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  displayName?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email?: string | null;
+  username: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "login-with-either".
+ */
+export interface LoginWithEither {
+  id: string;
   updatedAt: string;
   createdAt: string;
   email?: string | null;
@@ -79,10 +118,15 @@ export interface User {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      };
   key?: string | null;
   value?:
     | {

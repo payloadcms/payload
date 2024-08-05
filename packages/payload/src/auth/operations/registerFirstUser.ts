@@ -34,7 +34,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       config,
       config: {
         slug,
-        auth: { disableLocalStrategy, loginWithUsername, verify },
+        auth: { verify },
       },
     },
     data,

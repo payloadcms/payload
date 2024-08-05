@@ -6,7 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export const LoginWithUsernameConfig = buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -16,16 +16,23 @@ export default buildConfigWithDefaults({
       auth: {
         loginWithUsername: {
           requireEmail: false,
+          allowEmailLogin: false,
+        },
+      },
+      fields: [],
+    },
+    {
+      slug: 'login-with-either',
+      auth: {
+        loginWithUsername: {
+          requireEmail: false,
           allowEmailLogin: true,
           requireUsername: false,
         },
       },
-      fields: [
-        {
-          name: 'displayName',
-          type: 'text',
-        },
-      ],
+      fields: [],
     },
   ],
 })
+
+export default LoginWithUsernameConfig
