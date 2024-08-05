@@ -58,7 +58,7 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@lexical/eslint-plugin": " 0.17.0",
+    "@lexical/eslint-plugin": "0.17.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",

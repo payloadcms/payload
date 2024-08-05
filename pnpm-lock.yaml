@@ -1232,7 +1232,7 @@ importers:
         version: 10.0.0
     devDependencies:
       '@lexical/eslint-plugin':
-        specifier: ' 0.17.0'
+        specifier: 0.17.0
         version: 0.17.0(eslint@9.6.0)
       '@payloadcms/eslint-config':
         specifier: workspace:*

@@ -20,9 +20,9 @@ import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { PluginComponent, PluginComponentWithAnchor } from '../../../typesClient.js'
+import type { PluginComponent } from '../../../typesClient.js'
 
-import './index.scss'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 
 type MousePosition = {
   x: number
@@ -38,6 +38,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   const targetRef = useRef<HTMLElement | null>(null)
   const resizerRef = useRef<HTMLDivElement | null>(null)
   const tableRectRef = useRef<ClientRect | null>(null)
+  const editorConfig = useEditorConfigContext()
 
   const mouseStartPosRef = useRef<MousePosition | null>(null)
   const [mouseCurrentPos, updateMouseCurrentPos] = useState<MousePosition | null>(null)
@@ -378,12 +379,12 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
       {activeCell != null && !isMouseDown && (
         <React.Fragment>
           <div
-            className="TableCellResizer__resizer TableCellResizer__ui"
+            className={`${editorConfig.editorConfig.lexical.theme.tableCellResizer} TableCellResizer__ui`}
             onMouseDown={toggleResize('right')}
             style={resizerStyles.right || undefined}
           />
           <div
-            className="TableCellResizer__resizer TableCellResizer__ui"
+            className={`${editorConfig.editorConfig.lexical.theme.tableCellResizer} TableCellResizer__ui`}
             onMouseDown={toggleResize('bottom')}
             style={resizerStyles.bottom || undefined}
           />
