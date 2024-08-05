@@ -3,6 +3,12 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { PaginatedDocs, Payload } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
+import fs from 'fs/promises'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+import { generateTypes } from 'payload/node'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
@@ -1693,6 +1699,21 @@ describe('Fields', () => {
       })
 
       expect(result.docs).toHaveLength(1)
+    })
+  })
+
+  describe('TypeScript generated types', () => {
+    /**
+     * Check that the generated types have not unintentionally changed.
+     *
+     * If they must change:
+     *
+     * AFTER REVIEWING THE CHANGES, update the snapshot with `pnpm test:int fields --updateSnapshot`
+     */
+    it('should not unintentionally change the generated types', async () => {
+      await generateTypes(payload.config)
+      const payloadTypes = await fs.readFile(path.resolve(dirname, './payload-types.ts'), 'utf-8')
+      expect(payloadTypes).toMatchSnapshot()
     })
   })
 })
