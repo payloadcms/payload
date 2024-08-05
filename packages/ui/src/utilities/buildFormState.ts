@@ -174,6 +174,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   const result = await buildStateFromSchema({
     id,
+    collectionSlug,
     data,
     fieldSchema,
     operation,
@@ -185,14 +186,6 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   if (collectionSlug && formState) {
     if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
       result.file = formState.file
-    }
-
-    if (
-      req.payload.collections[collectionSlug]?.config?.auth &&
-      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
-    ) {
-      if (formState.username) result.username = formState.username
-      if (formState.email) result.email = formState.email
     }
   }
 

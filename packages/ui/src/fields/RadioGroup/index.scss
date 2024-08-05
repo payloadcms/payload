@@ -36,6 +36,10 @@
   .radio-input {
     cursor: default;
 
+    &:hover {
+      border-color: var(--theme-elevation-50);
+    }
+
     &__label {
       color: var(--theme-elevation-400);
     }
@@ -43,7 +47,7 @@
     &--is-selected {
       .radio-input__styled-radio {
         &:before {
-          background-color: var(--theme-elevation-100);
+          background-color: var(--theme-elevation-250);
         }
       }
     }

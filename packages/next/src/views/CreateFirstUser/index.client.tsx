@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -13,16 +13,15 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
-import React, { useMemo } from 'react'
+import React from 'react'
 
-import { LoginField } from '../Login/LoginField/index.js'
+import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
-}> = ({ initialState, loginType, requireEmail: requireEmailFromProps = true, userSlug }) => {
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const {
@@ -33,14 +32,6 @@ export const CreateFirstUserClient: React.FC<{
   const { t } = useTranslation()
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
-
-  const requireEmail = useMemo(() => {
-    if (loginType === 'email') {
-      return true
-    }
-
-    return requireEmailFromProps
-  }, [loginType, requireEmailFromProps])
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) =>
@@ -66,10 +57,7 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
         label={t('authentication:newPassword')}
         labelProps={{ htmlFor: 'field-password' }}
@@ -86,7 +74,7 @@ export const CreateFirstUserClient: React.FC<{
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

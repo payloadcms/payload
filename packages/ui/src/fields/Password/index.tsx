@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, Description, FormFieldBase, PayloadRequest, Validate } from 'payload'
+import type { Description, FormFieldBase, PasswordFieldValidation, PayloadRequest } from 'payload'
 
 import { useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { password } from 'payload/shared'
@@ -26,7 +26,7 @@ export type PasswordFieldProps = {
   required?: boolean
   rtl?: boolean
   style?: React.CSSProperties
-  validate?: Validate
+  validate?: PasswordFieldValidation
   width?: string
 } & Pick<
   FormFieldBase,
@@ -61,7 +61,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const locale = useLocale()
   const config = useConfig()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: PasswordFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

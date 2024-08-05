@@ -1,4 +1,10 @@
-import type { DescriptionComponent, FormFieldBase, LabelComponent, UploadField } from 'payload'
+import type {
+  DescriptionComponent,
+  FormFieldBase,
+  LabelComponent,
+  UploadField,
+  UploadFieldValidation,
+} from 'payload'
 
 import type { ErrorComponent } from '../forms/Error.js'
 
@@ -7,6 +13,7 @@ export type UploadFieldProps = {
   name?: string
   path?: string
   relationTo?: UploadField['relationTo']
+  validate?: UploadFieldValidation
   width?: string
 } & FormFieldBase
 

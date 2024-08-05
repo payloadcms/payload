@@ -1,3 +1,4 @@
+import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type {
   DescriptionComponent,
@@ -8,7 +9,8 @@ import type {
 
 export type RichTextComponentProps = {
   name: string
-  richTextComponentMap?: Map<string, MappedComponent | unknown>
+  richTextComponentMap?: Map<string, MappedComponent[] | React.ReactNode>
+  validate?: RichTextFieldValidation
   width?: string
 } & FormFieldBase
 

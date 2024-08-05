@@ -1,16 +1,16 @@
 'use client'
-import type { PayloadRequest } from 'payload'
+import type { Validate, ValidateOptions } from 'payload'
 
-import { EmailField, TextField, useConfig, useTranslation } from '@payloadcms/ui'
+import { EmailField, TextField, useTranslation } from '@payloadcms/ui'
 import { email, username } from 'payload/shared'
 import React from 'react'
 export type LoginFieldProps = {
   required?: boolean
   type: 'email' | 'emailOrUsername' | 'username'
+  validate?: Validate
 }
 export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
   const { t } = useTranslation()
-  const config = useConfig()
 
   if (type === 'email') {
     return (
@@ -21,17 +21,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         name="email"
         path="email"
         required={required}
-        validate={(value) =>
-          email(value, {
-            name: 'email',
-            type: 'email',
-            data: {},
-            preferences: { fields: {} },
-            req: { t } as PayloadRequest,
-            required: true,
-            siblingData: {},
-          })
-        }
+        validate={email}
       />
     )
   }
@@ -42,23 +32,8 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         label={t('authentication:username')}
         name="username"
         path="username"
-        required
-        validate={(value) =>
-          username(value, {
-            name: 'username',
-            type: 'text',
-            data: {},
-            preferences: { fields: {} },
-            req: {
-              payload: {
-                config,
-              },
-              t,
-            } as PayloadRequest,
-            required: true,
-            siblingData: {},
-          })
-        }
+        required={required}
+        validate={username}
       />
     )
   }
@@ -69,36 +44,16 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         label={t('authentication:emailOrUsername')}
         name="username"
         path="username"
-        required
-        validate={(value) => {
-          const passesUsername = username(value, {
-            name: 'username',
-            type: 'text',
-            data: {},
-            preferences: { fields: {} },
-            req: {
-              payload: {
-                config,
-              },
-              t,
-            } as PayloadRequest,
-            required: true,
-            siblingData: {},
-          })
-          const passesEmail = email(value, {
-            name: 'username',
-            type: 'email',
-            data: {},
-            preferences: { fields: {} },
-            req: {
-              payload: {
-                config,
-              },
-              t,
-            } as PayloadRequest,
-            required: true,
-            siblingData: {},
-          })
+        required={required}
+        validate={(value, options) => {
+          const passesUsername = username(
+            value,
+            options as ValidateOptions<any, { email?: string }, any, string>,
+          )
+          const passesEmail = email(
+            value,
+            options as ValidateOptions<any, { username?: string }, any, string>,
+          )
 
           if (!passesEmail && !passesUsername) {
             return `${t('general:email')}: ${passesEmail} ${t('general:username')}: ${passesUsername}`

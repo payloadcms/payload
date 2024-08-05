@@ -5,7 +5,7 @@
   width: $baseline;
 
   .stroke {
-    stroke: var(--theme-elevation-800);
+    stroke: currentColor;
     stroke-width: 2px;
   }
 }

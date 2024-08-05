@@ -17,6 +17,5 @@ export type GenericDescriptionProps = {
 }
 export type FieldDescriptionProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
-} & FieldComponentProps &
-  GenericDescriptionProps &
+} & GenericDescriptionProps &
   Partial<ServerProps>

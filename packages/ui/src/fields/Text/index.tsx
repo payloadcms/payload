@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, TextFieldProps } from 'payload'
+import type { TextFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -51,7 +51,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   const { localization: localizationConfig } = useConfig()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, maxLength, minLength, required })

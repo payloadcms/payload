@@ -16,13 +16,15 @@ const DefaultPreviewButton: React.FC = () => {
     <Button
       buttonStyle="secondary"
       className={baseClass}
+      icon={'link'}
+      iconPosition="left"
       // disabled={disabled}
       onClick={() =>
         generatePreviewURL({
           openPreviewWindow: true,
         })
       }
-      size="small"
+      size="medium"
     >
       {label}
     </Button>

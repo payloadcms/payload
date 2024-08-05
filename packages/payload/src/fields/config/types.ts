@@ -17,7 +17,12 @@ import type {
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
-import type { CustomComponent, LabelFunction, LabelStatic, PayloadComponent } from '../../config/types.js'
+import type {
+  CustomComponent,
+  LabelFunction,
+  LabelStatic,
+  PayloadComponent,
+} from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { CollectionSlug, GeneratedTypes } from '../../index.js'
@@ -175,12 +180,14 @@ export type Labels = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  collectionSlug?: string
   data: Partial<TData>
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
   previousValue?: TValue
   req: PayloadRequest
+  required?: boolean
   siblingData: Partial<TSiblingData>
 }
 
@@ -200,8 +207,6 @@ export type Validate<
   value: TValue,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
-
-export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
   label: LabelFunction | LabelStatic

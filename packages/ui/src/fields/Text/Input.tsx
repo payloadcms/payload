@@ -71,7 +71,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -98,6 +98,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             value={valueToRender}
           />
         ) : (
+<<<<<<< HEAD
           <div>
             <RenderComponent mappedComponent={BeforeInput} />
 
@@ -117,6 +118,27 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           </div>
         )}
         <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+=======
+          <input
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path?.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onKeyDown={onKeyDown}
+            placeholder={getTranslation(placeholder, i18n)}
+            ref={inputRef}
+            type="text"
+            value={value || ''}
+          />
+        )}
+        {AfterInput}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
+>>>>>>> beta
       </div>
     </div>
   )

@@ -13,6 +13,7 @@ import { useListInfo } from '@payloadcms/ui'
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -131,9 +132,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
+        <SearchIcon />
         <SearchFilter
           fieldName={titleField?.name}
-          handleChange={handleSearchChange}
+          handleChange={(search) => {
+            return void handleSearchChange(search)
+          }}
           initialParams={searchParams}
           key={collectionSlug}
           label={searchLabelTranslated.current}

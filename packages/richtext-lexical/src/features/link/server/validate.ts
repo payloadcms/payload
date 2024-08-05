@@ -13,7 +13,7 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, operation, preferences, req },
+      options: { id, collectionSlug, operation, preferences, req },
     },
   }) => {
     /**
@@ -22,6 +22,7 @@ export const linkValidation = (
 
     const result = await buildStateFromSchema({
       id,
+      collectionSlug,
       data: node.fields,
       fieldSchema: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       operation: operation === 'create' || operation === 'update' ? operation : 'update',

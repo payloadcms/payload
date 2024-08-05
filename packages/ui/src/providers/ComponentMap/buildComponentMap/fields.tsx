@@ -9,7 +9,6 @@ import type {
   CreateMappedComponent,
   DateFieldProps,
   EmailFieldProps,
-  ErrorProps,
   Field,
   FieldComponentProps,
   FieldDescriptionProps,
@@ -43,8 +42,14 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+<<<<<<< HEAD
 import { MissingEditorProp, deepCopyObject } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+=======
+import { MissingEditorProp } from 'payload'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import React, { Fragment } from 'react'
+>>>>>>> beta
 
 import type { FieldTypesComponents } from '../../../fields/index.js'
 
@@ -121,20 +126,6 @@ function generateFieldPath(parentPath, name) {
   }
 
   return tabPath
-}
-
-function prepareCustomComponentProps(
-  props: {
-    [key: string]: any
-  } & FieldComponentProps,
-) {
-  return deepCopyObject({
-    ...props,
-    fieldMap: undefined,
-    richTextComponentMap: undefined,
-    rows: undefined,
-    tabs: undefined,
-  })
 }
 
 export const mapFields = (args: {
@@ -766,11 +757,12 @@ export const mapFields = (args: {
           }
         }
 
-        const labelProps: Omit<LabelProps, 'type'> = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const labelProps: LabelProps = {
+          type: field.type,
+          label,
+          required: 'required' in field ? field.required : undefined,
           schemaPath: path,
-        })
+        }
 
         let CustomLabel: MappedComponent = createMappedComponent(
           field?.admin?.components &&
@@ -822,11 +814,10 @@ export const mapFields = (args: {
           }
         }
 
-        const descriptionProps: FieldDescriptionProps = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const descriptionProps: FieldDescriptionProps = {
+          type: field.type,
           description,
-        })
+        }
 
         const CustomDescription = createMappedComponent(
           field.admin?.components &&
@@ -836,11 +827,9 @@ export const mapFields = (args: {
           FieldDescription,
         )
 
-        const errorProps: ErrorProps = prepareCustomComponentProps({
-          ...fieldComponentPropsBase,
-          type: undefined,
+        const errorProps = {
           path,
-        })
+        }
 
         const CustomError = createMappedComponent(
           field?.admin?.components &&
