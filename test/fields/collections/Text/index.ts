@@ -8,7 +8,6 @@ const TextFields: CollectionConfig = {
     useAsTitle: 'text',
   },
   defaultSort: 'id',
-  versions: true,
   fields: [
     {
       name: 'text',
