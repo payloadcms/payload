@@ -168,6 +168,8 @@ export type {
   TextFieldProps,
 } from './fields/Text.js'
 
+export type { TextClientField } from './fields/Text.js'
+
 export type {
   TextareaFieldDescriptionComponent,
   TextareaFieldErrorComponent,

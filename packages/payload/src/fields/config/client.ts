@@ -1,10 +1,6 @@
 import type { MappedComponent, StaticDescription } from '../../admin/types.js'
 import type { StaticLabel } from '../../config/types.js'
-import type { Field, FieldBase, FieldTypes } from '../../fields/config/types.js'
-
-export type GenericClientFieldConfig<T extends FieldTypes = FieldTypes> = {
-  readonly type: T
-} & ClientFieldConfig
+import type { Field, FieldBase } from '../../fields/config/types.js'
 
 export type ClientField = {
   [K in Field['type']]: Omit<Extract<Field, { type: K }>, ServerOnlyFieldProperties>

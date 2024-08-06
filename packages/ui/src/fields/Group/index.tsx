@@ -32,9 +32,8 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
     descriptionProps,
     field,
     field: {
-      admin: { className, description, style, width },
+      admin: { className, description, hideGutter, style, width },
       fields,
-      hideGutter,
       label,
     },
     readOnly: readOnlyFromProps,

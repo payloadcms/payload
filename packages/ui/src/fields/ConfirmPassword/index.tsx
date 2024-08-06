@@ -11,8 +11,8 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type ConfirmPasswordFieldProps = {
-  disabled?: boolean
-  path?: string
+  readonly disabled?: boolean
+  readonly path?: string
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
@@ -45,7 +45,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError path={path} />
         {/* disable eslint here because the label is dynamic */}
-        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+        {}
         <input
           aria-label={t('authentication:confirmPassword')}
           autoComplete="off"

@@ -1,4 +1,4 @@
-import type { GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type {
@@ -8,8 +8,10 @@ import type {
   MappedComponent,
 } from '../types.js'
 
+export type RichTextFieldClient = Extract<ClientFieldConfig, { type: 'richText' }>
+
 export type RichTextComponentProps = {
-  readonly field: GenericClientFieldConfig<'richText'>
+  readonly field: RichTextFieldClient
   readonly name: string
   readonly richTextComponentMap?: Map<string, MappedComponent | unknown>
   readonly validate?: RichTextFieldValidation

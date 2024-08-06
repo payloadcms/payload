@@ -813,6 +813,10 @@ export type BlockField = {
 } & FieldBase
 
 export type PointField = {
+  admin?: {
+    placeholder?: Record<string, string> | string
+    step?: number
+  } & Admin
   type: 'point'
   validate?: Validate<unknown, unknown, unknown, PointField>
 } & FieldBase

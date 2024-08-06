@@ -21,9 +21,9 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
     field,
     field: {
+      _path: pathFromProps,
       admin: { className, style, width },
       label,
-      path: pathFromProps,
       relationTo,
       required,
     },
@@ -65,7 +65,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     return false
   }, [relationTo, permissions])
 
-  const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
+  const { filterOptions, formInitializing, formProcessing, setValue, showError, value } =
     useField<string>({
       path: pathFromContext ?? pathFromProps,
       validate: memoizedValidate,

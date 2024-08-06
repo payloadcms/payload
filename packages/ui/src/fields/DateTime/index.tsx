@@ -1,5 +1,5 @@
 'use client'
-import type { DateFieldProps } from 'payload'
+import type { DateFieldProps, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -12,8 +12,6 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
-
-import type { DateFieldValidation } from 'packages/payload/src/fields/validations.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

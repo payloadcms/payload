@@ -1,10 +1,15 @@
-import type { GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { StaticLabel } from '../../config/types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { PointFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
+export type PointFieldClient = {
+  readonly label: StaticLabel
+} & Extract<ClientFieldConfig, { type: 'point' }>
+
 export type PointFieldProps = {
-  readonly field: GenericClientFieldConfig<'point'>
+  readonly field: PointFieldClient
   readonly validate?: PointFieldValidation
 } & FormFieldBase
 

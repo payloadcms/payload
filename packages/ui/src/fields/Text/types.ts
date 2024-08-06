@@ -30,7 +30,7 @@ export type TextInputProps = {
   readonly minRows?: number
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string
-  readonly placeholder?: string
+  readonly placeholder?: Record<string, string> | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly rtl?: boolean
