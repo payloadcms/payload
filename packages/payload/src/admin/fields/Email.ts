@@ -1,5 +1,5 @@
 import type { GenericClientFieldConfig } from '../../fields/config/client.js'
-import { EmailFieldValidation } from '../../fields/validations.js'
+import type { EmailFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
