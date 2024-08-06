@@ -38,9 +38,9 @@ import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
-  LexicalFields,
-  LexicalMigrateFields,
-  LexicalLocalizedFields,
+  // LexicalFields,
+  // LexicalMigrateFields,
+  // LexicalLocalizedFields,
   {
     slug: 'users',
     admin: {
@@ -55,8 +55,8 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
-  ArrayFields,
-  BlockFields,
+  // ArrayFields,
+  // BlockFields,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
@@ -70,21 +70,21 @@ export const collectionSlugs: CollectionConfig[] = [
   JSONFields,
   NumberFields,
   PointFields,
-  RelationshipFields,
-  RichTextFields,
+  // RelationshipFields,
+  // RichTextFields,
   SelectFields,
-  TabsFields2,
-  TabsFields,
+  // TabsFields2,
+  // TabsFields,
   TextFields,
-  Uploads,
-  Uploads2,
-  Uploads3,
+  // Uploads,
+  // Uploads2,
+  // Uploads3,
   UIFields,
 ]
 
 export default buildConfigWithDefaults({
   collections: collectionSlugs,
-  globals: [TabsWithRichText],
+  // globals: [TabsWithRichText],
   custom: {
     client: {
       'new-value': 'client available',
@@ -113,7 +113,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      // await clearAndSeedEverything(payload)
     }
   },
   typescript: {

@@ -28,11 +28,7 @@ export const combineLabel = ({
   prefix?: JSX.Element | string
 }): JSX.Element => {
   const CustomLabelToRender: MappedComponent =
-    field &&
-    'CustomLabel' in field.admin.components &&
-    field.admin.components.CustomLabel !== undefined
-      ? field.admin.components.CustomLabel
-      : null
+    field?.admin?.components?.Label !== undefined ? field.admin.components.Label : null
 
   const DefaultLabelToRender: MappedComponent =
     field && 'label' in field && field.label
@@ -40,8 +36,8 @@ export const combineLabel = ({
           type: 'client',
           Component: FieldLabel,
           props: {
+            Label: field.admin?.components?.Label,
             label: field.label,
-            ...(field.labelProps || {}),
           },
         }
       : null
@@ -88,9 +84,9 @@ const reduceFields = ({
     // escape for a variety of reasons
     if (
       _isFieldAffectingData &&
-      (field.disableBulkEdit ||
+      (field.admin.disableBulkEdit ||
         field.unique ||
-        field.isHidden ||
+        field.admin.hidden ||
         ('readOnly' in field && field.readOnly))
     ) {
       return fieldsToUse
