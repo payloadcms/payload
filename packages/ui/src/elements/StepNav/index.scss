@@ -75,6 +75,18 @@
   }
 
   @include small-break {
-    gap: calc(var(--base) / 4);
+    gap: base(0.4);
+
+    &__truncate {
+      visibility: hidden;
+      width: base(0.6);
+
+      &::before {
+        content: '...';
+        display: inline-block;
+        width: base(0.6);
+        visibility: visible;
+      }
+    }
   }
 }

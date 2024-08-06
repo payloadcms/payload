@@ -57,7 +57,12 @@ const StepNav: React.FC<{
               <Fragment key={i}>
                 {item.url ? (
                   <LinkElement href={item.url}>
-                    <span key={i}>{StepLabel}</span>
+                    <span
+                      className={stepNav.length > 1 && i == 0 && `${baseClass}__truncate`}
+                      key={i}
+                    >
+                      {StepLabel}
+                    </span>
                   </LinkElement>
                 ) : (
                   <span key={i}>{StepLabel}</span>
