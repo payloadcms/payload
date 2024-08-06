@@ -178,23 +178,23 @@ export const DocumentControls: React.FC<{
                         !globalConfig?.versions?.drafts?.autosave)) && (
                       <SaveDraftButton
                         CustomComponent={
-                          collectionConfig.admin?.components?.edit?.SaveDraftButton ||
-                          globalConfig.admin?.components?.elements?.SaveDraftButton
+                          collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
+                          globalConfig?.admin?.components?.elements?.SaveDraftButton
                         }
                       />
                     )}
                     <PublishButton
                       CustomComponent={
-                        collectionConfig.admin?.components?.edit?.PublishButton ||
-                        globalConfig.admin?.components?.elements?.PublishButton
+                        collectionConfig?.admin?.components?.edit?.PublishButton ||
+                        globalConfig?.admin?.components?.elements?.PublishButton
                       }
                     />
                   </React.Fragment>
                 ) : (
                   <SaveButton
                     CustomComponent={
-                      collectionConfig.admin?.components?.edit?.SaveButton ||
-                      globalConfig.admin?.components?.elements?.SaveButton
+                      collectionConfig?.admin?.components?.edit?.SaveButton ||
+                      globalConfig?.admin?.components?.elements?.SaveButton
                     }
                   />
                 )}
