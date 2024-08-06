@@ -1,3 +1,4 @@
+import type { PointFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
@@ -6,8 +7,9 @@ export type PointFieldProps = {
   path?: string
   placeholder?: string
   step?: number
+  validate?: PointFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type PointFieldLabelComponent = LabelComponent<'point'>
 

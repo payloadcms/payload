@@ -26,13 +26,9 @@
     padding: 0;
     margin: 0;
     list-style: none;
-    display: flex;
     gap: var(--gap);
-    flex-wrap: wrap;
-
-    li {
-      width: calc(100% / var(--cols) - var(--gap) / var(--cols) * (var(--cols) - 1));
-    }
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
 
     .card {
       height: 100%;
@@ -49,10 +45,18 @@
   }
 
   @include small-break {
-    --cols: 1;
+    --cols: 2;
 
     &__wrap {
       gap: var(--base);
     }
+
+    &__card-list {
+      gap: base(0.4);
+    }
+  }
+
+  @include extra-small-break {
+    --cols: 1;
   }
 }

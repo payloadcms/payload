@@ -38,7 +38,8 @@
 
   &__editor {
     font-family: var(--font-serif);
-    font-size: base(0.625);
+    font-size: base(0.8);
+    letter-spacing: 0.02em;
 
     h1,
     h2,
@@ -48,6 +49,7 @@
     h6 {
       font-family: var(--font-body);
       line-height: 1.125;
+      letter-spacing: 0;
     }
 
     h1[data-slate-node='element'] {

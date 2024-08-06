@@ -1,6 +1,6 @@
 @import '../../../../scss/styles.scss';
 
-$icon-width: base(1);
+$icon-width: base(2);
 $icon-margin: base(0.25);
 
 .block-search {
@@ -13,14 +13,13 @@ $icon-margin: base(0.25);
 
   &__input {
     @include formInput;
-    padding-right: calc(#{$icon-width} + #{$icon-margin} * 2);
   }
 
-  .search {
+  .icon--search {
     position: absolute;
     top: 50%;
     transform: translate3d(0, -50%, 0);
-    right: base(0.25);
+    right: 0;
     width: $icon-width;
     margin: 0 $icon-margin;
 

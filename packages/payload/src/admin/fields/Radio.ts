@@ -1,4 +1,5 @@
 import type { Option } from '../../fields/config/types.js'
+import type { RadioFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
@@ -8,9 +9,10 @@ export type RadioFieldProps = {
   onChange?: OnChange
   options?: Option[]
   path?: string
+  validate?: RadioFieldValidation
   value?: string
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type OnChange<T = string> = (value: T) => void
 

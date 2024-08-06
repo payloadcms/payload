@@ -1,4 +1,5 @@
 import type { EmailField } from '../../fields/config/types.js'
+import type { EmailFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
@@ -7,8 +8,9 @@ export type EmailFieldProps = {
   name?: string
   path?: string
   placeholder?: EmailField['admin']['placeholder']
+  validate?: EmailFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type EmailFieldLabelComponent = LabelComponent<'email'>
 

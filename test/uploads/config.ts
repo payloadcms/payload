@@ -16,7 +16,10 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
+  mediaWithRelationPreviewSlug,
+  mediaWithoutRelationPreviewSlug,
   reduceSlug,
+  relationPreviewSlug,
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -554,6 +557,67 @@ export default buildConfigWithDefaults({
       },
     },
     CustomUploadFieldCollection,
+    {
+      slug: mediaWithRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        displayPreview: true,
+      },
+    },
+    {
+      slug: mediaWithoutRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: true,
+    },
+    {
+      slug: relationPreviewSlug,
+      fields: [
+        {
+          name: 'imageWithPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview2',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: false,
+        },
+        {
+          name: 'imageWithoutPreview2',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: false,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -673,6 +737,31 @@ export default buildConfigWithDefaults({
       file: {
         ...imageFile,
         name: `function-image-${imageFile.name}`,
+      },
+    })
+
+    // Create media with and without relation preview
+    const { id: uploadedImageWithPreview } = await payload.create({
+      collection: mediaWithRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    const { id: uploadedImageWithoutPreview } = await payload.create({
+      collection: mediaWithoutRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    await payload.create({
+      collection: relationPreviewSlug,
+      data: {
+        imageWithPreview1: uploadedImageWithPreview,
+        imageWithPreview2: uploadedImageWithPreview,
+        imageWithoutPreview1: uploadedImageWithPreview,
+        imageWithoutPreview2: uploadedImageWithoutPreview,
+        imageWithPreview3: uploadedImageWithoutPreview,
+        imageWithoutPreview3: uploadedImageWithoutPreview,
       },
     })
   },

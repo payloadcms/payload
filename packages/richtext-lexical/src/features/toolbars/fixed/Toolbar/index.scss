@@ -101,7 +101,7 @@ html[data-theme='dark'] {
       }
     }
 
-    > .editor-placeholder {
+    > .editor-scroller > .editor > div > .editor-placeholder {
       top: calc(var(--base) * 1.25);
     }
   }

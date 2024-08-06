@@ -11,7 +11,7 @@ export const ChevronIcon: React.FC<{
     className={['icon icon--chevron', className, size && `icon--size-${size}`]
       .filter(Boolean)
       .join(' ')}
-    height="100%"
+    height={20}
     style={{
       transform:
         direction === 'left'
@@ -22,10 +22,10 @@ export const ChevronIcon: React.FC<{
               ? 'rotate(180deg)'
               : undefined,
     }}
-    viewBox="0 0 9 7"
-    width="100%"
+    viewBox="0 0 20 20"
+    width={20}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M1.42871 1.5332L4.42707 4.96177L7.42543 1.5332" />
+    <path className="stroke" d="M6 9L10 13L14 9" strokeLinecap="square" />
   </svg>
 )

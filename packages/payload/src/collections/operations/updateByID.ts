@@ -11,6 +11,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -142,6 +143,17 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields: true,
     })
+
+    if (args.collection.config.auth) {
+      ensureUsernameOrEmail<TSlug>({
+        authOptions: args.collection.config.auth,
+        collectionSlug: args.collection.config.slug,
+        data: args.data,
+        operation: 'update',
+        originalDoc,
+        req: args.req,
+      })
+    }
 
     // /////////////////////////////////////
     // Generate data for all files and sizes

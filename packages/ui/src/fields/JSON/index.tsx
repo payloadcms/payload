@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, JSONFieldProps } from 'payload'
+import type { JSONFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -43,7 +43,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, jsonError, required })

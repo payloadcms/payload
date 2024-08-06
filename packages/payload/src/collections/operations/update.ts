@@ -12,6 +12,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
@@ -198,6 +199,17 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           overrideDelete: false,
           req,
         })
+
+        if (args.collection.config.auth) {
+          ensureUsernameOrEmail<TSlug>({
+            authOptions: args.collection.config.auth,
+            collectionSlug: args.collection.config.slug,
+            data: args.data,
+            operation: 'update',
+            originalDoc,
+            req: args.req,
+          })
+        }
 
         // /////////////////////////////////////
         // beforeValidate - Fields

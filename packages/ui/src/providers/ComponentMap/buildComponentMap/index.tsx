@@ -52,6 +52,7 @@ export const buildComponentMap = (args: {
     collections: config.collections,
     config,
     i18n,
+    payload,
     readOnly,
   })
 
@@ -62,6 +63,7 @@ export const buildComponentMap = (args: {
       config,
       globals: config.globals,
       i18n,
+      payload,
       readOnly,
     },
   })

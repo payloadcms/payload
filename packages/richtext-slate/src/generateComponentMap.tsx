@@ -12,7 +12,7 @@ import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
-  ({ WithServerSideProps, config, i18n }) => {
+  ({ WithServerSideProps, config, i18n, payload }) => {
     const componentMap = new Map()
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
@@ -67,6 +67,7 @@ export const getGenerateComponentMap =
               config,
               fieldSchema: args.admin?.link?.fields as Field[],
               i18n,
+              payload,
               readOnly: false,
             })
 
@@ -93,6 +94,7 @@ export const getGenerateComponentMap =
                   config,
                   fieldSchema: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
+                  payload,
                   readOnly: false,
                 })
 

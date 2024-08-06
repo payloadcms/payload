@@ -11,6 +11,7 @@ import type {
 import type {
   Field,
   JsonObject,
+  Payload,
   PayloadRequest,
   ReplaceAny,
   RequestContext,
@@ -283,6 +284,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   generateComponentMap?: (args: {
     config: SanitizedConfig
     i18n: I18nClient
+    payload: Payload
     props: ServerProps
     schemaPath: string
   }) => {

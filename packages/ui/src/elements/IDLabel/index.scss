@@ -3,9 +3,9 @@
 .id-label {
   font-size: base(0.75);
   font-weight: normal;
-  color: var(--theme-elevation-400);
+  color: var(--theme-elevation-600);
   background: var(--theme-elevation-100);
-  padding: base(0.25) base(0.5);
+  padding: 0 base(0.6);
   border-radius: $style-radius-m;
   display: inline-flex;
 }
