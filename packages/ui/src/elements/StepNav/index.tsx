@@ -8,6 +8,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
+import { PayloadIcon } from '@payloadcms/ui'
+
 import type { StepNavItem } from './types.js'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -15,21 +17,17 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 const baseClass = 'step-nav'
 
 const StepNav: React.FC<{
-  Link?: React.ComponentType
-  className?: string
+  readonly Link?: React.ComponentType
+  readonly className?: string
 }> = ({ Link, className }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()
 
   const {
+    config,
     config: {
       routes: { admin },
-      admin: {
-        components: {
-          graphics: { Icon },
-        },
-      },
     },
   } = useConfig()
 
@@ -43,7 +41,10 @@ const StepNav: React.FC<{
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
             <span title={t('general:dashboard')}>
-              <RenderComponent mappedComponent={Icon} />
+              <RenderComponent
+                Component={PayloadIcon}
+                mappedComponent={config?.admin?.components?.graphics?.Icon}
+              />
             </span>
           </LinkElement>
           <span>/</span>
@@ -75,7 +76,10 @@ const StepNav: React.FC<{
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
           <div className={`${baseClass}__home`}>
             <span title={t('general:dashboard')}>
-              <RenderComponent mappedComponent={Icon} />
+              <RenderComponent
+                Component={PayloadIcon}
+                mappedComponent={config?.admin?.components?.graphics?.Icon}
+              />
             </span>
           </div>
         </div>
