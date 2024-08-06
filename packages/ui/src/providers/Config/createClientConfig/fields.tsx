@@ -22,16 +22,6 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../../exports/client/index.js'
 
-const valueFields: Partial<{
-  [key in FieldTypes]: React.FC
-}> = {
-  date: DateCondition,
-  number: NumberCondition,
-  relationship: RelationshipCondition,
-  select: SelectCondition,
-  text: TextCondition,
-}
-
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
   if (parentPath && name) {

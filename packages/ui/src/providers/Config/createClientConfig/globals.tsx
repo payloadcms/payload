@@ -2,7 +2,6 @@ import type { TFunction } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
-  EditViewComponent,
   EditViewProps,
   Field,
   SanitizedConfig,

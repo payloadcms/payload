@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import type { FieldCondition } from '../types.js'
 
 export type Props = {
-  addCondition: ({
+  readonly addCondition: ({
     andIndex,
     fieldName,
     orIndex,
@@ -15,14 +15,14 @@ export type Props = {
     orIndex: number
     relation: 'and' | 'or'
   }) => void
-  andIndex: number
-  fieldName: string
-  fields: FieldCondition[]
-  initialValue: string
-  operator: Operator
-  orIndex: number
-  removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
-  updateCondition: ({
+  readonly andIndex: number
+  readonly fieldName: string
+  readonly fields: FieldCondition[]
+  readonly initialValue: string
+  readonly operator: Operator
+  readonly orIndex: number
+  readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
+  readonly updateCondition: ({
     andIndex,
     fieldName,
     operator,
@@ -37,7 +37,15 @@ export type Props = {
   }) => void
 }
 
-import type { MappedComponent, Operator } from 'payload'
+import type { FieldTypes, MappedComponent, Operator } from 'payload'
+
+import {
+  DateCondition,
+  NumberCondition,
+  RelationshipCondition,
+  SelectCondition,
+  TextCondition,
+} from '@payloadcms/ui'
 
 import type { Option } from '../../ReactSelect/index.js'
 
@@ -100,12 +108,25 @@ export const Condition: React.FC<Props> = (props) => {
   const booleanSelect =
     ['exists'].includes(internalOperatorOption) || internalField?.props?.type === 'checkbox'
 
+  const valueFields: Partial<{
+    [key in FieldTypes]: React.FC
+  }> = {
+    date: DateCondition,
+    number: NumberCondition,
+    relationship: RelationshipCondition,
+    select: SelectCondition,
+    text: TextCondition,
+  }
+
   const ValueComponent: MappedComponent = booleanSelect
     ? {
         type: 'client',
         Component: Select,
       }
-    : internalField.Filter
+    : internalField.Filter || {
+        type: 'client',
+        Component: valueFields?.[internalField?.props?.type] || TextCondition,
+      }
 
   let valueOptions
   if (booleanSelect) {
