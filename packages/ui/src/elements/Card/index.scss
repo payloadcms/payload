@@ -17,12 +17,12 @@
   gap: base(0.8);
 
   &__title {
-    @extend %h4;
+    @extend %h5;
     letter-spacing: 0;
     font-weight: 600;
-    line-height: base(1.2);
+    line-height: base(0.8);
     width: 100%;
-    margin: 0;
+    margin: base(0.1) 0;
   }
 
   &__actions {
