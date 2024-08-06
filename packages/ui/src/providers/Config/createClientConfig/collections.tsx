@@ -6,6 +6,7 @@ import type {
   EditViewComponent,
   EditViewProps,
   Field,
+  Payload,
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
@@ -18,12 +19,14 @@ export const createClientCollectionConfig = ({
   DefaultListView,
   collection,
   createMappedComponent,
+  payload,
   t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
+  payload: Payload
   t: TFunction
 }): ClientCollectionConfig => {
   const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
@@ -31,6 +34,7 @@ export const createClientCollectionConfig = ({
   sanitized.fields = createClientFieldConfigs({
     createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
+    payload,
     t,
   })
 
@@ -197,12 +201,14 @@ export const createClientCollectionConfigs = ({
   DefaultListView,
   collections,
   createMappedComponent,
+  payload,
   t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
+  payload: Payload
   t: TFunction
 }): ClientCollectionConfig[] =>
   collections.map((collection) =>
@@ -211,6 +217,7 @@ export const createClientCollectionConfigs = ({
       DefaultListView,
       collection,
       createMappedComponent,
+      payload,
       t,
     }),
   )

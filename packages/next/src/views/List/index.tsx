@@ -146,6 +146,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
             DefaultListView,
             collection: collectionConfig,
             createMappedComponent,
+            payload,
             t: i18n.t,
           })}
           collectionSlug={collectionSlug}

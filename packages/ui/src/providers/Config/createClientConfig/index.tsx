@@ -118,6 +118,7 @@ export const createClientConfig = async ({
     DefaultListView,
     collections: [...(clientConfig.collections as any as SanitizedCollectionConfig[])], // invert the type
     createMappedComponent,
+    payload,
     t: i18n.t,
   })
 
@@ -125,6 +126,7 @@ export const createClientConfig = async ({
     DefaultEditView,
     createMappedComponent,
     globals: [...(clientConfig.globals as any as SanitizedGlobalConfig[])], // invert the type
+    payload,
     t: i18n.t,
   })
 
