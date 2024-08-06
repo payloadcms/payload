@@ -16,11 +16,19 @@ export interface Config {
     'relation-updated-externally': RelationUpdatedExternally
     'collection-1': Collection1
     'collection-2': Collection2
+    'versioned-relationship-field': VersionedRelationshipField
     users: User
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
+  db: {
+    defaultIDType: string
+  }
   globals: {}
+  locale: 'en'
+  user: User & {
+    collection: 'users'
+  }
 }
 export interface FieldsRelationship {
   id: string
@@ -123,6 +131,22 @@ export interface Collection1 {
 export interface Collection2 {
   id: string
   name?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-relationship-field".
+ */
+export interface VersionedRelationshipField {
+  id: string
+  title: string
+  relationshipField?:
+    | {
+        relationTo: 'collection-1'
+        value: string | Collection1
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }

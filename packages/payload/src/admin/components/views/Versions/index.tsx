@@ -94,6 +94,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   const [{ data: versionsData, isLoading: isLoadingVersions }, { setParams }] =
     usePayloadAPI(fetchURL)
 
+  const hasDraftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
+
   const sharedParams = (status) => {
     return {
       depth: 0,
@@ -108,23 +110,25 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   }
 
   const [{ data: draft }] = usePayloadAPI(fetchURL, {
-    initialParams: { ...sharedParams('draft') },
+    initialParams: hasDraftsEnabled ? { ...sharedParams('draft') } : {},
   })
 
   const [{ data: published }] = usePayloadAPI(fetchURL, {
-    initialParams: { ...sharedParams('published') },
+    initialParams: hasDraftsEnabled ? { ...sharedParams('published') } : {},
   })
 
   useEffect(() => {
-    const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
-    const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
+    if (hasDraftsEnabled) {
+      const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
+      const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
 
-    if (!formattedPublished || !formattedDraft) return
+      if (!formattedPublished || !formattedDraft) return
 
-    const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
-    setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
-    setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
-  }, [draft, published])
+      const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
+      setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
+      setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
+    }
+  }, [hasDraftsEnabled, draft, published])
 
   useEffect(() => {
     const params = {

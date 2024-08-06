@@ -47,45 +47,57 @@ export const buildVersionColumns = (
   t: TFunction,
   latestDraftVersion?: string,
   latestPublishedVersion?: string,
-): Column[] => [
-  {
-    name: '',
-    accessor: 'updatedAt',
-    active: true,
-    components: {
-      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
-      renderCell: (row, data) => (
-        <CreatedAtCell collection={collection} date={data} global={global} id={row?.id} />
-      ),
-    },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'id',
-    active: true,
-    components: {
-      Heading: <SortColumn disable label={t('versionID')} name="id" />,
-      renderCell: (row, data) => <TextCell>{data}</TextCell>,
-    },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'autosave',
-    active: true,
-    components: {
-      Heading: <SortColumn disable label={t('status')} name="autosave" />,
-      renderCell: (row) => {
-        return (
-          <AutosaveCell
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-            rowData={row}
-          />
-        )
+): Column[] => {
+  const entityConfig = collection || global
+
+  const columns: Column[] = [
+    {
+      name: '',
+      accessor: 'updatedAt',
+      active: true,
+      components: {
+        Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
+        renderCell: (row, data) => (
+          <CreatedAtCell collection={collection} date={data} global={global} id={row?.id} />
+        ),
       },
+      label: '',
     },
-    label: '',
-  },
-]
+    {
+      name: '',
+      accessor: 'id',
+      active: true,
+      components: {
+        Heading: <SortColumn disable label={t('versionID')} name="id" />,
+        renderCell: (row, data) => <TextCell>{data}</TextCell>,
+      },
+      label: '',
+    },
+  ]
+
+  if (
+    entityConfig?.versions?.drafts ||
+    (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
+  ) {
+    columns.push({
+      name: '',
+      accessor: 'autosave',
+      active: true,
+      components: {
+        Heading: <SortColumn disable label={t('status')} name="autosave" />,
+        renderCell: (row) => {
+          return (
+            <AutosaveCell
+              latestDraftVersion={latestDraftVersion}
+              latestPublishedVersion={latestPublishedVersion}
+              rowData={row}
+            />
+          )
+        },
+      },
+      label: '',
+    })
+  }
+
+  return columns
+}

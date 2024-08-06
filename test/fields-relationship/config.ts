@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 import type { FilterOptionsProps } from '../../packages/payload/src/fields/config/types'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { PrePopulateFieldUI } from './PrePopulateFieldUI'
@@ -17,6 +16,7 @@ import {
   relationWithTitleSlug,
   slug,
 } from './collectionSlugs'
+import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField'
 
 export interface FieldsRelationship {
   createdAt: Date
@@ -301,6 +301,9 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: collection1Slug,
+      admin: {
+        useAsTitle: 'name',
+      },
     },
     {
       fields: [
@@ -311,7 +314,13 @@ export default buildConfigWithDefaults({
       ],
       slug: collection2Slug,
     },
+    VersionedRelationshipFieldCollection,
   ],
+  localization: {
+    locales: ['en'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -319,6 +328,8 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      depth: 0,
+      overrideAccess: true,
     })
     // Create docs to relate to
     const { id: relationOneDocId } = await payload.create({
@@ -326,29 +337,35 @@ export default buildConfigWithDefaults({
       data: {
         name: relationOneSlug,
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     const relationOneIDs: string[] = []
-    await mapAsync([...Array(11)], async () => {
+    for (let i = 0; i < 11; i++) {
       const doc = await payload.create({
         collection: relationOneSlug,
         data: {
           name: relationOneSlug,
         },
+        depth: 0,
+        overrideAccess: true,
       })
       relationOneIDs.push(doc.id)
-    })
+    }
 
     const relationTwoIDs: string[] = []
-    await mapAsync([...Array(11)], async () => {
+    for (let i = 0; i < 11; i++) {
       const doc = await payload.create({
         collection: relationTwoSlug,
         data: {
           name: relationTwoSlug,
         },
+        depth: 0,
+        overrideAccess: true,
       })
       relationTwoIDs.push(doc.id)
-    })
+    }
 
     // Existing relationships
     const { id: restrictedDocId } = await payload.create({
@@ -356,13 +373,17 @@ export default buildConfigWithDefaults({
       data: {
         name: 'relation-restricted',
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     const relationsWithTitle: string[] = []
 
-    await mapAsync(['relation-title', 'word boundary search'], async (title) => {
+    for (const title of ['relation-title', 'word boundary search']) {
       const { id } = await payload.create({
         collection: relationWithTitleSlug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: title,
           meta: {
@@ -371,19 +392,24 @@ export default buildConfigWithDefaults({
         },
       })
       relationsWithTitle.push(id)
-    })
+    }
 
     await payload.create({
       collection: slug,
+      depth: 0,
+      overrideAccess: true,
       data: {
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
         relationshipWithTitle: relationsWithTitle[0],
       },
     })
-    await mapAsync([...Array(11)], async () => {
+
+    for (let i = 0; i < 11; i++) {
       await payload.create({
         collection: slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           relationship: relationOneDocId,
           relationshipHasManyMultiple: relationOneIDs.map((id) => ({
@@ -393,9 +419,9 @@ export default buildConfigWithDefaults({
           relationshipRestricted: restrictedDocId,
         },
       })
-    })
+    }
 
-    await mapAsync([...Array(15)], async () => {
+    for (let i = 0; i < 15; i++) {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)]
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)]
       await payload.create({
@@ -408,20 +434,25 @@ export default buildConfigWithDefaults({
           relationshipRestricted: restrictedDocId,
         },
       })
-    })
-    ;[...Array(15)].forEach((_, i) => {
-      payload.create({
+    }
+
+    for (let i = 0; i < 15; i++) {
+      await payload.create({
         collection: collection1Slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: `relationship-test ${i}`,
         },
       })
-      payload.create({
+      await payload.create({
         collection: collection2Slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: `relationship-test ${i}`,
         },
       })
-    })
+    }
   },
 })

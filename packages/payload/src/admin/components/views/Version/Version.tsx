@@ -108,6 +108,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     initialParams: { depth: 1, draft: 'true', locale: '*' },
   })
 
+  const hasDraftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
+
   const sharedParams = (status) => {
     return {
       depth: 0,
@@ -122,24 +124,26 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }
 
   const [{ data: draft }] = usePayloadAPI(compareBaseURL, {
-    initialParams: { ...sharedParams('draft') },
+    initialParams: hasDraftsEnabled ? { ...sharedParams('draft') } : {},
   })
 
   const [{ data: published }] = usePayloadAPI(compareBaseURL, {
-    initialParams: { ...sharedParams('published') },
+    initialParams: hasDraftsEnabled ? { ...sharedParams('published') } : {},
   })
 
   useEffect(() => {
-    const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
-    const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
+    if (hasDraftsEnabled) {
+      const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
+      const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
 
-    if (!formattedPublished || !formattedDraft) return
+      if (!formattedPublished || !formattedDraft) return
 
-    const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
+      const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
 
-    setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
-    setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
-  }, [draft, published])
+      setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
+      setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
+    }
+  }, [hasDraftsEnabled, draft, published])
 
   useEffect(() => {
     let nav: StepNavItem[] = []
