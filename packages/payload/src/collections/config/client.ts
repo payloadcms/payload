@@ -1,10 +1,8 @@
-import type { TFunction } from '@payloadcms/translations'
-
+import type { MappedComponent } from '../../admin/types.js'
+import type { MappedView } from '../../admin/views/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
 import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { SanitizedCollectionConfig } from './types.js'
-
-import { createClientFieldConfigs } from '../../fields/config/client.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
@@ -13,98 +11,41 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'components' | 'hidden' | 'preview'
+  'hidden' | 'preview'
 >
 
 export type ClientCollectionConfig = {
   admin: {
+    components: {
+      Description: MappedComponent
+      PreviewButton: MappedComponent
+      PublishButton: MappedComponent
+      SaveButton: MappedComponent
+      SaveDraftButton: MappedComponent
+      Upload: MappedComponent
+      afterList: MappedComponent[]
+      afterListTable: MappedComponent[]
+      beforeList: MappedComponent[]
+      beforeListTable: MappedComponent[]
+      views: {
+        Edit: {
+          API: MappedView
+          Default: MappedView
+          LivePreview: MappedView
+          Version: MappedView
+          Versions: MappedView
+        }
+        List: {
+          Component: MappedComponent
+          actions: MappedComponent[]
+        }
+      }
+    }
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedCollectionConfig['admin'],
-    'fields' | 'livePreview' | ServerOnlyCollectionAdminProperties
+    'components' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientFieldConfig[]
+  isPreviewEnabled: boolean
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
-
-export const createClientCollectionConfig = ({
-  collection,
-  t,
-}: {
-  collection: SanitizedCollectionConfig
-  t: TFunction
-}): SanitizedCollectionConfig => {
-  const sanitized = { ...collection }
-  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
-
-  const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
-    'hooks',
-    'access',
-    'endpoints',
-    'custom',
-    // `upload`
-    // `admin`
-    // are all handled separately
-  ]
-
-  serverOnlyCollectionProperties.forEach((key) => {
-    if (key in sanitized) {
-      delete sanitized[key]
-    }
-  })
-
-  if ('upload' in sanitized && typeof sanitized.upload === 'object') {
-    sanitized.upload = { ...sanitized.upload }
-    delete sanitized.upload.handlers
-    delete sanitized.upload.adminThumbnail
-    delete sanitized.upload.externalFileHeaderFilter
-    delete sanitized.upload.withMetadata
-  }
-
-  if ('auth' in sanitized && typeof sanitized.auth === 'object') {
-    sanitized.auth = { ...sanitized.auth }
-    delete sanitized.auth.strategies
-    delete sanitized.auth.forgotPassword
-    delete sanitized.auth.verify
-  }
-
-  if (sanitized.labels) {
-    Object.entries(sanitized.labels).forEach(([labelType, collectionLabel]) => {
-      if (typeof collectionLabel === 'function') {
-        sanitized.labels[labelType] = collectionLabel({ t })
-      }
-    })
-  }
-
-  if ('admin' in sanitized) {
-    sanitized.admin = { ...sanitized.admin }
-
-    const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-      'components',
-      'hidden',
-      'preview',
-      // `livePreview` is handled separately
-    ]
-
-    serverOnlyCollectionAdminProperties.forEach((key) => {
-      if (key in sanitized.admin) {
-        delete sanitized.admin[key]
-      }
-    })
-
-    if ('livePreview' in sanitized.admin) {
-      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-      delete sanitized.admin.livePreview.url
-    }
-  }
-
-  return sanitized
-}
-
-export const createClientCollectionConfigs = ({
-  collections,
-  t,
-}: {
-  collections: SanitizedCollectionConfig[]
-  t: TFunction
-}): ClientCollectionConfig[] =>
-  collections.map((collection) => createClientCollectionConfig({ collection, t }))

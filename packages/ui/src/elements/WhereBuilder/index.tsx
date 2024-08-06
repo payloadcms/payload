@@ -26,15 +26,15 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, fieldMap } = props
+  const { collectionPluralLabel, fields } = props
   const { i18n, t } = useTranslation()
   const { code: currentLocale } = useLocale()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap({ fieldMap, i18n }))
+  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap({ fields, i18n }))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap({ fieldMap, i18n }))
-  }, [fieldMap, i18n])
+    setReducedColumns(reduceFieldMap({ fields, i18n }))
+  }, [fields, i18n])
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
@@ -81,7 +81,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         return transformedWhere.or
       }
 
-      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`)
+      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
     }
 
     return []

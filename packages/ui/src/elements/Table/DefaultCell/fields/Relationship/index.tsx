@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
@@ -17,19 +17,13 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps extends DefaultCellComponentProps<any> {
-  label: CellComponentProps['label']
-  relationTo: CellComponentProps['relationTo']
-}
+export interface RelationshipCellProps extends DefaultCellComponentProps<any> {}
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
-  fieldType,
-  label,
-  relationTo,
-  ...props
+  clientFieldConfig: { label, relationTo },
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])

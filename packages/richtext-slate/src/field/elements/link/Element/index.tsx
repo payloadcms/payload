@@ -64,10 +64,10 @@ export const LinkElement = () => {
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
   const { richTextComponentMap } = fieldProps
-  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
+  const fields = richTextComponentMap.get(linkFieldsSchemaPath)
 
   const editor = useSlate()
-  const config = useConfig()
+  const { config } = useConfig()
   const { user } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -120,7 +120,7 @@ export const LinkElement = () => {
         {renderModal && (
           <LinkDrawer
             drawerSlug={drawerSlug}
-            fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+            fields={Array.isArray(fields) ? fields : []}
             handleClose={() => {
               toggleModal(drawerSlug)
               setRenderModal(false)

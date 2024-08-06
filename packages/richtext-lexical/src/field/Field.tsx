@@ -1,6 +1,6 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
-import type { FormFieldBase } from 'payload'
+import type { FormFieldBase, GenericClientFieldConfig } from 'payload'
 
 import {
   FieldDescription,
@@ -23,6 +23,7 @@ const baseClass = 'rich-text-lexical'
 
 const RichTextComponent: React.FC<
   {
+    clientFieldConfig: GenericClientFieldConfig<'richText'>
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
@@ -30,22 +31,24 @@ const RichTextComponent: React.FC<
   } & FormFieldBase
 > = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        width,
+      },
+      label,
+      required,
+      style,
+    },
     descriptionProps,
     editorConfig,
     errorProps,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    style,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
-    width,
   } = props
 
   const memoizedValidate = useCallback(
@@ -100,13 +103,8 @@ const RichTextComponent: React.FC<
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
@@ -130,7 +128,7 @@ const RichTextComponent: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} {...(descriptionProps || {})} />
       </div>
     </div>
   )

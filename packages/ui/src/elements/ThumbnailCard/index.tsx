@@ -32,7 +32,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     thumbnail,
   } = props
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { i18n } = useTranslation()
 

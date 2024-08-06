@@ -1,15 +1,11 @@
-import type { DateField } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type DateFieldProps = {
-  date?: DateField['admin']['date']
-  name?: string
-  path?: string
-  placeholder?: DateField['admin']['placeholder'] | string
-  validate?: DateFieldValidation
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'date'>
+  readonly validate?: DateFieldValidation
 } & FormFieldBase
 
 export type DateFieldLabelComponent = LabelComponent<'date'>

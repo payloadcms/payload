@@ -11,7 +11,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -98,7 +98,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               blockType={row.blockType}
               blocks={blocks}
               duplicateRow={duplicateRow}
-              fieldMap={block.fieldMap}
+              fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
@@ -148,7 +148,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={block.fieldMap}
+          fields={block.fields}
           forceRender={forceRender}
           margins="small"
           path={path}

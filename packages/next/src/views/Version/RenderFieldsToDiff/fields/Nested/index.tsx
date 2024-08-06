@@ -14,7 +14,7 @@ const Nested: React.FC<Props> = ({
   diffComponents,
   disableGutter = false,
   field,
-  fieldMap,
+  fields,
   i18n,
   locale,
   locales,
@@ -23,14 +23,12 @@ const Nested: React.FC<Props> = ({
 }) => {
   return (
     <div className={baseClass}>
-      {'label' in field.fieldComponentProps &&
-        field.fieldComponentProps.label &&
-        typeof field.fieldComponentProps.label !== 'function' && (
-          <Label>
-            {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-            {getTranslation(field.fieldComponentProps.label, i18n)}
-          </Label>
-        )}
+      {'label' in field && field.label && typeof field.label !== 'function' && (
+        <Label>
+          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+          {getTranslation(field.label, i18n)}
+        </Label>
+      )}
       <div
         className={[`${baseClass}__wrap`, !disableGutter && `${baseClass}__wrap--gutter`]
           .filter(Boolean)
@@ -39,8 +37,8 @@ const Nested: React.FC<Props> = ({
         <RenderFieldsToDiff
           comparison={comparison}
           diffComponents={diffComponents}
-          fieldMap={fieldMap}
           fieldPermissions={permissions}
+          fields={fields}
           i18n={i18n}
           locales={locales}
           version={version}

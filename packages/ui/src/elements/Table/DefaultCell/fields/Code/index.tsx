@@ -6,7 +6,7 @@ import React from 'react'
 import './index.scss'
 
 export interface CodeCellProps extends DefaultCellComponentProps<string> {
-  nowrap?: boolean
+  readonly nowrap?: boolean
 }
 
 export const CodeCell: React.FC<CodeCellProps> = ({ cellData, nowrap }) => {

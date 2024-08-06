@@ -14,15 +14,15 @@ const baseClass = 'render-field-diffs'
 const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
   diffComponents,
-  fieldMap,
   fieldPermissions,
+  fields,
   i18n,
   locales,
   version,
 }) => {
   return (
     <div className={baseClass}>
-      {fieldMap?.map((field, i) => {
+      {fields?.map((field, i) => {
         if ('name' in field && field.name === 'id') return null
 
         const Component = diffComponents[field.type]
@@ -31,7 +31,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
         if (Component) {
-          if (field.isFieldAffectingData && 'name' in field) {
+          if (field._isFieldAffectingData && 'name' in field) {
             const fieldName = field.name
             const valueIsObject = field.type === 'code' || field.type === 'json'
 
@@ -54,11 +54,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               diffComponents,
               diffMethod,
               field,
-              fieldMap:
-                'fieldMap' in field.fieldComponentProps
-                  ? field.fieldComponentProps?.fieldMap
-                  : fieldMap,
               fieldPermissions: subFieldPermissions,
+              fields: 'fields' in field ? field?.fields : fields,
               i18n,
               isRichText,
               locales,
@@ -97,7 +94,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs' && 'fieldMap' in field.fieldComponentProps) {
+          if (field.type === 'tabs' && 'fields' in field) {
             const Tabs = diffComponents.tabs
 
             return (
@@ -105,7 +102,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 comparison={comparison}
                 diffComponents={diffComponents}
                 field={field}
-                fieldMap={field.fieldComponentProps.fieldMap}
+                fields={field.fields}
                 i18n={i18n}
                 key={i}
                 locales={locales}
@@ -115,14 +112,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           }
 
           // At this point, we are dealing with a `row`, etc
-          if ('fieldMap' in field.fieldComponentProps) {
+          if ('fields' in field) {
             return (
               <Nested
                 comparison={comparison}
                 diffComponents={diffComponents}
                 disableGutter
                 field={field}
-                fieldMap={field.fieldComponentProps.fieldMap}
+                fields={field.fields}
                 i18n={i18n}
                 key={i}
                 locales={locales}

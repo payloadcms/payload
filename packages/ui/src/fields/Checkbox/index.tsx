@@ -24,27 +24,34 @@ export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     checked: checkedFromProps,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: {
+          Description,
+          Error,
+          Label,
+          afterInput,
+          beforeInput,
+        } = {} as CheckboxFieldProps['clientFieldConfig']['admin']['components'],
+        description,
+        style,
+        width,
+      } = {} as CheckboxFieldProps['clientFieldConfig']['admin'],
+      disableFormData,
+      label,
+      required,
+    } = {} as CheckboxFieldProps['clientFieldConfig'],
     descriptionProps,
-    disableFormData,
     errorProps,
-    label,
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    style,
     validate,
-    width,
   } = props
 
   const { uuid } = useForm()
@@ -98,11 +105,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
       <CheckboxInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        CustomLabel={CustomLabel}
+        CustomLabel={Label}
+        afterInput={afterInput}
+        beforeInput={beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
@@ -114,7 +121,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        Description={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

@@ -12,7 +12,7 @@ import {
   COMMAND_PRIORITY_EDITOR,
   createCommand,
 } from 'lexical'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
 import type { RelationshipFeatureProps } from '../../server/index.js'
@@ -27,7 +27,9 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
 
 export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
   let enabledRelations: string[] = null
 

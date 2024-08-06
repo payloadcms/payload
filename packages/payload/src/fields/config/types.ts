@@ -20,12 +20,12 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type {
   CustomComponent,
   LabelFunction,
-  LabelStatic,
   PayloadComponent,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -175,8 +175,8 @@ type Admin = {
 }
 
 export type Labels = {
-  plural: LabelFunction | LabelStatic
-  singular: LabelFunction | LabelStatic
+  plural: LabelFunction | StaticLabel
+  singular: LabelFunction | StaticLabel
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
@@ -209,7 +209,7 @@ export type Validate<
 ) => Promise<string | true> | string | true
 
 export type OptionObject = {
-  label: LabelFunction | LabelStatic
+  label: LabelFunction | StaticLabel
   value: string
 }
 
@@ -237,7 +237,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: LabelFunction | LabelStatic | false
+  label?: LabelFunction | StaticLabel | false
   localized?: boolean
   /**
    * The name of the field. Must be alphanumeric and cannot contain ' . '
@@ -660,6 +660,7 @@ export type SingleRelationshipField = {
   } & RelationshipAdmin
   relationTo: CollectionSlug
 } & SharedRelationshipProperties
+
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
@@ -943,6 +944,10 @@ export function fieldIsPresentationalOnly(
   field: ClientFieldConfig | Field | TabAsField,
 ): field is UIField {
   return field.type === 'ui'
+}
+
+export function fieldIsSidebar(field: ClientFieldConfig | Field | TabAsField): boolean {
+  return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
 }
 
 export function fieldAffectsData(

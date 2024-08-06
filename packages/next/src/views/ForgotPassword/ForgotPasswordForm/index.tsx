@@ -8,7 +8,7 @@ import { email, text } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 export const ForgotPasswordForm: React.FC = () => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: { user: userSlug },
@@ -100,9 +100,11 @@ export const ForgotPasswordForm: React.FC = () => {
       ) : (
         <EmailField
           autoComplete="email"
-          label={t('general:email')}
-          name="email"
-          required
+          clientFieldConfig={{
+            name: 'email',
+            label: t('general:email'),
+            required: true,
+          }}
           validate={(value) =>
             email(value, {
               name: 'email',

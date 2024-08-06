@@ -14,7 +14,9 @@ export const AfterNavLinks: PayloadClientReactComponent<
   SanitizedConfig['admin']['components']['afterNavLinks'][0]
 > = () => {
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   return (

@@ -20,25 +20,32 @@ import { FieldError } from '../FieldError/index.js'
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: {
+          Description,
+          Error,
+          Label,
+        } = {} as RadioFieldProps['clientFieldConfig']['admin']['components'],
+        description,
+        layout = 'horizontal',
+        style,
+        width,
+      } = {} as RadioFieldProps['clientFieldConfig']['admin'],
+      label,
+      options = [],
+      required,
+    } = {} as RadioFieldProps['clientFieldConfig'],
     descriptionProps,
     errorProps,
-    label,
     labelProps,
-    layout = 'horizontal',
     onChange: onChangeFromProps,
-    options = [],
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    style,
     validate,
     value: valueFromProps,
-    width,
   } = props
 
   const { uuid } = useForm()
@@ -86,13 +93,8 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -131,7 +133,11 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
             )
           })}
         </ul>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

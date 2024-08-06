@@ -50,8 +50,10 @@ export const Auth: React.FC<Props> = (props) => {
   const { isInitializing } = useDocumentInfo()
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
@@ -142,10 +144,12 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                disabled={disabled}
-                label={t('authentication:newPassword')}
-                name="password"
-                path="password"
+                clientFieldConfig={{
+                  name: 'password',
+                  disabled,
+                  label: t('authentication:newPassword'),
+                  path: 'password',
+                }}
                 required
               />
               <ConfirmPasswordField disabled={readOnly} />
@@ -189,9 +193,11 @@ export const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <CheckboxField
-            disabled={disabled}
-            label={t('authentication:enableAPIKey')}
-            name="enableAPIKey"
+            clientFieldConfig={{
+              name: 'enableAPIKey',
+              disabled,
+              label: t('authentication:enableAPIKey'),
+            }}
             readOnly={readOnly}
           />
           <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
@@ -199,9 +205,11 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {verify && (
         <CheckboxField
-          disabled={disabled}
-          label={t('authentication:verified')}
-          name="_verified"
+          clientFieldConfig={{
+            name: '_verified',
+            disabled,
+            label: t('authentication:verified'),
+          }}
           readOnly={readOnly}
         />
       )}

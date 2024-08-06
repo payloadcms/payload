@@ -2,21 +2,23 @@ import { SelectField, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 export const LocaleSelector: React.FC<{
-  localeOptions: {
+  readonly localeOptions: {
     label: Record<string, string> | string
     value: string
   }[]
-  onChange: (value: string) => void
+  readonly onChange: (value: string) => void
 }> = ({ localeOptions, onChange }) => {
   const { t } = useTranslation()
 
   return (
     <SelectField
-      label={t('general:locale')}
-      name="locale"
+      clientFieldConfig={{
+        name: 'locale',
+        _path: 'locale',
+        label: t('general:locale'),
+        options: localeOptions,
+      }}
       onChange={(value: string) => onChange(value)}
-      options={localeOptions}
-      path="locale"
     />
   )
 }

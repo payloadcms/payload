@@ -1,5 +1,5 @@
 'use client'
-import type { FieldMap } from 'payload'
+import type { ClientFieldConfig } from 'packages/payload/src/index.js'
 import type React from 'react'
 
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
@@ -8,20 +8,20 @@ import { buildPathSegments } from './buildPathSegments.js'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths.js'
 
 type TrackSubSchemaErrorCountProps = {
-  fieldMap?: FieldMap
+  fields?: ClientFieldConfig[]
   path: string
   setErrorCount: (count: number) => void
 }
 
 export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
-  fieldMap,
+  fields,
   path,
   setErrorCount,
 }) => {
   const [formState] = useAllFormFields()
   const hasSubmitted = useFormSubmitted()
 
-  const pathSegments = buildPathSegments(path, fieldMap)
+  const pathSegments = buildPathSegments(path, fields)
 
   useThrottledEffect(
     () => {
@@ -31,7 +31,7 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
       }
     },
     250,
-    [formState, hasSubmitted, fieldMap],
+    [formState, hasSubmitted, fields],
   )
 
   return null

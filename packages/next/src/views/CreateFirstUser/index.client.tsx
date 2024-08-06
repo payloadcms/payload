@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, LoginWithUsernameOptions } from 'payload'
+import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -8,7 +8,6 @@ import {
   FormSubmit,
   PasswordField,
   RenderFields,
-  useComponentMap,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
@@ -22,16 +21,17 @@ export const CreateFirstUserClient: React.FC<{
   loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
 }> = ({ initialState, loginWithUsername, userSlug }) => {
-  const { getFieldMap } = useComponentMap()
-
   const {
-    routes: { admin, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
   const { t } = useTranslation()
 
-  const fieldMap = getFieldMap({ collectionSlug: userSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) =>
@@ -59,15 +59,16 @@ export const CreateFirstUserClient: React.FC<{
     >
       <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
-        label={t('authentication:newPassword')}
-        labelProps={{ htmlFor: 'field-password' }}
-        name="password"
-        path="password"
+        clientFieldConfig={{
+          name: 'password',
+          label: t('authentication:newPassword'),
+          path: 'password',
+        }}
         required
       />
       <ConfirmPasswordField />
       <RenderFields
-        fieldMap={fieldMap}
+        fields={collectionConfig.fields}
         forceRender
         operation="create"
         path=""

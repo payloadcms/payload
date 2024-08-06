@@ -27,7 +27,7 @@ export const LinkToDocClient: React.FC = () => {
     },
   } = fields
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: {

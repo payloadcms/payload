@@ -30,7 +30,9 @@ const filterRichTextCollections: FilteredCollectionsT = (collections, options) =
 
 export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
   const { children, uploads = false, ...rest } = props
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
   const { user } = useAuth()
   const { visibleEntities } = useEntityVisibility()
 

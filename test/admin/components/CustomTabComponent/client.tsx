@@ -11,8 +11,11 @@ export const CustomTabComponentClient: React.FC<{
   path: string
 }> = ({ path }) => {
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
+
   const params = useParams()
 
   const baseRoute = (params.segments.slice(0, 2) as string[]).join('/')

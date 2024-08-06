@@ -16,23 +16,25 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <RadioGroupField
-      label={t('general:adminTheme')}
-      name="theme"
+      clientFieldConfig={{
+        name: 'theme',
+        label: t('general:adminTheme'),
+        options: [
+          {
+            label: t('general:automatic'),
+            value: 'auto',
+          },
+          {
+            label: t('general:light'),
+            value: 'light',
+          },
+          {
+            label: t('general:dark'),
+            value: 'dark',
+          },
+        ],
+      }}
       onChange={onChange}
-      options={[
-        {
-          label: t('general:automatic'),
-          value: 'auto',
-        },
-        {
-          label: t('general:light'),
-          value: 'light',
-        },
-        {
-          label: t('general:dark'),
-          value: 'dark',
-        },
-      ]}
       value={autoMode ? 'auto' : theme}
     />
   )

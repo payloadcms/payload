@@ -1,31 +1,32 @@
 'use client'
 
-import type { FieldComponentProps, FieldPermissions, FieldTypes, MappedField } from 'payload'
+import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
 
 import React from 'react'
 
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
-  Field: MappedField['Field']
-  custom?: Record<any, string>
-  disabled: boolean
-  fieldComponentProps?: {
+  readonly Field: ClientFieldConfig['admin']['components']['Field']
+  readonly custom?: Record<any, string>
+  readonly disabled: boolean
+  readonly fieldComponentProps?: {
+    clientFieldConfig: ClientFieldConfig
     forceRender?: boolean
-  } & FieldComponentProps
-  indexPath?: string
-  isHidden?: boolean
-  name?: string
-  path: string
-  permissions?: FieldPermissions
-  readOnly?: boolean
-  schemaPath: string
-  siblingPermissions: {
+  }
+  readonly indexPath?: string
+  readonly isHidden?: boolean
+  readonly name?: string
+  readonly path: string
+  readonly permissions?: FieldPermissions
+  readonly readOnly?: boolean
+  readonly schemaPath: string
+  readonly siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: FieldTypes
+  readonly type: FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
@@ -63,10 +64,6 @@ export const RenderField: React.FC<Props> = ({
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {
     readOnly = true
-  }
-
-  if (Field === undefined) {
-    return null
   }
 
   return (

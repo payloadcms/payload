@@ -35,29 +35,32 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    allowCreate = true,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        allowCreate = true,
+        className,
+        components: { Description, Error, Label },
+        description,
+        isSortable = true,
+        sortOptions,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      relationTo,
+      required,
+    },
     descriptionProps,
     errorProps,
-    hasMany,
-    isSortable = true,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    sortOptions,
-    style,
     validate,
-    width,
   } = props
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     collections,
@@ -482,15 +485,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -595,7 +592,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

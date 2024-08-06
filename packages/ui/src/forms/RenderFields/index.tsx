@@ -13,7 +13,7 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldMap, forceRender, indexPath, margins, path, permissions, schemaPath } =
+  const { className, fields, forceRender, indexPath, margins, path, permissions, schemaPath } =
     props
 
   const { i18n } = useTranslation()
@@ -35,7 +35,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
+  if (!fields || (Array.isArray(fields) && fields.length === 0)) {
     return null
   }
 
@@ -43,7 +43,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
-  if (fieldMap) {
+  if (fields) {
     return (
       <div
         className={[
@@ -57,14 +57,15 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map((f, fieldIndex) => {
+          fields?.map((f, fieldIndex) => {
             const {
               type,
-              Field,
+              admin: {
+                components: { Field },
+              },
               custom,
               disabled,
-              fieldComponentProps,
-              fieldComponentProps: { readOnly },
+              readOnly,
             } = f
 
             const forceRenderChildren =
@@ -77,7 +78,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 Field={Field}
                 custom={custom}
                 disabled={disabled}
-                fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
+                fieldComponentProps={{ clientFieldConfig: f, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 key={fieldIndex}
                 name={name}

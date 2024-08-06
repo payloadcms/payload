@@ -51,9 +51,11 @@ const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = (
   } = useElement<UploadElementType>()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)

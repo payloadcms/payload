@@ -8,6 +8,7 @@ import './index.scss'
 
 export const CheckboxCell: React.FC<DefaultCellComponentProps<boolean>> = ({ cellData }) => {
   const { t } = useTranslation()
+
   return (
     <code className="bool-cell">
       <span>{t(`general:${cellData}`).toLowerCase()}</span>

@@ -17,27 +17,40 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const {
-    name,
     className: classNameFromProps,
-    fieldType,
-    isFieldAffectingData,
-    label,
+    clientFieldConfig: {
+      name,
+      type: fieldType,
+      _isFieldAffectingData,
+      admin: { className: classNameFromConfig },
+      label,
+    },
     onClick: onClickFromProps,
   } = props
 
   const { i18n } = useTranslation()
 
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const cellContext = useTableCell()
 
   const { cellData, cellProps, columnIndex, customCellContext, rowData } = cellContext || {}
 
-  const { className: classNameFromContext, link, onClick: onClickFromContext } = cellProps || {}
+  const {
+    className: classNameFromContext,
+    clientFieldConfig: {
+      admin: { className: classNameFromConfigContext },
+    },
+    link,
+    onClick: onClickFromContext,
+  } = cellProps || {}
 
-  const className = classNameFromProps || classNameFromContext
+  const className =
+    classNameFromProps || classNameFromConfig || classNameFromContext || classNameFromConfigContext
 
   const onClick = onClickFromProps || onClickFromContext
 
@@ -81,10 +94,12 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
       <WrapElement {...wrapElementProps}>
         <CodeCell
           cellData={`ID: ${cellData}`}
-          name={name}
+          clientFieldConfig={{
+            name,
+            _schemaPath: cellContext?.cellProps?.clientFieldConfig?._schemaPath,
+          }}
           nowrap
           rowData={rowData}
-          schemaPath={cellContext?.cellProps?.schemaPath}
         />
       </WrapElement>
     )
@@ -106,7 +121,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     )
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
-    if (customCellContext.uploadConfig && isFieldAffectingData && name === 'filename') {
+    if (customCellContext.uploadConfig && _isFieldAffectingData && name === 'filename') {
       const FileCellComponent = cellComponents.File
       CellComponent = (
         <FileCellComponent
@@ -120,7 +135,6 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
       return (
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
-            'label' in props &&
             i18n.t('general:noLabel', {
               label: getTranslation(label || 'data', i18n),
             })}

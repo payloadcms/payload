@@ -1,13 +1,10 @@
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type GroupFieldProps = {
-  fieldMap: FieldMap
-  forceRender?: boolean
-  hideGutter?: boolean
-  name?: string
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'group'>
+  readonly forceRender?: boolean
 } & FormFieldBase
 
 export type GroupFieldLabelComponent = LabelComponent<'group'>

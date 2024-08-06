@@ -7,7 +7,7 @@ import React from 'react'
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import './index.scss'
 
 const baseClass = 'field-error'

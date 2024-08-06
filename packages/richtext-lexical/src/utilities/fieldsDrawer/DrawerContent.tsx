@@ -1,6 +1,6 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { FieldMap, FormState } from 'payload'
+import type { ClientFieldConfig, FormState } from 'payload'
 
 import {
   Form,
@@ -30,7 +30,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
   const { schemaPath } = useFieldProps()
-  const config = useConfig()
+  const { config } = useConfig()
   const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
     field: { richTextComponentMap },
@@ -41,8 +41,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fieldMap: any =
-    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as FieldMap) // Field Schema
+  const fields: any =
+    fieldMapOverride ??
+    (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientFieldConfig[]) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {
@@ -88,14 +89,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     <Form
       beforeSubmit={[onChange]}
       disableValidationOnSubmit
-      fields={Array.isArray(fieldMap) ? fieldMap : []}
+      fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
       onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}
     >
       <RenderFields
-        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+        fields={Array.isArray(fields) ? fields : []}
         forceRender
         path="" // See Blocks feature path for details as for why this is empty
         readOnly={false}

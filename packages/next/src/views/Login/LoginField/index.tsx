@@ -4,11 +4,13 @@ import type { Validate, ValidateOptions } from 'payload'
 import { EmailField, TextField, useTranslation } from '@payloadcms/ui'
 import { email, username } from 'payload/shared'
 import React from 'react'
+
 export type LoginFieldProps = {
   required?: boolean
   type: 'email' | 'emailOrUsername' | 'username'
   validate?: Validate
 }
+
 export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
   const { t } = useTranslation()
 
@@ -16,11 +18,12 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
     return (
       <EmailField
         autoComplete="email"
-        label={t('general:email')}
-        labelProps={{ htmlFor: 'field-email', required }}
-        name="email"
-        path="email"
-        required={required}
+        clientFieldConfig={{
+          name: 'email',
+          label: t('general:email'),
+          path: 'email',
+          required,
+        }}
         validate={email}
       />
     )
@@ -29,10 +32,12 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'username') {
     return (
       <TextField
-        label={t('authentication:username')}
-        name="username"
-        path="username"
-        required={required}
+        clientFieldConfig={{
+          name: 'username',
+          label: t('authentication:username'),
+          path: 'username',
+          required,
+        }}
         validate={username}
       />
     )
@@ -41,10 +46,12 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'emailOrUsername') {
     return (
       <TextField
-        label={t('authentication:emailOrUsername')}
-        name="username"
-        path="username"
-        required={required}
+        clientFieldConfig={{
+          name: 'username',
+          label: t('authentication:emailOrUsername'),
+          path: 'username',
+          required,
+        }}
         validate={(value, options) => {
           const passesUsername = username(
             value,

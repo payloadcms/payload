@@ -5,7 +5,7 @@ import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -13,12 +13,12 @@ import './index.scss'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
     autoComplete = 'off',
+    beforeInput,
     className,
     errorProps,
     inputRef,
@@ -54,16 +54,16 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={Label}
         htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <div>
-          <RenderComponent mappedComponent={BeforeInput} />
+          <RenderComponent mappedComponent={beforeInput} />
           <input
             aria-label={label}
             autoComplete={autoComplete}
@@ -78,9 +78,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             type="password"
             value={value || ''}
           />
-          <RenderComponent mappedComponent={AfterInput} />
+          <RenderComponent mappedComponent={afterInput} />
         </div>
-        <RenderComponent mappedComponent={CustomDescription} />
+        <RenderComponent mappedComponent={Description} />
       </div>
     </div>
   )

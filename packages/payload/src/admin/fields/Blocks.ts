@@ -1,7 +1,7 @@
+import type { ClientFieldConfig, GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { BlockField } from '../../fields/config/types.js'
 import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type {
   DescriptionComponent,
   FormFieldBase,
@@ -10,22 +10,16 @@ import type {
 } from '../types.js'
 
 export type BlocksFieldProps = {
-  blocks?: ReducedBlock[]
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: BlockField['labels']
-  maxRows?: number
-  minRows?: number
-  name?: string
-  slug?: string
-  validate?: BlockFieldValidation
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'blocks'>
+  readonly forceRender?: boolean
+  readonly slug?: string
+  readonly validate?: BlockFieldValidation
 } & FormFieldBase
 
 export type ReducedBlock = {
   LabelComponent: MappedComponent
   custom?: Record<any, string>
-  fieldMap: FieldMap
+  fields: ClientFieldConfig[]
   imageAltText?: string
   imageURL?: string
   labels: BlockField['labels']

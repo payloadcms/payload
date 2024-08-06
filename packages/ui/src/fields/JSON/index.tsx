@@ -13,31 +13,32 @@ import './index.scss'
 const baseClass = 'json-field'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
 const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        editorOptions,
+        style,
+        width,
+      },
+      jsonSchema,
+      label,
+      required,
+    },
     descriptionProps,
-    editorOptions,
     errorProps,
-    jsonSchema,
-    label,
     labelProps,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
-    style,
     validate,
-    width,
   } = props
 
   const [stringValue, setStringValue] = useState<string>()
@@ -123,15 +124,10 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={BeforeInput} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -140,9 +136,13 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        <RenderComponent mappedComponent={AfterInput} />
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+      <FieldDescription
+        Description={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

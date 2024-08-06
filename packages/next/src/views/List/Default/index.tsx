@@ -1,6 +1,6 @@
 'use client'
 
-import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -21,7 +21,6 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  useComponentMap,
   useConfig,
   useEditDepth,
   useListInfo,
@@ -45,27 +44,26 @@ export const DefaultListView: React.FC = () => {
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
-  const config = useConfig()
+  const { getEntityConfig } = useConfig()
 
-  const { getComponentMap } = useComponentMap()
-
-  const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const {
-    AfterList,
-    AfterListTable,
-    BeforeList,
-    BeforeListTable,
-    Description,
-    actionsMap,
-    fieldMap,
-  } = componentMap || {}
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
-
-  const { labels } = collectionConfig
+    admin: {
+      components: {
+        Description,
+        afterList,
+        afterListTable,
+        beforeList,
+        beforeListTable,
+        views: {
+          List: { actions },
+        },
+      },
+    },
+    fields,
+    labels,
+  } = collectionConfig
 
   const { i18n } = useTranslation()
 
@@ -100,8 +98,8 @@ export const DefaultListView: React.FC = () => {
 
   return (
     <div className={baseClass}>
-      <SetViewActions actions={actionsMap?.List} />
-      <RenderComponent mappedComponent={BeforeList} />
+      <SetViewActions actions={actions} />
+      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
@@ -129,9 +127,8 @@ export const DefaultListView: React.FC = () => {
               </Fragment>
             )}
           </header>
-          <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
-          <RenderComponent mappedComponent={BeforeListTable} />
-
+          <ListControls collectionConfig={collectionConfig} fields={fields} />
+          <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -146,7 +143,7 @@ export const DefaultListView: React.FC = () => {
                   uploadConfig: collectionConfig.upload,
                 }}
                 data={docs}
-                fieldMap={fieldMap}
+                fields={fields}
               />
             </RelationshipProvider>
           )}
@@ -162,7 +159,7 @@ export const DefaultListView: React.FC = () => {
               )}
             </div>
           )}
-          <RenderComponent mappedComponent={AfterListTable} />
+          <RenderComponent mappedComponent={afterListTable} />
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
@@ -197,7 +194,7 @@ export const DefaultListView: React.FC = () => {
                     <div className={`${baseClass}__list-selection`}>
                       <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany collection={collectionConfig} fieldMap={fieldMap} />
+                        <EditMany collection={collectionConfig} fields={fields} />
                         <PublishMany collection={collectionConfig} />
                         <UnpublishMany collection={collectionConfig} />
                         <DeleteMany collection={collectionConfig} />
@@ -210,7 +207,7 @@ export const DefaultListView: React.FC = () => {
           )}
         </Gutter>
       </SelectionProvider>
-      <RenderComponent mappedComponent={AfterList} />
+      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }

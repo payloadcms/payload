@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, MappedField } from 'payload'
+import type { ClientCollectionConfig, ClientFieldConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '@payloadcms/ui'
@@ -22,7 +22,7 @@ type RelationshipValue = Record<string, any>
 
 const generateLabelFromValue = (
   collections: ClientCollectionConfig[],
-  field: MappedField,
+  field: ClientFieldConfig,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
 ): string => {
@@ -30,8 +30,7 @@ const generateLabelFromValue = (
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
 
-  const relationTo =
-    'relationTo' in field.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
+  const relationTo = 'relationTo' in field ? field.relationTo : undefined
 
   if (value === null || typeof value === 'undefined') {
     return String(value)
@@ -76,7 +75,9 @@ const generateLabelFromValue = (
 const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
   let placeholder = ''
 
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
@@ -98,10 +99,8 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
   }
 
   const label =
-    'label' in field.fieldComponentProps &&
-    typeof field.fieldComponentProps.label !== 'boolean' &&
-    typeof field.fieldComponentProps.label !== 'function'
-      ? field.fieldComponentProps.label
+    'label' in field && typeof field.label !== 'boolean' && typeof field.label !== 'function'
+      ? field.label
       : ''
 
   return (

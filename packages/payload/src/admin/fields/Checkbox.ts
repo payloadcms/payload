@@ -1,17 +1,16 @@
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type CheckboxFieldProps = {
-  checked?: boolean
-  disableFormData?: boolean
-  id?: string
-  name?: string
-  onChange?: (val: boolean) => void
-  partialChecked?: boolean
-  path?: string
-  validate?: CheckboxFieldValidation
-  width?: string
+  readonly checked?: boolean
+  readonly clientFieldConfig: GenericClientFieldConfig<'checkbox'>
+  readonly disableFormData?: boolean
+  readonly id?: string
+  readonly onChange?: (value: boolean) => void
+  readonly partialChecked?: boolean
+  readonly validate?: CheckboxFieldValidation
 } & FormFieldBase
 
 export type CheckboxFieldLabelComponent = LabelComponent<'checkbox'>

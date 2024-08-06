@@ -1,7 +1,6 @@
-import type { ArrayField } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type {
   DescriptionComponent,
   FormFieldBase,
@@ -10,16 +9,10 @@ import type {
 } from '../types.js'
 
 export type ArrayFieldProps = {
-  CustomRowLabel?: MappedComponent
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayField['labels']
-  maxRows?: ArrayField['maxRows']
-  minRows?: ArrayField['minRows']
-  name?: string
-  validate?: ArrayFieldValidation
-  width?: string
+  readonly CustomRowLabel?: MappedComponent
+  readonly clientFieldConfig: GenericClientFieldConfig<'array'>
+  readonly forceRender?: boolean
+  readonly validate?: ArrayFieldValidation
 } & FormFieldBase
 
 export type ArrayFieldLabelComponent = LabelComponent<'array'>

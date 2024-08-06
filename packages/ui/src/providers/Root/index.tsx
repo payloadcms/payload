@@ -7,7 +7,6 @@ import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
 
-import type { ComponentMap } from '../ComponentMap/buildComponentMap/types.js'
 import type { Theme } from '../Theme/index.js'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
@@ -17,7 +16,6 @@ import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
-import { ComponentMapProvider } from '../ComponentMap/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { FieldComponentsProvider } from '../FieldComponents/index.js'
@@ -32,7 +30,6 @@ import { TranslationProvider } from '../Translation/index.js'
 
 type Props = {
   children: React.ReactNode
-  componentMap: ComponentMap
   config: ClientConfig
   dateFNSKey: Language['dateFNSKey']
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
@@ -45,7 +42,6 @@ type Props = {
 
 export const RootProvider: React.FC<Props> = ({
   children,
-  componentMap,
   config,
   dateFNSKey,
   fallbackLang,
@@ -59,57 +55,55 @@ export const RootProvider: React.FC<Props> = ({
     <Fragment>
       <RouteCache>
         <ConfigProvider config={config}>
-          <ComponentMapProvider componentMap={componentMap}>
-            <FieldComponentsProvider>
-              <ClientFunctionProvider>
-                <TranslationProvider
-                  dateFNSKey={dateFNSKey}
-                  fallbackLang={fallbackLang}
-                  language={languageCode}
-                  languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
-                  translations={translations}
+          <FieldComponentsProvider>
+            <ClientFunctionProvider>
+              <TranslationProvider
+                dateFNSKey={dateFNSKey}
+                fallbackLang={fallbackLang}
+                language={languageCode}
+                languageOptions={languageOptions}
+                switchLanguageServerAction={switchLanguageServerAction}
+                translations={translations}
+              >
+                <WindowInfoProvider
+                  breakpoints={{
+                    l: '(max-width: 1440px)',
+                    m: '(max-width: 1024px)',
+                    s: '(max-width: 768px)',
+                    xs: '(max-width: 400px)',
+                  }}
                 >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
-                  >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
-                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <AuthProvider>
-                            <PreferencesProvider>
-                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <ActionsProvider>
-                                            <NavProvider>{children}</NavProvider>
-                                          </ActionsProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
-                        </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
-                  </WindowInfoProvider>
-                </TranslationProvider>
-              </ClientFunctionProvider>
-            </FieldComponentsProvider>
-          </ComponentMapProvider>
+                  <ScrollInfoProvider>
+                    <SearchParamsProvider>
+                      <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                        <AuthProvider>
+                          <PreferencesProvider>
+                            <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
+                              <ParamsProvider>
+                                <LocaleProvider>
+                                  <StepNavProvider>
+                                    <LoadingOverlayProvider>
+                                      <DocumentEventsProvider>
+                                        <ActionsProvider>
+                                          <NavProvider>{children}</NavProvider>
+                                        </ActionsProvider>
+                                      </DocumentEventsProvider>
+                                    </LoadingOverlayProvider>
+                                  </StepNavProvider>
+                                </LocaleProvider>
+                              </ParamsProvider>
+                            </ThemeProvider>
+                          </PreferencesProvider>
+                          <ModalContainer />
+                          <StayLoggedInModal />
+                        </AuthProvider>
+                      </ModalProvider>
+                    </SearchParamsProvider>
+                  </ScrollInfoProvider>
+                </WindowInfoProvider>
+              </TranslationProvider>
+            </ClientFunctionProvider>
+          </FieldComponentsProvider>
         </ConfigProvider>
       </RouteCache>
       <ToastContainer />

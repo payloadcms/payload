@@ -489,7 +489,7 @@ export type LocalizationConfig = Prettify<
 
 export type LabelFunction = ({ t }: { t: TFunction }) => string
 
-export type LabelStatic = Record<string, string> | string
+export type StaticLabel = Record<string, string> | string
 
 export type SharpDependency = (
   input?:

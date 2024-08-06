@@ -49,9 +49,11 @@ const Component: React.FC<Props> = (props) => {
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
   const { field } = useEditorConfigContext()
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const [relatedCollection, setRelatedCollection] = useState(() =>

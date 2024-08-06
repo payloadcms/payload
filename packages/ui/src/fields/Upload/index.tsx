@@ -19,27 +19,28 @@ export type { UploadInputProps }
 
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
+    clientFieldConfig: {
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        style,
+        width,
+      },
+      label,
+      path: pathFromProps,
+      relationTo,
+      required,
+    },
     readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    style,
     validate,
-    width,
   } = props
 
   const {
-    collections,
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { permissions } = useAuth()
@@ -87,18 +88,15 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   if (collection.upload) {
     return (
       <UploadInput
-        CustomDescription={CustomDescription}
-        CustomError={CustomError}
-        CustomLabel={CustomLabel}
+        Description={Description}
+        Error={Error}
+        Label={Label}
         allowNewUpload={canCreate}
         api={apiRoute}
         className={className}
         collection={collection}
-        descriptionProps={descriptionProps}
-        errorProps={errorProps}
         filterOptions={filterOptions}
         label={label}
-        labelProps={labelProps}
         onChange={onChange}
         path={path}
         readOnly={disabled}

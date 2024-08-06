@@ -1,21 +1,11 @@
-import type { TabsField } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TabsFieldProps = {
-  forceRender?: boolean
-  name?: string
-  path?: string
-  tabs?: MappedTab[]
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'tabs'>
+  readonly forceRender?: boolean
 } & FormFieldBase
-
-export type MappedTab = {
-  fieldMap?: FieldMap
-  label: TabsField['tabs'][0]['label']
-  name?: string
-}
 
 export type TabsFieldLabelComponent = LabelComponent<'tabs'>
 

@@ -19,35 +19,35 @@ export { TextAreaInputProps, TextareaInput }
 
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
+    clientFieldConfig: {
+      name,
+      admin: {
+        className,
+        components: { Description, Error, Label, afterInput, beforeInput },
+        description,
+        placeholder,
+        rtl,
+        style,
+        width,
+      },
+      label,
+      localized,
+      maxLength,
+      minLength,
+      path: pathFromProps,
+      required,
+      rows,
+    },
     locale,
-    localized,
-    maxLength,
-    minLength,
-    path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
-    required,
-    rows,
-    rtl,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
 
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -75,16 +75,14 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   return (
     <TextareaInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
       label={label}
-      labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)
       }}

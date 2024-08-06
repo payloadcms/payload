@@ -28,18 +28,18 @@ const FieldPropsContext = React.createContext<FieldPropsContextType>({
 })
 
 export type Props = {
-  children: React.ReactNode
-  custom?: Record<any, string>
-  indexPath?: string
-  isForceRendered?: boolean
-  path: string
-  permissions?: FieldPermissions
-  readOnly: boolean
-  schemaPath: string
-  siblingPermissions: {
+  readonly children: React.ReactNode
+  readonly custom?: Record<any, string>
+  readonly indexPath?: string
+  readonly isForceRendered?: boolean
+  readonly path: string
+  readonly permissions?: FieldPermissions
+  readonly readOnly: boolean
+  readonly schemaPath: string
+  readonly siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  type: FieldTypes
+  readonly type: FieldTypes
 }
 
 export const FieldPropsProvider: React.FC<Props> = ({

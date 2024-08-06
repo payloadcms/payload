@@ -36,25 +36,28 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    blocks,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        description,
+      },
+      blocks,
+      isSortable = true,
+      label,
+      labels: labelsFromProps,
+      localized,
+      maxRows,
+      minRows: minRowsProp,
+      required,
+    },
     descriptionProps,
     errorProps,
     forceRender = false,
-    isSortable = true,
-    label,
     labelProps,
-    labels: labelsFromProps,
-    localized,
-    maxRows,
-    minRows: minRowsProp,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    required,
     validate,
   } = props
 
@@ -64,7 +67,9 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
 
@@ -212,13 +217,13 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
+      {showError && <FieldError CustomError={Error} path={path} {...(errorProps || {})} />}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
               <FieldLabel
-                CustomLabel={CustomLabel}
+                Label={Label}
                 as="span"
                 label={label}
                 required={required}
@@ -253,7 +258,11 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

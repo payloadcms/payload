@@ -57,9 +57,11 @@ const Component: React.FC<ElementProps> = (props) => {
   } = props
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { closeModal } = useModal()

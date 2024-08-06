@@ -177,7 +177,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
       })}
       featureKey="blocks"
-      fieldMapOverride={reducedBlock?.fieldMap}
+      fieldMapOverride={reducedBlock?.fields}
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)
         if (!data) {

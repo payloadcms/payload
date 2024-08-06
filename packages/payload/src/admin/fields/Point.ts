@@ -1,14 +1,11 @@
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { PointFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  validate?: PointFieldValidation
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'point'>
+  readonly validate?: PointFieldValidation
 } & FormFieldBase
 
 export type PointFieldLabelComponent = LabelComponent<'point'>

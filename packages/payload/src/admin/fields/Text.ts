@@ -1,21 +1,13 @@
-import type { TextField } from '../../fields/config/types.js'
+import type { GenericClientFieldConfig } from '../../fields/config/client.js'
 import type { TextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TextFieldProps = {
-  hasMany?: boolean
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  maxLength?: number
-  maxRows?: number
-  minLength?: number
-  minRows?: number
-  name?: string
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  path?: string
-  placeholder?: TextField['admin']['placeholder']
-  validate?: TextFieldValidation
-  width?: string
+  readonly clientFieldConfig: GenericClientFieldConfig<'text'>
+  readonly inputRef?: React.MutableRefObject<HTMLInputElement>
+  readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  readonly validate?: TextFieldValidation
 } & FormFieldBase
 
 export type TextFieldLabelComponent = LabelComponent<'text'>

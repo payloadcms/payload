@@ -91,11 +91,6 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   group?: {
     title?: string | null;
   };

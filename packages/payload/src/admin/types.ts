@@ -154,8 +154,6 @@ export type {
   SelectFieldProps,
 } from './fields/Select.js'
 
-export type { MappedTab } from './fields/Tabs.js'
-
 export type {
   TabsFieldDescriptionComponent,
   TabsFieldErrorComponent,
@@ -196,11 +194,8 @@ export type {
   DescriptionFunction,
   FieldDescriptionProps,
   GenericDescriptionProps,
+  StaticDescription,
 } from './forms/FieldDescription.js'
-
-export type { MappedField } from './forms/FieldMap.js'
-
-export type { FieldMap } from './forms/FieldMap.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
@@ -222,30 +217,34 @@ export type {
   VisibleEntities,
 } from './views/types.js'
 
+export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent: React.ReactNode
+  props?: Partial<any>
+  type: 'server'
+}
+
+export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent?: React.ReactNode
+  props?: Partial<TComponentClientProps>
+  type: 'client'
+}
+
 export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
-  | {
-      Component: React.ComponentType<TComponentClientProps>
-      RenderedComponent: React.ReactNode
-      props?: Partial<any>
-      type: 'server'
-    }
-  | {
-      Component: React.ComponentType<TComponentClientProps>
-      RenderedComponent?: React.ReactNode
-      props?: Partial<TComponentClientProps>
-      type: 'client'
-    }
+  | MappedClientComponent<TComponentClientProps>
+  | MappedServerComponent<TComponentClientProps>
   | undefined
 
 export type CreateMappedComponent = {
   <T extends JsonObject>(
-    component: { ReactComponent: React.FC<T> } | PayloadComponent<T> | null,
+    component: { Component: React.FC<T> } | PayloadComponent<T> | null,
     props?: object,
     fallback?: React.FC,
   ): MappedComponent<T>
 
   <T extends JsonObject>(
-    components: ({ ReactComponent: React.FC<T> } | PayloadComponent<T>)[],
+    components: ({ Component: React.FC<T> } | PayloadComponent<T>)[],
     props?: object,
     fallback?: React.FC,
   ): MappedComponent<T>[]

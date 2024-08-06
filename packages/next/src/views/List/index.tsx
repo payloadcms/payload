@@ -7,13 +7,15 @@ import {
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig, mergeListSearchAndWhere } from 'payload'
+import { mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { ListPreferences } from './Default/types.js'
 
+import { DefaultEditView } from '../Edit/Default/index.js'
 import { DefaultListView } from './Default/index.js'
 
 export { generateListMetadata } from './meta.js'
@@ -70,10 +72,6 @@ export const ListView: React.FC<AdminViewProps> = async ({
   } = config
 
   if (collectionConfig) {
-    const {
-      admin: { components: { views: { List: CustomList } = {} } = {} },
-    } = collectionConfig
-
     if (!visibleEntities.collections.includes(collectionSlug)) {
       return notFound()
     }
@@ -133,15 +131,22 @@ export const ListView: React.FC<AdminViewProps> = async ({
       },
     })
 
-    const mappedListView = createMappedComponent(CustomList?.Component, undefined, DefaultListView)
+    const ListComponent = createMappedComponent(
+      collectionConfig?.admin?.components?.views?.List?.Component,
+      undefined,
+      DefaultListView,
+    )
 
     return (
       <Fragment>
         <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
           collectionConfig={createClientCollectionConfig({
+            DefaultEditView,
+            DefaultListView,
             collection: collectionConfig,
-            t: initPageResult.req.i18n.t,
+            createMappedComponent,
+            t: i18n.t,
           })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
@@ -166,9 +171,9 @@ export const ListView: React.FC<AdminViewProps> = async ({
               <RenderComponent
                 clientProps={{
                   collectionSlug,
-                  listSearchableFields: collectionConfig.admin.listSearchableFields,
+                  listSearchableFields: collectionConfig?.admin?.listSearchableFields,
                 }}
-                mappedComponent={mappedListView}
+                mappedComponent={ListComponent}
               />
             </TableColumnsProvider>
           </ListQueryProvider>

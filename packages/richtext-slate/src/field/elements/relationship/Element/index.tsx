@@ -42,9 +42,11 @@ const RelationshipElement: React.FC<Props> = () => {
   } = useElement<RelationshipElementType>()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const [enabledCollectionSlugs] = useState(() =>
     collections

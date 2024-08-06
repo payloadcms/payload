@@ -30,7 +30,9 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
   clientProps,
 }) => {
   const [editor] = useLexicalComposerContext()
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
   useEffect(() => {
     if (!editor.hasNodes([UploadNode])) {

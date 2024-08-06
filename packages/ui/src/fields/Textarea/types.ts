@@ -1,10 +1,31 @@
-import type { TextareaFieldProps } from 'payload'
+import type { MappedComponent, StaticDescription, StaticLabel } from 'payload'
 
 import { type ChangeEvent } from 'react'
 
 export type TextAreaInputProps = {
-  onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
-  rows?: number
-  showError?: boolean
-  value?: string
-} & TextareaFieldProps
+  readonly Description?: MappedComponent
+  readonly Error?: MappedComponent
+  readonly Label?: MappedComponent
+  readonly afterInput?: MappedComponent[]
+  readonly beforeInput?: MappedComponent[]
+  readonly className?: string
+  readonly description?: StaticDescription
+  readonly descriptionProps?: Record<string, unknown>
+  readonly errorProps?: Record<string, unknown>
+  readonly inputRef?: React.MutableRefObject<HTMLInputElement>
+  readonly label: StaticLabel
+  readonly labelProps?: Record<string, unknown>
+  readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  readonly path: string
+  readonly placeholder?: string
+  readonly readOnly?: boolean
+  readonly required?: boolean
+  readonly rows?: number
+  readonly rtl?: boolean
+  readonly showError?: boolean
+  readonly style?: React.CSSProperties
+  readonly value?: string
+  readonly valueToRender?: string
+  readonly width?: string
+}

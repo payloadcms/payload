@@ -38,7 +38,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const { uuid } = useEditorConfigContext()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { i18n, t } = useTranslation()
 

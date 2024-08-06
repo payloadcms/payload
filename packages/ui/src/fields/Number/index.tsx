@@ -11,7 +11,7 @@ import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderComponent } from '../../providers/ComponentMap/RenderComponent.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -21,30 +21,37 @@ import './index.scss'
 
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: {
+          Description,
+          Error,
+          Label,
+          afterInput,
+          beforeInput,
+        } = {} as NumberFieldProps['clientFieldConfig']['admin']['components'],
+        description,
+        placeholder,
+        style,
+        width,
+      } = {} as NumberFieldProps['clientFieldConfig']['admin'],
+      hasMany = false,
+      label,
+      max = Infinity,
+      maxRows = Infinity,
+      min = -Infinity,
+      required,
+      step = 1,
+    },
     descriptionProps,
     errorProps,
-    hasMany = false,
-    label,
     labelProps,
-    max = Infinity,
-    maxRows = Infinity,
-    min = -Infinity,
     onChange: onChangeFromProps,
-    path: pathFromProps,
-    placeholder,
     readOnly: readOnlyFromProps,
-    required,
-    step = 1,
-    style,
     validate,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
@@ -144,14 +151,9 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -180,7 +182,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={BeforeInput} />
+            <RenderComponent mappedComponent={beforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -197,10 +199,14 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            <RenderComponent mappedComponent={AfterInput} />
+            <RenderComponent mappedComponent={afterInput} />
           </div>
         )}
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

@@ -24,14 +24,17 @@ export { TabsProvider }
 
 const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    className,
-    descriptionProps,
+    clientFieldConfig: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description },
+      },
+      tabs = [],
+    },
     forceRender = false,
-    path: pathFromProps,
     readOnly: readOnlyFromProps,
-    tabs = [],
   } = props
 
   const {
@@ -153,12 +156,9 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription
-                CustomDescription={CustomDescription}
-                {...(descriptionProps || {})}
-              />
+              <FieldDescription Description={Description} />
               <RenderFields
-                fieldMap={activeTabConfig.fieldMap}
+                fields={activeTabConfig.fields}
                 forceRender={forceRender}
                 key={
                   activeTabConfig.label

@@ -11,7 +11,7 @@ export type IFieldComponentsContext = FieldTypesComponents
 const FieldComponentsContext = createContext<IFieldComponentsContext>(fieldComponents)
 
 export const FieldComponentsProvider: React.FC<{
-  children: React.ReactNode
+  readonly children: React.ReactNode
 }> = ({ children }) => {
   return (
     <FieldComponentsContext.Provider value={fieldComponents}>
