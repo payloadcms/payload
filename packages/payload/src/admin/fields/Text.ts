@@ -16,7 +16,7 @@ export type TextFieldProps = {
   placeholder?: TextField['admin']['placeholder']
   validate?: TextFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type TextFieldLabelComponent = LabelComponent<'text'>
 

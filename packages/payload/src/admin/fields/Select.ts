@@ -14,7 +14,7 @@ export type SelectFieldProps = {
   validate?: SelectFieldValidation
   value?: string
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type SelectFieldLabelComponent = LabelComponent<'select'>
 

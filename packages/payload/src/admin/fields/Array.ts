@@ -15,7 +15,7 @@ export type ArrayFieldProps = {
   name?: string
   validate?: ArrayFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type ArrayFieldLabelComponent = LabelComponent<'array'>
 

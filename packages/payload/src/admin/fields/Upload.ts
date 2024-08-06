@@ -15,7 +15,7 @@ export type UploadFieldProps = {
   relationTo?: UploadField['relationTo']
   validate?: UploadFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type UploadFieldLabelComponent = LabelComponent<'upload'>
 

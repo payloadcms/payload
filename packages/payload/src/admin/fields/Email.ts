@@ -10,7 +10,7 @@ export type EmailFieldProps = {
   placeholder?: EmailField['admin']['placeholder']
   validate?: EmailFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type EmailFieldLabelComponent = LabelComponent<'email'>
 

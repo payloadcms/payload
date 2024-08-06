@@ -8,7 +8,7 @@ export type RichTextComponentProps = {
   richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
   validate?: RichTextFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type RichTextFieldLabelComponent = LabelComponent<'richText'>
 
