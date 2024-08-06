@@ -18,7 +18,7 @@ import './index.scss'
 const baseClass = 'delete-documents'
 
 const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { labels: { plural }, slug } = {}, resetParams } = props
+  const { collection: { slug, labels: { plural } } = {}, resetParams } = props
 
   const { permissions } = useAuth()
   const {
@@ -41,7 +41,7 @@ const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(() => {
     setDeleting(true)
-    requests
+    void requests
       .delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
         headers: {
           'Accept-Language': i18n.language,
@@ -60,7 +60,15 @@ const DeleteMany: React.FC<Props> = (props) => {
           }
 
           if (json.errors) {
-            toast.error(json.message)
+            let message = json.message
+
+            if (json.errors) {
+              json.errors.forEach((error) => {
+                message = message + '\n' + error.message
+              })
+            }
+
+            toast.error(message)
           } else {
             addDefaultError()
           }
