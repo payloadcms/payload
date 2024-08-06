@@ -101,7 +101,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         alignCaret="left"
       />
       <CheckboxInput
-        CustomLabel={field?.admin?.components?.Label}
+        Label={field?.admin?.components?.Label}
         afterInput={field?.admin?.components?.afterInput}
         beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}

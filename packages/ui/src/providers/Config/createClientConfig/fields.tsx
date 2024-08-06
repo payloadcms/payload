@@ -3,7 +3,6 @@ import type {
   ClientFieldConfig,
   CreateMappedComponent,
   Field,
-  FieldTypes,
   LabelComponent,
   RowLabelComponent,
   ServerOnlyFieldAdminProperties,
@@ -11,16 +10,6 @@ import type {
 } from 'payload'
 
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
-
-import {
-  DateCondition,
-  FieldLabel,
-  NumberCondition,
-  RelationshipCondition,
-  SelectCondition,
-  TextCondition,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir
-} from '../../../exports/client/index.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -118,15 +107,18 @@ export const createClientFieldConfig = ({
 
       if (field.type === 'array') {
         // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-        field.RowLabel = createMappedComponent(CustomLabel, undefined, FieldLabel)
+        field.RowLabel = createMappedComponent(CustomLabel)
       }
 
       if (field.type === 'collapsible') {
-        CustomLabel =
+        if (
           'admin' in incomingField &&
           'components' in incomingField.admin &&
           'RowLabel' in incomingField.admin.components &&
           incomingField.admin.components.RowLabel
+        ) {
+          CustomLabel = incomingField.admin.components.RowLabel
+        }
       }
 
       break

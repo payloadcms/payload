@@ -1,6 +1,6 @@
 import type { CustomComponent, LabelFunction, ServerProps } from '../../config/types.js'
 import type { FieldTypes } from '../../fields/config/types.js'
-import type { FieldComponentProps, MappedComponent } from '../types.js'
+import type { MappedComponent } from '../types.js'
 
 export type DescriptionFunction = LabelFunction
 
