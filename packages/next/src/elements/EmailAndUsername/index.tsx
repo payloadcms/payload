@@ -76,7 +76,7 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
           type: 'text',
           CustomField: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
           cellComponentProps: null,
-          fieldComponentProps: { type: 'email', readOnly },
+          fieldComponentProps: { type: 'email', autoComplete: 'off', readOnly },
           fieldIsPresentational: false,
           isFieldAffectingData: true,
           localized: false,
