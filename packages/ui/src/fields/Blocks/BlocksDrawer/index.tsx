@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { Labels, ReducedBlock } from 'payload'
+import type { ClientBlock, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -14,16 +14,16 @@ import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'
 
 export type Props = {
-  addRow: (index: number, blockType?: string) => Promise<void> | void
-  addRowIndex: number
-  blocks: ReducedBlock[]
-  drawerSlug: string
-  labels: Labels
+  readonly addRow: (index: number, blockType?: string) => Promise<void> | void
+  readonly addRowIndex: number
+  readonly blocks: ClientBlock[]
+  readonly drawerSlug: string
+  readonly labels: Labels
 }
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: ReducedBlock, i18n: I18nClient) => {
+const getBlockLabel = (block: ClientBlock, i18n: I18nClient) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()

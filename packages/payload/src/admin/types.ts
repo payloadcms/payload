@@ -40,7 +40,7 @@ export type {
   ArrayFieldProps,
 } from './fields/Array.js'
 
-export type { ReducedBlock } from './fields/Blocks.js'
+export type { ClientBlock } from './fields/Blocks.js'
 
 export type {
   BlocksFieldDescriptionComponent,
