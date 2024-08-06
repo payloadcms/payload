@@ -68,7 +68,6 @@ export const createClientFieldConfig = ({
   field._isSidebar = fieldIsSidebar(field)
 
   const isHidden = 'hidden' in field && field?.hidden
-  const isHiddenFromAdmin = field?.admin && 'hidden' in field.admin && field.admin.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
@@ -324,6 +323,7 @@ export const createClientFieldConfigs = ({
           Field: null,
         },
         disableBulkEdit: true,
+        hidden: true,
       },
       hidden: true,
       label: 'ID',

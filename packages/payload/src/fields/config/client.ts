@@ -13,10 +13,6 @@ export type ClientFieldConfig = {
   _path: string
   _schemaPath: string
   admin: {
-    /**
-     * These are user-defined Custom Components, if provided. All Server Components are pre-rendered, while Client Components are simply mapped for the client to render.
-     * If no component is provided, these properties will be `undefined`, and the default component will be rendered.
-     */
     components?: {
       Cell?: MappedComponent
       Description?: MappedComponent
