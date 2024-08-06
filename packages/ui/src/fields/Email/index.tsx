@@ -18,18 +18,14 @@ import './index.scss'
 const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
   const {
     autoComplete,
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        components: {
-          Description,
-          Error,
-          Label,
-          afterInput,
-          beforeInput,
-        } = {} as EmailFieldProps['field']['admin']['components'],
         description,
         placeholder,
         style,
@@ -38,8 +34,6 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       label,
       required,
     } = {} as EmailFieldProps['field'],
-    descriptionProps,
-    errorProps,
     labelProps,
     readOnly: readOnlyFromProps,
     validate,
@@ -75,10 +69,19 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
@@ -92,10 +95,10 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={afterInput} />
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
       <FieldDescription
-        Description={Description}
+        Description={field?.admin?.components?.Description}
         description={description}
         {...(descriptionProps || {})}
       />

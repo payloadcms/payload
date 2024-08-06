@@ -31,15 +31,14 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
       CustomRowLabel,
-      admin: {
-        className,
-        components: { Description, Error, Label },
-        description,
-      },
+      admin: { className, description },
       fields,
       isSortable = true,
       label,
@@ -48,8 +47,6 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       minRows: minRowsProp,
       required,
     },
-    descriptionProps,
-    errorProps,
     forceRender = false,
     labelProps,
     readOnly: readOnlyFromProps,
@@ -209,13 +206,19 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={Error} path={path} {...(errorProps || {})} />}
+      {showError && (
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                Label={Label}
+                Label={field?.admin?.components?.Label}
                 as="span"
                 label={label}
                 required={required}
@@ -251,7 +254,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           )}
         </div>
         <FieldDescription
-          Description={Description}
+          Description={field?.admin?.components?.Description}
           description={description}
           {...(descriptionProps || {})}
         />

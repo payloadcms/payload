@@ -20,16 +20,14 @@ import { FieldError } from '../FieldError/index.js'
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        components: {
-          Description,
-          Error,
-          Label,
-        } = {} as RadioFieldProps['field']['admin']['components'],
         description,
         layout = 'horizontal',
         style,
@@ -39,8 +37,6 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
       options = [],
       required,
     } = {} as RadioFieldProps['field'],
-    descriptionProps,
-    errorProps,
     labelProps,
     onChange: onChangeFromProps,
     readOnly: readOnlyFromProps,
@@ -93,8 +89,18 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -134,7 +140,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
           })}
         </ul>
         <FieldDescription
-          Description={Description}
+          Description={field?.admin?.components?.Description}
           description={description}
           {...(descriptionProps || {})}
         />

@@ -19,13 +19,9 @@ export type { UploadInputProps }
 
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
+    field,
     field: {
-      admin: {
-        className,
-        components: { Description, Error, Label },
-        style,
-        width,
-      },
+      admin: { className, style, width },
       label,
       path: pathFromProps,
       relationTo,
@@ -88,9 +84,9 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   if (collection.upload) {
     return (
       <UploadInput
-        Description={Description}
-        Error={Error}
-        Label={Label}
+        Description={field?.admin?.components?.Description}
+        Error={field?.admin?.components?.Error}
+        Label={field?.admin?.components?.Label}
         allowNewUpload={canCreate}
         api={apiRoute}
         className={className}
@@ -98,7 +94,6 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         filterOptions={filterOptions}
         label={label}
         onChange={onChange}
-        path={path}
         readOnly={disabled}
         relationTo={relationTo}
         required={required}

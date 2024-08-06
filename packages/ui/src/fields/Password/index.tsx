@@ -16,18 +16,13 @@ import { PasswordInput } from './input.js'
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        components: {
-          Description,
-          Error,
-          Label,
-          afterInput,
-          beforeInput,
-        } = {} as PasswordFieldProps['field']['admin']['components'],
         description,
         placeholder,
         rtl,
@@ -38,7 +33,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       label,
       required,
     } = {} as PasswordFieldProps['field'],
-    errorProps,
     inputRef,
     labelProps,
     validate,
@@ -88,12 +82,12 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   return (
     <PasswordInput
-      Description={Description}
-      Error={Error}
-      Label={Label}
-      afterInput={afterInput}
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      afterInput={field?.admin?.components?.afterInput}
       autoComplete={autoComplete}
-      beforeInput={beforeInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
       description={description}
       errorProps={errorProps}

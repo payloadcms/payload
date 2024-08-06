@@ -19,23 +19,17 @@ import { FieldError } from '../FieldError/index.js'
 
 const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: { Description, Error, Label, afterInput, beforeInput },
-        description,
-        editorOptions,
-        style,
-        width,
-      },
+      admin: { className, description, editorOptions, style, width },
       jsonSchema,
       label,
       required,
     },
-    descriptionProps,
-    errorProps,
     labelProps,
     readOnly: readOnlyFromProps,
     validate,
@@ -124,10 +118,19 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -136,10 +139,10 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        <RenderComponent mappedComponent={afterInput} />
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
       <FieldDescription
-        Description={Description}
+        Description={field?.admin?.components?.Description}
         description={description}
         {...(descriptionProps || {})}
       />

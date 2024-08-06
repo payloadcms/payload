@@ -29,19 +29,14 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
+    descriptionProps,
+    field,
     field: {
-      admin: {
-        className,
-        components: { Description, Label },
-        description,
-        style,
-        width,
-      },
+      admin: { className, description, style, width },
       fields,
       hideGutter,
       label,
     },
-    descriptionProps,
     readOnly: readOnlyFromProps,
   } = props
 
@@ -86,15 +81,20 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(Label || Description || label) && (
+            {(field?.admin?.components?.Label ||
+              field?.admin?.components?.Description ||
+              label) && (
               <header>
-                {Label !== undefined ? (
-                  <RenderComponent clientProps={{ label }} mappedComponent={Label} />
+                {field?.admin?.components?.Label !== undefined ? (
+                  <RenderComponent
+                    clientProps={{ label }}
+                    mappedComponent={field?.admin?.components?.Label}
+                  />
                 ) : label ? (
                   <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
                 ) : null}
                 <FieldDescription
-                  Description={Description}
+                  Description={field?.admin?.components?.Description}
                   description={description}
                   {...(descriptionProps || {})}
                 />

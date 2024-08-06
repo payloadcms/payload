@@ -21,18 +21,14 @@ import './index.scss'
 
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
-        components: {
-          Description,
-          Error,
-          Label,
-          afterInput,
-          beforeInput,
-        } = {} as NumberFieldProps['field']['admin']['components'],
         description,
         placeholder,
         style,
@@ -46,8 +42,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       required,
       step = 1,
     },
-    descriptionProps,
-    errorProps,
     labelProps,
     onChange: onChangeFromProps,
     readOnly: readOnlyFromProps,
@@ -151,9 +145,18 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -182,7 +185,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={beforeInput} />
+            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -199,11 +202,11 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            <RenderComponent mappedComponent={afterInput} />
+            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
           </div>
         )}
         <FieldDescription
-          Description={Description}
+          Description={field?.admin?.components?.Description}
           description={description}
           {...(descriptionProps || {})}
         />
