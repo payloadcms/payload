@@ -64,14 +64,10 @@ export const createMigration: CreateMigration = async function createMigration(
       .reverse()?.[0]
 
     if (latestSnapshot) {
-      const latestSnapshotJSON: DrizzleSnapshotJSON = JSON.parse(
-        fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
-      ) as DrizzleSnapshotJSON
+      drizzleJsonBefore = JSON.parse(fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'))
 
-      if (latestSnapshotJSON.version < drizzleJsonBefore.version) {
-        drizzleJsonBefore = upPgSnapshot(latestSnapshotJSON)
-      } else {
-        drizzleJsonBefore = latestSnapshotJSON
+      if (drizzleJsonBefore.version < drizzleJsonAfter.version) {
+        drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
       }
     }
 
