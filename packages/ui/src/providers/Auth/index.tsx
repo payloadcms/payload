@@ -36,9 +36,14 @@ const maxTimeoutTime = 2147483647
 type Props = {
   children: React.ReactNode
   permissions?: Permissions
+  user?: ClientUser | null
 }
-export function AuthProvider({ children, permissions: initialPermissions }: Props) {
-  const [user, setUser] = useState<ClientUser | null>()
+export function AuthProvider({
+  children,
+  permissions: initialPermissions,
+  user: initialUser,
+}: Props) {
+  const [user, setUser] = useState<ClientUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()

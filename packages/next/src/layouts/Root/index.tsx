@@ -119,6 +119,7 @@ export const RootLayout = async ({
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}
+          user={user}
         >
           {wrappedChildren}
         </RootProvider>

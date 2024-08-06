@@ -42,6 +42,7 @@ type Props = {
   switchLanguageServerAction?: (lang: string) => Promise<void>
   theme: Theme
   translations: I18nClient['translations']
+  user: User | null
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -56,6 +57,7 @@ export const RootProvider: React.FC<Props> = ({
   switchLanguageServerAction,
   theme,
   translations,
+  user,
 }) => {
   return (
     <Fragment>
@@ -83,7 +85,7 @@ export const RootProvider: React.FC<Props> = ({
                     <ScrollInfoProvider>
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <AuthProvider permissions={permissions}>
+                          <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
                               <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
                                 <ParamsProvider>
