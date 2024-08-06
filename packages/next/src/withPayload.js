@@ -24,7 +24,7 @@ export const withPayload = (nextConfig = {}) => {
         '**/*': [
           ...(nextConfig.experimental?.outputFileTracingExcludes?.['**/*'] || []),
           'drizzle-kit',
-          'drizzle-kit/payload',
+          'drizzle-kit/api',
         ],
       },
       outputFileTracingIncludes: {
@@ -68,7 +68,7 @@ export const withPayload = (nextConfig = {}) => {
     serverExternalPackages: [
       ...(nextConfig?.serverExternalPackages || []),
       'drizzle-kit',
-      'drizzle-kit/payload',
+      'drizzle-kit/api',
       'pino',
       'libsql',
       'pino-pretty',
@@ -85,7 +85,7 @@ export const withPayload = (nextConfig = {}) => {
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           'drizzle-kit',
-          'drizzle-kit/payload',
+          'drizzle-kit/api',
           'sharp',
           'libsql',
         ],

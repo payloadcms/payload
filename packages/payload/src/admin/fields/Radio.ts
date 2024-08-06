@@ -12,7 +12,7 @@ export type RadioFieldProps = {
   validate?: RadioFieldValidation
   value?: string
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type OnChange<T = string> = (value: T) => void
 

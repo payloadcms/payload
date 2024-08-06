@@ -12,7 +12,7 @@ export type CheckboxFieldProps = {
   path?: string
   validate?: CheckboxFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type CheckboxFieldLabelComponent = LabelComponent<'checkbox'>
 

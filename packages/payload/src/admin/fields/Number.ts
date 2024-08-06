@@ -15,7 +15,7 @@ export type NumberFieldProps = {
   step?: number
   validate?: NumberFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type NumberFieldLabelComponent = LabelComponent<'number'>
 

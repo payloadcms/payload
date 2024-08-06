@@ -1,4 +1,4 @@
-import type { DrizzleSQLiteSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSQLiteSnapshotJSON } from 'drizzle-kit/api'
 
 export const defaultDrizzleSnapshot: DrizzleSQLiteSnapshotJSON = {
   id: '00000000-0000-0000-0000-000000000000',

@@ -15,7 +15,7 @@ export type BlocksFieldProps = {
   slug?: string
   validate?: BlockFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type ReducedBlock = {
   LabelComponent: Block['admin']['components']['Label']

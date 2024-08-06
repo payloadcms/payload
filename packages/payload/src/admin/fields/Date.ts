@@ -10,7 +10,7 @@ export type DateFieldProps = {
   placeholder?: DateField['admin']['placeholder'] | string
   validate?: DateFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type DateFieldLabelComponent = LabelComponent<'date'>
 
