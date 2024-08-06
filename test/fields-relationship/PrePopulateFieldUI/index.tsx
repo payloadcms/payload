@@ -3,11 +3,17 @@ import * as React from 'react'
 import useField from '../../../packages/payload/src/admin/components/forms/useField'
 import { collection1Slug } from '../collectionSlugs'
 
-export const PrePopulateFieldUI: React.FC<{
+export type PrePopulateFieldUIProps = {
   hasMany?: boolean
   hasMultipleRelations?: boolean
   path: string
-}> = ({ hasMany = true, hasMultipleRelations = false, path }) => {
+}
+
+export const PrePopulateFieldUI = ({
+  hasMany = true,
+  hasMultipleRelations = false,
+  path,
+}: PrePopulateFieldUIProps) => {
   const { setValue } = useField({ path })
 
   const addDefaults = React.useCallback(() => {

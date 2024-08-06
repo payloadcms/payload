@@ -3,7 +3,7 @@ import React from 'react'
 import LogOut from '../../../../packages/payload/src/admin/components/icons/LogOut'
 import { useConfig } from '../../../../packages/payload/src/admin/components/utilities/Config'
 
-const Logout: React.FC = () => {
+const Logout = () => {
   const config = useConfig()
   const {
     admin: { logoutRoute },

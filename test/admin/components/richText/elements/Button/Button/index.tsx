@@ -50,7 +50,7 @@ const insertButton = (editor, { href, label, newTab = false, style }: any) => {
   ReactEditor.focus(editor)
 }
 
-const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
+const ToolbarButton = ({ path }: { path: string }) => {
   const { closeAll, open } = useModal()
   const editor = useSlate()
 

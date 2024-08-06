@@ -11,12 +11,12 @@ type Props = {
   className?: string
 }
 
-export const VerticalPadding: React.FC<Props> = ({
+export const VerticalPadding = ({
   top = 'medium',
   bottom = 'medium',
   className,
   children,
-}) => {
+}: Props) => {
   return (
     <div
       className={[className, classes[`top-${top}`], classes[`bottom-${bottom}`]]

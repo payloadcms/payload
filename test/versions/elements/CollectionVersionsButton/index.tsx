@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-versions-button'
 
-const CollectionVersionsButton: React.FC = () => {
+const CollectionVersionsButton = () => {
   return (
     <div
       className={baseClass}

@@ -7,7 +7,11 @@ import { CMSLink } from '../../Link'
 
 import classes from './index.module.scss'
 
-export const HeaderNav: React.FC<{ header: HeaderType }> = ({ header }) => {
+export type HeaderNavProps = {
+  header: HeaderType
+}
+
+export const HeaderNav = ({ header }: HeaderNavProps) => {
   const navItems = header?.navItems || []
 
   return (

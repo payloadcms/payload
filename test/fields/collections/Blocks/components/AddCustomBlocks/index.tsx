@@ -6,7 +6,7 @@ import './index.scss'
 
 const baseClass = 'custom-blocks-field-management'
 
-export const AddCustomBlocks: React.FC = () => {
+export const AddCustomBlocks = () => {
   const { addFieldRow, replaceFieldRow } = useForm()
   const { value } = useField<number>({ path: 'customBlocks' })
 

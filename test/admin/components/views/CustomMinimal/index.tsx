@@ -14,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'custom-minimal-view'
 
-const CustomMinimalView: React.FC = () => {
+const CustomMinimalView = () => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()

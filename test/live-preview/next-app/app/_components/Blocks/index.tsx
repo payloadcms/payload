@@ -22,10 +22,12 @@ const blockComponents = {
 
 type Block = NonNullable<Page['layout']>[number]
 
-export const Blocks: React.FC<{
+export type BlocksProps = {
   blocks?: (Block | RelatedPostsProps | RelationshipsBlockProps)[] | null
   disableTopPadding?: boolean
-}> = (props) => {
+}
+
+export const Blocks = (props: BlocksProps) => {
   const { disableTopPadding, blocks } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0

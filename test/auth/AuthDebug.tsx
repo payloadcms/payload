@@ -5,7 +5,7 @@ import type { UIField } from '../../packages/payload/src/fields/config/types'
 
 import { useAuth } from '../../packages/payload/src/admin/components/utilities/Auth'
 
-export const AuthDebug: React.FC<UIField> = () => {
+export const AuthDebug = () => {
   const [state, setState] = useState<User | null | undefined>()
   const { user } = useAuth()
 

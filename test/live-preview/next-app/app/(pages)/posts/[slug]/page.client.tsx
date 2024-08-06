@@ -7,9 +7,11 @@ import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Blocks } from '@/app/_components/Blocks'
 import { PostHero } from '@/app/_heros/PostHero'
 
-export const PostClient: React.FC<{
+export type PostClientProps = {
   post: PostType
-}> = ({ post: initialPost }) => {
+}
+
+export const PostClient = ({ post: initialPost }: PostClientProps) => {
   const { data } = useLivePreview<PostType>({
     initialData: initialPost,
     serverURL: PAYLOAD_SERVER_URL,

@@ -14,7 +14,7 @@ const defaultCollectionLabels = {
   },
 }
 
-export const PageRange: React.FC<{
+export type PageRangeProps = {
   className?: string
   totalDocs?: number
   currentPage?: number
@@ -24,7 +24,9 @@ export const PageRange: React.FC<{
     singular?: string
     plural?: string
   }
-}> = (props) => {
+}
+
+export const PageRange = (props: PageRangeProps) => {
   const {
     className,
     totalDocs,

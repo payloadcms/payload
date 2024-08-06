@@ -10,11 +10,15 @@ import classes from './index.module.scss'
 
 type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'cta' }>
 
-export const CallToActionBlock: React.FC<
-  Props & {
-    id?: string
-  }
-> = ({ links, richText, invertBackground }) => {
+export type CallToActionBlockProps = Props & {
+  id?: string
+}
+
+export const CallToActionBlock = ({
+  links,
+  richText,
+  invertBackground,
+}: CallToActionBlockProps) => {
   return (
     <Gutter>
       <VerticalPadding

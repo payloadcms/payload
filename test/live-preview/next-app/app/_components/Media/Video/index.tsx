@@ -7,7 +7,7 @@ import { Props as MediaProps } from '../types'
 import classes from './index.module.scss'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
-export const Video: React.FC<MediaProps> = (props) => {
+export const Video = (props: MediaProps) => {
   const { videoClassName, resource, onClick } = props
 
   const videoRef = useRef<HTMLVideoElement>(null)

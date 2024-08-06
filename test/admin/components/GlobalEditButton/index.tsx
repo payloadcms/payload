@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'global-edit-button'
 
-const GlobalEditButton: React.FC = () => {
+const GlobalEditButton = () => {
   return (
     <div
       className={baseClass}
