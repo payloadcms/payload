@@ -32,7 +32,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -393,8 +392,8 @@ describe('versions', () => {
     })
 
     test('global — has versions route', async () => {
-      const global = new AdminUrlUtil(serverURL, globalSlug)
-      const versionsURL = `${global.global(globalSlug)}/versions`
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
       expect(page.url()).toMatch(/\/versions$/)
     })
