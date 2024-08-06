@@ -25,7 +25,7 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/api')
+  const { generateDrizzleJson, generateMigration, upPgSnapshot } = require('drizzle-kit/api')
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -64,9 +64,15 @@ export const createMigration: CreateMigration = async function createMigration(
       .reverse()?.[0]
 
     if (latestSnapshot) {
-      drizzleJsonBefore = JSON.parse(
+      const latestSnapshotJSON: DrizzleSnapshotJSON = JSON.parse(
         fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
       ) as DrizzleSnapshotJSON
+
+      if (latestSnapshotJSON.version < drizzleJsonBefore.version) {
+        drizzleJsonBefore = upPgSnapshot(latestSnapshotJSON)
+      } else {
+        drizzleJsonBefore = latestSnapshotJSON
+      }
     }
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
