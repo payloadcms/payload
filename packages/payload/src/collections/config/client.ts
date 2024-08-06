@@ -18,15 +18,17 @@ export type ClientCollectionConfig = {
   admin: {
     components: {
       Description: MappedComponent
-      PreviewButton: MappedComponent
-      PublishButton: MappedComponent
-      SaveButton: MappedComponent
-      SaveDraftButton: MappedComponent
-      Upload: MappedComponent
       afterList: MappedComponent[]
       afterListTable: MappedComponent[]
       beforeList: MappedComponent[]
       beforeListTable: MappedComponent[]
+      edit: {
+        PreviewButton: MappedComponent
+        PublishButton: MappedComponent
+        SaveButton: MappedComponent
+        SaveDraftButton: MappedComponent
+        Upload: MappedComponent
+      }
       views: {
         Edit: {
           API: MappedView

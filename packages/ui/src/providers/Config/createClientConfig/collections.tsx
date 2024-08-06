@@ -3,7 +3,6 @@ import type {
   AdminViewProps,
   ClientCollectionConfig,
   CreateMappedComponent,
-  EditViewComponent,
   EditViewProps,
   Field,
   SanitizedCollectionConfig,
@@ -87,100 +86,130 @@ export const createClientCollectionConfig = ({
     }
   })
 
-  const components = collection?.admin?.components
+  if (collection?.admin?.components) {
+    sanitized.admin.components = {} as ClientCollectionConfig['admin']['components']
 
-  const editViewFromConfig = components?.views?.Edit
+    if (collection.admin.components?.edit) {
+      sanitized.admin.components.edit = {} as ClientCollectionConfig['admin']['components']['edit']
 
-  const listViewFromConfig = components?.views?.List
+      if (collection.admin.components.edit?.PreviewButton) {
+        sanitized.admin.components.edit.PreviewButton = createMappedComponent(
+          collection.admin.components.edit.PreviewButton,
+        )
+      }
 
-  sanitized.admin.components = {
-    ...(components?.edit?.PreviewButton
-      ? {
-          PreviewButton: createMappedComponent(components?.edit?.PreviewButton),
-        }
-      : {}),
-    ...(components?.edit?.PublishButton
-      ? {
-          PublishButton: createMappedComponent(components?.edit?.PublishButton),
-        }
-      : {}),
-    ...(components?.edit?.SaveButton
-      ? {
-          SaveButton: createMappedComponent(components?.edit?.SaveButton),
-        }
-      : {}),
-    ...(components?.edit?.SaveDraftButton
-      ? {
-          SaveDraftButton: createMappedComponent(components?.edit?.SaveDraftButton),
-        }
-      : {}),
-    ...(components?.edit?.Upload
-      ? {
-          Upload: createMappedComponent(components?.edit?.Upload),
-        }
-      : {}),
-    ...(components?.afterList
-      ? {
-          afterList: components?.afterList?.map((Component) => createMappedComponent(Component)),
-        }
-      : {}),
-    ...(components?.afterListTable
-      ? {
-          afterListTable: components?.afterListTable?.map((Component) =>
-            createMappedComponent(Component),
-          ),
-        }
-      : {}),
-    ...(components?.beforeList
-      ? {
-          beforeList: components?.beforeList?.map((Component) => createMappedComponent(Component)),
-        }
-      : {}),
-    ...(components?.beforeListTable
-      ? {
-          beforeListTable: components?.beforeListTable?.map((Component) =>
-            createMappedComponent(Component),
-          ),
-        }
-      : {}),
-    views: {
-      Edit: {
-        Default: {
-          Component: createMappedComponent(
-            editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
-              ? (editViewFromConfig.Default.Component as EditViewComponent)
-              : null,
-            {
-              collectionSlug: collection.slug,
-            },
-            DefaultEditView,
-          ),
-          ...(editViewFromConfig?.Default &&
-          'actions' in editViewFromConfig.Default &&
-          editViewFromConfig.Default.actions.length > 0
-            ? {
-                actions: editViewFromConfig?.Default?.actions?.map((Component) =>
-                  createMappedComponent(Component),
-                ),
-              }
-            : {}),
+      if (collection.admin.components.edit?.PublishButton) {
+        sanitized.admin.components.edit.PublishButton = createMappedComponent(
+          collection.admin.components.edit.PublishButton,
+        )
+      }
+
+      if (collection.admin.components.edit?.SaveButton) {
+        sanitized.admin.components.edit.SaveButton = createMappedComponent(
+          collection.admin.components.edit.SaveButton,
+        )
+      }
+
+      if (collection.admin.components.edit?.SaveDraftButton) {
+        sanitized.admin.components.edit.SaveDraftButton = createMappedComponent(
+          collection.admin.components.edit.SaveDraftButton,
+        )
+      }
+
+      if (collection.admin.components.edit?.Upload) {
+        sanitized.admin.components.edit.Upload = createMappedComponent(
+          collection.admin.components.edit.Upload,
+        )
+      }
+    }
+
+    if (collection.admin.components?.beforeList) {
+      sanitized.admin.components.beforeList = collection.admin.components.beforeList.map(
+        (Component) => createMappedComponent(Component),
+      )
+    }
+
+    if (collection.admin.components?.beforeListTable) {
+      sanitized.admin.components.beforeListTable = collection.admin.components.beforeListTable.map(
+        (Component) => createMappedComponent(Component),
+      )
+    }
+
+    if (collection.admin.components?.afterList) {
+      sanitized.admin.components.afterList = collection.admin.components.afterList.map(
+        (Component) => createMappedComponent(Component),
+      )
+    }
+
+    if (collection.admin.components?.afterListTable) {
+      sanitized.admin.components.afterListTable = collection.admin.components.afterListTable.map(
+        (Component) => createMappedComponent(Component),
+      )
+    }
+  }
+
+  sanitized.admin.components.views = {
+    ...((collection?.admin?.components?.views ||
+      {}) as ClientCollectionConfig['admin']['components']['views']),
+  }
+
+  const hasEditView =
+    'admin' in collection &&
+    'components' in collection.admin &&
+    'views' in collection.admin.components &&
+    'Edit' in collection.admin.components.views &&
+    'Default' in collection.admin.components.views.Edit
+
+  // @ts-expect-error
+  sanitized.admin.components.views.Edit = {
+    Default: {
+      Component: createMappedComponent(
+        hasEditView &&
+          'Component' in collection.admin.components.views.Edit.Default &&
+          collection.admin.components.views.Edit.Default.Component,
+        {
+          collectionSlug: collection.slug,
         },
-      },
-      List: {
-        Component: createMappedComponent(
-          listViewFromConfig?.Component,
-          {
-            collectionSlug: collection.slug,
-          },
-          DefaultListView,
-        ),
-        ...(listViewFromConfig?.actions && listViewFromConfig?.actions.length > 0
-          ? {
-              actions: createMappedComponent(components?.views?.List?.actions),
-            }
-          : {}),
-      },
+        DefaultEditView,
+      ),
+      ...(hasEditView &&
+      'actions' in collection.admin.components.views.Edit.Default &&
+      collection.admin.components.views.Edit.Default.actions
+        ? {
+            actions: collection.admin.components.views.Edit.Default.actions.map((Component) =>
+              createMappedComponent(Component),
+            ),
+          }
+        : {}),
     },
+  }
+
+  const hasListView =
+    'admin' in collection &&
+    'components' in collection.admin &&
+    'views' in collection.admin.components &&
+    'List' in collection.admin.components.views
+
+  // @ts-expect-error
+  sanitized.admin.components.views.List = {
+    Component: createMappedComponent(
+      hasListView &&
+        'Component' in collection.admin.components.views.List &&
+        collection.admin.components.views.List.Component,
+      {
+        collectionSlug: collection.slug,
+      },
+      DefaultListView,
+    ),
+    ...(hasListView &&
+    'actions' in collection.admin.components.views.List &&
+    collection.admin.components.views.List.actions
+      ? {
+          actions: collection.admin.components.views.List.actions.map((Component) =>
+            createMappedComponent(Component),
+          ),
+        }
+      : {}),
   }
 
   if ('livePreview' in sanitized.admin) {

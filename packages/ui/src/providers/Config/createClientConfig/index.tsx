@@ -40,7 +40,6 @@ export const createClientConfig = async ({
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
-
   // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
   const clientConfig: ClientConfig = { ...(config as any as ClientConfig) } // invert the type
