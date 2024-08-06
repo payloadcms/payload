@@ -1,4 +1,5 @@
-import type { ClientFieldConfig, GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { StaticLabel } from '../../config/types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { BlockField } from '../../fields/config/types.js'
 import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
@@ -9,14 +10,19 @@ import type {
   MappedComponent,
 } from '../types.js'
 
+export type BlocksFieldClient = {
+  readonly blocks: ClientBlock[]
+  readonly label: StaticLabel
+} & Extract<ClientFieldConfig, { type: 'blocks' }>
+
 export type BlocksFieldProps = {
-  readonly field: GenericClientFieldConfig<'blocks'>
+  readonly field: BlocksFieldClient
   readonly forceRender?: boolean
   readonly slug?: string
   readonly validate?: BlockFieldValidation
 } & FormFieldBase
 
-export type ReducedBlock = {
+export type ClientBlock = {
   LabelComponent: MappedComponent
   custom?: Record<any, string>
   fields: ClientFieldConfig[]

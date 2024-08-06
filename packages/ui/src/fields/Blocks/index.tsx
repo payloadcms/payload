@@ -42,9 +42,8 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description },
+      admin: { className, description, isSortable = true },
       blocks,
-      isSortable = true,
       label,
       labels: labelsFromProps,
       localized,

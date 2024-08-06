@@ -1,5 +1,5 @@
 'use client'
-import type { MappedComponent, OptionObject, StaticDescription } from 'payload'
+import type { MappedComponent, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -28,7 +28,7 @@ export type SelectInputProps = {
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
-  readonly label: string
+  readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']

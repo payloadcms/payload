@@ -18,7 +18,7 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  readonly CustomRowLabel?: MappedComponent
+  readonly RowLabel?: MappedComponent
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
@@ -27,7 +27,7 @@ type ArrayRowProps = {
   readonly hasMaxRows?: boolean
   readonly indexPath: string
   readonly isSortable?: boolean
-  readonly labels: ArrayField['labels']
+  readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly path: string
   readonly permissions: FieldPermissions
@@ -41,7 +41,7 @@ type ArrayRowProps = {
 } & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
-  CustomRowLabel,
+  RowLabel: CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,

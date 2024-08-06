@@ -29,12 +29,15 @@ const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
         <RenderFields
-          {...{ fields, forceRender, path, readOnly, schemaPath }}
           className={`${baseClass}__fields`}
+          fields={fields}
           forceRender={forceRender}
           indexPath={indexPath}
           margins={false}
+          path={path}
           permissions={siblingPermissions}
+          readOnly={readOnly}
+          schemaPath={schemaPath}
         />
       </div>
     </RowProvider>

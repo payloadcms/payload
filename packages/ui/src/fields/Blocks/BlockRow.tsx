@@ -1,5 +1,5 @@
 'use client'
-import type { FieldPermissions, Labels, ReducedBlock, Row } from 'payload'
+import type { ClientBlock, FieldPermissions, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -20,8 +20,8 @@ const baseClass = 'blocks-field'
 
 type BlockFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
-  block: ReducedBlock
-  blocks: ReducedBlock[]
+  block: ClientBlock
+  blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   forceRender?: boolean

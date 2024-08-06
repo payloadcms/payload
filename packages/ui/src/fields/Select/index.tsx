@@ -29,10 +29,15 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, style, width } = {} as SelectFieldProps['field']['admin'],
+      admin: {
+        className,
+        description,
+        isClearable = true,
+        isSortable = true,
+        style,
+        width,
+      } = {} as SelectFieldProps['field']['admin'],
       hasMany = false,
-      isClearable = true,
-      isSortable = true,
       label,
       options: optionsFromProps = [],
       required,

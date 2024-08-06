@@ -1,6 +1,6 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
-import type { FormFieldBase, GenericClientFieldConfig } from 'payload'
+import type { FormFieldBase, RichTextFieldClient } from 'payload'
 
 import {
   FieldDescription,
@@ -23,29 +23,29 @@ const baseClass = 'rich-text-lexical'
 
 const RichTextComponent: React.FC<
   {
-    field: GenericClientFieldConfig<'richText'>
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-    width?: string
+    readonly editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+    readonly field: RichTextFieldClient
+    readonly name: string
+    readonly richTextComponentMap: Map<string, React.ReactNode>
+    readonly width?: string
   } & FormFieldBase
 > = (props) => {
   const {
+    descriptionProps,
+    editorConfig,
+    errorProps,
     field: {
       name,
       _path: pathFromProps,
       admin: {
         className,
         components: { Description, Error, Label },
+        style,
         width,
       },
       label,
       required,
-      style,
     },
-    descriptionProps,
-    editorConfig,
-    errorProps,
     labelProps,
     readOnly: readOnlyFromProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore

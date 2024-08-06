@@ -68,7 +68,6 @@ export const createClientFieldConfig = ({
   field._isSidebar = fieldIsSidebar(field)
 
   const isHidden = 'hidden' in field && field?.hidden
-  const isHiddenFromAdmin = field?.admin && 'hidden' in field.admin && field.admin.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
@@ -80,8 +79,9 @@ export const createClientFieldConfig = ({
     field._isFieldAffectingData && 'name' in field ? field.name : '',
   )
 
-  if ('label' in field && typeof field.label === 'function') {
-    field.label = field.label({ t })
+  if ('label' in incomingField && typeof incomingField.label === 'function') {
+    // @ts-expect-error // TODO: set this conditionally based on type to comply with the stricter types
+    field.label = incomingField.label({ t })
   }
 
   let CustomLabel: LabelComponent | RowLabelComponent =
@@ -90,31 +90,30 @@ export const createClientFieldConfig = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label
 
-  switch (field.type) {
+  switch (incomingField.type) {
     case 'array':
     case 'group':
     case 'collapsible':
     case 'row': {
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-      field.fields = [...(incomingField.fields as Field[])]
+      // @ts-expect-error // TODO: fix this type issue
+      field.fields = [...(incomingField.fields as ClientFieldConfig[])]
 
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      // @ts-expect-error // TODO: fix this type issue
       field.fields = createClientFieldConfigs({
         createMappedComponent,
-        disableAddingID: field.type !== 'array',
-        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-        fields: field.fields,
+        disableAddingID: incomingField.type !== 'array',
+        fields: incomingField.fields,
         parentPath: field._path,
         payload,
         t,
       })
 
-      if (field.type === 'array') {
-        // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      if (incomingField.type === 'array') {
+        // @ts-expect-error // TODO: fix this type issue
         field.RowLabel = createMappedComponent(CustomLabel)
       }
 
-      if (field.type === 'collapsible') {
+      if (incomingField.type === 'collapsible') {
         if (
           'admin' in incomingField &&
           'components' in incomingField.admin &&
@@ -129,10 +128,11 @@ export const createClientFieldConfig = ({
     }
 
     case 'blocks': {
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-      field.blocks = field.blocks?.map((block) => {
+      // @ts-expect-error // TODO: fix this type issue
+      field.blocks = incomingField.blocks?.map((block) => {
         const sanitized = { ...block, fields: [...block.fields] }
 
+        // @ts-expect-error // TODO: fix this type issue
         sanitized.fields = createClientFieldConfigs({
           createMappedComponent,
           fields: sanitized.fields,
@@ -324,6 +324,7 @@ export const createClientFieldConfigs = ({
           Field: null,
         },
         disableBulkEdit: true,
+        hidden: true,
       },
       hidden: true,
       label: 'ID',

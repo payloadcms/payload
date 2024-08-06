@@ -1,10 +1,10 @@
 import type { MappedComponent, StaticDescription } from '../../admin/types.js'
 import type { StaticLabel } from '../../config/types.js'
-import type { Field, FieldBase, FieldTypes } from '../../fields/config/types.js'
+import type { Field, FieldBase } from '../../fields/config/types.js'
 
-export type GenericClientFieldConfig<T extends FieldTypes = FieldTypes> = {
-  readonly type: T
-} & ClientFieldConfig
+export type ClientField = {
+  [K in Field['type']]: Omit<Extract<Field, { type: K }>, ServerOnlyFieldProperties>
+}[Field['type']]
 
 export type ClientFieldConfig = {
   _fieldIsPresentational: boolean
@@ -13,10 +13,6 @@ export type ClientFieldConfig = {
   _path: string
   _schemaPath: string
   admin: {
-    /**
-     * These are user-defined Custom Components, if provided. All Server Components are pre-rendered, while Client Components are simply mapped for the client to render.
-     * If no component is provided, these properties will be `undefined`, and the default component will be rendered.
-     */
     components?: {
       Cell?: MappedComponent
       Description?: MappedComponent
@@ -24,13 +20,14 @@ export type ClientFieldConfig = {
       Field?: MappedComponent
       Filter?: MappedComponent
       Label?: MappedComponent
+      RowLabel?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
     }
     description?: StaticDescription
     label?: StaticLabel
-  } & Omit<Field['admin'], 'components' | ServerOnlyFieldAdminProperties>
-} & Omit<Field, 'admin' | ServerOnlyFieldProperties> // TODO: the <Omit> breaks the field type inference
+  } & Omit<ClientField['admin'], 'components' | ServerOnlyFieldAdminProperties>
+} & ClientField
 
 export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function

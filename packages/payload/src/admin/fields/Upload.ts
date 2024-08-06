@@ -1,15 +1,20 @@
 import type {
+  ClientFieldConfig,
   DescriptionComponent,
   FormFieldBase,
-  GenericClientFieldConfig,
   LabelComponent,
+  StaticLabel,
 } from 'payload'
 
+import type { UploadFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import { UploadFieldValidation } from '../../fields/validations.js'
+
+export type UploadFieldClient = {
+  readonly label: StaticLabel
+} & Extract<ClientFieldConfig, { type: 'upload' }>
 
 export type UploadFieldProps = {
-  readonly field: GenericClientFieldConfig<'upload'>
+  readonly field: UploadFieldClient
   readonly validate?: UploadFieldValidation
 } & FormFieldBase
 

@@ -1,11 +1,16 @@
-import type { GenericClientFieldConfig } from '../../fields/config/client.js'
+import type { StaticLabel } from '../../config/types.js'
+import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { CodeFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
+export type CodeFieldClient = {
+  readonly label: StaticLabel
+} & Extract<ClientFieldConfig, { type: 'code' }>
+
 export type CodeFieldProps = {
   readonly autoComplete?: string
-  readonly field: GenericClientFieldConfig<'email'>
+  readonly field: CodeFieldClient
   readonly validate?: CodeFieldValidation
 } & FormFieldBase
 
