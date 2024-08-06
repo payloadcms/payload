@@ -104,7 +104,12 @@ export const DefaultEditView: React.FC = () => {
 
   const [schemaPath, setSchemaPath] = React.useState(entitySlug)
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (operation === 'create' && collectionConfig.auth) return true
+    if (
+      operation === 'create' &&
+      collectionConfig.auth &&
+      !collectionConfig.auth.disableLocalStrategy
+    )
+      return true
     return false
   })
 
