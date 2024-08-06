@@ -624,6 +624,8 @@ export interface TextField {
   text: string
   localizedText?: string | null
   i18nText?: string | null
+  defaultString?: string | null
+  defaultEmptyString?: string | null
   defaultFunction?: string | null
   defaultAsync?: string | null
   overrideLength?: string | null
@@ -864,6 +866,17 @@ export interface JsonField {
     | number
     | boolean
     | null
+  group?: {
+    jsonWithinGroup?:
+      | {
+          [k: string]: unknown
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null
+  }
   updatedAt: string
   createdAt: string
 }
