@@ -57,9 +57,23 @@ export const ListView: React.FC<AdminViewProps> = async ({
         req,
         user,
         where: {
-          key: {
-            equals: preferenceKey,
-          },
+          and: [
+            {
+              key: {
+                equals: preferenceKey,
+              },
+            },
+            {
+              'user.relationTo': {
+                equals: user.collection,
+              },
+            },
+            {
+              'user.value': {
+                equals: user?.id,
+              },
+            },
+          ],
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
