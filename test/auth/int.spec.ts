@@ -373,7 +373,7 @@ describe('Auth', () => {
                 },
                 {
                   'user.relationTo': {
-                    equals: loggedInUser.collection,
+                    equals: 'users',
                   },
                 },
                 {
@@ -410,7 +410,7 @@ describe('Auth', () => {
                 },
                 {
                   'user.relationTo': {
-                    equals: loggedInUser.collection,
+                    equals: 'users',
                   },
                 },
                 {
