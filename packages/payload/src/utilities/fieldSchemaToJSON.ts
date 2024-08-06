@@ -18,7 +18,6 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
     switch (field.type) {
       case 'group':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
           // @ts-expect-error
@@ -29,12 +28,12 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
       case 'array':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
           fields: fieldSchemaToJSON([
             // @ts-expect-error
             ...field.fields,
+            // @ts-expect-error
             {
               name: 'id',
               type: 'text',
@@ -46,14 +45,14 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
       case 'blocks':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
-          // @ts-expect-error
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
+                // @ts-expect-error
                 ...block.fields,
+                // @ts-expect-error
                 {
                   name: 'id',
                   type: 'text',
@@ -76,17 +75,18 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
       case 'tabs': {
         let tabFields = []
 
-        // @ts-expect-error
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
             tabFields.push({
               name: tab.name,
               type: field.type,
+              // @ts-expect-error
               fields: fieldSchemaToJSON(tab.fields),
             })
             return
           }
 
+          // @ts-expect-error
           tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields))
         })
 
@@ -98,11 +98,9 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
       case 'relationship':
       case 'upload':
         acc.push({
-          // @ts-expect-error
           name: field.name,
           type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          // @ts-expect-error
           relationTo: field.relationTo,
         })
 

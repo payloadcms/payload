@@ -29,16 +29,16 @@ import './index.scss'
 const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
-  apiURL: string
-  data?: any
-  disableActions?: boolean
-  hasPublishPermission?: boolean
-  hasSavePermission?: boolean
-  id?: number | string
-  isAccountView?: boolean
-  isEditing?: boolean
-  permissions: CollectionPermission | GlobalPermission | null
-  slug: SanitizedCollectionConfig['slug']
+  readonly apiURL: string
+  readonly data?: any
+  readonly disableActions?: boolean
+  readonly hasPublishPermission?: boolean
+  readonly hasSavePermission?: boolean
+  readonly id?: number | string
+  readonly isAccountView?: boolean
+  readonly isEditing?: boolean
+  readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly slug: SanitizedCollectionConfig['slug']
 }> = (props) => {
   const {
     id,
@@ -161,7 +161,10 @@ export const DocumentControls: React.FC<{
           <div className={`${baseClass}__controls`}>
             {(collectionConfig?.isPreviewEnabled || globalConfig?.isPreviewEnabled) && (
               <PreviewButton
-                CustomComponent={(collectionConfig || globalConfig).admin.components.PreviewButton}
+                CustomComponent={
+                  collectionConfig?.admin.components?.edit?.PreviewButton ||
+                  globalConfig?.admin.components?.elements?.PreviewButton
+                }
               />
             )}
             {hasSavePermission && (
@@ -175,19 +178,24 @@ export const DocumentControls: React.FC<{
                         !globalConfig?.versions?.drafts?.autosave)) && (
                       <SaveDraftButton
                         CustomComponent={
-                          (collectionConfig || globalConfig).admin.components.SaveDraftButton
+                          collectionConfig.admin?.components?.edit?.SaveDraftButton ||
+                          globalConfig.admin?.components?.elements?.SaveDraftButton
                         }
                       />
                     )}
                     <PublishButton
                       CustomComponent={
-                        (collectionConfig || globalConfig).admin.components.PublishButton
+                        collectionConfig.admin?.components?.edit?.PublishButton ||
+                        globalConfig.admin?.components?.elements?.PublishButton
                       }
                     />
                   </React.Fragment>
                 ) : (
                   <SaveButton
-                    CustomComponent={(collectionConfig || globalConfig).admin.components.SaveButton}
+                    CustomComponent={
+                      collectionConfig.admin?.components?.edit?.SaveButton ||
+                      globalConfig.admin?.components?.elements?.SaveButton
+                    }
                   />
                 )}
               </React.Fragment>

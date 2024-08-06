@@ -1,3 +1,4 @@
+import type { StaticLabel } from '../../config/types.js'
 import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
@@ -8,7 +9,9 @@ import type {
   MappedComponent,
 } from '../types.js'
 
-export type RichTextFieldClient = Extract<ClientFieldConfig, { type: 'richText' }>
+export type RichTextFieldClient = {
+  readonly label: StaticLabel
+} & Extract<ClientFieldConfig, { type: 'richText' }>
 
 export type RichTextComponentProps = {
   readonly field: RichTextFieldClient

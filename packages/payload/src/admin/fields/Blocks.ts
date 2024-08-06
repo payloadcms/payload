@@ -10,13 +10,13 @@ import type {
   MappedComponent,
 } from '../types.js'
 
-export type BlocksClientField = {
+export type BlocksFieldClient = {
   readonly blocks: ClientBlock[]
   readonly label: StaticLabel
 } & Extract<ClientFieldConfig, { type: 'blocks' }>
 
 export type BlocksFieldProps = {
-  readonly field: BlocksClientField
+  readonly field: BlocksFieldClient
   readonly forceRender?: boolean
   readonly slug?: string
   readonly validate?: BlockFieldValidation

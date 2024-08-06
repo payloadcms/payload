@@ -34,6 +34,7 @@ export type {
 } from './elements/WithServerSideProps.js'
 
 export type {
+  ArrayClientField,
   ArrayFieldDescriptionComponent,
   ArrayFieldErrorComponent,
   ArrayFieldLabelComponent,
@@ -43,6 +44,7 @@ export type {
 export type { ClientBlock } from './fields/Blocks.js'
 
 export type {
+  BlocksFieldClient,
   BlocksFieldDescriptionComponent,
   BlocksFieldErrorComponent,
   BlocksFieldLabelComponent,
@@ -50,6 +52,7 @@ export type {
 } from './fields/Blocks.js'
 
 export type {
+  CheckboxFieldClient,
   CheckboxFieldDescriptionComponent,
   CheckboxFieldErrorComponent,
   CheckboxFieldLabelComponent,
@@ -57,6 +60,7 @@ export type {
 } from './fields/Checkbox.js'
 
 export type {
+  CodeFieldClient,
   CodeFieldDescriptionComponent,
   CodeFieldErrorComponent,
   CodeFieldLabelComponent,
@@ -64,6 +68,7 @@ export type {
 } from './fields/Code.js'
 
 export type {
+  CollapsibleFieldClient,
   CollapsibleFieldDescriptionComponent,
   CollapsibleFieldErrorComponent,
   CollapsibleFieldLabelComponent,
@@ -71,6 +76,7 @@ export type {
 } from './fields/Collapsible.js'
 
 export type {
+  DateFieldClient,
   DateFieldDescriptionComponent,
   DateFieldErrorComponent,
   DateFieldLabelComponent,
@@ -78,6 +84,7 @@ export type {
 } from './fields/Date.js'
 
 export type {
+  EmailFieldClient,
   EmailFieldDescriptionComponent,
   EmailFieldErrorComponent,
   EmailFieldLabelComponent,
@@ -85,6 +92,7 @@ export type {
 } from './fields/Email.js'
 
 export type {
+  GroupFieldClient,
   GroupFieldDescriptionComponent,
   GroupFieldErrorComponent,
   GroupFieldLabelComponent,
@@ -99,6 +107,7 @@ export type {
 } from './fields/Hidden.js'
 
 export type {
+  JSONFieldClient,
   JSONFieldDescriptionComponent,
   JSONFieldErrorComponent,
   JSONFieldLabelComponent,
@@ -106,6 +115,7 @@ export type {
 } from './fields/JSON.js'
 
 export type {
+  NumberFieldClient,
   NumberFieldDescriptionComponent,
   NumberFieldErrorComponent,
   NumberFieldLabelComponent,
@@ -113,6 +123,7 @@ export type {
 } from './fields/Number.js'
 
 export type {
+  PointFieldClient,
   PointFieldDescriptionComponent,
   PointFieldErrorComponent,
   PointFieldLabelComponent,
@@ -120,6 +131,7 @@ export type {
 } from './fields/Point.js'
 
 export type {
+  RadioFieldClient,
   RadioFieldDescriptionComponent,
   RadioFieldErrorComponent,
   RadioFieldLabelComponent,
@@ -127,6 +139,7 @@ export type {
 } from './fields/Radio.js'
 
 export type {
+  RelationshipFieldClient,
   RelationshipFieldDescriptionComponent,
   RelationshipFieldErrorComponent,
   RelationshipFieldLabelComponent,
@@ -135,12 +148,14 @@ export type {
 
 export type {
   RichTextComponentProps,
+  RichTextFieldClient,
   RichTextFieldDescriptionComponent,
   RichTextFieldErrorComponent,
   RichTextFieldLabelComponent,
 } from './fields/RichText.js'
 
 export type {
+  RowFieldClient,
   RowFieldDescriptionComponent,
   RowFieldErrorComponent,
   RowFieldLabelComponent,
@@ -148,6 +163,7 @@ export type {
 } from './fields/Row.js'
 
 export type {
+  SelectFieldClient,
   SelectFieldDescriptionComponent,
   SelectFieldErrorComponent,
   SelectFieldLabelComponent,
@@ -155,6 +171,7 @@ export type {
 } from './fields/Select.js'
 
 export type {
+  TabsFieldClient,
   TabsFieldDescriptionComponent,
   TabsFieldErrorComponent,
   TabsFieldLabelComponent,
@@ -162,15 +179,15 @@ export type {
 } from './fields/Tabs.js'
 
 export type {
+  TextClientField,
   TextFieldDescriptionComponent,
   TextFieldErrorComponent,
   TextFieldLabelComponent,
   TextFieldProps,
 } from './fields/Text.js'
 
-export type { TextClientField } from './fields/Text.js'
-
 export type {
+  TextareaFieldClient,
   TextareaFieldDescriptionComponent,
   TextareaFieldErrorComponent,
   TextareaFieldLabelComponent,
@@ -178,6 +195,7 @@ export type {
 } from './fields/Textarea.js'
 
 export type {
+  UploadFieldClient,
   UploadFieldDescriptionComponent,
   UploadFieldErrorComponent,
   UploadFieldLabelComponent,
