@@ -5,6 +5,7 @@ import type {
   EditViewComponent,
   EditViewProps,
   Field,
+  Payload,
   SanitizedConfig,
   ServerOnlyGlobalAdminProperties,
   ServerOnlyGlobalProperties,
@@ -16,11 +17,13 @@ export const createClientGlobalConfig = ({
   DefaultEditView,
   createMappedComponent,
   global,
+  payload,
   t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   createMappedComponent: CreateMappedComponent
   global: SanitizedConfig['globals'][0]
+  payload: Payload
   t: TFunction
 }): ClientGlobalConfig => {
   const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
@@ -28,6 +31,7 @@ export const createClientGlobalConfig = ({
   sanitized.fields = createClientFieldConfigs({
     createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
+    payload,
     t,
   })
 
@@ -124,13 +128,15 @@ export const createClientGlobalConfigs = ({
   DefaultEditView,
   createMappedComponent,
   globals,
+  payload,
   t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   createMappedComponent: CreateMappedComponent
   globals: SanitizedConfig['globals']
+  payload: Payload
   t: TFunction
 }): ClientGlobalConfig[] =>
   globals.map((global) =>
-    createClientGlobalConfig({ DefaultEditView, createMappedComponent, global, t }),
+    createClientGlobalConfig({ DefaultEditView, createMappedComponent, global, payload, t }),
   )

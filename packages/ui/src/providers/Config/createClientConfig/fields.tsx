@@ -5,6 +5,7 @@ import type {
   Field,
   FieldTypes,
   LabelComponent,
+  Payload,
   RowLabelComponent,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
@@ -104,11 +105,13 @@ export const createClientFieldConfig = ({
   createMappedComponent,
   field: incomingField,
   parentPath,
+  payload,
   t,
 }: {
   createMappedComponent: CreateMappedComponent
   field: Field
   parentPath?: string
+  payload: Payload
   t: TFunction
 }): ClientFieldConfig => {
   const field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
@@ -180,6 +183,7 @@ export const createClientFieldConfig = ({
         // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
         fields: field.fields,
         parentPath: field._path,
+        payload,
         t,
       })
 
@@ -208,6 +212,7 @@ export const createClientFieldConfig = ({
           createMappedComponent,
           fields: sanitized.fields,
           parentPath: field._path,
+          payload,
           t,
         })
 
@@ -227,6 +232,7 @@ export const createClientFieldConfig = ({
           disableAddingID: true,
           fields: sanitized.fields,
           parentPath: field._path,
+          payload,
           t,
         })
 
@@ -342,16 +348,20 @@ export const createClientFieldConfigs = ({
   disableAddingID,
   fields,
   parentPath,
+  payload,
   t,
 }: {
   createMappedComponent: CreateMappedComponent
   disableAddingID?: boolean
   fields: Field[]
   parentPath?: string
+  payload: Payload
   t: TFunction
 }): ClientFieldConfig[] => {
   const result = [...fields]
-    .map((field) => createClientFieldConfig({ createMappedComponent, field, parentPath, t }))
+    .map((field) =>
+      createClientFieldConfig({ createMappedComponent, field, parentPath, payload, t }),
+    )
     .filter(Boolean)
 
   const hasID =
@@ -360,7 +370,7 @@ export const createClientFieldConfigs = ({
   if (!disableAddingID && !hasID) {
     result.push({
       name: 'id',
-      type: 'text',
+      type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
       _fieldIsPresentational: false,
       _isFieldAffectingData: true,
       admin: {
