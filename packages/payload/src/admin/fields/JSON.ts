@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type JSONFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'json'>
+  readonly field: GenericClientFieldConfig<'json'>
   readonly validate?: JSONFieldValidation
 } & FormFieldBase
 

@@ -5,7 +5,7 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 
 export type CodeFieldProps = {
   readonly autoComplete?: string
-  readonly clientFieldConfig: GenericClientFieldConfig<'email'>
+  readonly field: GenericClientFieldConfig<'email'>
   readonly validate?: CodeFieldValidation
 } & FormFieldBase
 

@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RelationshipFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'relationship'>
+  readonly field: GenericClientFieldConfig<'relationship'>
   readonly validate?: RelationshipFieldValidation
 } & FormFieldBase
 

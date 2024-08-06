@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TextareaFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'textarea'>
+  readonly field: GenericClientFieldConfig<'textarea'>
   readonly inputRef?: React.MutableRefObject<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextareaFieldValidation

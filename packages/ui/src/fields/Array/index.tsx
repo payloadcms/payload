@@ -31,7 +31,7 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       CustomRowLabel,

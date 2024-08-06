@@ -9,9 +9,7 @@ import { formatDate } from '../../../../../utilities/formatDate.js'
 
 export const DateCell: React.FC<DefaultCellComponentProps<Date | number | string>> = ({
   cellData,
-  clientFieldConfig: {
-    admin: { dateFormat: dateFormatFromField } = {} as ClientFieldConfig['admin'],
-  },
+  field: { admin: { dateFormat: dateFormatFromField } = {} as ClientFieldConfig['admin'] },
 }) => {
   const {
     config: {

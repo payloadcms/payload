@@ -23,7 +23,7 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

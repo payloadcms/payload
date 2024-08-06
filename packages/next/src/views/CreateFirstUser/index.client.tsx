@@ -59,7 +59,7 @@ export const CreateFirstUserClient: React.FC<{
     >
       <EmailAndUsernameFields loginWithUsername={loginWithUsername} />
       <PasswordField
-        clientFieldConfig={{
+        field={{
           name: 'password',
           label: t('authentication:newPassword'),
           path: 'password',

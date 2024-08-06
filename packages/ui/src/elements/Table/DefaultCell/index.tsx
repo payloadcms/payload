@@ -18,7 +18,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const {
     className: classNameFromProps,
-    clientFieldConfig: {
+    field: {
       name,
       type: fieldType,
       _isFieldAffectingData,
@@ -42,7 +42,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
 
   const {
     className: classNameFromContext,
-    clientFieldConfig: {
+    field: {
       admin: { className: classNameFromConfigContext },
     },
     link,
@@ -94,9 +94,9 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
       <WrapElement {...wrapElementProps}>
         <CodeCell
           cellData={`ID: ${cellData}`}
-          clientFieldConfig={{
+          field={{
             name,
-            _schemaPath: cellContext?.cellProps?.clientFieldConfig?._schemaPath,
+            _schemaPath: cellContext?.cellProps?.field?._schemaPath,
           }}
           nowrap
           rowData={rowData}

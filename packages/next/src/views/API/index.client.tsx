@@ -161,7 +161,7 @@ export const APIViewClient: React.FC = () => {
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
                 <CheckboxField
-                  clientFieldConfig={{
+                  field={{
                     name: 'draft',
                     _path: 'draft',
                     label: t('version:draft'),
@@ -170,7 +170,7 @@ export const APIViewClient: React.FC = () => {
                 />
               )}
               <CheckboxField
-                clientFieldConfig={{
+                field={{
                   name: 'authenticated',
                   _path: 'authenticated',
                   label: t('authentication:authenticated'),
@@ -180,7 +180,7 @@ export const APIViewClient: React.FC = () => {
             </div>
             {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
             <NumberField
-              clientFieldConfig={{
+              field={{
                 name: 'depth',
                 _path: 'depth',
                 admin: {

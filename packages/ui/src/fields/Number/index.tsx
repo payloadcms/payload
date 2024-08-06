@@ -21,7 +21,7 @@ import './index.scss'
 
 const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -32,12 +32,12 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           Label,
           afterInput,
           beforeInput,
-        } = {} as NumberFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as NumberFieldProps['field']['admin']['components'],
         description,
         placeholder,
         style,
         width,
-      } = {} as NumberFieldProps['clientFieldConfig']['admin'],
+      } = {} as NumberFieldProps['field']['admin'],
       hasMany = false,
       label,
       max = Infinity,

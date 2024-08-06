@@ -82,7 +82,7 @@ export const LoginForm: React.FC<{
       <div className={`${baseClass}__inputWrap`}>
         <LoginField type={loginType} />
         <PasswordField
-          clientFieldConfig={{
+          field={{
             name: 'password',
             label: t('general:password'),
             required: true,

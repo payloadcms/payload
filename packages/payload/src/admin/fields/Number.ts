@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type NumberFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'number'>
+  readonly field: GenericClientFieldConfig<'number'>
   readonly onChange?: (e: number) => void
   readonly validate?: NumberFieldValidation
 } & FormFieldBase

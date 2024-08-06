@@ -124,9 +124,9 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: 'name' in field ? (field.name as string) : undefined,
         active,
         cellProps: {
-          clientFieldConfig: {
+          field: {
             ...(field || ({} as ClientFieldConfig)),
-            ...(cellProps?.[index]?.clientFieldConfig || ({} as ClientFieldConfig)),
+            ...(cellProps?.[index]?.field || ({} as ClientFieldConfig)),
           },
           ...cellProps?.[index],
           link: isFirstActiveColumn,
@@ -149,7 +149,7 @@ export const buildColumnState = (args: Args): Column[] => {
       accessor: '_select',
       active: true,
       cellProps: {
-        clientFieldConfig: {
+        field: {
           name: '',
           type: null,
         },

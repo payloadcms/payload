@@ -10,7 +10,7 @@ import type {
 } from '../types.js'
 
 export type BlocksFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'blocks'>
+  readonly field: GenericClientFieldConfig<'blocks'>
   readonly forceRender?: boolean
   readonly slug?: string
   readonly validate?: BlockFieldValidation

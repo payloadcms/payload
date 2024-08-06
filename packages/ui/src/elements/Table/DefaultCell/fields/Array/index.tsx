@@ -8,10 +8,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface ArrayCellProps extends DefaultCellComponentProps<Record<string, unknown>[]> {}
 
-export const ArrayCell: React.FC<ArrayCellProps> = ({
-  cellData,
-  clientFieldConfig: { labels },
-}) => {
+export const ArrayCell: React.FC<ArrayCellProps> = ({ cellData, field: { labels } }) => {
   const { i18n } = useTranslation()
 
   const arrayFields = cellData ?? []

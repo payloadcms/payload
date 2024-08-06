@@ -5,7 +5,7 @@ export type RowData = Record<string, any>
 
 export type CellComponentProps = {
   readonly className?: string
-  readonly clientFieldConfig: ClientFieldConfig
+  readonly field: ClientFieldConfig
   readonly link?: boolean
   readonly onClick?: (args: {
     cellData: unknown

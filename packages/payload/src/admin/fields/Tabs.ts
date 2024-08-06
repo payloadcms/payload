@@ -3,7 +3,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type TabsFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'tabs'>
+  readonly field: GenericClientFieldConfig<'tabs'>
   readonly forceRender?: boolean
 } & FormFieldBase
 

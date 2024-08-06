@@ -24,7 +24,7 @@ export { TabsProvider }
 
 const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

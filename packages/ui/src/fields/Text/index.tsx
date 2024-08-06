@@ -19,7 +19,7 @@ export { TextInput, TextInputProps }
 
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

@@ -3,7 +3,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type CollapsibleFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'collapsible'>
+  readonly field: GenericClientFieldConfig<'collapsible'>
 } & FormFieldBase
 
 export type CollapsibleFieldLabelComponent = LabelComponent<'collapsible'>

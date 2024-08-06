@@ -25,7 +25,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -36,11 +36,11 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
           Label,
           afterInput,
           beforeInput,
-        } = {} as SelectFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as SelectFieldProps['field']['admin']['components'],
         description,
         style,
         width,
-      } = {} as SelectFieldProps['clientFieldConfig']['admin'],
+      } = {} as SelectFieldProps['field']['admin'],
       hasMany = false,
       isClearable = true,
       isSortable = true,

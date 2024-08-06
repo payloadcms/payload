@@ -11,7 +11,7 @@ import type { ChangeEvent } from 'react'
 
 export type PasswordFieldProps = {
   readonly autoComplete?: string
-  readonly clientFieldConfig: GenericClientFieldConfig<'text'>
+  readonly field: GenericClientFieldConfig<'text'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly validate?: PasswordFieldValidation
 } & FormFieldBase

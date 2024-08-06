@@ -20,7 +20,7 @@ import { FieldError } from '../FieldError/index.js'
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -29,16 +29,16 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
           Description,
           Error,
           Label,
-        } = {} as RadioFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as RadioFieldProps['field']['admin']['components'],
         description,
         layout = 'horizontal',
         style,
         width,
-      } = {} as RadioFieldProps['clientFieldConfig']['admin'],
+      } = {} as RadioFieldProps['field']['admin'],
       label,
       options = [],
       required,
-    } = {} as RadioFieldProps['clientFieldConfig'],
+    } = {} as RadioFieldProps['field'],
     descriptionProps,
     errorProps,
     labelProps,

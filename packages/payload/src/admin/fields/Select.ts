@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type SelectFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'select'>
+  readonly field: GenericClientFieldConfig<'select'>
   readonly onChange?: (e: string | string[]) => void
   readonly validate?: SelectFieldValidation
   readonly value?: string

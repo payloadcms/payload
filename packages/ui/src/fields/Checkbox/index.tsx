@@ -25,7 +25,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     checked: checkedFromProps,
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -36,15 +36,15 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
           Label,
           afterInput,
           beforeInput,
-        } = {} as CheckboxFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as CheckboxFieldProps['field']['admin']['components'],
         description,
         style,
         width,
-      } = {} as CheckboxFieldProps['clientFieldConfig']['admin'],
+      } = {} as CheckboxFieldProps['field']['admin'],
       disableFormData,
       label,
       required,
-    } = {} as CheckboxFieldProps['clientFieldConfig'],
+    } = {} as CheckboxFieldProps['field'],
     descriptionProps,
     errorProps,
     labelProps,

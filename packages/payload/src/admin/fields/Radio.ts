@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RadioFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'radio'>
+  readonly field: GenericClientFieldConfig<'radio'>
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string

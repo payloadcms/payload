@@ -9,7 +9,7 @@ import type {
 } from '../types.js'
 
 export type RichTextComponentProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'richText'>
+  readonly field: GenericClientFieldConfig<'richText'>
   readonly name: string
   readonly richTextComponentMap?: Map<string, MappedComponent | unknown>
   readonly validate?: RichTextFieldValidation

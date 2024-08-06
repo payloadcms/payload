@@ -18,7 +18,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
     return (
       <EmailField
         autoComplete="email"
-        clientFieldConfig={{
+        field={{
           name: 'email',
           label: t('general:email'),
           path: 'email',
@@ -32,7 +32,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'username') {
     return (
       <TextField
-        clientFieldConfig={{
+        field={{
           name: 'username',
           label: t('authentication:username'),
           path: 'username',
@@ -46,7 +46,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'emailOrUsername') {
     return (
       <TextField
-        clientFieldConfig={{
+        field={{
           name: 'username',
           label: t('authentication:emailOrUsername'),
           path: 'username',

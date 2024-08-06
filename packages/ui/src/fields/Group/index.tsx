@@ -29,7 +29,7 @@ const baseClass = 'group-field'
 
 export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       admin: {
         className,
         components: { Description, Label },

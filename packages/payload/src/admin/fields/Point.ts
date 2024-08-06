@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type PointFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'point'>
+  readonly field: GenericClientFieldConfig<'point'>
   readonly validate?: PointFieldValidation
 } & FormFieldBase
 

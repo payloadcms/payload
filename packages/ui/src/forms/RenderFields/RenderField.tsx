@@ -13,7 +13,7 @@ type Props = {
   readonly custom?: Record<any, string>
   readonly disabled: boolean
   readonly fieldComponentProps?: {
-    clientFieldConfig: ClientFieldConfig
+    field: ClientFieldConfig
     forceRender?: boolean
   }
   readonly indexPath?: string

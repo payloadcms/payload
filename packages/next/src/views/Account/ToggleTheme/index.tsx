@@ -16,7 +16,7 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <RadioGroupField
-      clientFieldConfig={{
+      field={{
         name: 'theme',
         label: t('general:adminTheme'),
         options: [

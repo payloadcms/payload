@@ -19,7 +19,7 @@ export { TextAreaInputProps, TextareaInput }
 
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       admin: {
         className,

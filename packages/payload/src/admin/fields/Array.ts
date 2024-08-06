@@ -10,7 +10,7 @@ import type {
 
 export type ArrayFieldProps = {
   readonly CustomRowLabel?: MappedComponent
-  readonly clientFieldConfig: GenericClientFieldConfig<'array'>
+  readonly field: GenericClientFieldConfig<'array'>
   readonly forceRender?: boolean
   readonly validate?: ArrayFieldValidation
 } & FormFieldBase

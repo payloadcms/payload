@@ -23,7 +23,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       _path: pathFromProps,
       admin: {
         className,

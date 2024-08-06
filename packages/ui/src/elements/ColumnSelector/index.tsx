@@ -21,7 +21,7 @@ export type Props = {
 
 const filterColumnFields = (fields: Column[]): Column[] => {
   return fields.filter((field) => {
-    return !field.cellProps?.clientFieldConfig?.admin?.disableListColumn
+    return !field.cellProps?.field?.admin?.disableListColumn
   })
 }
 
@@ -65,7 +65,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.cellProps?.clientFieldConfig?.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col.cellProps?.field?.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

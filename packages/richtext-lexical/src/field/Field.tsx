@@ -23,7 +23,7 @@ const baseClass = 'rich-text-lexical'
 
 const RichTextComponent: React.FC<
   {
-    clientFieldConfig: GenericClientFieldConfig<'richText'>
+    field: GenericClientFieldConfig<'richText'>
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
@@ -31,7 +31,7 @@ const RichTextComponent: React.FC<
   } & FormFieldBase
 > = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

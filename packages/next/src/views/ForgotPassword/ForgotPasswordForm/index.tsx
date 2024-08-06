@@ -100,7 +100,7 @@ export const ForgotPasswordForm: React.FC = () => {
       ) : (
         <EmailField
           autoComplete="email"
-          clientFieldConfig={{
+          field={{
             name: 'email',
             label: t('general:email'),
             required: true,

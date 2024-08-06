@@ -12,7 +12,7 @@ export const LocaleSelector: React.FC<{
 
   return (
     <SelectField
-      clientFieldConfig={{
+      field={{
         name: 'locale',
         _path: 'locale',
         label: t('general:locale'),

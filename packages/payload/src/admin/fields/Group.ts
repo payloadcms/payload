@@ -3,7 +3,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type GroupFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'group'>
+  readonly field: GenericClientFieldConfig<'group'>
   readonly forceRender?: boolean
 } & FormFieldBase
 

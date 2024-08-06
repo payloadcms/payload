@@ -20,7 +20,7 @@ import { FieldLabel } from '../FieldLabel/index.js'
 
 export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

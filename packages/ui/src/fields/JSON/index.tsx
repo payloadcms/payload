@@ -19,7 +19,7 @@ import { FieldError } from '../FieldError/index.js'
 
 const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {

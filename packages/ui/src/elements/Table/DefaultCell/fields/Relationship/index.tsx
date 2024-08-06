@@ -21,7 +21,7 @@ export interface RelationshipCellProps extends DefaultCellComponentProps<any> {}
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
-  clientFieldConfig: { label, relationTo },
+  field: { label, relationTo },
 }) => {
   const { config } = useConfig()
   const { collections, routes } = config

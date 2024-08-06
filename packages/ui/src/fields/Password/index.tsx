@@ -16,7 +16,7 @@ import { PasswordInput } from './input.js'
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -27,17 +27,17 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
           Label,
           afterInput,
           beforeInput,
-        } = {} as PasswordFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as PasswordFieldProps['field']['admin']['components'],
         description,
         placeholder,
         rtl,
         style,
         width,
-      } = {} as PasswordFieldProps['clientFieldConfig']['admin'],
+      } = {} as PasswordFieldProps['field']['admin'],
       disabled: disabledFromProps,
       label,
       required,
-    } = {} as PasswordFieldProps['clientFieldConfig'],
+    } = {} as PasswordFieldProps['field'],
     errorProps,
     inputRef,
     labelProps,

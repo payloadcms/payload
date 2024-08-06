@@ -5,7 +5,7 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 
 export type CheckboxFieldProps = {
   readonly checked?: boolean
-  readonly clientFieldConfig: GenericClientFieldConfig<'checkbox'>
+  readonly field: GenericClientFieldConfig<'checkbox'>
   readonly disableFormData?: boolean
   readonly id?: string
   readonly onChange?: (value: boolean) => void

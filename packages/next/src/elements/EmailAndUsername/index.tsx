@@ -22,7 +22,7 @@ export const EmailAndUsernameFields: React.FC<Props> = ({ loginWithUsername }) =
     <React.Fragment>
       {showEmailField && (
         <EmailField
-          clientFieldConfig={{
+          field={{
             name: 'email',
             autoComplete: 'email',
             label: t('general:email'),
@@ -36,7 +36,7 @@ export const EmailAndUsernameFields: React.FC<Props> = ({ loginWithUsername }) =
 
       {showUsernameField && (
         <TextField
-          clientFieldConfig={{
+          field={{
             name: 'username',
             label: t('authentication:username'),
             path: 'username',

@@ -8,10 +8,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface BlocksCellProps extends DefaultCellComponentProps<any> {}
 
-export const BlocksCell: React.FC<BlocksCellProps> = ({
-  cellData,
-  clientFieldConfig: { blocks, labels },
-}) => {
+export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, field: { blocks, labels } }) => {
   const { i18n } = useTranslation()
 
   const selectedBlocks = Array.isArray(cellData) ? cellData.map(({ blockType }) => blockType) : []

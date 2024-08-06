@@ -4,7 +4,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type DateFieldProps = {
-  readonly clientFieldConfig: GenericClientFieldConfig<'date'>
+  readonly field: GenericClientFieldConfig<'date'>
   readonly validate?: DateFieldValidation
 } & FormFieldBase
 

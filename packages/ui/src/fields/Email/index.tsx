@@ -18,7 +18,7 @@ import './index.scss'
 const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
   const {
     autoComplete,
-    clientFieldConfig: {
+    field: {
       name,
       _path: pathFromProps,
       admin: {
@@ -29,15 +29,15 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           Label,
           afterInput,
           beforeInput,
-        } = {} as EmailFieldProps['clientFieldConfig']['admin']['components'],
+        } = {} as EmailFieldProps['field']['admin']['components'],
         description,
         placeholder,
         style,
         width,
-      } = {} as EmailFieldProps['clientFieldConfig']['admin'],
+      } = {} as EmailFieldProps['field']['admin'],
       label,
       required,
-    } = {} as EmailFieldProps['clientFieldConfig'],
+    } = {} as EmailFieldProps['field'],
     descriptionProps,
     errorProps,
     labelProps,

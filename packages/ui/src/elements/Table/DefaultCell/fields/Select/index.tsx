@@ -9,10 +9,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface SelectCellProps extends DefaultCellComponentProps<any> {}
 
-export const SelectCell: React.FC<SelectCellProps> = ({
-  cellData,
-  clientFieldConfig: { options },
-}) => {
+export const SelectCell: React.FC<SelectCellProps> = ({ cellData, field: { options } }) => {
   const { i18n } = useTranslation()
 
   const findLabel = (items: string[]) =>

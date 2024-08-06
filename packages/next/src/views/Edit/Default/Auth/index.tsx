@@ -144,7 +144,7 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                clientFieldConfig={{
+                field={{
                   name: 'password',
                   disabled,
                   label: t('authentication:newPassword'),
@@ -193,7 +193,7 @@ export const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <CheckboxField
-            clientFieldConfig={{
+            field={{
               name: 'enableAPIKey',
               disabled,
               label: t('authentication:enableAPIKey'),
@@ -205,7 +205,7 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {verify && (
         <CheckboxField
-          clientFieldConfig={{
+          field={{
             name: '_verified',
             disabled,
             label: t('authentication:verified'),

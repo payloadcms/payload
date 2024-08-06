@@ -3,7 +3,7 @@ import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type HiddenFieldProps = {
-  readonly clientFieldConfig?: ClientFieldConfig
+  readonly field?: ClientFieldConfig
   readonly disableModifyingForm?: false
   readonly forceUsePathFromProps?: boolean
   readonly value?: unknown
