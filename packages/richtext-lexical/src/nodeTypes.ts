@@ -9,6 +9,12 @@ import type {
 
 import type { SerializedQuoteNode } from './features/blockquote/feature.server.js'
 import type { SerializedBlockNode } from './features/blocks/nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './features/blocks/nodes/InlineBlocksNode.js'
+import type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from './features/experimental_table/feature.server.js'
 import type { SerializedHeadingNode } from './features/heading/feature.server.js'
 import type { SerializedHorizontalRuleNode } from './features/horizontalRule/nodes/HorizontalRuleNode.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from './features/link/nodes/types.js'
@@ -21,11 +27,15 @@ export type {
   SerializedBlockNode,
   SerializedHeadingNode,
   SerializedHorizontalRuleNode,
+  SerializedInlineBlockNode,
   SerializedLinkNode,
   SerializedListItemNode,
   SerializedListNode,
   SerializedQuoteNode,
   SerializedRelationshipNode,
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
   SerializedUploadNode,
 }
 

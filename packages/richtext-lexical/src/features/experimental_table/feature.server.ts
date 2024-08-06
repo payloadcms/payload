@@ -1,3 +1,9 @@
+import type {
+  SerializedTableCellNode as _SerializedTableCellNode,
+  SerializedTableNode as _SerializedTableNode,
+  SerializedTableRowNode as _SerializedTableRowNode,
+} from '@lexical/table'
+import type { Spread } from 'lexical'
 import type { Config, Field } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
@@ -23,6 +29,27 @@ const fields: Field[] = [
     required: true,
   },
 ]
+
+export type SerializedTableCellNode = Spread<
+  {
+    type: 'tablecell'
+  },
+  _SerializedTableCellNode
+>
+
+export type SerializedTableNode = Spread<
+  {
+    type: 'table'
+  },
+  _SerializedTableNode
+>
+
+export type SerializedTableRowNode = Spread<
+  {
+    type: 'tablerow'
+  },
+  _SerializedTableRowNode
+>
 export const EXPERIMENTAL_TableFeature = createServerFeature({
   feature: async ({ config, isRoot }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
@@ -46,15 +73,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
                 return `<table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table>`
               },
@@ -66,15 +104,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
 
                 const tagName = node.headerState > 0 ? 'th' : 'td'
@@ -95,15 +144,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
                 return `<tr class="lexical-table-row">${childrenText}</tr>`
               },
