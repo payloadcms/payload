@@ -219,7 +219,7 @@ export const Document: React.FC<AdminViewProps> = async ({
        * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error when loading up some version views - for example a versions
        * view in the draft-posts collection of the versions test suite. RenderCustomComponent is what renders the versions view.
        *
-       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this ans remove deepCopyObjectSimple if that's the case)
+       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
        */}
       <HydrateClientUser permissions={deepCopyObjectSimple(permissions)} user={user} />
       <EditDepthProvider
