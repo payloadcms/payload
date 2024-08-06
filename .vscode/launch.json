@@ -57,6 +57,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js fields-relationship",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Fields-Relationship",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "node --no-deprecation test/dev.js login-with-username",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Login-With-Username",
