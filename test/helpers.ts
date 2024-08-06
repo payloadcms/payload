@@ -309,7 +309,8 @@ export function initPageConsoleErrorCatch(page: Page) {
       // https://github.com/JedWatson/react-select/issues/3590
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
-      !msg.text().includes('Failed to fetch RSC payload for')
+      !msg.text().includes('Failed to fetch RSC payload for') &&
+      !msg.text().includes('Error: NEXT_NOT_FOUND')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
