@@ -46,15 +46,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
                 return `<table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table>`
               },
@@ -66,15 +77,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
 
                 const tagName = node.headerState > 0 ? 'th' : 'td'
@@ -95,15 +117,26 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
                 return `<tr class="lexical-table-row">${childrenText}</tr>`
               },

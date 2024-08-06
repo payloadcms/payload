@@ -116,15 +116,26 @@ export const LinkFeature = createServerFeature<
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
 
                 const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
@@ -150,15 +161,26 @@ export const LinkFeature = createServerFeature<
         createNode({
           converters: {
             html: {
-              converter: async ({ converters, node, parent, req }) => {
+              converter: async ({
+                converters,
+                draft,
+                node,
+                overrideAccess,
+                parent,
+                req,
+                showHiddenFields,
+              }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  draft,
                   lexicalNodes: node.children,
+                  overrideAccess,
                   parent: {
                     ...node,
                     parent,
                   },
                   req,
+                  showHiddenFields,
                 })
 
                 const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
