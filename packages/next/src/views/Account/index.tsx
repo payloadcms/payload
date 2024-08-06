@@ -1,6 +1,6 @@
 import type { AdminViewProps, ServerSideEditViewProps } from 'payload'
 
-import { DocumentInfoProvider, HydrateClientUser } from '@payloadcms/ui'
+import { DocumentInfoProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -82,7 +82,7 @@ export const Account: React.FC<AdminViewProps> = async ({
           i18n={i18n}
           permissions={permissions}
         />
-        <HydrateClientUser permissions={permissions} user={user} />
+        <HydrateAuthProvider permissions={permissions} />
         <RenderCustomComponent
           CustomComponent={
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined

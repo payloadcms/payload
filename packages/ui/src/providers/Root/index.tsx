@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions } from 'payload'
+import type { ClientConfig, LanguageOptions, Permissions, User } from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
@@ -38,6 +38,7 @@ type Props = {
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   languageCode: string
   languageOptions: LanguageOptions
+  permissions: Permissions
   switchLanguageServerAction?: (lang: string) => Promise<void>
   theme: Theme
   translations: I18nClient['translations']
@@ -51,6 +52,7 @@ export const RootProvider: React.FC<Props> = ({
   fallbackLang,
   languageCode,
   languageOptions,
+  permissions,
   switchLanguageServerAction,
   theme,
   translations,
@@ -81,7 +83,7 @@ export const RootProvider: React.FC<Props> = ({
                     <ScrollInfoProvider>
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <AuthProvider>
+                          <AuthProvider permissions={permissions}>
                             <PreferencesProvider>
                               <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
                                 <ParamsProvider>

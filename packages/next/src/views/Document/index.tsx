@@ -1,7 +1,11 @@
 import type { AdminViewComponent, AdminViewProps, EditViewComponent } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateClientUser } from '@payloadcms/ui'
-import { RenderCustomComponent, formatAdminURL , isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  RenderCustomComponent,
+  formatAdminURL,
+  isEditing as getIsEditing,
+} from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -208,7 +212,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           permissions={permissions}
         />
       )}
-      <HydrateClientUser permissions={permissions} user={user} />
+      <HydrateAuthProvider permissions={permissions} />
       <EditDepthProvider
         depth={1}
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}

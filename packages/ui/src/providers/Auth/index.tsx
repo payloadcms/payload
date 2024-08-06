@@ -33,7 +33,11 @@ const Context = createContext({} as AuthContext)
 
 const maxTimeoutTime = 2147483647
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+type Props = {
+  children: React.ReactNode
+  permissions?: Permissions
+}
+export function AuthProvider({ children, permissions: initialPermissions }: Props) {
   const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
@@ -51,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     serverURL,
   } = config
 
-  const [permissions, setPermissions] = useState<Permissions>()
+  const [permissions, setPermissions] = useState<Permissions>(initialPermissions)
 
   const { i18n } = useTranslation()
   const { closeAllModals, openModal } = useModal()
