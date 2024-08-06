@@ -502,16 +502,16 @@ export type Collection = {
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  joins: {
+  joins?: {
     [collectionSlug: string]: {
       /**
        * The field configuration defining the join
        */
       field: JoinField
       /**
-       * The nested field path in dot notation
+       * The schemaPath of the join field in dot notation
        */
-      path: string
+      schemaPath: string
     }[]
   }
 }

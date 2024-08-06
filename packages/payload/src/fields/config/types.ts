@@ -837,7 +837,7 @@ export type JoinField = {
   /**
    * A string for the field in the collection being joined to.
    */
-  path: string
+  on: string
   type: 'join'
 } & FieldBase
 

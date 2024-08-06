@@ -50,7 +50,7 @@ export default buildConfigWithDefaults({
           name: 'posts',
           type: 'join',
           collection: 'posts',
-          path: 'category',
+          on: 'category',
         },
         {
           name: 'group',
@@ -60,7 +60,7 @@ export default buildConfigWithDefaults({
               name: 'posts',
               type: 'join',
               collection: 'posts',
-              path: 'group.category',
+              on: 'group.category',
             },
           ],
         },

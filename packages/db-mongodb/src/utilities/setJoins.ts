@@ -1,25 +1,42 @@
 import type { MongooseQueryOptions } from 'mongoose'
-import type { Document, Payload } from 'payload'
+import type { Document, Payload, PayloadRequest } from 'payload'
 
 type Args = {
   collection: string
   doc: Document
   options: MongooseQueryOptions
   payload: Payload
+  req: PayloadRequest
 }
 
-export const setJoins = async ({ collection, doc, options, payload }: Args): Promise<Document> => {
+// TODO: pass in queryParam called `joins` to specify the pagination of each join
+// joins[schemaPath][page]=2&joins[schemaPath][limit]=100
+
+/**
+ * // fetch docs and add to the keys by path
+ * @param collection
+ * @param doc
+ * @param options
+ * @param payload
+ * @param req
+ */
+export const setJoins = async ({
+  collection,
+  doc,
+  options,
+  payload,
+  req,
+}: Args): Promise<Document> => {
   const joins = payload.collections[collection].joins
 
   await Promise.all(
     Object.keys(joins).map(async (slug) => {
-      // fetch docs and add to the keys by path
       const joinModel = payload.db.collections[slug]
 
       for (const join of joins[slug]) {
         const joinData = await joinModel
           .find(
-            { [join.field.path]: { $eq: doc._id.toString() } },
+            { [join.field.on]: { $eq: doc._id.toString() } },
             {
               _id: 1,
             },
@@ -27,8 +44,8 @@ export const setJoins = async ({ collection, doc, options, payload }: Args): Pro
           )
           .limit(10)
 
-        // iterate path and assign to the document
-        const path = join.path.split('.')
+        // iterate schemaPath and assign to the document
+        const path = join.schemaPath.split('.')
         let current = doc
         for (let i = 0; i <= path.length - 1; i++) {
           if (i === path.length - 1) {

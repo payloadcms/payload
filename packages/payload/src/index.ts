@@ -45,7 +45,7 @@ import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { ClientFieldConfig } from './fields/config/client.js'
-import type { Field} from './fields/config/types.js';
+import type { Field } from './fields/config/types.js'
 import type { DataFromGlobalSlug, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
@@ -500,6 +500,7 @@ export class BasePayload {
       config: this.config.globals,
     }
 
+    // TODO: move to sanitize to reduce looping of collections + fields
     this.config.collections.forEach((collection) => {
       const joins = {}
       let customIDType
@@ -512,12 +513,15 @@ export class BasePayload {
           return
         }
         if (fieldHasSubFields(field)) {
-          const parentPath = parentRef.path || ''
-          ref.path = `${parentPath}${parentPath ? '.' : ''}${field.name}`
+          const parentPath = parentRef.schemaPath || ''
+          ref.schemaPath = `${parentPath}${parentPath ? '.' : ''}${field.name}`
           return
         }
         if (field.type === 'join') {
-          const join = { field, path: `${ref.path || ''}${ref.path ? '.' : ''}${field.name}` }
+          const join = {
+            field,
+            schemaPath: `${ref.schemaPath || ''}${ref.schemaPath ? '.' : ''}${field.name}`,
+          }
           if (!joins[field.collection]) {
             joins[field.collection] = [join]
           } else {

@@ -29,7 +29,7 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result = await setJoins({ collection, doc, options, payload: this.payload })
+  let result = await setJoins({ collection, doc, options, payload: this.payload, req })
 
   result = JSON.parse(JSON.stringify(result))
 
