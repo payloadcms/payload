@@ -57,6 +57,12 @@ type FieldSchemaGenerator = (
   buildSchemaOptions: BuildSchemaOptions,
 ) => void
 
+const idTypes = {
+  string: String,
+  number: Number,
+  objectid: Schema.Types.ObjectId,
+}
+
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions
   const schema: SchemaTypeOptions<unknown> = {
@@ -429,17 +435,17 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
               _id: false,
-              type: Schema.Types.Mixed,
+              type: idTypes[field.idType] || Schema.Types.Mixed,
               relationTo: { type: String, enum: field.relationTo },
               value: {
-                type: Schema.Types.Mixed,
+                type: idTypes[field.idType] || Schema.Types.Mixed,
                 refPath: `${field.name}.${locale}.relationTo`,
               },
             }
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
-              type: Schema.Types.Mixed,
+              type: idTypes[field.idType] || Schema.Types.Mixed,
               ref: field.relationTo,
             }
           }
@@ -455,10 +461,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
         _id: false,
-        type: Schema.Types.Mixed,
+        type: idTypes[field.idType] || Schema.Types.Mixed,
         relationTo: { type: String, enum: field.relationTo },
         value: {
-          type: Schema.Types.Mixed,
+          type: idTypes[field.idType] || Schema.Types.Mixed,
           refPath: `${field.name}.relationTo`,
         },
       }
@@ -472,7 +478,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
-        type: Schema.Types.Mixed,
+        type: idTypes[field.idType] || Schema.Types.Mixed,
         ref: field.relationTo,
       }
 
