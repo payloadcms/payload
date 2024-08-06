@@ -6,6 +6,10 @@ export type GenericClientFieldConfig<T extends FieldTypes = FieldTypes> = {
   readonly type: T
 } & ClientFieldConfig
 
+export type ClientField = {
+  [K in Field['type']]: Omit<Extract<Field, { type: K }>, ServerOnlyFieldProperties>
+}[Field['type']]
+
 export type ClientFieldConfig = {
   _fieldIsPresentational: boolean
   _isFieldAffectingData: boolean
@@ -20,13 +24,14 @@ export type ClientFieldConfig = {
       Field?: MappedComponent
       Filter?: MappedComponent
       Label?: MappedComponent
+      RowLabel?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
     }
     description?: StaticDescription
     label?: StaticLabel
-  } & Omit<Field['admin'], 'components' | ServerOnlyFieldAdminProperties>
-} & Omit<Field, 'admin' | ServerOnlyFieldProperties> // TODO: the <Omit> breaks the field type inference
+  } & Omit<ClientField['admin'], 'components' | ServerOnlyFieldAdminProperties>
+} & ClientField
 
 export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function

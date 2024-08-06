@@ -37,10 +37,13 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      CustomRowLabel,
-      admin: { className, description },
+      admin: {
+        className,
+        components: { RowLabel },
+        description,
+        isSortable = true,
+      },
       fields,
-      isSortable = true,
       label,
       localized,
       maxRows,
@@ -82,9 +85,9 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps): ArrayFieldType['labels'] => {
+  const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
     if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p && p?.label) return { plural: undefined, singular: p?.label }
+    if ('label' in p.field && p.field.label) return { plural: undefined, singular: p.field.label }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -275,7 +278,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
-                    CustomRowLabel={CustomRowLabel}
+                    RowLabel={RowLabel}
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
