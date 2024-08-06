@@ -86,9 +86,9 @@ export const createClientCollectionConfig = ({
     }
   })
 
-  if (collection?.admin?.components) {
-    sanitized.admin.components = {} as ClientCollectionConfig['admin']['components']
+  sanitized.admin.components = {} as ClientCollectionConfig['admin']['components']
 
+  if (collection?.admin?.components) {
     if (collection.admin.components?.edit) {
       sanitized.admin.components.edit = {} as ClientCollectionConfig['admin']['components']['edit']
 
