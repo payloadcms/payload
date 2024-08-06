@@ -7,8 +7,9 @@ import { email, username } from 'payload/shared'
 import React from 'react'
 
 type Props = {
-  loginWithUsername?: LoginWithUsernameOptions | false
+  readonly loginWithUsername?: LoginWithUsernameOptions | false
 }
+
 export const EmailAndUsernameFields: React.FC<Props> = ({ loginWithUsername }) => {
   const { t } = useTranslation()
 
@@ -27,8 +28,7 @@ export const EmailAndUsernameFields: React.FC<Props> = ({ loginWithUsername }) =
             autoComplete: 'email',
             label: t('general:email'),
             path: 'email',
-            requireEmail,
-            required,
+            required: requireEmail,
           }}
           validate={email}
         />

@@ -23,23 +23,16 @@ import { FieldError } from '../FieldError/index.js'
 
 const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: { Description, Error, Label, afterInput, beforeInput },
-        date: datePickerProps,
-        description,
-        placeholder,
-        style,
-        width,
-      },
+      admin: { className, date: datePickerProps, description, placeholder, style, width },
       label,
       required,
     },
-    descriptionProps,
-    errorProps,
     labelProps,
     readOnly: readOnlyFromProps,
     validate,
@@ -81,10 +74,19 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
@@ -94,10 +96,10 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
           readOnly={disabled}
           value={value}
         />
-        <RenderComponent mappedComponent={afterInput} />
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
       <FieldDescription
-        Description={Description}
+        Description={field?.admin?.components?.Description}
         description={description}
         {...(descriptionProps || {})}
       />

@@ -9,7 +9,7 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
-  readonly CustomLabel?: MappedComponent
+  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly checked?: boolean
@@ -30,7 +30,7 @@ export const inputBaseClass = 'checkbox-input'
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
-  CustomLabel,
+  Label,
   afterInput,
   beforeInput,
   checked,
@@ -78,7 +78,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldLabel
-        Label={CustomLabel}
+        Label={Label}
         htmlFor={id}
         label={label}
         required={required}

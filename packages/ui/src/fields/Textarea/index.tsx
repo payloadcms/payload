@@ -19,17 +19,10 @@ export { TextAreaInputProps, TextareaInput }
 
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
+    field,
     field: {
       name,
-      admin: {
-        className,
-        components: { Description, Error, Label, afterInput, beforeInput },
-        description,
-        placeholder,
-        rtl,
-        style,
-        width,
-      },
+      admin: { className, description, placeholder, rtl, style, width },
       label,
       localized,
       maxLength,
@@ -75,11 +68,11 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   return (
     <TextareaInput
-      Description={Description}
-      Error={Error}
-      Label={Label}
-      afterInput={afterInput}
-      beforeInput={beforeInput}
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
       description={description}
       label={label}

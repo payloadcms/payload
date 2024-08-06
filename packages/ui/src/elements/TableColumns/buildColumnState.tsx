@@ -6,6 +6,7 @@ import type {
   StaticLabel,
 } from 'payload'
 
+import { DefaultCell } from '@payloadcms/ui'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -132,7 +133,11 @@ export const buildColumnState = (args: Args): Column[] => {
           link: isFirstActiveColumn,
         },
         components: {
-          Cell: field.admin.components.Cell,
+          Cell: field.admin?.components?.Cell || {
+            type: 'client',
+            Component: DefaultCell,
+            RenderedComponent: null,
+          },
           Heading,
         },
       }

@@ -25,12 +25,15 @@ export const getComponent = <
       serverProps: undefined,
     }
   }
+
   const { exportName, path } = parsePayloadComponent(payloadComponent)
+
   const key = path + '#' + exportName
 
   const Component = importMap[key]
+
   if (!Component) {
-    console.error(`Component not found in importMap: ${key}`)
+    console.error(`Component not found in importMap: ${key}`) // eslint-disable-line no-console
   }
 
   return {

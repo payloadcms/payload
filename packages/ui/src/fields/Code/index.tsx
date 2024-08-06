@@ -23,23 +23,16 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: { Description, Error, Label, afterInput, beforeInput },
-        description,
-        editorOptions = {},
-        language = 'javascript',
-        style,
-        width,
-      },
+      admin: { className, description, editorOptions = {}, language = 'javascript', style, width },
       label,
       required,
     },
-    descriptionProps,
-    errorProps,
     labelProps,
     readOnly: readOnlyFromProps,
     validate,
@@ -79,10 +72,19 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={field?.admin?.components?.Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={disabled ? () => null : (val) => setValue(val)}
@@ -90,10 +92,10 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
           readOnly={disabled}
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={afterInput} />
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
       <FieldDescription
-        Description={Description}
+        Description={field?.admin?.components?.Description}
         description={description}
         {...(descriptionProps || {})}
       />

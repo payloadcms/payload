@@ -10,11 +10,12 @@ export function parsePayloadComponent(payloadComponent: PayloadComponent): {
   let path = ''
   let exportName = 'default'
 
-  if (pathAndMaybeExport.includes('#')) {
+  if (pathAndMaybeExport?.includes('#')) {
     ;[path, exportName] = pathAndMaybeExport.split('#')
   } else {
     path = pathAndMaybeExport
   }
+
   if (typeof payloadComponent === 'object' && payloadComponent.exportName) {
     exportName = payloadComponent.exportName
   }

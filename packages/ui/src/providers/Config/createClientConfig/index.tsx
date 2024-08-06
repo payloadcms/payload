@@ -12,8 +12,6 @@ import {
   serverOnlyConfigProperties,
 } from 'payload'
 
-import { PayloadIcon } from '../../../graphics/Icon/index.js'
-import { PayloadLogo } from '../../../graphics/Logo/index.js'
 import { createClientCollectionConfig, createClientCollectionConfigs } from './collections.js'
 import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'
@@ -42,7 +40,6 @@ export const createClientConfig = async ({
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
-
   // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
   const clientConfig: ClientConfig = { ...(config as any as ClientConfig) } // invert the type
@@ -72,45 +69,44 @@ export const createClientConfig = async ({
   if ('admin' in clientConfig) {
     clientConfig.admin = { ...clientConfig.admin }
 
-    clientConfig.admin.components = {
-      Avatar: createMappedComponent(
-        config.admin?.avatar &&
-          typeof config.admin?.avatar === 'object' &&
-          config.admin?.avatar &&
-          'Component' in config.admin.avatar &&
-          config.admin?.avatar.Component,
-      ),
-      ...(config.admin?.components?.logout?.Button
-        ? {
-            LogoutButton: createMappedComponent(config.admin?.components?.logout?.Button),
-          }
-        : {}),
-      ...(config.admin?.components?.actions && config.admin?.components?.actions.length > 0
-        ? {
-            actions: config.admin?.components?.actions?.map((Component) =>
-              createMappedComponent(Component),
-            ),
-          }
-        : {}),
-      graphics: {
-        Icon: createMappedComponent(
-          config.admin?.components?.graphics?.Icon,
-          undefined,
-          PayloadIcon,
-        ),
-        Logo: createMappedComponent(
-          config.admin?.components?.graphics?.Logo,
-          undefined,
-          PayloadLogo,
-        ),
-      },
+    if (
+      config.admin?.avatar &&
+      typeof config.admin?.avatar === 'object' &&
+      config.admin?.avatar &&
+      'Component' in config.admin.avatar
+    ) {
+      clientConfig.admin.components.Avatar = createMappedComponent(config.admin.avatar.Component)
     }
 
-    if ('livePreview' in clientConfig.admin) {
-      clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
-      // @ts-expect-error
-      delete clientConfig.admin.livePreview.url
+    if (config.admin?.components?.logout?.Button) {
+      clientConfig.admin.components.LogoutButton = createMappedComponent(
+        config.admin.components.logout.Button,
+      )
     }
+
+    if (config.admin?.components?.actions && config.admin?.components?.actions.length > 0) {
+      clientConfig.admin.components.actions = config.admin.components.actions.map((Component) =>
+        createMappedComponent(Component),
+      )
+    }
+
+    if (config.admin?.components?.graphics?.Icon) {
+      clientConfig.admin.components.graphics.Icon = createMappedComponent(
+        config.admin.components.graphics.Icon,
+      )
+    }
+
+    if (config.admin?.components?.graphics?.Logo) {
+      clientConfig.admin.components.graphics.Logo = createMappedComponent(
+        config.admin.components.graphics.Logo,
+      )
+    }
+  }
+
+  if ('livePreview' in clientConfig.admin) {
+    clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
+    // @ts-expect-error
+    delete clientConfig.admin.livePreview.url
   }
 
   clientConfig.collections = createClientCollectionConfigs({

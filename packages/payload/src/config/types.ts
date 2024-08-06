@@ -13,7 +13,7 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
+import type { DocumentTabConfig, MappedComponent, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {

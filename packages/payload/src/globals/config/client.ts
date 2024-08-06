@@ -16,10 +16,12 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
 export type ClientGlobalConfig = {
   admin: {
     components: {
-      PreviewButton: MappedComponent
-      PublishButton: MappedComponent
-      SaveButton: MappedComponent
-      SaveDraftButton: MappedComponent
+      elements: {
+        PreviewButton: MappedComponent
+        PublishButton: MappedComponent
+        SaveButton: MappedComponent
+        SaveDraftButton: MappedComponent
+      }
       views: {
         Edit: {
           API: MappedView

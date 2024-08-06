@@ -1,6 +1,5 @@
 import type {
   ClientFieldConfig,
-  Field,
   MappedComponent,
   Operator,
   SanitizedCollectionConfig,
@@ -21,7 +20,7 @@ export type FieldCondition = {
     label: string
     value: Operator
   }[]
-  props: Field
+  props: ClientFieldConfig
   value: string
 }
 

@@ -25,28 +25,17 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     checked: checkedFromProps,
+    descriptionProps,
+    errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: {
-          Description,
-          Error,
-          Label,
-          afterInput,
-          beforeInput,
-        } = {} as CheckboxFieldProps['field']['admin']['components'],
-        description,
-        style,
-        width,
-      } = {} as CheckboxFieldProps['field']['admin'],
+      admin: { className, description, style, width } = {} as CheckboxFieldProps['field']['admin'],
       disableFormData,
       label,
       required,
     } = {} as CheckboxFieldProps['field'],
-    descriptionProps,
-    errorProps,
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
@@ -105,11 +94,16 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <CheckboxInput
-        CustomLabel={Label}
-        afterInput={afterInput}
-        beforeInput={beforeInput}
+        Label={field?.admin?.components?.Label}
+        afterInput={field?.admin?.components?.afterInput}
+        beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
@@ -122,7 +116,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         required={required}
       />
       <FieldDescription
-        Description={Description}
+        Description={field?.admin?.components?.Description}
         description={description}
         {...(descriptionProps || {})}
       />

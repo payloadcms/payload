@@ -24,13 +24,11 @@ export { TabsProvider }
 
 const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
+    field,
     field: {
       name,
       _path: pathFromProps,
-      admin: {
-        className,
-        components: { Description },
-      },
+      admin: { className },
       tabs = [],
     },
     forceRender = false,
@@ -156,7 +154,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={Description} />
+              <FieldDescription Description={field?.admin?.components?.Description} />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

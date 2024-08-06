@@ -58,15 +58,7 @@ export const RenderFields: React.FC<Props> = (props) => {
       >
         {hasRendered &&
           fields?.map((f, fieldIndex) => {
-            const {
-              type,
-              admin: {
-                components: { Field },
-              },
-              custom,
-              disabled,
-              readOnly,
-            } = f
+            const { type, custom, disabled, readOnly } = f
 
             const forceRenderChildren =
               (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
@@ -75,7 +67,6 @@ export const RenderFields: React.FC<Props> = (props) => {
 
             return (
               <RenderField
-                Field={Field}
                 custom={custom}
                 disabled={disabled}
                 fieldComponentProps={{ field: f, forceRender: forceRenderChildren }}

@@ -2,6 +2,7 @@
 
 import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
 
+import { HiddenField, useFieldComponents } from '@payloadcms/ui'
 import React from 'react'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -9,7 +10,6 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
-  readonly Field: ClientFieldConfig['admin']['components']['Field']
   readonly custom?: Record<any, string>
   readonly disabled: boolean
   readonly fieldComponentProps?: {
@@ -32,7 +32,6 @@ type Props = {
 export const RenderField: React.FC<Props> = ({
   name,
   type,
-  Field,
   custom,
   disabled,
   fieldComponentProps,
@@ -43,8 +42,13 @@ export const RenderField: React.FC<Props> = ({
   schemaPath: schemaPathFromProps,
   siblingPermissions,
 }) => {
+  const fieldComponents = useFieldComponents()
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
+
+  if (!fieldComponents) {
+    return null
+  }
 
   const path = [pathFromProps, name].filter(Boolean).join('.')
   const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
@@ -66,6 +70,15 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
+  // hide from admin if field is `admin.hidden: true`
+  if (
+    'admin' in fieldComponentProps.field &&
+    'hidden' in fieldComponentProps.field.admin &&
+    fieldComponentProps.field.admin.hidden
+  ) {
+    return <HiddenField {...fieldComponentProps} />
+  }
+
   return (
     <FieldPropsProvider
       custom={custom}
@@ -77,7 +90,11 @@ export const RenderField: React.FC<Props> = ({
       siblingPermissions={siblingPermissions}
       type={type}
     >
-      <RenderComponent clientProps={fieldComponentProps} mappedComponent={Field} />
+      <RenderComponent
+        Component={fieldComponents?.[type]}
+        clientProps={fieldComponentProps}
+        mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
+      />
     </FieldPropsProvider>
   )
 }

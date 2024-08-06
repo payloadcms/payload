@@ -2,7 +2,6 @@ import type { TFunction } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
-  EditViewComponent,
   EditViewProps,
   Field,
   Payload,
@@ -63,54 +62,72 @@ export const createClientGlobalConfig = ({
       }
     })
 
-    const components = global?.admin?.components
+    sanitized.admin.components = {} as ClientGlobalConfig['admin']['components']
 
-    const editViewFromConfig = components?.views?.Edit
+    if (global?.admin?.components) {
+      if (global.admin.components.elements) {
+        sanitized.admin.components.elements =
+          {} as ClientGlobalConfig['admin']['components']['elements']
 
-    sanitized.admin.components = {
-      ...(components?.elements?.PreviewButton
-        ? {
-            PreviewButton: createMappedComponent(components?.elements?.PreviewButton),
-          }
-        : {}),
-      ...(components?.elements?.PublishButton
-        ? {
-            PublishButton: createMappedComponent(components?.elements?.PublishButton),
-          }
-        : {}),
-      ...(components?.elements?.SaveButton
-        ? {
-            SaveButton: createMappedComponent(components?.elements?.SaveButton),
-          }
-        : {}),
-      ...(components?.elements?.SaveDraftButton
-        ? {
-            SaveDraftButton: createMappedComponent(components?.elements?.SaveDraftButton),
-          }
-        : {}),
-      views: {
-        Edit: {
-          Default: {
-            Component: createMappedComponent(
-              editViewFromConfig?.Default && 'Component' in editViewFromConfig.Default
-                ? (editViewFromConfig.Default.Component as EditViewComponent)
-                : null,
-              {
-                collectionSlug: global.slug,
-              },
-              DefaultEditView,
-            ),
-            ...(editViewFromConfig?.Default &&
-            'actions' in editViewFromConfig.Default &&
-            editViewFromConfig.Default.actions.length > 0
-              ? {
-                  actions: editViewFromConfig?.Default?.actions?.map((Component) =>
-                    createMappedComponent(Component),
-                  ),
-                }
-              : {}),
+        if (global.admin.components.elements?.PreviewButton) {
+          sanitized.admin.components.elements.PreviewButton = createMappedComponent(
+            global.admin.components.elements.PreviewButton,
+          )
+        }
+
+        if (global.admin.components.elements?.PublishButton) {
+          sanitized.admin.components.elements.PublishButton = createMappedComponent(
+            global.admin.components.elements.PublishButton,
+          )
+        }
+
+        if (global.admin.components.elements?.SaveButton) {
+          sanitized.admin.components.elements.SaveButton = createMappedComponent(
+            global.admin.components.elements.SaveButton,
+          )
+        }
+
+        if (global.admin.components.elements?.SaveDraftButton) {
+          sanitized.admin.components.elements.SaveDraftButton = createMappedComponent(
+            global.admin.components.elements.SaveDraftButton,
+          )
+        }
+      }
+    }
+
+    sanitized.admin.components.views = {
+      ...((global?.admin?.components?.views ||
+        {}) as ClientGlobalConfig['admin']['components']['views']),
+    }
+
+    const hasEditView =
+      'admin' in global &&
+      'components' in global.admin &&
+      'views' in global.admin.components &&
+      'Edit' in global.admin.components.views &&
+      'Default' in global.admin.components.views.Edit
+
+    // @ts-expect-error
+    sanitized.admin.components.views.Edit = {
+      Default: {
+        Component: createMappedComponent(
+          hasEditView &&
+            'Component' in global.admin.components.views.Edit.Default &&
+            global.admin.components.views.Edit.Default.Component,
+          {
+            globalSlug: global.slug,
           },
-        },
+          DefaultEditView,
+        ),
+        ...(hasEditView &&
+        'actions' in global.admin.components.views.Edit.Default &&
+        global.admin.components.views.Edit.Default.actions
+          ? {
+              actions: global.admin.components.views.Edit.Default.actions.map((Component) =>
+                createMappedComponent(Component),
+              ),
+            }
+          : {}),
       },
     }
 
