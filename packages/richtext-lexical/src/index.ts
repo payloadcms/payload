@@ -14,6 +14,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   deepCopyObject,
+  deepCopyObjectSimple,
   getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
@@ -124,13 +125,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         isRoot,
         unSanitizedEditorConfig: {
           features,
-          lexical: lexical ? lexical : defaultEditorConfig.lexical,
+          lexical: lexical ? lexical : deepCopyObjectSimple(defaultEditorConfig.lexical),
         },
       })
 
       finalSanitizedEditorConfig = {
         features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical: lexical ? lexical : defaultEditorConfig.lexical,
+        lexical: lexical ? lexical : deepCopyObjectSimple(defaultEditorConfig.lexical),
         resolvedFeatureMap,
       }
     }
@@ -463,8 +464,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
                 nodes:
-                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root
-                    ?.children ?? [],
+                  (siblingDocWithLocales[field.name] as SerializedEditorState)?.root?.children ??
+                  [],
               })
             }
 
