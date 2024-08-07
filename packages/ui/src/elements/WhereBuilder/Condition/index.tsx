@@ -118,7 +118,10 @@ export const Condition: React.FC<Props> = (props) => {
 
   let valueOptions
   if (booleanSelect) {
-    valueOptions = [t('general:true'), t('general:false')]
+    valueOptions = [
+      { label: t('general:true'), value: 'true' },
+      { label: t('general:false'), value: 'false' },
+    ]
   } else if (internalField?.props && 'options' in internalField.props) {
     valueOptions = internalField.props.options
   }
