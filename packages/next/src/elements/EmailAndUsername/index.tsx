@@ -79,21 +79,33 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
         {
           name: 'email',
           type: 'text',
-          CustomField: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
-          cellComponentProps: null,
-          fieldComponentProps: { type: 'email', readOnly },
-          fieldIsPresentational: false,
-          isFieldAffectingData: true,
+          _fieldIsPresentational: false,
+          _isFieldAffectingData: true,
+          admin: {
+            components: {
+              Field: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
+              },
+            },
+          },
           localized: false,
         },
         {
           name: 'username',
           type: 'text',
-          CustomField: <UsernameFieldComponent loginWithUsername={loginWithUsername} />,
-          cellComponentProps: null,
-          fieldComponentProps: { type: 'text', readOnly },
-          fieldIsPresentational: false,
-          isFieldAffectingData: true,
+          _fieldIsPresentational: false,
+          _isFieldAffectingData: true,
+          admin: {
+            components: {
+              Field: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <UsernameFieldComponent loginWithUsername={loginWithUsername} />,
+              },
+            },
+          },
           localized: false,
         },
       ]}
