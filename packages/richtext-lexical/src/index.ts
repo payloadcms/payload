@@ -13,6 +13,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   deepCopyObject,
+  deepCopyObjectSimple,
   getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
@@ -114,20 +115,21 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         features = deepCopyObject(defaultEditorFeatures)
       }
 
-      const lexical: LexicalEditorConfig = props.lexical
+      const lexical: LexicalEditorConfig =
+        props.lexical ?? deepCopyObjectSimple(defaultEditorConfig.lexical)
 
       resolvedFeatureMap = await loadFeatures({
         config,
         isRoot,
         unSanitizedEditorConfig: {
           features,
-          lexical: lexical ? lexical : defaultEditorConfig.lexical,
+          lexical,
         },
       })
 
       finalSanitizedEditorConfig = {
         features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical: lexical ? lexical : defaultEditorConfig.lexical,
+        lexical,
         resolvedFeatureMap,
       }
     }
