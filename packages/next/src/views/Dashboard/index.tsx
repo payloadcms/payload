@@ -1,7 +1,6 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui'
 import {
   EntityType,
   RenderComponent,
@@ -91,7 +90,6 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   return (
     <Fragment>
-      <HydrateClientUser permissions={permissions} user={user} />
       <RenderComponent
         clientProps={{
           Link,

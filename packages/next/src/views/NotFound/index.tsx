@@ -7,7 +7,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui'
+import { HydrateAuthProvider } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
@@ -66,21 +66,18 @@ export const NotFoundPage = async ({
   })
 
   return (
-    <Fragment>
-      <HydrateClientUser permissions={initPageResult.permissions} user={initPageResult.req.user} />
-      <DefaultTemplate
-        i18n={initPageResult.req.i18n}
-        locale={initPageResult.locale}
-        params={params}
-        payload={initPageResult.req.payload}
-        permissions={initPageResult.permissions}
-        searchParams={searchParams}
-        user={initPageResult.req.user}
-        visibleEntities={initPageResult.visibleEntities}
-      >
-        <NotFoundClient />
-      </DefaultTemplate>
-    </Fragment>
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={initPageResult.req.payload}
+      permissions={initPageResult.permissions}
+      searchParams={searchParams}
+      user={initPageResult.req.user}
+      visibleEntities={initPageResult.visibleEntities}
+    >
+      <NotFoundClient />
+    </DefaultTemplate>
   )
 }
 

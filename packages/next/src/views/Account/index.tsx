@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { DocumentInfoProvider, HydrateClientUser, RenderComponent } from '@payloadcms/ui'
+import { DocumentInfoProvider, HydrateAuthProvider, RenderComponent } from '@payloadcms/ui'
 import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -96,7 +96,7 @@ export const Account: React.FC<AdminViewProps> = async ({
           payload={payload}
           permissions={permissions}
         />
-        <HydrateClientUser permissions={permissions} user={user} />
+        <HydrateAuthProvider permissions={permissions} />
         <RenderComponent mappedComponent={mappedAccountComponent} />
       </DocumentInfoProvider>
     )

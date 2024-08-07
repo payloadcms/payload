@@ -1,5 +1,5 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig } from 'payload'
+import type { ImportMap, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -54,6 +54,20 @@ export const RootLayout = async ({
     language: languageCode,
   })
 
+  const req = await createLocalReq(
+    {
+      fallbackLocale: null,
+      req: {
+        headers,
+        host: headers.get('host'),
+        i18n,
+        url: `${payload.config.serverURL}`,
+      } as PayloadRequest,
+    },
+    payload,
+  )
+  const { permissions, user } = await payload.auth({ headers, req })
+
   const { clientConfig, render } = await createClientConfig({
     DefaultEditView,
     DefaultListView,
@@ -101,9 +115,11 @@ export const RootLayout = async ({
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          permissions={permissions}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}
+          user={user}
         >
           {render}
         </RootProvider>

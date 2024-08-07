@@ -62,13 +62,18 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         },
       })
       if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, collectionSlug, 'draft', 'collection')
-        latestPublishedVersion = await getLatestVersion(
+        latestDraftVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
           payload,
-          collectionSlug,
-          'published',
-          'collection',
-        )
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
@@ -90,8 +95,18 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       })
 
       if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, globalSlug, 'draft', 'global')
-        latestPublishedVersion = await getLatestVersion(payload, globalSlug, 'published', 'global')
+        latestDraftVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
