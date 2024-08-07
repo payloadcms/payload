@@ -104,7 +104,6 @@ export interface BaseDatabaseAdapter {
    * reference to the instance of payload
    */
   payload: Payload
-  prodMigrations?: Migration[]
 
   queryDrafts: QueryDrafts
   /**
