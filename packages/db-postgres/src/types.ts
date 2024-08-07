@@ -24,7 +24,7 @@ import type {
   pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
-import type { Payload, PayloadRequest } from 'payload'
+import type { Migration, Payload, PayloadRequest } from 'payload'
 import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {
@@ -33,6 +33,7 @@ export type Args = {
   logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
+  prodMigrations?: Migration[]
   push?: boolean
   relationshipsSuffix?: string
   /**

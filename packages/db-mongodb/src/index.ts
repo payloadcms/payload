@@ -1,7 +1,7 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj, Migration, Payload } from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -78,6 +78,7 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
+  prodMigrations?: Migration[]
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -121,6 +122,7 @@ export function mongooseAdapter({
   disableIndexHints = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
+  prodMigrations,
   transactionOptions = {},
   url,
 }: Args): DatabaseAdapterObj {
@@ -167,6 +169,7 @@ export function mongooseAdapter({
       migrateFresh,
       migrationDir,
       payload,
+      prodMigrations,
       queryDrafts,
       rollbackTransaction,
       updateGlobal,
