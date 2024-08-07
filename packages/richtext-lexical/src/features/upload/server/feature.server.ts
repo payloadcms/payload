@@ -97,7 +97,7 @@ export const UploadFeature = createServerFeature<
         createNode({
           converters: {
             html: {
-              converter: async ({ node, req }) => {
+              converter: async ({ draft, node, overrideAccess, req, showHiddenFields }) => {
                 // @ts-expect-error
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
@@ -113,11 +113,11 @@ export const UploadFeature = createServerFeature<
                       currentDepth: 0,
                       data: uploadDocument,
                       depth: 1,
-                      draft: false,
+                      draft,
                       key: 'value',
-                      overrideAccess: false,
+                      overrideAccess,
                       req,
-                      showHiddenFields: false,
+                      showHiddenFields,
                     })
                   } catch (ignored) {
                     // eslint-disable-next-line no-console
