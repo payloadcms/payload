@@ -44,7 +44,6 @@ export interface BaseDatabaseAdapter {
   deleteOne: DeleteOne
 
   deleteVersions: DeleteVersions
-
   /**
    * Terminate the connection with the database
    */
@@ -68,7 +67,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>
+  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
@@ -79,15 +78,16 @@ export interface BaseDatabaseAdapter {
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
-
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -148,7 +148,7 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
-}) => Promise<void>
+}) => Promise<void> | void
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -396,8 +396,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = {
-  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
-  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  down: (args: unknown) => Promise<void>
+  up: (args: unknown) => Promise<void>
 } & MigrationData
 
 export type MigrationData = {
