@@ -36,6 +36,7 @@ type Props = {
   config: ClientConfig
   dateFNSKey: Language['dateFNSKey']
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  isNavOpen?: boolean
   languageCode: string
   languageOptions: LanguageOptions
   permissions: Permissions
@@ -51,6 +52,7 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  isNavOpen,
   languageCode,
   languageOptions,
   permissions,
@@ -94,7 +96,9 @@ export const RootProvider: React.FC<Props> = ({
                                       <LoadingOverlayProvider>
                                         <DocumentEventsProvider>
                                           <ActionsProvider>
-                                            <NavProvider>{children}</NavProvider>
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              {children}
+                                            </NavProvider>
                                           </ActionsProvider>
                                         </DocumentEventsProvider>
                                       </LoadingOverlayProvider>
