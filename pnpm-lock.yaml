@@ -302,8 +302,8 @@ importers:
         specifier: 2.11.2
         version: 2.11.2
       drizzle-kit:
-        specifier: 0.23.2
-        version: 0.23.2
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-fb9a90fa48-20240614)(types-react@19.0.0-rc.0)
@@ -351,8 +351,8 @@ importers:
         specifier: 2.11.2
         version: 2.11.2
       drizzle-kit:
-        specifier: 0.23.2
-        version: 0.23.2
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-fb9a90fa48-20240614)(types-react@19.0.0-rc.0)
@@ -9063,8 +9063,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /drizzle-kit@0.23.2:
-    resolution: {integrity: sha512-NWkQ7GD2OTbQ7HzcjsaCOf3n0tlFPSEAF38fvDpwDj8jRbGWGFtN2cD8I8wp4lU+5Os/oyP2xycTKGLHdPipUw==}
+  /drizzle-kit@0.23.2-df9e596:
+    resolution: {integrity: sha512-MOvoeDE1c05XGevXLqhRVu/TNHwueibPZqMUH/kG1v6DOHD5pB2poRpjphr4sjae2QDS6h+PU5pCfzqEa6le6Q==}
     hasBin: true
     dependencies:
       '@drizzle-team/brocli': 0.8.2
