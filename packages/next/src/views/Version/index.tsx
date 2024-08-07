@@ -55,8 +55,18 @@ export const VersionView: EditViewComponent = async (props) => {
       })
 
       if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
-        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
+        latestDraftVersion = await getLatestVersion({
+          slug,
+          type: 'collection',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       return notFound()
@@ -80,8 +90,18 @@ export const VersionView: EditViewComponent = async (props) => {
       })
 
       if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
-        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
+        latestDraftVersion = await getLatestVersion({
+          slug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       return notFound()
