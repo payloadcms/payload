@@ -27,7 +27,7 @@ export const readMigrationFiles = async ({
     .readdirSync(payload.db.migrationDir)
     .sort()
     .filter((f) => {
-      return f.endsWith('.ts') || f.endsWith('.js')
+      return ['.ts', '.js', '.cjs', '.mjs'].some((extension => f.endsWith(extension)));
     })
     .map((file) => {
       return path.resolve(payload.db.migrationDir, file)
