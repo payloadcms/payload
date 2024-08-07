@@ -79,6 +79,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   return (
     <Fragment>
+      <HydrateAuthProvider permissions={permissions} />
       <RenderCustomComponent
         CustomComponent={
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined

@@ -86,7 +86,7 @@ export const DefaultNavClient: React.FC = () => {
                 LinkWithDefault) as typeof LinkWithDefault.default
 
               const LinkElement = Link || 'a'
-              const activeCollection = pathname.startsWith(href)
+              const activeCollection = pathname.endsWith(href)
 
               return (
                 <LinkElement
