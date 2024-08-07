@@ -73,8 +73,12 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     siblingDoc: doc,
   })
 
-  await Promise.all(fieldPromises)
-  await Promise.all(populationPromises)
+  while (fieldPromises.length > 0 || populationPromises.length > 0) {
+    const allPromises = [...fieldPromises, ...populationPromises]
+    fieldPromises.splice(0)
+    populationPromises.splice(0)
+    await Promise.all(allPromises)
+  }
 
   return doc
 }
