@@ -629,7 +629,6 @@ describe('fields - relationship', () => {
 
 async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(slug)
-  await clearCollectionDocs(collection1Slug)
   await clearCollectionDocs(relationOneSlug)
   await clearCollectionDocs(relationTwoSlug)
   await clearCollectionDocs(relationRestrictedSlug)
