@@ -53,13 +53,10 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
           required,
         }}
         validate={(value, options) => {
-          const passesUsername = username(
-            value,
-            options,
-          )
+          const passesUsername = username(value, options)
           const passesEmail = email(
             value,
-            options,
+            options as ValidateOptions<any, { username?: string }, any, any>,
           )
 
           if (!passesEmail && !passesUsername) {
