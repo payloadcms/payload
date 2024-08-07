@@ -6,7 +6,7 @@ import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { parseCookies } from 'payload'
+import { createLocalReq, parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'

@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions, User } from 'payload'
+import type { ClientConfig, LanguageOptions, Permissions, User } from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
