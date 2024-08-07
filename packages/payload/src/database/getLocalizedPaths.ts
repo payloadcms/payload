@@ -33,7 +33,7 @@ export async function getLocalizedPaths({
       fields: flattenFields(fields, false),
       globalSlug,
       invalid: false,
-      path: '',
+      path: incomingPath,
     },
   ]
 
