@@ -7,7 +7,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { AdminViewProps } from 'payload'
 
-import { Button, HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { Button, SetStepNav } from '@payloadcms/ui'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
@@ -49,7 +49,6 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({
       user={user}
       visibleEntities={visibleEntities}
     >
-      <HydrateAuthProvider permissions={permissions} />
       <SetStepNav
         nav={[
           {
