@@ -64,6 +64,7 @@ export const CreateFirstUserClient: React.FC<{
         readOnly={false}
       />
       <PasswordField
+        autoComplete={'off'}
         field={{
           name: 'password',
           label: t('authentication:newPassword'),

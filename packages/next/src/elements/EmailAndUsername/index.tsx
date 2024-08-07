@@ -71,7 +71,6 @@ type RenderEmailAndUsernameFieldsProps = {
 export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps) {
   const { className, loginWithUsername, operation, permissions, readOnly } = props
 
-  // TODO: Fix this!
   return (
     <RenderFields
       className={className}
@@ -82,6 +81,7 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
           _fieldIsPresentational: false,
           _isFieldAffectingData: true,
           admin: {
+            autoComplete: 'off',
             components: {
               Field: {
                 type: 'client',
