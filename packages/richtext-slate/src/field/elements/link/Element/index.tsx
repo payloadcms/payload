@@ -63,7 +63,9 @@ export const LinkElement = () => {
 
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
-  const { richTextComponentMap } = fieldProps
+  const {
+    field: { richTextComponentMap },
+  } = fieldProps
   const fields = richTextComponentMap.get(linkFieldsSchemaPath)
 
   const editor = useSlate()

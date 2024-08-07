@@ -1,6 +1,6 @@
 import type { Config, RichTextAdapterProvider } from 'payload'
 
-import { genImportMapIterateFields, sanitizeFields, withNullableJSONSchemaType } from 'payload'
+import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 

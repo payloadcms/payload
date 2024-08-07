@@ -1,3 +1,7 @@
+import type { RichTextFieldProps } from 'payload'
+
+import type { RichTextPlugin } from '../types.js'
+
 export type EnabledFeatures = {
   elements: {
     [name: string]: {
@@ -15,3 +19,9 @@ export type EnabledFeatures = {
   }
   plugins: React.ReactNode[]
 }
+
+export type SlateFieldProps = {
+  elements: EnabledFeatures['elements']
+  leaves: EnabledFeatures['leaves']
+  plugins: RichTextPlugin[]
+} & RichTextFieldProps

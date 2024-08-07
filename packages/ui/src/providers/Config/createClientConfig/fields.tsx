@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   BlocksFieldClient,
   ClientFieldConfig,
+  ClientTab,
   CreateMappedComponent,
   Field,
   ImportMap,
@@ -199,19 +200,25 @@ export const createClientFieldConfig = ({
       const field = _field as unknown as TabsFieldClient
 
       field.tabs = field.tabs?.map((tab) => {
-        const sanitized = { ...tab, fields: [...tab.fields] }
+        const clientTab: ClientTab = { ...tab }
 
-        sanitized.fields = createClientFieldConfigs({
+        serverOnlyFieldProperties.forEach((key) => {
+          if (key in clientTab) {
+            delete clientTab[key]
+          }
+        })
+
+        clientTab.fields = createClientFieldConfigs({
           createMappedComponent,
           disableAddingID: true,
-          fields: sanitized.fields as unknown as Field[],
+          fields: tab.fields as unknown as Field[],
           i18n,
           importMap,
           parentPath: field._path,
           payload,
         })
 
-        return sanitized
+        return clientTab
       })
 
       break

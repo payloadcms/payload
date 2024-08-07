@@ -1,7 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from 'payload'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -138,7 +137,7 @@ const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = (
   )
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const customFieldsMap = fieldProps.richTextComponentMap.get(relatedFieldSchemaPath)
+  const customFieldsMap = fieldProps.field.richTextComponentMap.get(relatedFieldSchemaPath)
 
   return (
     <div

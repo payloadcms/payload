@@ -1,16 +1,17 @@
 import type { Field, RichTextGenerateComponentMap } from 'payload'
 
+import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
+
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
 import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 import { defaultLeaves as leafTypes } from './field/leaves/index.js'
-import { createClientFieldConfigs } from 'packages/ui/src/providers/Config/createClientConfig/fields.js'
 
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextGenerateComponentMap =>
-  ({ config, createMappedComponent, i18n, importMap }) => {
+  ({ createMappedComponent, i18n, importMap, payload }) => {
     const componentMap = new Map()
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
@@ -61,12 +62,11 @@ export const getGenerateComponentMap =
         switch (element.name) {
           case 'link': {
             const fields = createClientFieldConfigs({
-              config,
               createMappedComponent,
-              fieldSchema: args.admin?.link?.fields as Field[],
+              fields: args.admin?.link?.fields as Field[],
               i18n,
               importMap,
-              readOnly: false,
+              payload,
             })
 
             componentMap.set(linkFieldsSchemaPath, fields)
@@ -75,7 +75,7 @@ export const getGenerateComponentMap =
           }
 
           case 'upload': {
-            const uploadEnabledCollections = config.collections.filter(
+            const uploadEnabledCollections = payload.config.collections.filter(
               ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
                 if (hidden === true) {
                   return false
@@ -88,12 +88,11 @@ export const getGenerateComponentMap =
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
                 const fields = createClientFieldConfigs({
-                  config,
                   createMappedComponent,
-                  fieldSchema: args?.admin?.upload?.collections[collection.slug]?.fields,
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
                   importMap,
-                  readOnly: false,
+                  payload,
                 })
 
                 componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, fields)
