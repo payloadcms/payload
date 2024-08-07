@@ -51,9 +51,9 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
+  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
     await this.migrate({ migrations: this.prodMigrations })
   }
-
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
 }
