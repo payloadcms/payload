@@ -19,7 +19,7 @@ export type ArrayFieldProps = {
   readonly field: ArrayClientField
   readonly forceRender?: boolean
   readonly validate?: ArrayFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type ArrayFieldLabelComponent = LabelComponent<'array'>
 

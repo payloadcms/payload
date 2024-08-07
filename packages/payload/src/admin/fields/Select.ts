@@ -13,7 +13,7 @@ export type SelectFieldProps = {
   readonly onChange?: (e: string | string[]) => void
   readonly validate?: SelectFieldValidation
   readonly value?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type SelectFieldLabelComponent = LabelComponent<'select'>
 

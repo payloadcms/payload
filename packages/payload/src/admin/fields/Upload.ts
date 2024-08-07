@@ -16,7 +16,7 @@ export type UploadFieldClient = {
 export type UploadFieldProps = {
   readonly field: UploadFieldClient
   readonly validate?: UploadFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type UploadFieldLabelComponent = LabelComponent<'upload'>
 

@@ -11,7 +11,7 @@ export type RelationshipFieldClient = {
 export type RelationshipFieldProps = {
   readonly field: RelationshipFieldClient
   readonly validate?: RelationshipFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type RelationshipFieldLabelComponent = LabelComponent<'relationship'>
 

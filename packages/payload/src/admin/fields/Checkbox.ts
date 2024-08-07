@@ -16,7 +16,7 @@ export type CheckboxFieldProps = {
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean
   readonly validate?: CheckboxFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type CheckboxFieldLabelComponent = LabelComponent<'checkbox'>
 

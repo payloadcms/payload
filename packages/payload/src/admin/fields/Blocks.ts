@@ -20,7 +20,7 @@ export type BlocksFieldProps = {
   readonly forceRender?: boolean
   readonly slug?: string
   readonly validate?: BlockFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type ClientBlock = {
   LabelComponent: MappedComponent

@@ -1,3 +1,5 @@
+import type React from 'react'
+
 import type { StaticLabel } from '../../config/types.js'
 import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { TextareaFieldValidation } from '../../fields/validations.js'
@@ -13,7 +15,7 @@ export type TextareaFieldProps = {
   readonly inputRef?: React.MutableRefObject<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextareaFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type TextareaFieldLabelComponent = LabelComponent<'textarea'>
 

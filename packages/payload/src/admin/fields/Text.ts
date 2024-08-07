@@ -13,7 +13,7 @@ export type TextFieldProps = {
   readonly inputRef?: React.MutableRefObject<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type TextFieldLabelComponent = LabelComponent<'text'>
 
