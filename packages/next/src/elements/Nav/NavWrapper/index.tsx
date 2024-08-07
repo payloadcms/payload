@@ -10,7 +10,7 @@ export const NavWrapper: React.FC<{
 }> = (props) => {
   const { baseClass, children } = props
 
-  const { navOpen, navRef, shouldAnimate } = useNav()
+  const { hydrated, navOpen, navRef, shouldAnimate } = useNav()
 
   return (
     <aside
@@ -18,6 +18,7 @@ export const NavWrapper: React.FC<{
         baseClass,
         navOpen && `${baseClass}--nav-open`,
         shouldAnimate && `${baseClass}--nav-animate`,
+        hydrated && `${baseClass}--nav-hydrated`,
       ]
         .filter(Boolean)
         .join(' ')}

@@ -6,6 +6,7 @@ import React, { useEffect, useRef } from 'react'
 import { usePreferences } from '../../providers/Preferences/index.js'
 
 type NavContextType = {
+  hydrated: boolean
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
@@ -13,6 +14,7 @@ type NavContextType = {
 }
 
 export const NavContext = React.createContext<NavContextType>({
+  hydrated: false,
   navOpen: true,
   navRef: null,
   setNavOpen: () => {},
@@ -49,6 +51,7 @@ export const NavProvider: React.FC<{
   const [navOpen, setNavOpen] = React.useState(initialIsOpen)
 
   const [shouldAnimate, setShouldAnimate] = React.useState(false)
+  const [hydrated, setHydrated] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
@@ -84,9 +87,11 @@ export const NavProvider: React.FC<{
     if (largeBreak === true || midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
+    setHydrated(true)
+
     setTimeout(() => {
       setShouldAnimate(true)
-    }, 1000)
+    }, 100)
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
@@ -97,7 +102,7 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ navOpen, navRef, setNavOpen, shouldAnimate }}>
+    <NavContext.Provider value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
       {children}
     </NavContext.Provider>
   )
