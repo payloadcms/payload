@@ -87,7 +87,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    let result: T = await req.payload.db.findOne(findOneArgs)
+    let result: T = await (collectionConfig?.db.findOne || req.payload.db.findOne)(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {

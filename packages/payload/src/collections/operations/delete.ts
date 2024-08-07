@@ -104,7 +104,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // Retrieve documents
     // /////////////////////////////////////
 
-    const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({
+    const { docs } = await (
+      collectionConfig?.db?.find || payload.db.find<GeneratedTypes['collections'][TSlug]>
+    )({
       collection: collectionConfig.slug,
       locale,
       req,
@@ -160,7 +162,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         // Delete document
         // /////////////////////////////////////
 
-        await payload.db.deleteOne({
+        await (collectionConfig?.db?.deleteOne || payload.db.deleteOne)({
           collection: collectionConfig.slug,
           req,
           where: {

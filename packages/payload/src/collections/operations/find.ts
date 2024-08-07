@@ -142,7 +142,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         where,
       })
 
-      result = await payload.db.find<T>({
+      result = await (collectionConfig?.db?.find || payload.db.find<T>)({
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,

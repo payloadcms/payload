@@ -137,7 +137,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       docs = query.docs
     } else {
-      const query = await payload.db.find({
+      const query = await (collectionConfig?.db?.find || payload.db.find)({
         collection: collectionConfig.slug,
         limit: 0,
         locale,
@@ -282,7 +282,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         if (!shouldSaveDraft || data._status === 'published') {
-          result = await req.payload.db.updateOne({
+          result = await (collectionConfig?.db?.updateOne || req.payload.db.updateOne)({
             id,
             collection: collectionConfig.slug,
             data: result,

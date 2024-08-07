@@ -97,7 +97,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Retrieve document
     // /////////////////////////////////////
 
-    const docToDelete = await req.payload.db.findOne({
+    const docToDelete = await (collectionConfig?.db?.findOne || req.payload.db.findOne)({
       collection: collectionConfig.slug,
       locale: req.locale,
       req,
@@ -132,7 +132,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete document
     // /////////////////////////////////////
 
-    let result = await req.payload.db.deleteOne({
+    let result = await (collectionConfig?.db?.deleteOne || req.payload.db.deleteOne)({
       collection: collectionConfig.slug,
       req,
       where: { id: { equals: id } },

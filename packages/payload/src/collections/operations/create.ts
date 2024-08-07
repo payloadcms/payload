@@ -242,7 +242,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         req,
       })
     } else {
-      doc = await payload.db.create({
+      doc = await (collectionConfig?.db?.create || payload.db.create)({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,

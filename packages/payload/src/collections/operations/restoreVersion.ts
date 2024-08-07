@@ -85,7 +85,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
 
-    const doc = await req.payload.db.findOne(findOneArgs)
+    const doc = await (collectionConfig?.db?.findOne || req.payload.db.findOne)(findOneArgs)
 
     if (!doc && !hasWherePolicy) throw new NotFound(t)
     if (!doc && hasWherePolicy) throw new Forbidden(t)
@@ -106,7 +106,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // Update
     // /////////////////////////////////////
 
-    let result = await req.payload.db.updateOne({
+    let result = await (collectionConfig?.db?.updateOne || req.payload.db.updateOne)({
       id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
