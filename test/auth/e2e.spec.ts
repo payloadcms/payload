@@ -158,7 +158,7 @@ describe('auth', () => {
     test('should have up-to-date user in `useAuth` hook', async () => {
       await page.goto(url.account)
       await page.waitForURL(url.account)
-      await expect(page.locator('#users-api-result')).toHaveText('')
+      await expect(page.locator('#users-api-result')).toHaveText('Hello, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Hello, world!')
       const field = page.locator('#field-custom')
       await field.fill('Goodbye, world!')

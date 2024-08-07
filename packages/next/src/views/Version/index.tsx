@@ -1,12 +1,12 @@
-import type {
-  CollectionPermission,
-  Document,
-  EditViewComponent,
-  GlobalPermission,
-  OptionObject,
-} from 'payload'
-
 import { notFound } from 'next/navigation.js'
+import {
+  type CollectionPermission,
+  type Document,
+  type EditViewComponent,
+  type GlobalPermission,
+  type OptionObject,
+  deepCopyObjectSimple,
+} from 'payload'
 import React from 'react'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
@@ -55,8 +55,18 @@ export const VersionView: EditViewComponent = async (props) => {
       })
 
       if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'collection')
-        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'collection')
+        latestDraftVersion = await getLatestVersion({
+          slug,
+          type: 'collection',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       return notFound()
@@ -80,8 +90,18 @@ export const VersionView: EditViewComponent = async (props) => {
       })
 
       if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, slug, 'draft', 'global')
-        latestPublishedVersion = await getLatestVersion(payload, slug, 'published', 'global')
+        latestDraftVersion = await getLatestVersion({
+          slug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       return notFound()
@@ -116,7 +136,14 @@ export const VersionView: EditViewComponent = async (props) => {
   return (
     <DefaultVersionView
       doc={doc}
-      docPermissions={docPermissions}
+      /**
+       * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
+       * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
+       * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error
+       *
+       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
+       */
+      docPermissions={deepCopyObjectSimple(docPermissions)}
       initialComparisonDoc={latestVersion}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}

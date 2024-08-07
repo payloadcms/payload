@@ -110,16 +110,9 @@
   &__link {
     display: flex;
     align-items: center;
-
-    &.active {
-      .nav__link-icon {
-        display: block;
-      }
-    }
   }
 
   &__link-icon {
-    display: none;
     margin-right: calc(var(--base) * 0.25);
     top: -1px;
     position: relative;

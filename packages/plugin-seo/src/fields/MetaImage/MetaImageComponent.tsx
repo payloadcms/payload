@@ -54,7 +54,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       method: 'POST',
     })
 
-    const { result: generatedImage } = await genImageResponse.json()
+    const generatedImage = await genImageResponse.text()
 
     setValue(generatedImage || '')
   }, [hasGenerateImageFn, docInfo, getData, locale, setValue])
