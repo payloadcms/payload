@@ -82,7 +82,7 @@ const generateLabelFromValue = (
     }
   } else if (relatedDoc) {
     // Handle non-polymorphic `hasMany` relationships or fallback
-    if (typeof relatedDoc.id !== 'undefined') {
+    if (typeof relatedDoc?.id !== 'undefined') {
       valueToReturn = relatedDoc.id
     } else {
       valueToReturn = relatedDoc
