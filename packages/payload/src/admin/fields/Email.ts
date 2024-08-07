@@ -12,7 +12,7 @@ export type EmailFieldProps = {
   readonly autoComplete?: string
   readonly field: EmailFieldClient
   readonly validate?: EmailFieldValidation
-} &  Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase, 'validate'>
 
 export type EmailFieldLabelComponent = LabelComponent<'email'>
 
