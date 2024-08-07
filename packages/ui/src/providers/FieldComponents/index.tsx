@@ -4,15 +4,14 @@ import React, { createContext, useContext } from 'react'
 
 import type { FieldTypesComponents } from '../../fields/index.js'
 
-import { fieldComponents } from '../../fields/index.js'
-
 export type IFieldComponentsContext = FieldTypesComponents
 
-const FieldComponentsContext = createContext<IFieldComponentsContext>(fieldComponents)
+const FieldComponentsContext = createContext<IFieldComponentsContext>(null)
 
 export const FieldComponentsProvider: React.FC<{
   readonly children: React.ReactNode
-}> = ({ children }) => {
+  readonly fieldComponents: FieldTypesComponents
+}> = ({ children, fieldComponents }) => {
   return (
     <FieldComponentsContext.Provider value={fieldComponents}>
       {children}
