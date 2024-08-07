@@ -91,7 +91,7 @@
     "prompts": "2.4.2",
     "qs": "6.11.2",
     "read-stream": "^2.1.1",
-    "rimraf": "3.0.2",
+    "rimraf": "4.4.1",
     "semver": "^7.5.4",
     "shelljs": "0.8.5",
     "simple-git": "^3.20.0",
