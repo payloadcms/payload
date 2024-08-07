@@ -47,6 +47,10 @@
     gap: var(--base);
     margin: 0;
     width: 100%;
+
+    & button {
+      margin: 0;
+    }
   }
 
   &__list-item {
