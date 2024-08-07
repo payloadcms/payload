@@ -1,5 +1,4 @@
- 
-import type { Payload, PayloadRequest } from 'payload'
+import type { DatabaseAdapter, Payload, PayloadRequest } from 'payload'
 
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
@@ -9,9 +8,14 @@ import type { DrizzleAdapter, Migration } from './types.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
-export async function migrate(this: DrizzleAdapter): Promise<void> {
+export const migrate: DatabaseAdapter['migrate'] = async function migrate(
+  this: DrizzleAdapter,
+  args,
+): Promise<void> {
+  const migrationDirOverride = args?.migrationDir
+
   const { payload } = this
-  const migrationFiles = await readMigrationFiles({ payload })
+  const migrationFiles = await readMigrationFiles({ migrationDir: migrationDirOverride, payload })
 
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations to run.' })
@@ -64,7 +68,7 @@ export async function migrate(this: DrizzleAdapter): Promise<void> {
 
     // If already ran, skip
     if (alreadyRan) {
-      continue  
+      continue
     }
 
     await runMigrationFile(payload, migration, newBatch)

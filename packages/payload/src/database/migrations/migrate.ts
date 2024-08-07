@@ -7,9 +7,14 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'
 
-export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
+export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
+  this: BaseDatabaseAdapter,
+  args,
+): Promise<void> {
+  const migrationDirOverride = args?.migrationDir
+
   const { payload } = this
-  const migrationFiles = await readMigrationFiles({ payload })
+  const migrationFiles = await readMigrationFiles({ migrationDir: migrationDirOverride, payload })
   const { existingMigrations, latestBatch } = await getMigrations({ payload })
 
   const newBatch = latestBatch + 1

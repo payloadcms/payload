@@ -8,29 +8,33 @@ import type { Migration } from '../types.js'
  * Read the migration files from disk
  */
 export const readMigrationFiles = async ({
+  migrationDir: migrationDirOverride,
   payload,
 }: {
+  migrationDir?: string
   payload: Payload
 }): Promise<Migration[]> => {
-  if (!fs.existsSync(payload.db.migrationDir)) {
+  const migrationDir = migrationDirOverride || payload.db.migrationDir
+
+  if (!fs.existsSync(migrationDir)) {
     payload.logger.error({
-      msg: `No migration directory found at ${payload.db.migrationDir}`,
+      msg: `No migration directory found at ${migrationDir}`,
     })
     return []
   }
 
   payload.logger.info({
-    msg: `Reading migration files from ${payload.db.migrationDir}`,
+    msg: `Reading migration files from ${migrationDir}`,
   })
 
   const files = fs
-    .readdirSync(payload.db.migrationDir)
+    .readdirSync(migrationDir)
     .sort()
     .filter((f) => {
       return f.endsWith('.ts') || f.endsWith('.js')
     })
     .map((file) => {
-      return path.resolve(payload.db.migrationDir, file)
+      return path.resolve(migrationDir, file)
     })
 
   return Promise.all(

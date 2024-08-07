@@ -68,7 +68,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>
+  migrate: (args?: { migrationDir?: string }) => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
