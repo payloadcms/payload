@@ -3,11 +3,13 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
 import type {
+  Collection1,
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
   RelationRestricted,
   RelationTwo,
   RelationWithTitle,
+  VersionedRelationshipField,
 } from './payload-types'
 
 import payload from '../../packages/payload/src'
@@ -16,6 +18,7 @@ import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '..
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
+  collection1Slug,
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -24,13 +27,16 @@ import {
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
   slug,
+  versionedRelationshipFieldSlug,
 } from './collectionSlugs'
 
 const { beforeAll, beforeEach, describe } = test
 
 describe('fields - relationship', () => {
   let url: AdminUrlUtil
+  let versionedRelationshipFieldURL: AdminUrlUtil
   let page: Page
+  let collectionOneDoc: Collection1
   let relationOneDoc: RelationOne
   let anotherRelationOneDoc: RelationOne
   let relationTwoDoc: RelationTwo
@@ -45,6 +51,7 @@ describe('fields - relationship', () => {
     serverURL = serverURLFromConfig
 
     url = new AdminUrlUtil(serverURL, slug)
+    versionedRelationshipFieldURL = new AdminUrlUtil(serverURL, versionedRelationshipFieldSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -107,6 +114,14 @@ describe('fields - relationship', () => {
       },
     })
 
+    // Collection 1 Doc
+    collectionOneDoc = (await payload.create({
+      collection: collection1Slug,
+      data: {
+        name: 'One',
+      },
+    })) as any
+
     // Add restricted doc as relation
     docWithExistingRelations = (await payload.create({
       collection: slug,
@@ -119,6 +134,8 @@ describe('fields - relationship', () => {
       },
     })) as any
   })
+
+  const tableRowLocator = 'table > tbody > tr'
 
   test('should create relationship', async () => {
     await page.goto(url.create)
@@ -464,6 +481,42 @@ describe('fields - relationship', () => {
     ).toHaveCount(1)
   })
 
+  test('should allow filtering by polymorphic relationships with version drafts enabled', async () => {
+    await createVersionedRelationshipFieldDoc('Without relationship')
+    await createVersionedRelationshipFieldDoc('with relationship', [
+      {
+        value: collectionOneDoc.id,
+        relationTo: collection1Slug,
+      },
+    ])
+
+    await page.goto(versionedRelationshipFieldURL.list)
+
+    await page.locator('.list-controls__toggle-columns').click()
+    await page.locator('.list-controls__toggle-where').click()
+    await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+    await page.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = page.locator('.condition__field')
+    await conditionField.click()
+
+    const dropdownFieldOptions = conditionField.locator('.rs__option')
+    await dropdownFieldOptions.locator('text=Relationship Field').nth(0).click()
+
+    const operatorField = page.locator('.condition__operator')
+    await operatorField.click()
+
+    const dropdownOperatorOptions = operatorField.locator('.rs__option')
+    await dropdownOperatorOptions.locator('text=exists').click()
+
+    const valueField = page.locator('.condition__value')
+    await valueField.click()
+    const dropdownValueOptions = valueField.locator('.rs__option')
+    await dropdownValueOptions.locator('text=True').click()
+
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
@@ -580,6 +633,7 @@ async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(relationTwoSlug)
   await clearCollectionDocs(relationRestrictedSlug)
   await clearCollectionDocs(relationWithTitleSlug)
+  await clearCollectionDocs(versionedRelationshipFieldSlug)
 }
 
 async function clearCollectionDocs(collectionSlug: string): Promise<void> {
@@ -589,4 +643,19 @@ async function clearCollectionDocs(collectionSlug: string): Promise<void> {
       id: { exists: true },
     },
   })
+}
+
+async function createVersionedRelationshipFieldDoc(
+  title: VersionedRelationshipField['title'],
+  relationshipField?: VersionedRelationshipField['relationshipField'],
+  overrides?: Partial<VersionedRelationshipField>,
+): Promise<VersionedRelationshipField> {
+  return payload.create({
+    collection: versionedRelationshipFieldSlug,
+    data: {
+      title,
+      relationshipField,
+      ...overrides,
+    },
+  }) as unknown as Promise<VersionedRelationshipField>
 }
