@@ -13,7 +13,7 @@ import type {
 export type BlocksFieldClient = {
   blocks: ClientBlock[]
   label: StaticLabel
-} & Extract<ClientFieldConfig, { type: 'blocks' }>
+} & Omit<Extract<ClientFieldConfig, { type: 'blocks' }>, 'blocks'>
 
 export type BlocksFieldProps = {
   readonly field: BlocksFieldClient

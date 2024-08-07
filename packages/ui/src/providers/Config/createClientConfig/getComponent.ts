@@ -9,9 +9,11 @@ export const getComponent = <
   TComponentServerProps extends object,
   TComponentClientProps extends object,
 >({
+  identifier,
   importMap,
   payloadComponent,
 }: {
+  identifier?: string
   importMap: ImportMap
   payloadComponent:
     | PayloadComponent<TComponentServerProps, TComponentClientProps>
@@ -33,7 +35,11 @@ export const getComponent = <
   const Component = importMap[key]
 
   if (!Component) {
-    console.error(`Component not found in importMap: ${key}`) // eslint-disable-line no-console
+    console.error(`getComponent: Component not found in importMap`, {
+      identifier,
+      key,
+      payloadComponent,
+    })
   }
 
   return {

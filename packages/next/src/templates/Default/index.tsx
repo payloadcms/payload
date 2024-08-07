@@ -50,7 +50,12 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     },
   })
 
-  const MappedDefaultNav: MappedComponent = createMappedComponent(CustomNav, undefined, DefaultNav)
+  const MappedDefaultNav: MappedComponent = createMappedComponent(
+    CustomNav,
+    undefined,
+    DefaultNav,
+    'CustomNav',
+  )
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>

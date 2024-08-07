@@ -2,6 +2,7 @@ import type { ClientFieldConfig, MappedComponent, RichTextGenerateComponentMap }
 
 import { getComponent } from '@payloadcms/ui/shared'
 import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
+import { deepCopyObjectSimple } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
@@ -40,11 +41,16 @@ export const getGenerateComponentMap =
             for (const componentKey in components) {
               const payloadComponent = components[componentKey]
 
-              const mappedComponent: MappedComponent = createMappedComponent(payloadComponent, {
-                componentKey,
-                featureKey: resolvedFeature.key,
-                key: `${resolvedFeature.key}-${componentKey}`,
-              })
+              const mappedComponent: MappedComponent = createMappedComponent(
+                payloadComponent,
+                {
+                  componentKey,
+                  featureKey: resolvedFeature.key,
+                  key: `${resolvedFeature.key}-${componentKey}`,
+                },
+                undefined,
+                'lexical-from-resolvedFeature',
+              )
 
               if (mappedComponent) {
                 componentMap.set(
@@ -73,7 +79,11 @@ export const getGenerateComponentMap =
 
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
-                const clientFields = createClientFieldConfigs({
+                let clientFields: ClientFieldConfig[] = deepCopyObjectSimple(
+                  fields,
+                ) as unknown as ClientFieldConfig[]
+                clientFields = createClientFieldConfigs({
+                  clientFields,
                   createMappedComponent,
                   disableAddingID: true,
                   fields,
@@ -93,6 +103,7 @@ export const getGenerateComponentMap =
 
           const ClientComponent = resolvedFeature.ClientFeature
           const ResolvedClientComponent = getComponent({
+            identifier: 'lexical-clientComponent',
             importMap,
             payloadComponent: ClientComponent,
           })

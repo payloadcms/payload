@@ -1,4 +1,4 @@
-import type { CreateMappedComponent, CustomComponent, MappedComponent } from 'payload'
+import type { MappedComponent } from 'payload'
 
 import { isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'

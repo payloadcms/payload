@@ -28,41 +28,31 @@ export const BlocksFeature = createServerFeature<
       reducedBlockSlugs: [],
       reducedInlineBlockSlugs: [],
     }
+    const validRelationships = _config.collections.map((c) => c.slug) || []
 
-    if (props?.blocks?.length || props?.inlineBlocks?.length) {
-      const validRelationships = _config.collections.map((c) => c.slug) || []
+    const sanitized = await sanitizeFields({
+      config: _config as unknown as Config,
+      fields: [
+        {
+          name: 'lexical_blocks',
+          type: 'blocks',
+          blocks: props.blocks ?? [],
+        },
+        {
+          name: 'lexical_inline_blocks',
+          type: 'blocks',
+          blocks: props.inlineBlocks ?? [],
+        },
+      ],
+      requireFieldLevelRichTextEditor: isRoot,
+      validRelationships,
+    })
 
-      if (props?.blocks?.length) {
-        for (const block of props.blocks) {
-          block.fields = block.fields.concat(baseBlockFields)
-          block.labels = !block.labels ? formatLabels(block.slug) : block.labels
+    props.blocks = (sanitized[0] as BlockField).blocks
+    props.inlineBlocks = (sanitized[1] as BlockField).blocks
 
-          block.fields = await sanitizeFields({
-            config: _config as unknown as Config,
-            fields: block.fields,
-            requireFieldLevelRichTextEditor: isRoot,
-            validRelationships,
-          }) // TODO: Do I need to sanitize fields?
-
-          clientProps.reducedBlockSlugs.push(block.slug)
-        }
-      }
-      if (props?.inlineBlocks?.length) {
-        for (const block of props.inlineBlocks) {
-          block.fields = block.fields.concat(baseBlockFields)
-          block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
-          block.fields = await sanitizeFields({
-            config: _config as unknown as Config,
-            fields: block.fields,
-            requireFieldLevelRichTextEditor: isRoot,
-            validRelationships,
-          }) // TODO: Do I need to sanitize fields?
-
-          clientProps.reducedInlineBlockSlugs.push(block.slug)
-        }
-      }
-    }
+    clientProps.reducedBlockSlugs = props.blocks.map((block) => block.slug)
+    clientProps.reducedInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',

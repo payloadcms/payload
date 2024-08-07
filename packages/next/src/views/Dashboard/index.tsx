@@ -87,6 +87,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
     CustomDashboardComponent?.Component,
     undefined,
     DefaultDashboard,
+    'CustomDashboardComponent.Component',
   )
 
   return (

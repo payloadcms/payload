@@ -4,7 +4,6 @@ import type {
   ClientCollectionConfig,
   CreateMappedComponent,
   EditViewProps,
-  Field,
   ImportMap,
   Payload,
   SanitizedCollectionConfig,
@@ -13,11 +12,14 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import { createClientFieldConfigs } from './fields.js'
 
 export const createClientCollectionConfig = ({
   DefaultEditView,
   DefaultListView,
+  clientCollection,
   collection,
   createMappedComponent,
   i18n,
@@ -26,17 +28,17 @@ export const createClientCollectionConfig = ({
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
+  clientCollection: ClientCollectionConfig
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientCollectionConfig => {
-  const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
-
-  sanitized.fields = createClientFieldConfigs({
+  clientCollection.fields = createClientFieldConfigs({
+    clientFields: clientCollection.fields,
     createMappedComponent,
-    fields: sanitized.fields as any as Field[], // invert the type
+    fields: collection.fields,
     i18n,
     importMap,
     payload,
@@ -53,35 +55,31 @@ export const createClientCollectionConfig = ({
   ]
 
   serverOnlyCollectionProperties.forEach((key) => {
-    if (key in sanitized) {
-      delete sanitized[key]
+    if (key in clientCollection) {
+      delete clientCollection[key]
     }
   })
 
-  if ('upload' in sanitized && typeof sanitized.upload === 'object') {
-    sanitized.upload = { ...sanitized.upload }
-    delete sanitized.upload.handlers
-    delete sanitized.upload.adminThumbnail
-    delete sanitized.upload.externalFileHeaderFilter
-    delete sanitized.upload.withMetadata
+  if ('upload' in clientCollection && typeof clientCollection.upload === 'object') {
+    delete clientCollection.upload.handlers
+    delete clientCollection.upload.adminThumbnail
+    delete clientCollection.upload.externalFileHeaderFilter
+    delete clientCollection.upload.withMetadata
   }
 
-  if ('auth' in sanitized && typeof sanitized.auth === 'object') {
-    sanitized.auth = { ...sanitized.auth }
-    delete sanitized.auth.strategies
-    delete sanitized.auth.forgotPassword
-    delete sanitized.auth.verify
+  if ('auth' in clientCollection && typeof clientCollection.auth === 'object') {
+    delete clientCollection.auth.strategies
+    delete clientCollection.auth.forgotPassword
+    delete clientCollection.auth.verify
   }
 
-  if (sanitized.labels) {
-    Object.entries(sanitized.labels).forEach(([labelType, collectionLabel]) => {
+  if (collection.labels) {
+    Object.entries(collection.labels).forEach(([labelType, collectionLabel]) => {
       if (typeof collectionLabel === 'function') {
-        sanitized.labels[labelType] = collectionLabel({ t: i18n.t })
+        clientCollection.labels[labelType] = collectionLabel({ t: i18n.t })
       }
     })
   }
-
-  sanitized.admin = { ...(sanitized.admin || ({} as any)) }
 
   const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
     'hidden',
@@ -90,77 +88,118 @@ export const createClientCollectionConfig = ({
   ]
 
   serverOnlyCollectionAdminProperties.forEach((key) => {
-    if (key in sanitized.admin) {
-      delete sanitized.admin[key]
+    if (key in clientCollection.admin) {
+      delete clientCollection.admin[key]
     }
   })
 
-  sanitized.admin.components = {} as ClientCollectionConfig['admin']['components']
+  clientCollection.admin.components = {} as ClientCollectionConfig['admin']['components']
 
   if (collection?.admin?.components) {
     if (collection.admin.components?.edit) {
-      sanitized.admin.components.edit = {} as ClientCollectionConfig['admin']['components']['edit']
+      clientCollection.admin.components.edit =
+        {} as ClientCollectionConfig['admin']['components']['edit']
 
       if (collection.admin.components.edit?.PreviewButton) {
-        sanitized.admin.components.edit.PreviewButton = createMappedComponent(
+        clientCollection.admin.components.edit.PreviewButton = createMappedComponent(
           collection.admin.components.edit.PreviewButton,
+          undefined,
+          undefined,
+          'collection.admin.components.edit.PreviewButton',
         )
       }
 
       if (collection.admin.components.edit?.PublishButton) {
-        sanitized.admin.components.edit.PublishButton = createMappedComponent(
+        clientCollection.admin.components.edit.PublishButton = createMappedComponent(
           collection.admin.components.edit.PublishButton,
+          undefined,
+          undefined,
+          'collection.admin.components.edit.PublishButton',
         )
       }
 
       if (collection.admin.components.edit?.SaveButton) {
-        sanitized.admin.components.edit.SaveButton = createMappedComponent(
+        clientCollection.admin.components.edit.SaveButton = createMappedComponent(
           collection.admin.components.edit.SaveButton,
+          undefined,
+          undefined,
+          'collection.admin.components.edit.SaveButton',
         )
       }
 
       if (collection.admin.components.edit?.SaveDraftButton) {
-        sanitized.admin.components.edit.SaveDraftButton = createMappedComponent(
+        clientCollection.admin.components.edit.SaveDraftButton = createMappedComponent(
           collection.admin.components.edit.SaveDraftButton,
+          undefined,
+          undefined,
+          'collection.admin.components.edit.SaveDraftButton',
         )
       }
 
       if (collection.admin.components.edit?.Upload) {
-        sanitized.admin.components.edit.Upload = createMappedComponent(
+        clientCollection.admin.components.edit.Upload = createMappedComponent(
           collection.admin.components.edit.Upload,
+          undefined,
+          undefined,
+          'collection.admin.components.edit.Upload',
         )
       }
     }
 
     if (collection.admin.components?.beforeList) {
-      sanitized.admin.components.beforeList = collection.admin.components.beforeList.map(
-        (Component) => createMappedComponent(Component),
+      clientCollection.admin.components.beforeList = collection.admin.components.beforeList.map(
+        (Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'collection.admin.components.beforeList',
+          ),
       )
     }
 
     if (collection.admin.components?.beforeListTable) {
-      sanitized.admin.components.beforeListTable = collection.admin.components.beforeListTable.map(
-        (Component) => createMappedComponent(Component),
-      )
+      clientCollection.admin.components.beforeListTable =
+        collection.admin.components.beforeListTable.map((Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'collection.admin.components.beforeListTable',
+          ),
+        )
     }
 
     if (collection.admin.components?.afterList) {
-      sanitized.admin.components.afterList = collection.admin.components.afterList.map(
-        (Component) => createMappedComponent(Component),
+      clientCollection.admin.components.afterList = collection.admin.components.afterList.map(
+        (Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'collection.admin.components.afterList',
+          ),
       )
     }
 
     if (collection.admin.components?.afterListTable) {
-      sanitized.admin.components.afterListTable = collection.admin.components.afterListTable.map(
-        (Component) => createMappedComponent(Component),
-      )
+      clientCollection.admin.components.afterListTable =
+        collection.admin.components.afterListTable.map((Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'collection.admin.components.afterListTable',
+          ),
+        )
     }
   }
 
-  sanitized.admin.components.views = {
-    ...((collection?.admin?.components?.views ||
-      {}) as ClientCollectionConfig['admin']['components']['views']),
-  }
+  clientCollection.admin.components.views = (
+    collection?.admin?.components?.views
+      ? deepCopyObjectSimple(collection?.admin?.components?.views)
+      : {}
+  ) as ClientCollectionConfig['admin']['components']['views']
 
   const hasEditView =
     'admin' in collection &&
@@ -169,8 +208,7 @@ export const createClientCollectionConfig = ({
     'Edit' in collection.admin.components.views &&
     'Default' in collection.admin.components.views.Edit
 
-  // @ts-expect-error
-  sanitized.admin.components.views.Edit = {
+  clientCollection.admin.components.views.Edit = {
     Default: {
       Component: createMappedComponent(
         hasEditView &&
@@ -180,13 +218,19 @@ export const createClientCollectionConfig = ({
           collectionSlug: collection.slug,
         },
         DefaultEditView,
+        'collection.admin.components.views.Edit.Default',
       ),
       ...(hasEditView &&
       'actions' in collection.admin.components.views.Edit.Default &&
       collection.admin.components.views.Edit.Default.actions
         ? {
             actions: collection.admin.components.views.Edit.Default.actions.map((Component) =>
-              createMappedComponent(Component),
+              createMappedComponent(
+                Component,
+                undefined,
+                undefined,
+                'collection.admin.components.views.Edit.Default',
+              ),
             ),
           }
         : {}),
@@ -199,8 +243,7 @@ export const createClientCollectionConfig = ({
     'views' in collection.admin.components &&
     'List' in collection.admin.components.views
 
-  // @ts-expect-error
-  sanitized.admin.components.views.List = {
+  clientCollection.admin.components.views.List = {
     Component: createMappedComponent(
       hasListView &&
         'Component' in collection.admin.components.views.List &&
@@ -209,30 +252,39 @@ export const createClientCollectionConfig = ({
         collectionSlug: collection.slug,
       },
       DefaultListView,
+      'collection.admin.components.views.List ',
     ),
     ...(hasListView &&
     'actions' in collection.admin.components.views.List &&
     collection.admin.components.views.List.actions
       ? {
           actions: collection.admin.components.views.List.actions.map((Component) =>
-            createMappedComponent(Component),
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'collection.admin.components.views.List',
+            ),
           ),
         }
       : {}),
   }
 
-  if ('livePreview' in sanitized.admin) {
-    sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-    // @ts-expect-error
-    delete sanitized.admin.livePreview.url
+  if (
+    'livePreview' in clientCollection.admin &&
+    clientCollection.admin.livePreview &&
+    'url' in clientCollection.admin.livePreview
+  ) {
+    delete clientCollection.admin.livePreview.url
   }
 
-  return sanitized
+  return clientCollection
 }
 
 export const createClientCollectionConfigs = ({
   DefaultEditView,
   DefaultListView,
+  clientCollections,
   collections,
   createMappedComponent,
   i18n,
@@ -241,20 +293,27 @@ export const createClientCollectionConfigs = ({
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
+  clientCollections: ClientCollectionConfig[]
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
-}): ClientCollectionConfig[] =>
-  collections.map((collection) =>
-    createClientCollectionConfig({
+}): ClientCollectionConfig[] => {
+  for (let i = 0; i < collections.length; i++) {
+    const collection = collections[i]
+    const clientCollection = clientCollections[i]
+    clientCollections[i] = createClientCollectionConfig({
       DefaultEditView,
       DefaultListView,
+      clientCollection,
       collection,
       createMappedComponent,
       i18n,
       importMap,
       payload,
-    }),
-  )
+    })
+  }
+
+  return clientCollections
+}

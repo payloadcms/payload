@@ -41,9 +41,9 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     },
   })
 
-  const mappedBeforeLogins = createMappedComponent(beforeLogin)
+  const mappedBeforeLogins = createMappedComponent(beforeLogin, undefined, undefined, 'beforeLogin')
 
-  const mappedAfterLogins = createMappedComponent(afterLogin)
+  const mappedAfterLogins = createMappedComponent(afterLogin, undefined, undefined, 'afterLogin')
 
   if (user) {
     redirect(admin)

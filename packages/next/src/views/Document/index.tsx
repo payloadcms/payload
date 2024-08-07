@@ -121,6 +121,9 @@ export const Document: React.FC<AdminViewProps> = async ({
         ? createMappedComponent(
             collectionConfig?.admin?.components?.views?.Edit?.Default
               ?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
+            undefined,
+            undefined,
+            'collectionConfig?.admin?.components?.views?.Edit?.Default',
           )
         : null
 
@@ -136,21 +139,24 @@ export const Document: React.FC<AdminViewProps> = async ({
         collectionViews?.CustomView?.payloadComponent,
         undefined,
         collectionViews?.CustomView?.Component,
+        'collectionViews?.CustomView.payloadComponent',
       )
       DefaultView = createMappedComponent(
         collectionViews?.DefaultView?.payloadComponent,
         undefined,
         collectionViews?.DefaultView?.Component,
+        'collectionViews?.DefaultView.payloadComponent',
       )
       ErrorView = createMappedComponent(
         collectionViews?.ErrorView?.payloadComponent,
         undefined,
         collectionViews?.ErrorView?.Component,
+        'collectionViews?.ErrorView.payloadComponent',
       )
     }
 
     if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-      ErrorView = createMappedComponent(undefined, undefined, NotFoundView)
+      ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
     }
   }
 
@@ -188,20 +194,23 @@ export const Document: React.FC<AdminViewProps> = async ({
         globalViews?.CustomView?.payloadComponent,
         undefined,
         globalViews?.CustomView?.Component,
+        'globalViews?.CustomView.payloadComponent',
       )
       DefaultView = createMappedComponent(
         globalViews?.DefaultView?.payloadComponent,
         undefined,
         globalViews?.DefaultView?.Component,
+        'globalViews?.DefaultView.payloadComponent',
       )
       ErrorView = createMappedComponent(
         globalViews?.ErrorView?.payloadComponent,
         undefined,
         globalViews?.ErrorView?.Component,
+        'globalViews?.ErrorView.payloadComponent',
       )
 
       if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-        ErrorView = createMappedComponent(undefined, undefined, NotFoundView)
+        ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
       }
     }
   }

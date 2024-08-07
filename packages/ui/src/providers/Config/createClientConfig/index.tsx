@@ -6,9 +6,8 @@ import {
   type EditViewProps,
   type ImportMap,
   type Payload,
-  type SanitizedCollectionConfig,
   type SanitizedConfig,
-  type SanitizedGlobalConfig,
+  deepCopyObjectSimple,
   serverOnlyConfigProperties,
 } from 'payload'
 import React from 'react'
@@ -44,7 +43,8 @@ export const createClientConfig = async ({
   payload: Payload
   // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<{ clientConfig: ClientConfig; render: React.ReactNode }> => {
-  const clientConfig: ClientConfig = { ...(config as any as ClientConfig) } // invert the type
+  // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
+  const clientConfig: ClientConfig = deepCopyObjectSimple(config) as unknown as ClientConfig
 
   const createMappedComponent = getCreateMappedComponent({
     importMap,
@@ -61,60 +61,73 @@ export const createClientConfig = async ({
   }
 
   if ('localization' in clientConfig && clientConfig.localization) {
-    clientConfig.localization = { ...clientConfig.localization }
-
     for (const locale of clientConfig.localization.locales) {
       delete locale.toString
     }
   }
 
   if ('admin' in clientConfig) {
-    clientConfig.admin = { ...clientConfig.admin }
-
     if (
       config.admin?.avatar &&
       typeof config.admin?.avatar === 'object' &&
       config.admin?.avatar &&
       'Component' in config.admin.avatar
     ) {
-      clientConfig.admin.components.Avatar = createMappedComponent(config.admin.avatar.Component)
+      clientConfig.admin.components.Avatar = createMappedComponent(
+        config.admin.avatar.Component,
+        undefined,
+        undefined,
+        'config.admin.avatar.Component',
+      )
     }
 
     if (config.admin?.components?.logout?.Button) {
       clientConfig.admin.components.LogoutButton = createMappedComponent(
         config.admin.components.logout.Button,
+        undefined,
+        undefined,
+        'config.admin.components.logout.Button',
       )
     }
 
     if (config.admin?.components?.actions && config.admin?.components?.actions.length > 0) {
       clientConfig.admin.components.actions = config.admin.components.actions.map((Component) =>
-        createMappedComponent(Component),
+        createMappedComponent(Component, undefined, undefined, 'config.admin.components.actions'),
       )
     }
 
     if (config.admin?.components?.graphics?.Icon) {
       clientConfig.admin.components.graphics.Icon = createMappedComponent(
         config.admin.components.graphics.Icon,
+        undefined,
+        undefined,
+        'config.admin.components.graphics.Icon',
       )
     }
 
     if (config.admin?.components?.graphics?.Logo) {
       clientConfig.admin.components.graphics.Logo = createMappedComponent(
         config.admin.components.graphics.Logo,
+        undefined,
+        undefined,
+        'config.admin.components.graphics.Logo',
       )
     }
   }
 
-  if ('livePreview' in clientConfig.admin) {
-    clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
-    // @ts-expect-error
+  if (
+    'livePreview' in clientConfig.admin &&
+    clientConfig.admin.livePreview &&
+    'url' in clientConfig.admin.livePreview
+  ) {
     delete clientConfig.admin.livePreview.url
   }
 
   clientConfig.collections = createClientCollectionConfigs({
     DefaultEditView,
     DefaultListView,
-    collections: [...(clientConfig.collections as any as SanitizedCollectionConfig[])], // invert the type
+    clientCollections: clientConfig.collections,
+    collections: config.collections,
     createMappedComponent,
     i18n,
     importMap,
@@ -123,8 +136,9 @@ export const createClientConfig = async ({
 
   clientConfig.globals = createClientGlobalConfigs({
     DefaultEditView,
+    clientGlobals: clientConfig.globals,
     createMappedComponent,
-    globals: [...(clientConfig.globals as any as SanitizedGlobalConfig[])], // invert the type
+    globals: config.globals,
     i18n,
     importMap,
     payload,
@@ -155,6 +169,7 @@ export const createClientConfig = async ({
         providers={config.admin?.components?.providers.map(
           (Component) =>
             getComponent({
+              identifier: 'config.admin?.components?.providers',
               importMap,
               payloadComponent: Component,
             }).Component,

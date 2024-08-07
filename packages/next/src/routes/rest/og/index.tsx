@@ -42,6 +42,7 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       config.admin?.components?.graphics?.Icon,
       undefined,
       PayloadIcon,
+      'config.admin.components.graphics.Icon',
     )
 
     let fontData

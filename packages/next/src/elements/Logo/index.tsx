@@ -29,7 +29,7 @@ export const Logo: React.FC<ServerProps> = (props) => {
     },
   })
 
-  const mappedCustomLogo = createMappedComponent(CustomLogo, undefined, PayloadLogo)
+  const mappedCustomLogo = createMappedComponent(CustomLogo, undefined, PayloadLogo, 'CustomLogo')
 
   return <RenderComponent mappedComponent={mappedCustomLogo} />
 }

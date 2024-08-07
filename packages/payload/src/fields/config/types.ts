@@ -225,6 +225,11 @@ export type OptionObject = {
 export type Option = OptionObject | string
 
 export interface FieldBase {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same field multiple times.
+   */
+  _sanitized?: boolean
   access?: {
     create?: FieldAccess
     read?: FieldAccess
@@ -763,6 +768,11 @@ export type RadioField = {
 } & FieldBase
 
 export type Block = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same block multiple times.
+   */
+  _sanitized?: boolean
   admin?: {
     components?: {
       Label?: PayloadComponent<

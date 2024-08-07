@@ -96,7 +96,7 @@ export const DocumentTabs: React.FC<{
                     },
                   })
 
-                  const mappedTab = createMappedComponent(Tab)
+                  const mappedTab = createMappedComponent(Tab, undefined, undefined, 'Tab')
                   return (
                     <RenderComponent
                       clientProps={{

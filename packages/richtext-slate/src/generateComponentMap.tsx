@@ -1,6 +1,7 @@
-import type { Field, RichTextGenerateComponentMap } from 'payload'
+import type { ClientFieldConfig, Field, RichTextGenerateComponentMap } from 'payload'
 
 import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
+import { deepCopyObjectSimple } from 'payload'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
 
@@ -61,7 +62,11 @@ export const getGenerateComponentMap =
 
         switch (element.name) {
           case 'link': {
-            const fields = createClientFieldConfigs({
+            let clientFields = deepCopyObjectSimple(
+              args.admin?.link?.fields,
+            ) as unknown as ClientFieldConfig[]
+            clientFields = createClientFieldConfigs({
+              clientFields,
               createMappedComponent,
               fields: args.admin?.link?.fields as Field[],
               i18n,
@@ -69,7 +74,7 @@ export const getGenerateComponentMap =
               payload,
             })
 
-            componentMap.set(linkFieldsSchemaPath, fields)
+            componentMap.set(linkFieldsSchemaPath, clientFields)
 
             break
           }
@@ -87,7 +92,11 @@ export const getGenerateComponentMap =
 
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-                const fields = createClientFieldConfigs({
+                let clientFields = deepCopyObjectSimple(
+                  args?.admin?.upload?.collections[collection.slug]?.fields,
+                ) as unknown as ClientFieldConfig[]
+                clientFields = createClientFieldConfigs({
+                  clientFields,
                   createMappedComponent,
                   fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                   i18n,
@@ -95,7 +104,7 @@ export const getGenerateComponentMap =
                   payload,
                 })
 
-                componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, fields)
+                componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, clientFields)
               }
             })
 

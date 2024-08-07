@@ -57,9 +57,19 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     },
   })
 
-  const mappedBeforeDashboards = createMappedComponent(beforeDashboard)
+  const mappedBeforeDashboards = createMappedComponent(
+    beforeDashboard,
+    undefined,
+    undefined,
+    'beforeDashboard',
+  )
 
-  const mappedAfterDashboards = createMappedComponent(afterDashboard)
+  const mappedAfterDashboards = createMappedComponent(
+    afterDashboard,
+    undefined,
+    undefined,
+    'afterDashboard',
+  )
 
   return (
     <div className={baseClass}>

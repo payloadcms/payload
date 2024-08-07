@@ -68,7 +68,7 @@ export const DocumentTab: React.FC<
       },
     })
 
-    const mappedPin = createMappedComponent(Pill, undefined, Pill_Component)
+    const mappedPin = createMappedComponent(Pill, undefined, Pill_Component, 'Pill')
 
     return (
       <DocumentTabLink

@@ -101,8 +101,8 @@ export const DefaultEditView: React.FC = () => {
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (
       operation === 'create' &&
-      collectionConfig.auth &&
-      !collectionConfig.auth.disableLocalStrategy
+      collectionClientConfig.auth &&
+      !collectionClientConfig.auth.disableLocalStrategy
     )
       return true
     return false

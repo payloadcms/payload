@@ -3,7 +3,6 @@ import type {
   ClientGlobalConfig,
   CreateMappedComponent,
   EditViewProps,
-  Field,
   ImportMap,
   Payload,
   SanitizedConfig,
@@ -12,10 +11,13 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { deepCopyObjectSimple } from 'payload'
+
 import { createClientFieldConfigs } from './fields.js'
 
 export const createClientGlobalConfig = ({
   DefaultEditView,
+  clientGlobal,
   createMappedComponent,
   global,
   i18n,
@@ -23,17 +25,17 @@ export const createClientGlobalConfig = ({
   payload,
 }: {
   DefaultEditView: React.FC<EditViewProps>
+  clientGlobal: ClientGlobalConfig
   createMappedComponent: CreateMappedComponent
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
 }): ClientGlobalConfig => {
-  const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
-
-  sanitized.fields = createClientFieldConfigs({
+  clientGlobal.fields = createClientFieldConfigs({
+    clientFields: clientGlobal.fields,
     createMappedComponent,
-    fields: sanitized.fields as any as Field[], // invert the type
+    fields: global.fields,
     i18n,
     importMap,
     payload,
@@ -48,62 +50,71 @@ export const createClientGlobalConfig = ({
   ]
 
   serverOnlyProperties.forEach((key) => {
-    if (key in sanitized) {
-      delete sanitized[key]
+    if (key in clientGlobal) {
+      delete clientGlobal[key]
     }
   })
 
-  if ('admin' in sanitized) {
-    sanitized.admin = { ...sanitized.admin }
-
+  if ('admin' in clientGlobal) {
     const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
       'hidden',
       'preview',
     ]
 
     serverOnlyGlobalAdminProperties.forEach((key) => {
-      if (key in sanitized.admin) {
-        delete sanitized.admin[key]
+      if (key in clientGlobal.admin) {
+        delete clientGlobal.admin[key]
       }
     })
 
-    sanitized.admin.components = {} as ClientGlobalConfig['admin']['components']
+    clientGlobal.admin.components = {} as ClientGlobalConfig['admin']['components']
 
     if (global?.admin?.components) {
       if (global.admin.components.elements) {
-        sanitized.admin.components.elements =
+        clientGlobal.admin.components.elements =
           {} as ClientGlobalConfig['admin']['components']['elements']
 
         if (global.admin.components.elements?.PreviewButton) {
-          sanitized.admin.components.elements.PreviewButton = createMappedComponent(
+          clientGlobal.admin.components.elements.PreviewButton = createMappedComponent(
             global.admin.components.elements.PreviewButton,
+            undefined,
+            undefined,
+            'global.admin.components.elements.PreviewButton',
           )
         }
 
         if (global.admin.components.elements?.PublishButton) {
-          sanitized.admin.components.elements.PublishButton = createMappedComponent(
+          clientGlobal.admin.components.elements.PublishButton = createMappedComponent(
             global.admin.components.elements.PublishButton,
+            undefined,
+            undefined,
+            'global.admin.components.elements.PublishButton',
           )
         }
 
         if (global.admin.components.elements?.SaveButton) {
-          sanitized.admin.components.elements.SaveButton = createMappedComponent(
+          clientGlobal.admin.components.elements.SaveButton = createMappedComponent(
             global.admin.components.elements.SaveButton,
+            undefined,
+            undefined,
+            'global.admin.components.elements.SaveButton',
           )
         }
 
         if (global.admin.components.elements?.SaveDraftButton) {
-          sanitized.admin.components.elements.SaveDraftButton = createMappedComponent(
+          clientGlobal.admin.components.elements.SaveDraftButton = createMappedComponent(
             global.admin.components.elements.SaveDraftButton,
+            undefined,
+            undefined,
+            'global.admin.components.elements.SaveDraftButton',
           )
         }
       }
     }
 
-    sanitized.admin.components.views = {
-      ...((global?.admin?.components?.views ||
-        {}) as ClientGlobalConfig['admin']['components']['views']),
-    }
+    clientGlobal.admin.components.views = (
+      global?.admin?.components?.views ? deepCopyObjectSimple(global?.admin?.components?.views) : {}
+    ) as ClientGlobalConfig['admin']['components']['views']
 
     const hasEditView =
       'admin' in global &&
@@ -112,8 +123,7 @@ export const createClientGlobalConfig = ({
       'Edit' in global.admin.components.views &&
       'Default' in global.admin.components.views.Edit
 
-    // @ts-expect-error
-    sanitized.admin.components.views.Edit = {
+    clientGlobal.admin.components.views.Edit = {
       Default: {
         Component: createMappedComponent(
           hasEditView &&
@@ -123,31 +133,40 @@ export const createClientGlobalConfig = ({
             globalSlug: global.slug,
           },
           DefaultEditView,
+          'global.admin.components.views.Edit.Default',
         ),
         ...(hasEditView &&
         'actions' in global.admin.components.views.Edit.Default &&
         global.admin.components.views.Edit.Default.actions
           ? {
               actions: global.admin.components.views.Edit.Default.actions.map((Component) =>
-                createMappedComponent(Component),
+                createMappedComponent(
+                  Component,
+                  undefined,
+                  undefined,
+                  'global.admin.components.views.Edit.Default.actions',
+                ),
               ),
             }
           : {}),
       },
     }
 
-    if ('livePreview' in sanitized.admin) {
-      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-      // @ts-expect-error
-      delete sanitized.admin.livePreview.url
+    if (
+      'livePreview' in clientGlobal.admin &&
+      clientGlobal.admin.livePreview &&
+      'url' in clientGlobal.admin.livePreview
+    ) {
+      delete clientGlobal.admin.livePreview.url
     }
   }
 
-  return sanitized
+  return clientGlobal
 }
 
 export const createClientGlobalConfigs = ({
   DefaultEditView,
+  clientGlobals,
   createMappedComponent,
   globals,
   i18n,
@@ -155,19 +174,25 @@ export const createClientGlobalConfigs = ({
   payload,
 }: {
   DefaultEditView: React.FC<EditViewProps>
+  clientGlobals: ClientGlobalConfig[]
   createMappedComponent: CreateMappedComponent
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
-}): ClientGlobalConfig[] =>
-  globals.map((global) =>
-    createClientGlobalConfig({
+}): ClientGlobalConfig[] => {
+  for (let i = 0; i < globals.length; i++) {
+    const global = globals[i]
+    const clientGlobal = clientGlobals[i]
+    clientGlobals[i] = createClientGlobalConfig({
       DefaultEditView,
+      clientGlobal,
       createMappedComponent,
       global,
       i18n,
       importMap,
       payload,
-    }),
-  )
+    })
+  }
+  return clientGlobals
+}

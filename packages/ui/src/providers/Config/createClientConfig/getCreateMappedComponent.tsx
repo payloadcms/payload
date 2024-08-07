@@ -27,8 +27,9 @@ export function getCreateMappedComponent({
   const createSingleMappedComponent = (
     payloadComponent: { ReactComponent: React.FC<any> } | PayloadComponent,
     key: number | string,
-    props?: JsonObject,
-    Fallback?: React.FC<any>,
+    props: JsonObject,
+    Fallback: React.FC<any>,
+    identifier: string,
   ): MappedComponent => {
     if (!payloadComponent) {
       if (!Fallback) {
@@ -62,12 +63,16 @@ export function getCreateMappedComponent({
             Component: payloadComponent.ReactComponent,
           }
         : getComponent({
+            identifier,
             importMap,
             payloadComponent: payloadComponent as any,
           })
 
     if (!resolvedComponent.Component) {
-      console.error(`Component not found in importMap: ${key}`)
+      console.error(`getCreateMappedComponent: Component not found in importMap`, {
+        identifier,
+        key,
+      })
     }
 
     if (isReactServerComponentOrFunction(resolvedComponent.Component)) {
@@ -96,7 +101,12 @@ export function getCreateMappedComponent({
     }
   }
 
-  const createMappedComponent: CreateMappedComponent = (payloadComponent, props, fallback) => {
+  const createMappedComponent: CreateMappedComponent = (
+    payloadComponent,
+    props,
+    fallback,
+    identifier,
+  ) => {
     if (!payloadComponent && !fallback) {
       return undefined as any
     }
@@ -104,12 +114,24 @@ export function getCreateMappedComponent({
     if (payloadComponent && Array.isArray(payloadComponent)) {
       const mappedComponents: MappedComponent[] = []
       for (let i = 0; i < payloadComponent.length; i++) {
-        const component = createSingleMappedComponent(payloadComponent[i], i, props, fallback)
+        const component = createSingleMappedComponent(
+          payloadComponent[i],
+          i,
+          props,
+          fallback,
+          identifier,
+        )
         mappedComponents.push(component)
       }
       return mappedComponents as any
     } else {
-      return createSingleMappedComponent(payloadComponent, undefined, props, fallback) as any
+      return createSingleMappedComponent(
+        payloadComponent,
+        undefined,
+        props,
+        fallback,
+        identifier,
+      ) as any
     }
   }
 

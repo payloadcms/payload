@@ -40,8 +40,18 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     },
   })
 
-  const mappedBeforeNavLinks = createMappedComponent(beforeNavLinks)
-  const mappedAfterNavLinks = createMappedComponent(afterNavLinks)
+  const mappedBeforeNavLinks = createMappedComponent(
+    beforeNavLinks,
+    undefined,
+    undefined,
+    'beforeNavLinks',
+  )
+  const mappedAfterNavLinks = createMappedComponent(
+    afterNavLinks,
+    undefined,
+    undefined,
+    'afterNavLinks',
+  )
 
   return (
     <NavWrapper baseClass={baseClass}>

@@ -74,6 +74,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       CustomAccountComponent?.Component,
       undefined,
       EditView,
+      'CustomAccountComponent.Component',
     )
 
     return (
