@@ -1,7 +1,7 @@
 import type { AdminViewProps, Where } from 'payload'
 
 import {
-  HydrateClientUser,
+  HydrateAuthProvider,
   ListInfoProvider,
   ListQueryProvider,
   TableColumnsProvider,
@@ -138,7 +138,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser permissions={permissions} user={user} />
+        <HydrateAuthProvider permissions={permissions} />
         <ListInfoProvider
           collectionConfig={createClientCollectionConfig({
             collection: collectionConfig,

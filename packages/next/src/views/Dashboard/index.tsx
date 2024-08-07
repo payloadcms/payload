@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateClientUser } from '@payloadcms/ui'
+import { HydrateAuthProvider } from '@payloadcms/ui'
 import { EntityType, RenderCustomComponent, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
@@ -79,7 +79,6 @@ export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   return (
     <Fragment>
-      <HydrateClientUser permissions={permissions} user={user} />
       <RenderCustomComponent
         CustomComponent={
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
