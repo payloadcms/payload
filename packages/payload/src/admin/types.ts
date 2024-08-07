@@ -7,7 +7,6 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type {
   RichTextAdapter,
   RichTextAdapterProvider,
-  RichTextFieldProps,
   RichTextGenerateComponentMap,
   RichTextHooks,
 } from './RichText.js'
@@ -147,11 +146,11 @@ export type {
 } from './fields/Relationship.js'
 
 export type {
-  RichTextComponentProps,
   RichTextFieldClient,
   RichTextFieldDescriptionComponent,
   RichTextFieldErrorComponent,
   RichTextFieldLabelComponent,
+  RichTextFieldProps,
 } from './fields/RichText.js'
 
 export type {
@@ -171,6 +170,7 @@ export type {
 } from './fields/Select.js'
 
 export type {
+  ClientTab,
   TabsFieldClient,
   TabsFieldDescriptionComponent,
   TabsFieldErrorComponent,

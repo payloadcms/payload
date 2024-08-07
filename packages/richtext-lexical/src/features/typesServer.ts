@@ -12,6 +12,7 @@ import type {
   Config,
   Field,
   JsonObject,
+  Payload,
   PayloadComponent,
   PayloadRequest,
   ReplaceAny,
@@ -287,12 +288,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   clientFeatureProps?: ClientFeatureProps
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   componentMap?:
-    | ((args: {
-        config: SanitizedConfig
-        i18n: I18nClient
-        props: ServerProps
-        schemaPath: string
-      }) => {
+    | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {
         [key: string]: PayloadComponent
       })
     | {

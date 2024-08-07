@@ -146,8 +146,9 @@ export const ListView: React.FC<AdminViewProps> = async ({
             DefaultListView,
             collection: collectionConfig,
             createMappedComponent,
+            i18n,
+            importMap: payload.importMap,
             payload,
-            t: i18n.t,
           })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}

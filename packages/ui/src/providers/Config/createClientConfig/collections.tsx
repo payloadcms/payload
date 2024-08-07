@@ -1,15 +1,17 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminViewProps,
   ClientCollectionConfig,
   CreateMappedComponent,
   EditViewProps,
   Field,
+  ImportMap,
   Payload,
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
 } from 'payload'
+import type React from 'react'
 
 import { createClientFieldConfigs } from './fields.js'
 
@@ -18,23 +20,26 @@ export const createClientCollectionConfig = ({
   DefaultListView,
   collection,
   createMappedComponent,
+  i18n,
+  importMap,
   payload,
-  t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
+  i18n: I18nClient
+  importMap: ImportMap
   payload: Payload
-  t: TFunction
 }): ClientCollectionConfig => {
   const sanitized: ClientCollectionConfig = { ...(collection as any as ClientCollectionConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
     createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
+    i18n,
+    importMap,
     payload,
-    t,
   })
 
   const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -71,7 +76,7 @@ export const createClientCollectionConfig = ({
   if (sanitized.labels) {
     Object.entries(sanitized.labels).forEach(([labelType, collectionLabel]) => {
       if (typeof collectionLabel === 'function') {
-        sanitized.labels[labelType] = collectionLabel({ t })
+        sanitized.labels[labelType] = collectionLabel({ t: i18n.t })
       }
     })
   }
@@ -230,15 +235,17 @@ export const createClientCollectionConfigs = ({
   DefaultListView,
   collections,
   createMappedComponent,
+  i18n,
+  importMap,
   payload,
-  t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
+  i18n: I18nClient
+  importMap: ImportMap
   payload: Payload
-  t: TFunction
 }): ClientCollectionConfig[] =>
   collections.map((collection) =>
     createClientCollectionConfig({
@@ -246,7 +253,8 @@ export const createClientCollectionConfigs = ({
       DefaultListView,
       collection,
       createMappedComponent,
+      i18n,
+      importMap,
       payload,
-      t,
     }),
   )

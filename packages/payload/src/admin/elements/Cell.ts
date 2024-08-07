@@ -3,16 +3,15 @@ import type { ClientFieldConfig } from '../../fields/config/client.js'
 
 export type RowData = Record<string, any>
 
-export type CellComponentProps = {
+export type CellComponentProps<TField extends ClientFieldConfig = ClientFieldConfig> = {
   readonly className?: string
-  readonly field: ClientFieldConfig
+  readonly field: TField
   readonly link?: boolean
   readonly onClick?: (args: {
     cellData: unknown
     collectionSlug: SanitizedCollectionConfig['slug']
     rowData: RowData
   }) => void
-  readonly richTextComponentMap?: Map<string, unknown>
 }
 
 export type DefaultCellComponentProps<T = any> = {

@@ -3,20 +3,12 @@ import type { JSONSchema4 } from 'json-schema'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type {
-  Config,
-  PayloadComponent,
-  ResolvedComponent,
-  SanitizedConfig,
-} from '../config/types.js'
+import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../types/index.js'
-import type { CreateMappedComponent } from './types.js'
-
-export type RichTextFieldProps<Value extends object, AdapterProps, ExtraFieldProperties = {}> = {
-  path?: string
-} & Omit<RichTextField<Value, AdapterProps, ExtraFieldProperties>, 'type'>
+import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
+import type { RichTextFieldProps } from './fields/RichText.js'
+import type { CreateMappedComponent, RichTextFieldClient } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -186,11 +178,13 @@ export type RichTextHooks = {
 }
 
 export type RichTextGenerateComponentMap = (args: {
-  config: SanitizedConfig
+  clientField: RichTextFieldClient
   createMappedComponent: CreateMappedComponent
   field: RichTextField
   i18n: I18nClient
+
   importMap: ImportMap
+  payload: Payload
   schemaPath: string
 }) => Map<string, unknown>
 
@@ -261,10 +255,7 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<
-    never,
-    RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>
-  >
+  FieldComponent: PayloadComponent<never, RichTextFieldProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

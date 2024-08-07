@@ -1,6 +1,6 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { CellComponentProps } from 'payload'
+import type { CellComponentProps, RichTextFieldClient } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useClientFunctions, useTableCell } from '@payloadcms/ui'
@@ -20,9 +20,13 @@ export const RichTextCell: React.FC<
   {
     admin?: LexicalFieldAdminProps
     lexicalEditorConfig: LexicalEditorConfig
-  } & CellComponentProps
+  } & CellComponentProps<RichTextFieldClient>
 > = (props) => {
-  const { admin, lexicalEditorConfig, richTextComponentMap } = props
+  const {
+    admin,
+    field: { richTextComponentMap },
+    lexicalEditorConfig,
+  } = props
 
   const [preview, setPreview] = React.useState('Loading...')
 
@@ -173,7 +177,7 @@ export const RichTextCell: React.FC<
             )
 
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
-              return richTextComponentMap.get(key) as React.ReactNode
+              return richTextComponentMap.get(key)
             })
 
             return (

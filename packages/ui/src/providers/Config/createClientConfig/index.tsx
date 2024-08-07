@@ -11,8 +11,10 @@ import {
   type SanitizedGlobalConfig,
   serverOnlyConfigProperties,
 } from 'payload'
+import React from 'react'
 
 import { createClientCollectionConfig, createClientCollectionConfigs } from './collections.js'
+import { createClientFieldConfig, createClientFieldConfigs } from './fields.js'
 import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'
 import { createClientGlobalConfig, createClientGlobalConfigs } from './globals.js'
@@ -114,16 +116,18 @@ export const createClientConfig = async ({
     DefaultListView,
     collections: [...(clientConfig.collections as any as SanitizedCollectionConfig[])], // invert the type
     createMappedComponent,
+    i18n,
+    importMap,
     payload,
-    t: i18n.t,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
     DefaultEditView,
     createMappedComponent,
     globals: [...(clientConfig.globals as any as SanitizedGlobalConfig[])], // invert the type
+    i18n,
+    importMap,
     payload,
-    t: i18n.t,
   })
 
   const NestProviders = ({
@@ -164,3 +168,4 @@ export const createClientConfig = async ({
 
   return { clientConfig, render }
 }
+export { createClientFieldConfig, createClientFieldConfigs }
