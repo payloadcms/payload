@@ -90,7 +90,7 @@
   }
 
   &__tableAddColumns:after, &__tableAddRows:after {
-    background-image: url(../../../../lexical/ui/icons/Add/index.svg);
+    background-image: url(../../../../../lexical/ui/icons/Add/index.svg);
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -169,7 +169,7 @@ html[data-theme='dark'] {
     }
 
     &__tableAddColumns:after, &__tableAddRows:after {
-      background-image: url(../../../../lexical/ui/icons/Add/light.svg);
+      background-image: url(../../../../../lexical/ui/icons/Add/light.svg);
     }
   }
 }
