@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 
 // Function to get all migration files (TS or JS) excluding 'index'
@@ -16,12 +17,15 @@ const getMigrationFiles = (dir: string) => {
 
 // Function to generate the index.ts content
 const generateIndexContent = (files: string[]) => {
+  const tsconfig = getTsconfig()
+  const importExt = tsconfig?.config?.compilerOptions?.moduleResolution === 'NodeNext' ? '.js' : ''
+
   let imports = ''
   let exportsArray = 'export const migrations = [\n'
 
   files.forEach((file, index) => {
     const fileNameWithoutExt = file.replace(/\.[^/.]+$/, '')
-    imports += `import * as migration_${fileNameWithoutExt} from './${fileNameWithoutExt}.js';\n`
+    imports += `import * as migration_${fileNameWithoutExt} from './${fileNameWithoutExt}${importExt}';\n`
     exportsArray += `  {
     up: migration_${fileNameWithoutExt}.up,
     down: migration_${fileNameWithoutExt}.down,
