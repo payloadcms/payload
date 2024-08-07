@@ -63,7 +63,7 @@ export const RootPage = async ({
 
   let dbHasUser = false
 
-  if (!DefaultView?.Component && !DefaultView?.PayloadComponent) {
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     notFound()
   }
 
@@ -108,9 +108,10 @@ export const RootPage = async ({
   })
 
   const MappedView: MappedComponent = createMappedView(
-    DefaultView.PayloadComponent,
+    DefaultView.payloadComponent,
     undefined,
     DefaultView.Component,
+    'createMappedView',
   )
 
   const RenderedView = <RenderComponent mappedComponent={MappedView} />

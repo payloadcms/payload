@@ -1,4 +1,4 @@
-import type { AdminViewComponent, SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from 'payload'
 
 import type { ViewFromConfig } from './getViewFromConfig.js'
 
@@ -24,20 +24,20 @@ export const getCustomViewByRoute = ({
     views &&
     typeof views === 'object' &&
     Object.entries(views).find(([, view]) => {
-      if (typeof view === 'object') {
-        return isPathMatchingRoute({
-          currentRoute,
-          exact: view.exact,
-          path: view.path,
-          sensitive: view.sensitive,
-          strict: view.strict,
-        })
-      }
+      return isPathMatchingRoute({
+        currentRoute,
+        exact: view.exact,
+        path: view.path,
+        sensitive: view.sensitive,
+        strict: view.strict,
+      })
     })?.[1]
 
-  return typeof foundViewConfig === 'object'
-    ? {
-        payloadComponent: foundViewConfig.Component,
-      }
-    : null
+  if (!foundViewConfig) {
+    return null
+  }
+
+  return {
+    payloadComponent: foundViewConfig.Component,
+  }
 }
