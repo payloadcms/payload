@@ -24,6 +24,7 @@ export interface Config {
     videos: Video;
     podcasts: Podcast;
     'mixed-media': MixedMedia;
+    'versioned-relationship-field': VersionedRelationshipField;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -32,7 +33,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
-  locale: null;
+  locale: 'en';
   user: User & {
     collection: 'users';
   };
@@ -40,6 +41,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -51,6 +53,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -260,6 +263,22 @@ export interface MixedMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-relationship-field".
+ */
+export interface VersionedRelationshipField {
+  id: string;
+  title: string;
+  relationshipField?:
+    | {
+        relationTo: 'collection-1';
+        value: string | Collection1;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -319,6 +338,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

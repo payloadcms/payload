@@ -21,6 +21,7 @@ import {
   slug,
   videoCollectionSlug,
 } from './collectionSlugs.js'
+import { VersionedRelationshipFieldCollection } from './collections/VersionedRelationshipField/index.js'
 
 export interface FieldsRelationship {
   createdAt: Date
@@ -323,6 +324,9 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: collection1Slug,
+      admin: {
+        useAsTitle: 'name',
+      },
     },
     {
       fields: [
@@ -378,7 +382,13 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    VersionedRelationshipFieldCollection,
   ],
+  localization: {
+    locales: ['en'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
