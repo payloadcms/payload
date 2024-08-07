@@ -9,12 +9,14 @@ type NavContextType = {
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
+  shouldAnimate: boolean
 }
 
 export const NavContext = React.createContext<NavContextType>({
   navOpen: true,
   navRef: null,
   setNavOpen: () => {},
+  shouldAnimate: false,
 })
 
 export const useNav = () => React.useContext(NavContext)
@@ -45,6 +47,8 @@ export const NavProvider: React.FC<{
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
   const [navOpen, setNavOpen] = React.useState(initialIsOpen)
+
+  const [shouldAnimate, setShouldAnimate] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
@@ -80,6 +84,9 @@ export const NavProvider: React.FC<{
     if (largeBreak === true || midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
+    setTimeout(() => {
+      setShouldAnimate(true)
+    }, 1000)
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
@@ -90,6 +97,8 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ navOpen, navRef, setNavOpen }}>{children}</NavContext.Provider>
+    <NavContext.Provider value={{ navOpen, navRef, setNavOpen, shouldAnimate }}>
+      {children}
+    </NavContext.Provider>
   )
 }

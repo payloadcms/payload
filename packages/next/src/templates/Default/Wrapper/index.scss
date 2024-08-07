@@ -5,11 +5,14 @@
   display: grid;
   position: relative;
   grid-template-columns: 0 auto;
-  transition: grid-template-columns var(--nav-trans-time) linear;
   isolation: isolate;
 
   @media (prefers-reduced-motion) {
     transition: none;
+  }
+
+  &--nav-animate {
+    transition: grid-template-columns var(--nav-trans-time) linear;
   }
 
   &--nav-open {
