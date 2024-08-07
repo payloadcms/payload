@@ -133,7 +133,7 @@ export type Migration = {
     db?: DrizzleTransaction | LibSQLDatabase<Record<string, never>> | PostgresDB
     payload: Payload
     req: PayloadRequest
-  }) => Promise<boolean>
+  }) => Promise<void>
   up: ({
     db,
     payload,
@@ -142,7 +142,7 @@ export type Migration = {
     db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
     payload: Payload
     req: PayloadRequest
-  }) => Promise<boolean>
+  }) => Promise<void>
 } & MigrationData
 
 export type CreateJSONQueryArgs = {

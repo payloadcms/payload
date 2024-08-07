@@ -397,8 +397,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = {
-  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<void>
-  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<void>
+  down: (args: unknown) => Promise<void>
+  up: (args: unknown) => Promise<void>
 } & MigrationData
 
 export type MigrationData = {
