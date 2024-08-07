@@ -1,13 +1,11 @@
 'use client'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { FormFieldBase } from 'payload'
 
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { GeneratedFeatureProviderComponent, LexicalFieldAdminProps } from '../types.js'
+import type { GeneratedFeatureProviderComponent, LexicalRichTextFieldProps } from '../types.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
@@ -17,15 +15,12 @@ const RichTextEditor = lazy(() =>
   import('./Field.js').then((module) => ({ default: module.RichText })),
 )
 
-export const RichTextField: React.FC<
-  {
-    admin?: LexicalFieldAdminProps
-    lexicalEditorConfig: LexicalEditorConfig
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
-> = (props) => {
-  const { admin, lexicalEditorConfig, richTextComponentMap } = props
+export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
+  const {
+    admin,
+    field: { richTextComponentMap },
+    lexicalEditorConfig,
+  } = props
   const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
@@ -121,7 +116,7 @@ export const RichTextField: React.FC<
             )
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
-            }) // TODO: Type better
+            }) as React.ReactNode[] // TODO: Type better
 
             return (
               <React.Fragment key={featureProvider.key}>

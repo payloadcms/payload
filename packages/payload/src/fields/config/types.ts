@@ -14,7 +14,6 @@ import type {
   Description,
   DescriptionComponent,
   LabelComponent,
-  MappedComponent,
   RowLabelComponent,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'

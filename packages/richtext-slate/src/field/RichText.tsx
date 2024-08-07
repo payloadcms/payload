@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase, PayloadRequest, RichTextFieldValidation } from 'payload'
+import type { PayloadRequest } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -22,8 +22,8 @@ import { Node, Element as SlateElement, Text, Transforms, createEditor } from 's
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, RichTextPlugin, TextNode } from '../types.js'
-import type { EnabledFeatures } from './types.js'
+import type { ElementNode, TextNode } from '../types.js'
+import type { SlateFieldProps } from './types.js'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
@@ -48,38 +48,30 @@ declare module 'slate' {
   }
 }
 
-const RichTextField: React.FC<
-  {
-    elements: EnabledFeatures['elements']
-    leaves: EnabledFeatures['leaves']
-    name: string
-    placeholder?: string
-    plugins: RichTextPlugin[]
-    richTextComponentMap: Map<string, React.ReactNode>
-    validate?: RichTextFieldValidation
-    width?: string
-  } & FormFieldBase
-> = (props) => {
+const RichTextField: React.FC<SlateFieldProps> = (props) => {
   const {
     name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     elements,
     errorProps,
-    label,
+    field: {
+      _path: pathFromProps,
+
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        style,
+        width,
+      },
+      label,
+      placeholder,
+      required,
+    },
     labelProps,
     leaves,
-    path: pathFromProps,
-    placeholder,
     plugins,
     readOnly: readOnlyFromProps,
-    required,
-    style,
     validate = richTextValidate,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -321,14 +313,9 @@ const RichTextField: React.FC<
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${baseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
@@ -459,7 +446,7 @@ const RichTextField: React.FC<
             </div>
           </div>
         </Slate>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} {...(descriptionProps || {})} />
       </div>
     </div>
   )

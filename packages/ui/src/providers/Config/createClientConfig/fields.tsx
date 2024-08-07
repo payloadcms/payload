@@ -1,16 +1,28 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
+  BlocksFieldClient,
   ClientFieldConfig,
+  ClientTab,
   CreateMappedComponent,
   Field,
+  ImportMap,
   LabelComponent,
   Payload,
+  RadioFieldClient,
+  RichTextFieldClient,
+  RichTextGenerateComponentMap,
+  RowFieldClient,
   RowLabelComponent,
+  SelectFieldClient,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
+  TabsFieldClient,
 } from 'payload'
 
+import { MissingEditorProp } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
+
+import { getComponent } from './getComponent.js'
 
 function generateFieldPath(parentPath, name) {
   let tabPath = parentPath || ''
@@ -26,17 +38,19 @@ function generateFieldPath(parentPath, name) {
 export const createClientFieldConfig = ({
   createMappedComponent,
   field: incomingField,
+  i18n,
+  importMap,
   parentPath,
   payload,
-  t,
 }: {
   createMappedComponent: CreateMappedComponent
   field: Field
+  i18n: I18nClient
+  importMap: ImportMap
   parentPath?: string
   payload: Payload
-  t: TFunction
 }): ClientFieldConfig => {
-  const field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
+  const _field: ClientFieldConfig = { ...(incomingField as any as ClientFieldConfig) } // invert the type
 
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -58,33 +72,32 @@ export const createClientFieldConfig = ({
   ]
 
   serverOnlyFieldProperties.forEach((key) => {
-    if (key in field) {
-      delete field[key]
+    if (key in _field) {
+      delete _field[key]
     }
   })
 
-  field._fieldIsPresentational = fieldIsPresentationalOnly(field)
-  field._isFieldAffectingData = fieldAffectsData(field)
-  field._isSidebar = fieldIsSidebar(field)
+  _field._fieldIsPresentational = fieldIsPresentationalOnly(_field)
+  _field._isFieldAffectingData = fieldAffectsData(_field)
+  _field._isSidebar = fieldIsSidebar(_field)
 
-  const isHidden = 'hidden' in field && field?.hidden
-  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
+  const isHidden = 'hidden' in _field && _field?.hidden
+  const disabledFromAdmin = _field?.admin && 'disabled' in _field.admin && _field.admin.disabled
 
-  if (field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
+  if (_field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
     return null
   }
 
-  field._path = generateFieldPath(
+  _field._path = generateFieldPath(
     parentPath,
-    field._isFieldAffectingData && 'name' in field ? field.name : '',
+    _field._isFieldAffectingData && 'name' in _field ? _field.name : '',
   )
 
-  if ('label' in incomingField && typeof incomingField.label === 'function') {
-    // @ts-expect-error // TODO: set this conditionally based on type to comply with the stricter types
-    field.label = incomingField.label({ t })
+  if ('label' in _field && 'label' in incomingField && typeof incomingField.label === 'function') {
+    _field.label = incomingField.label({ t: i18n.t })
   }
 
-  let CustomLabel: LabelComponent | RowLabelComponent =
+  const CustomLabel: LabelComponent | RowLabelComponent =
     'admin' in incomingField &&
     'components' in incomingField.admin &&
     'Label' in incomingField.admin.components &&
@@ -95,39 +108,30 @@ export const createClientFieldConfig = ({
     case 'group':
     case 'collapsible':
     case 'row': {
-      // @ts-expect-error // TODO: fix this type issue
-      field.fields = [...(incomingField.fields as ClientFieldConfig[])]
+      const field = _field as unknown as RowFieldClient
 
-      // @ts-expect-error // TODO: fix this type issue
       field.fields = createClientFieldConfigs({
         createMappedComponent,
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
+        i18n,
+        importMap,
         parentPath: field._path,
         payload,
-        t,
       })
 
-      if (incomingField.type === 'array') {
-        // @ts-expect-error // TODO: fix this type issue
-        field.RowLabel = createMappedComponent(CustomLabel)
-      }
-
-      if (incomingField.type === 'collapsible') {
-        if (
-          'admin' in incomingField &&
-          'components' in incomingField.admin &&
-          'RowLabel' in incomingField.admin.components &&
-          incomingField.admin.components.RowLabel
-        ) {
-          CustomLabel = incomingField.admin.components.RowLabel
-        }
+      if (incomingField?.admin?.components && 'RowLabel' in incomingField.admin.components) {
+        _field.admin.components.RowLabel = createMappedComponent(
+          incomingField.admin.components.RowLabel,
+        )
       }
 
       break
     }
 
     case 'blocks': {
+      const field = _field as BlocksFieldClient
+
       // @ts-expect-error // TODO: fix this type issue
       field.blocks = incomingField.blocks?.map((block) => {
         const sanitized = { ...block, fields: [...block.fields] }
@@ -136,9 +140,10 @@ export const createClientFieldConfig = ({
         sanitized.fields = createClientFieldConfigs({
           createMappedComponent,
           fields: sanitized.fields,
+          i18n,
+          importMap,
           parentPath: field._path,
           payload,
-          t,
         })
 
         return sanitized
@@ -147,32 +152,102 @@ export const createClientFieldConfig = ({
       break
     }
 
-    case 'tabs': {
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
-      field.tabs = field.tabs?.map((tab) => {
-        const sanitized = { ...tab, fields: [...tab.fields] }
+    case 'richText': {
+      const field = _field as RichTextFieldClient
 
-        sanitized.fields = createClientFieldConfigs({
-          createMappedComponent,
-          disableAddingID: true,
-          fields: sanitized.fields,
-          parentPath: field._path,
-          payload,
-          t,
+      if (!incomingField?.editor) {
+        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof incomingField?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+      if (!field.admin) {
+        field.admin = {}
+      }
+      if (!field.admin.components) {
+        field.admin.components = {}
+      }
+
+      field.admin.components.Field = createMappedComponent(incomingField.editor.FieldComponent)
+      field.admin.components.Cell = createMappedComponent(incomingField.editor.CellComponent)
+
+      if (incomingField.editor.generateComponentMap) {
+        const { Component: generateComponentMap, serverProps } = getComponent({
+          importMap,
+          payloadComponent: incomingField.editor.generateComponentMap,
         })
 
-        return sanitized
+        const actualGenerateComponentMap: RichTextGenerateComponentMap = (
+          generateComponentMap as any
+        )(serverProps)
+
+        const result = actualGenerateComponentMap({
+          clientField: field,
+          createMappedComponent,
+          field: incomingField,
+          i18n,
+          importMap,
+          payload,
+          schemaPath: field._schemaPath,
+        })
+
+        field.richTextComponentMap = result
+      }
+      break
+    }
+
+    case 'tabs': {
+      const field = _field as unknown as TabsFieldClient
+
+      field.tabs = field.tabs?.map((tab) => {
+        const clientTab: ClientTab = { ...tab }
+
+        serverOnlyFieldProperties.forEach((key) => {
+          if (key in clientTab) {
+            delete clientTab[key]
+          }
+        })
+
+        clientTab.fields = createClientFieldConfigs({
+          createMappedComponent,
+          disableAddingID: true,
+          fields: tab.fields as unknown as Field[],
+          i18n,
+          importMap,
+          parentPath: field._path,
+          payload,
+        })
+
+        return clientTab
       })
 
       break
     }
 
     case 'select': {
-      // @ts-expect-error // TODO: see note in `ClientFieldConfig` about <Omit> breaking the inference here
+      const field = _field as SelectFieldClient
+
       field.options = field.options.map((option) => {
         if (typeof option === 'object' && typeof option.label === 'function') {
           return {
-            label: option.label({ t }),
+            label: option.label({ t: i18n.t }),
+            value: option.value,
+          }
+        }
+
+        return option
+      })
+
+      break
+    }
+
+    case 'radio': {
+      const field = _field as RadioFieldClient
+
+      field.options = field.options.map((option) => {
+        if (typeof option === 'object' && typeof option.label === 'function') {
+          return {
+            label: option.label({ t: i18n.t }),
             value: option.value,
           }
         }
@@ -188,11 +263,15 @@ export const createClientFieldConfig = ({
 
   const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
 
-  field.admin = { ...(field?.admin || ({} as any)) }
+  _field.admin = { ...(_field?.admin || ({} as any)) }
+
+  if (!_field.admin.components) {
+    _field.admin.components = {}
+  }
 
   serverOnlyFieldAdminProperties.forEach((key) => {
-    if (key in field.admin) {
-      delete field.admin[key]
+    if (key in _field.admin) {
+      delete _field.admin[key]
     }
   })
 
@@ -201,112 +280,110 @@ export const createClientFieldConfig = ({
       typeof incomingField.admin?.description === 'string' ||
       typeof incomingField.admin?.description === 'object'
     ) {
-      field.admin.description = incomingField.admin.description
+      _field.admin.description = incomingField.admin.description
     } else if (typeof incomingField.admin?.description === 'function') {
-      field.admin.description = incomingField.admin?.description({ t })
+      _field.admin.description = incomingField.admin?.description({ t: i18n.t })
     }
   }
 
-  if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
-    'Cell' in incomingField.admin.components &&
-    incomingField.admin.components.Cell &&
-    incomingField.admin.components.Cell !== undefined
-  ) {
-    field.admin.components.Cell = createMappedComponent(incomingField.admin.components.Cell)
+  if (!_field.admin.components.Cell && incomingField?.admin?.components?.Cell !== undefined) {
+    _field.admin.components.Cell = createMappedComponent(incomingField.admin.components.Cell)
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.Description &&
+    incomingField?.admin?.components &&
     'Description' in incomingField.admin.components &&
-    incomingField.admin.components.Description !== undefined
+    incomingField?.admin?.components?.Description !== undefined
   ) {
-    field.admin.components.Description = createMappedComponent(
+    _field.admin.components.Description = createMappedComponent(
       incomingField.admin.components.Description,
     )
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.Error &&
+    incomingField?.admin?.components &&
     'Error' in incomingField.admin.components &&
     incomingField.admin.components.Error !== undefined
   ) {
-    field.admin.components.Error = createMappedComponent(incomingField.admin.components.Error)
+    _field.admin.components.Error = createMappedComponent(incomingField.admin.components.Error)
+  }
+
+  if (!_field.admin.components.Field && incomingField?.admin?.components?.Field !== undefined) {
+    _field.admin.components.Field = createMappedComponent(incomingField.admin.components.Field)
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
-    'Field' in incomingField.admin.components &&
-    incomingField.admin.components.Field !== undefined
-  ) {
-    field.admin.components.Field = createMappedComponent(incomingField.admin.components.Field)
-  }
-
-  if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.Filter &&
+    incomingField?.admin?.components &&
     'Filter' in incomingField.admin.components &&
     incomingField.admin.components.Filter !== undefined
   ) {
-    field.admin.components.Filter = createMappedComponent(incomingField.admin.components.Filter)
+    _field.admin.components.Filter = createMappedComponent(incomingField.admin.components.Filter)
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.Label &&
+    incomingField?.admin?.components &&
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label !== undefined
   ) {
-    field.admin.components.Label = createMappedComponent(CustomLabel)
+    _field.admin.components.Label = createMappedComponent(CustomLabel)
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.beforeInput &&
+    incomingField?.admin?.components &&
     'beforeInput' in incomingField.admin.components &&
     incomingField.admin.components.beforeInput !== undefined
   ) {
-    field.admin.components.beforeInput = createMappedComponent(
+    _field.admin.components.beforeInput = createMappedComponent(
       incomingField.admin?.components?.beforeInput,
     )
   }
 
   if (
-    'admin' in incomingField &&
-    'components' in incomingField.admin &&
+    !_field.admin.components.afterInput &&
+    incomingField?.admin?.components &&
     'afterInput' in incomingField.admin.components &&
     incomingField.admin.components.afterInput !== undefined
   ) {
-    field.admin.components.afterInput = createMappedComponent(
+    _field.admin.components.afterInput = createMappedComponent(
       incomingField.admin?.components?.afterInput,
     )
   }
 
-  return field
+  return _field
 }
 
 export const createClientFieldConfigs = ({
   createMappedComponent,
   disableAddingID,
   fields,
+  i18n,
+  importMap,
   parentPath,
   payload,
-  t,
 }: {
   createMappedComponent: CreateMappedComponent
   disableAddingID?: boolean
   fields: Field[]
+  i18n: I18nClient
+  importMap: ImportMap
   parentPath?: string
   payload: Payload
-  t: TFunction
 }): ClientFieldConfig[] => {
   const result = [...fields]
     .map((field) =>
-      createClientFieldConfig({ createMappedComponent, field, parentPath, payload, t }),
+      createClientFieldConfig({
+        createMappedComponent,
+        field,
+        i18n,
+        importMap,
+        parentPath,
+        payload,
+      }),
     )
     .filter(Boolean)
 

@@ -1,6 +1,5 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
-import type { FormFieldBase, RichTextFieldClient } from 'payload'
 
 import {
   FieldDescription,
@@ -14,6 +13,7 @@ import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import './bundled.css'
@@ -24,11 +24,7 @@ const baseClass = 'rich-text-lexical'
 const RichTextComponent: React.FC<
   {
     readonly editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    readonly field: RichTextFieldClient
-    readonly name: string
-    readonly richTextComponentMap: Map<string, React.ReactNode>
-    readonly width?: string
-  } & FormFieldBase
+  } & LexicalRichTextFieldProps
 > = (props) => {
   const {
     descriptionProps,
@@ -46,6 +42,7 @@ const RichTextComponent: React.FC<
       label,
       required,
     },
+    field,
     labelProps,
     readOnly: readOnlyFromProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
@@ -109,7 +106,7 @@ const RichTextComponent: React.FC<
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
-            fieldProps={props}
+            field={field}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()

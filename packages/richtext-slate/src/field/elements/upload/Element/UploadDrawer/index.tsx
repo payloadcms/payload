@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
+import type { SlateFieldProps } from '../../../../types.js'
 import type { UploadElementType } from '../../types.js'
 
 import { uploadFieldsSchemaPath } from '../../shared.js'
@@ -29,10 +30,7 @@ import { uploadFieldsSchemaPath } from '../../shared.js'
 export const UploadDrawer: React.FC<{
   readonly drawerSlug: string
   readonly element: UploadElementType
-  readonly fieldProps: {
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  readonly fieldProps: SlateFieldProps
   readonly relatedCollection: ClientCollectionConfig
   readonly schemaPath: string
 }> = (props) => {
@@ -46,7 +44,9 @@ export const UploadDrawer: React.FC<{
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const { richTextComponentMap } = fieldProps
+  const {
+    field: { richTextComponentMap },
+  } = fieldProps
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
   const fields = richTextComponentMap.get(relatedFieldSchemaPath)

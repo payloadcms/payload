@@ -67,7 +67,9 @@ export const LinkButton: React.FC = () => {
   const drawerSlug = useDrawerSlug('rich-text-link')
   const { schemaPath } = useFieldProps()
 
-  const { richTextComponentMap } = fieldProps
+  const {
+    field: { richTextComponentMap },
+  } = fieldProps
 
   const fields = richTextComponentMap.get(linkFieldsSchemaPath)
 

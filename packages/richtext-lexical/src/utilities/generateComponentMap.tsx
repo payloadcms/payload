@@ -1,17 +1,17 @@
-import type { MappedComponent, MappedField, RichTextGenerateComponentMap } from 'payload'
+import type { ClientFieldConfig, MappedComponent, RichTextGenerateComponentMap } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
-import { createClientFieldConfigs } from 'packages/ui/src/providers/Config/createClientConfig/fields.js'
+import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextGenerateComponentMap =>
-  ({ config, createMappedComponent, field, i18n, importMap, schemaPath }) => {
+  ({ createMappedComponent, field, i18n, importMap, payload, schemaPath }) => {
     const componentMap: Map<
       string,
-      GeneratedFeatureProviderComponent[] | MappedComponent | MappedField[]
+      ClientFieldConfig[] | GeneratedFeatureProviderComponent[] | MappedComponent
     > = new Map()
 
     // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
@@ -30,8 +30,8 @@ export const getGenerateComponentMap =
             const components =
               typeof resolvedFeature.componentMap === 'function'
                 ? resolvedFeature.componentMap({
-                    config,
                     i18n,
+                    payload,
                     props: resolvedFeature.sanitizedServerFeatureProps,
                     schemaPath,
                   })
@@ -63,7 +63,7 @@ export const getGenerateComponentMap =
             typeof resolvedFeature.generateSchemaMap === 'function'
           ) {
             const schemas = resolvedFeature.generateSchemaMap({
-              config,
+              config: payload.config,
               field,
               i18n,
               props: resolvedFeature.sanitizedServerFeatureProps,
@@ -73,20 +73,19 @@ export const getGenerateComponentMap =
 
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
-                const fields = createClientFieldConfigs({
-                  config,
+                const clientFields = createClientFieldConfigs({
                   createMappedComponent,
                   disableAddingID: true,
-                  fieldSchema: fields,
+                  fields,
                   i18n,
                   importMap,
                   parentPath: `${schemaPath}.lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
-                  readOnly: false,
+                  payload,
                 })
 
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
-                  fields,
+                  clientFields,
                 )
               }
             }

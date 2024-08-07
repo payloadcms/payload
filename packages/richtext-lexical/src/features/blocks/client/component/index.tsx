@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlocksFieldProps, FormState } from 'payload'
+import type { BlocksFieldClient, BlocksFieldProps, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
@@ -52,13 +52,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const mappedBlock = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const blockFieldComponentProps: BlocksFieldProps = mappedBlock.fieldComponentProps
-
-  const reducedBlock = blockFieldComponentProps.blocks.find(
-    (block) => block.slug === formData.blockType,
-  )
+  const reducedBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
   const fields = reducedBlock.fields
 
   // Field Schema

@@ -11,8 +11,8 @@ import type {
 } from '../types.js'
 
 export type BlocksFieldClient = {
-  readonly blocks: ClientBlock[]
-  readonly label: StaticLabel
+  blocks: ClientBlock[]
+  label: StaticLabel
 } & Extract<ClientFieldConfig, { type: 'blocks' }>
 
 export type BlocksFieldProps = {

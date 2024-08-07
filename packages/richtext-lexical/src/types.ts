@@ -72,12 +72,10 @@ export type LexicalRichTextAdapterProvider =
     isRoot?: boolean
   }) => Promise<LexicalRichTextAdapter>
 
-export type FieldProps = {
-  fieldTypes: FieldTypes
-  indexPath: string
-  path?: string
-  permissions: FieldPermissions
-} & RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps>
+export type LexicalRichTextFieldProps = {
+  admin: LexicalFieldAdminProps
+  lexicalEditorConfig: LexicalEditorConfig
+} & RichTextFieldProps
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

@@ -1,14 +1,16 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
   EditViewProps,
   Field,
+  ImportMap,
   Payload,
   SanitizedConfig,
   ServerOnlyGlobalAdminProperties,
   ServerOnlyGlobalProperties,
 } from 'payload'
+import type React from 'react'
 
 import { createClientFieldConfigs } from './fields.js'
 
@@ -16,22 +18,25 @@ export const createClientGlobalConfig = ({
   DefaultEditView,
   createMappedComponent,
   global,
+  i18n,
+  importMap,
   payload,
-  t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   createMappedComponent: CreateMappedComponent
   global: SanitizedConfig['globals'][0]
+  i18n: I18nClient
+  importMap: ImportMap
   payload: Payload
-  t: TFunction
 }): ClientGlobalConfig => {
   const sanitized: ClientGlobalConfig = { ...(global as any as ClientGlobalConfig) } // invert the type
 
   sanitized.fields = createClientFieldConfigs({
     createMappedComponent,
     fields: sanitized.fields as any as Field[], // invert the type
+    i18n,
+    importMap,
     payload,
-    t,
   })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
@@ -145,15 +150,24 @@ export const createClientGlobalConfigs = ({
   DefaultEditView,
   createMappedComponent,
   globals,
+  i18n,
+  importMap,
   payload,
-  t,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   createMappedComponent: CreateMappedComponent
   globals: SanitizedConfig['globals']
+  i18n: I18nClient
+  importMap: ImportMap
   payload: Payload
-  t: TFunction
 }): ClientGlobalConfig[] =>
   globals.map((global) =>
-    createClientGlobalConfig({ DefaultEditView, createMappedComponent, global, payload, t }),
+    createClientGlobalConfig({
+      DefaultEditView,
+      createMappedComponent,
+      global,
+      i18n,
+      importMap,
+      payload,
+    }),
   )

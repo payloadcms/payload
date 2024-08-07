@@ -4,13 +4,13 @@ import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { ErrorComponent } from '../forms/Error.js'
 
 export type RowFieldClient = {
-  readonly fields: ClientFieldConfig[]
-} & Extract<ClientFieldConfig, { type: 'row' }>
+  fields: ClientFieldConfig[]
+} & Omit<Extract<ClientFieldConfig, { type: 'row' }>, 'fields'>
 
 export type RowFieldProps = {
-  readonly field: RowFieldClient
-  readonly forceRender?: boolean
-  readonly indexPath: string
+  field: RowFieldClient
+  forceRender?: boolean
+  indexPath: string
 } & FormFieldBase
 
 export type RowFieldLabelComponent = LabelComponent<'row'>

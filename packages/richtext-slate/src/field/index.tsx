@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from 'payload'
+import type { RichTextFieldProps } from 'payload'
 
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
@@ -16,20 +16,17 @@ const RichTextEditor = lazy(() =>
   })),
 )
 
-export const RichTextField: React.FC<
-  {
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
-> = (props) => {
-  const { richTextComponentMap } = props
+export const RichTextField: React.FC<RichTextFieldProps> = (props) => {
+  const {
+    field: { richTextComponentMap },
+  } = props
 
   const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedPlugins, setHasLoadedPlugins] = useState(false)
 
   const [features] = useState<EnabledFeatures>(() => {
-    return createFeatureMap(richTextComponentMap)
+    return createFeatureMap(richTextComponentMap as any)
   })
 
   const [plugins, setPlugins] = useState<RichTextPlugin[]>([])
