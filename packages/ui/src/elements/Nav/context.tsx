@@ -33,7 +33,7 @@ export const NavProvider: React.FC<{
   children: React.ReactNode
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
-  let {
+  const {
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
@@ -44,21 +44,7 @@ export const NavProvider: React.FC<{
   // this is because getting the preference is async
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(() => {
-    if (typeof window !== 'undefined' && window) {
-      if (largeBreak === undefined) {
-        largeBreak = window.innerWidth <= 1440
-      }
-      if (midBreak === undefined) {
-        midBreak = window.innerWidth <= 1024
-      }
-      if (smallBreak === undefined) {
-        smallBreak = window.innerWidth <= 768
-      }
-    }
-
-    return initialIsOpen && !largeBreak && !midBreak && !smallBreak
-  })
+  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
