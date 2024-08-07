@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.0.0-beta.73",
+  "version": "3.0.0-beta.74",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -67,8 +67,8 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
+    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
   "publishConfig": {
     "exports": {

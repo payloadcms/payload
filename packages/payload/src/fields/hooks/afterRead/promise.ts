@@ -205,6 +205,7 @@ export const promise = async ({
                 collection,
                 context,
                 data: doc,
+                draft,
                 field,
                 findMany,
                 global,
@@ -214,6 +215,7 @@ export const promise = async ({
                 path: fieldPath,
                 req,
                 schemaPath: fieldSchemaPath,
+                showHiddenFields,
                 siblingData: siblingDoc,
                 value,
               })
@@ -230,6 +232,7 @@ export const promise = async ({
             collection,
             context,
             data: doc,
+            draft,
             field,
             findMany,
             global,
@@ -239,6 +242,7 @@ export const promise = async ({
             path: fieldPath,
             req,
             schemaPath: fieldSchemaPath,
+            showHiddenFields,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
           })

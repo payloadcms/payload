@@ -125,19 +125,6 @@ describe('admin1', () => {
       await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
     })
 
-    test('should render payload favicons', async () => {
-      await page.goto(postsUrl.admin)
-      const favicons = page.locator('link[rel="icon"]')
-      await expect(favicons).toHaveCount(4)
-      await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
-      await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')
-      await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute(
-        'href',
-        /\/payload-favicon-light\.[a-z\d]+\.png/,
-      )
-    })
-
     test('should render custom meta description from root config', async () => {
       await page.goto(`${serverURL}/admin`)
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
@@ -159,10 +146,11 @@ describe('admin1', () => {
     test('should render custom favicons', async () => {
       await page.goto(postsUrl.admin)
       const favicons = page.locator('link[rel="icon"]')
-      await expect(favicons).toHaveCount(4)
-      await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
-      await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+
+      await expect(favicons).toHaveCount(2)
+      await expect(favicons.nth(0)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
+      await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
+      await expect(favicons.nth(1)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
     })
 
     test('should render custom og:title from root config', async () => {

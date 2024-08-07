@@ -4,11 +4,11 @@
   &__table {
     border-collapse: collapse;
     border-spacing: 0;
-    max-width: 100%;
     overflow-y: scroll;
+    overflow-x: scroll;
     table-layout: fixed;
-    width: calc(100% - 25px);
-    margin: 30px 0;
+    width: max-content;
+    margin: 0 25px 30px 0;
 
     ::selection {
       background: rgba(172, 206, 247);
@@ -81,35 +81,39 @@
   }
 
   &__tableAddColumns {
-    position: absolute;
-    top: 0;
-    width: 20px;
-    background-color: #eee;
     height: 100%;
-    right: 0;
+  }
+
+  &__tableAddColumns, &__tableAddRows {
+    position: absolute;
+    background-color: var(--theme-elevation-100);
     animation: table-controls 0.2s ease;
     border: 0;
     cursor: pointer;
+    min-width: 24px;
+    min-height: 24px;
   }
 
-  &__tableAddColumns:hover {
-    background-color: #c9dbf0;
+  &__tableAddColumns:after, &__tableAddRows:after {
+    background-image: url(../../../../lexical/ui/icons/Add/index.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    display: block;
+    content: ' ';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+  }
+
+  &__tableAddColumns:hover, &__tableAddRows:hover {
+    background-color: var(--theme-elevation-200);
   }
 
   &__tableAddRows {
-    position: absolute;
-    bottom: -25px;
     width: calc(100% - 25px);
-    background-color: #eee;
-    height: 20px;
-    left: 0;
-    animation: table-controls 0.2s ease;
-    border: 0;
-    cursor: pointer;
-  }
-
-  &__tableAddRows:hover {
-    background-color: #c9dbf0;
   }
 
   @keyframes table-controls {
@@ -161,6 +165,10 @@ html[data-theme='dark'] {
   .LexicalEditorTheme {
     &__tableCellHeader {
       background-color: var(--theme-elevation-50);
+    }
+
+    &__tableAddColumns:after, &__tableAddRows:after {
+      background-image: url(../../../../lexical/ui/icons/Add/light.svg);
     }
   }
 }

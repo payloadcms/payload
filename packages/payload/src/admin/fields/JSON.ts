@@ -11,7 +11,7 @@ export type JSONFieldClient = {
 export type JSONFieldProps = {
   readonly field: JSONFieldClient
   readonly validate?: JSONFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type JSONFieldLabelComponent = LabelComponent<'json'>
 

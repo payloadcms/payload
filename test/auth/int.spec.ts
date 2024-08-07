@@ -371,7 +371,21 @@ describe('Auth', () => {
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 
@@ -394,7 +408,21 @@ describe('Auth', () => {
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 

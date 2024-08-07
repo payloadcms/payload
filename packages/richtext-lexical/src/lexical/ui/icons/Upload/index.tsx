@@ -19,7 +19,7 @@ export const UploadIcon: React.FC = () => (
     />
     <path
       d="M7.99984 9.33366C8.73622 9.33366 9.33317 8.73671 9.33317 8.00033C9.33317 7.26395 8.73622 6.66699 7.99984 6.66699C7.26346 6.66699 6.6665 7.26395 6.6665 8.00033C6.6665 8.73671 7.26346 9.33366 7.99984 9.33366Z"
-      stroke="#currentColor"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

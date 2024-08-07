@@ -13,7 +13,7 @@ export type RadioFieldProps = {
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type OnChange<T = string> = (value: T) => void
 

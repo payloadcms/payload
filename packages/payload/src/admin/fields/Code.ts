@@ -12,7 +12,7 @@ export type CodeFieldProps = {
   readonly autoComplete?: string
   readonly field: CodeFieldClient
   readonly validate?: CodeFieldValidation
-} & FormFieldBase
+} &  Omit<FormFieldBase, 'validate'>
 
 export type CodeFieldLabelComponent = LabelComponent<'code'>
 

@@ -11,7 +11,7 @@ export type PointFieldClient = {
 export type PointFieldProps = {
   readonly field: PointFieldClient
   readonly validate?: PointFieldValidation
-} & FormFieldBase
+} &  Omit<FormFieldBase, 'validate'>
 
 export type PointFieldLabelComponent = LabelComponent<'point'>
 

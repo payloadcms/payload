@@ -12,7 +12,7 @@ export type NumberFieldProps = {
   readonly field: NumberFieldClient
   readonly onChange?: (e: number) => void
   readonly validate?: NumberFieldValidation
-} & FormFieldBase
+} &  Omit<FormFieldBase, 'validate'>
 
 export type NumberFieldLabelComponent = LabelComponent<'number'>
 

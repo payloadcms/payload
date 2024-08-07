@@ -7,15 +7,18 @@ import type { SerializedListItemNode, SerializedListNode } from './plugin/index.
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
-  converter: async ({ converters, node, parent, req }) => {
+  converter: async ({ converters, draft, node, overrideAccess, parent, req, showHiddenFields }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
+      draft,
       lexicalNodes: node.children,
+      overrideAccess,
       parent: {
         ...node,
         parent,
       },
       req,
+      showHiddenFields,
     })
 
     return `<${node?.tag} class="list-${node?.listType}">${childrenText}</${node?.tag}>`
@@ -24,17 +27,20 @@ export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
 }
 
 export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
-  converter: async ({ converters, node, parent, req }) => {
+  converter: async ({ converters, draft, node, overrideAccess, parent, req, showHiddenFields }) => {
     const hasSubLists = node.children.some((child) => child.type === 'list')
 
     const childrenText = await convertLexicalNodesToHTML({
       converters,
+      draft,
       lexicalNodes: node.children,
+      overrideAccess,
       parent: {
         ...node,
         parent,
       },
       req,
+      showHiddenFields,
     })
 
     if ('listType' in parent && parent?.listType === 'check') {

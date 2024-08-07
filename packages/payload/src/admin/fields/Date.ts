@@ -11,7 +11,7 @@ export type DateFieldClient = {
 export type DateFieldProps = {
   readonly field: DateFieldClient
   readonly validate?: DateFieldValidation
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type DateFieldLabelComponent = LabelComponent<'date'>
 

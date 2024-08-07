@@ -160,7 +160,16 @@ export const lexicalHTML: (
     },
     hooks: {
       afterRead: [
-        async ({ collection, field, global, req, siblingData }) => {
+        async ({
+          collection,
+          draft,
+          field,
+          global,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingData,
+        }) => {
           const fields = collection ? collection.fields : global.fields
 
           const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
@@ -209,7 +218,10 @@ export const lexicalHTML: (
           return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
+            draft,
+            overrideAccess,
             req,
+            showHiddenFields,
           })
         },
       ],

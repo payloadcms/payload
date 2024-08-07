@@ -14,7 +14,7 @@ export type RichTextFieldProps = {
   readonly name: string
   readonly validate?: RichTextFieldValidation
   readonly width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type RichTextFieldLabelComponent = LabelComponent<'richText'>
 
