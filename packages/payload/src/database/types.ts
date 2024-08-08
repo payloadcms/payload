@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { Document, JoinQuery, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
@@ -178,6 +178,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: string
+  joins?: JoinQuery
   locale?: string
   req: PayloadRequest
   where?: Where
@@ -187,6 +188,7 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | n
 
 export type FindArgs = {
   collection: string
+  joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   locale?: string

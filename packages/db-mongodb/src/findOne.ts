@@ -9,7 +9,7 @@ import { withSession } from './withSession.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, joins, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
   const options: MongooseQueryOptions = {
@@ -29,7 +29,13 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result = await setJoins({ collection, doc, options, payload: this.payload, req })
+  let result = await setJoins({
+    collection,
+    doc,
+    joins,
+    options,
+    payload: this.payload,
+  })
 
   result = JSON.parse(JSON.stringify(result))
 

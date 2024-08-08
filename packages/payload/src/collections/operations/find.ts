@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -20,6 +20,7 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
+  joins?: JoinQuery
   limit?: number
   overrideAccess?: boolean
   page?: number
@@ -60,6 +61,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftsEnabled,
+      joins,
       limit,
       overrideAccess,
       page,
@@ -140,6 +142,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        joins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,

@@ -80,14 +80,38 @@ export default buildConfigWithDefaults({
       collection: 'categories',
       data: {
         name: 'example',
+        group: {},
       },
     })
 
-    await payload.create({
+    const post1 = await payload.create({
       collection: 'posts',
       data: {
         category: category.id,
-        title: 'example post',
+        group: {
+          category: category.id,
+        },
+        title: 'test',
+      },
+    })
+    const post2 = await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        group: {
+          category: category.id,
+        },
+        title: 'test',
+      },
+    })
+    const post3 = await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        group: {
+          category: category.id,
+        },
+        title: 'test',
       },
     })
   },

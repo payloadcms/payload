@@ -1,5 +1,5 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -18,6 +18,7 @@ export type Arguments = {
   disableErrors?: boolean
   draft?: boolean
   id: number | string
+  joins?: JoinQuery
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -53,6 +54,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      joins,
       overrideAccess = false,
       req: { fallbackLocale, locale, t },
       req,
@@ -72,6 +74,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      joins,
       locale,
       req: {
         transactionID: req.transactionID,

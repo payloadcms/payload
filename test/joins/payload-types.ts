@@ -29,6 +29,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -40,6 +41,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -50,6 +52,9 @@ export interface Post {
   id: string;
   title?: string | null;
   category?: (string | null) | Category;
+  group?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -61,6 +66,9 @@ export interface Category {
   id: string;
   name?: string | null;
   posts?: (string | Post)[] | null;
+  group?: {
+    posts?: (string | Post)[] | null;
+  };
   updatedAt: string;
   createdAt: string;
 }

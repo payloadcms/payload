@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { Category } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -13,6 +14,7 @@ let restClient: NextRESTClient
 const { email, password } = devUser
 
 describe('Joins Field Tests', () => {
+  let category: Category
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -30,6 +32,45 @@ describe('Joins Field Tests', () => {
       .then((res) => res.json())
 
     token = data.token
+
+    category = await payload.create({
+      collection: 'categories',
+      data: {
+        name: 'example',
+        group: {},
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        group: {
+          category: category.id,
+        },
+        title: 'test',
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        group: {
+          category: category.id,
+        },
+        title: 'test',
+      },
+    })
+    await payload.create({
+      collection: 'posts',
+      data: {
+        category: category.id,
+        group: {
+          category: category.id,
+        },
+        title: 'test',
+      },
+    })
   })
 
   afterAll(async () => {
@@ -39,45 +80,6 @@ describe('Joins Field Tests', () => {
   })
 
   it('should populate joins', async () => {
-    const category = await payload.create({
-      collection: 'categories',
-      data: {
-        name: 'example',
-        group: {},
-      },
-    })
-
-    const post1 = await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        group: {
-          category: category.id,
-        },
-        title: 'test',
-      },
-    })
-    const post2 = await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        group: {
-          category: category.id,
-        },
-        title: 'test',
-      },
-    })
-    const post3 = await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        group: {
-          category: category.id,
-        },
-        title: 'test',
-      },
-    })
-
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: 'categories',
@@ -93,5 +95,14 @@ describe('Joins Field Tests', () => {
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
+  })
+
+  describe('REST', () => {
+    it('should paginate joins', async () => {
+      const response = await restClient
+        .GET(`/categories/${category.id}?joins[posts][limit]=1`)
+        .then((res) => res.json())
+      expect(response.posts).toHaveLength(1)
+    })
   })
 })

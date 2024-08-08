@@ -1,12 +1,12 @@
 import type { MongooseQueryOptions } from 'mongoose'
-import type { Document, Payload, PayloadRequest } from 'payload'
+import type { Document, JoinQuery, Payload } from 'payload'
 
 type Args = {
   collection: string
   doc: Document
+  joins: JoinQuery
   options: MongooseQueryOptions
   payload: Payload
-  req: PayloadRequest
 }
 
 // TODO: pass in queryParam called `joins` to specify the pagination of each join
@@ -17,23 +17,37 @@ type Args = {
  * @param collection
  * @param doc
  * @param options
+ * @param joins,
  * @param payload
- * @param req
  */
 export const setJoins = async ({
   collection,
   doc,
+  joins = {},
   options,
   payload,
-  req,
 }: Args): Promise<Document> => {
-  const joins = payload.collections[collection].joins
+  const joinConfig = payload.collections[collection].joins
 
   await Promise.all(
-    Object.keys(joins).map(async (slug) => {
+    Object.keys(joinConfig).map(async (slug) => {
       const joinModel = payload.db.collections[slug]
+      const { defaultSort } = payload.collections[slug].config
 
-      for (const join of joins[slug]) {
+      for (const join of joinConfig[slug]) {
+        // get the query options for the join off of req
+        // TODO: allow disabling the join completely
+        // if (joins[join.schemaPath] === false || req.query[join.schemaPath] === 'false') {
+        //   continue
+        // }
+
+        const { limit, page, sort } = {
+          limit: 10,
+          page: 1,
+          sort: defaultSort,
+          ...(joins[join.schemaPath] ?? {}),
+        }
+
         const joinData = await joinModel
           .find(
             { [join.field.on]: { $eq: doc._id.toString() } },
@@ -42,7 +56,9 @@ export const setJoins = async ({
             },
             options,
           )
-          .limit(10)
+          .sort(sort === 'id' ? '_id' : sort)
+          .skip((page - 1) * limit)
+          .limit(limit)
 
         // iterate schemaPath and assign to the document
         const path = join.schemaPath.split('.')
