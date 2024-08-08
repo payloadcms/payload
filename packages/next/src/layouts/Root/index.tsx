@@ -1,12 +1,13 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { createClientConfig, parseCookies } from 'payload'
+import { createClientConfig, createLocalReq, parseCookies } from 'payload'
+import * as qs from 'qs-esm'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -51,6 +52,20 @@ export const RootLayout = async ({
     context: 'client',
     language: languageCode,
   })
+
+  const req = await createLocalReq(
+    {
+      fallbackLocale: null,
+      req: {
+        headers,
+        host: headers.get('host'),
+        i18n,
+        url: `${payload.config.serverURL}`,
+      } as PayloadRequest,
+    },
+    payload,
+  )
+  const { permissions, user } = await payload.auth({ headers, req })
 
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
@@ -100,9 +115,11 @@ export const RootLayout = async ({
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          permissions={permissions}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}
+          user={user}
         >
           {wrappedChildren}
         </RootProvider>

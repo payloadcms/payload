@@ -18,6 +18,11 @@ export type Args = {
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
@@ -100,6 +105,11 @@ export type SQLiteAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
@@ -139,6 +149,11 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string

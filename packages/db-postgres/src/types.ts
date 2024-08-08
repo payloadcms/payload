@@ -33,6 +33,11 @@ export type Args = {
   logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push?: boolean
   relationshipsSuffix?: string
   /**
@@ -136,6 +141,11 @@ export type PostgresAdapter = {
   pgSchema?: Schema
   pool: Pool
   poolOptions: Args['pool']
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
@@ -178,6 +188,11 @@ declare module 'payload' {
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
     poolOptions: Args['pool']
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string
