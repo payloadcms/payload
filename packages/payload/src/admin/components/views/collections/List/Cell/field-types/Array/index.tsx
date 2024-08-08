@@ -12,7 +12,11 @@ const ArrayCell: React.FC<CellComponentProps<ArrayField, Record<string, unknown>
 }) => {
   const { i18n, t } = useTranslation('general')
   const arrayFields = data ?? []
-  const label = `${arrayFields.length} ${getTranslation(field?.labels?.plural || t('rows'), i18n)}`
+
+  const label =
+    arrayFields.length === 1
+      ? `${arrayFields.length} ${getTranslation(field?.labels?.singular || t('row'), i18n)}`
+      : `${arrayFields.length} ${getTranslation(field?.labels?.plural || t('rows'), i18n)}`
 
   return <span>{label}</span>
 }
