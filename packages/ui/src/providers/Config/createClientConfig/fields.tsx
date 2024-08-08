@@ -446,9 +446,9 @@ export const createClientFieldConfigs = ({
         },
         disableBulkEdit: true,
         hidden: true,
+        label: 'ID',
       },
       hidden: true,
-      label: 'ID',
       localized: undefined,
     })
   }
