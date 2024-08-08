@@ -189,7 +189,7 @@ export const DefaultEditView: React.FC = () => {
     },
     [apiRoute, collectionSlug, schemaPath, getDocPreferences, globalSlug, id, operation, serverURL],
   )
-  console.log(validateBeforeSubmit)
+
   return (
     <main className={classes}>
       <OperationProvider operation={operation}>
