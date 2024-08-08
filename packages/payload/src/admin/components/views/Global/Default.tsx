@@ -65,7 +65,7 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   }, [global.slug, location.pathname, global?.admin?.components?.views?.Edit, setViewActions])
 
   return (
-    <main className={baseClass}>
+    <main className={`${baseClass} ${baseClass}--${global.slug}`}>
       <OperationContext.Provider value="update">
         <SetStepNav global={global} />
         <Form
