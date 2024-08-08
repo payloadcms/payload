@@ -32,6 +32,18 @@ const RelationshipFields: CollectionConfig = {
       },
     },
     {
+      name: 'relationNoHasManyNonPolymorphic',
+      relationTo: 'text-fields',
+      type: 'relationship',
+      hasMany: false,
+    },
+    {
+      name: 'relationHasManyNonPolymorphic',
+      relationTo: 'text-fields',
+      type: 'relationship',
+      hasMany: true,
+    },
+    {
       name: 'relationToSelf',
       relationTo: relationshipFieldsSlug,
       type: 'relationship',

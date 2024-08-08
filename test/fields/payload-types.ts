@@ -955,6 +955,8 @@ export interface RelationshipField {
           }
       )[]
     | null
+  relationNoHasManyNonPolymorphic?: (string | null) | TextField
+  relationHasManyNonPolymorphic?: (string | TextField)[] | null
   relationToSelf?: (string | null) | RelationshipField
   relationToSelfSelectOnly?: (string | null) | RelationshipField
   relationWithDynamicDefault?: (string | null) | User

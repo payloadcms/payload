@@ -244,9 +244,6 @@ describe('Fields', () => {
         },
       })
 
-      const anyChildren = await payload.find({
-        collection: relationshipFieldsSlug,
-      })
       const allChildren = await payload.find({
         collection: relationshipFieldsSlug,
         where: {
@@ -1557,7 +1554,47 @@ describe('Fields', () => {
     })
   })
 
-  describe('relationships', () => {
+  describe('relationship queries', () => {
+    let textDoc
+    let otherTextDoc
+    let relationshipDocWithNonPolyOne
+    let relationshipDocWithNonPolyTwo
+    const textDocText = 'text document'
+    const otherTextDocText = 'alt text'
+
+    beforeEach(async () => {
+      textDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: textDocText,
+        },
+      })
+      otherTextDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: otherTextDocText,
+        },
+      })
+      const relationship = { relationTo: 'text-fields', value: textDoc.id }
+      relationshipDocWithNonPolyOne = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          relationNoHasManyNonPolymorphic: textDoc.id,
+          relationHasManyNonPolymorphic: textDoc.id,
+        },
+      })
+
+      relationshipDocWithNonPolyTwo = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          relationNoHasManyNonPolymorphic: otherTextDoc.id,
+          relationHasManyNonPolymorphic: otherTextDoc.id,
+        },
+      })
+    })
+
     it('should not crash if querying with empty in operator', async () => {
       const query = await payload.find({
         collection: 'relationship-fields',
@@ -1569,6 +1606,25 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+
+    it('should properly query non-polymorphic relationship with not equals', async () => {
+      const withoutHasMany = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationNoHasManyNonPolymorphic: { not_equals: otherTextDoc.id },
+        },
+      })
+
+      const withHasMany = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationHasManyNonPolymorphic: { not_equals: textDoc.id },
+        },
+      })
+
+      expect(withoutHasMany.docs).toHaveLength(1)
+      expect(withHasMany.docs).toHaveLength(1)
     })
   })
 
