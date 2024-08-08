@@ -20,8 +20,8 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         autoComplete="email"
         field={{
           name: 'email',
+          _path: 'email',
           label: t('general:email'),
-          path: 'email',
           required,
         }}
         validate={email}
@@ -34,8 +34,8 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         field={{
           name: 'username',
+          _path: 'username',
           label: t('authentication:username'),
-          path: 'username',
           required,
         }}
         validate={username}
@@ -48,8 +48,8 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         field={{
           name: 'username',
+          _path: 'username',
           label: t('authentication:emailOrUsername'),
-          path: 'username',
           required,
         }}
         validate={(value, options) => {

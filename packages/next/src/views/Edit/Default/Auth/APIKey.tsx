@@ -42,7 +42,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           config,
         },
         t,
-      } as PayloadRequest,
+      } as unknown as PayloadRequest,
       siblingData: {},
     })
 
@@ -99,7 +99,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
         <FieldLabel
-          CustomLabel={{
+          Label={{
             type: 'client',
             Component: null,
             RenderedComponent: APIKeyLabel,

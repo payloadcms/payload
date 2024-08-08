@@ -28,11 +28,15 @@ export const buildVersionColumns = ({
 
   const columns: Column[] = [
     {
-      name: '',
-      type: 'date',
       Label: '',
       accessor: 'updatedAt',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'date',
+        },
+      },
       components: {
         Cell: {
           type: 'client',
@@ -49,11 +53,15 @@ export const buildVersionColumns = ({
       },
     },
     {
-      name: '',
-      type: 'text',
       Label: '',
       accessor: 'id',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'text',
+        },
+      },
       components: {
         Cell: {
           type: 'client',
@@ -70,11 +78,15 @@ export const buildVersionColumns = ({
     (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
   ) {
     columns.push({
-      name: '',
-      type: 'checkbox',
       Label: '',
       accessor: '_status',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'checkbox',
+        },
+      },
       components: {
         Cell: {
           type: 'client',

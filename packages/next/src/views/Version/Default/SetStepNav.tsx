@@ -5,6 +5,7 @@ import type React from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
+import { fieldAffectsData } from 'payload/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
@@ -39,13 +40,12 @@ export const SetStepNav: React.FC<{
       if (formattedDoc) {
         if (useAsTitle !== 'id') {
           const titleField = fields.find((f) => {
-            const { isFieldAffectingData } = f
             const fieldName = 'name' in f ? f.name : undefined
-            return Boolean(isFieldAffectingData && fieldName === useAsTitle)
+            return Boolean(fieldAffectsData(f) && fieldName === useAsTitle)
           })
 
           if (titleField && formattedDoc[useAsTitle]) {
-            if (titleField.localized) {
+            if ('localized' in titleField && titleField.localized) {
               docLabel = formattedDoc[useAsTitle]?.[locale.code]
             } else {
               docLabel = formattedDoc[useAsTitle]
