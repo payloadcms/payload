@@ -49,9 +49,6 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
       <CheckboxField
         checked={checked}
         field={{
-          name: 'checkbox',
-          type: 'checkbox',
-          _schemaPath: path,
           label: t('general:fallbackToDefaultLocale'),
         }}
         id={`field-${path.replace(/\./g, '__')}`}

@@ -24,7 +24,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
   customCellContext,
   field,
-  field: { _schemaPath, label, relationTo },
+  field: { label, relationTo },
 }) => {
   const { config } = useConfig()
   const { collections, routes } = config
