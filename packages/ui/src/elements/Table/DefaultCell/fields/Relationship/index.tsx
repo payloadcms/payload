@@ -21,7 +21,9 @@ export interface RelationshipCellProps extends DefaultCellComponentProps<any> {}
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
-  field: { label, relationTo },
+  customCellContext,
+  field,
+  field: { _schemaPath, label, relationTo },
 }) => {
   const { config } = useConfig()
   const { collections, routes } = config
@@ -88,11 +90,13 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         })
 
         let fileField = null
-        if (fieldType === 'upload') {
-          const { name, customCellContext, displayPreview, schemaPath } = props
+
+        if (field.type === 'upload') {
+          const { name, displayPreview } = field
           const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
           const previewAllowed =
             displayPreview || (relatedCollectionPreview && displayPreview !== false)
+
           if (previewAllowed && document) {
             fileField = (
               <FileCell
@@ -100,7 +104,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
                 customCellContext={customCellContext}
                 name={name}
                 rowData={document}
-                schemaPath={schemaPath}
+                schemaPath={_schemaPath}
               />
             )
           }
