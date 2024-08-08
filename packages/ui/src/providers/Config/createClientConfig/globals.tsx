@@ -123,33 +123,37 @@ export const createClientGlobalConfig = ({
       'Edit' in global.admin.components.views &&
       'Default' in global.admin.components.views.Edit
 
-    clientGlobal.admin.components.views.Edit = {
-      Default: {
-        Component: createMappedComponent(
-          hasEditView &&
-            'Component' in global.admin.components.views.Edit.Default &&
-            global.admin.components.views.Edit.Default.Component,
-          {
-            globalSlug: global.slug,
-          },
-          DefaultEditView,
-          'global.admin.components.views.Edit.Default',
-        ),
-        ...(hasEditView &&
-        'actions' in global.admin.components.views.Edit.Default &&
-        global.admin.components.views.Edit.Default.actions
-          ? {
-              actions: global.admin.components.views.Edit.Default.actions.map((Component) =>
-                createMappedComponent(
-                  Component,
-                  undefined,
-                  undefined,
-                  'global.admin.components.views.Edit.Default.actions',
-                ),
-              ),
-            }
-          : {}),
-      },
+    if (!clientGlobal.admin.components.views.Edit) {
+      clientGlobal.admin.components.views.Edit =
+        {} as ClientGlobalConfig['admin']['components']['views']['Edit']
+    }
+
+    clientGlobal.admin.components.views.Edit.Default = {
+      Component: createMappedComponent(
+        hasEditView &&
+          'Component' in global.admin.components.views.Edit.Default &&
+          global.admin.components.views.Edit.Default.Component,
+        {
+          globalSlug: global.slug,
+        },
+        DefaultEditView,
+        'global.admin.components.views.Edit.Default',
+      ),
+    }
+    if (
+      hasEditView &&
+      'actions' in global.admin.components.views.Edit.Default &&
+      global.admin.components.views.Edit.Default.actions
+    ) {
+      clientGlobal.admin.components.views.Edit.Default.actions =
+        global.admin.components.views.Edit.Default.actions.map((Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'global.admin.components.views.Edit.Default.actions',
+          ),
+        )
     }
 
     if (
