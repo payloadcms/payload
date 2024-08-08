@@ -276,10 +276,13 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            body: JSON.stringify(data),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
             },
+            method: 'post',
           })
 
           const json: DocumentPermissions = await res.json()
@@ -287,14 +290,13 @@ const DocumentInfo: React.FC<
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
             {
               body: JSON.stringify({
-                data: {
-                  ...(data || {}),
-                  _status: 'published',
-                },
+                ...(data || {}),
+                _status: 'published',
               }),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
               },
               method: 'POST',
             },
