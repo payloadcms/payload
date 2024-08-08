@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
 
 import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -120,7 +121,9 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
+                {Description ? (
+                  <div className={`${baseClass}__sub-header`}>{Description}</div>
+                ) : null}
               </Fragment>
             )}
           </header>
