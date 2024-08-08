@@ -103,7 +103,15 @@ export const DefaultEditView: React.FC = () => {
   const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
   const [schemaPath, setSchemaPath] = React.useState(entitySlug)
-  const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(false)
+  const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
+    if (
+      operation === 'create' &&
+      collectionConfig.auth &&
+      !collectionConfig.auth.disableLocalStrategy
+    )
+      return true
+    return false
+  })
 
   const onSave = useCallback(
     (json) => {

@@ -10,7 +10,7 @@ export const getGenerateComponentMap =
   (args: {
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateComponentMap'] =>
-  ({ WithServerSideProps, config, i18n, schemaPath }) => {
+  ({ WithServerSideProps, config, i18n, payload, schemaPath }) => {
     const componentMap = new Map()
 
     // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
@@ -35,6 +35,7 @@ export const getGenerateComponentMap =
             const components = resolvedFeature.generateComponentMap({
               config,
               i18n,
+              payload,
               props: resolvedFeature.sanitizedServerFeatureProps,
               schemaPath,
             })
@@ -80,6 +81,7 @@ export const getGenerateComponentMap =
                   fieldSchema: fields,
                   i18n,
                   parentPath: `${schemaPath}.lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
+                  payload,
                   readOnly: false,
                 })
 

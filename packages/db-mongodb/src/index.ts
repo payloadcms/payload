@@ -8,7 +8,7 @@ import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload'
 
-import type { CollectionModel, GlobalModel } from './types.js'
+import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
@@ -78,6 +78,11 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -90,6 +95,11 @@ export type MongooseAdapter = {
   connection: Connection
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   sessions: Record<number | string, ClientSession>
   versions: {
     [slug: string]: CollectionModel
@@ -107,6 +117,11 @@ declare module 'payload' {
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
     versions: {
@@ -121,6 +136,7 @@ export function mongooseAdapter({
   disableIndexHints = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
+  prodMigrations,
   transactionOptions = {},
   url,
 }: Args): DatabaseAdapterObj {
@@ -167,6 +183,7 @@ export function mongooseAdapter({
       migrateFresh,
       migrationDir,
       payload,
+      prodMigrations,
       queryDrafts,
       rollbackTransaction,
       updateGlobal,

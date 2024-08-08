@@ -1,10 +1,10 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
 import { createRequire } from 'module'
 import path from 'path'
-import { getPredefinedMigration } from 'payload'
+import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
@@ -25,7 +25,7 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const { generateSQLiteDrizzleJson, generateSQLiteMigration } = require('drizzle-kit/payload')
+  const { generateSQLiteDrizzleJson, generateSQLiteMigration } = require('drizzle-kit/api')
   const drizzleJsonAfter = await generateSQLiteDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -112,5 +112,8 @@ export const createMigration: CreateMigration = async function createMigration(
       upSQL: upSQL || `  // Migration code`,
     }),
   )
+
+  writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+
   payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
 }

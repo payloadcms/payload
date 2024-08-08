@@ -115,9 +115,23 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
           depth: 0,
           limit: 1,
           where: {
-            key: {
-              equals: preferencesKey,
-            },
+            and: [
+              {
+                key: {
+                  equals: preferencesKey,
+                },
+              },
+              {
+                'user.relationTo': {
+                  equals: req.user.collection,
+                },
+              },
+              {
+                'user.value': {
+                  equals: req.user.id,
+                },
+              },
+            ],
           },
         })) as unknown as { docs: { value: DocumentPreferences }[] }
 

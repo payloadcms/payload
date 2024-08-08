@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.73",
+  "version": "3.0.0-beta.76",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -94,7 +94,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.0.0-canary.53",
+    "next": "^15.0.0-canary.104",
     "payload": "workspace:*"
   },
   "engines": {

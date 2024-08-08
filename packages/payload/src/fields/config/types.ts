@@ -7,7 +7,6 @@ import type { CSSProperties } from 'react'
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { JSONSchema4 } from 'json-schema'
 import type React from 'react'
-import type { DeepPartial } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type { ErrorComponent } from '../../admin/forms/Error.js'
@@ -33,6 +32,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
+  /**
+   * Only available in the `afterRead` hook.
+   */
+  draft?: boolean
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -60,6 +63,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The schemaPath of the field, e.g. ["group", "myArray", "textField"]. The schemaPath is the path but without indexes and would be used in the context of field schemas, not field data.
    */
   schemaPath: string[]
+  /**
+   * Only available in the `afterRead` hook.
+   */
+  showHiddenFields?: boolean
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<TSiblingData>
   /**

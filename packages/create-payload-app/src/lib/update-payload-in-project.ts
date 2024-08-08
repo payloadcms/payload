@@ -74,9 +74,11 @@ export async function updatePayloadInProject(
   info('Payload packages updated successfully.')
 
   info(`Updating Payload Next.js files...`)
-  const templateFilesPath = dirname.endsWith('dist')
-    ? path.resolve(dirname, '../..', 'dist/template')
-    : path.resolve(dirname, '../../../../templates/blank-3.0')
+
+  const templateFilesPath =
+    process.env.JEST_WORKER_ID !== undefined
+      ? path.resolve(dirname, '../../../../templates/blank-3.0')
+      : path.resolve(dirname, '../..', 'dist/template')
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
 

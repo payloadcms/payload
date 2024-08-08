@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -32,7 +32,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -41,6 +40,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -87,6 +87,8 @@ const waitForAutoSaveToRunAndComplete = async (page: Page) => {
   await waitForAutoSaveToComplete(page)
 }
 
+let context: BrowserContext
+
 describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -101,7 +103,7 @@ describe('versions', () => {
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
@@ -318,14 +320,14 @@ describe('versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
-      await page.waitForURL(new RegExp(`${savedDocURL}/versions`))
+      await page.waitForURL(`${savedDocURL}/versions`)
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(new RegExp(`${savedDocURL}/versions/${versionID}`))
+      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
-      await page.waitForURL(new RegExp(savedDocURL))
+      await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
@@ -393,8 +395,8 @@ describe('versions', () => {
     })
 
     test('global — has versions route', async () => {
-      const global = new AdminUrlUtil(serverURL, globalSlug)
-      const versionsURL = `${global.global(globalSlug)}/versions`
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
       expect(page.url()).toMatch(/\/versions$/)
     })
@@ -418,9 +420,7 @@ describe('versions', () => {
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
       const titleField = page.locator('#field-title')
       await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
@@ -484,9 +484,7 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
@@ -494,8 +492,6 @@ describe('versions', () => {
       await saveDocAndAssert(page)
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
       await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()

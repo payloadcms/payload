@@ -22,6 +22,7 @@ import type {
   MappedTab,
   NumberFieldProps,
   Option,
+  Payload,
   PointFieldProps,
   RadioFieldProps,
   ReducedBlock,
@@ -67,6 +68,7 @@ export const mapFields = (args: {
   filter?: (field: Field) => boolean
   i18n: I18nClient
   parentPath?: string
+  payload: Payload
   readOnly?: boolean
 }): FieldMap => {
   const {
@@ -78,6 +80,7 @@ export const mapFields = (args: {
     i18n,
     i18n: { t },
     parentPath,
+    payload,
     readOnly: readOnlyOverride,
   } = args
 
@@ -193,6 +196,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: path,
+                payload,
                 readOnly: readOnlyOverride,
               }),
               isSortable: field.admin?.isSortable,
@@ -217,6 +221,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: `${path}.${block.slug}`,
+                payload,
                 readOnly: readOnlyOverride,
               })
 
@@ -303,6 +308,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: path,
+                payload,
                 readOnly: readOnlyOverride,
               }),
               initCollapsed: field.admin?.initCollapsed,
@@ -364,6 +370,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: path,
+                payload,
                 readOnly: readOnlyOverride,
               }),
               hideGutter: field.admin?.hideGutter,
@@ -494,6 +501,7 @@ export const mapFields = (args: {
                 WithServerSideProps,
                 config,
                 i18n,
+                payload,
                 schemaPath: path,
               })
 
@@ -526,6 +534,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: path,
+                payload,
                 readOnly: readOnlyOverride,
               }),
               readOnly: field.admin?.readOnly,
@@ -548,6 +557,7 @@ export const mapFields = (args: {
                 filter,
                 i18n,
                 parentPath: path,
+                payload,
                 readOnly: readOnlyOverride,
               })
 
@@ -835,7 +845,7 @@ export const mapFields = (args: {
     // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentPropsBase.name AND .name. This can probably be improved
     result.push({
       name: 'id',
-      type: 'text',
+      type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
       CustomField: null,
       cellComponentProps: {
         name: 'id',

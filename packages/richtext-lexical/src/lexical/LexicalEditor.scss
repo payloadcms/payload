@@ -25,12 +25,12 @@
   }
 
   &--show-gutter {
-    > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+    > .rich-text-lexical__wrap > .editor-container  > .editor-scroller > .editor > div > .editor-placeholder {
       left: 3rem;
     }
   }
 
-  &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+  &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-scroller > .editor > div > .editor-placeholder {
     left: 0;
   }
 

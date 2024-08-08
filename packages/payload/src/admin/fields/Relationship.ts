@@ -12,7 +12,7 @@ export type RelationshipFieldProps = {
   sortOptions?: RelationshipField['admin']['sortOptions']
   validate?: RelationshipFieldValidation
   width?: string
-} & FormFieldBase
+} & Omit<FormFieldBase, 'validate'>
 
 export type RelationshipFieldLabelComponent = LabelComponent<'relationship'>
 
