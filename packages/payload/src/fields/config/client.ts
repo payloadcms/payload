@@ -10,8 +10,8 @@ type ClientField = {
 
 export type ClientFieldConfig = {
   [K in Field['type']]: {
-    _fieldIsPresentational: boolean
-    _isFieldAffectingData: boolean
+    _isPresentational: boolean
+    _isAffectingData: boolean
     _isSidebar: boolean
     _path: string
     _schemaPath: string

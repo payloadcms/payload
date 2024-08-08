@@ -5,7 +5,7 @@ export const buildPathSegments = (parentPath: string, fields: ClientFieldConfig[
     const fields = 'fields' in field ? field.fields : undefined
 
     if (fields) {
-      if (field._isFieldAffectingData) {
+      if (field._isAffectingData) {
         // group, block, array
         const name = 'name' in field ? field.name : 'unnamed'
         acc.push(parentPath ? `${parentPath}.${name}.` : `${name}.`)
@@ -24,7 +24,7 @@ export const buildPathSegments = (parentPath: string, fields: ClientFieldConfig[
           acc.push(...buildPathSegments(tabPath, tab.fields))
         })
       }
-    } else if (field._isFieldAffectingData) {
+    } else if (field._isAffectingData) {
       // text, number, date, etc.
       const name = 'name' in field ? field.name : 'unnamed'
       acc.push(parentPath ? `${parentPath}.${name}` : name)

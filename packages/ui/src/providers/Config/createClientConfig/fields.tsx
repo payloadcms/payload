@@ -77,20 +77,20 @@ export const createClientFieldConfig = ({
     }
   })
 
-  _field._fieldIsPresentational = fieldIsPresentationalOnly(_field)
-  _field._isFieldAffectingData = fieldAffectsData(_field)
+  _field._isPresentational = fieldIsPresentationalOnly(_field)
+  _field._isAffectingData = fieldAffectsData(_field)
   _field._isSidebar = fieldIsSidebar(_field)
 
   const isHidden = 'hidden' in _field && _field?.hidden
   const disabledFromAdmin = _field?.admin && 'disabled' in _field.admin && _field.admin.disabled
 
-  if (_field._isFieldAffectingData && (isHidden || disabledFromAdmin)) {
+  if (_field._isAffectingData && (isHidden || disabledFromAdmin)) {
     return null
   }
 
   _field._path = generateFieldPath(
     parentPath,
-    _field._isFieldAffectingData && 'name' in _field ? _field.name : '',
+    _field._isAffectingData && 'name' in _field ? _field.name : '',
   )
 
   if ('label' in _field && 'label' in incomingField && typeof incomingField.label === 'function') {
@@ -387,15 +387,14 @@ export const createClientFieldConfigs = ({
     )
     .filter(Boolean)
 
-  const hasID =
-    result.findIndex((f) => 'name' in f && f._isFieldAffectingData && f.name === 'id') > -1
+  const hasID = result.findIndex((f) => 'name' in f && f._isAffectingData && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
     result.push({
       name: 'id',
       type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
-      _fieldIsPresentational: false,
-      _isFieldAffectingData: true,
+      _isPresentational: false,
+      _isAffectingData: true,
       admin: {
         components: {
           Field: null,

@@ -227,8 +227,8 @@ The following additional properties are also provided to the `field` prop:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`_fieldIsPresentational`** | A boolean indicating that the field is purely visual and does not directly affect data or change data shape, i.e. the [UI Field](../fields/ui). |
-| **`_isFieldAffectingData`** | A boolean indicating that the field directly affects data in the database. True when `_fieldIsPresentational: false` _and_ the field has a `name` property, i.e. a [Text Field](../fields/text) but not an unnamed [Row Field](../fields/row).
+| **`_isPresentational`** | A boolean indicating that the field is purely visual and does not directly affect data or change data shape, i.e. the [UI Field](../fields/ui). |
+| **`_isAffectingData`** | A boolean indicating that the field directly affects data in the database. True when `_isPresentational: false` _and_ the field has a `name` property, i.e. a [Text Field](../fields/text) but not an unnamed [Row Field](../fields/row).
 | **`_isSidebar`** | A boolean that indicates whether `admin.position` is `sidebar`. |
 | **`_path`** | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray[0].myField`. |
 | **`_schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `myGroup.myArray.myField` |
