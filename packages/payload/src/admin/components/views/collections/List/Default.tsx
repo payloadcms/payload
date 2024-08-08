@@ -68,7 +68,7 @@ const DefaultList: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className={baseClass}>
+    <div className={`${baseClass} ${baseClass}--${collection.slug}`}>
       {Array.isArray(BeforeList) &&
         BeforeList.map((Component, i) => <Component key={i} {...props} />)}
 
