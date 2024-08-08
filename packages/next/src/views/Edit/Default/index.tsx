@@ -99,8 +99,8 @@ export const DefaultEditView: React.FC = () => {
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (
       operation === 'create' &&
-      collectionClientConfig.auth &&
-      !collectionClientConfig.auth.disableLocalStrategy
+      collectionConfig.auth &&
+      !collectionConfig.auth.disableLocalStrategy
     )
       return true
     return false
@@ -243,9 +243,9 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {collectionConfig?.admin?.components?.Upload ? (
+                      {collectionConfig?.admin?.components?.edit?.Upload ? (
                         <RenderComponent
-                          mappedComponent={collectionConfig.admin.components.Upload}
+                          mappedComponent={collectionConfig.admin.components.edit.Upload}
                         />
                       ) : (
                         <Upload
