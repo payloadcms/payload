@@ -28,7 +28,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: {
         className,
         description,

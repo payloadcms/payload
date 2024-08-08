@@ -78,7 +78,7 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       <PasswordField
         field={{
           name: 'password',
-          _path: 'password',
+          _schemaPath: 'password',
           label: i18n.t('authentication:newPassword'),
           required: true,
         }}

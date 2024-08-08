@@ -25,7 +25,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: {
         className,
         description,

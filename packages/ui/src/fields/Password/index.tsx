@@ -20,7 +20,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: {
         className,
         description,

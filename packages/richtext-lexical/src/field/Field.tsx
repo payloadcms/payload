@@ -32,7 +32,7 @@ const RichTextComponent: React.FC<
     errorProps,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: {
         className,
         components: { Description, Error, Label },

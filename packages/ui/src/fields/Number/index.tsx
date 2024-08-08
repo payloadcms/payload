@@ -26,7 +26,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: {
         className,
         description,

@@ -25,7 +25,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: { className, description, placeholder, step, style, width },
       label,
       required,

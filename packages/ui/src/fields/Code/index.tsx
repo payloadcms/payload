@@ -28,7 +28,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: { className, description, editorOptions = {}, language = 'javascript', style, width },
       label,
       required,

@@ -31,7 +31,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: { className, description, style, width } = {} as CheckboxFieldProps['field']['admin'],
       label,
       required,

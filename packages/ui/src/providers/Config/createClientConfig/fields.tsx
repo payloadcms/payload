@@ -76,9 +76,15 @@ export const createClientFieldConfig = ({
     }
   })
 
-  clientField._isPresentational = fieldIsPresentationalOnly(incomingField)
-  clientField._isAffectingData = fieldAffectsData(incomingField)
-  clientField._isSidebar = fieldIsSidebar(incomingField)
+  if (fieldIsPresentationalOnly(incomingField)) {
+    clientField._isPresentational = true
+  }
+  if (fieldAffectsData(incomingField)) {
+    clientField._isAffectingData = true
+  }
+  if (fieldIsSidebar(incomingField)) {
+    clientField._isSidebar = true
+  }
 
   const isHidden = 'hidden' in incomingField && incomingField?.hidden
   const disabledFromAdmin =
@@ -88,7 +94,7 @@ export const createClientFieldConfig = ({
     return null
   }
 
-  clientField._path = generateFieldPath(
+  clientField._schemaPath = generateFieldPath(
     parentPath,
     clientField._isAffectingData && 'name' in clientField ? clientField.name : '',
   )
@@ -121,7 +127,7 @@ export const createClientFieldConfig = ({
         fields: incomingField.fields,
         i18n,
         importMap,
-        parentPath: field._path,
+        parentPath: field._schemaPath,
         payload,
       })
 
@@ -150,7 +156,7 @@ export const createClientFieldConfig = ({
             fields: block.fields,
             i18n,
             importMap,
-            parentPath: field._path,
+            parentPath: field._schemaPath,
             payload,
           })
         }
@@ -235,7 +241,7 @@ export const createClientFieldConfig = ({
             fields: tab.fields,
             i18n,
             importMap,
-            parentPath: field._path,
+            parentPath: field._schemaPath,
             payload,
           })
         }
@@ -438,7 +444,7 @@ export const createClientFieldConfigs = ({
       name: 'id',
       type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
       _isAffectingData: true,
-      _isPresentational: false,
+      _schemaPath: generateFieldPath(parentPath, 'id'),
       admin: {
         components: {
           Field: null,

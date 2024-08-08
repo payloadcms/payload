@@ -22,7 +22,7 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
     field,
     field: {
       name,
-      _path: pathFromProps,
+      _schemaPath: pathFromProps,
       admin: { className, description, placeholder, rows, rtl, style, width },
       label,
       localized,
