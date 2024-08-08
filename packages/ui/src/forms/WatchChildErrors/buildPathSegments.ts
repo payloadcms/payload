@@ -4,7 +4,7 @@ import { fieldAffectsData } from 'payload/shared'
 
 export const buildPathSegments = (parentPath: string, fields: ClientField[]): string[] => {
   const pathNames = fields.reduce((acc, field) => {
-    const fields: ClientField[] = 'fields' in field ? (field.fields as ClientField[]) : undefined
+    const fields: ClientField[] = 'fields' in field ? field.fields : undefined
 
     if (fields) {
       if (fieldAffectsData(field)) {

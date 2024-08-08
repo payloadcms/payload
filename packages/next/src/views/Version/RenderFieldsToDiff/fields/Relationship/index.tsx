@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientField } from 'payload'
+import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '@payloadcms/ui'
@@ -7,7 +7,7 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
@@ -95,7 +95,13 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
+const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
+  comparison,
+  field,
+  i18n,
+  locale,
+  version,
+}) => {
   const placeholder = `[${i18n.t('general:noValue')}]`
 
   const {

@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type {
   ClientField,
   NamedTab,
@@ -12,7 +14,7 @@ export type ClientTab =
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
 export type TabsFieldProps = {
-  readonly field: TabsFieldClient
+  readonly field: MarkOptional<TabsFieldClient, 'type'>
   readonly forceRender?: boolean
 } & FormFieldBase
 

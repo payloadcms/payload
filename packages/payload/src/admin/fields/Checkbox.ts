@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { CheckboxFieldClient } from '../../fields/config/types.js'
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
@@ -6,7 +8,7 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 export type CheckboxFieldProps = {
   readonly checked?: boolean
   readonly disableFormData?: boolean
-  readonly field: CheckboxFieldClient
+  readonly field: MarkOptional<CheckboxFieldClient, 'type'>
   readonly id?: string
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean

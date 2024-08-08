@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
@@ -10,7 +12,7 @@ import type {
 
 export type ArrayFieldProps = {
   readonly CustomRowLabel?: MappedComponent
-  readonly field: ArrayFieldClient
+  readonly field: MarkOptional<ArrayFieldClient, 'type'>
   readonly forceRender?: boolean
   readonly validate?: ArrayFieldValidation
 } & Omit<FormFieldBase, 'validate'>

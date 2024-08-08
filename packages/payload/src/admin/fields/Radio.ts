@@ -1,10 +1,12 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { RadioFieldClient } from '../../fields/config/types.js'
 import type { RadioFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RadioFieldProps = {
-  readonly field: RadioFieldClient
+  readonly field: MarkOptional<RadioFieldClient, 'type'>
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string

@@ -1,8 +1,11 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
+import { UIFieldClient } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 import React from 'react'
 
+import type { diffComponents as _diffComponents } from './fields/index.js'
 import type { FieldDiffProps, Props } from './types.js'
 
 import Nested from './fields/Nested/index.js'
@@ -13,13 +16,16 @@ const baseClass = 'render-field-diffs'
 
 const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
-  diffComponents,
+  diffComponents: __diffComponents,
   fieldPermissions,
   fields,
   i18n,
   locales,
   version,
 }) => {
+  // typing it as `as typeof _diffComponents` here ensures the TField generics of DiffComponentProps are respected.
+  // Without it, you could pass a UI field to the Tabs component, without it erroring
+  const diffComponents: typeof _diffComponents = __diffComponents as typeof _diffComponents
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
@@ -31,7 +37,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
         if (Component) {
-          if (field._isAffectingData && 'name' in field) {
+          if (fieldAffectsData(field)) {
             const fieldName = field.name
             const valueIsObject = field.type === 'code' || field.type === 'json'
 
@@ -102,7 +108,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 comparison={comparison}
                 diffComponents={diffComponents}
                 field={field}
-                fields={field.fields}
+                fields={[]}
                 i18n={i18n}
                 key={i}
                 locales={locales}

@@ -1,10 +1,12 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { RelationshipFieldClient } from '../../fields/config/types.js'
 import type { RelationshipFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RelationshipFieldProps = {
-  readonly field: RelationshipFieldClient
+  readonly field: MarkOptional<RelationshipFieldClient, 'type'>
   readonly validate?: RelationshipFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 

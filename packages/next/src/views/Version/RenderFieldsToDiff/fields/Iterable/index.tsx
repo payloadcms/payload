@@ -4,7 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { getUniqueListBy } from 'payload/shared'
 import React from 'react'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import RenderFieldsToDiff from '../../index.js'
@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<Props> = ({
+const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,

@@ -480,7 +480,6 @@ export const createClientFields = ({
     newClientFields.push({
       name: 'id',
       type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
-      _isAffectingData: true,
       _schemaPath: generateFieldPath(parentPath, 'id'),
       admin: {
         components: {

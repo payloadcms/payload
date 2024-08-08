@@ -314,7 +314,7 @@ export interface FieldBase {
 
 export interface FieldBaseClient {
   _isPresentational?: undefined
-  _schemaPath: string
+  _schemaPath?: string
   admin?: AdminClient
   hidden?: boolean
   index?: boolean
@@ -326,7 +326,7 @@ export interface FieldBaseClient {
    * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
-  name: string
+  name?: string
   required?: boolean
   saveToJWT?: boolean | string
   /**
@@ -987,9 +987,9 @@ export type RelationshipValue =
   | (number | string)
 
 export type RichTextField<
-  Value extends object = any,
-  AdapterProps = any,
-  ExtraProperties = object,
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
 > = {
   admin?: {
     components?: {
@@ -998,8 +998,8 @@ export type RichTextField<
     } & Admin['components']
   } & Admin
   editor?:
-    | RichTextAdapter<Value, AdapterProps, AdapterProps>
-    | RichTextAdapterProvider<Value, AdapterProps, AdapterProps>
+    | RichTextAdapter<TValue, TAdapterProps, TExtraProperties>
+    | RichTextAdapterProvider<TValue, TAdapterProps, TExtraProperties>
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
@@ -1007,13 +1007,13 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & ExtraProperties &
-  FieldBase
+} & FieldBase &
+  TExtraProperties
 
 export type RichTextFieldClient<
-  Value extends JsonObject = any,
-  AdapterProps = any,
-  ExtraProperties = JsonObject,
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
 > = {
   admin?: {
     components?: {
@@ -1022,9 +1022,9 @@ export type RichTextFieldClient<
     } & AdminClient['components']
   } & AdminClient
   richTextComponentMap?: Map<string, unknown>
-} & ExtraProperties &
-  FieldBaseClient &
-  Pick<RichTextField<Value, AdapterProps>, 'maxDepth' | 'type'>
+} & FieldBaseClient &
+  Pick<RichTextField<TValue, TAdapterProps, TExtraProperties>, 'maxDepth' | 'type'> &
+  TExtraProperties
 
 export type ArrayField = {
   admin?: {

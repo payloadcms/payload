@@ -30,9 +30,7 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
           name: field.name,
           type: field.type,
           fields: fieldSchemaToJSON([
-            // @ts-expect-error
             ...field.fields,
-            // @ts-expect-error
             {
               name: 'id',
               type: 'text',
@@ -49,9 +47,7 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
-                // @ts-expect-error
                 ...block.fields,
-                // @ts-expect-error
                 {
                   name: 'id',
                   type: 'text',

@@ -14,7 +14,7 @@ import React, { useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import diffComponents from '../RenderFieldsToDiff/fields/index.js'
+import { diffComponents } from '../RenderFieldsToDiff/fields/index.js'
 import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'

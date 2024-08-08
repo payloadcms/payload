@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { BlockFieldClient, ClientField, LabelsClient } from '../../fields/config/types.js'
 import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
@@ -9,7 +11,7 @@ import type {
 } from '../types.js'
 
 export type BlockFieldProps = {
-  readonly field: BlockFieldClient
+  readonly field: MarkOptional<BlockFieldClient, 'type'>
   readonly forceRender?: boolean
   readonly slug?: string
   readonly validate?: BlockFieldValidation
