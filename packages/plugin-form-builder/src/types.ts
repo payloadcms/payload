@@ -1,3 +1,4 @@
+import type { Payload } from 'payload'
 import type { Block, CollectionConfig, Field } from 'payload/types'
 
 export interface BlockConfig {
@@ -37,7 +38,7 @@ export interface FieldsConfig {
   textarea?: FieldConfig | boolean
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
+export type BeforeEmail = (emails: FormattedEmail[], payload: Payload, formSubmission: FormSubmission) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 
 export interface PluginConfig {
