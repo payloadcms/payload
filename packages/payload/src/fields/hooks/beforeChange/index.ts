@@ -16,6 +16,8 @@ type Args<T extends JsonObject> = {
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
+  publishSpecificLocale?: string
+  publishedDocWithLocales?: JsonObject
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -39,6 +41,8 @@ export const beforeChange = async <T extends JsonObject>({
   duplicate = false,
   global,
   operation,
+  publishSpecificLocale,
+  publishedDocWithLocales,
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
@@ -64,7 +68,7 @@ export const beforeChange = async <T extends JsonObject>({
     schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
-    siblingDocWithLocales: docWithLocales,
+    siblingDocWithLocales: publishSpecificLocale ? publishedDocWithLocales : docWithLocales,
     skipValidation,
   })
 

@@ -9,6 +9,7 @@ type Args = {
   config: SanitizedCollectionConfig
   id: number | string
   payload: Payload
+  published?: boolean
   query: FindOneArgs
   req?: PayloadRequest
 }

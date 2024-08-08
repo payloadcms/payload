@@ -1,5 +1,6 @@
 'use client'
 
+import { useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -9,13 +10,16 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const DefaultPublishButton: React.FC<{
+  label?: string
+  publishSpecificLocale?: () => void
+}> = ({ label: labelProp, publishSpecificLocale }) => {
   const { hasPublishPermission, publishedDoc, unpublishedVersions } = useDocumentInfo()
 
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-
+  const { label: localeLabel } = useLocale()
   const { t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
@@ -46,6 +50,12 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       buttonId="action-save"
       disabled={!canPublish}
       onClick={publish}
+      secondaryActions={[
+        {
+          label: `Publish ${localeLabel} only`,
+          onClick: publishSpecificLocale,
+        },
+      ]}
       size="medium"
       type="button"
     >

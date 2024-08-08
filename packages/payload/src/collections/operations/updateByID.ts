@@ -3,12 +3,13 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, GeneratedTypes } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -42,6 +43,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
 }
@@ -80,6 +82,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       draft: draftArg = false,
       overrideAccess,
       overwriteExistingFiles = false,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -126,6 +129,19 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       query: findOneArgs,
       req,
     })
+
+    let publishedDocWithLocales
+
+    if (publishSpecificLocale) {
+      publishedDocWithLocales = await getLatestCollectionVersion({
+        id,
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: findOneArgs,
+        req,
+      })
+    }
 
     if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
     if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
@@ -257,6 +273,8 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       docWithLocales,
       global: null,
       operation: 'update',
+      publishSpecificLocale,
+      publishedDocWithLocales,
       req,
       skipValidation:
         shouldSaveDraft &&
@@ -264,6 +282,23 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         !collectionConfig.versions.drafts.validate &&
         data._status !== 'published',
     })
+
+    let versionResult = result
+
+    if (publishSpecificLocale) {
+      versionResult = await beforeChange({
+        id,
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: originalDoc,
+        docWithLocales,
+        global: null,
+        operation: 'update',
+        req,
+        skipValidation: shouldSaveDraft || data._status === 'draft',
+      })
+    }
 
     // /////////////////////////////////////
     // Handle potential password update
@@ -307,11 +342,12 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         autosave,
         collection: collectionConfig,
         docWithLocales: {
-          ...result,
+          ...versionResult,
           createdAt: docWithLocales.createdAt,
         },
-        draft: shouldSaveDraft,
+        draft: publishSpecificLocale ? true : shouldSaveDraft,
         payload,
+        publishSpecificLocale,
         req,
       })
     }

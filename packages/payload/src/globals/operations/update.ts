@@ -49,6 +49,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     let { data } = args
 
     const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)
+    const publishSpecificLocale = req.query?.publishSpecificLocale
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -78,6 +79,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       config: globalConfig,
       locale,
       payload,
+      published: publishSpecificLocale !== undefined ? true : false,
       req,
       where: query,
     })
