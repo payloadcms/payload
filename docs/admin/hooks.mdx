@@ -818,7 +818,7 @@ import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const config = useConfig()
+  const { config } = useConfig()
   // highlight-end
 
   return <span>{config.serverURL}</span>

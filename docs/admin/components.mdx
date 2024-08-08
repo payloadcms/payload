@@ -207,7 +207,7 @@ import React from 'react'
 import { useConfig } from '@payloadcms/ui'
 
 export const MyClientComponent: React.FC = () => {
-  const { serverURL } = useConfig() // highlight-line
+  const { config: { serverURL } } = useConfig() // highlight-line
 
   return (
     <Link href={serverURL}>
@@ -220,6 +220,22 @@ export const MyClientComponent: React.FC = () => {
 <Banner type="success">
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
+
+All [Field Components](./fields) automatically receive their respective Client Field Config through a common [`field`](./fields#the-field-prop) prop:
+
+```tsx
+'use client'
+import React from 'react'
+import type { TextFieldProps } from 'payload'
+
+export const MyClientFieldComponent: TextFieldProps = ({ field: { name } }) => {
+  return (
+    <p>
+      {`This field's name is ${name}`}
+    </p>
+  )
+}
+```
 
 ### Using Hooks
 
