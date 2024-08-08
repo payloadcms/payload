@@ -12,7 +12,7 @@ export const flattenFieldMap = (
   keepPresentationalFields?: boolean,
 ): ClientFieldConfig[] => {
   return fields.reduce((acc, field) => {
-    if ('name' in field || (keepPresentationalFields && field._fieldIsPresentational)) {
+    if ('name' in field || (keepPresentationalFields && field._isPresentational)) {
       acc.push(field)
       return acc
     } else if ('fields' in field) {

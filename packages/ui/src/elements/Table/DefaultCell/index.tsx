@@ -21,7 +21,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     field: {
       name,
       type: fieldType,
-      _isFieldAffectingData,
+      _isAffectingData,
       admin: { className: classNameFromConfig },
       label,
     },
@@ -121,7 +121,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     )
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
-    if (customCellContext.uploadConfig && _isFieldAffectingData && name === 'filename') {
+    if (customCellContext.uploadConfig && _isAffectingData && name === 'filename') {
       const FileCellComponent = cellComponents.File
       CellComponent = (
         <FileCellComponent

@@ -113,7 +113,7 @@ export const buildColumnState = (args: Args): Column[] => {
     const Heading = (
       <SortColumn
         Label={Label}
-        disable={fieldAffectsDataSubFields || field?._fieldIsPresentational || undefined}
+        disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? (field.name as string) : undefined}
       />

@@ -80,10 +80,10 @@ const reduceFields = ({
   }
 
   return fields?.reduce((fieldsToUse, field) => {
-    const { _isFieldAffectingData } = field
+    const { _isAffectingData } = field
     // escape for a variety of reasons
     if (
-      _isFieldAffectingData &&
+      _isAffectingData &&
       (field.admin.disableBulkEdit ||
         field.unique ||
         field.admin.hidden ||
