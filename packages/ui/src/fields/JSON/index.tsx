@@ -24,7 +24,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     field,
     field: {
       name,
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: { className, description, editorOptions, style, width },
       jsonSchema,
       label,

@@ -40,7 +40,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     field,
     field: {
       name,
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: {
         allowCreate = true,
         className,

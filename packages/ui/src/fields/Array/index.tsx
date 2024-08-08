@@ -36,7 +36,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     field,
     field: {
       name,
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: {
         className,
         components: { RowLabel },

@@ -10,10 +10,11 @@ import type {
 } from 'payload'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
+import type { MarkOptional } from 'ts-essentials'
 
 export type PasswordFieldProps = {
   readonly autoComplete?: string
-  readonly field: TextFieldClient
+  readonly field: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly validate?: PasswordFieldValidation
 } & FormFieldBase

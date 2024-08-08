@@ -26,7 +26,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
     descriptionProps,
     field,
     field: {
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: { className, description, initCollapsed = false },
       fields,
       label,

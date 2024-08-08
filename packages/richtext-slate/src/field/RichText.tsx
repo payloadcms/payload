@@ -55,7 +55,7 @@ const RichTextField: React.FC<SlateFieldProps> = (props) => {
     elements,
     errorProps,
     field: {
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
 
       admin: {
         className,

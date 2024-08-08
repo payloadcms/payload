@@ -21,7 +21,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
     field,
     field: {
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: { className, style, width },
       label,
       relationTo,

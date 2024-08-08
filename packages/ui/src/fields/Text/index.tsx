@@ -22,7 +22,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
     field,
     field: {
       name,
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: { className, description, placeholder, rtl, style, width },
       hasMany,
       label,

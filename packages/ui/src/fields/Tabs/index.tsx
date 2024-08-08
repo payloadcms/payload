@@ -26,7 +26,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
     field,
     field: {
-      _schemaPath: pathFromProps,
+      _path: pathFromProps,
       admin: { className },
       tabs = [],
     },
