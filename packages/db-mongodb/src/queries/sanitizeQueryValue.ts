@@ -136,14 +136,6 @@ export const sanitizeQueryValue = ({
       }
     }
 
-    if (operator === 'not_equals' && formattedValue && typeof formattedValue === 'string') {
-      return {
-        rawQuery: {
-          [`${path}`]: { $ne: formattedValue },
-        },
-      }
-    }
-
     if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       if ('hasMany' in field && field.hasMany) {
         formattedValue = handleHasManyValues(formattedValue)
