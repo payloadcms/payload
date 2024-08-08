@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientFieldConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ClientField, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -35,7 +35,7 @@ export type ListControlsProps = {
   collectionConfig: ClientCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
-  fields: ClientFieldConfig[]
+  fields: ClientField[]
   handleSearchChange?: (search: string) => void
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
@@ -66,7 +66,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       getTranslation(
         'label' in titleField && typeof titleField.label === 'string'
           ? titleField.label
-          : titleField.name,
+          : 'name' in titleField
+            ? titleField.name
+            : null,
         i18n,
       )) ??
     'ID'
@@ -100,7 +102,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     if (listSearchableFields?.length > 0) {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
-          const label = 'label' in field && field.label ? field.label : field.name
+          const label =
+            'label' in field && field.label ? field.label : 'name' in field ? field.name : null
 
           if (i === 0) {
             return `${t('general:searchBy', {
@@ -128,7 +131,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <SearchIcon />
         <SearchFilter
-          fieldName={titleField?.name}
+          fieldName={'name' in titleField ? titleField?.name : null}
           handleChange={(search) => {
             return void handleSearchChange(search)
           }}

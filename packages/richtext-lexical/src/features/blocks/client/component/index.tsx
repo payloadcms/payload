@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlocksFieldClient, BlocksFieldProps, FormState } from 'payload'
+import type { BlockFieldProps, BlocksFieldClient, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'

@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-duplicate-type-constituents: 0 */ // --> OFF
 
 import type { ArrayFieldProps } from './Array.js'
-import type { BlocksFieldProps } from './Blocks.js'
+import type { BlockFieldProps } from './Blocks.js'
 import type { CheckboxFieldProps } from './Checkbox.js'
 import type { CodeFieldProps } from './Code.js'
 import type { CollapsibleFieldProps } from './Collapsible.js'
@@ -14,7 +14,7 @@ import type { NumberFieldProps } from './Number.js'
 import type { PointFieldProps } from './Point.js'
 import type { RadioFieldProps } from './Radio.js'
 import type { RelationshipFieldProps } from './Relationship.js'
-import type { RichTextComponentProps } from './RichText.js'
+import type { RichTextFieldProps } from './RichText.js'
 import type { RowFieldProps } from './Row.js'
 import type { SelectFieldProps } from './Select.js'
 import type { TabsFieldProps } from './Tabs.js'
@@ -28,7 +28,7 @@ export type FieldComponentProps =
     } & ArrayFieldProps)
   | ({
       type: 'blocks'
-    } & BlocksFieldProps)
+    } & BlockFieldProps)
   | ({
       type: 'checkbox'
     } & CheckboxFieldProps)
@@ -67,7 +67,7 @@ export type FieldComponentProps =
     } & RelationshipFieldProps)
   | ({
       type: 'richText'
-    } & RichTextComponentProps)
+    } & RichTextFieldProps)
   | ({
       type: 'row'
     } & RowFieldProps)

@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldProps } from 'payload'
+import type { BlockFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -32,7 +32,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -190,7 +190,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows

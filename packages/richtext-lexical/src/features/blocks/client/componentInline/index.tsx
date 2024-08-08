@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient, BlocksFieldProps } from 'payload'
+import type { BlockFieldProps, BlocksFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'

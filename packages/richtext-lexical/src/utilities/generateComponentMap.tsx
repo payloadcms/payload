@@ -1,7 +1,7 @@
-import type { ClientFieldConfig, MappedComponent, RichTextGenerateComponentMap } from 'payload'
+import type { ClientField, MappedComponent, RichTextGenerateComponentMap } from 'payload'
 
 import { getComponent } from '@payloadcms/ui/shared'
-import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
+import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
 import { deepCopyObjectSimple } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
@@ -12,7 +12,7 @@ export const getGenerateComponentMap =
   ({ createMappedComponent, field, i18n, importMap, payload, schemaPath }) => {
     const componentMap: Map<
       string,
-      ClientFieldConfig[] | GeneratedFeatureProviderComponent[] | MappedComponent
+      ClientField[] | GeneratedFeatureProviderComponent[] | MappedComponent
     > = new Map()
 
     // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
@@ -79,10 +79,10 @@ export const getGenerateComponentMap =
 
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
-                let clientFields: ClientFieldConfig[] = deepCopyObjectSimple(
+                let clientFields: ClientField[] = deepCopyObjectSimple(
                   fields,
-                ) as unknown as ClientFieldConfig[]
-                clientFields = createClientFieldConfigs({
+                ) as unknown as ClientField[]
+                clientFields = createClientFields({
                   clientFields,
                   createMappedComponent,
                   disableAddingID: true,

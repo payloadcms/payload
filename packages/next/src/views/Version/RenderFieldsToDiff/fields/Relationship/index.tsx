@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientFieldConfig } from 'payload'
+import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '@payloadcms/ui'
@@ -22,7 +22,7 @@ type RelationshipValue = Record<string, any>
 
 const generateLabelFromValue = (
   collections: ClientCollectionConfig[],
-  field: ClientFieldConfig,
+  field: ClientField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
 ): string => {

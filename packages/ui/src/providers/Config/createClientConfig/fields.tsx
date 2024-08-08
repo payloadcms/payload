@@ -1,11 +1,14 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  BlocksFieldClient,
-  ClientFieldConfig,
+  AdminClient,
+  ArrayFieldClient,
+  BlockFieldClient,
+  ClientField,
   CreateMappedComponent,
   Field,
   ImportMap,
   LabelComponent,
+  MappedComponent,
   Payload,
   RadioFieldClient,
   RichTextFieldClient,
@@ -19,7 +22,7 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsSidebar } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import { getComponent } from './getComponent.js'
 
@@ -34,7 +37,7 @@ function generateFieldPath(parentPath: string, name: string): string {
   return tabPath
 }
 
-export const createClientFieldConfig = ({
+export const createClientField = ({
   clientField,
   createMappedComponent,
   field: incomingField,
@@ -43,14 +46,14 @@ export const createClientFieldConfig = ({
   parentPath,
   payload,
 }: {
-  clientField: ClientFieldConfig
+  clientField: ClientField
   createMappedComponent: CreateMappedComponent
   field: Field
   i18n: I18nClient
   importMap: ImportMap
   parentPath?: string
   payload: Payload
-}): ClientFieldConfig => {
+}): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',
@@ -79,24 +82,18 @@ export const createClientFieldConfig = ({
   if (fieldIsPresentationalOnly(incomingField)) {
     clientField._isPresentational = true
   }
-  if (fieldAffectsData(incomingField)) {
-    clientField._isAffectingData = true
-  }
-  if (fieldIsSidebar(incomingField)) {
-    clientField._isSidebar = true
-  }
 
   const isHidden = 'hidden' in incomingField && incomingField?.hidden
   const disabledFromAdmin =
     incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
 
-  if (clientField._isAffectingData && (isHidden || disabledFromAdmin)) {
+  if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
     return null
   }
 
   clientField._schemaPath = generateFieldPath(
     parentPath,
-    clientField._isAffectingData && 'name' in clientField ? clientField.name : '',
+    fieldAffectsData(clientField) ? clientField.name : '',
   )
 
   if (
@@ -120,7 +117,7 @@ export const createClientFieldConfig = ({
     case 'row': {
       const field = clientField as unknown as RowFieldClient
 
-      field.fields = createClientFieldConfigs({
+      field.fields = createClientFields({
         clientFields: field.fields,
         createMappedComponent,
         disableAddingID: incomingField.type !== 'array',
@@ -132,7 +129,7 @@ export const createClientFieldConfig = ({
       })
 
       if (incomingField?.admin?.components && 'RowLabel' in incomingField.admin.components) {
-        clientField.admin.components.RowLabel = createMappedComponent(
+        ;(field as unknown as ArrayFieldClient).admin.components.RowLabel = createMappedComponent(
           incomingField.admin.components.RowLabel,
           undefined,
           undefined,
@@ -144,13 +141,13 @@ export const createClientFieldConfig = ({
     }
 
     case 'blocks': {
-      const field = clientField as unknown as BlocksFieldClient
+      const field = clientField as unknown as BlockFieldClient
 
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
           const clientBlock = field.blocks[i]
-          clientBlock.fields = createClientFieldConfigs({
+          clientBlock.fields = createClientFields({
             clientFields: clientBlock.fields,
             createMappedComponent,
             fields: block.fields,
@@ -234,7 +231,7 @@ export const createClientFieldConfig = ({
             }
           })
 
-          clientTab.fields = createClientFieldConfigs({
+          clientTab.fields = createClientFields({
             clientFields: clientTab.fields,
             createMappedComponent,
             disableAddingID: true,
@@ -290,14 +287,20 @@ export const createClientFieldConfig = ({
     }
   })
 
+  type FieldWithDescription = {
+    admin: AdminClient
+  } & ClientField
+
   if (incomingField.admin && 'description' in incomingField.admin) {
     if (
       typeof incomingField.admin?.description === 'string' ||
       typeof incomingField.admin?.description === 'object'
     ) {
-      clientField.admin.description = incomingField.admin.description
+      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
     } else if (typeof incomingField.admin?.description === 'function') {
-      clientField.admin.description = incomingField.admin?.description({ t: i18n.t })
+      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
+        t: i18n.t,
+      })
     }
   }
 
@@ -310,25 +313,37 @@ export const createClientFieldConfig = ({
     )
   }
 
+  type FieldWithDescriptionComponent = {
+    admin: AdminClient
+  } & ClientField
+
   if (
     incomingField?.admin?.components &&
     'Description' in incomingField.admin.components &&
     incomingField?.admin?.components?.Description !== undefined
   ) {
-    clientField.admin.components.Description = createMappedComponent(
-      incomingField.admin.components.Description,
-      undefined,
-      undefined,
-      'incomingField.admin.components.Description',
-    )
+    ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
+      createMappedComponent(
+        incomingField.admin.components.Description,
+        undefined,
+        undefined,
+        'incomingField.admin.components.Description',
+      )
   }
 
+  type FieldWithErrorComponent = {
+    admin: {
+      components: {
+        Error: MappedComponent
+      }
+    } & AdminClient
+  } & ClientField
   if (
     incomingField?.admin?.components &&
     'Error' in incomingField.admin.components &&
     incomingField.admin.components.Error !== undefined
   ) {
-    clientField.admin.components.Error = createMappedComponent(
+    ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
       incomingField.admin.components.Error,
       undefined,
       undefined,
@@ -358,12 +373,19 @@ export const createClientFieldConfig = ({
     )
   }
 
+  type FieldWithLabelComponent = {
+    admin: {
+      components: {
+        Label: MappedComponent
+      }
+    } & AdminClient
+  } & ClientField
   if (
     incomingField?.admin?.components &&
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label !== undefined
   ) {
-    clientField.admin.components.Label = createMappedComponent(
+    ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
       CustomLabel,
       undefined,
       undefined,
@@ -371,36 +393,52 @@ export const createClientFieldConfig = ({
     )
   }
 
+  type FieldWithBeforeInputComponent = {
+    admin: {
+      components: {
+        beforeInput: MappedComponent[]
+      }
+    } & AdminClient
+  } & ClientField
   if (
     incomingField?.admin?.components &&
     'beforeInput' in incomingField.admin.components &&
     incomingField.admin.components.beforeInput !== undefined
   ) {
-    clientField.admin.components.beforeInput = createMappedComponent(
-      incomingField.admin?.components?.beforeInput,
-      undefined,
-      undefined,
-      'incomingField.admin.components.beforeInput',
-    )
+    ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
+      createMappedComponent(
+        incomingField.admin?.components?.beforeInput,
+        undefined,
+        undefined,
+        'incomingField.admin.components.beforeInput',
+      )
   }
 
+  type FieldWithAfterInputComponent = {
+    admin: {
+      components: {
+        afterInput: MappedComponent[]
+      }
+    } & AdminClient
+  } & ClientField
   if (
     incomingField?.admin?.components &&
     'afterInput' in incomingField.admin.components &&
     incomingField.admin.components.afterInput !== undefined
   ) {
-    clientField.admin.components.afterInput = createMappedComponent(
-      incomingField.admin?.components?.afterInput,
-      undefined,
-      undefined,
-      'incomingField.admin.components.afterInput',
-    )
+    ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
+      createMappedComponent(
+        incomingField.admin?.components?.afterInput,
+        undefined,
+        undefined,
+        'incomingField.admin.components.afterInput',
+      )
   }
 
   return clientField
 }
 
-export const createClientFieldConfigs = ({
+export const createClientFields = ({
   clientFields,
   createMappedComponent,
   disableAddingID,
@@ -410,7 +448,7 @@ export const createClientFieldConfigs = ({
   parentPath,
   payload,
 }: {
-  clientFields: ClientFieldConfig[]
+  clientFields: ClientField[]
   createMappedComponent: CreateMappedComponent
   disableAddingID?: boolean
   fields: Field[]
@@ -418,12 +456,12 @@ export const createClientFieldConfigs = ({
   importMap: ImportMap
   parentPath?: string
   payload: Payload
-}): ClientFieldConfig[] => {
-  const newClientFields: ClientFieldConfig[] = []
+}): ClientField[] => {
+  const newClientFields: ClientField[] = []
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
-    const newField = createClientFieldConfig({
+    const newField = createClientField({
       clientField: clientFields[i],
       createMappedComponent,
       field,
@@ -436,8 +474,7 @@ export const createClientFieldConfigs = ({
       newClientFields.push({ ...newField })
     }
   }
-  const hasID =
-    newClientFields.findIndex((f) => 'name' in f && f._isAffectingData && f.name === 'id') > -1
+  const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
     newClientFields.push({
@@ -451,9 +488,9 @@ export const createClientFieldConfigs = ({
         },
         disableBulkEdit: true,
         hidden: true,
-        label: 'ID',
       },
       hidden: true,
+      label: 'ID',
       localized: undefined,
     })
   }

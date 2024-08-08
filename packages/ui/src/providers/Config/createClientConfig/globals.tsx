@@ -13,7 +13,7 @@ import type React from 'react'
 
 import { deepCopyObjectSimple } from 'payload'
 
-import { createClientFieldConfigs } from './fields.js'
+import { createClientFields } from './fields.js'
 
 export const createClientGlobalConfig = ({
   DefaultEditView,
@@ -32,7 +32,7 @@ export const createClientGlobalConfig = ({
   importMap: ImportMap
   payload: Payload
 }): ClientGlobalConfig => {
-  clientGlobal.fields = createClientFieldConfigs({
+  clientGlobal.fields = createClientFields({
     clientFields: clientGlobal.fields,
     createMappedComponent,
     fields: global.fields,

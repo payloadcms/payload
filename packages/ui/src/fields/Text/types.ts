@@ -1,5 +1,6 @@
 import type { MappedComponent, StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent } from 'react'
+import type React from 'react'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
@@ -23,7 +24,7 @@ export type TextInputProps = {
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
   readonly errorProps?: Record<string, unknown>
-  readonly inputRef?: React.MutableRefObject<HTMLInputElement>
+  readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly maxRows?: number

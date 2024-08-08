@@ -7,7 +7,7 @@ import React from 'react'
 type LeafContextType = {
   attributes: Record<string, unknown>
   children: React.ReactNode
-  editorRef: React.MutableRefObject<HTMLDivElement>
+  editorRef: React.RefObject<HTMLDivElement>
   fieldProps: {
     name: string
   } & FormFieldBase

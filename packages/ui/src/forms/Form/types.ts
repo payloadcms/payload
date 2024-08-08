@@ -191,7 +191,7 @@ export type Context = {
    * Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
   fields: FormState
-  formRef: React.MutableRefObject<HTMLFormElement>
+  formRef: React.RefObject<HTMLFormElement>
   getData: GetData
   getDataByPath: GetDataByPath
   getField: GetField

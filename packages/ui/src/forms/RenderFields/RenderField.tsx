@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientFieldConfig, FieldPermissions, FieldTypes } from 'payload'
+import type { ClientField, FieldPermissions, FieldTypes } from 'payload'
 
 import { HiddenField, useFieldComponents } from '@payloadcms/ui'
 import React from 'react'
@@ -13,7 +13,7 @@ type Props = {
   readonly custom?: Record<any, string>
   readonly disabled: boolean
   readonly fieldComponentProps?: {
-    field: ClientFieldConfig
+    field: ClientField
     forceRender?: boolean
   }
   readonly indexPath?: string

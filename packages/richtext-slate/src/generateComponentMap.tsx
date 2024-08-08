@@ -1,6 +1,6 @@
-import type { ClientFieldConfig, Field, RichTextGenerateComponentMap } from 'payload'
+import type { ClientField, Field, RichTextGenerateComponentMap } from 'payload'
 
-import { createClientFieldConfigs } from '@payloadcms/ui/utilities/createClientConfig'
+import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
 import { deepCopyObjectSimple } from 'payload'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
@@ -64,8 +64,8 @@ export const getGenerateComponentMap =
           case 'link': {
             let clientFields = deepCopyObjectSimple(
               args.admin?.link?.fields,
-            ) as unknown as ClientFieldConfig[]
-            clientFields = createClientFieldConfigs({
+            ) as unknown as ClientField[]
+            clientFields = createClientFields({
               clientFields,
               createMappedComponent,
               fields: args.admin?.link?.fields as Field[],
@@ -94,8 +94,8 @@ export const getGenerateComponentMap =
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
                 let clientFields = deepCopyObjectSimple(
                   args?.admin?.upload?.collections[collection.slug]?.fields,
-                ) as unknown as ClientFieldConfig[]
-                clientFields = createClientFieldConfigs({
+                ) as unknown as ClientField[]
+                clientFields = createClientFields({
                   clientFields,
                   createMappedComponent,
                   fields: args?.admin?.upload?.collections[collection.slug]?.fields,

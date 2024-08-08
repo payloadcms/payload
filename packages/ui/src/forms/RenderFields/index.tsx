@@ -57,28 +57,26 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fields?.map((f, fieldIndex) => {
-            const { type, custom, disabled, readOnly } = f
-
+          fields?.map((field, fieldIndex) => {
             const forceRenderChildren =
               (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
-            const name = 'name' in f ? f.name : undefined
+            const name = 'name' in field ? field.name : undefined
 
             return (
               <RenderField
-                custom={custom}
-                disabled={disabled}
-                fieldComponentProps={{ field: f, forceRender: forceRenderChildren }}
+                custom={field.admin?.custom}
+                disabled={field.admin?.disabled}
+                fieldComponentProps={{ field, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 key={fieldIndex}
                 name={name}
                 path={path}
                 permissions={permissions?.[name]}
-                readOnly={readOnly}
+                readOnly={field.admin?.readOnly}
                 schemaPath={schemaPath}
                 siblingPermissions={permissions}
-                type={type}
+                type={field.type}
               />
             )
           })}

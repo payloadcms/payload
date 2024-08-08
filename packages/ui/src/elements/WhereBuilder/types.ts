@@ -1,5 +1,5 @@
 import type {
-  ClientFieldConfig,
+  ClientField,
   MappedComponent,
   Operator,
   SanitizedCollectionConfig,
@@ -9,7 +9,7 @@ import type {
 export type WhereBuilderProps = {
   readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  readonly fields?: ClientFieldConfig[]
+  readonly fields?: ClientField[]
 }
 
 export type FieldCondition = {
@@ -20,7 +20,7 @@ export type FieldCondition = {
     label: string
     value: Operator
   }[]
-  props: ClientFieldConfig
+  props: ClientField
   value: string
 }
 

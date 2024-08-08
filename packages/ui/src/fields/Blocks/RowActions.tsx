@@ -1,5 +1,5 @@
 'use client'
-import type { ClientBlock, ClientFieldConfig, Labels } from 'payload'
+import type { ClientBlock, ClientField, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -13,7 +13,7 @@ export const RowActions: React.FC<{
   readonly blockType: string
   readonly blocks: ClientBlock[]
   readonly duplicateRow: (rowIndex: number, blockType: string) => void
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
   readonly labels: Labels

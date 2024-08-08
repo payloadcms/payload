@@ -1,11 +1,13 @@
-import type { ClientFieldConfig } from 'payload'
+import type { ClientField } from 'payload'
 
-export const buildPathSegments = (parentPath: string, fields: ClientFieldConfig[]): string[] => {
+import { fieldAffectsData } from 'payload/shared'
+
+export const buildPathSegments = (parentPath: string, fields: ClientField[]): string[] => {
   const pathNames = fields.reduce((acc, field) => {
-    const fields = 'fields' in field ? field.fields : undefined
+    const fields: ClientField[] = 'fields' in field ? (field.fields as ClientField[]) : undefined
 
     if (fields) {
-      if (field._isAffectingData) {
+      if (fieldAffectsData(field)) {
         // group, block, array
         const name = 'name' in field ? field.name : 'unnamed'
         acc.push(parentPath ? `${parentPath}.${name}.` : `${name}.`)
@@ -24,7 +26,7 @@ export const buildPathSegments = (parentPath: string, fields: ClientFieldConfig[
           acc.push(...buildPathSegments(tabPath, tab.fields))
         })
       }
-    } else if (field._isAffectingData) {
+    } else if (fieldAffectsData(field)) {
       // text, number, date, etc.
       const name = 'name' in field ? field.name : 'unnamed'
       acc.push(parentPath ? `${parentPath}.${name}` : name)

@@ -1,12 +1,10 @@
-import type { ClientFieldConfig } from 'payload'
+import type { ClientField } from 'payload'
+
+import { fieldAffectsData } from 'payload/shared'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
-export function fieldAffectsData(field: ClientFieldConfig): boolean {
-  return 'name' in field && field.type !== 'ui'
-}
-
-const getRemainingColumns = (fields: ClientFieldConfig[], useAsTitle: string): ColumnPreferences =>
+const getRemainingColumns = (fields: ClientField[], useAsTitle: string): ColumnPreferences =>
   fields.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
@@ -33,7 +31,7 @@ const getRemainingColumns = (fields: ClientFieldConfig[], useAsTitle: string): C
   }, [])
 
 export const getInitialColumns = (
-  fields: ClientFieldConfig[],
+  fields: ClientField[],
   useAsTitle: string,
   defaultColumns: string[],
 ): ColumnPreferences => {

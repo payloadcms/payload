@@ -1,6 +1,7 @@
 'use client'
-import type { ClientFieldConfig, Description, DocumentPermissions } from 'payload'
+import type { ClientField, Description, DocumentPermissions } from 'payload'
 
+import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -14,7 +15,7 @@ type Args = {
   readonly BeforeFields?: React.ReactNode
   readonly description?: Description
   readonly docPermissions: DocumentPermissions
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
   readonly readOnly: boolean
   readonly schemaPath: string
@@ -30,9 +31,9 @@ export const DocumentFields: React.FC<Args> = ({
   readOnly,
   schemaPath,
 }) => {
-  const mainFields = fields.filter(({ _isSidebar }) => !_isSidebar)
+  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
 
-  const sidebarFields = fields.filter(({ _isSidebar }) => _isSidebar)
+  const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 

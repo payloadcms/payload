@@ -1,11 +1,13 @@
 'use client'
 import type { ChangeEvent } from 'react'
 
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -36,6 +38,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     value,
     width,
   } = props
+  const { i18n } = useTranslation()
 
   return (
     <div
@@ -65,7 +68,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         <div>
           <RenderComponent mappedComponent={beforeInput} />
           <input
-            aria-label={label}
+            aria-label={getTranslation(label, i18n)}
             autoComplete={autoComplete}
             data-rtl={rtl}
             disabled={readOnly}
@@ -73,7 +76,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             ref={inputRef}
             type="password"
             value={value || ''}

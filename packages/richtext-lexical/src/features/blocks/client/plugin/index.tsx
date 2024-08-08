@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldClient, BlocksFieldProps } from 'payload'
+import type { BlockFieldProps, BlocksFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'

@@ -1,5 +1,5 @@
 import type { StepNavItem } from '@payloadcms/ui'
-import type { ClientCollectionConfig, ClientFieldConfig, ClientGlobalConfig } from 'payload'
+import type { ClientCollectionConfig, ClientField, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -11,7 +11,7 @@ export const SetStepNav: React.FC<{
   readonly collectionConfig?: ClientCollectionConfig
   readonly collectionSlug?: string
   readonly doc: any
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly globalConfig?: ClientGlobalConfig
   readonly globalSlug?: string
   readonly id?: number | string

@@ -1,4 +1,5 @@
 import type { MappedComponent, StaticDescription, StaticLabel } from 'payload'
+import type React from 'react'
 
 import { type ChangeEvent } from 'react'
 
@@ -12,10 +13,10 @@ export type TextAreaInputProps = {
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
   readonly errorProps?: Record<string, unknown>
-  readonly inputRef?: React.MutableRefObject<HTMLInputElement>
+  readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
-  readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  readonly onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string
   readonly placeholder?: string

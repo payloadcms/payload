@@ -4,11 +4,17 @@ import type { JSONSchema4 } from 'json-schema'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
-import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type {
+  Field,
+  FieldAffectingData,
+  RichTextField,
+  RichTextFieldClient,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
 import type { RichTextFieldProps } from './fields/RichText.js'
-import type { CreateMappedComponent, RichTextFieldClient } from './types.js'
+import type { CreateMappedComponent } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,

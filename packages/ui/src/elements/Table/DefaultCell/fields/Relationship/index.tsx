@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps, RelationshipFieldClient, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
@@ -17,7 +17,8 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps extends DefaultCellComponentProps<any> {}
+export interface RelationshipCellProps
+  extends DefaultCellComponentProps<any, RelationshipFieldClient | UploadFieldClient> {}
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
@@ -92,19 +93,17 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         let fileField = null
 
         if (field.type === 'upload') {
-          const { name, displayPreview } = field
           const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
           const previewAllowed =
-            displayPreview || (relatedCollectionPreview && displayPreview !== false)
+            field.displayPreview || (relatedCollectionPreview && field.displayPreview !== false)
 
           if (previewAllowed && document) {
             fileField = (
               <FileCell
                 cellData={label}
                 customCellContext={customCellContext}
-                name={name}
+                field={field}
                 rowData={document}
-                schemaPath={_schemaPath}
               />
             )
           }

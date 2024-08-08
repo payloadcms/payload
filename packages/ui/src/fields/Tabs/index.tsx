@@ -2,7 +2,7 @@
 import type { DocumentPreferences, TabsFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { toKebabCase } from 'payload/shared'
+import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -26,7 +26,6 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
     field,
     field: {
-      name,
       _schemaPath: pathFromProps,
       admin: { className },
       tabs = [],
@@ -44,7 +43,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   } = useFieldProps()
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext ?? pathFromProps ?? name
+  const path = pathFromContext ?? pathFromProps
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -103,9 +102,9 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
 
   function generateTabPath() {
     let tabPath = path
-    if (path && activeTabConfig.name) {
+    if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = `${path}.${activeTabConfig.name}`
-    } else if (!path && activeTabConfig.name) {
+    } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = activeTabConfig.name
     }
 
@@ -171,7 +170,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                     : siblingPermissions
                 }
                 readOnly={readOnly}
-                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
+                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
               />
             </div>
           )}

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientFieldConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, ClientField, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -30,7 +30,7 @@ const baseClass = 'edit-many'
 
 export type EditManyProps = {
   readonly collection: ClientCollectionConfig
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
 }
 
 const Submit: React.FC<{

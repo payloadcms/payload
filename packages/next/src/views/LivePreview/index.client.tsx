@@ -3,7 +3,7 @@ import type { FormProps } from '@payloadcms/ui'
 import type {
   ClientCollectionConfig,
   ClientConfig,
-  ClientFieldConfig,
+  ClientField,
   ClientGlobalConfig,
   Data,
   LivePreviewConfig,
@@ -39,7 +39,7 @@ type Props = {
   readonly apiRoute: string
   readonly collectionConfig?: ClientCollectionConfig
   readonly config: ClientConfig
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly globalConfig?: ClientGlobalConfig
   readonly schemaPath: string
   readonly serverURL: string

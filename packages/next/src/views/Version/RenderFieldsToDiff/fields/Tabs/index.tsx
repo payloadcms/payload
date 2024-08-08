@@ -1,4 +1,4 @@
-import type { ClientFieldConfig, TabsFieldProps } from 'payload'
+import type { ClientField, TabsFieldProps } from 'payload'
 
 import React from 'react'
 
@@ -11,7 +11,7 @@ const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<
   {
-    readonly field: ClientFieldConfig & TabsFieldProps
+    readonly field: ClientField & TabsFieldProps
   } & Omit<Props, 'field'>
 > = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
   return (

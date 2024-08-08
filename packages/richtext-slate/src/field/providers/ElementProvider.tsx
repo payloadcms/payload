@@ -8,7 +8,7 @@ import type { SlateFieldProps } from '../types.js'
 type ElementContextType<T> = {
   attributes: Record<string, unknown>
   children: React.ReactNode
-  editorRef: React.MutableRefObject<HTMLDivElement>
+  editorRef: React.RefObject<HTMLDivElement>
   element: T
   fieldProps: SlateFieldProps
   path: string

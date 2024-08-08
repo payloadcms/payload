@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps, OptionObject } from 'payload'
+import type { DefaultCellComponentProps, OptionObject, SelectFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { optionsAreObjects } from 'payload/shared'
@@ -7,7 +7,7 @@ import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface SelectCellProps extends DefaultCellComponentProps<any> {}
+export interface SelectCellProps extends DefaultCellComponentProps<any, SelectFieldClient> {}
 
 export const SelectCell: React.FC<SelectCellProps> = ({ cellData, field: { options } }) => {
   const { i18n } = useTranslation()

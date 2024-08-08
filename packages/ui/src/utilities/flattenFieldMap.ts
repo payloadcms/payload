@@ -1,4 +1,4 @@
-import type { ClientFieldConfig } from 'payload'
+import type { ClientField } from 'payload'
 
 /**
  * Flattens a collection's fields into a single array of fields, as long
@@ -8,9 +8,9 @@ import type { ClientFieldConfig } from 'payload'
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
 export const flattenFieldMap = (
-  fields: ClientFieldConfig[],
+  fields: ClientField[],
   keepPresentationalFields?: boolean,
-): ClientFieldConfig[] => {
+): ClientField[] => {
   return fields.reduce((acc, field) => {
     if ('name' in field || (keepPresentationalFields && field._isPresentational)) {
       acc.push(field)

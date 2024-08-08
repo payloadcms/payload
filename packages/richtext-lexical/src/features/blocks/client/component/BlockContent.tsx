@@ -1,5 +1,5 @@
 import type {
-  ClientFieldConfig,
+  ClientField,
   CollapsedPreferences,
   Data,
   FormFieldBase,
@@ -40,7 +40,7 @@ type Props = {
     richTextComponentMap: Map<string, React.ReactNode>
   } & FormFieldBase
   formData: BlockFields
-  formSchema: ClientFieldConfig[]
+  formSchema: ClientField[]
   nodeKey: string
   path: string
   reducedBlock: ReducedBlock
