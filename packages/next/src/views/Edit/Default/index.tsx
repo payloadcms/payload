@@ -102,14 +102,18 @@ export const DefaultEditView: React.FC = () => {
 
   const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
-  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [schemaPath, setSchemaPath] = React.useState(() => {
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
+      return `_${entitySlug}.auth`
+    }
+
+    return entitySlug
+  })
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (
-      operation === 'create' &&
-      collectionConfig.auth &&
-      !collectionConfig.auth.disableLocalStrategy
-    )
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
+    }
+
     return false
   })
 
@@ -185,7 +189,7 @@ export const DefaultEditView: React.FC = () => {
     },
     [apiRoute, collectionSlug, schemaPath, getDocPreferences, globalSlug, id, operation, serverURL],
   )
-
+  console.log(validateBeforeSubmit)
   return (
     <main className={classes}>
       <OperationProvider operation={operation}>
