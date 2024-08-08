@@ -65,7 +65,6 @@
 }
 
 html {
-  overflow: hidden;
   @extend %body;
   background: var(--theme-bg);
   -webkit-font-smoothing: antialiased;
