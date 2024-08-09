@@ -86,7 +86,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     if (formData) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, formData])
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id]) // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -112,7 +112,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }
     },
 
-    [config.routes.api, config.serverURL, schemaFieldsPath, id, formData.blockName],
+    [config.routes.api, config.serverURL, id, schemaFieldsPath, formData.blockName],
   )
   const { i18n } = useTranslation()
 
@@ -175,17 +175,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
       </Collapsible>
     )
   }, [
-    classNames,
+    clientBlock,
+    initialState,
+    onChange,
+    submitted,
     parentLexicalRichTextField,
     nodeKey,
-    i18n,
-    submitted,
-    initialState,
-    clientBlock,
-    onChange,
-    schemaFieldsPath,
     path,
-    formData,
-  ]) // Adding formData to the dependencies here might break it
+    schemaFieldsPath,
+    classNames,
+    i18n, // Adding formData to the dependencies here might break it. DO NOT ADD FORMDATA!!!
+  ])
+
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
 }

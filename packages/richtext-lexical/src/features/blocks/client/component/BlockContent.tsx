@@ -232,7 +232,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fields={Array.isArray(formSchema) ? formSchema : []}
+          fields={formSchema}
           forceRender
           margins="small"
           path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?
