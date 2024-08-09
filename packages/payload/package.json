@@ -83,6 +83,16 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
+  },
   "dependencies": {
     "@next/env": "^15.0.0-canary.104",
     "@payloadcms/translations": "workspace:*",
