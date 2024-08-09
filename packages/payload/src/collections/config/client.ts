@@ -25,7 +25,7 @@ import type { TFunction } from '@payloadcms/translations'
 import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
-import { createClientFieldConfigs } from '../../fields/config/client.js'
+import { createClientFieldConfig, createClientFieldConfigs } from '../../fields/config/client.js'
 
 export const createClientCollectionConfig = ({
   collection,
@@ -52,6 +52,17 @@ export const createClientCollectionConfig = ({
       delete sanitized[key]
     }
   })
+
+  if ('joins' in sanitized && typeof sanitized.joins === 'object') {
+    const sanitizedJoins = {}
+    Object.keys(sanitized.joins).forEach((slug) => {
+      sanitizedJoins[slug] = sanitized.joins[slug].map((join) => ({
+        ...join,
+        field: createClientFieldConfig({ field: join.field, t }),
+      }))
+    })
+    sanitized.joins = sanitizedJoins
+  }
 
   if ('upload' in sanitized && typeof sanitized.upload === 'object') {
     sanitized.upload = { ...sanitized.upload }

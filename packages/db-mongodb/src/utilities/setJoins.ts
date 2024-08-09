@@ -24,7 +24,9 @@ export const setJoins = async ({
   options,
   payload,
 }: Args): Promise<Document> => {
-  const joinConfig = payload.collections[collection].joins
+  // TODO: allow disabling of joining at the top level using `joins: false` or `?joins=false`
+  // if (joins === false) return doc
+  const joinConfig = payload.collections[collection].config.joins
 
   await Promise.all(
     Object.keys(joinConfig).map(async (slug) => {

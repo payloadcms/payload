@@ -60,10 +60,9 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData, fieldHasSubFields } from './fields/config/types.js'
+import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getDependencies } from './utilities/dependencies/getDependencies.js'
-import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -500,33 +499,15 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    // TODO: move to sanitize to reduce looping of collections + fields
     this.config.collections.forEach((collection) => {
-      const joins = {}
       let customIDType
-      const callback = (field: ClientFieldConfig | Field, ref, parentRef) => {
+      const callback = (field: ClientFieldConfig | Field) => {
         if (!fieldAffectsData(field)) {
           return
         }
         if (field.name === 'id') {
           customIDType = field.type
-          return
-        }
-        if (fieldHasSubFields(field)) {
-          const parentPath = parentRef.schemaPath || ''
-          ref.schemaPath = `${parentPath}${parentPath ? '.' : ''}${field.name}`
-          return
-        }
-        if (field.type === 'join') {
-          const join = {
-            field,
-            schemaPath: `${ref.schemaPath || ''}${ref.schemaPath ? '.' : ''}${field.name}`,
-          }
-          if (!joins[field.collection]) {
-            joins[field.collection] = [join]
-          } else {
-            joins[field.collection].push(join)
-          }
+          return true
         }
       }
 
@@ -535,7 +516,6 @@ export class BasePayload {
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
-        joins,
       }
     })
 

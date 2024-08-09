@@ -11,24 +11,26 @@ type Ref = {
  * Iterate a recurse an array of fields, calling a callback for each field
  *
  * @param fields
- * @param callback callback called for each field
+ * @param callback callback called for each field, discontinue looping if callback returns truthy
  * @param ref
  * @param parentRef
  */
 export const traverseFields = (
   fields: (ClientFieldConfig | Field)[],
-  callback?: (field: ClientFieldConfig | Field, ref: Ref, parentRef: Ref) => void,
+  callback?: (field: ClientFieldConfig | Field, ref: Ref, parentRef: Ref) => boolean | void,
   ref: Ref = {},
   parentRef: Ref = {},
 ): void => {
-  fields.forEach((field) => {
+  fields.some((field) => {
     if (fieldHasSubFields(field)) {
       const parentRef = ref
       if ('name' in field && field.name) {
         ref[field.name] = {}
         ref = ref[field.name]
       }
-      if (callback) callback(field, ref, parentRef)
+      if (callback && callback(field, ref, parentRef)) {
+        return true
+      }
       traverseFields(field.fields, callback, ref, parentRef)
     }
 
@@ -41,6 +43,8 @@ export const traverseFields = (
         traverseFields(tab.fields, callback, ref, parentRef)
       })
     }
-    callback(field, ref, parentRef)
+    if (callback && callback(field, ref, parentRef)) {
+      return true
+    }
   })
 }

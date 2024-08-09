@@ -474,6 +474,21 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   versions?: IncomingCollectionVersions | boolean
 }
 
+export type SanitizedJoin = {
+  /**
+   * The field configuration defining the join
+   */
+  field: JoinField
+  /**
+   * The schemaPath of the join field in dot notation
+   */
+  schemaPath: string
+}
+
+export type SanitizedJoins = {
+  [collectionSlug: string]: SanitizedJoin[]
+}
+
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -482,6 +497,10 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins?: SanitizedJoins
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
@@ -498,21 +517,6 @@ export type Collection = {
     updateMutationInputType: GraphQLNonNull<any>
     versionType: GraphQLObjectType
     whereInputType: GraphQLInputObjectType
-  }
-  /**
-   * Object of collections to join 'Join Fields object keyed by collection
-   */
-  joins?: {
-    [collectionSlug: string]: {
-      /**
-       * The field configuration defining the join
-       */
-      field: JoinField
-      /**
-       * The schemaPath of the join field in dot notation
-       */
-      schemaPath: string
-    }[]
   }
 }
 
