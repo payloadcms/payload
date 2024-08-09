@@ -13,7 +13,7 @@ export type Props = {
   selectedDocs?: ArchiveBlockProps['selectedDocs']
 }
 
-export const CollectionArchiveBySelection: React.FC<Props> = (props) => {
+export const CollectionArchiveBySelection = (props: Props) => {
   const { className, selectedDocs } = props
 
   const result = selectedDocs?.map((doc) => doc.value)

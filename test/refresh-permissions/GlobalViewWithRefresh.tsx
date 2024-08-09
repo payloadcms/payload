@@ -5,7 +5,7 @@ import type { Props } from '../../packages/payload/src/admin/components/views/Gl
 import { useAuth } from '../../packages/payload/src/admin/components/utilities/Auth'
 import DefaultGlobalView from '../../packages/payload/src/admin/components/views/Global/Default'
 
-const GlobalView: React.FC<Props> = (props) => {
+const GlobalView = (props: Props) => {
   const { onSave } = props
   const { refreshPermissions } = useAuth()
   const modifiedOnSave = useCallback(

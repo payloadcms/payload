@@ -6,7 +6,7 @@ import { Media } from '../Media'
 
 import classes from './index.module.scss'
 
-export const Card: React.FC<{
+export type CardProps = {
   alignItems?: 'center'
   className?: string
   showCategories?: boolean
@@ -15,7 +15,9 @@ export const Card: React.FC<{
   relationTo?: 'posts'
   doc?: Post
   orientation?: 'horizontal' | 'vertical'
-}> = (props) => {
+}
+
+export const Card = (props: CardProps) => {
   const {
     relationTo,
     showCategories,

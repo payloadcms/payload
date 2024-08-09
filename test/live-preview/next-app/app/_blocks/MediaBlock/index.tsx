@@ -8,12 +8,15 @@ import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
-type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'mediaBlock' }> & {
+type MediaBlockProps = Extract<
+  Exclude<Page['layout'], undefined>[0],
+  { blockType: 'mediaBlock' }
+> & {
   staticImage?: StaticImageData
   id?: string
 }
 
-export const MediaBlock: React.FC<Props> = (props) => {
+export const MediaBlock = (props: MediaBlockProps) => {
   const { media, position = 'default', staticImage } = props
 
   let caption

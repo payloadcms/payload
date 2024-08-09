@@ -10,9 +10,11 @@ import { formatDateTime } from '../../_utilities/formatDateTime'
 import classes from './index.module.scss'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
-export const PostHero: React.FC<{
+export type PostHeroProps = {
   post: Post
-}> = ({ post }) => {
+}
+
+export const PostHero = ({ post }: PostHeroProps) => {
   const { id, meta: { image: metaImage, description } = {}, createdAt } = post
 
   return (

@@ -7,11 +7,11 @@ import { ArchiveBlockProps } from './types'
 
 import classes from './index.module.scss'
 
-export const ArchiveBlock: React.FC<
-  ArchiveBlockProps & {
-    id?: string
-  }
-> = (props) => {
+export type ArchiveBlockProps = ArchiveBlockProps & {
+  id?: string
+}
+
+export const ArchiveBlock = ({ props }: ArchiveBlockProps) => {
   const {
     introContent,
     id,
