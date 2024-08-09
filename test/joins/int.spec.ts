@@ -48,7 +48,7 @@ describe('Joins Field Tests', () => {
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'test a',
       },
     })
     await payload.create({
@@ -58,7 +58,7 @@ describe('Joins Field Tests', () => {
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'test b',
       },
     })
     await payload.create({
@@ -68,7 +68,7 @@ describe('Joins Field Tests', () => {
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'test c',
       },
     })
   })
@@ -79,7 +79,7 @@ describe('Joins Field Tests', () => {
     }
   })
 
-  it('should populate joins', async () => {
+  it('should populate joins using findByID', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: 'categories',
@@ -91,7 +91,26 @@ describe('Joins Field Tests', () => {
 
     expect(categoryWithPosts.group.posts).toHaveLength(3)
     expect(categoryWithPosts.group.posts[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts[0].title).toBe('test')
+    expect(categoryWithPosts.group.posts[0].title).toBe('test a')
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
+    expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
+  })
+
+  it('should populate joins using find', async () => {
+    const result = await payload.find({
+      collection: 'categories',
+    })
+
+    const [categoryWithPosts] = result.docs
+
+    expect(Array.isArray(categoryWithPosts.group.posts)).toBeDefined()
+    expect(Array.isArray(categoryWithPosts.posts)).toBeDefined()
+    const joinedIDs = categoryWithPosts.group.posts.map((post) => post.id)
+
+    expect(categoryWithPosts.group.posts).toHaveLength(3)
+    expect(categoryWithPosts.group.posts[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.posts[0].title).toBe('test a')
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
     expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
@@ -100,9 +119,16 @@ describe('Joins Field Tests', () => {
   describe('REST', () => {
     it('should paginate joins', async () => {
       const response = await restClient
-        .GET(`/categories/${category.id}?joins[posts][limit]=1`)
+        .GET(`/categories/${category.id}?joins[posts][limit]=1[page]=2`)
         .then((res) => res.json())
       expect(response.posts).toHaveLength(1)
+      expect(response.posts[0].title).toStrictEqual('test b')
+    })
+    it('should sort joins', async () => {
+      const response = await restClient
+        .GET(`/categories/${category.id}?joins[posts][sort]=-title`)
+        .then((res) => res.json())
+      expect(response.posts[0].title).toStrictEqual('test c')
     })
   })
 })

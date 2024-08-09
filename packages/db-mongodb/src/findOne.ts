@@ -1,4 +1,4 @@
-import type { MongooseQueryOptions } from 'mongoose'
+import type { QueryOptions } from 'mongoose'
 import type { FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -12,7 +12,7 @@ export const findOne: FindOne = async function findOne(
   { collection, joins, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options: MongooseQueryOptions = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
   }

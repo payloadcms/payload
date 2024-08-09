@@ -1,23 +1,20 @@
-import type { MongooseQueryOptions } from 'mongoose'
+import type { QueryOptions } from 'mongoose'
 import type { Document, JoinQuery, Payload } from 'payload'
 
 type Args = {
   collection: string
   doc: Document
   joins: JoinQuery
-  options: MongooseQueryOptions
+  options: QueryOptions
   payload: Payload
 }
 
-// TODO: pass in queryParam called `joins` to specify the pagination of each join
-// joins[schemaPath][page]=2&joins[schemaPath][limit]=100
-
 /**
- * // fetch docs and add to the keys by path
+ * // fetch docs and add to the keys by path, mutating and returning the doc
  * @param collection
  * @param doc
- * @param options
  * @param joins,
+ * @param options
  * @param payload
  */
 export const setJoins = async ({

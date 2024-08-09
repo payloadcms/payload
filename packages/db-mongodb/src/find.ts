@@ -7,11 +7,22 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { setJoins } from './utilities/setJoins.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    req = {} as PayloadRequest,
+    sort: sortArg,
+    where,
+  },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
@@ -89,6 +100,26 @@ export const find: Find = async function find(
   }
 
   const result = await Model.paginate(query, paginationOptions)
+
+  const joinPromises = []
+
+  result.docs.forEach((doc) => {
+    joinPromises.push(
+      setJoins({
+        collection,
+        doc,
+        joins,
+        options: {
+          lean: true,
+          session: options.session,
+        },
+        payload: this.payload,
+      }),
+    )
+  })
+
+  await Promise.all(joinPromises)
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
