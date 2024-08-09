@@ -438,8 +438,11 @@ const DocumentInfo: React.FC<
             serverURL,
             signal: abortController.signal,
           })
+          const data = reduceFieldsToValues(result, true)
+          setData(data)
 
-          setData(reduceFieldsToValues(result, true))
+          if (localeChanged) void getDocPermissions(data)
+
           setInitialState(result)
         } catch (err) {
           if (!abortController.signal.aborted) {
@@ -474,6 +477,7 @@ const DocumentInfo: React.FC<
     onLoadError,
     initialDataFromProps,
     initialStateFromProps,
+    getDocPermissions,
   ])
 
   useEffect(() => {
@@ -494,13 +498,8 @@ const DocumentInfo: React.FC<
   }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const localeChanged = locale !== prevLocalePermissions.current
-
     if (data && (collectionSlug || globalSlug)) {
-      if (localeChanged) {
-        prevLocalePermissions.current = locale
-        void getDocPermissions(data)
-      } else if (
+      if (
         hasInitializedDocPermissions.current === false &&
         (!docPermissions ||
           hasSavePermission === undefined ||
@@ -521,7 +520,6 @@ const DocumentInfo: React.FC<
     collectionSlug,
     globalSlug,
     data,
-    locale,
     docPermissions,
     hasSavePermission,
     hasPublishPermission,
