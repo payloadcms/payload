@@ -1,4 +1,4 @@
-import type { Data, Field, FormField, FormState, Row, User } from 'payload'
+import type { ClientField, Data, Field, FormField, FormState, Row, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -22,7 +22,7 @@ export type FormProps = {
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
    * feature of the Lexical Rich Text field)
    */
-  fields?: Field[]
+  fields?: ClientField[]
   handleResponse?: (
     res: Response,
     successToast: (value: string) => void,

@@ -3,11 +3,13 @@ import type {
   AdminClient,
   ArrayFieldClient,
   BlockFieldClient,
+  ClientBlock,
   ClientField,
   CreateMappedComponent,
   Field,
   ImportMap,
   LabelComponent,
+  LabelsClient,
   MappedComponent,
   Payload,
   RadioFieldClient,
@@ -146,7 +148,42 @@ export const createClientField = ({
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
-          const clientBlock = field.blocks[i]
+          const clientBlock: ClientBlock = {
+            slug: block.slug,
+            admin: {
+              components: {},
+              custom: block.admin?.custom,
+            },
+            fields: field.blocks[i].fields,
+            imageAltText: block.imageAltText,
+            imageURL: block.imageURL,
+          }
+
+          if (block.labels) {
+            clientBlock.labels = {} as unknown as LabelsClient
+            if (block.labels.singular) {
+              if (typeof block.labels.singular === 'function') {
+                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+              } else {
+                clientBlock.labels.singular = block.labels.singular
+              }
+              if (typeof block.labels.plural === 'function') {
+                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+              } else {
+                clientBlock.labels.plural = block.labels.plural
+              }
+            }
+          }
+
+          if (block.admin?.components?.Label) {
+            clientBlock.admin.components.Label = createMappedComponent(
+              block.admin.components.Label,
+              undefined,
+              undefined,
+              'block.admin.components.Label',
+            )
+          }
+
           clientBlock.fields = createClientFields({
             clientFields: clientBlock.fields,
             createMappedComponent,
@@ -156,6 +193,8 @@ export const createClientField = ({
             parentPath: field._schemaPath,
             payload,
           })
+
+          field.blocks[i] = clientBlock
         }
       }
 

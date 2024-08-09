@@ -11,7 +11,6 @@ import type { DeepUndefinable } from 'ts-essentials'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type { ErrorComponent } from '../../admin/forms/Error.js'
 import type {
-  ClientBlock,
   ClientTab,
   ConditionalDateProps,
   Description,
@@ -1022,7 +1021,7 @@ export type RichTextFieldClient<
       Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient
-  richTextComponentMap?: Map<string, unknown>
+  richTextComponentMap?: Map<string, any>
 } & FieldBaseClient &
   Pick<RichTextField<TValue, TAdapterProps, TExtraProperties>, 'maxDepth' | 'type'> &
   TExtraProperties
@@ -1150,6 +1149,15 @@ export type Block = {
   labels?: Labels
   slug: string
 }
+export type ClientBlock = {
+  admin?: {
+    components?: {
+      Label?: MappedComponent
+    }
+  } & Pick<Block['admin'], 'custom'>
+  fields: ClientField[]
+  labels?: LabelsClient
+} & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
 
 export type BlockField = {
   admin?: {

@@ -7,6 +7,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import * as React from 'react'
 import { createContext, useContext, useMemo, useRef, useState } from 'react'
 
+import type { LexicalRichTextFieldProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 // Should always produce a 20 character pseudo-random string
@@ -21,7 +22,7 @@ export interface EditorConfigContextType {
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  field: RichTextFieldClient
+  field: LexicalRichTextFieldProps['field']
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void
   focusedEditor: EditorConfigContextType | null
@@ -47,7 +48,7 @@ export const EditorConfigProvider = ({
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  field: RichTextFieldClient
+  field: LexicalRichTextFieldProps['field']
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
   const [editor] = useLexicalComposerContext()

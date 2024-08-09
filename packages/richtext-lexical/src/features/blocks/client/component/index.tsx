@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlockFieldProps, BlocksFieldClient, FormState } from 'payload'
+import type { BlockFieldClient, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
@@ -52,10 +52,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
-  const reducedBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
-  const fields = reducedBlock.fields
+  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
   // Field Schema
   useEffect(() => {
@@ -121,11 +120,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
-    return reducedBlock && initialState !== false ? (
+    return clientBlock && initialState !== false ? (
       <Form
         beforeSubmit={[onChange]}
-        // @ts-expect-error TODO: Fix this
-        fields={fields}
+        fields={clientBlock.fields}
         initialState={initialState}
         onChange={[onChange]}
         submitted={submitted}
@@ -133,12 +131,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
       >
         <BlockContent
           baseClass={baseClass}
+          clientBlock={clientBlock}
           field={parentLexicalRichTextField}
           formData={formData}
-          formSchema={Array.isArray(fields) ? fields : []}
+          formSchema={clientBlock.fields}
           nodeKey={nodeKey}
           path={`${path}.lexical_internal_feature.blocks.${formData.blockType}`}
-          reducedBlock={reducedBlock}
           schemaPath={schemaFieldsPath}
         />
       </Form>
@@ -147,10 +145,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle="default"
         header={
-          reducedBlock.LabelComponent ? (
+          clientBlock?.admin?.components?.Label ? (
             <RenderComponent
               clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={reducedBlock.LabelComponent}
+              mappedComponent={clientBlock.admin.components.Label}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>
@@ -159,11 +157,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                   pillStyle="white"
                 >
-                  {reducedBlock && typeof reducedBlock.labels.singular === 'string'
-                    ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : reducedBlock.slug}
+                  {clientBlock && typeof clientBlock.labels.singular === 'string'
+                    ? getTranslation(clientBlock.labels.singular, i18n)
+                    : clientBlock.slug}
                 </Pill>
-                <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+                <SectionTitle
+                  path="blockName"
+                  readOnly={parentLexicalRichTextField?.admin?.readOnly}
+                />
               </div>
             </div>
           )
@@ -175,13 +176,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     )
   }, [
     classNames,
-    fields,
     parentLexicalRichTextField,
     nodeKey,
     i18n,
     submitted,
     initialState,
-    reducedBlock,
+    clientBlock,
     onChange,
     schemaFieldsPath,
     path,

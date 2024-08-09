@@ -39,8 +39,6 @@ export type {
   ArrayFieldProps,
 } from './fields/Array.js'
 
-export type { ClientBlock } from './fields/Blocks.js'
-
 export type {
   BlockFieldDescriptionComponent,
   BlockFieldErrorComponent,

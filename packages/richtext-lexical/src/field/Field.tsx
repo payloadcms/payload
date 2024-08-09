@@ -142,4 +142,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)

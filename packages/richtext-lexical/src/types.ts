@@ -58,7 +58,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps, any>
+} & RichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -75,7 +75,7 @@ export type LexicalRichTextAdapterProvider =
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
   lexicalEditorConfig: LexicalEditorConfig
-} & RichTextFieldProps
+} & RichTextFieldProps<SerializedEditorState, AdapterProps, object>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

@@ -162,7 +162,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
-            disabled={field?.readOnly}
+            disabled={field?.admin?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
@@ -176,7 +176,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.readOnly}
+            disabled={field?.admin?.readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()
