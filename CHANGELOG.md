@@ -1,3 +1,25 @@
+## [2.26.0](https://github.com/payloadcms/payload/compare/v2.25.0...v2.26.0) (2024-08-09)
+
+
+### Features
+
+* adds classnames to edit, list views ([#7595](https://github.com/payloadcms/payload/issues/7595)) ([7f39afa](https://github.com/payloadcms/payload/commit/7f39afa1928b118451138e811ea71a04fce021d5))
+* adds upload's relationship thumbnail ([#5015](https://github.com/payloadcms/payload/issues/5015)) ([39e110e](https://github.com/payloadcms/payload/commit/39e110e6331efff0ca8ca7174780076243a016de))
+* **ui:** expose custom errors in delete many ([#7439](https://github.com/payloadcms/payload/issues/7439)) ([3e780b9](https://github.com/payloadcms/payload/commit/3e780b98155550f877021996dd094ba435dff81b))
+
+
+### Bug Fixes
+
+* **db-postgres:** localized array inside blocks field ([#7458](https://github.com/payloadcms/payload/issues/7458)) ([a308d63](https://github.com/payloadcms/payload/commit/a308d6384f9724c5ff330382070a5803fbcf167c)), closes [#5240](https://github.com/payloadcms/payload/issues/5240)
+* deprecated `inflight` package ([#6558](https://github.com/payloadcms/payload/issues/6558)) ([eca1517](https://github.com/payloadcms/payload/commit/eca1517237c78983c192f4bafa92a86d94a0de9e)), closes [#6492](https://github.com/payloadcms/payload/issues/6492)
+* enable `relationship` & `upload` field population in `versions` ([#7533](https://github.com/payloadcms/payload/issues/7533)) ([9865ae9](https://github.com/payloadcms/payload/commit/9865ae998b9aeb5d72724023976bb203133e19ff))
+* filtering by non-poly `relationships` with `not_equals` operator ([#7573](https://github.com/payloadcms/payload/issues/7573)) ([efa56ce](https://github.com/payloadcms/payload/commit/efa56cefc15a48cd45b3aaba2eddacca79e1be30)), closes [#5212](https://github.com/payloadcms/payload/issues/5212) [#6278](https://github.com/payloadcms/payload/issues/6278)
+* filtering by polymorphic `relationships` with `drafts` enabled ([#7565](https://github.com/payloadcms/payload/issues/7565)) ([907d7d1](https://github.com/payloadcms/payload/commit/907d7d1d3a89ed22bb991a1f238bb77d54e3e173)), closes [#6880](https://github.com/payloadcms/payload/issues/6880)
+* retained date milliseconds ([#7393](https://github.com/payloadcms/payload/issues/7393)) ([9c9e689](https://github.com/payloadcms/payload/commit/9c9e6896a502de209c6cccf63cc5cfc0f0143bf3)), closes [#6108](https://github.com/payloadcms/payload/issues/6108)
+* prevents `hasMany` text going outside of input boundaries ([#7454](https://github.com/payloadcms/payload/issues/7454)) ([1a0ef48](https://github.com/payloadcms/payload/commit/1a0ef4824b3d6548d36e7f28a2030640361c0655)), closes [#6034](https://github.com/payloadcms/payload/issues/6034)
+* previousValue missing from ValidateOptions type ([#6931](https://github.com/payloadcms/payload/issues/6931)) ([fca5a40](https://github.com/payloadcms/payload/commit/fca5a404dbf3b440b428e55cf5e03db647f9a453))
+* render singular label for `ArrayCell` when length is 1 ([#7585](https://github.com/payloadcms/payload/issues/7585)) ([fc4d24a](https://github.com/payloadcms/payload/commit/fc4d24aa8889ac9be76059a92478d5532b142b5c)), closes [#6099](https://github.com/payloadcms/payload/issues/6099)
+
 ## [2.25.0](https://github.com/payloadcms/payload/compare/v2.24.2...v2.25.0) (2024-07-26)
 
 
