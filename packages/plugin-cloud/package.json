@@ -28,12 +28,12 @@
     "@aws-sdk/credential-providers": "^3.289.0",
     "@aws-sdk/lib-storage": "^3.267.0",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "6.9.9"
+    "nodemailer": "6.9.14"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
     "@types/jest": "^29.5.1",
-    "@types/nodemailer": "6.4.14",
+    "@types/nodemailer": "6.4.15",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0",
     "webpack": "^5.78.0"
