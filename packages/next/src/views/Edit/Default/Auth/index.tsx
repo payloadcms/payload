@@ -147,6 +147,7 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
+                autoComplete="new-password"
                 disabled={disabled}
                 label={t('authentication:newPassword')}
                 name="password"
