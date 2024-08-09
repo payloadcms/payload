@@ -104,7 +104,7 @@
     "minimist": "1.2.8",
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
-    "nodemailer": "6.9.8",
+    "nodemailer": "6.9.9",
     "object-to-formdata": "4.5.1",
     "passport": "0.6.0",
     "passport-anonymous": "1.0.1",
