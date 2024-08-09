@@ -6,13 +6,17 @@ import type { ErrorProps } from './Error.js'
 import type { FieldDescriptionProps } from './FieldDescription.js'
 import type { LabelProps } from './Label.js'
 
+// TODO: Check if we still need this. Shouldnt most of it be present in the field type?
 export type FormFieldBase = {
   readonly descriptionProps?: FieldDescriptionProps
   readonly docPreferences?: DocumentPreferences
   readonly errorProps?: ErrorProps
+  /**
+   * forceRender is added by RenderField automatically
+   */
+  readonly forceRender?: boolean
   readonly labelProps?: LabelProps
   readonly locale?: Locale
-  readonly readOnly?: boolean
   readonly user?: User
   readonly validate?: Validate
 }

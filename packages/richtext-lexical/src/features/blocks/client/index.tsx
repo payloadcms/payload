@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlocksFieldClient } from 'payload'
+import type { BlockFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -16,8 +16,8 @@ import { INSERT_BLOCK_COMMAND, OPEN_INLINE_BLOCK_DRAWER_COMMAND } from './plugin
 import { BlocksPlugin } from './plugin/index.js'
 
 export type BlocksFeatureClientProps = {
-  reducedBlockSlugs: string[]
-  reducedInlineBlockSlugs: string[]
+  clientBlockSlugs: string[]
+  clientInlineBlockSlugs: string[]
 }
 
 export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>(({ props }) => ({
@@ -31,26 +31,24 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
   sanitizedClientFeatureProps: props,
   slashMenu: {
     groups: [
-      props.reducedBlockSlugs?.length
+      props.clientBlockSlugs?.length
         ? {
-            items: props.reducedBlockSlugs.map((blockSlug) => {
+            items: props.clientBlockSlugs.map((blockSlug) => {
               return {
                 Icon: BlockIcon,
                 key: 'block-' + blockSlug,
                 keywords: ['block', 'blocks', blockSlug],
                 label: ({ i18n, richTextComponentMap }) => {
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
+                  const blocksField: BlockFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
                   )[0]
 
-                  const reducedBlock = blocksField.blocks.find(
-                    (_block) => _block.slug === blockSlug,
-                  )
+                  const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
 
-                  const blockDisplayName = reducedBlock.labels.singular
-                    ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : reducedBlock.slug
+                  const blockDisplayName = clientBlock.labels.singular
+                    ? getTranslation(clientBlock.labels.singular, i18n)
+                    : clientBlock.slug
 
                   return blockDisplayName
                 },
@@ -69,9 +67,9 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
             },
           }
         : null,
-      props.reducedInlineBlockSlugs?.length
+      props.clientInlineBlockSlugs?.length
         ? {
-            items: props.reducedInlineBlockSlugs.map((inlineBlockSlug) => {
+            items: props.clientInlineBlockSlugs.map((inlineBlockSlug) => {
               return {
                 Icon: InlineBlocksIcon,
                 key: 'inlineBlocks-' + inlineBlockSlug,
@@ -79,17 +77,17 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
                 label: ({ i18n, richTextComponentMap }) => {
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
 
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
+                  const blocksField: BlockFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
                   )[0]
 
-                  const reducedBlock = blocksField.blocks.find(
+                  const clientBlock = blocksField.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,
                   )
 
-                  const blockDisplayName = reducedBlock.labels.singular
-                    ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : reducedBlock.slug
+                  const blockDisplayName = clientBlock.labels.singular
+                    ? getTranslation(clientBlock.labels.singular, i18n)
+                    : clientBlock.slug
 
                   return blockDisplayName
                 },
@@ -114,28 +112,26 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
   },
   toolbarFixed: {
     groups: [
-      props.reducedBlockSlugs?.length
+      props.clientBlockSlugs?.length
         ? {
             type: 'dropdown',
             ChildComponent: BlockIcon,
-            items: props.reducedBlockSlugs.map((blockSlug, index) => {
+            items: props.clientBlockSlugs.map((blockSlug, index) => {
               return {
                 ChildComponent: BlockIcon,
                 isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                 key: 'block-' + blockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
+                  const blocksField: BlockFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
                   )[0]
 
-                  const reducedBlock = blocksField.blocks.find(
-                    (_block) => _block.slug === blockSlug,
-                  )
+                  const clientBlock = blocksField.blocks.find((_block) => _block.slug === blockSlug)
 
-                  const blockDisplayName = reducedBlock.labels.singular
-                    ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : reducedBlock.slug
+                  const blockDisplayName = clientBlock.labels.singular
+                    ? getTranslation(clientBlock.labels.singular, i18n)
+                    : clientBlock.slug
 
                   return blockDisplayName
                 },
@@ -153,28 +149,28 @@ export const BlocksFeatureClient = createClientFeature<BlocksFeatureClientProps>
             order: 20,
           }
         : null,
-      props.reducedInlineBlockSlugs?.length
+      props.clientInlineBlockSlugs?.length
         ? {
             type: 'dropdown',
             ChildComponent: InlineBlocksIcon,
-            items: props.reducedInlineBlockSlugs.map((inlineBlockSlug, index) => {
+            items: props.clientInlineBlockSlugs.map((inlineBlockSlug, index) => {
               return {
                 ChildComponent: InlineBlocksIcon,
                 isActive: undefined,
                 key: 'inlineBlock-' + inlineBlockSlug,
                 label: ({ i18n, richTextComponentMap }) => {
                   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-                  const blocksField: BlocksFieldClient = richTextComponentMap.get(
+                  const blocksField: BlockFieldClient = richTextComponentMap.get(
                     componentMapRenderedBlockPath,
                   )[0]
 
-                  const reducedBlock = blocksField.blocks.find(
+                  const clientBlock = blocksField.blocks.find(
                     (_block) => _block.slug === inlineBlockSlug,
                   )
 
-                  const blockDisplayName = reducedBlock.labels.singular
-                    ? getTranslation(reducedBlock.labels.singular, i18n)
-                    : reducedBlock.slug
+                  const blockDisplayName = clientBlock.labels.singular
+                    ? getTranslation(clientBlock.labels.singular, i18n)
+                    : clientBlock.slug
 
                   return blockDisplayName
                 },

@@ -160,11 +160,11 @@ const RelationshipElement: React.FC<Props> = () => {
       <div className={`${baseClass}__actions`}>
         <ListDrawerToggler
           className={`${baseClass}__list-drawer-toggler`}
-          disabled={fieldProps?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
         >
           <Button
             buttonStyle="icon-label"
-            disabled={fieldProps?.readOnly}
+            disabled={fieldProps?.field?.admin?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
@@ -177,7 +177,7 @@ const RelationshipElement: React.FC<Props> = () => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
-          disabled={fieldProps?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
           icon="x"
           onClick={(e) => {
             e.preventDefault()

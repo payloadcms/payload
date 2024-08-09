@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, ClientFieldConfig, FieldPermissions, MappedComponent, Row } from 'payload'
+import type { ArrayField, ClientField, FieldPermissions, MappedComponent, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -22,7 +22,7 @@ type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly indexPath: string

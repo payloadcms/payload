@@ -77,9 +77,11 @@ export const ForgotPasswordForm: React.FC = () => {
 
       {loginWithUsername ? (
         <TextField
-          label={t('authentication:username')}
-          name="username"
-          required
+          field={{
+            name: 'username',
+            label: t('authentication:username'),
+            required: true,
+          }}
           validate={(value) =>
             text(value, {
               name: 'username',
@@ -91,7 +93,7 @@ export const ForgotPasswordForm: React.FC = () => {
                   config,
                 },
                 t,
-              } as PayloadRequest,
+              } as unknown as PayloadRequest,
               required: true,
               siblingData: {},
             })

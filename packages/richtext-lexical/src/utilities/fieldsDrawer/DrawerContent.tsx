@@ -1,6 +1,6 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientFieldConfig, FormState } from 'payload'
+import type { ClientField, FormState } from 'payload'
 
 import {
   Form,
@@ -42,8 +42,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
   const fields: any =
-    fieldMapOverride ??
-    (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientFieldConfig[]) // Field Schema
+    fieldMapOverride ?? (richTextComponentMap.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
 
   useEffect(() => {
     const awaitInitialState = async () => {

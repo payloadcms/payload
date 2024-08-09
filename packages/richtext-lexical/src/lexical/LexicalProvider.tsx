@@ -1,12 +1,12 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
-import type { RichTextFieldClient } from 'payload'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
 import * as React from 'react'
 import { useMemo } from 'react'
 
+import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
@@ -18,7 +18,7 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig
-  field: RichTextFieldClient
+  field: LexicalRichTextFieldProps['field']
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean

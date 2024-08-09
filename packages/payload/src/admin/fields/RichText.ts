@@ -1,19 +1,17 @@
-import type { StaticLabel } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
-export type RichTextFieldClient = {
-  label: StaticLabel
-  richTextComponentMap?: Map<string, unknown>
-} & Extract<ClientFieldConfig, { type: 'richText' }>
-
-export type RichTextFieldProps = {
-  readonly field: RichTextFieldClient
-  readonly name: string
+export type RichTextFieldProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = {
+  readonly field: MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
   readonly validate?: RichTextFieldValidation
-  readonly width?: string
 } & Omit<FormFieldBase, 'validate'>
 
 export type RichTextFieldLabelComponent = LabelComponent<'richText'>

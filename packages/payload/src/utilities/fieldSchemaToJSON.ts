@@ -1,4 +1,4 @@
-import type { ClientFieldConfig } from '../fields/config/client.js'
+import type { ClientField } from '../fields/config/client.js'
 import type { FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
@@ -11,7 +11,7 @@ export type FieldSchemaJSON = {
   type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
@@ -20,7 +20,6 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
         acc.push({
           name: field.name,
           type: field.type,
-          // @ts-expect-error
           fields: fieldSchemaToJSON(field.fields),
         })
 
@@ -31,9 +30,7 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
           name: field.name,
           type: field.type,
           fields: fieldSchemaToJSON([
-            // @ts-expect-error
             ...field.fields,
-            // @ts-expect-error
             {
               name: 'id',
               type: 'text',
@@ -50,9 +47,7 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
-                // @ts-expect-error
                 ...block.fields,
-                // @ts-expect-error
                 {
                   name: 'id',
                   type: 'text',
@@ -68,7 +63,6 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
 
       case 'row':
       case 'collapsible':
-        // @ts-expect-error
         result = result.concat(fieldSchemaToJSON(field.fields))
         break
 
@@ -80,13 +74,11 @@ export const fieldSchemaToJSON = (fields: ClientFieldConfig[]): FieldSchemaJSON 
             tabFields.push({
               name: tab.name,
               type: field.type,
-              // @ts-expect-error
               fields: fieldSchemaToJSON(tab.fields),
             })
             return
           }
 
-          // @ts-expect-error
           tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields))
         })
 

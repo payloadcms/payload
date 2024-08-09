@@ -79,8 +79,6 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  const LabelComponent = block?.LabelComponent
-
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
@@ -121,10 +119,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             : undefined
         }
         header={
-          LabelComponent ? (
+          block?.admin?.components?.Label ? (
             <RenderComponent
               clientProps={{ blockKind: 'block', formData: row }}
-              mappedComponent={LabelComponent}
+              mappedComponent={block.admin.components.Label}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>

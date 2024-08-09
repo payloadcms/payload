@@ -24,12 +24,12 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       admin: {
         className,
         description,
+        disabled: disabledFromProps,
         placeholder,
         rtl,
         style,
         width,
       } = {} as PasswordFieldProps['field']['admin'],
-      disabled: disabledFromProps,
       label,
       required,
     } = {} as PasswordFieldProps['field'],
@@ -58,7 +58,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
             config,
           },
           t,
-        } as PayloadRequest,
+        } as unknown as PayloadRequest,
         required: true,
         siblingData: {},
       })

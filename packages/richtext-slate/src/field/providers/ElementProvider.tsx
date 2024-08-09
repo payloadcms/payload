@@ -3,14 +3,14 @@ import type { Element } from 'slate'
 
 import React from 'react'
 
-import type { SlateFieldProps } from '../types.js'
+import type { LoadedSlateFieldProps } from '../types.js'
 
 type ElementContextType<T> = {
   attributes: Record<string, unknown>
   children: React.ReactNode
-  editorRef: React.MutableRefObject<HTMLDivElement>
+  editorRef: React.RefObject<HTMLDivElement>
   element: T
-  fieldProps: SlateFieldProps
+  fieldProps: LoadedSlateFieldProps
   path: string
   schemaPath: string
 }

@@ -1,15 +1,12 @@
-import type { StaticLabel } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { RelationshipFieldClient } from '../../fields/config/types.js'
 import type { RelationshipFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
-export type RelationshipFieldClient = {
-  readonly label: StaticLabel
-} & Extract<ClientFieldConfig, { type: 'relationship' }>
-
 export type RelationshipFieldProps = {
-  readonly field: RelationshipFieldClient
+  readonly field: MarkOptional<RelationshipFieldClient, 'type'>
   readonly validate?: RelationshipFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 

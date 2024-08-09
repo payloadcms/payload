@@ -1,15 +1,11 @@
-import type { StaticLabel } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { CollapsibleFieldClient } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
-export type CollapsibleFieldClient = {
-  readonly fields: ClientFieldConfig[]
-  readonly label: StaticLabel
-} & Extract<ClientFieldConfig, { type: 'collapsible' }>
-
 export type CollapsibleFieldProps = {
-  readonly field: CollapsibleFieldClient
+  readonly field: MarkOptional<CollapsibleFieldClient, 'type'>
 } & FormFieldBase
 
 export type CollapsibleFieldLabelComponent = LabelComponent<'collapsible'>

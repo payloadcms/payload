@@ -1,6 +1,6 @@
 import type { Block, BlockField, Config, Field } from 'payload'
 
-import { baseBlockFields, fieldsToJSONSchema, formatLabels, sanitizeFields } from 'payload'
+import { fieldsToJSONSchema, sanitizeFields } from 'payload'
 
 import type { BlocksFeatureClientProps } from '../client/index.js'
 
@@ -25,8 +25,8 @@ export const BlocksFeature = createServerFeature<
   feature: async ({ config: _config, isRoot, props }) => {
     // Build clientProps
     const clientProps: BlocksFeatureClientProps = {
-      reducedBlockSlugs: [],
-      reducedInlineBlockSlugs: [],
+      clientBlockSlugs: [],
+      clientInlineBlockSlugs: [],
     }
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
@@ -51,8 +51,8 @@ export const BlocksFeature = createServerFeature<
     props.blocks = (sanitized[0] as BlockField).blocks
     props.inlineBlocks = (sanitized[1] as BlockField).blocks
 
-    clientProps.reducedBlockSlugs = props.blocks.map((block) => block.slug)
-    clientProps.reducedInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
+    clientProps.clientBlockSlugs = props.blocks.map((block) => block.slug)
+    clientProps.clientInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',

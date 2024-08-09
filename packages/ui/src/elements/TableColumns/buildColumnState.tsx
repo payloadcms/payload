@@ -1,7 +1,7 @@
 'use client'
 import type {
   CellComponentProps,
-  ClientFieldConfig,
+  ClientField,
   SanitizedCollectionConfig,
   StaticLabel,
 } from 'payload'
@@ -23,7 +23,7 @@ type Args = {
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
-  fields: ClientFieldConfig[]
+  fields: ClientField[]
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
@@ -35,7 +35,7 @@ export const buildColumnState = (args: Args): Column[] => {
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap.findIndex((field) => field.name === 'id')
+  const idFieldIndex = sortedFieldMap.findIndex((field) => 'name' in field && field.name === 'id')
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
@@ -43,7 +43,7 @@ export const buildColumnState = (args: Args): Column[] => {
   }
 
   const useAsTitleFieldIndex = useAsTitle
-    ? sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+    ? sortedFieldMap.findIndex((field) => 'name' in field && field.name === useAsTitle)
     : -1
 
   if (useAsTitleFieldIndex > -1) {
@@ -77,7 +77,7 @@ export const buildColumnState = (args: Args): Column[] => {
     if (columnPreference) {
       active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = columns.find((column) => column.accessor === field.name)?.active
+      active = columns.find((column) => 'name' in field && column.accessor === field.name)?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -115,20 +115,20 @@ export const buildColumnState = (args: Args): Column[] => {
         Label={Label}
         disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
-        name={'name' in field ? (field.name as string) : undefined}
+        name={'name' in field ? field.name : undefined}
       />
     )
 
     if (field) {
       const column: Column = {
         Label,
-        accessor: 'name' in field ? (field.name as string) : undefined,
+        accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
           field: {
-            ...(field || ({} as ClientFieldConfig)),
-            ...(cellProps?.[index]?.field || ({} as ClientFieldConfig)),
-          },
+            ...(field || ({} as ClientField)),
+            ...(cellProps?.[index]?.field || ({} as ClientField)),
+          } as ClientField,
           ...cellProps?.[index],
           link: isFirstActiveColumn,
         },
@@ -153,12 +153,6 @@ export const buildColumnState = (args: Args): Column[] => {
       Label: null,
       accessor: '_select',
       active: true,
-      cellProps: {
-        field: {
-          name: '',
-          type: null,
-        },
-      },
       components: {
         Cell: {
           type: 'client',

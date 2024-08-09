@@ -78,8 +78,6 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
         {
           name: 'email',
           type: 'text',
-          _isAffectingData: true,
-          _isPresentational: false,
           admin: {
             autoComplete: 'off',
             components: {
@@ -95,8 +93,6 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
         {
           name: 'username',
           type: 'text',
-          _isAffectingData: true,
-          _isPresentational: false,
           admin: {
             components: {
               Field: {

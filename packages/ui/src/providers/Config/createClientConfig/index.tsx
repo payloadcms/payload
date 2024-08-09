@@ -13,7 +13,7 @@ import {
 import React from 'react'
 
 import { createClientCollectionConfig, createClientCollectionConfigs } from './collections.js'
-import { createClientFieldConfig, createClientFieldConfigs } from './fields.js'
+import { createClientField, createClientFields } from './fields.js'
 import { getComponent } from './getComponent.js'
 import { getCreateMappedComponent } from './getCreateMappedComponent.js'
 import { createClientGlobalConfig, createClientGlobalConfigs } from './globals.js'
@@ -183,4 +183,4 @@ export const createClientConfig = async ({
 
   return { clientConfig, render }
 }
-export { createClientFieldConfig, createClientFieldConfigs }
+export { createClientField, createClientFields }

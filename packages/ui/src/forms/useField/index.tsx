@@ -173,7 +173,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                   },
                   t,
                   user,
-                } as PayloadRequest,
+                } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
               })
             : true

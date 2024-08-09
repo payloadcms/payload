@@ -208,7 +208,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 {hasExtraFields ? (
                   <DrawerToggler
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={field?.readOnly}
+                    disabled={field?.admin?.readOnly}
                     slug={drawerSlug}
                   >
                     <Button
@@ -226,7 +226,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
                 <Button
                   buttonStyle="icon-label"
-                  disabled={field?.readOnly}
+                  disabled={field?.admin?.readOnly}
                   el="div"
                   icon="swap"
                   onClick={() => {
@@ -240,7 +240,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={field?.readOnly}
+                  disabled={field?.admin?.readOnly}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()

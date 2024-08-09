@@ -1,16 +1,11 @@
-import type { StaticLabel } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { GroupFieldClient } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
-export type GroupFieldClient = {
-  readonly fields: ClientFieldConfig[]
-  readonly label: StaticLabel
-} & Extract<ClientFieldConfig, { type: 'group' }>
-
 export type GroupFieldProps = {
-  readonly field: GroupFieldClient
-  readonly forceRender?: boolean
+  readonly field: MarkOptional<GroupFieldClient, 'type'>
 } & FormFieldBase
 
 export type GroupFieldLabelComponent = LabelComponent<'group'>

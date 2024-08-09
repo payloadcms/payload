@@ -30,6 +30,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         className,
         description,
         layout = 'horizontal',
+        readOnly: readOnlyFromProps,
         style,
         width,
       } = {} as RadioFieldProps['field']['admin'],
@@ -39,7 +40,6 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
     } = {} as RadioFieldProps['field'],
     labelProps,
     onChange: onChangeFromProps,
-    readOnly: readOnlyFromProps,
     validate,
     value: valueFromProps,
   } = props

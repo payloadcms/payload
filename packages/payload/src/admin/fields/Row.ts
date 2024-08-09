@@ -1,14 +1,11 @@
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { RowFieldClient } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 
-export type RowFieldClient = {
-  fields: ClientFieldConfig[]
-} & Omit<Extract<ClientFieldConfig, { type: 'row' }>, 'fields'>
-
 export type RowFieldProps = {
-  field: RowFieldClient
+  field: MarkOptional<RowFieldClient, 'type'>
   forceRender?: boolean
   indexPath: string
 } & FormFieldBase

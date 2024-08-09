@@ -23,7 +23,15 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, placeholder, rtl, style, width },
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromProps,
+        rtl,
+        style,
+        width,
+      },
       hasMany,
       label,
       localized,
@@ -34,7 +42,6 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
       required,
     },
     inputRef,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

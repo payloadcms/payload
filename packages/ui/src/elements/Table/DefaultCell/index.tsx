@@ -2,9 +2,15 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type {
+  CellComponentProps,
+  CodeFieldClient,
+  DefaultCellComponentProps,
+  UploadFieldClient,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { fieldAffectsData } from 'payload/shared'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -16,17 +22,7 @@ import { cellComponents } from './fields/index.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultCell: React.FC<CellComponentProps> = (props) => {
-  const {
-    className: classNameFromProps,
-    field: {
-      name,
-      type: fieldType,
-      _isAffectingData,
-      admin: { className: classNameFromConfig },
-      label,
-    },
-    onClick: onClickFromProps,
-  } = props
+  const { className: classNameFromProps, field, onClick: onClickFromProps } = props
 
   const { i18n } = useTranslation()
 
@@ -42,15 +38,18 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
 
   const {
     className: classNameFromContext,
-    field: {
-      admin: { className: classNameFromConfigContext },
-    },
+    field: { admin },
     link,
     onClick: onClickFromContext,
   } = cellProps || {}
 
+  const classNameFromConfigContext = 'className' in admin ? admin.className : undefined
+
   const className =
-    classNameFromProps || classNameFromConfig || classNameFromContext || classNameFromConfigContext
+    classNameFromProps ||
+    (field.admin && 'className' in field.admin ? field.admin.className : null) ||
+    classNameFromContext ||
+    classNameFromConfigContext
 
   const onClick = onClickFromProps || onClickFromContext
 
@@ -89,13 +88,13 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     }
   }
 
-  if (name === 'id') {
+  if ('name' in field && field.name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
         <CodeCell
           cellData={`ID: ${cellData}`}
           field={{
-            name,
+            ...(field as CodeFieldClient),
             _schemaPath: cellContext?.cellProps?.field?._schemaPath,
           }}
           nowrap
@@ -106,7 +105,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   }
 
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
-    typeof cellData !== 'undefined' && cellComponents[fieldType]
+    typeof cellData !== 'undefined' && cellComponents[field.type]
 
   let CellComponent: React.ReactNode = null
 
@@ -121,14 +120,14 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     )
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
-    if (customCellContext.uploadConfig && _isAffectingData && name === 'filename') {
+    if (customCellContext.uploadConfig && fieldAffectsData(field) && field.name === 'filename') {
       const FileCellComponent = cellComponents.File
       CellComponent = (
         <FileCellComponent
           cellData={cellData}
           customCellContext={customCellContext}
           rowData={rowData}
-          {...props}
+          {...(props as CellComponentProps<UploadFieldClient>)}
         />
       )
     } else {
@@ -136,7 +135,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
             i18n.t('general:noLabel', {
-              label: getTranslation(label || 'data', i18n),
+              label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
             })}
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}

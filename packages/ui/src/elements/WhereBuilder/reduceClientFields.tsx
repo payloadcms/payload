@@ -1,17 +1,18 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
-import type { ClientFieldConfig } from 'payload'
+import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { tabHasName } from 'payload/shared'
 
 import type { FieldCondition } from './types.js'
 
-import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
 import fieldTypes from './field-types.js'
 
-export type ReduceFieldMapArgs = {
-  fields: ClientFieldConfig[]
+export type ReduceClientFieldsArgs = {
+  fields: ClientField[]
   i18n: I18nClient
   labelPrefix?: string
   pathPrefix?: string
@@ -21,14 +22,14 @@ export type ReduceFieldMapArgs = {
  * Reduces a field map to a flat array of fields with labels and values.
  * Used in the WhereBuilder component to render the fields in the dropdown.
  */
-export const reduceFieldMap = ({
+export const reduceClientFields = ({
   fields,
   i18n,
   labelPrefix,
   pathPrefix,
-}: ReduceFieldMapArgs): FieldCondition[] => {
+}: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if (field.disableListFilter) return reduced
+    if (field.admin?.disableListFilter) return reduced
 
     if (field.type === 'tabs' && 'tabs' in field) {
       const tabs = field.tabs
@@ -42,15 +43,16 @@ export const reduceFieldMap = ({
             : localizedTabLabel
 
           // Make sure we handle nested tabs
-          const tabPathPrefix = tab.name
-            ? pathPrefix
-              ? pathPrefix + '.' + tab.name
-              : tab.name
-            : pathPrefix
+          const tabPathPrefix =
+            tabHasName(tab) && tab.name
+              ? pathPrefix
+                ? pathPrefix + '.' + tab.name
+                : tab.name
+              : pathPrefix
 
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
-              ...reduceFieldMap({
+              ...reduceClientFields({
                 fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
@@ -66,7 +68,7 @@ export const reduceFieldMap = ({
     // Rows cant have labels, so we need to handle them differently
     if (field.type === 'row' && 'fields' in field) {
       reduced.push(
-        ...reduceFieldMap({
+        ...reduceClientFields({
           fields: field.fields,
           i18n,
           labelPrefix,
@@ -84,7 +86,7 @@ export const reduceFieldMap = ({
         : localizedTabLabel
 
       reduced.push(
-        ...reduceFieldMap({
+        ...reduceClientFields({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -111,7 +113,7 @@ export const reduceFieldMap = ({
         : pathPrefix
 
       reduced.push(
-        ...reduceFieldMap({
+        ...reduceClientFields({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,

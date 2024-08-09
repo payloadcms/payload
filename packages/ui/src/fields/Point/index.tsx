@@ -26,12 +26,19 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, placeholder, step, style, width },
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromProps,
+        step,
+        style,
+        width,
+      },
       label,
       required,
     },
     labelProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

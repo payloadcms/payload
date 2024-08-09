@@ -1,4 +1,6 @@
 'use client'
+import type React from 'react'
+
 import { useConfig } from '@payloadcms/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -20,7 +22,7 @@ export const usePopupWindow = (props: {
 }): {
   isPopupOpen: boolean
   openPopupWindow: () => void
-  popupRef?: React.MutableRefObject<Window | null>
+  popupRef?: React.RefObject<Window | null>
 } => {
   const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)

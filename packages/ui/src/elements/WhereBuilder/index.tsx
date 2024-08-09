@@ -13,7 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import './index.scss'
-import { reduceFieldMap } from './reduceFieldMap.js'
+import { reduceClientFields } from './reduceClientFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
 
@@ -30,10 +30,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { code: currentLocale } = useLocale()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap({ fields, i18n }))
+  const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    setReducedColumns(reduceFieldMap({ fields, i18n }))
+    setReducedColumns(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
   const { searchParams } = useSearchParams()

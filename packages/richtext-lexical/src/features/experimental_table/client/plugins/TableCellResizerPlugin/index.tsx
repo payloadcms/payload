@@ -22,7 +22,7 @@ import { createPortal } from 'react-dom'
 
 import type { PluginComponent } from '../../../../typesClient.js'
 
-import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 
 type MousePosition = {
   x: number

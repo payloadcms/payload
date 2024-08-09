@@ -1,9 +1,9 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { ClientField } from '../../fields/config/client.js'
 
 export type RowData = Record<string, any>
 
-export type CellComponentProps<TField extends ClientFieldConfig = ClientFieldConfig> = {
+export type CellComponentProps<TField extends ClientField = ClientField> = {
   readonly className?: string
   readonly field: TField
   readonly link?: boolean
@@ -14,11 +14,11 @@ export type CellComponentProps<TField extends ClientFieldConfig = ClientFieldCon
   }) => void
 }
 
-export type DefaultCellComponentProps<T = any> = {
-  readonly cellData: T
+export type DefaultCellComponentProps<TCellData = any, TField extends ClientField = ClientField> = {
+  readonly cellData: TCellData
   readonly customCellContext?: {
     collectionSlug?: SanitizedCollectionConfig['slug']
     uploadConfig?: SanitizedCollectionConfig['upload']
   }
   readonly rowData: RowData
-} & CellComponentProps
+} & CellComponentProps<TField>

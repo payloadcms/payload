@@ -1,5 +1,6 @@
 'use client'
-import type { BlocksFieldClient, BlocksFieldProps } from 'payload'
+
+import type { BlockFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
@@ -54,11 +55,11 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
+  const blocksField: BlockFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
     ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
     : null
 
-  const reducedBlock = blocksField
+  const clientBlock = blocksField
     ? blocksField.blocks.find((block) => block.slug === blockFields?.blockType)
     : null
 
@@ -163,9 +164,9 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
     return null
   }
 
-  const blockDisplayName = reducedBlock?.labels?.singular
-    ? getTranslation(reducedBlock?.labels?.singular, i18n)
-    : reducedBlock?.slug
+  const blockDisplayName = clientBlock?.labels?.singular
+    ? getTranslation(clientBlock?.labels?.singular, i18n)
+    : clientBlock?.slug
 
   return (
     <FieldsDrawer
@@ -175,7 +176,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
       })}
       featureKey="blocks"
-      fieldMapOverride={reducedBlock?.fields}
+      fieldMapOverride={clientBlock?.fields}
       handleDrawerSubmit={(_fields, data) => {
         closeModal(drawerSlug)
         if (!data) {

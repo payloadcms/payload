@@ -1,11 +1,4 @@
-import type {
-  ClientFieldConfig,
-  CollapsedPreferences,
-  Data,
-  FormFieldBase,
-  FormState,
-  ReducedBlock,
-} from 'payload'
+import type { ClientBlock, ClientField, CollapsedPreferences, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
@@ -26,7 +19,7 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
-import type { SanitizedClientEditorConfig } from '../../../../lexical/config/types.js'
+import type { LexicalRichTextFieldProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 import type { BlockNode } from '../nodes/BlocksNode.js'
 
@@ -34,16 +27,12 @@ import { FormSavePlugin } from './FormSavePlugin.js'
 
 type Props = {
   baseClass: string
-  field: {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  clientBlock: ClientBlock
+  field: LexicalRichTextFieldProps['field']
   formData: BlockFields
-  formSchema: ClientFieldConfig[]
+  formSchema: ClientField[]
   nodeKey: string
   path: string
-  reducedBlock: ReducedBlock
   schemaPath: string
 }
 
@@ -53,7 +42,7 @@ type Props = {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, field, formData, formSchema, nodeKey, reducedBlock, schemaPath } = props
+  const { baseClass, clientBlock, field, formData, formSchema, nodeKey, schemaPath } = props
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
@@ -198,10 +187,10 @@ export const BlockContent: React.FC<Props> = (props) => {
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
-          reducedBlock?.LabelComponent ? (
+          clientBlock?.admin?.components?.Label ? (
             <RenderComponent
               clientProps={{ blockKind: 'lexicalBlock', formData }}
-              mappedComponent={reducedBlock.LabelComponent}
+              mappedComponent={clientBlock.admin.components.Label}
             />
           ) : (
             <div className={`${baseClass}__block-header`}>
@@ -210,18 +199,18 @@ export const BlockContent: React.FC<Props> = (props) => {
                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                   pillStyle="white"
                 >
-                  {typeof reducedBlock?.labels.singular === 'string'
-                    ? getTranslation(reducedBlock?.labels.singular, i18n)
-                    : reducedBlock.slug}
+                  {typeof clientBlock?.labels.singular === 'string'
+                    ? getTranslation(clientBlock?.labels.singular, i18n)
+                    : clientBlock.slug}
                 </Pill>
-                <SectionTitle path="blockName" readOnly={field?.readOnly} />
+                <SectionTitle path="blockName" readOnly={field?.admin?.readOnly} />
                 {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
               </div>
               {editor.isEditable() && (
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={field?.readOnly}
+                  disabled={field?.admin?.readOnly}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
@@ -243,7 +232,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fields={Array.isArray(formSchema) ? formSchema : []}
+          fields={formSchema}
           forceRender
           margins="small"
           path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?

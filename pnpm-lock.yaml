@@ -139,7 +139,7 @@ importers:
         version: 9.4.0
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.24.7)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)
+        version: 15.0.0-canary.104(@babel/core@7.24.7)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -1493,6 +1493,9 @@ importers:
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.5.4)
       use-context-selector:
         specifier: 2.0.0
         version: 2.0.0(react@19.0.0-rc-fb9a90fa48-20240614)(scheduler@0.25.0-rc-f994737d14-20240522)
@@ -12887,6 +12890,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    dev: false
 
   /next@15.0.0-canary.104(@babel/core@7.24.7)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)(sass@1.77.4):
     resolution: {integrity: sha512-LVzRmV/p/BGGYmTjlZSmCULmBQ2S5ov1nQAXYssu4cEMhkpklQVgh2I+uHHgo/xgdqIIcEBlUgsfV+CfKVsM6Q==}
@@ -12935,7 +12939,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
 
   /nice-napi@1.0.2:
     resolution: {integrity: sha512-px/KnJAJZf5RuBGcfD+Sp2pAKq0ytz8j+1NehvgIGFkvtvFrDM3T8E4x/JJODXK9WZow8RRGrbA9QQ3hs+pDhA==}
@@ -15892,7 +15895,7 @@ packages:
       '@uploadthing/shared': 6.7.8
       consola: 3.2.3
       effect: 3.4.5
-      next: 15.0.0-canary.104(@babel/core@7.24.7)(@playwright/test@1.43.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)
+      next: 15.0.0-canary.104(@babel/core@7.24.7)(@playwright/test@1.43.0)(react-dom@19.0.0-rc-fb9a90fa48-20240614)(react@19.0.0-rc-fb9a90fa48-20240614)(sass@1.77.4)
       std-env: 3.7.0
 
   /uri-js@4.4.1:

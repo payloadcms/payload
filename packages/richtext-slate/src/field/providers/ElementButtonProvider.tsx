@@ -2,11 +2,11 @@
 
 import React from 'react'
 
-import type { SlateFieldProps } from '../types.js'
+import type { LoadedSlateFieldProps } from '../types.js'
 
 type ElementButtonContextType = {
   disabled?: boolean
-  fieldProps: SlateFieldProps
+  fieldProps: LoadedSlateFieldProps
   path: string
   schemaPath: string
 }

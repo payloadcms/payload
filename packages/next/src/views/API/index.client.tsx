@@ -184,11 +184,11 @@ export const APIViewClient: React.FC = () => {
                 name: 'depth',
                 _path: 'depth',
                 admin: {
-                  max: 10,
-                  min: 0,
                   step: 1,
                 },
                 label: t('general:depth'),
+                max: 10,
+                min: 0,
               }}
               onChange={(value) => setDepth(value?.toString())}
             />

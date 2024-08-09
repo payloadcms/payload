@@ -1,6 +1,6 @@
-import type { RichTextFieldProps } from 'payload'
+import type React from 'react'
 
-import type { RichTextPlugin } from '../types.js'
+import type { RichTextPlugin, SlateFieldProps } from '../types.js'
 
 export type EnabledFeatures = {
   elements: {
@@ -20,8 +20,8 @@ export type EnabledFeatures = {
   plugins: React.ReactNode[]
 }
 
-export type SlateFieldProps = {
+export type LoadedSlateFieldProps = {
   elements: EnabledFeatures['elements']
   leaves: EnabledFeatures['leaves']
   plugins: RichTextPlugin[]
-} & RichTextFieldProps
+} & SlateFieldProps

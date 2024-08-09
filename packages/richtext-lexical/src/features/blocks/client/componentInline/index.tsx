@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient, BlocksFieldProps } from 'payload'
+import type { BlockFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
@@ -45,9 +45,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 
-  const reducedBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
       $getNodeByKey(nodeKey).remove()
@@ -101,11 +101,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     )
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
-  const LabelComponent = reducedBlock?.LabelComponent
-
-  const blockDisplayName = reducedBlock?.labels?.singular
-    ? getTranslation(reducedBlock.labels.singular, i18n)
-    : reducedBlock.slug
+  const blockDisplayName = clientBlock?.labels?.singular
+    ? getTranslation(clientBlock.labels.singular, i18n)
+    : clientBlock.slug
 
   return (
     <div
@@ -118,20 +116,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         .join(' ')}
       ref={inlineBlockElemElemRef}
     >
-      {LabelComponent ? (
+      {clientBlock?.admin?.components?.Label ? (
         <RenderComponent
           clientProps={{ blockKind: 'lexicalInlineBlock', formData }}
-          mappedComponent={LabelComponent}
+          mappedComponent={clientBlock.admin.components.Label}
         />
       ) : (
-        <div>{getTranslation(reducedBlock.labels?.singular, i18n)}</div>
+        <div>{getTranslation(clientBlock.labels?.singular, i18n)}</div>
       )}
       {editor.isEditable() && (
         <div className={`${baseClass}__actions`}>
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__editButton`}
-            disabled={field?.readOnly}
+            disabled={field?.admin?.readOnly}
             el="div"
             icon="edit"
             onClick={() => {
@@ -147,7 +145,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.readOnly}
+            disabled={field?.admin?.readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()

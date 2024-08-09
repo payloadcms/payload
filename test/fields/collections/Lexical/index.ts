@@ -92,6 +92,9 @@ const editorConfig: ServerEditorConfig = {
           fields: [
             {
               name: 'key',
+              label: () => {
+                return 'Key'
+              },
               type: 'select',
               options: ['value1', 'value2', 'value3'],
             },

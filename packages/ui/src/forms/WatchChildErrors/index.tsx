@@ -1,5 +1,5 @@
 'use client'
-import type { ClientFieldConfig } from 'packages/payload/src/index.js'
+import type { ClientField } from 'packages/payload/src/index.js'
 import type React from 'react'
 
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
@@ -8,7 +8,7 @@ import { buildPathSegments } from './buildPathSegments.js'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths.js'
 
 type TrackSubSchemaErrorCountProps = {
-  fields?: ClientFieldConfig[]
+  fields?: ClientField[]
   path: string
   setErrorCount: (count: number) => void
 }

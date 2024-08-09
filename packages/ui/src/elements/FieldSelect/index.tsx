@@ -1,11 +1,12 @@
 'use client'
-import type { ClientFieldConfig, FieldWithPath, MappedComponent } from 'payload'
+import type { ClientField, FieldWithPath, MappedComponent } from 'payload'
 
+import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 import React, { Fragment, type JSX, useState } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
@@ -14,7 +15,7 @@ import './index.scss'
 const baseClass = 'field-select'
 
 export type FieldSelectProps = {
-  readonly fields: ClientFieldConfig[]
+  readonly fields: ClientField[]
   readonly setSelected: (fields: FieldWithPath[]) => void
 }
 
@@ -24,11 +25,15 @@ export const combineLabel = ({
   prefix,
 }: {
   customLabel?: string
-  field?: ClientFieldConfig
+  field?: ClientField
   prefix?: JSX.Element | string
 }): JSX.Element => {
   const CustomLabelToRender: MappedComponent =
-    field?.admin?.components?.Label !== undefined ? field.admin.components.Label : null
+    field?.admin?.components &&
+    'Label' in field.admin.components &&
+    field?.admin?.components?.Label !== undefined
+      ? field.admin.components.Label
+      : null
 
   const DefaultLabelToRender: MappedComponent =
     field && 'label' in field && field.label
@@ -36,7 +41,10 @@ export const combineLabel = ({
           type: 'client',
           Component: FieldLabel,
           props: {
-            Label: field.admin?.components?.Label,
+            Label:
+              field.admin?.components && 'Label' in field.admin.components
+                ? field.admin?.components?.Label
+                : null,
             label: field.label,
           },
         }
@@ -71,7 +79,7 @@ const reduceFields = ({
   labelPrefix = null,
   path = '',
 }: {
-  fields: ClientFieldConfig[]
+  fields: ClientField[]
   labelPrefix?: JSX.Element | string
   path?: string
 }): { Label: JSX.Element; value: FieldWithPath }[] => {
@@ -80,10 +88,9 @@ const reduceFields = ({
   }
 
   return fields?.reduce((fieldsToUse, field) => {
-    const { _isAffectingData } = field
     // escape for a variety of reasons
     if (
-      _isAffectingData &&
+      fieldAffectsData(field) &&
       (field.admin.disableBulkEdit ||
         field.unique ||
         field.admin.hidden ||
@@ -92,7 +99,7 @@ const reduceFields = ({
       return fieldsToUse
     }
 
-    if (!(field.type === 'array' || field.type === 'blocks') && 'fields' in field) {
+    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
       return [
         ...fieldsToUse,
         ...reduceFields({

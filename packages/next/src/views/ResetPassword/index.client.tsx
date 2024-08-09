@@ -84,7 +84,13 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
         }}
       />
       <ConfirmPasswordField />
-      <HiddenField forceUsePathFromProps name="token" value={token} />
+      <HiddenField
+        field={{
+          name: 'token',
+        }}
+        forceUsePathFromProps
+        value={token}
+      />
       <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
   )

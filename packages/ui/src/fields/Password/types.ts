@@ -1,17 +1,20 @@
 import type {
   ErrorProps,
+  FieldBaseClient,
   FormFieldBase,
   LabelProps,
   MappedComponent,
   PasswordFieldValidation,
   StaticDescription,
-  TextClientField,
+  TextFieldClient,
 } from 'payload'
 import type { ChangeEvent } from 'react'
+import type React from 'react'
+import type { MarkOptional } from 'ts-essentials'
 
 export type PasswordFieldProps = {
   readonly autoComplete?: string
-  readonly field: TextClientField
+  readonly field: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly validate?: PasswordFieldValidation
 } & FormFieldBase
@@ -27,12 +30,12 @@ export type PasswordInputProps = {
   readonly description?: StaticDescription
   readonly errorProps: ErrorProps
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly label: string
+  readonly label: FieldBaseClient['label']
   readonly labelProps: LabelProps
   readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string
-  readonly placeholder?: string
+  readonly placeholder?: Record<string, string> | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly rtl?: boolean

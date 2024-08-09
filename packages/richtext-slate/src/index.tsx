@@ -153,13 +153,13 @@ export function slateEditor(
 export type {
   AdapterArguments,
   ElementNode,
-  FieldProps,
   RichTextCustomElement,
   RichTextCustomLeaf,
   RichTextElement,
   RichTextLeaf,
   RichTextPlugin,
   RichTextPluginComponent,
+  SlateFieldProps,
   TextNode,
 } from './types.js'
 

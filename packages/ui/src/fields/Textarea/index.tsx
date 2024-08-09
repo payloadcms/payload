@@ -23,7 +23,16 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, placeholder, rows, rtl, style, width },
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromProps,
+        rows,
+        rtl,
+        style,
+        width,
+      },
       label,
       localized,
       maxLength,
@@ -31,7 +40,6 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       required,
     },
     locale,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

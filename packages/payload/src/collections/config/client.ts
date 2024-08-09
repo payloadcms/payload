@@ -1,7 +1,7 @@
 import type { MappedComponent } from '../../admin/types.js'
 import type { MappedView } from '../../admin/views/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
-import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { ClientField } from '../../fields/config/client.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
@@ -48,6 +48,6 @@ export type ClientCollectionConfig = {
     SanitizedCollectionConfig['admin'],
     'components' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
-  fields: ClientFieldConfig[]
+  fields: ClientField[]
   isPreviewEnabled: boolean
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>

@@ -65,7 +65,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.cellProps?.field?.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col.cellProps?.field && 'name' in col.cellProps.field ? col.cellProps?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

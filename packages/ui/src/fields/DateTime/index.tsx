@@ -27,12 +27,19 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, date: datePickerProps, description, placeholder, style, width },
+      admin: {
+        className,
+        date: datePickerProps,
+        description,
+        placeholder,
+        readOnly: readOnlyFromProps,
+        style,
+        width,
+      },
       label,
       required,
     },
     labelProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 
