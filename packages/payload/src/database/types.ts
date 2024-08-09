@@ -155,11 +155,12 @@ export type Transaction = (
 
 export type BeginTransaction = (
   options?: Record<string, unknown>,
+  req?: PayloadRequest,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: number | string | Promise<number | string>) => Promise<void>
+export type RollbackTransaction = (id: Promise<number | string> | number | string) => Promise<void>
 
-export type CommitTransaction = (id: number | string | Promise<number | string>) => Promise<void>
+export type CommitTransaction = (id: Promise<number | string> | number | string) => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
