@@ -161,14 +161,16 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete any associated files
     // /////////////////////////////////////
 
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
-      t,
-    })
+    if(!collectionConfig.versions){
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: docWithLocales,
+        files: filesToUpload,
+        overrideDelete: false,
+        t,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields
