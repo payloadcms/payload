@@ -460,11 +460,14 @@ describe('admin2', () => {
     })
 
     describe('table columns', () => {
-      const reorderColumns = async () => {
-        // open the column controls
+      const openColumnControls = async () => {
         await page.locator('.list-controls__toggle-columns').click()
         // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+      }
+
+      const reorderColumns = async () => {
+        await openColumnControls()
 
         const numberBoundingBox = await page
           .locator(`.column-selector .column-selector__column`, {
@@ -498,6 +501,18 @@ describe('admin2', () => {
         // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
         await wait(1000)
       }
+
+      test('should render field in group as column', async () => {
+        await createPost({ group: { title: 'nested group title 1' } })
+        await page.goto(postsUrl.list)
+        await openColumnControls()
+        await page
+          .locator('.column-selector .column-selector__column', {
+            hasText: exactText('Group > Title'),
+          })
+          .click()
+        await expect(page.locator('.row-1 .cell-group-title')).toHaveText('nested group title 1')
+      })
 
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost()

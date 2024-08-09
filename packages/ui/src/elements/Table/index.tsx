@@ -62,10 +62,20 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
+                  function getCellData(row: Record<string, unknown>, col: Column) {
+                    if (col.cellProps?.schemaPath) {
+                      return col.cellProps.schemaPath.split('.').reduce((acc, key) => {
+                        return acc?.[key]
+                      }, row)
+                    } else {
+                      return row[col.accessor]
+                    }
+                  }
+
                   return (
                     <td className={`cell-${col.accessor}`} key={colIndex}>
                       <TableCellProvider
-                        cellData={row[col.accessor]}
+                        cellData={getCellData(row, col)}
                         cellProps={col?.cellProps}
                         columnIndex={colIndex}
                         customCellContext={customCellContext}

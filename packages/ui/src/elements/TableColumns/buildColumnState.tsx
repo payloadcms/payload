@@ -1,4 +1,5 @@
 'use client'
+import type { I18nClient } from '@payloadcms/translations'
 import type { CellComponentProps, FieldMap, MappedField, SanitizedCollectionConfig } from 'payload'
 
 import React from 'react'
@@ -21,12 +22,14 @@ type Args = {
   columns?: ColumnPreferences
   enableRowSelections: boolean
   fieldMap: FieldMap
+  i18n: I18nClient
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 export const buildColumnState = (args: Args): Column[] => {
-  const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
+  const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, i18n, useAsTitle } =
+    args
 
-  let sortedFieldMap = flattenFieldMap(fieldMap)
+  let sortedFieldMap = flattenFieldMap({ fieldMap, i18n })
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -101,7 +104,11 @@ export const buildColumnState = (args: Args): Column[] => {
         ? field.fieldComponentProps.CustomLabel
         : undefined
 
-    const Label = (
+    const Label = CustomLabelToRender ? (
+      CustomLabelToRender
+    ) : field.labelWithPrefix ? (
+      field.labelWithPrefix
+    ) : (
       <FieldLabel
         CustomLabel={CustomLabelToRender}
         label={field.fieldComponentProps?.label}

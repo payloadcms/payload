@@ -75,6 +75,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
     fieldMap,
+    i18n,
   )
 
   const searchLabelTranslated = useRef(

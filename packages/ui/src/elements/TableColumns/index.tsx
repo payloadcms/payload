@@ -1,6 +1,7 @@
 'use client'
 import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 
+import { useTranslation } from '@payloadcms/ui'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -48,6 +49,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const config = useConfig()
 
   const { componentMap } = useComponentMap()
+  const { i18n } = useTranslation()
 
   const { fieldMap } = componentMap.collections[collectionSlug]
 
@@ -73,6 +75,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       columns: initialColumns,
       enableRowSelections,
       fieldMap,
+      i18n,
       useAsTitle,
     }),
   )
@@ -175,6 +178,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
               columns: initialColumns,
               enableRowSelections: true,
               fieldMap,
+              i18n,
               useAsTitle,
             }),
           )
@@ -190,6 +194,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     fieldMap,
     cellProps,
     defaultColumns,
+    i18n,
     useAsTitle,
     listPreferences,
     initialColumns,
