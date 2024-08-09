@@ -626,7 +626,6 @@ export type CollapsibleFieldClient = {
   | {
       admin: {
         components: {
-          Label?: MappedComponent
           RowLabel: MappedComponent
         } & AdminClient['components']
         initCollapsed?: boolean
@@ -635,9 +634,6 @@ export type CollapsibleFieldClient = {
     }
   | {
       admin?: {
-        components?: {
-          Label?: MappedComponent
-        } & AdminClient['components']
         initCollapsed?: boolean
       } & AdminClient
       label: Required<FieldBaseClient['label']>
