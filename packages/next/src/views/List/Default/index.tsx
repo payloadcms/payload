@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
 
 import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
@@ -98,7 +99,7 @@ export const DefaultListView: React.FC = () => {
   }, [setStepNav, labels, drawerDepth])
 
   return (
-    <div className={baseClass}>
+    <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actionsMap?.List} />
       {BeforeList}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
@@ -120,7 +121,9 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
+                {Description ? (
+                  <div className={`${baseClass}__sub-header`}>{Description}</div>
+                ) : null}
               </Fragment>
             )}
           </header>
@@ -189,17 +192,13 @@ export const DefaultListView: React.FC = () => {
                   />
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
-                      <Fragment>
-                        <ListSelection
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany collection={collectionConfig} fieldMap={fieldMap} />
-                          <PublishMany collection={collectionConfig} />
-                          <UnpublishMany collection={collectionConfig} />
-                          <DeleteMany collection={collectionConfig} />
-                        </div>
-                      </Fragment>
+                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        <EditMany collection={collectionConfig} fieldMap={fieldMap} />
+                        <PublishMany collection={collectionConfig} />
+                        <UnpublishMany collection={collectionConfig} />
+                        <DeleteMany collection={collectionConfig} />
+                      </div>
                     </div>
                   )}
                 </Fragment>
