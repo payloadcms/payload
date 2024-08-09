@@ -134,6 +134,11 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
+      "./utilities/createClientConfig": {
+        "import": "./dist/providers/Config/createClientConfig/index.js",
+        "types": "./dist/providers/Config/createClientConfig/index.d.ts",
+        "default": "./dist/providers/Config/createClientConfig/index.js"
+      },
       "./css": {
         "import": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
