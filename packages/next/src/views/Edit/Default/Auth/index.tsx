@@ -202,10 +202,9 @@ export const Auth: React.FC<Props> = (props) => {
           <CheckboxField
             field={{
               name: 'enableAPIKey',
-              admin: { disabled },
+              admin: { disabled, readOnly },
               label: t('authentication:enableAPIKey'),
             }}
-            readOnly={readOnly}
           />
           <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
         </div>
@@ -214,10 +213,9 @@ export const Auth: React.FC<Props> = (props) => {
         <CheckboxField
           field={{
             name: '_verified',
-            admin: { disabled },
+            admin: { disabled, readOnly },
             label: t('authentication:verified'),
           }}
-          readOnly={readOnly}
         />
       )}
     </div>

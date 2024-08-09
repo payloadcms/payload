@@ -161,7 +161,7 @@ const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = (
               {Boolean(customFieldsMap) && (
                 <DrawerToggler
                   className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={fieldProps?.readOnly}
+                  disabled={fieldProps?.field?.admin?.readOnly}
                   slug={drawerSlug}
                 >
                   <Button
@@ -178,11 +178,11 @@ const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = (
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
-                disabled={fieldProps?.readOnly}
+                disabled={fieldProps?.field?.admin?.readOnly}
               >
                 <Button
                   buttonStyle="icon-label"
-                  disabled={fieldProps?.readOnly}
+                  disabled={fieldProps?.field?.admin?.readOnly}
                   el="div"
                   icon="swap"
                   onClick={() => {
@@ -195,7 +195,7 @@ const UploadElement: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = (
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
-                disabled={fieldProps?.readOnly}
+                disabled={fieldProps?.field?.admin?.readOnly}
                 icon="x"
                 onClick={(e) => {
                   e.preventDefault()
