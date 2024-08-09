@@ -1,4 +1,4 @@
-import type { ClientField, Field, RichTextGenerateComponentMap } from 'payload'
+import type { ClientField, Field, MappedComponent, RichTextGenerateComponentMap } from 'payload'
 
 import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
 import { deepCopyObjectSimple } from 'payload'
@@ -13,7 +13,7 @@ import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextGenerateComponentMap =>
   ({ createMappedComponent, i18n, importMap, payload }) => {
-    const componentMap = new Map()
+    const componentMap: Map<string, ClientField[] | MappedComponent> = new Map()
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
       let leafObject: RichTextCustomLeaf
@@ -28,12 +28,22 @@ export const getGenerateComponentMap =
         const LeafButton = leafObject.Button
         const LeafComponent = leafObject.Leaf
 
-        componentMap.set(`leaf.button.${leafObject.name}`, <LeafButton />)
-        componentMap.set(`leaf.component.${leafObject.name}`, <LeafComponent />)
+        componentMap.set(
+          `leaf.button.${leafObject.name}`,
+          createMappedComponent(LeafButton, undefined, undefined, 'slate-LeafButton'),
+        )
+
+        componentMap.set(
+          `leaf.component.${leafObject.name}`,
+          createMappedComponent(LeafComponent, undefined, undefined, 'slate-LeafComponent'),
+        )
 
         if (Array.isArray(leafObject.plugins)) {
           leafObject.plugins.forEach((Plugin, i) => {
-            componentMap.set(`leaf.plugin.${leafObject.name}.${i}`, <Plugin />)
+            componentMap.set(
+              `leaf.plugin.${leafObject.name}.${i}`,
+              createMappedComponent(Plugin, undefined, undefined, 'slate-LeafPlugin'),
+            )
           })
         }
       }
@@ -51,12 +61,22 @@ export const getGenerateComponentMap =
         const ElementButton = element.Button
         const ElementComponent = element.Element
 
-        if (ElementButton) componentMap.set(`element.button.${element.name}`, <ElementButton />)
-        componentMap.set(`element.component.${element.name}`, <ElementComponent />)
+        if (ElementButton)
+          componentMap.set(
+            `element.button.${element.name}`,
+            createMappedComponent(ElementButton, undefined, undefined, 'slate-ElementButton'),
+          )
+        componentMap.set(
+          `element.component.${element.name}`,
+          createMappedComponent(ElementComponent, undefined, undefined, 'slate-ElementComponent'),
+        )
 
         if (Array.isArray(element.plugins)) {
           element.plugins.forEach((Plugin, i) => {
-            componentMap.set(`element.plugin.${element.name}.${i}`, <Plugin />)
+            componentMap.set(
+              `element.plugin.${element.name}.${i}`,
+              createMappedComponent(Plugin, undefined, undefined, 'slate-ElementPlugin'),
+            )
           })
         }
 

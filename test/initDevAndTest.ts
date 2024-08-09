@@ -1,9 +1,7 @@
 import fs from 'fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { generateImportMap } from 'payload'
-
-import { load } from './loader/load.js'
+import { type SanitizedConfig, generateImportMap } from 'payload'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -106,7 +104,7 @@ export async function initDevAndTest() {
   const pathWithConfig = path.resolve(testDir, 'config.ts')
   console.log('Generating import map for config:', pathWithConfig)
 
-  const config = await load(pathWithConfig)
+  const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
   process.env.ROOT_DIR =
     testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root'

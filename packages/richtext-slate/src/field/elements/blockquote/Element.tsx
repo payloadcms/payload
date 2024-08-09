@@ -5,7 +5,7 @@ import React from 'react'
 import { useElement } from '../../providers/ElementProvider.js'
 import './index.scss'
 
-export const Blockquote = () => {
+export const BlockquoteElement = () => {
   const { attributes, children } = useElement()
 
   return (

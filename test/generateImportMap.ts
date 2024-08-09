@@ -9,7 +9,6 @@ import type { SanitizedConfig } from 'payload'
 import { generateImportMap } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { load } from './loader/load.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -22,9 +21,7 @@ async function run() {
     const pathWithConfig = path.resolve(testDir, 'config.ts')
     console.log('Generating ad-hoc import map for config:', pathWithConfig)
 
-    const config: SanitizedConfig = (await load(pathWithConfig)) as unknown as SanitizedConfig
-
-    setTestEnvPaths(testDir)
+    const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
     process.env.ROOT_DIR =
       testConfigDir === 'live-preview' || testConfigDir === 'admin-root'
@@ -35,4 +32,4 @@ async function run() {
   }
 }
 
-void run()
+await run()

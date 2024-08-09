@@ -11,7 +11,6 @@ import type { SanitizedConfig } from 'payload'
 
 import { fileURLToPath } from 'url'
 
-import { load } from './loader/load.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -24,7 +23,7 @@ async function run() {
     const pathWithConfig = path.resolve(testDir, 'config.ts')
     console.log('Generating types for config:', pathWithConfig)
 
-    const config: SanitizedConfig = (await load(pathWithConfig)) as unknown as SanitizedConfig
+    const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
     setTestEnvPaths(testDir)
     await generateTypes(config)

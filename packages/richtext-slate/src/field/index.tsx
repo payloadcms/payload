@@ -1,6 +1,6 @@
 'use client'
 
-import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
+import { RenderComponent, ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'
@@ -51,7 +51,11 @@ export const RichTextField: React.FC<SlateFieldProps> = (props) => {
       <React.Fragment>
         {Array.isArray(features.plugins) &&
           features.plugins.map((Plugin, i) => {
-            return <React.Fragment key={i}>{Plugin}</React.Fragment>
+            return (
+              <React.Fragment key={i}>
+                <RenderComponent mappedComponent={Plugin} />
+              </React.Fragment>
+            )
           })}
       </React.Fragment>
     )

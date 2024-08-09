@@ -10,6 +10,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  RenderComponent,
   useEditDepth,
   useField,
   useFieldProps,
@@ -175,7 +176,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
             path={path}
             schemaPath={schemaPath}
           >
-            {Element}
+            <RenderComponent mappedComponent={Element} />
           </ElementProvider>
         )
 
@@ -208,7 +209,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                   result={result}
                   schemaPath={schemaPath}
                 >
-                  {Leaf}
+                  <RenderComponent mappedComponent={Leaf} />
                 </LeafProvider>
               )
             }
@@ -342,7 +343,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                           path={path}
                           schemaPath={schemaPath}
                         >
-                          {Button}
+                          <RenderComponent mappedComponent={Button} />
                         </ElementButtonProvider>
                       )
                     }
@@ -360,7 +361,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
                           path={path}
                           schemaPath={schemaPath}
                         >
-                          {Button}
+                          <RenderComponent mappedComponent={Button} />
                         </LeafButtonProvider>
                       )
                     }

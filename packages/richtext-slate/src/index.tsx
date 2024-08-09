@@ -6,7 +6,9 @@ import type { AdapterArguments } from './types.js'
 
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
+import { elements as elementTypes } from './field/elements/index.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
+import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
 export function slateEditor(
@@ -53,6 +55,56 @@ export function slateEditor(
         addToImportMap('@payloadcms/richtext-slate/client#RichTextCell')
         addToImportMap('@payloadcms/richtext-slate/client#RichTextField')
         addToImportMap('@payloadcms/richtext-slate/generateComponentMap#getGenerateComponentMap')
+        Object.values(leafTypes).forEach((leaf) => {
+          if (leaf.Button) {
+            addToImportMap(leaf.Button)
+          }
+          if (leaf.Leaf) {
+            addToImportMap(leaf.Leaf)
+          }
+          if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
+            addToImportMap(leaf.plugins)
+          }
+        })
+        args?.admin?.leaves?.forEach((leaf) => {
+          if (typeof leaf === 'object') {
+            if (leaf.Button) {
+              addToImportMap(leaf.Button)
+            }
+            if (leaf.Leaf) {
+              addToImportMap(leaf.Leaf)
+            }
+            if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
+              addToImportMap(leaf.plugins)
+            }
+          }
+        })
+
+        Object.values(elementTypes).forEach((element) => {
+          if (element.Button) {
+            addToImportMap(element.Button)
+          }
+          if (element.Element) {
+            addToImportMap(element.Element)
+          }
+          if (Array.isArray(element.plugins) && element.plugins?.length) {
+            addToImportMap(element.plugins)
+          }
+        })
+
+        args?.admin?.elements?.forEach((element) => {
+          if (typeof element === 'object') {
+            if (element.Button) {
+              addToImportMap(element.Button)
+            }
+            if (element.Element) {
+              addToImportMap(element.Element)
+            }
+            if (Array.isArray(element.plugins) && element.plugins?.length) {
+              addToImportMap(element.plugins)
+            }
+          }
+        })
       },
       generateSchemaMap: getGenerateSchemaMap(args),
       graphQLPopulationPromises({
