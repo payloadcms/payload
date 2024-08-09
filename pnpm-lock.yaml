@@ -551,6 +551,9 @@ importers:
 
   packages/graphql:
     dependencies:
+      '@swc-node/register':
+        specifier: 1.10.9
+        version: 1.10.9(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.4)
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
@@ -726,15 +729,9 @@ importers:
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
-      '@swc-node/core':
-        specifier: 1.13.1
-        version: 1.13.1(@swc/core@1.6.13)(@swc/types@0.1.9)
-      '@swc-node/sourcemap-support':
-        specifier: 0.5.0
-        version: 0.5.0
-      '@swc/core':
-        specifier: ^1.6.13
-        version: 1.6.13
+      '@swc-node/register':
+        specifier: 1.10.9
+        version: 1.10.9(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.4)
       ajv:
         specifier: 8.14.0
         version: 8.14.0
@@ -4001,11 +3998,28 @@ packages:
       effect: 3.4.5
       fast-check: 3.19.0
 
+  /@emnapi/core@1.2.0:
+    resolution: {integrity: sha512-E7Vgw78I93we4ZWdYCb4DGAwRROGkMIXk7/y87UmANR+J6qsWusmC3gLt0H+O0KOt5e6O38U8oJamgbudrES/w==}
+    requiresBuild: true
+    dependencies:
+      '@emnapi/wasi-threads': 1.0.1
+      tslib: 2.6.3
+    dev: false
+    optional: true
+
   /@emnapi/runtime@1.2.0:
     resolution: {integrity: sha512-bV21/9LQmcQeCPEg3BDFtvwL6cwiTMksYNWQQ4KOxCZikEGalWtenoZ0wCiukJINlGCIi2KXx01g4FoH/LxpzQ==}
     requiresBuild: true
     dependencies:
       tslib: 2.6.3
+    optional: true
+
+  /@emnapi/wasi-threads@1.0.1:
+    resolution: {integrity: sha512-iIBu7mwkq4UQGeMEM8bLwNK962nXdhodeScX4slfQnRhEMMzvYivHhutCIk8uojvmASXXPC2WNEjwxFWk72Oqw==}
+    requiresBuild: true
+    dependencies:
+      tslib: 2.6.3
+    dev: false
     optional: true
 
   /@emotion/babel-plugin@11.11.0:
@@ -5815,6 +5829,16 @@ packages:
       sparse-bitfield: 3.0.3
     optional: true
 
+  /@napi-rs/wasm-runtime@0.2.4:
+    resolution: {integrity: sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ==}
+    requiresBuild: true
+    dependencies:
+      '@emnapi/core': 1.2.0
+      '@emnapi/runtime': 1.2.0
+      '@tybys/wasm-util': 0.9.0
+    dev: false
+    optional: true
+
   /@neon-rs/load@0.0.4:
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
 
@@ -5935,6 +5959,96 @@ packages:
   /@one-ini/wasm@0.1.1:
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
     dev: false
+
+  /@oxc-resolver/binding-darwin-arm64@1.10.2:
+    resolution: {integrity: sha512-aOCZYXqmFL+2sXlaVkYbAOtICGGeTFtmdul8OimQfOXHJods6YHJ2nR6+rEeBcJzaXyXPP18ne1IsEc4AYL1IA==}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-darwin-x64@1.10.2:
+    resolution: {integrity: sha512-6WD7lHGkoduFZfUgnC2suKOlqttQRKxWsiVXiiGPu3mfXvQAhMd/gekuH1t8vOhFlPJduaww15n5UB0bSjCK+w==}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-freebsd-x64@1.10.2:
+    resolution: {integrity: sha512-nEqHWx/Ot5p7Mafj8qH6vFlLSvHjECxAcZwhnAMqRuQu1NgXC/QM3emkdhVGy7QJgsxZbHpPaF6TERNf5/NL9Q==}
+    cpu: [x64]
+    os: [freebsd]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-linux-arm-gnueabihf@1.10.2:
+    resolution: {integrity: sha512-+AlZI0fPnpfArh8aC5k2295lmQrxa2p8gBLxC3buvCkz0ZpbVLxyyAXz3J2jGwJnmc5MUPLEqPYw6ZlAGH4XHA==}
+    cpu: [arm]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-linux-arm64-gnu@1.10.2:
+    resolution: {integrity: sha512-8fZ8NszFaUZaoA8eUwkF2lHjgUs76aFiewWgG/cjcZmwKp+ErZQLW8eOvIWZ4SohHQ+ScvhVsSaU2PU38c88gw==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-linux-arm64-musl@1.10.2:
+    resolution: {integrity: sha512-oPrLICrw96Ym9n04FWXWGkbkpF6qJtZ57JSnqI3oQ24xHTt4iWyjHKHQO46NbJAK9sFb3Qce4BzV8faDI5Rifg==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-linux-x64-gnu@1.10.2:
+    resolution: {integrity: sha512-eli74jTAUiIfqi8IPFqiPxQS69Alcr6w/IFRyf3XxrkxeFGgcgxJkRIxWNTKJ6T3EXxjuma+49LdZn6l9rEj7A==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-linux-x64-musl@1.10.2:
+    resolution: {integrity: sha512-HH9zmjNSQo3rkbqJH5nIjGrtjC+QPrUy0KGGMR/oRCSLuD0cNFJ/Uly1XAugwSm4oEw0+rv6PmeclXmVTKsxhw==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-wasm32-wasi@1.10.2:
+    resolution: {integrity: sha512-3ItX23q33sfVBtMMdMhVDSe0NX5zBHxHfmFiXhSJuwNaVIwGpLFU7WU2nmq9oNdnmTOvjL8vlhOqiGvumBLlRA==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+    requiresBuild: true
+    dependencies:
+      '@napi-rs/wasm-runtime': 0.2.4
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-win32-arm64-msvc@1.10.2:
+    resolution: {integrity: sha512-aVoj2V+jmQ1N+lVy9AhaLmzssJM0lcKt8D0UL83aNLZJ5lSN7hgBuUXTVmL+VF268f167khjo38z+fbELDVm8Q==}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@oxc-resolver/binding-win32-x64-msvc@1.10.2:
+    resolution: {integrity: sha512-l8BDQWyP0Piw8hlmYPUqTRKLsq+ceG9h+9p6ZrjNzwW9AmJX7T7T2hgoVVHqS6f4WNA/CFkb3RyZP9QTzNkyyA==}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /@pkgjs/parseargs@0.11.0:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -6531,8 +6645,8 @@ packages:
       '@smithy/types': 3.3.0
       tslib: 2.6.3
 
-  /@swc-node/core@1.13.1(@swc/core@1.6.13)(@swc/types@0.1.9):
-    resolution: {integrity: sha512-emB5l2nZsXjUEAuusqjYvWnQMLWZp6K039Mv8aq5SX1rsNM/N7DNhw1i4/DX7AyzNZ0tT+ASWyTvqEURldp5HA==}
+  /@swc-node/core@1.13.3(@swc/core@1.6.13)(@swc/types@0.1.9):
+    resolution: {integrity: sha512-OGsvXIid2Go21kiNqeTIn79jcaX4l0G93X2rAnas4LFoDyA9wAwVK7xZdm+QsKoMn5Mus2yFLCc4OtX2dD/PWA==}
     engines: {node: '>= 10'}
     peerDependencies:
       '@swc/core': '>= 1.4.13'
@@ -6542,8 +6656,28 @@ packages:
       '@swc/types': 0.1.9
     dev: false
 
-  /@swc-node/sourcemap-support@0.5.0:
-    resolution: {integrity: sha512-fbhjL5G0YvFoWwNhWleuBUfotiX+USiA9oJqu9STFw+Hb0Cgnddn+HVS/K5fI45mn92e8V+cHD2jgFjk4w2T9Q==}
+  /@swc-node/register@1.10.9(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.4):
+    resolution: {integrity: sha512-iXy2sjP0phPEpK2yivjRC3PAgoLaT4sjSk0LDWCTdcTBJmR4waEog0E6eJbvoOkLkOtWw37SB8vCkl/bbh4+8A==}
+    peerDependencies:
+      '@swc/core': '>= 1.4.13'
+      typescript: 5.5.4
+    dependencies:
+      '@swc-node/core': 1.13.3(@swc/core@1.6.13)(@swc/types@0.1.9)
+      '@swc-node/sourcemap-support': 0.5.1
+      '@swc/core': 1.6.13
+      colorette: 2.0.20
+      debug: 4.3.5(supports-color@5.5.0)
+      oxc-resolver: 1.10.2
+      pirates: 4.0.6
+      tslib: 2.6.3
+      typescript: 5.5.4
+    transitivePeerDependencies:
+      - '@swc/types'
+      - supports-color
+    dev: false
+
+  /@swc-node/sourcemap-support@0.5.1:
+    resolution: {integrity: sha512-JxIvIo/Hrpv0JCHSyRpetAdQ6lB27oFYhv0PKCNf1g2gUXOjpeR1exrXccRxLMuAV5WAmGFBwRnNOJqN38+qtg==}
     dependencies:
       source-map-support: 0.5.21
       tslib: 2.6.3
@@ -6714,6 +6848,14 @@ packages:
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
+
+  /@tybys/wasm-util@0.9.0:
+    resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
+    requiresBuild: true
+    dependencies:
+      tslib: 2.6.3
+    dev: false
+    optional: true
 
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -12995,6 +13137,22 @@ packages:
     dependencies:
       arch: 2.2.0
     dev: true
+
+  /oxc-resolver@1.10.2:
+    resolution: {integrity: sha512-NIbwVqoU8Bhl7PVtItHCg+VFFokIDwBgIgFUwFG2Y8ePhxftFh5xG+KLar5PLWXlCP4WunPIuXD3jr3v6/MfRw==}
+    optionalDependencies:
+      '@oxc-resolver/binding-darwin-arm64': 1.10.2
+      '@oxc-resolver/binding-darwin-x64': 1.10.2
+      '@oxc-resolver/binding-freebsd-x64': 1.10.2
+      '@oxc-resolver/binding-linux-arm-gnueabihf': 1.10.2
+      '@oxc-resolver/binding-linux-arm64-gnu': 1.10.2
+      '@oxc-resolver/binding-linux-arm64-musl': 1.10.2
+      '@oxc-resolver/binding-linux-x64-gnu': 1.10.2
+      '@oxc-resolver/binding-linux-x64-musl': 1.10.2
+      '@oxc-resolver/binding-wasm32-wasi': 1.10.2
+      '@oxc-resolver/binding-win32-arm64-msvc': 1.10.2
+      '@oxc-resolver/binding-win32-x64-msvc': 1.10.2
+    dev: false
 
   /p-cancelable@2.1.1:
     resolution: {integrity: sha512-BZOr3nRQHOntUjTrH8+Lh54smKHoHyur8We1V8DSMVrl5A2malOOwuJRnKRDjSnkoeBh4at6BwEnb5I7Jl31wg==}

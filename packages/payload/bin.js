@@ -10,12 +10,12 @@ if (process.env.DISABLE_SWC !== 'true') {
   const dirname = path.dirname(filename)
   const url = pathToFileURL(dirname).toString() + '/'
 
-  register('./dist/bin/loader/index.js', url)
+  register('@swc-node/register/esm', url)
 }
 
 const start = async () => {
   const { bin } = await import('./dist/bin/index.js')
-  bin()
+  await bin()
 }
 
 void start()
