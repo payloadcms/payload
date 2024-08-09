@@ -98,11 +98,7 @@ export const DefaultNavClient: React.FC = () => {
                   key={i}
                   tabIndex={!navOpen ? -1 : undefined}
                 >
-                  {activeCollection && (
-                    <span className={`${baseClass}__link-icon`}>
-                      <ChevronIcon direction="right" />
-                    </span>
-                  )}
+                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
                   <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                 </LinkElement>
               )

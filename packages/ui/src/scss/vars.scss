@@ -18,7 +18,7 @@ $baseline-body-size: 13px !default;
 $baseline: math.div($baseline-px, $baseline-body-size) + rem;
 
 @function base($multiplier) {
-  @return (math.div($baseline-px, $baseline-body-size) * $multiplier) + rem;
+  @return ($baseline-px * $multiplier);
 }
 
 //////////////////////////////

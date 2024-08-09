@@ -75,6 +75,6 @@
   }
 
   @include small-break {
-    gap: calc(var(--base) / 4);
+    gap: base(0.4);
   }
 }

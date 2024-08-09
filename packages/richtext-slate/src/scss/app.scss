@@ -38,19 +38,19 @@
 
   --gutter-h: #{base(3)};
   --spacing-view-bottom: var(--gutter-h);
-  --app-header-height: calc(var(--base) * 3);
-  --doc-controls-height: calc(var(--base) * 3);
+  --doc-controls-height: calc(var(--base) * 2.8);
+  --app-header-height: calc(var(--base) * 2.8);
   --nav-width: 275px;
   --nav-trans-time: 150ms;
 
   @include mid-break {
     --gutter-h: #{base(2)};
-    --app-header-height: calc(var(--base) * 2);
-    --doc-controls-height: calc(var(--base) * 2.5);
+    --app-header-height: calc(var(--base) * 2.4);
+    --doc-controls-height: calc(var(--base) * 2.4);
   }
 
   @include small-break {
-    --gutter-h: #{base(0.5)};
+    --gutter-h: #{base(0.8)};
     --spacing-view-bottom: calc(var(--base) * 2);
     --nav-width: 100vw;
   }

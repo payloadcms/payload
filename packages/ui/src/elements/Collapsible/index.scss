@@ -17,9 +17,10 @@
     gap: base(0.2);
     border-top-right-radius: $style-radius-m;
     border-top-left-radius: $style-radius-m;
+    width: 100%;
 
     & > * {
-      z-index: 2;
+      z-index: 1;
     }
 
     &:has(.collapsible__drag) {
@@ -87,6 +88,8 @@
     left: 0;
     pointer-events: none;
     width: 100%;
+    overflow: hidden;
+    max-width: 100%;
   }
 
   &__header-wrap--has-drag-handle {

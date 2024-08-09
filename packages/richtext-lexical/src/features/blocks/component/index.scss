@@ -9,9 +9,13 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--base) / 2);
-  font-family: var(
-    --font-body
-  ); // Reset font to non-serif, body font, as the lexical editor parent uses a serif font.
+  @extend %body;
+
+  &__row {
+    .collapsible__toggle-wrap {
+      padding-inline-start: base(0.4);
+    }
+  }
 
   margin: 0 0 1.5em;
 
