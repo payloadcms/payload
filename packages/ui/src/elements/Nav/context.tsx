@@ -6,15 +6,19 @@ import React, { useEffect, useRef } from 'react'
 import { usePreferences } from '../../providers/Preferences/index.js'
 
 type NavContextType = {
+  hydrated: boolean
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
+  shouldAnimate: boolean
 }
 
 export const NavContext = React.createContext<NavContextType>({
+  hydrated: false,
   navOpen: true,
   navRef: null,
   setNavOpen: () => {},
+  shouldAnimate: false,
 })
 
 export const useNav = () => React.useContext(NavContext)
@@ -31,7 +35,8 @@ const getNavPreference = async (getPreference): Promise<boolean> => {
 
 export const NavProvider: React.FC<{
   children: React.ReactNode
-}> = ({ children }) => {
+  initialIsOpen?: boolean
+}> = ({ children, initialIsOpen }) => {
   const {
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()
@@ -43,7 +48,10 @@ export const NavProvider: React.FC<{
   // this is because getting the preference is async
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(false)
+  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
+
+  const [shouldAnimate, setShouldAnimate] = React.useState(false)
+  const [hydrated, setHydrated] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
@@ -53,7 +61,7 @@ export const NavProvider: React.FC<{
         setNavOpen(preferredState)
       }
 
-      setNavFromPreferences() // eslint-disable-line @typescript-eslint/no-floating-promises
+      void setNavFromPreferences()
     }
   }, [largeBreak, getPreference, setNavOpen])
 
@@ -76,9 +84,14 @@ export const NavProvider: React.FC<{
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
   useEffect(() => {
-    if (largeBreak === false || midBreak === false || smallBreak === false) {
+    if (largeBreak === true || midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
+    setHydrated(true)
+
+    setTimeout(() => {
+      setShouldAnimate(true)
+    }, 100)
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
@@ -89,6 +102,8 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ navOpen, navRef, setNavOpen }}>{children}</NavContext.Provider>
+    <NavContext.Provider value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
+      {children}
+    </NavContext.Provider>
   )
 }
