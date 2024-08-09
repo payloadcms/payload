@@ -3,7 +3,7 @@ import { Select, useFormFields } from 'payload/components/forms'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import { TextField } from 'payload/dist/fields/config/types'
 
-export const ProductSelect: React.FC<TextField> = props => {
+export const ProductSelect: React.FC<TextField> = (props) => {
   const { name, label } = props
   const [options, setOptions] = React.useState<
     {
@@ -48,9 +48,8 @@ export const ProductSelect: React.FC<TextField> = props => {
     getStripeProducts()
   }, [])
 
-  const href = `https://dashboard.stripe.com/${
-    process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
-  }products/${stripeProductID}`
+  const isTestKey = process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY === 'true'
+  const href = `https://dashboard.stripe.com/${isTestKey ? 'test/' : ''}products/${stripeProductID}`
 
   return (
     <div>
@@ -63,9 +62,7 @@ export const ProductSelect: React.FC<TextField> = props => {
       >
         {`Select the related Stripe product or `}
         <a
-          href={`https://dashboard.stripe.com/${
-            process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
-          }products/create`}
+          href={`https://dashboard.stripe.com/${isTestKey ? 'test/' : ''}products/create`}
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'var(--theme-text' }}
@@ -78,7 +75,7 @@ export const ProductSelect: React.FC<TextField> = props => {
       {Boolean(stripeProductID) && (
         <div
           style={{
-            marginTop: '-1rem',
+            marginTop: '1rem',
             marginBottom: '1.5rem',
           }}
         >
@@ -102,13 +99,7 @@ export const ProductSelect: React.FC<TextField> = props => {
               fontWeight: '600',
             }}
           >
-            <a
-              href={`https://dashboard.stripe.com/${
-                process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
-              }products/${stripeProductID}`}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
+            <a href={href} target="_blank" rel="noreferrer noopener">
               {href}
             </a>
           </div>
