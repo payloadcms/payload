@@ -44,6 +44,8 @@ import type {
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
+import type { ClientFieldConfig } from './fields/config/client.js'
+import type { Field } from './fields/config/types.js'
 import type { DataFromGlobalSlug, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
@@ -58,12 +60,13 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData } from './fields/config/types.js'
+import { fieldAffectsData, fieldHasSubFields } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getDependencies } from './utilities/dependencies/getDependencies.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
+import { traverseFields } from './utilities/traverseFields.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -497,18 +500,42 @@ export class BasePayload {
       config: this.config.globals,
     }
 
+    // TODO: move to sanitize to reduce looping of collections + fields
     this.config.collections.forEach((collection) => {
-      const customID = flattenFields(collection.fields).find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
-
+      const joins = {}
       let customIDType
+      const callback = (field: ClientFieldConfig | Field, ref, parentRef) => {
+        if (!fieldAffectsData(field)) {
+          return
+        }
+        if (field.name === 'id') {
+          customIDType = field.type
+          return
+        }
+        if (fieldHasSubFields(field)) {
+          const parentPath = parentRef.schemaPath || ''
+          ref.schemaPath = `${parentPath}${parentPath ? '.' : ''}${field.name}`
+          return
+        }
+        if (field.type === 'join') {
+          const join = {
+            field,
+            schemaPath: `${ref.schemaPath || ''}${ref.schemaPath ? '.' : ''}${field.name}`,
+          }
+          if (!joins[field.collection]) {
+            joins[field.collection] = [join]
+          } else {
+            joins[field.collection].push(join)
+          }
+        }
+      }
 
-      if (customID?.type === 'number' || customID?.type === 'text') customIDType = customID.type
+      traverseFields(collection.fields, callback)
 
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
+        joins,
       }
     })
 
@@ -892,6 +919,7 @@ export type {
   GroupField,
   HookName,
   JSONField,
+  JoinField,
   Labels,
   NamedTab,
   NonPresentationalField,

@@ -96,6 +96,13 @@ export type {
 } from './fields/JSON.js'
 
 export type {
+  JoinFieldDescriptionComponent,
+  JoinFieldErrorComponent,
+  JoinFieldLabelComponent,
+  JoinFieldProps,
+} from './fields/Join.js'
+
+export type {
   NumberFieldDescriptionComponent,
   NumberFieldErrorComponent,
   NumberFieldLabelComponent,

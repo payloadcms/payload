@@ -9,6 +9,7 @@ export type FieldTypes = {
   email: React.ComponentType<any>
   group: React.ComponentType<any>
   hidden: React.ComponentType<any>
+  join: React.ComponentType<any>
   json: React.ComponentType<any>
   number: React.ComponentType<any>
   password: React.ComponentType<any>

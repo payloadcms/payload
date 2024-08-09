@@ -17,6 +17,7 @@ import type {
   FormFieldBase,
   GroupFieldProps,
   JSONFieldProps,
+  JoinFieldProps,
   LabelProps,
   MappedField,
   MappedTab,
@@ -380,6 +381,17 @@ export const mapFields = (args: {
             }
 
             fieldComponentPropsBase = groupField
+            break
+          }
+          case 'join': {
+            // TODO: Implement join field
+            const joinField: JoinFieldProps = {
+              ...baseFieldProps,
+              name: field.name,
+              className: field.admin?.className,
+              style: field.admin?.style,
+            }
+            fieldComponentPropsBase = joinField
             break
           }
           case 'json': {

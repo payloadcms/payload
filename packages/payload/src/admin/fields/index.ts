@@ -8,6 +8,7 @@ import type { EmailFieldProps } from './Email.js'
 import type { GroupFieldProps } from './Group.js'
 import type { HiddenFieldProps } from './Hidden.js'
 import type { JSONFieldProps } from './JSON.js'
+import type { JoinFieldProps } from './Join.js'
 import type { NumberFieldProps } from './Number.js'
 import type { PointFieldProps } from './Point.js'
 import type { RadioFieldProps } from './Radio.js'
@@ -48,6 +49,9 @@ export type FieldComponentProps =
   | ({
       type: 'hidden'
     } & HiddenFieldProps)
+  | ({
+      type: 'join'
+    } & JoinFieldProps)
   | ({
       type: 'json'
     } & JSONFieldProps)
