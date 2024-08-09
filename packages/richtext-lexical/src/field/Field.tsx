@@ -18,6 +18,7 @@ import type { LexicalRichTextFieldProps } from '../types.js'
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import './bundled.css'
 import './index.scss'
+import '../lexical/theme/EditorTheme.scss'
 
 const baseClass = 'rich-text-lexical'
 
