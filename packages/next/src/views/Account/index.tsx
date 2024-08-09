@@ -10,6 +10,7 @@ import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
+import { AccountClient } from './index.client.js'
 
 export { generateAccountMetadata } from './meta.js'
 
@@ -100,6 +101,7 @@ export const Account: React.FC<AdminViewProps> = async ({
               user,
             }}
           />
+          <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>
     )
