@@ -29,12 +29,19 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, editorOptions = {}, language = 'javascript', style, width },
+      admin: {
+        className,
+        description,
+        editorOptions = {},
+        language = 'javascript',
+        readOnly: readOnlyFromProps,
+        style,
+        width,
+      },
       label,
       required,
     },
     labelProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

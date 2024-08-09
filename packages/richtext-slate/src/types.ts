@@ -71,4 +71,4 @@ export type AdapterArguments = {
   }
 }
 
-export type FieldProps = RichTextFieldProps<any[], AdapterArguments, AdapterArguments>
+export type SlateFieldProps = RichTextFieldProps<any[], AdapterArguments, AdapterArguments>

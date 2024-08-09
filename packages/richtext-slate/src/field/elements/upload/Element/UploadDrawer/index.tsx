@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig, FormFieldBase } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
-import type { SlateFieldProps } from '../../../../types.js'
+import type { LoadedSlateFieldProps } from '../../../../types.js'
 import type { UploadElementType } from '../../types.js'
 
 import { uploadFieldsSchemaPath } from '../../shared.js'
@@ -30,7 +30,7 @@ import { uploadFieldsSchemaPath } from '../../shared.js'
 export const UploadDrawer: React.FC<{
   readonly drawerSlug: string
   readonly element: UploadElementType
-  readonly fieldProps: SlateFieldProps
+  readonly fieldProps: LoadedSlateFieldProps
   readonly relatedCollection: ClientCollectionConfig
   readonly schemaPath: string
 }> = (props) => {

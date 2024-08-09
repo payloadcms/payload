@@ -27,11 +27,10 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, description, initCollapsed = false },
+      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromProps },
       fields,
       label,
     },
-    readOnly: readOnlyFromProps,
   } = props
 
   const {

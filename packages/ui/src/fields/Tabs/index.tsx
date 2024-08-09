@@ -27,11 +27,10 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className },
+      admin: { className, readOnly: readOnlyFromProps },
       tabs = [],
     },
     forceRender = false,
-    readOnly: readOnlyFromProps,
   } = props
 
   const {

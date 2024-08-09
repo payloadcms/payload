@@ -23,7 +23,7 @@ import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
 import type { ElementNode, TextNode } from '../types.js'
-import type { SlateFieldProps } from './types.js'
+import type { LoadedSlateFieldProps } from './types.js'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
@@ -48,29 +48,28 @@ declare module 'slate' {
   }
 }
 
-const RichTextField: React.FC<SlateFieldProps> = (props) => {
+const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
-    name,
     descriptionProps,
     elements,
     errorProps,
     field: {
+      name,
       _path: pathFromProps,
-
       admin: {
         className,
         components: { Description, Error, Label },
+        placeholder,
+        readOnly: readOnlyFromProps,
         style,
         width,
       },
       label,
-      placeholder,
       required,
     },
     labelProps,
     leaves,
     plugins,
-    readOnly: readOnlyFromProps,
     validate = richTextValidate,
   } = props
 
@@ -313,7 +312,7 @@ const RichTextField: React.FC<SlateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${baseClass}__wrap`}>
         <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
         <Slate

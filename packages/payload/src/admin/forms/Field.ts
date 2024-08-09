@@ -11,9 +11,12 @@ export type FormFieldBase = {
   readonly descriptionProps?: FieldDescriptionProps
   readonly docPreferences?: DocumentPreferences
   readonly errorProps?: ErrorProps
+  /**
+   * forceRender is added by RenderField automatically
+   */
+  readonly forceRender?: boolean
   readonly labelProps?: LabelProps
   readonly locale?: Locale
-  readonly readOnly?: boolean
   readonly user?: User
   readonly validate?: Validate
 }

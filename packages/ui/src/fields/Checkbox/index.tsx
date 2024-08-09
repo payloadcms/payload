@@ -32,14 +32,19 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, style, width } = {} as CheckboxFieldProps['field']['admin'],
+      admin: {
+        className,
+        description,
+        readOnly: readOnlyFromProps,
+        style,
+        width,
+      } = {} as CheckboxFieldProps['field']['admin'],
       label,
       required,
     } = {} as CheckboxFieldProps['field'],
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

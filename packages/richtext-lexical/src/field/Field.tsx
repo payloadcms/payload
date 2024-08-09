@@ -36,6 +36,7 @@ const RichTextComponent: React.FC<
       admin: {
         className,
         components: { Description, Error, Label },
+        readOnly: readOnlyFromProps,
         style,
         width,
       },
@@ -44,7 +45,6 @@ const RichTextComponent: React.FC<
     },
     field,
     labelProps,
-    readOnly: readOnlyFromProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
@@ -66,17 +66,8 @@ const RichTextComponent: React.FC<
     validate: memoizedValidate,
   })
 
-  const {
-    errorMessage,
-    formInitializing,
-    formProcessing,
-    initialValue,
-    path,
-    schemaPath,
-    setValue,
-    showError,
-    value,
-  } = fieldType
+  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+    fieldType
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 

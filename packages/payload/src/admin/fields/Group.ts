@@ -6,7 +6,6 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 
 export type GroupFieldProps = {
   readonly field: MarkOptional<GroupFieldClient, 'type'>
-  readonly forceRender?: boolean
 } & FormFieldBase
 
 export type GroupFieldLabelComponent = LabelComponent<'group'>

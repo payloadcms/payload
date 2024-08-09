@@ -42,7 +42,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, isSortable = true },
+      admin: { className, description, isSortable = true, readOnly: readOnlyFromProps },
       blocks,
       label,
       labels: labelsFromProps,
@@ -53,7 +53,6 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     },
     forceRender = false,
     labelProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

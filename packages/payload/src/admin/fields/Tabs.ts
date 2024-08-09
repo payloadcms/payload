@@ -15,7 +15,6 @@ export type ClientTab =
 
 export type TabsFieldProps = {
   readonly field: MarkOptional<TabsFieldClient, 'type'>
-  readonly forceRender?: boolean
 } & FormFieldBase
 
 export type TabsFieldLabelComponent = LabelComponent<'tabs'>

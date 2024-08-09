@@ -11,9 +11,7 @@ export type RichTextFieldProps<
   TExtraProperties = object,
 > = {
   readonly field: MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
-  readonly name: string
   readonly validate?: RichTextFieldValidation
-  readonly width?: string
 } & Omit<FormFieldBase, 'validate'>
 
 export type RichTextFieldLabelComponent = LabelComponent<'richText'>

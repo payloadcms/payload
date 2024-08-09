@@ -25,6 +25,8 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       name,
       _path: pathFromProps,
       admin: {
+        readOnly: readOnlyFromProps,
+
         className,
         description,
         placeholder,
@@ -35,7 +37,6 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       required,
     } = {} as EmailFieldProps['field'],
     labelProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

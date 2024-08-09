@@ -34,6 +34,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
         description,
         isClearable = true,
         isSortable = true,
+        readOnly: readOnlyFromProps,
         style,
         width,
       } = {} as SelectFieldProps['field']['admin'],
@@ -43,7 +44,6 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    readOnly: readOnlyFromProps,
     validate,
   } = props
 

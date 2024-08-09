@@ -7,8 +7,6 @@ import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../typ
 
 export type BlockFieldProps = {
   readonly field: MarkOptional<BlockFieldClient, 'type'>
-  readonly forceRender?: boolean
-  readonly slug?: string
   readonly validate?: BlockFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 

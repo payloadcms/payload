@@ -13,7 +13,6 @@ import type {
 export type ArrayFieldProps = {
   readonly CustomRowLabel?: MappedComponent
   readonly field: MarkOptional<ArrayFieldClient, 'type'>
-  readonly forceRender?: boolean
   readonly validate?: ArrayFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 

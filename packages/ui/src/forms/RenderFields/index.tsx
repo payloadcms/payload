@@ -65,18 +65,14 @@ export const RenderFields: React.FC<Props> = (props) => {
 
             return (
               <RenderField
-                custom={field.admin?.custom}
-                disabled={field.admin?.disabled}
                 fieldComponentProps={{ field, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 key={fieldIndex}
                 name={name}
                 path={path}
                 permissions={permissions?.[name]}
-                readOnly={field.admin?.readOnly}
                 schemaPath={schemaPath}
                 siblingPermissions={permissions}
-                type={field.type}
               />
             )
           })}
