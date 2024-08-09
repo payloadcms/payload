@@ -24,8 +24,9 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         // @ts-expect-error-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
         draggableProps,
         // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
+        onSave,
+        // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
         setDrawerIsOpen,
-        // onSave,
       } = {},
     } = {},
   } = props
@@ -77,7 +78,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             </Tooltip>
             <EditIcon className={`${baseClass}__icon`} />
           </DocumentDrawerToggler>
-          <DocumentDrawer onSave={/* onSave */ null} />
+          <DocumentDrawer onSave={onSave} />
         </Fragment>
       )}
     </div>
