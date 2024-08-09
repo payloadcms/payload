@@ -32,7 +32,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { type PgSchema, pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -94,6 +94,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
+      prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',

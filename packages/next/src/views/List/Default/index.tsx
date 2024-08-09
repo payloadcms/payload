@@ -97,7 +97,7 @@ export const DefaultListView: React.FC = () => {
   }, [setStepNav, labels, drawerDepth])
 
   return (
-    <div className={baseClass}>
+    <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
       <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
