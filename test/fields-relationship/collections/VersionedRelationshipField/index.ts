@@ -17,5 +17,7 @@ export const VersionedRelationshipFieldCollection: CollectionConfig = {
       hasMany: true,
     },
   ],
-  versions: true,
+  versions: {
+    drafts: true,
+  },
 }
