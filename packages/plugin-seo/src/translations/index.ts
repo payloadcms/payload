@@ -1,3 +1,4 @@
+import de from './de.json'
 import en from './en.json'
 import es from './es.json'
 import fa from './fa.json'
@@ -9,6 +10,7 @@ import zh from './zh.json'
 import zhTw from './zh-tw.json'
 
 export default {
+  de,
   en,
   es,
   fa,
