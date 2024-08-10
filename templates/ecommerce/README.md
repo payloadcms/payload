@@ -288,8 +288,8 @@ To spin up this example locally, follow the [Quick Start](#quick-start). Then [C
 
 Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
+1. Follow [steps 1 and 2 from above](#development), the docker-compose.yml file will automatically use the `.env` file in your project root
+1. Next run `docker compose up`
 1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
 
 That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
@@ -304,7 +304,7 @@ To seed the database with a few products and pages you can run `yarn seed`. This
 
 > In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
 >
-> This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
+> This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.
 > Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
 
 ## Production
