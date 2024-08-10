@@ -2,18 +2,29 @@ import child_process from 'node:child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { initDevAndTest } from './initDevAndTest.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export async function spawnInitProcess(
+export async function runInit(
   testSuiteArg: string,
   writeDBAdapter: boolean,
+  separateProcess: boolean = false,
 ): Promise<void> {
-  // Now use tsx to execute initDevAndTest and wait until it console logs "Done". use child_process
+  if (!separateProcess) {
+    await initDevAndTest(testSuiteArg, String(writeDBAdapter))
+
+    return
+  }
+
+  let done = false
+
+  // Now use node & swc-node/register to execute initDevAndTest and wait until it console logs "Done". use child_process
   // 1. execute
   // 2. wait until console.log("Done")
   const child = child_process.spawn(
-    path.resolve(dirname, '..', 'node_modules/.bin/tsx'),
+    path.resolve('node --no-deprecation --import @swc-node/register/esm-register'),
     ['test/initDevAndTest.ts', testSuiteArg, writeDBAdapter ? 'true' : 'false'],
     {
       stdio: 'pipe',
@@ -21,8 +32,6 @@ export async function spawnInitProcess(
     },
   )
 
-  let done = false
-  // Wait until the child process logs "Done"
   child.stdout.on('data', (data) => {
     console.log('initDevAndTest data', data.toString())
     if (data.toString().includes('Done')) {

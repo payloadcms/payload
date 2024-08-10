@@ -47,6 +47,9 @@ importers:
       '@playwright/test':
         specifier: 1.43.0
         version: 1.43.0
+      '@swc-node/register':
+        specifier: 1.10.9
+        version: 1.10.9(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.4)
       '@swc/cli':
         specifier: 0.3.12
         version: 0.3.12(@swc/core@1.6.13)
@@ -188,9 +191,6 @@ importers:
       tempy:
         specifier: 1.0.1
         version: 1.0.1
-      tsx:
-        specifier: 4.17.0
-        version: 4.17.0
       turbo:
         specifier: ^1.13.3
         version: 1.13.4
@@ -4004,7 +4004,6 @@ packages:
     dependencies:
       '@emnapi/wasi-threads': 1.0.1
       tslib: 2.6.3
-    dev: false
     optional: true
 
   /@emnapi/runtime@1.2.0:
@@ -4019,7 +4018,6 @@ packages:
     requiresBuild: true
     dependencies:
       tslib: 2.6.3
-    dev: false
     optional: true
 
   /@emotion/babel-plugin@11.11.0:
@@ -5836,7 +5834,6 @@ packages:
       '@emnapi/core': 1.2.0
       '@emnapi/runtime': 1.2.0
       '@tybys/wasm-util': 0.9.0
-    dev: false
     optional: true
 
   /@neon-rs/load@0.0.4:
@@ -5965,7 +5962,6 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-darwin-x64@1.10.2:
@@ -5973,7 +5969,6 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-freebsd-x64@1.10.2:
@@ -5981,7 +5976,6 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-linux-arm-gnueabihf@1.10.2:
@@ -5989,7 +5983,6 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-linux-arm64-gnu@1.10.2:
@@ -5997,7 +5990,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-linux-arm64-musl@1.10.2:
@@ -6005,7 +5997,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-linux-x64-gnu@1.10.2:
@@ -6013,7 +6004,6 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-linux-x64-musl@1.10.2:
@@ -6021,7 +6011,6 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-wasm32-wasi@1.10.2:
@@ -6031,7 +6020,6 @@ packages:
     requiresBuild: true
     dependencies:
       '@napi-rs/wasm-runtime': 0.2.4
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-win32-arm64-msvc@1.10.2:
@@ -6039,7 +6027,6 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@oxc-resolver/binding-win32-x64-msvc@1.10.2:
@@ -6047,7 +6034,6 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
-    dev: false
     optional: true
 
   /@pkgjs/parseargs@0.11.0:
@@ -6654,7 +6640,6 @@ packages:
     dependencies:
       '@swc/core': 1.6.13
       '@swc/types': 0.1.9
-    dev: false
 
   /@swc-node/register@1.10.9(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.4):
     resolution: {integrity: sha512-iXy2sjP0phPEpK2yivjRC3PAgoLaT4sjSk0LDWCTdcTBJmR4waEog0E6eJbvoOkLkOtWw37SB8vCkl/bbh4+8A==}
@@ -6674,14 +6659,12 @@ packages:
     transitivePeerDependencies:
       - '@swc/types'
       - supports-color
-    dev: false
 
   /@swc-node/sourcemap-support@0.5.1:
     resolution: {integrity: sha512-JxIvIo/Hrpv0JCHSyRpetAdQ6lB27oFYhv0PKCNf1g2gUXOjpeR1exrXccRxLMuAV5WAmGFBwRnNOJqN38+qtg==}
     dependencies:
       source-map-support: 0.5.21
       tslib: 2.6.3
-    dev: false
 
   /@swc/cli@0.3.12(@swc/core@1.6.13):
     resolution: {integrity: sha512-h7bvxT+4+UDrLWJLFHt6V+vNAcUNii2G4aGSSotKz1ECEk4MyEh5CWxmeSscwuz5K3i+4DWTgm4+4EyMCQKn+g==}
@@ -6854,7 +6837,6 @@ packages:
     requiresBuild: true
     dependencies:
       tslib: 2.6.3
-    dev: false
     optional: true
 
   /@types/babel__core@7.20.5:
@@ -10545,6 +10527,7 @@ packages:
     resolution: {integrity: sha512-ZCuZCnlqNzjb4QprAzXKdpp/gh6KTxSJuw3IBsPnV/7fV4NxC9ckB+vPTt8w7fJA0TaSD7c55BR47JD6MEDyDw==}
     dependencies:
       resolve-pkg-maps: 1.0.0
+    dev: false
 
   /giget@1.2.3:
     resolution: {integrity: sha512-8EHPljDvs7qKykr6uw8b+lqLiUc/vUg+KVTI0uND4s63TdsZM2Xus3mflvF0DDG9SiM4RlCkFGL+7aAjRmV7KA==}
@@ -13152,7 +13135,6 @@ packages:
       '@oxc-resolver/binding-wasm32-wasi': 1.10.2
       '@oxc-resolver/binding-win32-arm64-msvc': 1.10.2
       '@oxc-resolver/binding-win32-x64-msvc': 1.10.2
-    dev: false
 
   /p-cancelable@2.1.1:
     resolution: {integrity: sha512-BZOr3nRQHOntUjTrH8+Lh54smKHoHyur8We1V8DSMVrl5A2malOOwuJRnKRDjSnkoeBh4at6BwEnb5I7Jl31wg==}
@@ -14130,6 +14112,7 @@ packages:
 
   /resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+    dev: false
 
   /resolve.exports@2.0.2:
     resolution: {integrity: sha512-X2UW6Nw3n/aMgDVy+0rSqgHlv39WZAlZrXCdnbyEiKm17DSqHX4MmQMaST3FbeWR5FTuRcUwYAziZajji0Y7mg==}
@@ -14883,7 +14866,6 @@ packages:
     dependencies:
       buffer-from: 1.1.2
       source-map: 0.6.1
-    dev: false
 
   /source-map@0.5.7:
     resolution: {integrity: sha512-LbrmJOMUSdEVxIKvdcJzQC+nQhe8FUZQTXQy6+I75skNgn3OoQ0DZA8YnFa7gp8tqtL3KPf1kmo0R5DoApeSGQ==}
@@ -15494,17 +15476,6 @@ packages:
 
   /tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
-
-  /tsx@4.17.0:
-    resolution: {integrity: sha512-eN4mnDA5UMKDt4YZixo9tBioibaMBpoxBkD+rIPAjVmYERSG0/dWEY1CEFuV89CgASlKL499q8AhmkMnnjtOJg==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    dependencies:
-      esbuild: 0.23.0
-      get-tsconfig: 4.7.5
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: true
 
   /tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}

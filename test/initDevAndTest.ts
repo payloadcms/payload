@@ -6,8 +6,7 @@ import { type SanitizedConfig, generateImportMap } from 'payload'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const testSuiteArg = process.argv[2]
-const writeDBAdapter = process.argv[3]
+const runImmediately = process.argv[2]
 
 const databaseAdapters = {
   mongodb: `
@@ -67,7 +66,7 @@ const databaseAdapters = {
   })`,
 }
 
-export async function initDevAndTest() {
+export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: string): Promise<void> {
   // create a new importMap.js with contents export const importMap = {} in app/(payload)/admin/importMap.js - delete existing file:
   if (testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root') {
     fs.writeFileSync(
@@ -116,4 +115,9 @@ export async function initDevAndTest() {
   console.log('Done')
 }
 
-void initDevAndTest()
+if (runImmediately === 'true') {
+  console.log('fuck')
+  const testSuiteArg = process.argv[3]
+  const writeDBAdapter = process.argv[4]
+  await initDevAndTest(testSuiteArg, writeDBAdapter)
+}

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import open from 'open'
 
 import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
-import { spawnInitProcess } from './spawnInitProcess.js'
+import { runInit } from './runInit.js'
 import { createTestHooks } from './testHooks.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -34,7 +34,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg)
 
-await spawnInitProcess(testSuiteArg, true)
+await runInit(testSuiteArg, true)
 
 // Open the admin if the -o flag is passed
 if (args.o) {

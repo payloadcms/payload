@@ -40,7 +40,7 @@
     "build:types": "tsc --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "tsx scripts/translateNewKeys/run.ts"
+    "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
   },
   "dependencies": {
     "date-fns": "3.3.1"

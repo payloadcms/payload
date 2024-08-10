@@ -1,7 +1,5 @@
 import path from 'path'
 
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
-
 const [testConfigDir] = process.argv.slice(2)
 
 import type { SanitizedConfig } from 'payload'

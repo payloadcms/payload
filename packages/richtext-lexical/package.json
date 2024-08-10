@@ -39,7 +39,7 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "tsx scripts/translateNewKeys.ts"
+    "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
   "dependencies": {
     "@lexical/headless": "0.17.0",

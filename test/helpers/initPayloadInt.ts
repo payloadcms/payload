@@ -3,7 +3,7 @@ import type { Payload, SanitizedConfig } from 'payload'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import path from 'path'
 
-import { spawnInitProcess } from '../spawnInitProcess.js'
+import { runInit } from '../runInit.js'
 import { NextRESTClient } from './NextRESTClient.js'
 
 /**
@@ -14,7 +14,7 @@ export async function initPayloadInt(
   testSuiteNameOverride?: string,
 ): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
-  await spawnInitProcess(testSuiteName, false)
+  await runInit(testSuiteName, false)
   const { default: config } = await eval('import(path.resolve(dirname, "config.ts"))')
 
   const payload = await getPayloadHMR({ config })
