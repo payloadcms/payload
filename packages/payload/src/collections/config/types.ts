@@ -442,6 +442,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | LabelStatic
     singular?: LabelFunction | LabelStatic
   }
+  /**
+   * Unique, URL-friendly string that will act as an identifier for this Collection.
+   */
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
