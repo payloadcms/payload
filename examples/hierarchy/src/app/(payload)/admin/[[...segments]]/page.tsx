@@ -3,7 +3,7 @@ import config from '@payload-config'
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 import { RootPage } from '@payloadcms/next/views'
 
-type Args = {
+type Props = {
   params: {
     segments: string[]
   }
@@ -12,6 +12,6 @@ type Args = {
   }
 }
 
-const Page = ({ params, searchParams }: Args) => RootPage({ config, params, searchParams })
+const Page = ({ params, searchParams }: Props) => RootPage({ config, params, searchParams })
 
 export default Page

@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'document-fields'
 
-type Args = {
+type Props = {
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
@@ -20,7 +20,7 @@ type Args = {
   schemaPath: string
 }
 
-export const DocumentFields: React.FC<Args> = ({
+export const DocumentFields: React.FC<Props> = ({
   AfterFields,
   BeforeFields,
   description,

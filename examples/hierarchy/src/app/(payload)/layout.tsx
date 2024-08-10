@@ -7,10 +7,10 @@ import React from 'react'
 
 import './custom.scss'
 
-type Args = {
+type Props = {
   children: React.ReactNode
 }
 
-const Layout = ({ children }: Args) => <RootLayout config={configPromise}>{children}</RootLayout>
+const Layout = ({ children }: Props) => <RootLayout config={configPromise}>{children}</RootLayout>
 
 export default Layout
