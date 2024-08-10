@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   azure-storage:
     image: mcr.microsoft.com/azure-storage/azurite:3.18.0
