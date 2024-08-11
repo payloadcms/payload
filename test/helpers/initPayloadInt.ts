@@ -15,8 +15,8 @@ export async function initPayloadInt(
 ): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
   await runInit(testSuiteName, false, false, true)
-  console.log('importing config')
-  const { default: config } = await eval('import(path.resolve(dirname, "config.ts"))')
+  console.log('importing config', path.resolve(dirname, 'config.ts'))
+  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
   console.log('starting payload')
 
   const payload = await getPayload({ config })
