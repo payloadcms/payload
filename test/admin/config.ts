@@ -19,8 +19,6 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
-import { default as customFaviconDark } from './custom-favicon-dark.png'
-import { default as customFaviconLight } from './custom-favicon-light.png'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -35,7 +33,6 @@ import {
   customParamViewPath,
   customViewPath,
 } from './shared.js'
-
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -87,13 +84,13 @@ export default buildConfigWithDefaults({
         {
           type: 'image/png',
           rel: 'icon',
-          url: customFaviconDark.src,
+          url: '/custom-favicon-dark.png',
         },
         {
           type: 'image/png',
           media: '(prefers-color-scheme: dark)',
           rel: 'icon',
-          url: customFaviconLight.src,
+          url: '/custom-favicon-light.png',
         },
       ],
       openGraph: {

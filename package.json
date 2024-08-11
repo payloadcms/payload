@@ -56,7 +56,7 @@
     "dev": "pnpm runts ./test/dev.ts",
     "runts": "node --no-deprecation --import @swc-node/register/esm-register",
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
-    "dev:generate-importMap": "pnpm runts ./test/generateImportMap.ts fields",
+    "dev:generate-importMap": "pnpm runts ./test/generateImportMap.ts",
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
     "dev:postgres": "pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",

@@ -173,6 +173,9 @@ export type IconConfig = {
   rel?: string
   sizes?: string
   type?: string
+  /**
+   * URL of the icon to use. You can use a relative path from the public folder (see https://nextjs.org/docs/app/building-your-application/optimizing/static-assets) or an absolute URL.
+   */
   url: string
 }
 
