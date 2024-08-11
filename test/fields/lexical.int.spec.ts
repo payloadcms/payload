@@ -61,6 +61,7 @@ describe('Lexical', () => {
     createdArrayDocID = (
       await payload.find({
         collection: arrayFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'array doc 1',
@@ -72,6 +73,7 @@ describe('Lexical', () => {
     createdJPGDocID = (
       await payload.find({
         collection: uploadsSlug,
+        depth: 0,
         where: {
           filename: {
             equals: 'payload.jpg',
@@ -83,6 +85,7 @@ describe('Lexical', () => {
     createdTextDocID = (
       await payload.find({
         collection: textFieldsSlug,
+        depth: 0,
         where: {
           text: {
             equals: 'Seeded text document',
@@ -94,6 +97,7 @@ describe('Lexical', () => {
     createdRichTextDocID = (
       await payload.find({
         collection: richTextFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'Rich Text',
@@ -230,6 +234,7 @@ describe('Lexical', () => {
   it('ensure link nodes convert to markdown', async () => {
     const newLexicalDoc = await payload.create({
       collection: lexicalFieldsSlug,
+      depth: 0,
       data: {
         title: 'Lexical Markdown Test',
         lexicalWithBlocks: {

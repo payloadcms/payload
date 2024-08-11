@@ -116,7 +116,6 @@ export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: strin
 }
 
 if (runImmediately === 'true') {
-  console.log('fuck')
   const testSuiteArg = process.argv[3]
   const writeDBAdapter = process.argv[4]
   await initDevAndTest(testSuiteArg, writeDBAdapter)
