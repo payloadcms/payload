@@ -74,7 +74,10 @@ export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: strin
       'export const importMap = {}',
     )
   } else {
-    fs.writeFileSync('app/(payload)/admin/importMap.js', 'export const importMap = {}')
+    fs.writeFileSync(
+      path.resolve(dirname, '../app/(payload)/admin/importMap.js'),
+      'export const importMap = {}',
+    )
   }
 
   if (writeDBAdapter === 'true') {
