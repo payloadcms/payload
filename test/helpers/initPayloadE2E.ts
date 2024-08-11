@@ -1,8 +1,7 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload } from 'payload'
+import { type Payload, getPayload } from 'payload'
 import { wait } from 'payload/shared'
 import { parse } from 'url'
 
@@ -29,7 +28,7 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   await startMemoryDB()
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const port = 3000
   process.env.PORT = String(port)

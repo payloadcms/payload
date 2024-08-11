@@ -1,7 +1,7 @@
 import type { Payload, SanitizedConfig } from 'payload'
 
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import path from 'path'
+import { getPayload } from 'payload'
 
 import { runInit } from '../runInit.js'
 import { NextRESTClient } from './NextRESTClient.js'
@@ -17,7 +17,7 @@ export async function initPayloadInt(
   await runInit(testSuiteName, false)
   const { default: config } = await eval('import(path.resolve(dirname, "config.ts"))')
 
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const restClient = new NextRESTClient(payload.config)
 
   return { config: payload.config, payload, restClient }
