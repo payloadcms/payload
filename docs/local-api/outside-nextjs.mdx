@@ -52,13 +52,14 @@ const seed = async () => {
 await seed()
 ```
 
-You can then use the script using our `payload run` bin script. E.g. if you placed this standalone script in `src/seed.ts`, you would execute it like this:
+You can then execute the script using `payload run`. Example: if you placed this standalone script in `src/seed.ts`, you would execute it like this:
 
 ```sh
 payload run src/seed.ts
 ```
 
 The `payload run` command does two things for you:
+
 1. It loads the environment variables the same way Next.js loads them, eliminating the need for additional dependencies like `dotenv`. The usage of `dotenv` is not recommended, as Next.js loads environment variables differently. By using `payload run`, you ensure consistent environment variable handling across your Payload and Next.js setup.
 2. It initializes swc, allowing direct execution of TypeScript files without requiring tools like tsx or ts-node.
 
@@ -69,4 +70,5 @@ If you encounter import-related errors, try running the script in TSX mode:
 ```sh
 payload run src/seed.ts --use-tsx
 ```
+
 Note: Install tsx in your project first. Be aware that TSX mode is slower than the default swc mode, so only use it if necessary.
