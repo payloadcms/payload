@@ -42,6 +42,10 @@ export default buildConfigWithDefaults({
           ]
         },
       },
+      redirectTypes: ['301', '302'],
+      redirectTypeFieldOverride: {
+        label: 'Redirect Type (Overridden)',
+      },
     }),
   ],
   typescript: {
