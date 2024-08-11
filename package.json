@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "bf": "pnpm runts build:force",
-    "build": "pnpm runts build:core",
+    "bf": "pnpm run build:force",
+    "build": "pnpm run build:core",
     "build:all": "turbo build",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
@@ -21,7 +21,7 @@
     "build:email-resend": "turbo build --filter email-resend",
     "build:eslint-config": "turbo build --filter eslint-config",
     "build:essentials:force": "pnpm clean:build && turbo build --filter=\"payload...\" --filter=\"@payloadcms/ui\" --filter=\"@payloadcms/next\" --filter=\"@payloadcms/db-mongodb\" --filter=\"@payloadcms/db-postgres\" --filter=\"@payloadcms/richtext-lexical\" --filter=\"@payloadcms/translations\" --filter=\"@payloadcms/plugin-cloud\" --filter=\"@payloadcms/graphql\" --no-cache --force",
-    "build:force": "pnpm runts build:core:force",
+    "build:force": "pnpm run build:core:force",
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",
     "build:live-preview-react": "turbo build --filter live-preview-react",
@@ -64,7 +64,7 @@
     "docker:start": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "fix": "eslint \"packages/**/*.ts\" --fix",
-    "force:build": "pnpm runts build:core:force",
+    "force:build": "pnpm run build:core:force",
     "lint": "eslint \"packages/**/*.ts\"",
     "lint-staged": "lint-staged",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
@@ -93,7 +93,7 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; runts lint --fix\"",
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
