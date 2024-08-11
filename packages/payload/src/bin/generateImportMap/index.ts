@@ -80,7 +80,9 @@ export async function generateImportMap(
   config: SanitizedConfig,
   options?: { force?: boolean; log: boolean },
 ): Promise<void> {
-  if (options?.log) {
+  const shouldLog = options?.log ?? true
+
+  if (shouldLog) {
     console.log('Generating import map')
   }
   const importMap: InternalImportMap = {}
@@ -150,7 +152,7 @@ export async function generateImportMap(
     fileName: 'importMap.js',
     force: options?.force,
     importMap: imports,
-    log: options?.log,
+    log: shouldLog,
     rootDir,
   })
 }
