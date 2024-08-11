@@ -13,11 +13,12 @@ const dirname = path.dirname(filename)
 let payload: Payload
 
 describe('@payloadcms/storage-s3', () => {
-  const TEST_BUCKET = process.env.S3_BUCKET
+  let TEST_BUCKET: string
   let client: AWS.S3Client
 
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
+    TEST_BUCKET = process.env.S3_BUCKET
 
     client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,
