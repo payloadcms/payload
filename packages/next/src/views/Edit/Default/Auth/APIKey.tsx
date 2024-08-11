@@ -1,11 +1,13 @@
 'use client'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, TextFieldClient } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   CopyToClipboard,
   FieldLabel,
   GenerateConfirmation,
   useConfig,
+  useDocumentInfo,
   useField,
   useFormFields,
   useTranslation,
@@ -18,16 +20,23 @@ const path = 'apiKey'
 const baseClass = 'api-key'
 const fieldBaseClass = 'field-type'
 
-export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
+export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: boolean }> = ({
   enabled,
   readOnly,
 }) => {
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { config } = useConfig()
+  const { collectionSlug, docPermissions } = useDocumentInfo()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
+
+  const apiKeyField: TextFieldClient = config.collections
+    .find((collection) => {
+      return collection.slug === collectionSlug
+    })
+    ?.fields?.find((field) => 'name' in field && field.name === 'apiKey') as TextFieldClient
 
   const validate = (val) =>
     text(val, {
@@ -48,15 +57,31 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
 
   const apiKeyValue = apiKey?.value
 
+  const apiKeyLabel = useMemo(() => {
+    let label: Record<string, string> | string = 'API Key'
+
+    if (apiKeyField?.label) {
+      label = apiKeyField.label
+    }
+
+    return getTranslation(label, i18n)
+  }, [apiKeyField, i18n])
+
   const APIKeyLabel = useMemo(
     () => (
       <div className={`${baseClass}__label`}>
-        <span>API Key</span>
+        <span>{apiKeyLabel}</span>
         <CopyToClipboard value={apiKeyValue as string} />
       </div>
     ),
-    [apiKeyValue],
+    [apiKeyLabel, apiKeyValue],
   )
+
+  const canUpdateAPIKey = useMemo(() => {
+    if (docPermissions && docPermissions?.fields?.apiKey) {
+      return docPermissions.fields.apiKey.update.permission
+    }
+  }, [docPermissions])
 
   const fieldType = useField({
     path: 'apiKey',
@@ -107,7 +132,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           htmlFor={path}
         />
         <input
-          aria-label="API Key"
+          aria-label={apiKeyLabel}
           className={highlightedField ? 'highlight' : undefined}
           disabled
           id="apiKey"
@@ -116,7 +141,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           value={(value as string) || ''}
         />
       </div>
-      {!readOnly && (
+      {!readOnly && canUpdateAPIKey && (
         <GenerateConfirmation highlightField={highlightField} setKey={() => setValue(uuidv4())} />
       )}
     </React.Fragment>

@@ -31,7 +31,7 @@ type CreateAccessPromise = (args: {
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
   const { id, type, entity, operations, req } = args
-  const { data, payload, user } = req
+  const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
   const policies = {
@@ -45,6 +45,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       if (type === 'global') {
         return payload.findGlobal({
           slug: entity.slug,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
         })
@@ -55,7 +57,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           const paginatedRes = await payload.find({
             collection: entity.slug,
             depth: 0,
+            fallbackLocale: null,
             limit: 1,
+            locale,
             overrideAccess: true,
             pagination: false,
             req,
@@ -79,6 +83,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           id,
           collection: entity.slug,
           depth: 0,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
         })
