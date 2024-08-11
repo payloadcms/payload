@@ -24,8 +24,15 @@ export async function runInit(
   // 1. execute
   // 2. wait until console.log("Done")
   const child = child_process.spawn(
-    path.resolve('node --no-deprecation --import @swc-node/register/esm-register'),
-    ['test/initDevAndTest.ts', testSuiteArg, writeDBAdapter ? 'true' : 'false'],
+    'node',
+    [
+      '--no-deprecation',
+      '--import',
+      '@swc-node/register/esm-register',
+      'test/initDevAndTest.ts',
+      testSuiteArg,
+      writeDBAdapter ? 'true' : 'false',
+    ],
     {
       stdio: 'pipe',
       cwd: path.resolve(dirname, '..'),

@@ -50,7 +50,10 @@ async function run() {
       // start a new node process which runs test/generateTypes with pathWithConfig as argument. Can't run it in this process, as there could otherwise be
       // breakage between tests, as node can cache things in between runs.
       // Make sure to wait until the process is done before starting the next one.
-      const child = spawn('node --no-deprecation --import @swc-node/register/esm-register', [
+      const child = spawn('node', [
+        '--no-deprecation',
+        '--import',
+        '@swc-node/register/esm-register',
         'test/generateTypes.ts',
         suiteDir,
       ])
