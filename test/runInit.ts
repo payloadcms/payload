@@ -11,9 +11,10 @@ export async function runInit(
   testSuiteArg: string,
   writeDBAdapter: boolean,
   separateProcess: boolean = false,
+  skipGenImportMap: boolean = false,
 ): Promise<void> {
   if (!separateProcess) {
-    await initDevAndTest(testSuiteArg, String(writeDBAdapter))
+    await initDevAndTest(testSuiteArg, String(writeDBAdapter), String(skipGenImportMap))
 
     return
   }
@@ -32,6 +33,7 @@ export async function runInit(
       'test/initDevAndTest.ts',
       testSuiteArg,
       writeDBAdapter ? 'true' : 'false',
+      skipGenImportMap ? 'true' : 'false',
     ],
     {
       stdio: 'pipe',

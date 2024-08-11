@@ -66,7 +66,11 @@ const databaseAdapters = {
   })`,
 }
 
-export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: string): Promise<void> {
+export async function initDevAndTest(
+  testSuiteArg: string,
+  writeDBAdapter: string,
+  skipGenImportMap: string,
+): Promise<void> {
   // create a new importMap.js with contents export const importMap = {} in app/(payload)/admin/importMap.js - delete existing file:
   if (testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root') {
     fs.writeFileSync(
@@ -100,6 +104,11 @@ export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: strin
     console.log('Wrote', dbAdapter, 'db adapter')
   }
 
+  if (skipGenImportMap === 'true') {
+    console.log('Done')
+    return
+  }
+
   // Generate importMap
   const testDir = path.resolve(dirname, testSuiteArg)
 
@@ -121,5 +130,6 @@ export async function initDevAndTest(testSuiteArg: string, writeDBAdapter: strin
 if (runImmediately === 'true') {
   const testSuiteArg = process.argv[3]
   const writeDBAdapter = process.argv[4]
-  await initDevAndTest(testSuiteArg, writeDBAdapter)
+  const skipGenImportMap = process.argv[5]
+  await initDevAndTest(testSuiteArg, writeDBAdapter, skipGenImportMap)
 }
