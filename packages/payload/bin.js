@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-deprecation
 
 import { register } from 'node:module'
 import path from 'node:path'
