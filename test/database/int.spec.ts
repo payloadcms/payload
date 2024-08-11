@@ -1,7 +1,10 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { PgTable } from 'drizzle-orm/pg-core'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload'
@@ -478,6 +481,62 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
+    })
+  })
+
+  describe('dbJsonColumn', () => {
+    it('should replace table creation with a json column', () => {
+      if (payload.db.name === 'mongoose') return
+
+      const adapter = payload.db as unknown as DrizzleAdapter
+
+      const matchedTables = Object.keys(adapter.schema).filter((name) =>
+        name.startsWith('json_store'),
+      )
+
+      expect(matchedTables).toHaveLength(1)
+
+      const table = adapter.schema.json_store
+
+      expect(table).toHaveProperty('textMany')
+      expect(table).toHaveProperty('selectMany')
+      expect(table).toHaveProperty('array')
+      expect(table).toHaveProperty('blocks')
+      expect(table).toHaveProperty('tab')
+    })
+
+    it('should create / read with dbJsonColumn fields', async () => {
+      if (payload.db.name === 'mongoose') return
+
+      const res = await payload.create({
+        collection: 'json-store',
+        data: {
+          array: [],
+          blocks: [{ blockType: 'test-block' }],
+          selectMany: ['x'],
+          textMany: ['asd'],
+          numberMany: [10],
+          tab: { text: 'asd' },
+        },
+      })
+
+      expect(res.array).toEqual([])
+      expect(res.blocks[0].blockType).toEqual('test-block')
+      expect(res.selectMany[0]).toBe('x')
+      expect(res.textMany[0]).toBe('asd')
+      expect(res.numberMany[0]).toBe(10)
+      expect(res.tab.text).toBe('asd')
+
+      const adapter = payload.db as unknown as DrizzleAdapter
+
+      const [resRaw] = await payload.db.drizzle.select().from(adapter.schema.json_store as PgTable)
+
+      expect(resRaw.array).toEqual([])
+      expect(resRaw.blocks[0].blockType).toEqual('test-block')
+      expect(resRaw.selectMany[0]).toBe('x')
+      expect(resRaw.textMany[0]).toBe('asd')
+      expect(resRaw.numberMany[0]).toBe(10)
+      expect((resRaw.tab as Record<string, unknown>).text).toBe('asd')
     })
   })
 })

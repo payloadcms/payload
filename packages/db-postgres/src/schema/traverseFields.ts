@@ -153,6 +153,11 @@ export const traverseFields = ({
     switch (field.type) {
       case 'text': {
         if (field.hasMany) {
+          if (field.dbJsonColumn) {
+            targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+            break
+          }
+
           if (field.localized) {
             hasLocalizedManyTextField = true
           }
@@ -182,6 +187,11 @@ export const traverseFields = ({
 
       case 'number': {
         if (field.hasMany) {
+          if (field.dbJsonColumn) {
+            targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+            break
+          }
+
           if (field.localized) {
             hasLocalizedManyNumberField = true
           }
@@ -227,6 +237,11 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
+        if (field.type === 'select' && field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         const enumName = createTableName({
           adapter,
           config: field,
@@ -324,6 +339,10 @@ export const traverseFields = ({
       }
 
       case 'array': {
+        if (field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         const arrayTableName = createTableName({
@@ -433,6 +452,10 @@ export const traverseFields = ({
       }
 
       case 'blocks': {
+        if (field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
@@ -558,6 +581,11 @@ export const traverseFields = ({
 
       case 'tab':
       case 'group': {
+        if ('dbJsonColumn' in field && field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         if (!('name' in field)) {
           const {
             hasLocalizedField: groupHasLocalizedField,
@@ -721,6 +749,11 @@ export const traverseFields = ({
 
       case 'relationship':
       case 'upload':
+        if ('dbJsonColumn' in field && field.dbJsonColumn) {
+          targetTable[fieldName] = withDefault(jsonb(fieldName), field)
+          break
+        }
+
         if (Array.isArray(field.relationTo)) {
           field.relationTo.forEach((relation) => relationships.add(relation))
         } else if (field.type === 'relationship' && field.hasMany) {

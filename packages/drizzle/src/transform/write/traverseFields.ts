@@ -92,7 +92,9 @@ export const traverseFields = ({
       fieldData = data[field.name]
     }
 
-    if (field.type === 'array') {
+    const storeAsJson = 'dbJsonColumn' in field && field.dbJsonColumn
+
+    if (field.type === 'array' && !storeAsJson) {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
@@ -145,7 +147,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !storeAsJson) {
       field.blocks.forEach(({ slug }) => {
         blocksToDelete.add(toSnakeCase(slug))
       })
@@ -192,7 +194,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'group') {
+    if (field.type === 'group' && !storeAsJson) {
       if (typeof data[field.name] === 'object' && data[field.name] !== null) {
         if (field.localized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
@@ -251,6 +253,11 @@ export const traverseFields = ({
       field.tabs.forEach((tab) => {
         if ('name' in tab) {
           if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
+            if (tab.dbJsonColumn) {
+              row[`${columnPrefix || ''}${toSnakeCase(tab.name)}`] = data[tab.name]
+              return
+            }
+
             if (tab.localized) {
               Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {
                 traverseFields({
@@ -350,7 +357,7 @@ export const traverseFields = ({
       })
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
+    if ((field.type === 'relationship' || field.type === 'upload') && !storeAsJson) {
       const relationshipPath = `${path || ''}${field.name}`
 
       if (
@@ -419,7 +426,7 @@ export const traverseFields = ({
       }
     }
 
-    if (field.type === 'text' && field.hasMany) {
+    if (field.type === 'text' && field.hasMany && !storeAsJson) {
       const textPath = `${path || ''}${field.name}`
 
       if (field.localized) {
@@ -450,7 +457,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'number' && field.hasMany) {
+    if (field.type === 'number' && field.hasMany && !storeAsJson) {
       const numberPath = `${path || ''}${field.name}`
 
       if (field.localized) {
@@ -481,7 +488,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'select' && field.hasMany) {
+    if (field.type === 'select' && field.hasMany && !storeAsJson) {
       const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) selects[selectTableName] = []
 
