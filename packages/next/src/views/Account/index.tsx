@@ -1,6 +1,6 @@
 import type { AdminViewProps, ServerSideEditViewProps } from 'payload'
 
-import { DocumentInfoProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderCustomComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -10,6 +10,7 @@ import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
+import { AccountClient } from './index.client.js'
 
 export { generateAccountMetadata } from './meta.js'
 
@@ -75,30 +76,33 @@ export const Account: React.FC<AdminViewProps> = async ({
         initialState={formState}
         isEditing
       >
-        <DocumentHeader
-          collectionConfig={collectionConfig}
-          config={payload.config}
-          hideTabs
-          i18n={i18n}
-          permissions={permissions}
-        />
-        <HydrateAuthProvider permissions={permissions} />
-        <RenderCustomComponent
-          CustomComponent={
-            typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
-          }
-          DefaultComponent={EditView}
-          componentProps={viewComponentProps}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
+        <EditDepthProvider depth={1}>
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            config={payload.config}
+            hideTabs
+            i18n={i18n}
+            permissions={permissions}
+          />
+          <HydrateAuthProvider permissions={permissions} />
+          <RenderCustomComponent
+            CustomComponent={
+              typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
+            }
+            DefaultComponent={EditView}
+            componentProps={viewComponentProps}
+            serverOnlyProps={{
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            }}
+          />
+          <AccountClient />
+        </EditDepthProvider>
       </DocumentInfoProvider>
     )
   }

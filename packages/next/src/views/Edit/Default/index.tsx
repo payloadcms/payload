@@ -100,7 +100,10 @@ export const DefaultEditView: React.FC = () => {
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
 
-  const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+  const classes = [baseClass, id && `${baseClass}--is-editing`]
+
+  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
+  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
 
   const [schemaPath, setSchemaPath] = React.useState(entitySlug)
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
@@ -187,7 +190,7 @@ export const DefaultEditView: React.FC = () => {
   )
 
   return (
-    <main className={classes}>
+    <main className={classes.filter(Boolean).join(' ')}>
       <OperationProvider operation={operation}>
         <Form
           action={action}

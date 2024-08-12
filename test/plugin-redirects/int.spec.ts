@@ -49,6 +49,7 @@ describe('@payloadcms/plugin-redirects', () => {
             value: page.id,
           },
         },
+        type: '301',
       },
     })
 
@@ -66,6 +67,7 @@ describe('@payloadcms/plugin-redirects', () => {
           type: 'custom',
           url: '/test',
         },
+        type: '301',
       },
     })
 

@@ -276,10 +276,13 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            body: JSON.stringify(data),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
             },
+            method: 'post',
           })
 
           const json: DocumentPermissions = await res.json()
@@ -287,14 +290,13 @@ const DocumentInfo: React.FC<
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
             {
               body: JSON.stringify({
-                data: {
-                  ...(data || {}),
-                  _status: 'published',
-                },
+                ...(data || {}),
+                _status: 'published',
               }),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
               },
               method: 'POST',
             },
@@ -436,8 +438,11 @@ const DocumentInfo: React.FC<
             serverURL,
             signal: abortController.signal,
           })
+          const data = reduceFieldsToValues(result, true)
+          setData(data)
 
-          setData(reduceFieldsToValues(result, true))
+          if (localeChanged) void getDocPermissions(data)
+
           setInitialState(result)
         } catch (err) {
           if (!abortController.signal.aborted) {
@@ -472,6 +477,7 @@ const DocumentInfo: React.FC<
     onLoadError,
     initialDataFromProps,
     initialStateFromProps,
+    getDocPermissions,
   ])
 
   useEffect(() => {
@@ -492,13 +498,8 @@ const DocumentInfo: React.FC<
   }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const localeChanged = locale !== prevLocalePermissions.current
-
     if (data && (collectionSlug || globalSlug)) {
-      if (localeChanged) {
-        prevLocalePermissions.current = locale
-        void getDocPermissions(data)
-      } else if (
+      if (
         hasInitializedDocPermissions.current === false &&
         (!docPermissions ||
           hasSavePermission === undefined ||
@@ -519,7 +520,6 @@ const DocumentInfo: React.FC<
     collectionSlug,
     globalSlug,
     data,
-    locale,
     docPermissions,
     hasSavePermission,
     hasPublishPermission,
