@@ -180,11 +180,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     onChange,
     submitted,
     parentLexicalRichTextField,
+    formData,
     nodeKey,
     path,
     schemaFieldsPath,
     classNames,
-    i18n, // Adding formData to the dependencies here might break it. DO NOT ADD FORMDATA!!!
+    i18n,
   ])
 
   return <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>{formContent}</div>
