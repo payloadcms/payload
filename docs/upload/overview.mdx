@@ -169,6 +169,22 @@ When an uploaded image is smaller than the defined image size, we have 3 options
   image size. Use the `withoutEnlargement` prop to change this.
 </Banner>
 
+#### Custom file name per size
+
+Each image size supports a `generateImageName` function that can be used to generate a custom file name for the resized image.
+This function receives the original file name, the resize name, the extension, height and width as arguments.
+
+```ts
+{
+  name: 'thumbnail',
+  width: 400,
+  height: 300,
+  generateImageName: ({ height, sizeName, extension, width }) => {
+    return `custom-${sizeName}-${height}-${width}.${extension}`
+  },
+}
+```
+
 ## Crop and Focal Point Selector
 
 This feature is only available for image file types.

@@ -24,6 +24,7 @@ import {
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   focalOnlySlug,
   mediaSlug,
   relationPreviewSlug,
@@ -51,6 +52,7 @@ let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
+let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -74,6 +76,7 @@ describe('uploads', () => {
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
+    customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -241,6 +244,25 @@ describe('uploads', () => {
     await saveDocAndAssert(page)
 
     await expect(page.locator('.file-details img')).toBeVisible()
+  })
+
+  test('should have custom file name for image size', async () => {
+    await page.goto(customFileNameURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const renamedImageSizeFile = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+
+    await expect(renamedImageSizeFile).toContainText('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
