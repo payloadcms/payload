@@ -151,7 +151,6 @@ export const Auth: React.FC<Props> = (props) => {
               <PasswordField
                 field={{
                   name: 'password',
-                  _path: 'password',
                   admin: {
                     disabled,
                   },

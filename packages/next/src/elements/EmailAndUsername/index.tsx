@@ -23,7 +23,6 @@ function EmailFieldComponent(props: Props) {
         autoComplete="off"
         field={{
           name: 'email',
-          _path: 'email',
           label: t('general:email'),
           required: requireEmail,
         }}
@@ -47,7 +46,6 @@ function UsernameFieldComponent(props: Props) {
       <TextField
         field={{
           name: 'username',
-          _path: 'username',
           label: t('authentication:username'),
           required: requireUsername,
         }}

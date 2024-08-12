@@ -6,9 +6,9 @@ import { email, username } from 'payload/shared'
 import React from 'react'
 
 export type LoginFieldProps = {
-  required?: boolean
-  type: 'email' | 'emailOrUsername' | 'username'
-  validate?: Validate
+  readonly required?: boolean
+  readonly type: 'email' | 'emailOrUsername' | 'username'
+  readonly validate?: Validate
 }
 
 export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
@@ -20,7 +20,6 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
         autoComplete="email"
         field={{
           name: 'email',
-          _path: 'email',
           label: t('general:email'),
           required,
         }}
@@ -34,7 +33,6 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         field={{
           name: 'username',
-          _path: 'username',
           label: t('authentication:username'),
           required,
         }}
@@ -48,7 +46,6 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
       <TextField
         field={{
           name: 'username',
-          _path: 'username',
           label: t('authentication:emailOrUsername'),
           required,
         }}
