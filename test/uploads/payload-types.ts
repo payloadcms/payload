@@ -27,6 +27,7 @@ export interface Config {
     enlarge: Enlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
+    'custom-file-name-media': CustomFileNameMedia;
     'unstored-media': UnstoredMedia;
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
@@ -56,6 +57,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -67,6 +69,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -745,6 +748,34 @@ export interface MediaTrim {
       filename?: string | null;
     };
     trimOptions?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-file-name-media".
+ */
+export interface CustomFileNameMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    custom?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
