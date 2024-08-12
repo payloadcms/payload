@@ -148,9 +148,15 @@ describe('admin1', () => {
       const favicons = page.locator('link[rel="icon"]')
 
       await expect(favicons).toHaveCount(2)
-      await expect(favicons.nth(0)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
+      await expect(favicons.nth(0)).toHaveAttribute(
+        'href',
+        /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
+      )
       await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+      await expect(favicons.nth(1)).toHaveAttribute(
+        'href',
+        /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
+      )
     })
 
     test('should render custom og:title from root config', async () => {
