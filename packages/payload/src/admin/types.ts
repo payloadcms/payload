@@ -180,8 +180,6 @@ export type {
   UploadFieldProps,
 } from './fields/Upload.js'
 
-export type { FieldComponentProps } from './fields/index.js'
-
 export type { ErrorComponent, ErrorProps, GenericErrorProps } from './forms/Error.js'
 
 export type { FormFieldBase } from './forms/Field.js'
