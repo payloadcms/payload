@@ -1,4 +1,4 @@
-import type { DOMConversionOutput, LexicalNode } from 'lexical'
+import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'lexical'
 
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
@@ -14,6 +14,14 @@ const HorizontalRuleComponent = React.lazy(() =>
 )
 
 export class HorizontalRuleNode extends HorizontalRuleServerNode {
+  static clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
+    return super.clone(node)
+  }
+
+  static getType(): string {
+    return super.getType()
+  }
+
   /**
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
@@ -26,6 +34,10 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
    */
   decorate(): React.ReactElement {
     return <HorizontalRuleComponent nodeKey={this.__key} />
+  }
+
+  exportJSON(): SerializedLexicalNode {
+    return super.exportJSON()
   }
 }
 

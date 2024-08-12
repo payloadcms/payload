@@ -37,6 +37,14 @@ function $relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutpu
 }
 
 export class RelationshipNode extends RelationshipServerNode {
+  static clone(node: RelationshipServerNode): RelationshipServerNode {
+    return super.clone(node)
+  }
+
+  static getType(): string {
+    return super.getType()
+  }
+
   static importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {
       div: (domNode: HTMLDivElement) => {
@@ -77,6 +85,10 @@ export class RelationshipNode extends RelationshipServerNode {
         nodeKey={this.getKey()}
       />
     )
+  }
+
+  exportJSON(): SerializedRelationshipNode {
+    return super.exportJSON()
   }
 }
 

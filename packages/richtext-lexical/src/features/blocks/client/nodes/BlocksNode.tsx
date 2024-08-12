@@ -14,6 +14,14 @@ const BlockComponent = React.lazy(() =>
 )
 
 export class BlockNode extends ServerBlockNode {
+  static clone(node: ServerBlockNode): ServerBlockNode {
+    return super.clone(node)
+  }
+
+  static getType(): string {
+    return super.getType()
+  }
+
   static importJSON(serializedNode: SerializedBlockNode): BlockNode {
     if (serializedNode.version === 1) {
       // Convert (version 1 had the fields wrapped in another, unnecessary data property)
@@ -32,6 +40,10 @@ export class BlockNode extends ServerBlockNode {
 
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return <BlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+  }
+
+  exportJSON(): SerializedBlockNode {
+    return super.exportJSON()
   }
 }
 

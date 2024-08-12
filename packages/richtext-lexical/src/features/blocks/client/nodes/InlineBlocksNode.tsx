@@ -9,6 +9,8 @@ import type {
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
+import type { SerializedServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
+
 import { ServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
 
 export type InlineBlockFields = {
@@ -35,6 +37,14 @@ export type SerializedInlineBlockNode = Spread<
 >
 
 export class InlineBlockNode extends ServerInlineBlockNode {
+  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+    return super.clone(node)
+  }
+
+  static getType(): string {
+    return super.getType()
+  }
+
   static importJSON(serializedNode: SerializedInlineBlockNode): InlineBlockNode {
     const node = $createInlineBlockNode(serializedNode.fields)
     return node
@@ -42,6 +52,10 @@ export class InlineBlockNode extends ServerInlineBlockNode {
 
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return <InlineBlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+  }
+
+  exportJSON(): SerializedServerInlineBlockNode {
+    return super.exportJSON()
   }
 }
 

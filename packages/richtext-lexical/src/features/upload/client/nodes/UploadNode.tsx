@@ -48,6 +48,14 @@ export type SerializedUploadNode = {
 } & Spread<UploadData, SerializedDecoratorBlockNode>
 
 export class UploadNode extends UploadServerNode {
+  static clone(node: UploadServerNode): UploadServerNode {
+    return super.clone(node)
+  }
+
+  static getType(): string {
+    return super.getType()
+  }
+
   static importDOM(): DOMConversionMap | null {
     return {
       img: (node: HTMLImageElement) => ({
@@ -81,6 +89,10 @@ export class UploadNode extends UploadServerNode {
 
   decorate(): JSX.Element {
     return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
+  }
+
+  exportJSON(): SerializedUploadNode {
+    return super.exportJSON()
   }
 }
 
