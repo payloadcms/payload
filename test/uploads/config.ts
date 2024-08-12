@@ -13,6 +13,7 @@ import { Uploads2 } from './collections/Upload2/index.js'
 import {
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
@@ -508,6 +509,23 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './media-trim'),
         trimOptions: 0,
+      },
+    },
+    {
+      slug: customFileNameMediaSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'custom',
+            height: 500,
+            width: 500,
+            generateImageName: ({ extension, height, width, sizeName }) =>
+              `${sizeName}-${width}x${height}.${extension}`,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
       },
     },
     {

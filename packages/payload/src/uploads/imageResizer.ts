@@ -408,15 +408,26 @@ export async function resizeAndTransformImageSizes({
 
       const mimeInfo = await fileTypeFromBuffer(bufferData)
 
-      const imageNameWithDimensions = createImageName({
-        extension: mimeInfo?.ext || sanitizedImage.ext,
-        height: extractHeightFromImage({
-          ...originalImageMeta,
-          height: bufferInfo.height,
-        }),
-        outputImageName: sanitizedImage.name,
-        width: bufferInfo.width,
-      })
+      const imageNameWithDimensions = imageResizeConfig.generateImageName
+        ? imageResizeConfig.generateImageName({
+            extension: mimeInfo?.ext || sanitizedImage.ext,
+            height: extractHeightFromImage({
+              ...originalImageMeta,
+              height: bufferInfo.height,
+            }),
+            originalName: sanitizedImage.name,
+            sizeName: imageResizeConfig.name,
+            width: bufferInfo.width,
+          })
+        : createImageName({
+            extension: mimeInfo?.ext || sanitizedImage.ext,
+            height: extractHeightFromImage({
+              ...originalImageMeta,
+              height: bufferInfo.height,
+            }),
+            outputImageName: sanitizedImage.name,
+            width: bufferInfo.width,
+          })
 
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
 

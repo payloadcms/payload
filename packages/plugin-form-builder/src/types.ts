@@ -1,4 +1,10 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type {
+  Block,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  Field,
+  TypeWithID,
+} from 'payload'
 
 export interface BlockConfig {
   block: Block
@@ -37,7 +43,11 @@ export interface FieldsConfig {
   textarea?: FieldConfig | boolean
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
+type BeforeChangeParams<T extends TypeWithID = any> = Parameters<CollectionBeforeChangeHook<T>>[0]
+export type BeforeEmail<T extends TypeWithID = any> = (
+  emails: FormattedEmail[],
+  beforeChangeParams: BeforeChangeParams<T>,
+) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
