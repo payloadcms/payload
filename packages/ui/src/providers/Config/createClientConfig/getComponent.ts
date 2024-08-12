@@ -12,6 +12,7 @@ export const getComponent = <
   identifier,
   importMap,
   payloadComponent,
+  silent,
 }: {
   identifier?: string
   importMap: ImportMap
@@ -19,6 +20,7 @@ export const getComponent = <
     | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | null
     | undefined
+  silent?: boolean
 }): ResolvedComponent<TComponentServerProps, TComponentClientProps> => {
   if (!payloadComponent) {
     return {
@@ -34,7 +36,7 @@ export const getComponent = <
 
   const Component = importMap[key]
 
-  if (!Component) {
+  if (!Component && !silent) {
     console.error(`getComponent: Component not found in importMap`, {
       identifier,
       key,

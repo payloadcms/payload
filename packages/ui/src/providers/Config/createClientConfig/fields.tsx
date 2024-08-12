@@ -235,23 +235,26 @@ export const createClientField = ({
           identifier: 'richText-generateComponentMap',
           importMap,
           payloadComponent: incomingField.editor.generateComponentMap,
+          silent: true,
         })
 
-        const actualGenerateComponentMap: RichTextGenerateComponentMap = (
-          generateComponentMap as any
-        )(serverProps)
+        if (generateComponentMap) {
+          const actualGenerateComponentMap: RichTextGenerateComponentMap = (
+            generateComponentMap as any
+          )(serverProps)
 
-        const result = actualGenerateComponentMap({
-          clientField: field,
-          createMappedComponent,
-          field: incomingField,
-          i18n,
-          importMap,
-          payload,
-          schemaPath: field._schemaPath,
-        })
+          const result = actualGenerateComponentMap({
+            clientField: field,
+            createMappedComponent,
+            field: incomingField,
+            i18n,
+            importMap,
+            payload,
+            schemaPath: field._schemaPath,
+          })
 
-        field.richTextComponentMap = result
+          field.richTextComponentMap = result
+        }
       }
       break
     }
