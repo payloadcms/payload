@@ -71,17 +71,24 @@ export async function initDevAndTest(
   writeDBAdapter: string,
   skipGenImportMap: string,
 ): Promise<void> {
-  // create a new importMap.js with contents export const importMap = {} in app/(payload)/admin/importMap.js - delete existing file:
-  if (testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root') {
-    fs.writeFileSync(
-      'test/live-preview/app/(payload)/admin/importMap.js',
-      'export const importMap = {}',
-    )
-  } else {
-    fs.writeFileSync(
-      path.resolve(dirname, '../app/(payload)/admin/importMap.js'),
-      'export const importMap = {}',
-    )
+  let appPath: string
+
+  switch (testSuiteArg) {
+    case 'live-preview':
+      appPath = './live-preview/app/(payload)/admin/importMap.js'
+      break
+    case 'admin-root':
+      appPath = './admin-root/app/(payload)/admin/importMap.js'
+      break
+    default:
+      appPath = '../app/(payload)/admin/importMap.js'
+      break
+  }
+
+  try {
+    fs.writeFileSync(path.resolve(dirname, appPath), 'export const importMap = {}')
+  } catch (error) {
+    console.log('Error writing importMap.js', error)
   }
 
   if (writeDBAdapter === 'true') {
