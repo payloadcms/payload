@@ -105,7 +105,7 @@
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.43.0",
     "@swc-node/register": "1.10.9",
-    "@swc/cli": "0.3.12",
+    "@swc/cli": "0.4.0",
     "@swc/jest": "0.2.36",
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
@@ -150,7 +150,7 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
-    "swc-plugin-transform-remove-imports": "1.14.0",
+    "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
     "turbo": "^1.13.3",
     "typescript": "5.5.4"
