@@ -11,6 +11,7 @@ import {
   animatedTypeMedia,
   audioSlug,
   cropOnlySlug,
+  customFileNameMediaSlug,
   enlargeSlug,
   focalOnlySlug,
   globalWithMedia,
@@ -201,6 +202,23 @@ export default buildConfigWithDefaults({
           }
           return false
         },
+      },
+    },
+    {
+      slug: customFileNameMediaSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'custom',
+            height: 500,
+            width: 500,
+            generateImageName: ({ extension, height, width, sizeName }) =>
+              `${sizeName}-${width}x${height}.${extension}`,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: `./${customFileNameMediaSlug}`,
       },
     },
     {
