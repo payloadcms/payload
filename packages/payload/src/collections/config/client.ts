@@ -31,6 +31,7 @@ export type ClientCollectionConfig = {
       }
       views: {
         Edit: {
+          [key: string]: MappedView
           API: MappedView
           Default: MappedView
           LivePreview: MappedView

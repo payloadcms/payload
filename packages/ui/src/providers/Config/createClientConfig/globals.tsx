@@ -2,8 +2,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientGlobalConfig,
   CreateMappedComponent,
+  EditViewConfig,
   EditViewProps,
   ImportMap,
+  MappedView,
   Payload,
   SanitizedConfig,
   ServerOnlyGlobalAdminProperties,
@@ -140,20 +142,36 @@ export const createClientGlobalConfig = ({
         'global.admin.components.views.Edit.Default',
       ),
     }
-    if (
-      hasEditView &&
-      'actions' in global.admin.components.views.Edit.Default &&
-      global.admin.components.views.Edit.Default.actions
-    ) {
-      clientGlobal.admin.components.views.Edit.Default.actions =
-        global.admin.components.views.Edit.Default.actions.map((Component) =>
-          createMappedComponent(
-            Component,
+
+    if (global?.admin?.components?.views?.Edit) {
+      for (const key in global.admin.components.views.Edit) {
+        const view: EditViewConfig = global.admin.components.views.Edit[key]
+        if (!clientGlobal.admin.components.views.Edit[key]) {
+          clientGlobal.admin.components.views.Edit[key] = {} as MappedView
+        }
+
+        if ('Component' in view && key !== 'Default') {
+          clientGlobal.admin.components.views.Edit[key].Component = createMappedComponent(
+            view.Component,
+            {
+              globalSlug: global.slug,
+            },
             undefined,
-            undefined,
-            'global.admin.components.views.Edit.Default.actions',
-          ),
-        )
+            'global.admin.components.views.Edit.key.Component',
+          )
+        }
+
+        if ('actions' in view && view.actions?.length) {
+          clientGlobal.admin.components.views.Edit[key].actions = view.actions.map((Component) =>
+            createMappedComponent(
+              Component,
+              undefined,
+              undefined,
+              'global.admin.components.views.key.actions',
+            ),
+          )
+        }
+      }
     }
 
     if (

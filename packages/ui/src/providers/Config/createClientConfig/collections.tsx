@@ -3,8 +3,10 @@ import type {
   AdminViewProps,
   ClientCollectionConfig,
   CreateMappedComponent,
+  EditViewConfig,
   EditViewProps,
   ImportMap,
+  MappedView,
   Payload,
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
@@ -234,20 +236,34 @@ export const createClientCollectionConfig = ({
     ),
   }
 
-  if (
-    hasEditView &&
-    'actions' in collection.admin.components.views.Edit.Default &&
-    collection.admin.components.views.Edit.Default.actions
-  ) {
-    clientCollection.admin.components.views.Edit.Default.actions =
-      collection.admin.components.views.Edit.Default.actions.map((Component) =>
-        createMappedComponent(
-          Component,
+  if (collection?.admin?.components?.views?.Edit) {
+    for (const key in collection.admin.components.views.Edit) {
+      const view: EditViewConfig = collection.admin.components.views.Edit[key]
+      if (!clientCollection.admin.components.views.Edit[key]) {
+        clientCollection.admin.components.views.Edit[key] = {} as MappedView
+      }
+      if ('Component' in view && key !== 'Default') {
+        clientCollection.admin.components.views.Edit[key].Component = createMappedComponent(
+          view.Component,
+          {
+            collectionSlug: collection.slug,
+          },
           undefined,
-          undefined,
-          'collection.admin.components.views.Edit.Default',
-        ),
-      )
+          'collection.admin.components.views.Edit.key.Component',
+        )
+      }
+
+      if ('actions' in view && view.actions?.length) {
+        clientCollection.admin.components.views.Edit[key].actions = view.actions.map((Component) =>
+          createMappedComponent(
+            Component,
+            undefined,
+            undefined,
+            'collection.admin.components.views.key.admin',
+          ),
+        )
+      }
+    }
   }
 
   const hasListView =

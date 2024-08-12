@@ -24,6 +24,7 @@ export type ClientGlobalConfig = {
       }
       views: {
         Edit: {
+          [key: string]: MappedView
           API: MappedView
           Default: MappedView
           LivePreview: MappedView
