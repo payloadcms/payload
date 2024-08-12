@@ -51,12 +51,24 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
+export type GenerateImageName = (args: {
+  extension: string
+  height: number
+  originalName: string
+  sizeName: string
+  width: number
+}) => string
+
 export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
   /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
+  /**
+   * Generate a custom name for the file of this image size.
+   */
+  generateImageName?: GenerateImageName
   name: string
   trimOptions?: ImageUploadTrimOptions
   /**
