@@ -128,7 +128,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
         // Only dispatch if the validation result has changed
         // This will prevent unnecessary rerenders
-        if (valid !== prevValid.current) {
+        if (valid !== prevValid.current || errorMessage !== field?.errorMessage) {
           prevValid.current = valid
 
           if (typeof dispatchField === 'function') {
