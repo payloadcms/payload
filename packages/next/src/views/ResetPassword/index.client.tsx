@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation.js'
 import React from 'react'
 import { toast } from 'sonner'
 
-type Args = {
+type Props = {
   token: string
 }
 
@@ -33,7 +33,7 @@ const initialState: FormState = {
   },
 }
 
-export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
+export const ResetPasswordClient: React.FC<Props> = ({ token }) => {
   const i18n = useTranslation()
   const {
     admin: {

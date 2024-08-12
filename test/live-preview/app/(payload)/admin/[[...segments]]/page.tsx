@@ -5,7 +5,7 @@ import config from '@payload-config'
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 import { RootPage, generatePageMetadata } from '@payloadcms/next/views/Root/index.js'
 
-type Args = {
+type Props = {
   params: {
     segments: string[]
   }
@@ -14,9 +14,9 @@ type Args = {
   }
 }
 
-export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
+export const generateMetadata = ({ params, searchParams }: Props): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams })
 
-const Page = ({ params, searchParams }: Args) => RootPage({ config, params, searchParams })
+const Page = ({ params, searchParams }: Props) => RootPage({ config, params, searchParams })
 
 export default Page

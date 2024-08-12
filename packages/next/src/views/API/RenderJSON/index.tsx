@@ -34,7 +34,7 @@ const Bracket = ({
   )
 }
 
-type Args = {
+type Props = {
   isEmpty?: boolean
   object: Record<string, any> | any[]
   objectKey?: string
@@ -48,7 +48,7 @@ export const RenderJSON = ({
   objectKey,
   parentType = 'object',
   trailingComma = false,
-}: Args) => {
+}: Props) => {
   const objectKeys = object ? Object.keys(object) : []
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)

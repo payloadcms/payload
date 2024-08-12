@@ -15,7 +15,7 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
 
-type Args = {
+type Props = {
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
@@ -23,7 +23,8 @@ type Args = {
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
-export const buildColumnState = (args: Args): Column[] => {
+
+export const buildColumnState = (args: Props): Column[] => {
   const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
 
   let sortedFieldMap = flattenFieldMap(fieldMap)
