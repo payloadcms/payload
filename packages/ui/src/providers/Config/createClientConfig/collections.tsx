@@ -205,7 +205,8 @@ export const createClientCollectionConfig = ({
     'admin' in collection &&
     'components' in collection.admin &&
     'views' in collection.admin.components &&
-    'Edit' in collection.admin.components.views
+    'Edit' in collection.admin.components.views &&
+    'Default' in collection.admin.components.views.Edit
 
   if (!clientCollection.admin.components.views.Edit) {
     clientCollection.admin.components.views.Edit =
