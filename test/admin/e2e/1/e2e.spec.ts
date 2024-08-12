@@ -80,7 +80,7 @@ describe('admin1', () => {
   let loginURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
