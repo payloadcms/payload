@@ -96,13 +96,19 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
-
-    const docToDelete = await (collectionConfig?.db?.findOne || req.payload.db.findOne)({
+    let docToDelete: Document
+    const dbArgs = {
       collection: collectionConfig.slug,
       locale: req.locale,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
-    })
+    }
+
+    if (collectionConfig?.db?.findOne) {
+      docToDelete = await collectionConfig.db.findOne(dbArgs)
+    } else {
+      docToDelete = await req.payload.db.findOne(dbArgs)
+    }
 
     if (!docToDelete && !hasWhereAccess) throw new NotFound(t)
     if (!docToDelete && hasWhereAccess) throw new Forbidden(t)

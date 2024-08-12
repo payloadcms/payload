@@ -104,14 +104,20 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // Retrieve documents
     // /////////////////////////////////////
 
-    const { docs } = await (
-      collectionConfig?.db?.find || payload.db.find<GeneratedTypes['collections'][TSlug]>
-    )({
+    const dbArgs = {
       collection: collectionConfig.slug,
       locale,
       req,
       where: fullWhere,
-    })
+    }
+    let docs
+    if (collectionConfig?.db?.find) {
+      const result = await collectionConfig.db.find<GeneratedTypes['collections'][TSlug]>(dbArgs)
+      docs = result.docs
+    } else {
+      const result = await payload.db.find<GeneratedTypes['collections'][TSlug]>(dbArgs)
+      docs = result.docs
+    }
 
     const errors = []
 

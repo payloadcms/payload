@@ -85,7 +85,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
 
-    const doc = await (collectionConfig?.db?.findOne || req.payload.db.findOne)(findOneArgs)
+    let doc: T
+    if (collectionConfig?.db?.findOne) {
+      doc = await collectionConfig.db.findOne(findOneArgs)
+    } else {
+      doc = await req.payload.db.findOne(findOneArgs)
+    }
 
     if (!doc && !hasWherePolicy) throw new NotFound(t)
     if (!doc && hasWherePolicy) throw new Forbidden(t)
