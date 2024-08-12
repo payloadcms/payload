@@ -1,48 +1,9 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Payload } from 'payload'
+import type { Connect } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { drizzle } from 'drizzle-orm/node-postgres'
-import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
-
-const connectWithReconnect = async function ({
-  adapter,
-  payload,
-  reconnect = false,
-}: {
-  adapter: PostgresAdapter
-  payload: Payload
-  reconnect?: boolean
-}) {
-  let result
-
-  if (!reconnect) {
-    result = await adapter.pool.connect()
-  } else {
-    try {
-      result = await adapter.pool.connect()
-    } catch (err) {
-      setTimeout(() => {
-        payload.logger.info('Reconnecting to postgres')
-        void connectWithReconnect({ adapter, payload, reconnect: true })
-      }, 1000)
-    }
-  }
-  if (!result) {
-    return
-  }
-  result.prependListener('error', (err) => {
-    try {
-      if (err.code === 'ECONNRESET') {
-        void connectWithReconnect({ adapter, payload, reconnect: true })
-      }
-    } catch (err) {
-      // swallow error
-    }
-  })
-}
 
 export const connect: Connect = async function connect(
   this: PostgresAdapter,

@@ -28,7 +28,13 @@ import type { Payload, PayloadRequest } from 'payload'
 import type { Pool, QueryResult } from 'pg'
 
 export type Args = {
-  getDrizzle: DrizzleAdapter['getDrizzle']
+  /**
+   * A function that connects to the database and returns the drizzle instance
+   */
+  getDrizzle: (args: {
+    logger: DrizzleConfig['logger']
+    schema: Record<string, unknown>
+  }) => Promise<PostgresDB | TransactionPg>
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -132,6 +138,13 @@ export type PostgresAdapter = {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  /**
+   * A function that connects to the database and returns the drizzle instance
+   */
+  getDrizzle: (args: {
+    logger: DrizzleConfig['logger']
+    schema: Record<string, unknown>
+  }) => Promise<PostgresDB | TransactionPg>
   idType: Args['idType']
   initializing: Promise<void>
   insert: Insert

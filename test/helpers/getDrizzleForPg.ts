@@ -1,9 +1,9 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 
-export const getDrizzlePg: DrizzleAdapter['getDrizzle'] = async (args) => {
+export const getDrizzlePg: PostgresAdapter['getDrizzle'] = async (args) => {
   const poolConfig: pg.PoolConfig = {
     connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
   }
