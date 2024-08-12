@@ -34,7 +34,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         description,
         editorOptions = {},
         language = 'javascript',
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       },
@@ -42,8 +42,12 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       required,
     },
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
+
     validate,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
     (value, options) => {

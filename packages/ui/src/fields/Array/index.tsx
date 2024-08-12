@@ -42,7 +42,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         components: { RowLabel },
         description,
         isSortable = true,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
       },
       fields,
       label,
@@ -53,8 +53,11 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     },
     forceRender = false,
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
     indexPath,

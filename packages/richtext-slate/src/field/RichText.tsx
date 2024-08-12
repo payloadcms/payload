@@ -61,7 +61,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         className,
         components: { Description, Error, Label },
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       },
@@ -71,8 +71,11 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     labelProps,
     leaves,
     plugins,
+    readOnly: readOnlyFromTopLevelProps,
     validate = richTextValidate,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
   const editorRef = useRef(null)

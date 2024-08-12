@@ -25,7 +25,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       name,
       _path: pathFromProps,
       admin: {
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
 
         className,
         description,
@@ -37,8 +37,10 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       required,
     } = {} as EmailFieldProps['field'],
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 

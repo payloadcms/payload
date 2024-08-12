@@ -31,7 +31,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         className,
         description,
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         step = 1,
         style,
         width,
@@ -45,8 +45,10 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     },
     labelProps,
     onChange: onChangeFromProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 

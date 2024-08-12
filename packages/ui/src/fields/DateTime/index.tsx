@@ -32,7 +32,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         date: datePickerProps,
         description,
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       },
@@ -40,8 +40,10 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       required,
     },
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 

@@ -34,7 +34,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
         description,
         isClearable = true,
         isSortable = true,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as SelectFieldProps['field']['admin'],
@@ -44,8 +44,10 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
       required,
     },
     onChange: onChangeFromProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 

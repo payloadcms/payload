@@ -30,7 +30,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         className,
         description,
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         step,
         style,
         width,
@@ -39,8 +39,10 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
       required,
     },
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 

@@ -42,7 +42,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, isSortable = true, readOnly: readOnlyFromProps },
+      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin },
       blocks,
       label,
       labels: labelsFromProps,
@@ -53,8 +53,10 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     },
     forceRender = false,
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = minRowsProp ?? required ? 1 : 0

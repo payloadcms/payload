@@ -27,7 +27,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
         className,
         description,
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         rtl,
         style,
         width,
@@ -42,8 +42,10 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
       required,
     },
     inputRef,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 

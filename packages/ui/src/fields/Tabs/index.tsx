@@ -27,10 +27,11 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, readOnly: readOnlyFromProps },
+      admin: { className, readOnly: readOnlyFromAdmin },
       tabs = [],
     },
     forceRender = false,
+    readOnly: readOnlyFromTopLevelProps,
   } = props
 
   const {
@@ -40,6 +41,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const path = pathFromContext ?? pathFromProps

@@ -46,7 +46,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         className,
         description,
         isSortable = true,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         sortOptions,
         style,
         width,
@@ -57,8 +57,10 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       required,
     },
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { config } = useConfig()
 

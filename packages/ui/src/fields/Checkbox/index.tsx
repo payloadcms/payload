@@ -35,7 +35,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
       admin: {
         className,
         description,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       } = {} as CheckboxFieldProps['field']['admin'],
@@ -45,8 +45,10 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 

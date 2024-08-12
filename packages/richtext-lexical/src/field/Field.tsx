@@ -37,7 +37,7 @@ const RichTextComponent: React.FC<
       admin: {
         className,
         components: { Description, Error, Label },
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         style,
         width,
       },
@@ -46,8 +46,10 @@ const RichTextComponent: React.FC<
     },
     field,
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {

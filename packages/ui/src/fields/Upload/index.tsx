@@ -22,13 +22,15 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, readOnly: readOnlyFromProps, style, width },
+      admin: { className, readOnly: readOnlyFromAdmin, style, width },
       label,
       relationTo,
       required,
     },
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
     config: {

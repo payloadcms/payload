@@ -27,7 +27,7 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
         className,
         description,
         placeholder,
-        readOnly: readOnlyFromProps,
+        readOnly: readOnlyFromAdmin,
         rows,
         rtl,
         style,
@@ -40,8 +40,10 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       required,
     },
     locale,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 

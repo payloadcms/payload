@@ -3,7 +3,6 @@
 import type { ClientField, FieldPermissions } from 'payload'
 
 import { HiddenField, useFieldComponents } from '@payloadcms/ui'
-import { deepCopyObjectComplex } from 'payload/shared'
 import React from 'react'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -14,6 +13,7 @@ type Props = {
   readonly fieldComponentProps?: {
     field: ClientField
     forceRender?: boolean
+    readOnly?: boolean
   }
   readonly indexPath?: string
   readonly isHidden?: boolean
@@ -53,14 +53,15 @@ export const RenderField: React.FC<Props> = ({
   }
 
   // `admin.readOnly` displays the value but prevents the field from being edited
-  let readOnly = fieldComponentProps?.field?.admin?.readOnly
+  fieldComponentProps.readOnly = fieldComponentProps?.field?.admin?.readOnly
 
   // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
-  if (readOnlyFromContext && readOnly !== false) readOnly = true
+  if (readOnlyFromContext && fieldComponentProps.readOnly !== false)
+    fieldComponentProps.readOnly = true
 
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {
-    readOnly = true
+    fieldComponentProps.readOnly = true
   }
 
   let RenderedField: React.ReactElement
@@ -73,23 +74,13 @@ export const RenderField: React.FC<Props> = ({
   ) {
     RenderedField = <HiddenField {...fieldComponentProps} />
   } else {
-    // TODO: We have to deepCopyObjectComplex (not deepCopySimple, as React components, richtext component map & other complex objects can be inside) the field prop to avoid mutating the readOnly prop of the original object
-    // TODO: We should find a better solution for this eventually, as deep copying objects is not performant
-    const deepCopiedFieldProp: ClientField = deepCopyObjectComplex(
-      fieldComponentProps?.field ?? {},
-    ) as ClientField
-    if (!deepCopiedFieldProp.admin) {
-      deepCopiedFieldProp.admin = {}
-    }
-    deepCopiedFieldProp.admin.readOnly = readOnly
-
     RenderedField = (
       <RenderComponent
         Component={fieldComponents?.[fieldComponentProps?.field?.type]}
         clientProps={{
-          ...fieldComponentProps,
-          field: deepCopiedFieldProp,
-          test: path,
+          field: fieldComponentProps.field,
+          forceRender: fieldComponentProps.forceRender,
+          readOnly: fieldComponentProps.readOnly,
         }}
         mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
       />
@@ -102,7 +93,7 @@ export const RenderField: React.FC<Props> = ({
       indexPath={indexPath}
       path={path}
       permissions={permissions}
-      readOnly={readOnly}
+      readOnly={fieldComponentProps.readOnly}
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
       type={fieldComponentProps?.field?.type}

@@ -17,6 +17,10 @@ export type FormFieldBase = {
   readonly forceRender?: boolean
   readonly labelProps?: LabelProps
   readonly locale?: Locale
+  /**
+   * forceRender is added by RenderField automatically. This should be used instead of field.admin.readOnly
+   */
+  readonly readOnly?: boolean
   readonly user?: User
   readonly validate?: Validate
 }

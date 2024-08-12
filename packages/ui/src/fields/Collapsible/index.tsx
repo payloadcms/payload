@@ -27,11 +27,14 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromProps },
+      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromAdmin },
       fields,
       label,
     },
+    readOnly: readOnlyFromTopLevelProps,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
     indexPath,

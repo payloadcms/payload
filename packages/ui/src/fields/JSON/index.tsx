@@ -25,14 +25,16 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, editorOptions, readOnly: readOnlyFromProps, style, width },
+      admin: { className, description, editorOptions, readOnly: readOnlyFromAdmin, style, width },
       jsonSchema,
       label,
       required,
     },
     labelProps,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
