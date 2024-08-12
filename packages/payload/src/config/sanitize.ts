@@ -62,7 +62,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         ...incomingConfig?.admin?.routes,
       },
     },
-    graphql: {
+    graphQL: {
       ...defaults.graphQL,
       ...incomingConfig?.graphQL,
     },
