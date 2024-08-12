@@ -1,12 +1,15 @@
 import type {
   DOMConversionMap,
   DOMExportOutput,
+  EditorConfig,
+  LexicalEditor,
   LexicalNode,
   NodeKey,
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
 import type React from 'react'
+import type { JSX } from 'react'
 
 import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
@@ -60,15 +63,19 @@ export class ServerInlineBlockNode extends DecoratorNode<React.ReactElement> {
   static isInline(): false {
     return false
   }
+
   canIndent() {
     return true
   }
-
   createDOM() {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
     return element
+  }
+
+  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return null
   }
 
   exportDOM(): DOMExportOutput {

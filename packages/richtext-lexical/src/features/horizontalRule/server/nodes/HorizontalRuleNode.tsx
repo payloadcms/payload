@@ -74,6 +74,10 @@ export class HorizontalRuleServerNode extends DecoratorNode<React.ReactElement> 
     return element
   }
 
+  decorate() {
+    return null
+  }
+
   /**
    * Opposite of importDOM, this function defines what happens when you copy an hr element from the lexical editor and paste it into another page.
    *

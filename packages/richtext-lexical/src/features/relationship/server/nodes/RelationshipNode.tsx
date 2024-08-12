@@ -3,12 +3,15 @@ import type {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
+  EditorConfig,
   ElementFormatType,
+  LexicalEditor,
   LexicalNode,
   NodeKey,
   Spread,
 } from 'lexical'
 import type { CollectionSlug } from 'payload'
+import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 
@@ -97,6 +100,10 @@ export class RelationshipServerNode extends DecoratorBlockNode {
 
   static isInline(): false {
     return false
+  }
+
+  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return null
   }
 
   exportDOM(): DOMExportOutput {
