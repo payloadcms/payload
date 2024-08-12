@@ -38,6 +38,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     value,
     width,
   } = props
+
   const { i18n } = useTranslation()
 
   return (

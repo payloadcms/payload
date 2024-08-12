@@ -17,7 +17,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 type Args = {
-  token: string
+  readonly token: string
 }
 
 const initialState: FormState = {
