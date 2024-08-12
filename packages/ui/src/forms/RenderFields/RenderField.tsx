@@ -3,6 +3,7 @@
 import type { ClientField, FieldPermissions } from 'payload'
 
 import { HiddenField, useFieldComponents } from '@payloadcms/ui'
+import { deepCopyObjectComplex } from 'payload/shared'
 import React from 'react'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
@@ -62,13 +63,37 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
+  let RenderedField: React.ReactElement
+
   // hide from admin if field is `admin.hidden: true`
   if (
     'admin' in fieldComponentProps.field &&
     'hidden' in fieldComponentProps.field.admin &&
     fieldComponentProps.field.admin.hidden
   ) {
-    return <HiddenField {...fieldComponentProps} />
+    RenderedField = <HiddenField {...fieldComponentProps} />
+  } else {
+    // TODO: We have to deepCopyObjectComplex (not deepCopySimple, as React components, richtext component map & other complex objects can be inside) the field prop to avoid mutating the readOnly prop of the original object
+    // TODO: We should find a better solution for this eventually, as deep copying objects is not performant
+    const deepCopiedFieldProp: ClientField = deepCopyObjectComplex(
+      fieldComponentProps?.field ?? {},
+    ) as ClientField
+    if (!deepCopiedFieldProp.admin) {
+      deepCopiedFieldProp.admin = {}
+    }
+    deepCopiedFieldProp.admin.readOnly = readOnly
+
+    RenderedField = (
+      <RenderComponent
+        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
+        clientProps={{
+          ...fieldComponentProps,
+          field: deepCopiedFieldProp,
+          test: path,
+        }}
+        mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
+      />
+    )
   }
 
   return (
@@ -82,20 +107,7 @@ export const RenderField: React.FC<Props> = ({
       siblingPermissions={siblingPermissions}
       type={fieldComponentProps?.field?.type}
     >
-      <RenderComponent
-        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
-        clientProps={{
-          ...fieldComponentProps,
-          fields: {
-            ...fieldComponentProps,
-            admin: {
-              ...(fieldComponentProps?.field?.admin || {}),
-              readOnly,
-            },
-          },
-        }}
-        mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
-      />
+      {RenderedField}
     </FieldPropsProvider>
   )
 }
