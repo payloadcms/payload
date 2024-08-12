@@ -65,6 +65,14 @@ export const createClientCollectionConfig = ({
     delete clientCollection.upload.adminThumbnail
     delete clientCollection.upload.externalFileHeaderFilter
     delete clientCollection.upload.withMetadata
+
+    if ('imageSizes' in clientCollection.upload && clientCollection.upload.imageSizes.length) {
+      clientCollection.upload.imageSizes = clientCollection.upload.imageSizes.map((size) => {
+        const sanitizedSize = { ...size }
+        if ('generateImageName' in sanitizedSize) delete sanitizedSize.generateImageName
+        return sanitizedSize
+      })
+    }
   }
 
   if ('auth' in clientCollection && typeof clientCollection.auth === 'object') {
