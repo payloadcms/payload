@@ -183,35 +183,6 @@ export async function writeImportMap({
     )
   }
 
-  const importMapFilePath = path.resolve(importMapFolderPath, fileName)
-
-  if (!force) {
-    // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
-    const currentImportMapImports = currentImportMap
-      .split('\n')
-      .filter((line) => line.startsWith('import'))
-    let hasAllImports = true
-    for (const { path, specifier } of Object.values(importMap)) {
-      let foundImport = false
-      for (const currentImportMapImport of currentImportMapImports) {
-        if (currentImportMapImport.includes(path) && currentImportMapImport.includes(specifier)) {
-          foundImport = true
-          break
-        }
-      }
-      if (!foundImport) {
-        hasAllImports = false
-        break
-      }
-    }
-
-    if (log && hasAllImports) {
-      console.log('No new imports found, skipping writing import map')
-      return
-    }
-  }
-
   const imports: string[] = []
   for (const [identifier, { path, specifier }] of Object.entries(importMap)) {
     imports.push(`import { ${specifier} as ${identifier} } from '${path}'`)
@@ -228,6 +199,20 @@ export const importMap = {
 ${mapKeys.join(',\n')}
 }
 `
+
+  const importMapFilePath = path.resolve(importMapFolderPath, fileName)
+
+  if (!force) {
+    // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
+    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
+
+    if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
+      if (log) {
+        console.log('No new imports found, skipping writing import map')
+      }
+      return
+    }
+  }
 
   if (log) {
     console.log('Writing import map to', importMapFilePath)
