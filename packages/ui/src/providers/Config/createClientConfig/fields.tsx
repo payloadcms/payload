@@ -190,7 +190,7 @@ export const createClientField = ({
             fields: block.fields,
             i18n,
             importMap,
-            parentPath: field._schemaPath,
+            parentPath: `${field._schemaPath}.${block.slug}`,
             payload,
           })
 
@@ -524,6 +524,7 @@ export const createClientFields = ({
         components: {
           Field: null,
         },
+        description: 'The unique identifier for this document',
         disableBulkEdit: true,
         hidden: true,
       },
