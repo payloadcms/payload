@@ -72,7 +72,13 @@ export const RenderField: React.FC<Props> = ({
     'hidden' in fieldComponentProps.field.admin &&
     fieldComponentProps.field.admin.hidden
   ) {
-    RenderedField = <HiddenField {...fieldComponentProps} />
+    RenderedField = (
+      <HiddenField
+        field={fieldComponentProps.field}
+        forceRender={fieldComponentProps.forceRender}
+        readOnly={fieldComponentProps.readOnly}
+      />
+    )
   } else {
     RenderedField = (
       <RenderComponent
