@@ -60,17 +60,9 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    if (!this.pool) {
-      this.pool = new pg.Pool(this.poolOptions)
-      await connectWithReconnect({ adapter: this, payload: this.payload })
-    }
-
     const logger = this.logger || false
-    if (this.getDrizzle) {
-      this.drizzle = await this.getDrizzle({ schema: this.schema })
-    } else {
-      this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
-    }
+
+    this.drizzle = await this.getDrizzle({ logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

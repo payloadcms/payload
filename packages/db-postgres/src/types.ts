@@ -25,15 +25,14 @@ import type {
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
-import type { Pool, PoolConfig, QueryResult } from 'pg'
+import type { Pool, QueryResult } from 'pg'
 
 export type Args = {
-  getDrizzle?: DrizzleAdapter['getDrizzle']
+  getDrizzle: DrizzleAdapter['getDrizzle']
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
-  pool: PoolConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -141,7 +140,6 @@ export type PostgresAdapter = {
   operators: Operators
   pgSchema?: Schema
   pool: Pool
-  poolOptions: Args['pool']
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -188,7 +186,6 @@ declare module 'payload' {
     logger: DrizzleConfig['logger']
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
-    poolOptions: Args['pool']
     prodMigrations?: {
       down: (args: MigrateDownArgs) => Promise<void>
       name: string
