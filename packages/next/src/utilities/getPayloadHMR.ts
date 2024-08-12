@@ -88,6 +88,9 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
       await cached.reload
     }
 
+    if (options?.importMap) {
+      cached.payload.importMap = options.importMap
+    }
     return cached.payload
   }
 
@@ -127,6 +130,10 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   } catch (e) {
     cached.promise = null
     throw e
+  }
+
+  if (options?.importMap) {
+    cached.payload.importMap = options.importMap
   }
 
   return cached.payload
