@@ -63,11 +63,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
       abortController: AbortController
       relationSlug: string
     }) => {
-      const collection = collections.find((coll) => coll.slug === relationSlug)
-      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-      const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
+      if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
+        const collection = collections.find((coll) => coll.slug === relationSlug)
+        const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+        const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-      if (partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
         const query: {
           depth?: number
           limit?: number

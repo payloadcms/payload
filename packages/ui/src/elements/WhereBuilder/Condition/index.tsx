@@ -39,14 +39,6 @@ export type Props = {
 
 import type { FieldTypes, MappedComponent, Operator } from 'payload'
 
-import {
-  DateCondition,
-  NumberCondition,
-  RelationshipCondition,
-  SelectCondition,
-  TextCondition,
-} from '@payloadcms/ui'
-
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -54,7 +46,11 @@ import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
+import { DateField } from './Date/index.js'
+import { NumberField } from './Number/index.js'
+import { RelationshipField } from './Relationship/index.js'
 import { Select } from './Select/index.js'
+import { Text } from './Text/index.js'
 import './index.scss'
 
 const baseClass = 'condition'
@@ -106,16 +102,16 @@ export const Condition: React.FC<Props> = (props) => {
   ])
 
   const booleanSelect =
-    ['exists'].includes(internalOperatorOption) || internalField?.props?.type === 'checkbox'
+    ['exists'].includes(internalOperatorOption) || internalField?.field?.type === 'checkbox'
 
   const valueFields: Partial<{
     [key in FieldTypes]: React.FC
   }> = {
-    date: DateCondition,
-    number: NumberCondition,
-    relationship: RelationshipCondition,
-    select: SelectCondition,
-    text: TextCondition,
+    date: DateField,
+    number: NumberField,
+    relationship: RelationshipField,
+    select: Select,
+    text: Text,
   }
 
   const ValueComponent: MappedComponent = booleanSelect
@@ -125,7 +121,7 @@ export const Condition: React.FC<Props> = (props) => {
       }
     : internalField.Filter || {
         type: 'client',
-        Component: valueFields?.[internalField?.props?.type] || TextCondition,
+        Component: valueFields?.[internalField?.field?.type] || Text,
       }
 
   let valueOptions
@@ -134,8 +130,8 @@ export const Condition: React.FC<Props> = (props) => {
       { label: t('general:true'), value: 'true' },
       { label: t('general:false'), value: 'false' },
     ]
-  } else if (internalField?.props && 'options' in internalField.props) {
-    valueOptions = internalField.props.options
+  } else if (internalField?.field && 'options' in internalField.field) {
+    valueOptions = internalField.field.options
   }
 
   return (
@@ -172,17 +168,14 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__value`}>
             <RenderComponent
               clientProps={{
-                ...internalField?.props,
+                ...internalField?.field,
                 disabled: !internalOperatorOption,
                 onChange: setInternalQueryValue,
                 operator: internalOperatorOption,
                 options: valueOptions,
                 relationTo:
-                  internalField?.props?.type === 'relationship' &&
-                  'cellComponentProps' in internalField.props &&
-                  typeof internalField.props.cellComponentProps === 'object' &&
-                  'relationTo' in internalField.props.cellComponentProps
-                    ? internalField.props.cellComponentProps?.relationTo
+                  internalField?.field?.type === 'relationship'
+                    ? internalField?.field?.relationTo
                     : undefined,
                 value: internalQueryValue ?? '',
               }}

@@ -15,12 +15,12 @@ export type WhereBuilderProps = {
 export type FieldCondition = {
   Filter: MappedComponent
   component?: string
+  field: ClientField
   label: string
   operators: {
     label: string
     value: Operator
   }[]
-  props: ClientField
   value: string
 }
 

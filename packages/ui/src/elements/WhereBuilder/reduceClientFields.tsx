@@ -155,11 +155,11 @@ export const reduceClientFields = ({
         label: formattedLabel,
         value: formattedValue,
         ...fieldTypes[field.type],
-        operators,
-        props: {
+        field: {
           ...field,
           ...(field?.admin?.components?.Cell || {}),
         },
+        operators,
       }
 
       reduced.push(formattedField)
