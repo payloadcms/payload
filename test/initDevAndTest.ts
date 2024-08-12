@@ -138,5 +138,5 @@ if (runImmediately === 'true') {
   const testSuiteArg = process.argv[3]
   const writeDBAdapter = process.argv[4]
   const skipGenImportMap = process.argv[5]
-  await initDevAndTest(testSuiteArg, writeDBAdapter, skipGenImportMap)
+  void initDevAndTest(testSuiteArg, writeDBAdapter, skipGenImportMap)
 }
