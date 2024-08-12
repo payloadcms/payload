@@ -76,11 +76,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     },
   }
 
-  incomingConfig = {
-    ...defaults,
-    ...incomingConfig,
-  }
-
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
   }
