@@ -1654,6 +1654,9 @@ importers:
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.118.0(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
       '@types/react':
         specifier: npm:types-react@19.0.0-rc.0
         version: /types-react@19.0.0-rc.0
@@ -1693,6 +1696,9 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../packages/payload
+      pg:
+        specifier: 8.11.3
+        version: 8.11.3
       qs-esm:
         specifier: 7.0.2
         version: 7.0.2

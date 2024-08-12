@@ -172,6 +172,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  getDrizzle?: (args: { schema: Record<string, unknown> }) => Promise<PostgresDB | TransactionPg>
   getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
   initializing: Promise<void>

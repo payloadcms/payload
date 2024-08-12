@@ -28,6 +28,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import type { Pool, PoolConfig, QueryResult } from 'pg'
 
 export type Args = {
+  getDrizzle?: DrizzleAdapter['getDrizzle']
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']

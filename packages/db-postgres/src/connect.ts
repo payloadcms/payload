@@ -66,7 +66,11 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
+    if (this.getDrizzle) {
+      this.drizzle = await this.getDrizzle({ schema: this.schema })
+    } else {
+      this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
+    }
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
