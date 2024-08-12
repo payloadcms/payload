@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-// import { slateEditor } from '@payloadcms/richtext-slate'
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug } from '../slugs.js'
@@ -40,15 +40,15 @@ export const Posts: CollectionConfig = {
               name: 'number',
               type: 'number',
             },
-            // {
-            //   name: 'richText',
-            //   type: 'richText',
-            //   editor: slateEditor({
-            //     admin: {
-            //       elements: ['relationship'],
-            //     },
-            //   }),
-            // },
+            {
+              name: 'richText',
+              type: 'richText',
+              editor: slateEditor({
+                admin: {
+                  elements: ['relationship'],
+                },
+              }),
+            },
             {
               name: 'demoUIField',
               type: 'ui',
