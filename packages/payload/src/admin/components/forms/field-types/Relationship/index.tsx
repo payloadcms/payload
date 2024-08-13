@@ -44,6 +44,7 @@ const Relationship: React.FC<Props> = (props) => {
       condition,
       description,
       isSortable = true,
+      placeholder,
       readOnly,
       sortOptions,
       style,
@@ -534,6 +535,7 @@ const Relationship: React.FC<Props> = (props) => {
               })
             }}
             options={options}
+            placeholder={placeholder}
             showError={showError}
             value={valueToRender ?? null}
           />

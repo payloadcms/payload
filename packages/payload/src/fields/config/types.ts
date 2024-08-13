@@ -508,6 +508,7 @@ type RelationshipAdmin = Admin & {
     Label?: React.ComponentType<LabelProps>
   }
   isSortable?: boolean
+  placeholder?: string
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
