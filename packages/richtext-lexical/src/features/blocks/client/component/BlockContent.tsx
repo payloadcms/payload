@@ -14,8 +14,7 @@ import {
   useFormSubmitted,
   useTranslation,
 } from '@payloadcms/ui'
-import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-
+import { dequal } from 'dequal/lite'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
@@ -36,13 +35,66 @@ type Props = {
   schemaPath: string
 }
 
+// Recursively remove all undefined values from even being present in formData, as they will
+// cause isDeepEqual to return false if, for example, formData has a key that fields.data
+// does not have, even if it's undefined.
+// Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
+// Inside of fields.data however, that sub-blocks blockName property does not exist at all.
+function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
+  for (const key in obj) {
+    const value = obj[key]
+    if (Array.isArray(value) && !value?.length) {
+      delete obj[key]
+    } else if (value && typeof value === 'object') {
+      removeUndefinedAndNullAndEmptyArraysRecursively(value)
+    } else if (value === undefined || value === null) {
+      delete obj[key]
+    }
+  }
+}
+
+const has = Object.prototype.hasOwnProperty
+
+// Same as dequal/lite, but ignores undefined, null and empty arrays.
+// Why undefineds are introduced:
+// Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
+// Inside of fields.data however, that sub-blocks blockName property does not exist at all.
+export function customDequal(foo, bar) {
+  let ctor, len
+  if (foo === bar) return true
+
+  if (foo && bar && (ctor = foo.constructor) === bar.constructor) {
+    if (ctor === Date) return foo.getTime() === bar.getTime()
+    if (ctor === RegExp) return foo.toString() === bar.toString()
+
+    if (ctor === Array) {
+      if ((len = foo.length) === bar.length) {
+        while (len-- && customDequal(foo[len], bar[len]));
+      }
+      return len === -1
+    }
+
+    if (!ctor || typeof foo === 'object') {
+      len = 0
+      for (ctor in foo) {
+        if (has.call(foo, ctor) && ++len && !has.call(bar, ctor)) return false
+        if (!(ctor in bar) || !customDequal(foo[ctor], bar[ctor])) return false
+      }
+      return Object.keys(bar).length === len
+    }
+  }
+
+  return foo !== foo && bar !== bar
+}
+
 /**
  * The actual content of the Block. This should be INSIDE a Form component,
  * scoped to the block. All format operations in here are thus scoped to the block's form, and
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, clientBlock, field, formData, formSchema, nodeKey, schemaPath } = props
+  const { baseClass, clientBlock, field, formSchema, nodeKey, schemaPath } = props
+  let { formData } = props
 
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
@@ -86,33 +138,12 @@ export const BlockContent: React.FC<Props> = (props) => {
       newFormData,
     }: {
       fullFieldsWithValues: FormState
-      newFormData: Data
+      newFormData: BlockFields
     }) => {
-      newFormData = {
-        ...newFormData,
-        id: formData.id,
-        blockType: formData.blockType,
-      }
+      newFormData.id = formData.id
+      newFormData.blockType = formData.blockType
 
-      // Recursively remove all undefined values from even being present in formData, as they will
-      // cause isDeepEqual to return false if, for example, formData has a key that fields.data
-      // does not have, even if it's undefined.
-      // Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
-      // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
-      function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
-        for (const key in obj) {
-          const value = obj[key]
-          if (Array.isArray(value) && !value?.length) {
-            delete obj[key]
-          } else if (value && typeof value === 'object') {
-            removeUndefinedAndNullAndEmptyArraysRecursively(value)
-          } else if (value === undefined || value === null) {
-            delete obj[key]
-          }
-        }
-      }
       removeUndefinedAndNullAndEmptyArraysRecursively(newFormData)
-
       removeUndefinedAndNullAndEmptyArraysRecursively(formData)
 
       // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
@@ -126,7 +157,8 @@ export const BlockContent: React.FC<Props> = (props) => {
           editor.update(() => {
             const node: BlockNode = $getNodeByKey(nodeKey)
             if (node) {
-              node.setFields(newFormData as BlockFields)
+              formData = newFormData
+              node.setFields(newFormData)
             }
           })
         }, 0)

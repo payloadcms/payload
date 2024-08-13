@@ -71,15 +71,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
       })
 
       if (state) {
-        setInitialState({
-          ...state,
-          blockName: {
-            initialValue: '',
-            passesCondition: true,
-            valid: true,
-            value: formData.blockName,
-          },
-        })
+        state.blockName = {
+          initialValue: '',
+          passesCondition: true,
+          valid: true,
+          value: formData.blockName,
+        }
+
+        setInitialState(state)
       }
     }
 
@@ -101,15 +100,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
         serverURL: config.serverURL,
       })
 
-      return {
-        ...formState,
-        blockName: {
-          initialValue: '',
-          passesCondition: true,
-          valid: true,
-          value: formData.blockName,
-        },
+      formState.blockName = {
+        initialValue: '',
+        passesCondition: true,
+        valid: true,
+        value: formData.blockName,
       }
+
+      return formState
     },
 
     [config.routes.api, config.serverURL, id, schemaFieldsPath, formData.blockName],
@@ -180,7 +178,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     onChange,
     submitted,
     parentLexicalRichTextField,
-    formData,
     nodeKey,
     path,
     schemaFieldsPath,
