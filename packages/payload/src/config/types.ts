@@ -377,21 +377,21 @@ export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
 
 export type EditViewConfig =
   | {
+      Component: EditViewComponent
+      path?: string
+    }
+  | {
+      actions?: CustomComponent[]
+    }
+  | {
+      path?: string
       /**
        * Add a new Edit view to the admin panel
        * i.e. you can render a custom view that has no tab, if desired
        * Or override a specific properties of an existing one
        * i.e. you can customize the `Default` view tab label, if desired
        */
-      Tab?: DocumentTabConfig
-      path?: string
-    }
-  | {
-      Component: EditViewComponent
-      path?: string
-    }
-  | {
-      actions?: CustomComponent[]
+      tab?: DocumentTabConfig
     }
 
 export type ServerProps = {
@@ -930,7 +930,6 @@ export type EditConfig = {
   LivePreview?: Partial<EditViewConfig>
   Version?: Partial<EditViewConfig>
   Versions?: Partial<EditViewConfig>
-
   // TODO: uncomment these as they are built
   // References?: EditView
   // Relationships?: EditView

@@ -58,8 +58,8 @@ export type InitPageResult = {
 }
 
 export type ServerSideEditViewProps = {
-  initPageResult: InitPageResult
-  params: { [key: string]: string | string[] | undefined }
-  routeSegments: string[]
-  searchParams: { [key: string]: string | string[] | undefined }
+  readonly initPageResult: InitPageResult
+  readonly params: { [key: string]: string | string[] | undefined }
+  readonly routeSegments: string[]
+  readonly searchParams: { [key: string]: string | string[] | undefined }
 }

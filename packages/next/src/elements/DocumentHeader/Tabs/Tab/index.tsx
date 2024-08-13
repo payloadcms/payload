@@ -9,7 +9,7 @@ import './index.scss'
 export const baseClass = 'doc-tab'
 
 export const DocumentTab: React.FC<
-  { Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
+  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
 > = (props) => {
   const {
     Pill,

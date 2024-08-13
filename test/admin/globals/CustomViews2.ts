@@ -13,7 +13,7 @@ export const CustomGlobalViews2: GlobalConfig = {
           },
           MyCustomView: {
             Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
-            Tab: {
+            tab: {
               href: '/custom-tab-view',
               label: 'Custom',
             },
@@ -21,8 +21,8 @@ export const CustomGlobalViews2: GlobalConfig = {
           },
           MyCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
-            Tab: {
-              TabComponent: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
             },
             path: '/custom-tab-component',
           },

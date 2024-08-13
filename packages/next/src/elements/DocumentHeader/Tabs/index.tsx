@@ -48,10 +48,9 @@ export const DocumentTabs: React.FC<{
               })
               ?.map(([name, tab], index) => {
                 const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
-                const tabConfig = typeof tabFromConfig === 'object' ? tabFromConfig : undefined
+                const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
 
-                const { condition } = tabConfig || {}
+                const { condition } = tabFromConfig || {}
 
                 const meetsCondition =
                   !condition ||
@@ -74,16 +73,10 @@ export const DocumentTabs: React.FC<{
                 return null
               })}
             {customViews?.map((CustomView, index) => {
-              if ('Tab' in CustomView) {
-                const { Tab, path } = CustomView
+              if ('tab' in CustomView) {
+                const { path, tab } = CustomView
 
-                if (typeof Tab === 'object' && !isPlainObject(Tab)) {
-                  throw new Error(
-                    `Custom 'Tab' Component for path: "${path}" must be a React Server Component. To use client-side functionality, render your Client Component within a Server Component and pass it only props that are serializable. More info: https://react.dev/reference/react/use-server#serializable-parameters-and-return-values`,
-                  )
-                }
-
-                if (typeof Tab === 'function') {
+                if (tab.Component) {
                   const createMappedComponent = getCreateMappedComponent({
                     importMap: payload.importMap,
                     serverProps: {
@@ -96,7 +89,13 @@ export const DocumentTabs: React.FC<{
                     },
                   })
 
-                  const mappedTab = createMappedComponent(Tab, undefined, undefined, 'Tab')
+                  const mappedTab = createMappedComponent(
+                    tab.Component,
+                    undefined,
+                    undefined,
+                    'tab.Component',
+                  )
+
                   return (
                     <RenderComponent
                       clientProps={{
@@ -114,7 +113,7 @@ export const DocumentTabs: React.FC<{
                     key={`tab-custom-${index}`}
                     {...{
                       ...props,
-                      ...Tab,
+                      ...tab,
                     }}
                   />
                 )

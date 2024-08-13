@@ -8,7 +8,7 @@ import React from 'react'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const CustomTabComponentClient: React.FC<{
-  path: string
+  readonly path: string
 }> = ({ path }) => {
   const {
     config: {

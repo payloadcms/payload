@@ -7,12 +7,12 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Payload } from '../../index.js'
 
 export type DocumentTabProps = {
-  apiURL?: string
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-  i18n: I18n
-  payload: Payload
-  permissions: Permissions
+  readonly apiURL?: string
+  readonly collectionConfig?: SanitizedCollectionConfig
+  readonly globalConfig?: SanitizedGlobalConfig
+  readonly i18n: I18n
+  readonly payload: Payload
+  readonly permissions: Permissions
 }
 
 export type DocumentTabCondition = (args: {
@@ -25,10 +25,10 @@ export type DocumentTabCondition = (args: {
 // Everything is optional because we merge in the defaults
 // i.e. the config may override the `Default` view with a `label` but not an `href`
 export type DocumentTabConfig = {
-  Pill?: PayloadComponent
-  TabComponent?: DocumentTabComponent
-  condition?: DocumentTabCondition
-  href?:
+  readonly Component?: DocumentTabComponent
+  readonly Pill?: PayloadComponent
+  readonly condition?: DocumentTabCondition
+  readonly href?:
     | ((args: {
         apiURL: string
         collection: SanitizedCollectionConfig
@@ -37,9 +37,9 @@ export type DocumentTabConfig = {
         routes: SanitizedConfig['routes']
       }) => string)
     | string
-  isActive?: ((args: { href: string }) => boolean) | boolean
-  label?: ((args: { t: (key: string) => string }) => string) | string
-  newTab?: boolean
+  readonly isActive?: ((args: { href: string }) => boolean) | boolean
+  readonly label?: ((args: { t: (key: string) => string }) => string) | string
+  readonly newTab?: boolean
 }
 
 export type DocumentTabComponent = PayloadComponent<{
