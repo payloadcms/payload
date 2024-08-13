@@ -152,6 +152,7 @@
     "sort-package-json": "^2.10.0",
     "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
+    "tsx": "4.17.0",
     "turbo": "^1.13.3",
     "typescript": "5.5.4"
   },
