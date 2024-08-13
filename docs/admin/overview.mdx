@@ -191,6 +191,55 @@ When constructing the `ClientConfig`, Payload uses the component paths as keys t
 
 Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map.
 
+### Component paths in external packages
+
+Component paths are resolved relative to your project's base directory, which is either your current working directory or the directory specified in `config.admin.baseDir`. When using custom components from external packages, you can't use relative paths. Instead, use an import path that's accessible as if you were writing an import statement in your project's base directory.
+
+For example, to export a field with a custom component from an external package named `my-external-package`:
+
+```ts
+import type { Field } from 'payload'
+export const MyCustomField: Field = {
+  type: 'text',
+  name: 'MyField',
+  admin: {
+    components: {
+      Field: 'my-external-package/client#MyFieldComponent'
+    }
+  }
+}
+```
+
+Despite `MyFieldComponent` living in `src/components/MyFieldComponent.tsx` in `my-external-package`, this will not be accessible from the consuming project. Instead, we recommend exporting all custom components from one file in the external package. For example, you can define a `src/client.ts file in `my-external-package`:
+
+```ts
+'use client'
+export { MyFieldComponent } from './components/MyFieldComponent'
+```
+
+Then, update the package.json of `my-external-package:
+
+```json
+{
+...
+  "exports": {
+    "./client": {
+        "import": "./dist/client.js",
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.js"
+    }
+  }
+}
+```
+
+This setup allows you to specify the component path as `my-external-package/client#MyFieldComponent` as seen above. The import map will generate:
+
+```ts
+import { MyFieldComponent } from 'my-external-package/client'
+```
+
+which is a valid way to access MyFieldComponent that can be resolved by the consuming project.
+
 ## Admin Options
 
 All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
