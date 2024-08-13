@@ -96,6 +96,36 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'filename-compound-index',
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+          admin: {
+            description: 'Alt text to be used for compound index',
+          },
+        },
+      ],
+      upload: {
+        filenameCompoundIndex: ['filename', 'alt'],
+        imageSizes: [
+          {
+            name: 'small',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
+          },
+          {
+            name: 'large',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
+          },
+        ],
+        mimeTypes: ['image/*'],
+      },
+    },
+    {
       slug: 'no-image-sizes',
       fields: [],
       upload: {
@@ -786,6 +816,14 @@ export default buildConfigWithDefaults({
         imageWithPreview3: uploadedImageWithoutPreview,
         imageWithoutPreview3: uploadedImageWithoutPreview,
       },
+    })
+
+    await payload.create({
+      collection: 'filename-compound-index',
+      data: {
+        alt: 'alt-1',
+      },
+      file: imageFile,
     })
   },
   serverURL: undefined,
