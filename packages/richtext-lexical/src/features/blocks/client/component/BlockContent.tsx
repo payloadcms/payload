@@ -1,4 +1,4 @@
-import type { ClientBlock, ClientField, CollapsedPreferences, Data, FormState } from 'payload'
+import type { ClientBlock, ClientField, CollapsedPreferences, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
@@ -51,40 +51,6 @@ function removeUndefinedAndNullAndEmptyArraysRecursively(obj: object) {
       delete obj[key]
     }
   }
-}
-
-const has = Object.prototype.hasOwnProperty
-
-// Same as dequal/lite, but ignores undefined, null and empty arrays.
-// Why undefineds are introduced:
-// Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
-// Inside of fields.data however, that sub-blocks blockName property does not exist at all.
-export function customDequal(foo, bar) {
-  let ctor, len
-  if (foo === bar) return true
-
-  if (foo && bar && (ctor = foo.constructor) === bar.constructor) {
-    if (ctor === Date) return foo.getTime() === bar.getTime()
-    if (ctor === RegExp) return foo.toString() === bar.toString()
-
-    if (ctor === Array) {
-      if ((len = foo.length) === bar.length) {
-        while (len-- && customDequal(foo[len], bar[len]));
-      }
-      return len === -1
-    }
-
-    if (!ctor || typeof foo === 'object') {
-      len = 0
-      for (ctor in foo) {
-        if (has.call(foo, ctor) && ++len && !has.call(bar, ctor)) return false
-        if (!(ctor in bar) || !customDequal(foo[ctor], bar[ctor])) return false
-      }
-      return Object.keys(bar).length === len
-    }
-  }
-
-  return foo !== foo && bar !== bar
 }
 
 /**
