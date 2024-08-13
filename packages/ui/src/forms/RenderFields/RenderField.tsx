@@ -66,6 +66,10 @@ export const RenderField: React.FC<Props> = ({
 
   let RenderedField: React.ReactElement
 
+  if (fieldComponentProps?.field?.admin?.components?.Field === null) {
+    return null
+  }
+
   // hide from admin if field is `admin.hidden: true`
   if (
     'admin' in fieldComponentProps.field &&
