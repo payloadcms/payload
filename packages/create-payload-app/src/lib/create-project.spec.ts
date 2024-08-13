@@ -32,7 +32,7 @@ describe('createProject', () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank-3.0',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
@@ -64,8 +64,8 @@ describe('createProject', () => {
       const templates = getValidTemplates()
 
       it.each([
-        ['blank-3.0', 'mongodb'],
-        ['blank-3.0', 'postgres'],
+        ['blank', 'mongodb'],
+        ['blank', 'postgres'],
 
         // TODO: Re-enable these once 3.0 is stable and templates updated
         // ['website', 'mongodb'],
