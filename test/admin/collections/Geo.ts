@@ -11,7 +11,7 @@ export const Geo: CollectionConfig = {
           api: {
             actions: ['/components/CollectionAPIButton/index.js#CollectionAPIButton'],
           },
-          Default: {
+          default: {
             actions: ['/components/CollectionEditButton/index.js#CollectionEditButton'],
           },
         },
