@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   google-cloud-storage:
     image: fsouza/fake-gcs-server

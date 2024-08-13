@@ -1,4 +1,3 @@
-version: '3.2'
 services:
   localstack:
     image: localstack/localstack:latest
