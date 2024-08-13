@@ -565,13 +565,13 @@ describe('admin1', () => {
       const prevSibling = await input.evaluateHandle((el) => {
         return el.previousElementSibling
       })
-      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
       expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
-      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
 

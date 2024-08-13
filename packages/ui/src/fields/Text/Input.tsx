@@ -94,20 +94,18 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             value={valueToRender}
           />
         ) : (
-          <div>
-            <input
-              data-rtl={rtl}
-              disabled={readOnly}
-              id={`field-${path?.replace(/\./g, '__')}`}
-              name={path}
-              onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
-              onKeyDown={onKeyDown}
-              placeholder={getTranslation(placeholder, i18n)}
-              ref={inputRef}
-              type="text"
-              value={value || ''}
-            />
-          </div>
+          <input
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path?.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onKeyDown={onKeyDown}
+            placeholder={getTranslation(placeholder, i18n)}
+            ref={inputRef}
+            type="text"
+            value={value || ''}
+          />
         )}
         <RenderComponent mappedComponent={afterInput} />
         <FieldDescription
