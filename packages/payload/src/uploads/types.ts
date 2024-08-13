@@ -119,6 +119,10 @@ export type UploadConfig = {
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
+   * Field slugs to use for a compount index instead of the default filename index.
+   */
+  filenameCompoundIndex?: string[]
+  /**
    * Require files to be uploaded when creating a document.
    * @default true
    */

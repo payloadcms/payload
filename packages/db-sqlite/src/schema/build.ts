@@ -40,6 +40,10 @@ export type RelationMap = Map<string, { localized: boolean; target: string; type
 type Args = {
   adapter: SQLiteAdapter
   baseColumns?: Record<string, SQLiteColumnBuilder>
+  /**
+   * After table is created, run these functions to add extra config to the table
+   * ie. indexes, multiple columns, etc
+   */
   baseExtraConfig?: BaseExtraConfig
   buildNumbers?: boolean
   buildRelationships?: boolean
