@@ -120,7 +120,7 @@ export const APIViewClient: React.FC = () => {
       />
       <SetViewActions
         actions={
-          (collectionClientConfig || globalClientConfig)?.admin?.components?.views?.Edit?.API
+          (collectionClientConfig || globalClientConfig)?.admin?.components?.views?.edit?.api
             ?.actions
         }
       />

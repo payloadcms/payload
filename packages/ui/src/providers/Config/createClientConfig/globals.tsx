@@ -122,47 +122,47 @@ export const createClientGlobalConfig = ({
       'admin' in global &&
       'components' in global.admin &&
       'views' in global.admin.components &&
-      'Edit' in global.admin.components.views &&
-      'Default' in global.admin.components.views.Edit
+      'edit' in global.admin.components.views &&
+      'default' in global.admin.components.views.edit
 
-    if (!clientGlobal.admin.components.views.Edit) {
-      clientGlobal.admin.components.views.Edit =
-        {} as ClientGlobalConfig['admin']['components']['views']['Edit']
+    if (!clientGlobal.admin.components.views.edit) {
+      clientGlobal.admin.components.views.edit =
+        {} as ClientGlobalConfig['admin']['components']['views']['edit']
     }
 
-    clientGlobal.admin.components.views.Edit.Default = {
+    clientGlobal.admin.components.views.edit.default = {
       Component: createMappedComponent(
         hasEditView &&
-          'Component' in global.admin.components.views.Edit.Default &&
-          global.admin.components.views.Edit.Default.Component,
+          'Component' in global.admin.components.views.edit.default &&
+          global.admin.components.views.edit.default.Component,
         {
           globalSlug: global.slug,
         },
         DefaultEditView,
-        'global.admin.components.views.Edit.Default',
+        'global.admin.components.views.edit.default',
       ),
     }
 
-    if (global?.admin?.components?.views?.Edit) {
-      for (const key in global.admin.components.views.Edit) {
-        const view: EditViewConfig = global.admin.components.views.Edit[key]
-        if (!clientGlobal.admin.components.views.Edit[key]) {
-          clientGlobal.admin.components.views.Edit[key] = {} as MappedView
+    if (global?.admin?.components?.views?.edit) {
+      for (const key in global.admin.components.views.edit) {
+        const view: EditViewConfig = global.admin.components.views.edit[key]
+        if (!clientGlobal.admin.components.views.edit[key]) {
+          clientGlobal.admin.components.views.edit[key] = {} as MappedView
         }
 
-        if ('Component' in view && key !== 'Default') {
-          clientGlobal.admin.components.views.Edit[key].Component = createMappedComponent(
+        if ('Component' in view && key !== 'default') {
+          clientGlobal.admin.components.views.edit[key].Component = createMappedComponent(
             view.Component,
             {
               globalSlug: global.slug,
             },
             undefined,
-            'global.admin.components.views.Edit.key.Component',
+            'global.admin.components.views.edit.key.Component',
           )
         }
 
         if ('actions' in view && view.actions?.length) {
-          clientGlobal.admin.components.views.Edit[key].actions = view.actions.map((Component) =>
+          clientGlobal.admin.components.views.edit[key].actions = view.actions.map((Component) =>
             createMappedComponent(
               Component,
               undefined,

@@ -239,7 +239,7 @@ export const LivePreviewClient: React.FC<{
     <Fragment>
       <SetViewActions
         actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.LivePreview?.actions
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.livePreview?.actions
         }
       />
       <LivePreviewProvider

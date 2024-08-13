@@ -11,8 +11,8 @@ export const Footer: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          LivePreview: {
+        edit: {
+          livePreview: {
             actions: ['/components/GlobalLivePreviewButton/index.js#GlobalLivePreviewButton'],
           },
         },

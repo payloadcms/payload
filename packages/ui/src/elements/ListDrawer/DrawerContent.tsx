@@ -80,7 +80,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
   )
 
-  const List = selectedCollectionConfig?.admin?.components.views.List.Component
+  const List = selectedCollectionConfig?.admin?.components.views.list.Component
 
   const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig

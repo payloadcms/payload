@@ -7,11 +7,11 @@ export const CustomGlobalViews2: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          Default: {
+        edit: {
+          default: {
             Component: '/components/views/CustomEditDefault/index.js#CustomDefaultEditView',
           },
-          MyCustomView: {
+          myCustomView: {
             Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
             tab: {
               href: '/custom-tab-view',
@@ -19,14 +19,14 @@ export const CustomGlobalViews2: GlobalConfig = {
             },
             path: '/custom-tab-view',
           },
-          MyCustomViewWithCustomTab: {
+          myCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
             tab: {
               Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
             },
             path: '/custom-tab-component',
           },
-          Versions: {
+          versions: {
             Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
           },
         },

@@ -386,7 +386,7 @@ export type EditViewConfig =
   | {
       path?: string
       /**
-       * Add a new Edit view to the admin panel
+       * Add a new Edit View to the admin panel
        * i.e. you can render a custom view that has no tab, if desired
        * Or override a specific properties of an existing one
        * i.e. you can customize the `Default` view tab label, if desired
@@ -916,23 +916,23 @@ export type EditConfig = {
   [key: string]: Partial<EditViewConfig>
   /**
    * Replace or modify individual nested routes, or add new ones:
-   * + `Default` - `/admin/collections/:collection/:id`
-   * + `API` - `/admin/collections/:collection/:id/api`
-   * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-   * + `References` - `/admin/collections/:collection/:id/references`
-   * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `Versions` - `/admin/collections/:collection/:id/versions`
-   * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `CustomView` - `/admin/collections/:collection/:id/:path`
+   * + `default` - `/admin/collections/:collection/:id`
+   * + `api` - `/admin/collections/:collection/:id/api`
+   * + `livePreview` - `/admin/collections/:collection/:id/preview`
+   * + `references` - `/admin/collections/:collection/:id/references`
+   * + `relationships` - `/admin/collections/:collection/:id/relationships`
+   * + `versions` - `/admin/collections/:collection/:id/versions`
+   * + `version` - `/admin/collections/:collection/:id/versions/:version`
+   * + `customView` - `/admin/collections/:collection/:id/:path`
    */
-  API?: Partial<EditViewConfig>
-  Default?: Partial<EditViewConfig>
-  LivePreview?: Partial<EditViewConfig>
-  Version?: Partial<EditViewConfig>
-  Versions?: Partial<EditViewConfig>
+  api?: Partial<EditViewConfig>
+  default?: Partial<EditViewConfig>
+  livePreview?: Partial<EditViewConfig>
+  version?: Partial<EditViewConfig>
+  versions?: Partial<EditViewConfig>
   // TODO: uncomment these as they are built
-  // References?: EditView
-  // Relationships?: EditView
+  // references?: EditView
+  // relationships?: EditView
 }
 
 export type EntityDescriptionComponent = CustomComponent

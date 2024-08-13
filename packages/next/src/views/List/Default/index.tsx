@@ -57,7 +57,7 @@ export const DefaultListView: React.FC = () => {
         beforeList,
         beforeListTable,
         views: {
-          List: { actions },
+          list: { actions },
         },
       },
     },

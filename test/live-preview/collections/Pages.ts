@@ -23,8 +23,8 @@ export const Pages: CollectionConfig = {
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     components: {
       views: {
-        Edit: {
-          LivePreview: {
+        edit: {
+          livePreview: {
             actions: [
               '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
             ],

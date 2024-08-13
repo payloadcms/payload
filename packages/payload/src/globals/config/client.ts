@@ -23,13 +23,13 @@ export type ClientGlobalConfig = {
         SaveDraftButton: MappedComponent
       }
       views: {
-        Edit: {
+        edit: {
           [key: string]: MappedView
-          API: MappedView
-          Default: MappedView
-          LivePreview: MappedView
-          Version: MappedView
-          Versions: MappedView
+          api: MappedView
+          default: MappedView
+          livePreview: MappedView
+          version: MappedView
+          versions: MappedView
         }
       }
     }

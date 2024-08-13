@@ -80,7 +80,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     <main className={baseClass}>
       <SetViewActions
         actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Version?.actions
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.version?.actions
         }
       />
       <SetStepNav

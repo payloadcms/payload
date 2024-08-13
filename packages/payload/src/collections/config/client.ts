@@ -30,15 +30,15 @@ export type ClientCollectionConfig = {
         Upload: MappedComponent
       }
       views: {
-        Edit: {
+        edit: {
           [key: string]: MappedView
-          API: MappedView
-          Default: MappedView
-          LivePreview: MappedView
-          Version: MappedView
-          Versions: MappedView
+          api: MappedView
+          default: MappedView
+          livePreview: MappedView
+          version: MappedView
+          versions: MappedView
         }
-        List: {
+        list: {
           Component: MappedComponent
           actions: MappedComponent[]
         }

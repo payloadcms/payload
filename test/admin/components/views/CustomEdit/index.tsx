@@ -47,7 +47,7 @@ export const CustomEditView: PayloadServerReactComponent<EditViewComponent> = ({
       >
         <h1>Custom Edit View</h1>
         <p>This custom edit view was added through the following Payload config:</p>
-        <code>components.views.Edit</code>
+        <code>components.views.edit</code>
         <p>
           {'This takes precedence over the default edit view, '}
           <b>as well as all nested views like versions.</b>

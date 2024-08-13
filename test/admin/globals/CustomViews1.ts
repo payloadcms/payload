@@ -7,8 +7,8 @@ export const CustomGlobalViews1: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          Default: {
+        edit: {
+          default: {
             Component: '/components/views/CustomEdit/index.js#CustomEditView',
           },
         },

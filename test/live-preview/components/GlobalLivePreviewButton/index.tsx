@@ -5,7 +5,7 @@ import React from 'react'
 const baseClass = 'global-live-preview-button'
 
 export const GlobalLivePreviewButton: PayloadServerReactComponent<
-  SanitizedGlobalConfig['admin']['components']['views']['Edit']['LivePreview']
+  SanitizedGlobalConfig['admin']['components']['views']['edit']['livePreview']
 > = () => {
   return (
     <div

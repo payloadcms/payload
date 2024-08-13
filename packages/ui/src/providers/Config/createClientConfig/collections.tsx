@@ -215,46 +215,48 @@ export const createClientCollectionConfig = ({
     'admin' in collection &&
     'components' in collection.admin &&
     'views' in collection.admin.components &&
-    'Edit' in collection.admin.components.views &&
-    'Default' in collection.admin.components.views.Edit
+    'edit' in collection.admin.components.views &&
+    'default' in collection.admin.components.views.edit
 
-  if (!clientCollection.admin.components.views.Edit) {
-    clientCollection.admin.components.views.Edit =
-      {} as ClientCollectionConfig['admin']['components']['views']['Edit']
+  if (!clientCollection.admin.components.views.edit) {
+    clientCollection.admin.components.views.edit =
+      {} as ClientCollectionConfig['admin']['components']['views']['edit']
   }
 
-  clientCollection.admin.components.views.Edit.Default = {
+  clientCollection.admin.components.views.edit.default = {
     Component: createMappedComponent(
       hasEditView &&
-        'Component' in collection.admin.components.views.Edit.Default &&
-        collection.admin.components.views.Edit.Default.Component,
+        'Component' in collection.admin.components.views.edit.default &&
+        collection.admin.components.views.edit.default.Component,
       {
         collectionSlug: collection.slug,
       },
       DefaultEditView,
-      'collection.admin.components.views.Edit.Default',
+      'collection.admin.components.views.edit.default',
     ),
   }
 
-  if (collection?.admin?.components?.views?.Edit) {
-    for (const key in collection.admin.components.views.Edit) {
-      const view: EditViewConfig = collection.admin.components.views.Edit[key]
-      if (!clientCollection.admin.components.views.Edit[key]) {
-        clientCollection.admin.components.views.Edit[key] = {} as MappedView
+  if (collection?.admin?.components?.views?.edit) {
+    for (const key in collection.admin.components.views.edit) {
+      const view: EditViewConfig = collection.admin.components.views.edit[key]
+
+      if (!clientCollection.admin.components.views.edit[key]) {
+        clientCollection.admin.components.views.edit[key] = {} as MappedView
       }
-      if ('Component' in view && key !== 'Default') {
-        clientCollection.admin.components.views.Edit[key].Component = createMappedComponent(
+
+      if ('Component' in view && key !== 'default') {
+        clientCollection.admin.components.views.edit[key].Component = createMappedComponent(
           view.Component,
           {
             collectionSlug: collection.slug,
           },
           undefined,
-          'collection.admin.components.views.Edit.key.Component',
+          'collection.admin.components.views.edit.key.Component',
         )
       }
 
       if ('actions' in view && view.actions?.length) {
-        clientCollection.admin.components.views.Edit[key].actions = view.actions.map((Component) =>
+        clientCollection.admin.components.views.edit[key].actions = view.actions.map((Component) =>
           createMappedComponent(
             Component,
             undefined,
@@ -270,36 +272,36 @@ export const createClientCollectionConfig = ({
     'admin' in collection &&
     'components' in collection.admin &&
     'views' in collection.admin.components &&
-    'List' in collection.admin.components.views
+    'list' in collection.admin.components.views
 
-  if (!clientCollection.admin.components.views.List) {
-    clientCollection.admin.components.views.List =
-      {} as ClientCollectionConfig['admin']['components']['views']['List']
+  if (!clientCollection.admin.components.views.list) {
+    clientCollection.admin.components.views.list =
+      {} as ClientCollectionConfig['admin']['components']['views']['list']
   }
 
-  clientCollection.admin.components.views.List.Component = createMappedComponent(
+  clientCollection.admin.components.views.list.Component = createMappedComponent(
     hasListView &&
-      'Component' in collection.admin.components.views.List &&
-      collection.admin.components.views.List.Component,
+      'Component' in collection.admin.components.views.list &&
+      collection.admin.components.views.list.Component,
     {
       collectionSlug: collection.slug,
     },
     DefaultListView,
-    'collection.admin.components.views.List ',
+    'collection.admin.components.views.list ',
   )
 
   if (
     hasListView &&
-    'actions' in collection.admin.components.views.List &&
-    collection.admin.components.views.List.actions
+    'actions' in collection.admin.components.views.list &&
+    collection.admin.components.views.list.actions
   ) {
-    clientCollection.admin.components.views.List.actions =
-      collection.admin.components.views.List.actions.map((Component) =>
+    clientCollection.admin.components.views.list.actions =
+      collection.admin.components.views.list.actions.map((Component) =>
         createMappedComponent(
           Component,
           undefined,
           undefined,
-          'collection.admin.components.views.List',
+          'collection.admin.components.views.list',
         ),
       )
   }

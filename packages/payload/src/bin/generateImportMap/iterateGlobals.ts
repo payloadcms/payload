@@ -34,8 +34,9 @@ export function iterateGlobals({
     addToImportMap(global.admin?.components?.elements?.PublishButton)
     addToImportMap(global.admin?.components?.elements?.SaveButton)
     addToImportMap(global.admin?.components?.elements?.SaveDraftButton)
-    if (global.admin?.components?.views?.Edit) {
-      for (const editViewConfig of Object.values(global.admin?.components?.views?.Edit)) {
+
+    if (global.admin?.components?.views?.edit) {
+      for (const editViewConfig of Object.values(global.admin?.components?.views?.edit)) {
         if ('Component' in editViewConfig) {
           addToImportMap(editViewConfig?.Component)
         }
