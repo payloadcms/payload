@@ -117,7 +117,7 @@ export const CollectionConfig: CollectionConfig = {
       // ...
       admin: {
         components: {
-          Field: MyFieldComponent, // highlight-line
+          Field: '/path/to/MyFieldComponent', // highlight-line
         },
       },
     }
@@ -280,7 +280,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Cell: MyCustomCell, // highlight-line
+      Cell: '/path/to/MyCustomCellComponent', // highlight-line
     },
   },
 }
@@ -320,7 +320,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Label: MyCustomLabel, // highlight-line
+      Label: '/path/to/MyCustomLabelComponent', // highlight-line
     },
   },
 }
@@ -383,7 +383,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Error: MyCustomError, // highlight-line
+      Error: '/path/to/MyCustomErrorComponent', // highlight-line
     },
   },
 }
@@ -505,7 +505,6 @@ To easily add a Description Component to a field, use the `admin.components.Desc
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomDescription } from './MyCustomDescription'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -516,7 +515,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Description: MyCustomDescription, // highlight-line
+          Description: '/path/to/MyCustomDescriptionComponent', // highlight-line
         }
       }
     }
@@ -586,8 +585,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       admin: {
         components: {
           // highlight-start
-          beforeInput: [MyCustomComponent],
-          afterInput: [MyOtherCustomComponent],
+          beforeInput: ['/path/to/MyCustomComponent'],
+          afterInput: ['/path/to/MyOtherCustomComponent'],
           // highlight-end
         }
       }

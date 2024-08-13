@@ -32,7 +32,7 @@ const config = buildConfig({
     components: {
       views: {
         dashboard: {
-          Component: MyCustomDashboardView, // highlight-line
+          Component: '/path/to/MyCustomDashboardView#MyCustomDashboardViewComponent', // highlight-line
         }
       },
     },
@@ -76,7 +76,7 @@ const config = buildConfig({
         // highlight-start
         myCustomView: {
         // highlight-end
-          Component: MyCustomView,
+          Component: '/path/to/MyCustomView#MyCustomViewComponent',
           path: '/my-custom-view',
         },
       },
@@ -111,7 +111,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
     components: {
       views: {
         edit: {
-          Component: MyCustomEditView, // highlight-line
+          Component: '/path/to/MyCustomEditView', // highlight-line
         }
       },
     },
@@ -152,7 +152,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   admin: {
     components: {
       views: {
-        edit: MyCustomEditView, // highlight-line
+        edit: '/path/to/MyCustomEditView', // highlight-line
       },
     },
   },
@@ -193,7 +193,7 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
       views: {
         edit: {
           api: {
-            Component: MyCustomAPIView, // highlight-line
+            Component: '/path/to/MyCustomAPIViewComponent', // highlight-line
           },
         },
       },
@@ -233,14 +233,14 @@ export const MyCollection: SanitizedCollectionConfig = {
       views: {
         edit: {
           myCustomTab: {
-            Component: MyCustomTab,
+            Component: '/path/to/MyCustomTab',
             path: '/my-custom-tab',
             tab: {
-              Component: MyCustomTabComponent // highlight-line
+              Component: '/path/to/MyCustomTabComponent' // highlight-line
             }
           },
           anotherCustomTab: {
-            Component: AnotherCustomView,
+            Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start
             tab: {
@@ -267,7 +267,6 @@ Custom Views are just [Custom Components](./components) rendered at the page-lev
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomView } from './MyCustomView'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -275,7 +274,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
     components: {
       views: {
         edit: {
-          Component: MyCustomView // highlight-line
+          Component: '/path/to/MyCustomView' // highlight-line
         }
       },
     },

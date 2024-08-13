@@ -69,6 +69,128 @@ All auto-generated files will contain the following comments at the top of each 
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 ```
 
+## Defining Custom Components in the Payload Config
+
+In the Payload Config, you can define custom React Components to enhance the admin interface. However, these components should not be imported directly into the server-only Payload Config to avoid including client-side code. Instead, you specify the path to the component. Here’s how you can do it:
+
+
+src/components/Logout.tsx
+```tsx
+'use client'
+import React from 'react'
+
+export const MyComponent = () => {
+  return (
+    <button>Click me!</button>
+  )
+}
+```
+
+payload.config.ts:
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    components: {
+      logout: {
+        Button: '/src/components/Logout#MyComponent'
+      }
+    }
+  },
+})
+```
+
+In the path `/src/components/Logout#MyComponent`, `/src/components/Logout` is the file path, and `MyComponent` is the named export. If the component is the default export, the export name can be omitted. Path and export name are separated by a `#`.
+
+### Configuring the Base Directory
+
+Component paths, by default, are relative to your working directory - this is usually where your Next.js config lies. To simplify component paths, you have the option to configure the *base directory* using the `admin.baseDir.baseDir` property:
+
+```ts
+import { buildConfig } from 'payload'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+     importMap: {
+      baseDir: path.resolve(dirname, 'src'),
+    },
+    components: {
+      logout: {
+        Button: '/components/Logout#MyComponent'
+      }
+    }
+  },
+})
+```
+
+In this example, we set the base directory to the `src` directory - thus we can omit the `/src/` part of our component path string.
+
+### Passing Props
+
+Each React Component in the Payload Config is typed as `PayloadComponent`. This usually is a string, but can also be an object containing the following properties:
+
+| Property      | Description                                                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `clientProps` | Props to be passed to the React Component if it's a Client Component                                                          |
+| `exportName`  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
+| `path`        | Path to the React Component. Named exports can be appended to the end of the path, separated by a `#`                         |
+| `serverProps` | Props to be passed to the React Component if it's a Server Component                                                          |
+
+To pass in props from the config, you can use the `clientProps` and/or `serverProps` properties. This alleviates the need to use an HOC (Higher-Order-Component) to declare a React Component with props passed in.
+
+Here is an example:
+
+src/components/Logout.tsx
+```tsx
+'use client'
+import React from 'react'
+
+export const MyComponent = ({ text }: { text: string }) => {
+  return (
+    <button>Click me! {text}</button>
+  )
+}
+```
+
+payload.config.ts:
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    components: {
+      logout: {
+        Button: {
+          path: '/src/components/Logout',
+          clientProps: {
+            text: 'Some Text.'
+          },
+          exportName: 'MyComponent'
+        }
+      }
+    }
+  },
+})
+```
+
+### Import Maps
+
+It's essential to understand how `PayloadComponent` paths function behind the scenes. Directly importing React Components into your Payload Config using import statements can introduce client-only modules like CSS into your server-only config. This could error when attempting to load the Payload Config in server-only environments and unnecessarily increase the size of the Payload Config, which should remain streamlined and efficient for server use.
+
+Instead, we utilize component paths to reference React Components. This method enhances the Payload Config with actual React Component imports on the client side, without affecting server-side usage. A script is deployed to scan the Payload Config, collecting all component paths and creating an `importMap.js`. This file, located in app/(payload)/admin/importMap.js, must be statically imported by your Next.js root page and layout. The script imports all the React Components from the specified paths into a Map, associating them with their respective paths (the ones you defined).
+
+When constructing the `ClientConfig`, Payload uses the component paths as keys to fetch the corresponding React Component imports from the Import Map. It then substitutes the `PayloadComponent` with a `MappedComponent`. A `MappedComponent` includes the React Component and additional metadata, such as whether it's a server or a client component and which props it should receive. These components are then rendered through the `<RenderComponent />` component within the Payload Admin Panel.
+
+Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map.
+
 ## Admin Options
 
 All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
@@ -167,12 +289,12 @@ const config = buildConfig({
 
 The following options are available:
 
-| Option             | Default route           | Description                           |
-| ------------------ | ----------------------- | ------------------------------------- |
-| `admin`            | `/admin`                | The Admin Panel itself. |
-| `api`              | `/api`                  | The [REST API](../rest-api/overview) base path.               |
-| `graphQL`          | `/graphql`              | The [GraphQL API](../graphql/overview) base path.            |
-| `graphQLPlayground`| `/graphql-playground`   | The GraphQL Playground.               |
+| Option              | Default route         | Description                                       |
+|---------------------|-----------------------|---------------------------------------------------|
+| `admin`             | `/admin`              | The Admin Panel itself.                           |
+| `api`               | `/api`                | The [REST API](../rest-api/overview) base path.   |
+| `graphQL`           | `/graphql`            | The [GraphQL API](../graphql/overview) base path. |
+| `graphQLPlayground` | `/graphql-playground` | The GraphQL Playground.                           |
 
 <Banner type="success">
   <strong>Tip:</strong>

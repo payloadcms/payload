@@ -33,8 +33,6 @@ To override Root Components, use the `admin.components` property in your [Payloa
 ```ts
 import { buildConfig } from 'payload'
 
-import { MyCustomLogo } from './MyCustomLogo'
-
 export default buildConfig({
   // ...
   admin: {
@@ -81,13 +79,11 @@ To add a Custom Provider, use the `admin.components.providers` property in your 
 ```ts
 import { buildConfig } from 'payload'
 
-import { MyProvider } from './MyProvider'
-
 export default buildConfig({
   // ...
   admin: {
     components: {
-      providers: [MyProvider], // highlight-line
+      providers: ['/path/to/MyProvider'], // highlight-line
     },
   },
 })
