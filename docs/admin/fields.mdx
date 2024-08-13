@@ -214,7 +214,7 @@ The exact shape of this prop is unique to the specific [Field Type](../fields/ov
 import React from 'react'
 import type { TextFieldProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldProps = ({ field: { name } }) => {
+export const MyClientFieldComponent: React.FC<TextFieldProps> = ({ field: { name } }) => {
   return (
     <p>
       {`This field's name is ${name}`}
@@ -264,6 +264,12 @@ import type {
   TextareaFieldClient,
   UploadFieldClient
 } from 'payload'
+```
+
+When working on the client, you will never have access to objects of type `Field`. This is reserved for the server-side. Instead, you can use `ClientField` which is a union type of all the client fields:
+
+```tsx
+import type { ClientField } from 'payload'
 ```
 
 ### The Cell Component
