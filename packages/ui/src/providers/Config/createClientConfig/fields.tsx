@@ -120,9 +120,9 @@ export const createClientField = ({
       const field = clientField as unknown as RowFieldClient
 
       field.fields = createClientFields({
-        appendID: incomingField.type === 'array',
         clientFields: field.fields,
         createMappedComponent,
+        disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
         importMap,
@@ -185,7 +185,6 @@ export const createClientField = ({
           }
 
           clientBlock.fields = createClientFields({
-            appendID: true,
             clientFields: clientBlock.fields,
             createMappedComponent,
             fields: block.fields,
@@ -277,6 +276,7 @@ export const createClientField = ({
           clientTab.fields = createClientFields({
             clientFields: clientTab.fields,
             createMappedComponent,
+            disableAddingID: true,
             fields: tab.fields,
             i18n,
             importMap,
@@ -481,18 +481,18 @@ export const createClientField = ({
 }
 
 export const createClientFields = ({
-  appendID,
   clientFields,
   createMappedComponent,
+  disableAddingID,
   fields,
   i18n,
   importMap,
   parentPath,
   payload,
 }: {
-  appendID?: boolean
   clientFields: ClientField[]
   createMappedComponent: CreateMappedComponent
+  disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
   importMap: ImportMap
@@ -500,7 +500,6 @@ export const createClientFields = ({
   payload: Payload
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
-
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
@@ -513,34 +512,29 @@ export const createClientFields = ({
       parentPath,
       payload,
     })
-
     if (newField) {
       newClientFields.push({ ...newField })
     }
   }
+  const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
 
-  if (appendID) {
-    const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
-
-    if (!hasID) {
-      newClientFields.push({
-        name: 'id',
-        type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
-        _schemaPath: generateFieldPath(parentPath, 'id'),
-        admin: {
-          components: {
-            Field: null,
-          },
-          description: 'The unique identifier for this document',
-          disableBulkEdit: true,
-          hidden: true,
+  if (!disableAddingID && !hasID) {
+    newClientFields.push({
+      name: 'id',
+      type: payload.db.defaultIDType === 'number' ? 'number' : 'text',
+      _schemaPath: generateFieldPath(parentPath, 'id'),
+      admin: {
+        components: {
+          Field: null,
         },
+        description: 'The unique identifier for this document',
+        disableBulkEdit: true,
         hidden: true,
-        label: 'ID',
-        localized: undefined,
-      })
-    }
+      },
+      hidden: true,
+      label: 'ID',
+      localized: undefined,
+    })
   }
-
   return newClientFields
 }

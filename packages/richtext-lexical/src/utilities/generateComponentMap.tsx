@@ -85,6 +85,7 @@ export const getGenerateComponentMap =
                 clientFields = createClientFields({
                   clientFields,
                   createMappedComponent,
+                  disableAddingID: true,
                   fields,
                   i18n,
                   importMap,
