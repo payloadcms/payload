@@ -23,6 +23,11 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./migrate": {
+      "import": "./src/exports/server/migrate.ts",
+      "types": "./src/exports/server/migrate.ts",
+      "default": "./src/exports/server/migrate.ts"
+    },
     "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
@@ -108,6 +113,11 @@
         "import": "./dist/exports/client/index.js",
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
+      },
+      "./migrate": {
+        "import": "./dist/exports/server/migrate.js",
+        "types": "./dist/exports/server/migrate.d.ts",
+        "default": "./dist/exports/server/migrate.js"
       },
       "./generateComponentMap": {
         "import": "./dist/utilities/generateComponentMap.js",
