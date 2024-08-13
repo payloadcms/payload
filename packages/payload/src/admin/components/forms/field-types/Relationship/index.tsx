@@ -8,6 +8,7 @@ import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types
 import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types'
 
 import { relationship } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex'
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback'
 import ReactSelect from '../../../elements/ReactSelect'
@@ -535,7 +536,7 @@ const Relationship: React.FC<Props> = (props) => {
               })
             }}
             options={options}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             showError={showError}
             value={valueToRender ?? null}
           />
