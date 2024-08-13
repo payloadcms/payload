@@ -533,7 +533,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Build all generated templates
-        run: pnpm runts ./scripts/build-generated-templates.ts
+        run: pnpm tsx ./scripts/build-generated-templates.ts
 
   all-green:
     name: All Green
@@ -587,7 +587,7 @@ jobs:
 
       - name: Canary release script
         # dry run hard-coded to true for testing and no npm token provided
-        run: pnpm runts ./scripts/publish-canary.ts
+        run: pnpm tsx ./scripts/publish-canary.ts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
