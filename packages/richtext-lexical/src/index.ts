@@ -879,28 +879,11 @@ export { LinkFeature, type LinkFeatureServerProps } from './features/link/server
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
-export { LexicalPluginToLexicalFeature } from './features/migrations/lexicalPluginToLexical/feature.server.js'
-export { SlateBlockquoteConverter } from './features/migrations/slateToLexical/converter/converters/blockquote/converter.js'
-export { SlateHeadingConverter } from './features/migrations/slateToLexical/converter/converters/heading/converter.js'
-export { SlateIndentConverter } from './features/migrations/slateToLexical/converter/converters/indent/converter.js'
-export { SlateLinkConverter } from './features/migrations/slateToLexical/converter/converters/link/converter.js'
-export { SlateListItemConverter } from './features/migrations/slateToLexical/converter/converters/listItem/converter.js'
-export { SlateOrderedListConverter } from './features/migrations/slateToLexical/converter/converters/orderedList/converter.js'
-export { SlateRelationshipConverter } from './features/migrations/slateToLexical/converter/converters/relationship/converter.js'
-export { SlateUnknownConverter } from './features/migrations/slateToLexical/converter/converters/unknown/converter.js'
-export { SlateUnorderedListConverter } from './features/migrations/slateToLexical/converter/converters/unorderedList/converter.js'
-export { SlateUploadConverter } from './features/migrations/slateToLexical/converter/converters/upload/converter.js'
-export { defaultSlateConverters } from './features/migrations/slateToLexical/converter/defaultConverters.js'
 
-export {
-  convertSlateNodesToLexical,
-  convertSlateToLexical,
-} from './features/migrations/slateToLexical/converter/index.js'
 export type {
   SlateNode,
   SlateNodeConverter,
 } from './features/migrations/slateToLexical/converter/types.js'
-export { SlateToLexicalFeature } from './features/migrations/slateToLexical/feature.server.js'
 
 export { ParagraphFeature } from './features/paragraph/server/index.js'
 export {
@@ -1008,7 +991,5 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
-
-export { migrateSlateToLexical } from './utilities/migrateSlateToLexical/index.js'
 
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

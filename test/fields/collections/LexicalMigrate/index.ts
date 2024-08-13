@@ -2,14 +2,16 @@ import type { CollectionConfig } from 'payload'
 
 import {
   HTMLConverterFeature,
-  LexicalPluginToLexicalFeature,
   LinkFeature,
-  SlateToLexicalFeature,
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
   lexicalHTML,
 } from '@payloadcms/richtext-lexical'
+import {
+  LexicalPluginToLexicalFeature,
+  SlateToLexicalFeature,
+} from '@payloadcms/richtext-lexical/migrate'
 
 import { lexicalMigrateFieldsSlug } from '../../slugs.js'
 import { getSimpleLexicalData } from './data.js'
