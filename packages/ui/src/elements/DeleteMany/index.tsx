@@ -30,8 +30,10 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth()
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { toggleModal } = useModal()
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()

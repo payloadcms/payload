@@ -1,7 +1,9 @@
+import type { MappedComponent } from 'payload'
+
 import type { EnabledFeatures } from './types.js'
 
 export const createFeatureMap = (
-  richTextComponentMap: Map<string, React.ReactNode>,
+  richTextComponentMap: Map<string, MappedComponent>,
 ): EnabledFeatures => {
   const features: EnabledFeatures = {
     elements: {},

@@ -20,7 +20,7 @@ export interface LivePreviewContextType {
     width: number
   }
   openPopupWindow: ReturnType<typeof usePopupWindow>['openPopupWindow']
-  popupRef?: React.MutableRefObject<Window | null>
+  popupRef?: React.RefObject<Window | null>
   previewWindowType: 'iframe' | 'popup'
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void

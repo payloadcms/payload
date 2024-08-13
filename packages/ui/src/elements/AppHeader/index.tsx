@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -21,11 +22,13 @@ export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {
-    admin: {
-      routes: { account: accountRoute },
+    config: {
+      admin: {
+        routes: { account: accountRoute },
+      },
+      localization,
+      routes: { admin: adminRoute },
     },
-    localization,
-    routes: { admin: adminRoute },
   } = useConfig()
 
   const { actions } = useActions()
@@ -78,7 +81,7 @@ export const AppHeader: React.FC = () => {
                       }
                       key={i}
                     >
-                      {Action}
+                      <RenderComponent mappedComponent={Action} />
                     </div>
                   ))}
               </div>

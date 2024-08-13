@@ -1,5 +1,8 @@
 import type { Payload, Where } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
@@ -10,7 +13,6 @@ import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { tabSlug } from './collections/Tab/index.js'
-import configPromise from './config.js'
 import {
   defaultLocale,
   englishTitle,
@@ -33,12 +35,15 @@ const collection = localizedPostsSlug
 let payload: Payload
 let restClient: NextRESTClient
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Localization', () => {
   let post1: LocalizedPost
   let postWithLocalizedData: LocalizedPost
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     post1 = await payload.create({
       collection,

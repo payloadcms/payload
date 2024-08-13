@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useConfig } from '../../../providers/Config/index.js'
 
 export const useRelatedCollections = (relationTo: string | string[]): ClientCollectionConfig[] => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const [relatedCollections] = useState(() => {
     if (relationTo) {

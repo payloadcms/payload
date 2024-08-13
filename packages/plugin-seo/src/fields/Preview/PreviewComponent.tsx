@@ -9,7 +9,6 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { get } from 'http'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'

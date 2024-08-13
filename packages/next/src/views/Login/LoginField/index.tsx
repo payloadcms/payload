@@ -4,11 +4,13 @@ import type { Validate, ValidateOptions } from 'payload'
 import { EmailField, TextField, useTranslation } from '@payloadcms/ui'
 import { email, username } from 'payload/shared'
 import React from 'react'
+
 export type LoginFieldProps = {
-  required?: boolean
-  type: 'email' | 'emailOrUsername' | 'username'
-  validate?: Validate
+  readonly required?: boolean
+  readonly type: 'email' | 'emailOrUsername' | 'username'
+  readonly validate?: Validate
 }
+
 export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true }) => {
   const { t } = useTranslation()
 
@@ -16,10 +18,11 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
     return (
       <EmailField
         autoComplete="email"
-        label={t('general:email')}
-        name="email"
-        path="email"
-        required={required}
+        field={{
+          name: 'email',
+          label: t('general:email'),
+          required,
+        }}
         validate={email}
       />
     )
@@ -28,10 +31,11 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'username') {
     return (
       <TextField
-        label={t('authentication:username')}
-        name="username"
-        path="username"
-        required={required}
+        field={{
+          name: 'username',
+          label: t('authentication:username'),
+          required,
+        }}
         validate={username}
       />
     )
@@ -40,10 +44,11 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'emailOrUsername') {
     return (
       <TextField
-        label={t('authentication:emailOrUsername')}
-        name="username"
-        path="username"
-        required={required}
+        field={{
+          name: 'username',
+          label: t('authentication:emailOrUsername'),
+          required,
+        }}
         validate={(value, options) => {
           const passesUsername = username(value, options)
           const passesEmail = email(

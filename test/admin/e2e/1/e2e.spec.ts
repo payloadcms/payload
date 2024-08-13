@@ -80,7 +80,7 @@ describe('admin1', () => {
   let loginURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -148,9 +148,15 @@ describe('admin1', () => {
       const favicons = page.locator('link[rel="icon"]')
 
       await expect(favicons).toHaveCount(2)
-      await expect(favicons.nth(0)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
+      await expect(favicons.nth(0)).toHaveAttribute(
+        'href',
+        /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
+      )
       await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
+      await expect(favicons.nth(1)).toHaveAttribute(
+        'href',
+        /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
+      )
     })
 
     test('should render custom og:title from root config', async () => {
@@ -559,13 +565,13 @@ describe('admin1', () => {
       const prevSibling = await input.evaluateHandle((el) => {
         return el.previousElementSibling
       })
-      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
       expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
-      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
 

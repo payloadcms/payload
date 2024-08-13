@@ -1,20 +1,19 @@
-import type { ArrayField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type {
+  DescriptionComponent,
+  FormFieldBase,
+  LabelComponent,
+  MappedComponent,
+} from '../types.js'
 
 export type ArrayFieldProps = {
-  CustomRowLabel?: React.ReactNode
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayField['labels']
-  maxRows?: ArrayField['maxRows']
-  minRows?: ArrayField['minRows']
-  name?: string
-  validate?: ArrayFieldValidation
-  width?: string
+  readonly CustomRowLabel?: MappedComponent
+  readonly field: MarkOptional<ArrayFieldClient, 'type'>
+  readonly validate?: ArrayFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
 export type ArrayFieldLabelComponent = LabelComponent<'array'>

@@ -12,6 +12,7 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    simple: Simple;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -68,24 +69,35 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  richText2?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  myBlocks?:
+    | (
+        | {
+            test?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test';
+          }
+        | {
+            test2?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'someBlock2';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -52,7 +52,7 @@ The `useField` hook accepts the following arguments:
 The `useField` hook returns the following object:
 
 ```ts
-type FieldResult<T> = {
+type FieldType<T> = {
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult
@@ -65,7 +65,7 @@ type FieldResult<T> = {
   readOnly?: boolean
   rows?: Row[]
   schemaPath: string
-  setValue: (val: unknown, disableModifyingForm?: boolean) => voi
+  setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   valid?: boolean
   value: T
@@ -463,7 +463,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -560,7 +560,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -670,7 +670,7 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
@@ -818,7 +818,7 @@ import { useConfig } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const config = useConfig()
+  const { config } = useConfig()
   // highlight-end
 
   return <span>{config.serverURL}</span>

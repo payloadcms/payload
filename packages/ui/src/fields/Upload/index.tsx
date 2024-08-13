@@ -19,27 +19,25 @@ export type { UploadInputProps }
 
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    style,
+    field,
+    field: {
+      _path: pathFromProps,
+      admin: { className, readOnly: readOnlyFromAdmin, style, width },
+      label,
+      relationTo,
+      required,
+    },
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
-    collections,
-    routes: { api: apiRoute },
-    serverURL,
+    config: {
+      collections,
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { permissions } = useAuth()
@@ -68,7 +66,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     return false
   }, [relationTo, permissions])
 
-  const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
+  const { filterOptions, formInitializing, formProcessing, setValue, showError, value } =
     useField<string>({
       path: pathFromContext ?? pathFromProps,
       validate: memoizedValidate,
@@ -87,20 +85,16 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   if (collection.upload) {
     return (
       <UploadInput
-        CustomDescription={CustomDescription}
-        CustomError={CustomError}
-        CustomLabel={CustomLabel}
+        Description={field?.admin?.components?.Description}
+        Error={field?.admin?.components?.Error}
+        Label={field?.admin?.components?.Label}
         allowNewUpload={canCreate}
         api={apiRoute}
         className={className}
         collection={collection}
-        descriptionProps={descriptionProps}
-        errorProps={errorProps}
         filterOptions={filterOptions}
         label={label}
-        labelProps={labelProps}
         onChange={onChange}
-        path={path}
         readOnly={disabled}
         relationTo={relationTo}
         required={required}

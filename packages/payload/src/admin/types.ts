@@ -1,5 +1,15 @@
+import type React from 'react'
+
+import type { PayloadComponent } from '../config/types.js'
+import type { JsonObject } from '../types/index.js'
+
 export type { LanguageOptions } from './LanguageOptions.js'
-export type { RichTextAdapter, RichTextAdapterProvider, RichTextFieldProps } from './RichText.js'
+export type {
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextGenerateComponentMap,
+  RichTextHooks,
+} from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -9,7 +19,6 @@ export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
 
 export type {
-  DocumentTab,
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
@@ -30,13 +39,11 @@ export type {
   ArrayFieldProps,
 } from './fields/Array.js'
 
-export type { ReducedBlock } from './fields/Blocks.js'
-
 export type {
-  BlocksFieldDescriptionComponent,
-  BlocksFieldErrorComponent,
-  BlocksFieldLabelComponent,
-  BlocksFieldProps,
+  BlockFieldDescriptionComponent,
+  BlockFieldErrorComponent,
+  BlockFieldLabelComponent,
+  BlockFieldProps,
 } from './fields/Blocks.js'
 
 export type {
@@ -124,10 +131,10 @@ export type {
 } from './fields/Relationship.js'
 
 export type {
-  RichTextComponentProps,
   RichTextFieldDescriptionComponent,
   RichTextFieldErrorComponent,
   RichTextFieldLabelComponent,
+  RichTextFieldProps,
 } from './fields/RichText.js'
 
 export type {
@@ -144,9 +151,8 @@ export type {
   SelectFieldProps,
 } from './fields/Select.js'
 
-export type { MappedTab } from './fields/Tabs.js'
-
 export type {
+  ClientTab,
   TabsFieldDescriptionComponent,
   TabsFieldErrorComponent,
   TabsFieldLabelComponent,
@@ -174,8 +180,6 @@ export type {
   UploadFieldProps,
 } from './fields/Upload.js'
 
-export type { FieldComponentProps } from './fields/index.js'
-
 export type { ErrorComponent, ErrorProps, GenericErrorProps } from './forms/Error.js'
 
 export type { FormFieldBase } from './forms/Field.js'
@@ -186,11 +190,8 @@ export type {
   DescriptionFunction,
   FieldDescriptionProps,
   GenericDescriptionProps,
+  StaticDescription,
 } from './forms/FieldDescription.js'
-
-export type { MappedField } from './forms/FieldMap.js'
-
-export type { FieldMap } from './forms/FieldMap.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
@@ -211,3 +212,38 @@ export type {
   ServerSideEditViewProps,
   VisibleEntities,
 } from './views/types.js'
+
+export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent: React.ReactNode
+  props?: Partial<any>
+  type: 'server'
+}
+
+export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
+  Component: React.ComponentType<TComponentClientProps>
+  RenderedComponent?: React.ReactNode
+  props?: Partial<TComponentClientProps>
+  type: 'client'
+}
+
+export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
+  | MappedClientComponent<TComponentClientProps>
+  | MappedServerComponent<TComponentClientProps>
+  | undefined
+
+export type CreateMappedComponent = {
+  <T extends JsonObject>(
+    component: { Component: React.FC<T> } | PayloadComponent<T> | null,
+    props: object,
+    fallback: React.FC,
+    identifier: string,
+  ): MappedComponent<T>
+
+  <T extends JsonObject>(
+    components: ({ Component: React.FC<T> } | PayloadComponent<T>)[],
+    props: object,
+    fallback: React.FC,
+    identifier: string,
+  ): MappedComponent<T>[]
+}

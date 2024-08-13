@@ -35,7 +35,7 @@ export const LexicalMigrateFields: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          LexicalPluginToLexicalFeature(),
+          LexicalPluginToLexicalFeature({ quiet: true }),
           TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({

@@ -1,6 +1,6 @@
 import type { ExportDefaultExpression, ModuleItem } from '@swc/core'
 
-import swc from '@swc/core'
+import { parse } from '@swc/core'
 import chalk from 'chalk'
 import { Syntax, parseModule } from 'esprima-next'
 import fs from 'fs'
@@ -281,10 +281,10 @@ async function compileTypeScriptFileToAST(
    * https://github.com/swc-project/swc/issues/1366
    */
   if (process.env.NODE_ENV === 'test') {
-    parseOffset = (await swc.parse('')).span.end
+    parseOffset = (await parse('')).span.end
   }
 
-  const module = await swc.parse(fileContent, {
+  const module = await parse(fileContent, {
     syntax: 'typescript',
   })
 

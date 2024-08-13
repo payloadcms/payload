@@ -1,14 +1,13 @@
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
+import type { RowFieldClient } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 
 export type RowFieldProps = {
-  fieldMap: FieldMap
+  field: MarkOptional<RowFieldClient, 'type'>
   forceRender?: boolean
   indexPath: string
-  path?: string
-  width?: string
 } & FormFieldBase
 
 export type RowFieldLabelComponent = LabelComponent<'row'>

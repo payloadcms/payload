@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps, RelationshipFieldClient, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
@@ -17,19 +17,16 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps extends DefaultCellComponentProps<any> {
-  label: CellComponentProps['label']
-  relationTo: CellComponentProps['relationTo']
-}
+export interface RelationshipCellProps
+  extends DefaultCellComponentProps<any, RelationshipFieldClient | UploadFieldClient> {}
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
-  fieldType,
-  label,
-  relationTo,
-  ...props
+  customCellContext,
+  field,
+  field: { label, relationTo },
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
@@ -94,19 +91,19 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         })
 
         let fileField = null
-        if (fieldType === 'upload') {
-          const { name, customCellContext, displayPreview, schemaPath } = props
+
+        if (field.type === 'upload') {
           const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
           const previewAllowed =
-            displayPreview || (relatedCollectionPreview && displayPreview !== false)
+            field.displayPreview || (relatedCollectionPreview && field.displayPreview !== false)
+
           if (previewAllowed && document) {
             fileField = (
               <FileCell
                 cellData={label}
                 customCellContext={customCellContext}
-                name={name}
+                field={field}
                 rowData={document}
-                schemaPath={schemaPath}
               />
             )
           }

@@ -23,16 +23,18 @@ import { FieldDescription } from '../FieldDescription/index.js'
 
 const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
   const {
-    CustomDescription,
-    CustomLabel,
-    className,
     descriptionProps,
-    fieldMap,
-    initCollapsed = false,
-    label,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
+    field,
+    field: {
+      _path: pathFromProps,
+      admin: { className, description, initCollapsed = false, readOnly: readOnlyFromAdmin },
+      fields,
+      label,
+    },
+    readOnly: readOnlyFromTopLevelProps,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
     indexPath,
@@ -114,7 +116,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
@@ -131,7 +133,16 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              <RowLabel RowLabelComponent={CustomLabel} i18n={i18n} path={path} rowLabel={label} />
+              <RowLabel
+                RowLabel={
+                  field?.admin?.components && 'RowLabel' in field.admin.components
+                    ? field.admin.components.RowLabel
+                    : undefined
+                }
+                i18n={i18n}
+                path={path}
+                rowLabel={label}
+              />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -139,7 +150,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           onToggle={onToggle}
         >
           <RenderFields
-            fieldMap={fieldMap}
+            fields={fields}
             forceRender
             indexPath={indexPath}
             margins="small"
@@ -149,7 +160,11 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
             schemaPath={schemaPath}
           />
         </CollapsibleElement>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </Fragment>
   )
