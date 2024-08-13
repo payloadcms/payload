@@ -205,6 +205,32 @@ export const createClientCollectionConfig = ({
     }
   }
 
+  let description = undefined
+  if (collection.admin?.description) {
+    if (
+      typeof collection.admin?.description === 'string' ||
+      typeof collection.admin?.description === 'object'
+    ) {
+      description = collection.admin.description
+    } else if (typeof collection.admin?.description === 'function') {
+      description = collection.admin?.description({ t: i18n.t })
+    }
+  }
+  clientCollection.admin.description = description
+
+  if (collection.admin.components.edit?.Description) {
+    clientCollection.admin.components.edit.Description = createMappedComponent(
+      collection.admin.components.edit.Description,
+      {
+        description,
+      },
+      undefined,
+      'collection.admin.components.edit.Description',
+    )
+  }
+
+  clientCollection.admin.description = description
+
   clientCollection.admin.components.views = (
     collection?.admin?.components?.views
       ? deepCopyObjectSimple(collection?.admin?.components?.views)

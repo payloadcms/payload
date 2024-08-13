@@ -21,6 +21,7 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
+  ViewDescription,
   useConfig,
   useEditDepth,
   useListInfo,
@@ -60,6 +61,7 @@ export const DefaultListView: React.FC = () => {
           list: { actions },
         },
       },
+      description,
     },
     fields,
     labels,
@@ -119,9 +121,13 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {Description && (
+                {description && (
                   <div className={`${baseClass}__sub-header`}>
-                    <RenderComponent mappedComponent={Description} />
+                    <RenderComponent
+                      Component={ViewDescription}
+                      clientProps={{ description }}
+                      mappedComponent={Description}
+                    />
                   </div>
                 )}
               </Fragment>

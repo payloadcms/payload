@@ -23,6 +23,7 @@ export type ClientCollectionConfig = {
       beforeList: MappedComponent[]
       beforeListTable: MappedComponent[]
       edit: {
+        Description: MappedComponent
         PreviewButton: MappedComponent
         PublishButton: MappedComponent
         SaveButton: MappedComponent
@@ -44,10 +45,11 @@ export type ClientCollectionConfig = {
         }
       }
     }
+    description?: Record<string, string> | string
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedCollectionConfig['admin'],
-    'components' | 'livePreview' | ServerOnlyCollectionAdminProperties
+    'components' | 'description' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
   isPreviewEnabled: boolean
