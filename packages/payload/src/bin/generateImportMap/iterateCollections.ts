@@ -41,8 +41,8 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.edit?.SaveDraftButton)
     addToImportMap(collection.admin?.components?.edit?.Upload)
 
-    if (collection.admin?.components?.views?.Edit) {
-      for (const editViewConfig of Object.values(collection.admin?.components?.views?.Edit)) {
+    if (collection.admin?.components?.views?.edit) {
+      for (const editViewConfig of Object.values(collection.admin?.components?.views?.edit)) {
         if ('Component' in editViewConfig) {
           addToImportMap(editViewConfig?.Component)
         }
@@ -58,7 +58,7 @@ export function iterateCollections({
       }
     }
 
-    addToImportMap(collection.admin?.components?.views?.List?.Component)
-    addToImportMap(collection.admin?.components?.views?.List?.actions)
+    addToImportMap(collection.admin?.components?.views?.list?.Component)
+    addToImportMap(collection.admin?.components?.views?.list?.actions)
   }
 }

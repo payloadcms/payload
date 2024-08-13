@@ -5,7 +5,7 @@ import React from 'react'
 const baseClass = 'collection-live-preview-button'
 
 export const CollectionLivePreviewButton: PayloadServerReactComponent<
-  SanitizedCollectionConfig['admin']['components']['views']['Edit']['LivePreview']
+  SanitizedCollectionConfig['admin']['components']['views']['edit']['livePreview']
 > = () => {
   return (
     <div

@@ -287,11 +287,11 @@ export type CollectionAdminOptions = {
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?: EditConfig
-      List?: {
+      edit?: EditConfig
+      list?: {
         Component?: PayloadComponent
         actions?: CustomComponent[]
       }
@@ -342,7 +342,7 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
-   * Field to use as title in Edit view and first column in List view
+   * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string
 }

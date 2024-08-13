@@ -7,15 +7,15 @@ export const Geo: CollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          API: {
+        edit: {
+          api: {
             actions: ['/components/CollectionAPIButton/index.js#CollectionAPIButton'],
           },
           Default: {
             actions: ['/components/CollectionEditButton/index.js#CollectionEditButton'],
           },
         },
-        List: {
+        list: {
           actions: ['/components/CollectionListButton/index.js#CollectionListButton'],
         },
       },

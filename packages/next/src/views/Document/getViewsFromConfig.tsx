@@ -35,7 +35,6 @@ export const getViewsFromConfig = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-
   docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
@@ -67,7 +66,7 @@ export const getViewsFromConfig = ({
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
   if (collectionConfig) {
-    const editConfig = collectionConfig?.admin?.components?.views?.Edit
+    const editConfig = collectionConfig?.admin?.components?.views?.edit
     const EditOverride = typeof editConfig === 'function' ? editConfig : null
 
     if (EditOverride) {
@@ -88,7 +87,7 @@ export const getViewsFromConfig = ({
               case 'create': {
                 if ('create' in docPermissions && docPermissions?.create?.permission) {
                   CustomView = {
-                    payloadComponent: getCustomViewByKey(views, 'Default'),
+                    payloadComponent: getCustomViewByKey(views, 'default'),
                   }
                   DefaultView = {
                     Component: DefaultEditView,
@@ -103,7 +102,7 @@ export const getViewsFromConfig = ({
 
               default: {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'Default'),
+                  payloadComponent: getCustomViewByKey(views, 'default'),
                 }
                 DefaultView = {
                   Component: DefaultEditView,
@@ -120,7 +119,7 @@ export const getViewsFromConfig = ({
               case 'api': {
                 if (collectionConfig?.admin?.hideAPIURL !== true) {
                   CustomView = {
-                    payloadComponent: getCustomViewByKey(views, 'API'),
+                    payloadComponent: getCustomViewByKey(views, 'api'),
                   }
                   DefaultView = {
                     Component: DefaultAPIView,
@@ -141,7 +140,7 @@ export const getViewsFromConfig = ({
               case 'versions': {
                 if (docPermissions?.readVersions?.permission) {
                   CustomView = {
-                    payloadComponent: getCustomViewByKey(views, 'Versions'),
+                    payloadComponent: getCustomViewByKey(views, 'versions'),
                   }
                   DefaultView = {
                     Component: DefaultVersionsView,
@@ -186,7 +185,7 @@ export const getViewsFromConfig = ({
             if (segment4 === 'versions') {
               if (docPermissions?.readVersions?.permission) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'Version'),
+                  payloadComponent: getCustomViewByKey(views, 'version'),
                 }
                 DefaultView = {
                   Component: DefaultVersionView,
@@ -226,7 +225,7 @@ export const getViewsFromConfig = ({
   }
 
   if (globalConfig) {
-    const editConfig = globalConfig?.admin?.components?.views?.Edit
+    const editConfig = globalConfig?.admin?.components?.views?.edit
     const EditOverride = typeof editConfig === 'function' ? editConfig : null
 
     if (EditOverride) {
@@ -242,7 +241,7 @@ export const getViewsFromConfig = ({
         switch (routeSegments.length) {
           case 2: {
             CustomView = {
-              payloadComponent: getCustomViewByKey(views, 'Default'),
+              payloadComponent: getCustomViewByKey(views, 'default'),
             }
             DefaultView = {
               Component: DefaultEditView,
@@ -256,7 +255,7 @@ export const getViewsFromConfig = ({
               case 'api': {
                 if (globalConfig?.admin?.hideAPIURL !== true) {
                   CustomView = {
-                    payloadComponent: getCustomViewByKey(views, 'API'),
+                    payloadComponent: getCustomViewByKey(views, 'api'),
                   }
                   DefaultView = {
                     Component: DefaultAPIView,
@@ -277,7 +276,7 @@ export const getViewsFromConfig = ({
               case 'versions': {
                 if (docPermissions?.readVersions?.permission) {
                   CustomView = {
-                    payloadComponent: getCustomViewByKey(views, 'Versions'),
+                    payloadComponent: getCustomViewByKey(views, 'versions'),
                   }
                   DefaultView = {
                     Component: DefaultVersionsView,
@@ -326,7 +325,7 @@ export const getViewsFromConfig = ({
             if (segment3 === 'versions') {
               if (docPermissions?.readVersions?.permission) {
                 CustomView = {
-                  payloadComponent: getCustomViewByKey(views, 'Version'),
+                  payloadComponent: getCustomViewByKey(views, 'version'),
                 }
                 DefaultView = {
                   Component: DefaultVersionView,

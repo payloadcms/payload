@@ -49,7 +49,7 @@ export const CustomVersionsView: PayloadServerReactComponent<EditViewComponent> 
         <p>This custom Versions view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Versions</code>
+            <code>components.views.edit.Versions</code>
             <p>
               {'This allows you to override only the Versions edit view specifically, but '}
               <b>
@@ -59,7 +59,7 @@ export const CustomVersionsView: PayloadServerReactComponent<EditViewComponent> 
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Versions.Component</code>
+            <code>components.views.edit.versions.Component</code>
           </li>
           <p>
             This is the most granular override, allowing you to override only the Versions

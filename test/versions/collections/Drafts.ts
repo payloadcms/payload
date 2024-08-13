@@ -33,11 +33,11 @@ const DraftPosts: CollectionConfig = {
         PublishButton: '/elements/CustomSaveButton/index.js#CustomPublishButton',
       },
       views: {
-        Edit: {
-          Version: {
+        edit: {
+          version: {
             actions: ['/elements/CollectionVersionButton/index.js'],
           },
-          Versions: {
+          versions: {
             actions: ['/elements/CollectionVersionsButton/index.js'],
           },
         },

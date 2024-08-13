@@ -94,7 +94,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   // If the request does not include doc preferences,
   // we should fetch them. This is useful for DocumentInfoProvider
   // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit view
+  // when we fetch data for the Edit View
   if (!docPreferences) {
     let preferencesKey
 

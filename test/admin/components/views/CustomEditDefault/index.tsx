@@ -49,7 +49,7 @@ export const CustomDefaultEditView: PayloadServerReactComponent<EditViewComponen
         <p>This custom Default view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Default</code>
+            <code>components.views.edit.default</code>
             <p>
               {'This allows you to override only the default edit view specifically, but '}
               <b>
@@ -61,7 +61,7 @@ export const CustomDefaultEditView: PayloadServerReactComponent<EditViewComponen
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Default.Component</code>
+            <code>components.views.edit.default.Component</code>
             <p>
               This is the most granular override, allowing you to override only the Default
               component, or any of its other properties like path and label.

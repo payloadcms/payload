@@ -35,8 +35,8 @@ export type AdminViewProps = {
 export type AdminViewComponent = PayloadComponent<AdminViewProps>
 
 export type EditViewProps = {
-  collectionSlug?: string
-  globalSlug?: string
+  readonly collectionSlug?: string
+  readonly globalSlug?: string
 }
 
 export type VisibleEntities = {

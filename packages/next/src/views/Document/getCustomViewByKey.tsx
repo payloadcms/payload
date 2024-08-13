@@ -6,8 +6,8 @@ export const getCustomViewByKey = (
     | SanitizedGlobalConfig['admin']['components']['views'],
   customViewKey: string,
 ): EditViewComponent => {
-  return typeof views?.Edit?.[customViewKey] === 'object' &&
-    'Component' in views.Edit[customViewKey]
-    ? views?.Edit?.[customViewKey].Component
+  return typeof views?.edit?.[customViewKey] === 'object' &&
+    'Component' in views.edit[customViewKey]
+    ? views?.edit?.[customViewKey].Component
     : null
 }

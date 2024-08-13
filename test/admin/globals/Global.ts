@@ -7,11 +7,11 @@ export const Global: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          API: {
+        edit: {
+          api: {
             actions: ['/components/GlobalAPIButton/index.js#GlobalAPIButton'],
           },
-          Default: {
+          default: {
             actions: ['/components/GlobalEditButton/index.js#GlobalEditButton'],
           },
         },

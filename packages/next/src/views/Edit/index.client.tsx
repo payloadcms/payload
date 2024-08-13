@@ -13,7 +13,7 @@ export const EditViewClient: React.FC = () => {
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
-  const Edit = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Default
+  const Edit = (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default
     ?.Component
 
   if (!Edit) {
@@ -24,7 +24,7 @@ export const EditViewClient: React.FC = () => {
     <Fragment>
       <SetViewActions
         actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Default?.actions
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
         }
       />
       <RenderComponent mappedComponent={Edit} />

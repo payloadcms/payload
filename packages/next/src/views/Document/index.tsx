@@ -116,14 +116,14 @@ export const Document: React.FC<AdminViewProps> = async ({
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
     ViewOverride =
-      collectionConfig?.admin?.components?.views?.Edit?.Default &&
-      'Component' in collectionConfig.admin.components.views.Edit.Default
+      collectionConfig?.admin?.components?.views?.edit?.default &&
+      'Component' in collectionConfig.admin.components.views.edit.default
         ? createMappedComponent(
-            collectionConfig?.admin?.components?.views?.Edit?.Default
+            collectionConfig?.admin?.components?.views?.edit?.default
               ?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
             undefined,
             undefined,
-            'collectionConfig?.admin?.components?.views?.Edit?.Default',
+            'collectionConfig?.admin?.components?.views?.edit?.default',
           )
         : null
 
@@ -141,12 +141,14 @@ export const Document: React.FC<AdminViewProps> = async ({
         collectionViews?.CustomView?.Component,
         'collectionViews?.CustomView.payloadComponent',
       )
+
       DefaultView = createMappedComponent(
         collectionViews?.DefaultView?.payloadComponent,
         undefined,
         collectionViews?.DefaultView?.Component,
         'collectionViews?.DefaultView.payloadComponent',
       )
+
       ErrorView = createMappedComponent(
         collectionViews?.ErrorView?.payloadComponent,
         undefined,
@@ -179,7 +181,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
-    const editConfig = globalConfig?.admin?.components?.views?.Edit
+    const editConfig = globalConfig?.admin?.components?.views?.edit
     ViewOverride = typeof editConfig === 'function' ? editConfig : null
 
     if (!ViewOverride) {
@@ -196,12 +198,14 @@ export const Document: React.FC<AdminViewProps> = async ({
         globalViews?.CustomView?.Component,
         'globalViews?.CustomView.payloadComponent',
       )
+
       DefaultView = createMappedComponent(
         globalViews?.DefaultView?.payloadComponent,
         undefined,
         globalViews?.DefaultView?.Component,
         'globalViews?.DefaultView.payloadComponent',
       )
+
       ErrorView = createMappedComponent(
         globalViews?.ErrorView?.payloadComponent,
         undefined,

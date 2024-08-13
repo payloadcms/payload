@@ -39,7 +39,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
 
-  const Edit = collectionConfig.admin.components.views.Edit.Default.Component
+  const Edit = collectionConfig.admin.components.views.edit.default.Component
 
   const isEditing = Boolean(docID)
   const apiURL = docID

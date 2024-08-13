@@ -43,7 +43,7 @@ export const VersionsViewClient: React.FC<{
     <React.Fragment>
       <SetViewActions
         actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.Edit?.Versions?.actions
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.versions?.actions
         }
       />
       <LoadingOverlayToggle name="versions" show={!data} />

@@ -9,11 +9,11 @@ const DraftWithMaxGlobal: GlobalConfig = {
     preview: () => 'https://payloadcms.com',
     components: {
       views: {
-        Edit: {
-          Version: {
+        edit: {
+          version: {
             actions: ['/elements/GlobalVersionButton/index.js'],
           },
-          Versions: {
+          versions: {
             actions: ['/elements/GlobalVersionsButton/index.js'],
           },
         },

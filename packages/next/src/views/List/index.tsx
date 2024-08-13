@@ -146,10 +146,10 @@ export const ListView: React.FC<AdminViewProps> = async ({
     })
 
     const ListComponent = createMappedComponent(
-      collectionConfig?.admin?.components?.views?.List?.Component,
+      collectionConfig?.admin?.components?.views?.list?.Component,
       undefined,
       DefaultListView,
-      'collectionConfig?.admin?.components?.views?.List?.Component',
+      'collectionConfig?.admin?.components?.views?.list?.Component',
     )
 
     let clientCollectionConfig = deepCopyObjectSimple(
