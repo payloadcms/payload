@@ -61,7 +61,7 @@ export const LeaveWithoutSaving: React.FC = () => {
     setShow(true)
   }, [])
 
-  usePreventLeave({ hasAccepted, onPrevent, prevent })
+  usePreventLeave({ hasAccepted, modalSlug, onPrevent, prevent })
 
   return (
     <Component
