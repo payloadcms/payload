@@ -14,6 +14,7 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
 >
 
 export type ClientGlobalConfig = {
+  _isPreviewEnabled?: true
   admin: {
     components: {
       elements: {
@@ -39,5 +40,4 @@ export type ClientGlobalConfig = {
     'components' | 'livePreview' | ServerOnlyGlobalAdminProperties
   >
   fields: ClientField[]
-  isPreviewEnabled: boolean
 } & Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties>

@@ -103,6 +103,10 @@ export const createClientCollectionConfig = ({
     }
   })
 
+  if (collection.admin.preview) {
+    clientCollection._isPreviewEnabled = true
+  }
+
   clientCollection.admin.components = {} as ClientCollectionConfig['admin']['components']
 
   if (collection?.admin?.components) {
@@ -313,7 +317,7 @@ export const createClientCollectionConfig = ({
       collectionSlug: collection.slug,
     },
     DefaultListView,
-    'collection.admin.components.views.list ',
+    'collection.admin.components.views.list',
   )
 
   if (

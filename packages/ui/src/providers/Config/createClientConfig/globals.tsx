@@ -69,6 +69,10 @@ export const createClientGlobalConfig = ({
       }
     })
 
+    if (global.admin.preview) {
+      clientGlobal._isPreviewEnabled = true
+    }
+
     clientGlobal.admin.components = {} as ClientGlobalConfig['admin']['components']
 
     if (global?.admin?.components) {

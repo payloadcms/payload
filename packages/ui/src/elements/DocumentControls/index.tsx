@@ -159,11 +159,11 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {(collectionConfig?.isPreviewEnabled || globalConfig?.isPreviewEnabled) && (
+            {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
               <PreviewButton
                 CustomComponent={
-                  collectionConfig?.admin.components?.edit?.PreviewButton ||
-                  globalConfig?.admin.components?.elements?.PreviewButton
+                  collectionConfig?.admin?.components?.edit?.PreviewButton ||
+                  globalConfig?.admin?.components?.elements?.PreviewButton
                 }
               />
             )}

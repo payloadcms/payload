@@ -15,6 +15,7 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 >
 
 export type ClientCollectionConfig = {
+  _isPreviewEnabled?: true
   admin: {
     components: {
       Description: MappedComponent
@@ -52,5 +53,4 @@ export type ClientCollectionConfig = {
     'components' | 'description' | 'livePreview' | ServerOnlyCollectionAdminProperties
   >
   fields: ClientField[]
-  isPreviewEnabled: boolean
 } & Omit<SanitizedCollectionConfig, 'admin' | 'fields' | ServerOnlyCollectionProperties>
