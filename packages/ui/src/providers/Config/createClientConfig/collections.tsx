@@ -369,6 +369,7 @@ export const createClientCollectionConfigs = ({
   for (let i = 0; i < collections.length; i++) {
     const collection = collections[i]
     const clientCollection = clientCollections[i]
+
     clientCollections[i] = createClientCollectionConfig({
       DefaultEditView,
       DefaultListView,

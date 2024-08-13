@@ -210,6 +210,7 @@ export const createClientGlobalConfigs = ({
   for (let i = 0; i < globals.length; i++) {
     const global = globals[i]
     const clientGlobal = clientGlobals[i]
+
     clientGlobals[i] = createClientGlobalConfig({
       DefaultEditView,
       clientGlobal,

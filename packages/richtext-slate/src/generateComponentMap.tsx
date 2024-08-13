@@ -86,6 +86,7 @@ export const getGenerateComponentMap =
               args.admin?.link?.fields,
             ) as unknown as ClientField[]
             clientFields = createClientFields({
+              appendID: true,
               clientFields,
               createMappedComponent,
               fields: args.admin?.link?.fields as Field[],
@@ -116,6 +117,7 @@ export const getGenerateComponentMap =
                   args?.admin?.upload?.collections[collection.slug]?.fields,
                 ) as unknown as ClientField[]
                 clientFields = createClientFields({
+                  appendID: true,
                   clientFields,
                   createMappedComponent,
                   fields: args?.admin?.upload?.collections[collection.slug]?.fields,
