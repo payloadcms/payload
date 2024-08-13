@@ -31,10 +31,7 @@ export type Args = {
   /**
    * A function that connects to the database and returns the drizzle instance
    */
-  getDrizzle: (args: {
-    logger: DrizzleConfig['logger']
-    schema: Record<string, unknown>
-  }) => Promise<PostgresDB | TransactionPg>
+  getDrizzle: PostgresAdapter['getDrizzle']
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -141,10 +138,9 @@ export type PostgresAdapter = {
   /**
    * A function that connects to the database and returns the drizzle instance
    */
-  getDrizzle: (args: {
-    logger: DrizzleConfig['logger']
-    schema: Record<string, unknown>
-  }) => Promise<PostgresDB | TransactionPg>
+  getDrizzle: (
+    args: Pick<DrizzleConfig<Record<string, unknown>>, 'logger' | 'schema'>,
+  ) => { drizzle: PostgresDB | TransactionPg } | Promise<{ drizzle: PostgresDB | TransactionPg }>
   idType: Args['idType']
   initializing: Promise<void>
   insert: Insert

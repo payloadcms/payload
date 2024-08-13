@@ -23,7 +23,8 @@ export const connect: Connect = async function connect(
   try {
     const logger = this.logger || false
 
-    this.drizzle = await this.getDrizzle({ logger, schema: this.schema })
+    const { drizzle } = await this.getDrizzle({ logger, schema: this.schema })
+    this.drizzle = drizzle
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

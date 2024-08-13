@@ -1,5 +1,7 @@
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
+export { nodePostgres } from './connectionHelpers/nodePostgres.js'
+
 import {
   beginTransaction,
   commitTransaction,
