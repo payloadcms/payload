@@ -36,6 +36,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const showError = valid === false && submitted
 
   const prevValid = useRef(valid)
+  const prevErrorMessage = useRef(field?.errorMessage)
   const prevValue = useRef(value)
 
   // Method to return from `useField`, used to
@@ -128,8 +129,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
         // Only dispatch if the validation result has changed
         // This will prevent unnecessary rerenders
-        if (valid !== prevValid.current) {
+        if (valid !== prevValid.current || errorMessage !== prevErrorMessage.current) {
           prevValid.current = valid
+          prevErrorMessage.current = errorMessage
 
           if (typeof dispatchField === 'function') {
             dispatchField({
