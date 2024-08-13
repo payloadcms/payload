@@ -1,10 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 'use client'
-import type React from 'react'
-
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -113,4 +112,35 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
     return null
   }
+
+  return (
+    <React.Fragment>
+      <Pill
+        className={`${baseClass}__toggle`}
+        onClick={() => {
+          setSubmitted(false)
+          toggleModal(modalSlug)
+        }}
+      >
+        {t('version:unpublish')}
+      </Pill>
+      <Modal className={baseClass} slug={modalSlug}>
+        <div className={`${baseClass}__template`}>
+          <h1>{t('version:confirmUnpublish')}</h1>
+          <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
+          <Button
+            buttonStyle="secondary"
+            id="confirm-cancel"
+            onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+            type="button"
+          >
+            {t('general:cancel')}
+          </Button>
+          <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
+            {submitted ? t('version:unpublishing') : t('general:confirm')}
+          </Button>
+        </div>
+      </Modal>
+    </React.Fragment>
+  )
 }
