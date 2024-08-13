@@ -1,7 +1,7 @@
 import type { ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderCustomComponent } from '@payloadcms/ui/shared'
+import { RenderCustomComponent, WithServerSideProps } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
@@ -31,11 +31,30 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   const {
     admin: {
-      components: { Nav: CustomNav } = {
+      components: { Nav: CustomNav, header } = {
         Nav: undefined,
+        header: undefined,
       },
     } = {},
   } = payload.config || {}
+
+  const CustomHeader = Array.isArray(header)
+    ? header.map((Component, i) => (
+        <WithServerSideProps
+          Component={Component}
+          key={i}
+          serverOnlyProps={{
+            i18n,
+            locale,
+            params,
+            payload,
+            permissions,
+            searchParams,
+            user,
+          }}
+        />
+      ))
+    : null
 
   const navProps: NavProps = {
     i18n,
@@ -49,11 +68,14 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <div>
+      {CustomHeader && Array.isArray(CustomHeader) && CustomHeader.map((Component) => Component)}
+      <div style={{ position: 'relative' }}>
         <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-          <NavToggler className={`${baseClass}__nav-toggler`}>
-            <NavHamburger />
-          </NavToggler>
+          <div className={`${baseClass}__nav-toggler`}>
+            <NavToggler>
+              <NavHamburger />
+            </NavToggler>
+          </div>
         </div>
         <Wrapper baseClass={baseClass} className={className}>
           <RenderCustomComponent

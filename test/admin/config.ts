@@ -23,6 +23,7 @@ import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterNavLinks } from './components/AfterNavLinks/index.js'
 import { BeforeLogin } from './components/BeforeLogin/index.js'
+import { CustomHeader } from './components/CustomHeader/index.js'
 import { CustomProvider } from './components/CustomProvider/index.js'
 import { Logout } from './components/Logout/index.js'
 import { CustomDefaultView } from './components/views/CustomDefault/index.js'
@@ -54,6 +55,7 @@ export default buildConfigWithDefaults({
       afterDashboard: [AfterDashboard],
       afterNavLinks: [AfterNavLinks],
       beforeLogin: [BeforeLogin],
+      header: [CustomHeader],
       logout: {
         Button: Logout,
       },
