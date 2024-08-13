@@ -21,6 +21,18 @@ const buildCollectionSchema = (
     },
   })
 
+  if (Array.isArray(collection.upload.filenameCompoundIndex)) {
+    const indexDefinition: Record<string, 1> = collection.upload.filenameCompoundIndex.reduce(
+      (acc, index) => {
+        acc[index] = 1
+        return acc
+      },
+      {},
+    )
+
+    schema.index(indexDefinition, { unique: true })
+  }
+
   if (config.indexSortableFields && collection.timestamps !== false) {
     schema.index({ updatedAt: 1 })
     schema.index({ createdAt: 1 })

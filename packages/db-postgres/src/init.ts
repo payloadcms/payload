@@ -6,7 +6,7 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { BaseExtraConfig } from './schema/build.js'
-import type { GenericColumn, PostgresAdapter } from './types.js'
+import type { PostgresAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
 
