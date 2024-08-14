@@ -8,7 +8,7 @@ import canUseDOM from '../../utilities/canUseDOM'
 
 export interface ContextType {
   headerTheme?: Theme | null
-  setHeaderTheme: (theme: Theme | null) => void  
+  setHeaderTheme: (theme: Theme | null) => void
 }
 
 const initialContext: ContextType = {
