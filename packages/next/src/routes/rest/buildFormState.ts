@@ -20,6 +20,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       status: httpStatus.OK,
     })
   } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
     if (err.message === 'Could not find field schema for given path') {
       return Response.json(
         {
@@ -38,8 +40,6 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
         status: httpStatus.UNAUTHORIZED,
       })
     }
-
-    req.payload.logger.error({ err, msg: `There was an error building form state` })
 
     return routeError({
       config: req.payload.config,

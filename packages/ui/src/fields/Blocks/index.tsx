@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldProps } from 'payload'
+import type { BlockFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -32,31 +32,31 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
+const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    blocks,
-    className,
     descriptionProps,
     errorProps,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin },
+      blocks,
+      label,
+      labels: labelsFromProps,
+      localized,
+      maxRows,
+      minRows: minRowsProp,
+      required,
+    },
     forceRender = false,
-    isSortable = true,
-    label,
     labelProps,
-    labels: labelsFromProps,
-    localized,
-    maxRows,
-    minRows: minRowsProp,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = minRowsProp ?? required ? 1 : 0
@@ -64,7 +64,9 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
 
@@ -189,7 +191,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -212,13 +214,19 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
+      {showError && (
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
               <FieldLabel
-                CustomLabel={CustomLabel}
+                Label={field?.admin?.components?.Description}
                 as="span"
                 label={label}
                 required={required}
@@ -253,7 +261,11 @@ const BlocksFieldComponent: React.FC<BlocksFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

@@ -16,7 +16,7 @@ export const Localizer: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
-  const config = useConfig()
+  const { config } = useConfig()
   const { localization } = config
 
   const { i18n } = useTranslation()

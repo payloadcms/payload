@@ -2,9 +2,6 @@ import type { Block, Field } from 'payload'
 
 import type { FieldConfig, PaymentFieldConfig } from '../../types.js'
 
-import { DynamicFieldSelector } from './DynamicFieldSelector.js'
-import { DynamicPriceSelector } from './DynamicPriceSelector.js'
-
 const name: Field = {
   name: 'name',
   type: 'text',
@@ -454,7 +451,7 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             type: 'text',
             admin: {
               components: {
-                Field: DynamicFieldSelector,
+                Field: '@payloadcms/plugin-form-builder/client#DynamicFieldSelector',
               },
             },
           },
@@ -534,7 +531,7 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             type: 'text',
             admin: {
               components: {
-                Field: DynamicPriceSelector,
+                Field: '@payloadcms/plugin-form-builder/client#DynamicPriceSelector',
               },
             },
             label: 'Value',
@@ -572,7 +569,6 @@ const Message: Block = {
   },
 }
 
- 
 export const fields = {
   checkbox: Checkbox,
   country: Country,

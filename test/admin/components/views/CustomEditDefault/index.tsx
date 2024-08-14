@@ -1,10 +1,12 @@
-import type { EditViewComponent } from 'payload'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-export const CustomDefaultEditView: EditViewComponent = ({ initPageResult }) => {
+export const CustomDefaultEditView: PayloadServerReactComponent<EditViewComponent> = ({
+  initPageResult,
+}) => {
   if (!initPageResult) {
     notFound()
   }
@@ -47,7 +49,7 @@ export const CustomDefaultEditView: EditViewComponent = ({ initPageResult }) => 
         <p>This custom Default view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Default</code>
+            <code>components.views.edit.default</code>
             <p>
               {'This allows you to override only the default edit view specifically, but '}
               <b>
@@ -59,7 +61,7 @@ export const CustomDefaultEditView: EditViewComponent = ({ initPageResult }) => 
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Default.Component</code>
+            <code>components.views.edit.default.Component</code>
             <p>
               This is the most granular override, allowing you to override only the Default
               component, or any of its other properties like path and label.

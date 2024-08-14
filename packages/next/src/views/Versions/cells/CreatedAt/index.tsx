@@ -18,8 +18,10 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   globalSlug,
 }) => {
   const {
-    admin: { dateFormat },
-    routes: { admin: adminRoute },
+    config: {
+      admin: { dateFormat },
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()

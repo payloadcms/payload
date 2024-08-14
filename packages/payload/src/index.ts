@@ -17,6 +17,7 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
+import type { ImportMap } from './bin/generateImportMap/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -147,11 +148,10 @@ export class BasePayload {
   authStrategies: AuthStrategy[]
 
   collections: {
-    [slug: number | string | symbol]: Collection
+    [slug: string]: Collection
   } = {}
 
   config: SanitizedConfig
-
   /**
    * @description Performs count operation
    * @param options
@@ -175,8 +175,8 @@ export class BasePayload {
     const { create } = localOperations
     return create<TSlug>(this, options)
   }
-  db: DatabaseAdapter
 
+  db: DatabaseAdapter
   decrypt = decrypt
 
   duplicate = async <TSlug extends CollectionSlug>(
@@ -188,10 +188,10 @@ export class BasePayload {
 
   email: InitializedEmailAdapter
 
+  encrypt = encrypt
+
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
-
-  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -290,6 +290,8 @@ export class BasePayload {
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
 
   globals: Globals
+
+  importMap: ImportMap
 
   logger: Logger
 
@@ -479,6 +481,8 @@ export class BasePayload {
       }
     }
 
+    this.importMap = options.importMap
+
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
@@ -666,8 +670,8 @@ interface RequestContext {
 
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export type { FieldTypes } from './admin/forms/FieldTypes.js'
 export type * from './admin/types.js'
+export type { MappedView } from './admin/views/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
@@ -698,8 +702,15 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
+export { generateImportMap } from './bin/generateImportMap/index.js'
+
+export type { ImportMap } from './bin/generateImportMap/index.js'
+export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export type { ClientCollectionConfig } from './collections/config/client.js'
-export { createClientCollectionConfig } from './collections/config/client.js'
+export type {
+  ServerOnlyCollectionAdminProperties,
+  ServerOnlyCollectionProperties,
+} from './collections/config/client.js'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -749,19 +760,11 @@ export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export type { ClientConfig } from './config/client.js'
-export { createClientConfig } from './config/client.js'
+
+export { serverOnlyConfigProperties } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
-export type {
-  Access,
-  AccessArgs,
-  EditViewComponent,
-  EntityDescription,
-  EntityDescriptionComponent,
-  EntityDescriptionFunction,
-  SanitizedConfig,
-} from './config/types.js'
-export * from './config/types.js'
+export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
@@ -863,64 +866,101 @@ export {
 } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export type { ClientFieldConfig } from './fields/config/client.js'
-export { createClientFieldConfig } from './fields/config/client.js'
+export type { ServerOnlyFieldProperties } from './fields/config/client.js'
+export type { ServerOnlyFieldAdminProperties } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
 export type {
+  AdminClient,
   ArrayField,
+  ArrayFieldClient,
+  BaseValidateOptions,
   Block,
   BlockField,
+  BlockFieldClient,
   CheckboxField,
+  CheckboxFieldClient,
+  ClientBlock,
+  ClientField,
   CodeField,
+  CodeFieldClient,
   CollapsibleField,
+  CollapsibleFieldClient,
   Condition,
   DateField,
+  DateFieldClient,
   EmailField,
+  EmailFieldClient,
   Field,
   FieldAccess,
   FieldAffectingData,
+  FieldAffectingDataClient,
   FieldBase,
+  FieldBaseClient,
   FieldHook,
   FieldHookArgs,
   FieldPresentationalOnly,
+  FieldPresentationalOnlyClient,
+  FieldTypes,
   FieldWithMany,
+  FieldWithManyClient,
   FieldWithMaxDepth,
+  FieldWithMaxDepthClient,
   FieldWithPath,
+  FieldWithPathClient,
   FieldWithSubFields,
+  FieldWithSubFieldsClient,
   FilterOptions,
   FilterOptionsProps,
   GroupField,
+  GroupFieldClient,
   HookName,
   JSONField,
+  JSONFieldClient,
   Labels,
+  LabelsClient,
   NamedTab,
   NonPresentationalField,
+  NonPresentationalFieldClient,
   NumberField,
+  NumberFieldClient,
   Option,
   OptionObject,
   PointField,
+  PointFieldClient,
   PolymorphicRelationshipField,
+  PolymorphicRelationshipFieldClient,
   RadioField,
+  RadioFieldClient,
   RelationshipField,
+  RelationshipFieldClient,
   RelationshipValue,
   RichTextField,
-  RowAdmin,
+  RichTextFieldClient,
   RowField,
+  RowFieldClient,
   SelectField,
+  SelectFieldClient,
   SingleRelationshipField,
+  SingleRelationshipFieldClient,
   Tab,
   TabAsField,
-  TabsAdmin,
+  TabAsFieldClient,
   TabsField,
+  TabsFieldClient,
   TextField,
+  TextFieldClient,
   TextareaField,
+  TextareaFieldClient,
   UIField,
+  UIFieldClient,
   UnnamedTab,
   UploadField,
+  UploadFieldClient,
   Validate,
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
@@ -950,7 +990,10 @@ export type {
   UsernameFieldValidation,
 } from './fields/validations.js'
 export type { ClientGlobalConfig } from './globals/config/client.js'
-export { createClientGlobalConfig } from './globals/config/client.js'
+export type {
+  ServerOnlyGlobalAdminProperties,
+  ServerOnlyGlobalProperties,
+} from './globals/config/client.js'
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1015,12 +1058,12 @@ export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
+export { getDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { getDependencies }
 export { saveVersion } from './versions/saveVersion.js'
 export type { TypeWithVersion } from './versions/types.js'
 

@@ -1,10 +1,13 @@
 'use client'
 
+import type { MappedComponent } from 'payload'
+
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -16,8 +19,10 @@ const baseClass = 'save-draft'
 
 export const DefaultSaveDraftButton: React.FC = () => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const modified = useFormModified()
@@ -87,10 +92,10 @@ export const DefaultSaveDraftButton: React.FC = () => {
 }
 
 type Props = {
-  CustomComponent?: React.ReactNode
+  CustomComponent?: MappedComponent
 }
 
 export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return CustomComponent
+  if (CustomComponent) return <RenderComponent mappedComponent={CustomComponent} />
   return <DefaultSaveDraftButton />
 }

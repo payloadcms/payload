@@ -1,14 +1,14 @@
-import type { LexicalPluginNodeConverterProvider } from './types.js'
+import type { LexicalPluginNodeConverter } from './types.js'
 
-import { HeadingConverter } from './converters/heading/index.js'
-import { LinkConverter } from './converters/link/index.js'
-import { ListConverter } from './converters/list/index.js'
-import { ListItemConverter } from './converters/listItem/index.js'
-import { QuoteConverter } from './converters/quote/index.js'
-import { UnknownConverter } from './converters/unknown/index.js'
-import { UploadConverter } from './converters/upload/index.js'
+import { HeadingConverter } from './converters/heading/converter.js'
+import { LinkConverter } from './converters/link/converter.js'
+import { ListConverter } from './converters/list/converter.js'
+import { ListItemConverter } from './converters/listItem/converter.js'
+import { QuoteConverter } from './converters/quote/converter.js'
+import { UnknownConverter } from './converters/unknown/converter.js'
+import { UploadConverter } from './converters/upload/converter.js'
 
-export const defaultConverters: LexicalPluginNodeConverterProvider[] = [
+export const defaultConverters: LexicalPluginNodeConverter[] = [
   HeadingConverter,
   LinkConverter,
   ListConverter,

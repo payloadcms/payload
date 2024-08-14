@@ -68,6 +68,7 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
         if (typeof field.editor.generateSchemaMap === 'function') {
           field.editor.generateSchemaMap({
             config,
+            field,
             i18n,
             schemaMap,
             schemaPath: `${schemaPath}.${field.name}`,

@@ -1,10 +1,12 @@
-import type { EditViewComponent } from 'payload'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-export const CustomVersionsView: EditViewComponent = ({ initPageResult }) => {
+export const CustomVersionsView: PayloadServerReactComponent<EditViewComponent> = ({
+  initPageResult,
+}) => {
   if (!initPageResult) {
     notFound()
   }
@@ -47,7 +49,7 @@ export const CustomVersionsView: EditViewComponent = ({ initPageResult }) => {
         <p>This custom Versions view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Versions</code>
+            <code>components.views.edit.Versions</code>
             <p>
               {'This allows you to override only the Versions edit view specifically, but '}
               <b>
@@ -57,7 +59,7 @@ export const CustomVersionsView: EditViewComponent = ({ initPageResult }) => {
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Versions.Component</code>
+            <code>components.views.edit.versions.Component</code>
           </li>
           <p>
             This is the most granular override, allowing you to override only the Versions

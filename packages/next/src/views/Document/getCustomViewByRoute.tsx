@@ -13,8 +13,8 @@ export const getCustomViewByRoute = ({
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views']
 }): EditViewComponent => {
-  if (typeof views?.Edit === 'object' && typeof views?.Edit !== 'function') {
-    const foundViewConfig = Object.entries(views.Edit).find(([, view]) => {
+  if (typeof views?.edit === 'object' && typeof views?.edit !== 'function') {
+    const foundViewConfig = Object.entries(views.edit).find(([, view]) => {
       if (typeof view === 'object' && typeof view !== 'function' && 'path' in view) {
         const viewPath = `${baseRoute}${view.path}`
 

@@ -30,8 +30,10 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { permissions } = useAuth()
   const { toggleModal } = useModal()

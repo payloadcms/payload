@@ -7,7 +7,7 @@ export const usernameFieldConfig: TextField = {
   type: 'text',
   admin: {
     components: {
-      Field: () => null,
+      Field: '@payloadcms/ui/shared#emptyComponent',
     },
   },
   hooks: {

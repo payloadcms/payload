@@ -19,37 +19,39 @@ export { TextInput, TextInputProps }
 
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        rtl,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      localized,
+      maxLength,
+      maxRows,
+      minLength,
+      minRows,
+      required,
+    },
     inputRef,
-    label,
-    labelProps,
-    localized,
-    maxLength,
-    maxRows,
-    minLength,
-    minRows,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    rtl,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
-  const { localization: localizationConfig } = useConfig()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -118,18 +120,16 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
       hasMany={hasMany}
       inputRef={inputRef}
       label={label}
-      labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

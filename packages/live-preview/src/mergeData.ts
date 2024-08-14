@@ -71,7 +71,9 @@ export const mergeData = async <T>(args: {
       try {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
-          endpoint: `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+          endpoint: encodeURI(
+            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+          ),
           serverURL,
         }).then((res) => res.json())
 

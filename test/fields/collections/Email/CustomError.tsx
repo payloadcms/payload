@@ -3,7 +3,7 @@
 import { useField, useFormFields, useFormSubmitted } from '@payloadcms/ui'
 import React from 'react'
 
-const CustomError: React.FC<any> = (props) => {
+export const CustomError: React.FC<any> = (props) => {
   const { path: pathFromProps } = props
   const submitted = useFormSubmitted()
   const { path } = useField(pathFromProps)
@@ -18,5 +18,3 @@ const CustomError: React.FC<any> = (props) => {
 
   return null
 }
-
-export default CustomError

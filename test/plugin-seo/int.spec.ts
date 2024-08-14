@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import configPromise from './config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -21,7 +20,7 @@ describe('@payloadcms/plugin-seo', () => {
   beforeAll(async () => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
 
     // Create image
     const filePath = path.resolve(dirname, './image-1.jpg')
