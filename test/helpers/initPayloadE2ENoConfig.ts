@@ -7,7 +7,7 @@ import { fileURLToPath, parse } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 
-import { runInit } from '../runInit.js'
+import { runInitSeparateProcess } from '../runInitSeparateProcess.js'
 import { createTestHooks } from '../testHooks.js'
 import { getNextJSRootDir } from './getNextJSRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
@@ -32,7 +32,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 }: Args): Promise<Result<T>> {
   const testSuiteName = path.basename(dirname)
 
-  await runInit(testSuiteName, true)
+  await runInitSeparateProcess(testSuiteName, true)
 
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
