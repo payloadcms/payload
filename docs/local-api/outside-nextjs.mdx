@@ -65,10 +65,21 @@ The `payload run` command does two things for you:
 
 ### Troubleshooting
 
-If you encounter import-related errors, try running the script in TSX mode:
+If you encounter import-related errors, you have 2 options:
 
+#### Option 1: enable tsx mode by appending `--use-tsx` to the `payload` command:
+
+Example:
 ```sh
 payload run src/seed.ts --use-tsx
 ```
 
 Note: Install tsx in your project first. Be aware that TSX mode is slower than the default swc mode, so only use it if necessary.
+
+#### Option 2: run the script with bun by replacing `payload` with `payload-bun`:
+
+```sh
+payload-bun run src/seed.ts
+```
+
+You will need to have bun installed on your system for this to work.
