@@ -86,6 +86,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   // which seeds test data twice + other bad things.
   // We initialize Payload above so we can have access to it in the tests
   void app.prepare().then(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     createServer(async (req, res) => {
       const parsedUrl = parse(req.url, true)
       await handle(req, res, parsedUrl)
