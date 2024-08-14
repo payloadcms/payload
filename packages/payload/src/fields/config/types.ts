@@ -1237,6 +1237,11 @@ export type JoinField = {
   type: 'join'
 } & FieldBase
 
+export type JoinFieldClient = {
+  admin?: AdminClient & Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
+} & FieldBaseClient
+& Pick<JoinField, 'collection' | 'index' | 'on' | 'type'>
+
 export type Field =
   | ArrayField
   | BlockField
@@ -1271,6 +1276,7 @@ export type ClientField =
   | EmailFieldClient
   | GroupFieldClient
   | JSONFieldClient
+  | JoinFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1318,6 +1324,7 @@ export type FieldAffectingDataClient =
   | EmailFieldClient
   | GroupFieldClient
   | JSONFieldClient
+  | JoinFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient

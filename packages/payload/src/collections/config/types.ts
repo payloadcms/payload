@@ -499,7 +499,7 @@ export interface SanitizedCollectionConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  joins?: SanitizedJoins
+  joins: SanitizedJoins
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }

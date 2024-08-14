@@ -10,18 +10,16 @@ import { withCondition } from '../../forms/withCondition/index.js'
 
 const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
   const {
-    name,
-    disableModifyingForm = true,
-    forceUsePathFromProps,
-    path: pathFromProps,
-    value: valueFromProps,
+    field: { name, _path: pathFromProps, collection, on },
   } = props
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { path, value } = useField({
-    path: (!forceUsePathFromProps ? pathFromContext : null) || pathFromProps || name,
+    path: pathFromContext ?? pathFromProps ?? name,
   })
+
+  console.log(props)
 
   // TODO: replace hidden placeholder with the actual edit component
   return (

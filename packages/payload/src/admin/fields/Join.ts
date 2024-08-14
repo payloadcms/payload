@@ -1,12 +1,11 @@
+import type { MarkOptional } from 'ts-essentials'
+
+import type { JoinFieldClient } from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type JoinFieldProps = {
-  disableModifyingForm?: false
-  forceUsePathFromProps?: boolean
-  name?: string
-  path?: string
-  value?: unknown
+  readonly field: MarkOptional<JoinFieldClient, 'type'>
 } & FormFieldBase
 
 export type JoinFieldLabelComponent = LabelComponent<'join'>

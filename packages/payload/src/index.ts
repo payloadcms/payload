@@ -923,6 +923,7 @@ export type {
   JSONField,
   JSONFieldClient,
   JoinField,
+  JoinFieldClient,
   Labels,
   LabelsClient,
   NamedTab,
