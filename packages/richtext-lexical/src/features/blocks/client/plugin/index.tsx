@@ -5,7 +5,13 @@ import type { BlockFieldClient } from 'payload'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import { useFieldProps, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  formatDrawerSlug,
+  useEditDepth,
+  useFieldProps,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -37,8 +43,6 @@ import {
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
-const drawerSlug = 'lexical-inlineBlocks-create'
-
 export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [editor] = useLexicalComposerContext()
   const { closeModal, toggleModal } = useModal()
@@ -47,21 +51,17 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
   const { i18n, t } = useTranslation<string, any>()
   const { schemaPath } = useFieldProps()
+  const { uuid } = useEditorConfigContext()
+  const editDepth = useEditDepth()
+
+  const drawerSlug = formatDrawerSlug({
+    slug: `lexical-inlineBlocks-create-` + uuid,
+    depth: editDepth,
+  })
 
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
-
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
-
-  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
-    ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
-    : null
-
-  const clientBlock = blocksField
-    ? blocksField.blocks.find((block) => block.slug === blockFields?.blockType)
-    : null
 
   useEffect(() => {
     if (!editor.hasNodes([BlockNode])) {
@@ -158,7 +158,22 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [editor, targetNodeKey, toggleModal])
+  }, [editor, targetNodeKey, toggleModal, drawerSlug])
+
+  if (!blockFields) {
+    return null
+  }
+
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.lexical_inline_blocks.${blockFields?.blockType}`
+
+  const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_inline_blocks`
+  const blocksField: BlockFieldClient = richTextComponentMap.has(componentMapRenderedBlockPath)
+    ? richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+    : null
+
+  const clientBlock = blocksField
+    ? blocksField.blocks.find((block) => block.slug === blockFields?.blockType)
+    : null
 
   if (!blocksField) {
     return null

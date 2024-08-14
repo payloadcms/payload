@@ -9,9 +9,10 @@ import {
   Button,
   DrawerToggler,
   File,
+  formatDrawerSlug,
   useConfig,
   useDocumentDrawer,
-  useDrawerSlug,
+  useEditDepth,
   useModal,
   usePayloadAPI,
   useTranslation,
@@ -65,7 +66,8 @@ const Component: React.FC<ElementProps> = (props) => {
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { closeModal } = useModal()
-
+  const { uuid } = useEditorConfigContext()
+  const editDepth = useEditDepth()
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
@@ -77,7 +79,10 @@ const Component: React.FC<ElementProps> = (props) => {
     collections.find((coll) => coll.slug === relationTo),
   )
 
-  const drawerSlug = useDrawerSlug('upload-drawer')
+  const drawerSlug = formatDrawerSlug({
+    slug: `lexical-upload-drawer-` + uuid,
+    depth: editDepth,
+  })
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value,
