@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
-import type { CSSProperties } from 'react'
-
-//eslint-disable-next-line @typescript-eslint/no-unused-vars
-import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { JSONSchema4 } from 'json-schema'
+import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
@@ -29,7 +26,7 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug, JsonObject } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 
