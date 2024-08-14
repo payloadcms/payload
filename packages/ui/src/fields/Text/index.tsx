@@ -31,7 +31,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
         rtl,
         style,
         width,
-      },
+      } = {},
       hasMany,
       label,
       localized,

@@ -43,7 +43,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         description,
         isSortable = true,
         readOnly: readOnlyFromAdmin,
-      },
+      } = {},
       fields,
       label,
       localized,
