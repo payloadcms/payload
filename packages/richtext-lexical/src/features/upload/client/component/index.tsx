@@ -26,7 +26,7 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { ClientComponentProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
@@ -79,8 +79,10 @@ const Component: React.FC<ElementProps> = (props) => {
     collections.find((coll) => coll.slug === relationTo),
   )
 
+  const componentID = useId()
+
   const drawerSlug = formatDrawerSlug({
-    slug: `lexical-upload-drawer-` + uuid,
+    slug: `lexical-upload-drawer-` + uuid + componentID, // There can be multiple upload components, each with their own drawer, in one single editor => separate them by componentID
     depth: editDepth,
   })
 
