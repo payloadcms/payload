@@ -42,6 +42,7 @@ export const DocumentControls: React.FC<{
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
 }> = (props) => {
@@ -55,6 +56,7 @@ export const DocumentControls: React.FC<{
     isEditing,
     onDuplicate,
     permissions,
+    redirectAfterDelete,
     redirectAfterDuplicate,
   } = props
 
@@ -250,6 +252,7 @@ export const DocumentControls: React.FC<{
                     buttonId="action-delete"
                     collectionSlug={collectionConfig?.slug}
                     id={id.toString()}
+                    redirectAfterDelete={redirectAfterDelete}
                     singularLabel={collectionConfig?.labels?.singular}
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />

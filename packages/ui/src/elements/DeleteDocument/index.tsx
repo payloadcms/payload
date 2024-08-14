@@ -26,13 +26,21 @@ export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly id?: string
+  readonly redirectAfterDelete?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly title?: string
   readonly useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const DeleteDocument: React.FC<Props> = (props) => {
-  const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
+  const {
+    id,
+    buttonId,
+    collectionSlug,
+    redirectAfterDelete = true,
+    singularLabel,
+    title: titleFromProps,
+  } = props
 
   const {
     config: {
@@ -61,6 +69,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     setDeleting(true)
     setModified(false)
+
     try {
       await requests
         .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
@@ -76,19 +85,26 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             if (res.status < 400) {
               setDeleting(false)
               toggleModal(modalSlug)
+
               toast.success(
                 t('general:titleDeleted', { label: getTranslation(singularLabel, i18n), title }) ||
                   json.message,
               )
 
-              return router.push(
-                formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${collectionSlug}`,
-                }),
-              )
+              if (redirectAfterDelete) {
+                return router.push(
+                  formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${collectionSlug}`,
+                  }),
+                )
+              }
+
+              return
             }
+
             toggleModal(modalSlug)
+
             if (json.errors) {
               json.errors.forEach((error) => toast.error(error.message))
             } else {
@@ -117,6 +133,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     router,
     adminRoute,
     addDefaultError,
+    redirectAfterDelete,
   ])
 
   if (id) {

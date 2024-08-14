@@ -56,6 +56,7 @@ export const DefaultEditView: React.FC = () => {
     isInitializing,
     onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDelete,
     redirectAfterDuplicate,
   } = useDocumentInfo()
 
@@ -223,6 +224,7 @@ export const DefaultEditView: React.FC = () => {
             isEditing={isEditing}
             onDuplicate={onDuplicate}
             permissions={docPermissions}
+            redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />

@@ -12,6 +12,8 @@ export type DocumentDrawerProps = {
   readonly onDelete?: DocumentInfoContext['onDelete']
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly onSave?: DocumentInfoContext['onSave']
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {

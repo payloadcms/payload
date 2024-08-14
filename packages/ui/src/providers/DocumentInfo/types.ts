@@ -52,6 +52,7 @@ export type DocumentInfoProps = {
     doc: TypeWithID
     result: Data
   }) => Promise<void> | void
+  redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
 }
 

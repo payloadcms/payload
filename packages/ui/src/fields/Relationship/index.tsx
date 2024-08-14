@@ -233,8 +233,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 dispatchOptions({
                   type: 'ADD',
                   collection,
-                  // TODO: fix this
-                  // @ts-expect-error-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -246,8 +244,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               dispatchOptions({
                 type: 'ADD',
                 collection,
-                // TODO: fix this
-                // @ts-expect-error-next-line
                 config,
                 docs: [],
                 i18n,
@@ -354,8 +350,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           dispatchOptions({
             type: 'ADD',
             collection,
-            // TODO: fix this
-            // @ts-expect-error-next-line
             config,
             docs,
             i18n,
@@ -434,8 +428,19 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       dispatchOptions({
         type: 'UPDATE',
         collection: args.collectionConfig,
-        // TODO: fix this
-        // @ts-expect-error-next-line
+        config,
+        doc: args.doc,
+        i18n,
+      })
+    },
+    [i18n, config],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      dispatchOptions({
+        type: 'REMOVE',
+        collection: args.collectionConfig,
         config,
         doc: args.doc,
         i18n,
@@ -510,7 +515,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               customProps={{
                 disableKeyDown: drawerIsOpen,
                 disableMouseDown: drawerIsOpen,
-                onDelete: onSave,
+                onDelete,
                 onDuplicate: onSave,
                 onSave,
                 setDrawerIsOpen,

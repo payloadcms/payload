@@ -1,11 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, SanitizedConfig } from 'payload'
+import type { ClientCollectionConfig, ClientConfig } from 'payload'
 
 export type Option = {
-  readonly label: string
-  readonly options?: Option[]
-  readonly relationTo?: string
-  readonly value: number | string
+  label: string
+  options?: Option[]
+  relationTo?: string
+  value: number | string
 }
 
 export type OptionGroup = {
@@ -26,7 +26,7 @@ type CLEAR = {
 
 type UPDATE = {
   collection: ClientCollectionConfig
-  config: SanitizedConfig
+  config: ClientConfig
   doc: any
   i18n: I18nClient
   type: 'UPDATE'
@@ -34,7 +34,7 @@ type UPDATE = {
 
 type ADD = {
   collection: ClientCollectionConfig
-  config: SanitizedConfig
+  config: ClientConfig
   docs: any[]
   i18n: I18nClient
   ids?: (number | string)[]
@@ -42,7 +42,15 @@ type ADD = {
   type: 'ADD'
 }
 
-export type Action = ADD | CLEAR | UPDATE
+type REMOVE = {
+  collection: ClientCollectionConfig
+  config: ClientConfig
+  doc: any
+  i18n: I18nClient
+  type: 'REMOVE'
+}
+
+export type Action = ADD | CLEAR | REMOVE | UPDATE
 
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number

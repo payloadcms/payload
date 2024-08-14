@@ -27,6 +27,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
 }) => {
   const { config } = useConfig()
 
@@ -148,7 +150,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onDuplicate={onDuplicate}
       onLoadError={onLoadError}
       onSave={onSave}
-      redirectAfterDuplicate={false}
+      redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
+      redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
       <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>
