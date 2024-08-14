@@ -155,7 +155,7 @@ export const Autosave: React.FC<Props> = ({
                   }
                 })
                 .then((json) => {
-                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json.errors) {
+                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
                     if (Array.isArray(json.errors)) {
                       const [fieldErrors, nonFieldErrors] = json.errors.reduce(
                         ([fieldErrs, nonFieldErrs], err) => {
