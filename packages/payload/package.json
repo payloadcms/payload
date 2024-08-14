@@ -64,11 +64,13 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "bin": {
-    "payload": "bin.js"
+    "payload": "bin.js",
+    "payload-bun": "bun-bin.js"
   },
   "files": [
     "dist",
-    "bin.js"
+    "bin.js",
+    "bin-bun.js"
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
