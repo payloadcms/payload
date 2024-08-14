@@ -35,7 +35,7 @@ export type Imports = {
  * Import Map after being imported from the actual import map. Contains all the actual imported components
  */
 export type ImportMap = {
-  [path: UserImportPath]: React.FC
+  [path: UserImportPath]: any
 }
 
 export function addPayloadComponentToImportMap({

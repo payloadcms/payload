@@ -64,7 +64,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },

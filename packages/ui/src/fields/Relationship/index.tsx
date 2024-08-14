@@ -50,7 +50,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         sortOptions,
         style,
         width,
-      },
+      } = {},
       hasMany,
       label,
       relationTo,

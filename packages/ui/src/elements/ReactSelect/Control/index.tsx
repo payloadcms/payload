@@ -16,7 +16,6 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
 
   return (
     <React.Fragment>
-      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.Control
         {...props}
         innerProps={{

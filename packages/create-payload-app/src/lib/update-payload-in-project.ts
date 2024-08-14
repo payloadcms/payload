@@ -77,7 +77,7 @@ export async function updatePayloadInProject(
 
   const templateFilesPath =
     process.env.JEST_WORKER_ID !== undefined
-      ? path.resolve(dirname, '../../../../templates/blank-3.0')
+      ? path.resolve(dirname, '../../../../templates/blank')
       : path.resolve(dirname, '../..', 'dist/template')
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')

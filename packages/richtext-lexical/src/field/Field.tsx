@@ -40,7 +40,7 @@ const RichTextComponent: React.FC<
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },

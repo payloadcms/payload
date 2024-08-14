@@ -482,7 +482,9 @@ describe('lexicalMain', () => {
     // Click on button with class lexical-upload__upload-drawer-toggler
     await newUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
 
-    const uploadExtraFieldsDrawer = page.locator('dialog[id^=drawer_1_upload-drawer-]').first()
+    const uploadExtraFieldsDrawer = page
+      .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
+      .first()
     await expect(uploadExtraFieldsDrawer).toBeVisible()
     await wait(500)
 
@@ -508,7 +510,7 @@ describe('lexicalMain', () => {
     await expect(reloadedUploadNode).toBeVisible()
     await reloadedUploadNode.locator('.lexical-upload__upload-drawer-toggler').first().click()
     const reloadedUploadExtraFieldsDrawer = page
-      .locator('dialog[id^=drawer_1_upload-drawer-]')
+      .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
       .first()
     await expect(reloadedUploadExtraFieldsDrawer).toBeVisible()
     await wait(500)

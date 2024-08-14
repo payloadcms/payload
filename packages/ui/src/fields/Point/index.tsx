@@ -34,7 +34,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         step,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },

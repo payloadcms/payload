@@ -18,7 +18,7 @@ concurrency:
 
 env:
   NODE_VERSION: 18.20.2
-  PNPM_VERSION: 8.15.7
+  PNPM_VERSION: 9.7.0
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -427,8 +427,8 @@ jobs:
       - name: Pack and build app
         run: |
           set -ex
-          pnpm run script:pack --dest templates/blank-3.0
-          cd templates/blank-3.0
+          pnpm run script:pack --dest templates/blank
+          cd templates/blank
           cp .env.example .env
           ls -la
           pnpm add ./*.tgz --ignore-workspace
