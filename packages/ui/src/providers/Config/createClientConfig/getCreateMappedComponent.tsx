@@ -31,7 +31,7 @@ export function getCreateMappedComponent({
     Fallback: React.FC<any>,
     identifier: string,
   ): MappedComponent => {
-    if (!payloadComponent) {
+    if (payloadComponent === undefined || payloadComponent === null) {
       if (!Fallback) {
         return undefined
       }
@@ -52,6 +52,12 @@ export function getCreateMappedComponent({
         if (props) toReturn.props = props
 
         return toReturn
+      }
+    }
+
+    if (payloadComponent === false) {
+      return {
+        type: 'empty',
       }
     }
 
@@ -107,7 +113,7 @@ export function getCreateMappedComponent({
     fallback,
     identifier,
   ) => {
-    if (!payloadComponent && !fallback) {
+    if ((payloadComponent === undefined || payloadComponent === null) && !fallback) {
       return undefined as any
     }
 

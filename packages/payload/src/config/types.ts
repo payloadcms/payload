@@ -13,7 +13,7 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, MappedComponent, RichTextAdapter } from '../admin/types.js'
+import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
@@ -38,12 +38,12 @@ import type { PayloadLogger } from '../utilities/logger.js'
 /**
  * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
  *
- * If the path is an empty string, it will be treated as () => null
+ * If it is `false` an empty component will be rendered.
  */
 export type PayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
-> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
+> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | false | string
 
 // We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
 // We also NEED to actually use those generics for this to work, thus they are part of the props.
