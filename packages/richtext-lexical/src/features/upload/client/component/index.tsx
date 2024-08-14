@@ -9,9 +9,10 @@ import {
   Button,
   DrawerToggler,
   File,
+  formatDrawerSlug,
   useConfig,
   useDocumentDrawer,
-  useDrawerSlug,
+  useEditDepth,
   useModal,
   usePayloadAPI,
   useTranslation,
@@ -25,7 +26,7 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { ClientComponentProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
@@ -65,7 +66,8 @@ const Component: React.FC<ElementProps> = (props) => {
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { closeModal } = useModal()
-
+  const { uuid } = useEditorConfigContext()
+  const editDepth = useEditDepth()
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
@@ -77,7 +79,12 @@ const Component: React.FC<ElementProps> = (props) => {
     collections.find((coll) => coll.slug === relationTo),
   )
 
-  const drawerSlug = useDrawerSlug('upload-drawer')
+  const componentID = useId()
+
+  const drawerSlug = formatDrawerSlug({
+    slug: `lexical-upload-drawer-` + uuid + componentID, // There can be multiple upload components, each with their own drawer, in one single editor => separate them by componentID
+    depth: editDepth,
+  })
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value,
