@@ -1023,6 +1023,30 @@ describe('admin1', () => {
       await page.locator('.doc-controls__popup >> .popup-button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
+
+    test('should properly close leave-without-saving modal after clicking leave-anyway button', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const title = 'title'
+      await page.locator('#field-title').fill(title)
+      await saveDocHotkeyAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+
+      const newTitle = 'new title'
+      await page.locator('#field-title').fill(newTitle)
+
+      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
+      await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
+    })
   })
 
   describe('custom IDs', () => {
