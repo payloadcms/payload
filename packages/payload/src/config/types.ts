@@ -914,9 +914,6 @@ export type SanitizedConfig = {
 
 export type EditConfig =
   | {
-      api?: Partial<EditViewConfig>
-      default?: Partial<EditViewConfig>
-      livePreview?: Partial<EditViewConfig>
       /**
        * Replace or modify individual nested routes, or add new ones:
        * + `default` - `/admin/collections/:collection/:id`
@@ -927,7 +924,12 @@ export type EditConfig =
        * + `versions` - `/admin/collections/:collection/:id/versions`
        * + `version` - `/admin/collections/:collection/:id/versions/:version`
        * + `customView` - `/admin/collections/:collection/:id/:path`
+       *
+       * To override the entire Edit View including all nested views, use the `root` key.
        */
+      api?: Partial<EditViewConfig>
+      default?: Partial<EditViewConfig>
+      livePreview?: Partial<EditViewConfig>
       root?: never
       version?: Partial<EditViewConfig>
       versions?: Partial<EditViewConfig>
@@ -940,7 +942,7 @@ export type EditConfig =
       default?: never
       livePreview?: never
       /**
-       * Replace or modify all nested routes, including the document header and controls. This cannot be used in conjunction with other nested views.
+       * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
        * + `root` - `/admin/collections/:collection/:id/**\/*`
        */
       root: Partial<EditViewConfig>
