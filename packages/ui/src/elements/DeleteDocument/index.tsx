@@ -23,12 +23,12 @@ import './index.scss'
 const baseClass = 'delete-document'
 
 export type Props = {
-  buttonId?: string
-  collectionSlug: SanitizedCollectionConfig['slug']
-  id?: string
-  singularLabel: SanitizedCollectionConfig['labels']['singular']
-  title?: string
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
+  readonly buttonId?: string
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly id?: string
+  readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
+  readonly title?: string
+  readonly useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const DeleteDocument: React.FC<Props> = (props) => {
@@ -47,7 +47,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { title } = useDocumentInfo()
-  const drawerDepth = useEditDepth()
+  const editDepth = useEditDepth()
 
   const titleToRender = titleFromProps || title || id
 
@@ -135,7 +135,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           className={baseClass}
           slug={modalSlug}
           style={{
-            zIndex: drawerZBase + drawerDepth,
+            zIndex: drawerZBase + editDepth,
           }}
         >
           <div className={`${baseClass}__template`}>
@@ -162,7 +162,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               >
                 {t('general:cancel')}
               </Button>
-              <Button id="confirm-delete" onClick={deleting ? undefined : void handleDelete}>
+              <Button
+                id="confirm-delete"
+                onClick={() => {
+                  if (!deleting) void handleDelete()
+                }}
+              >
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>

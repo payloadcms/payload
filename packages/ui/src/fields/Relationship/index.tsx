@@ -510,6 +510,8 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               customProps={{
                 disableKeyDown: drawerIsOpen,
                 disableMouseDown: drawerIsOpen,
+                onDelete: onSave,
+                onDuplicate: onSave,
                 onSave,
                 setDrawerIsOpen,
               }}

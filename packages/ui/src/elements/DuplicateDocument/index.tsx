@@ -4,6 +4,7 @@ import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useEditDepth } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -17,6 +18,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
@@ -57,6 +59,8 @@ export const DuplicateDocument: React.FC<Props> = ({
   const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
+
+  const editDepth = useEditDepth()
 
   const handleClick = useCallback(
     async (override = false) => {
@@ -146,7 +150,13 @@ export const DuplicateDocument: React.FC<Props> = ({
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
-        <Modal className={`${baseClass}__modal`} slug={modalSlug}>
+        <Modal
+          className={`${baseClass}__modal`}
+          slug={modalSlug}
+          style={{
+            zIndex: drawerZBase + editDepth,
+          }}
+        >
           <div className={`${baseClass}__modal-template`}>
             <h1>{t('general:confirmDuplication')}</h1>
             <p>{t('general:unsavedChangesDuplicate')}</p>
@@ -158,7 +168,12 @@ export const DuplicateDocument: React.FC<Props> = ({
             >
               {t('general:cancel')}
             </Button>
-            <Button id="confirm-duplicate" onClick={void confirm}>
+            <Button
+              id="confirm-duplicate"
+              onClick={() => {
+                void confirm()
+              }}
+            >
               {t('general:duplicateWithoutSaving')}
             </Button>
           </div>

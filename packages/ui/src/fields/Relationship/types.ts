@@ -2,10 +2,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientCollectionConfig, SanitizedConfig } from 'payload'
 
 export type Option = {
-  label: string
-  options?: Option[]
-  relationTo?: string
-  value: number | string
+  readonly label: string
+  readonly options?: Option[]
+  readonly relationTo?: string
+  readonly value: number | string
 }
 
 export type OptionGroup = {
