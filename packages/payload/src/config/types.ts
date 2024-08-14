@@ -916,6 +916,7 @@ export type EditConfig = {
   [key: string]: Partial<EditViewConfig>
   /**
    * Replace or modify individual nested routes, or add new ones:
+   * + `root` - `/admin/collections/:collection/:id/**\/*`
    * + `default` - `/admin/collections/:collection/:id`
    * + `api` - `/admin/collections/:collection/:id/api`
    * + `livePreview` - `/admin/collections/:collection/:id/preview`
@@ -928,6 +929,7 @@ export type EditConfig = {
   api?: Partial<EditViewConfig>
   default?: Partial<EditViewConfig>
   livePreview?: Partial<EditViewConfig>
+  root?: Partial<EditViewConfig>
   version?: Partial<EditViewConfig>
   versions?: Partial<EditViewConfig>
   // TODO: uncomment these as they are built

@@ -60,7 +60,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
 
-  let ViewOverride: MappedComponent<ServerSideEditViewProps>
+  let RootViewOverride: MappedComponent<ServerSideEditViewProps>
   let CustomView: MappedComponent<ServerSideEditViewProps>
   let DefaultView: MappedComponent<ServerSideEditViewProps>
   let ErrorView: MappedComponent<AdminViewProps>
@@ -115,19 +115,18 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
 
-    ViewOverride =
-      collectionConfig?.admin?.components?.views?.edit?.default &&
-      'Component' in collectionConfig.admin.components.views.edit.default
+    RootViewOverride =
+      collectionConfig?.admin?.components?.views?.edit?.root &&
+      'Component' in collectionConfig.admin.components.views.edit.root
         ? createMappedComponent(
-            collectionConfig?.admin?.components?.views?.edit?.default
-              ?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
+            collectionConfig?.admin?.components?.views?.edit?.root?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
             undefined,
             undefined,
-            'collectionConfig?.admin?.components?.views?.edit?.default',
+            'collectionConfig?.admin?.components?.views?.edit?.root',
           )
         : null
 
-    if (!ViewOverride) {
+    if (!RootViewOverride) {
       const collectionViews = getViewsFromConfig({
         collectionConfig,
         config,
@@ -157,7 +156,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       )
     }
 
-    if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
+    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
       ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
     }
   }
@@ -170,9 +169,11 @@ export const Document: React.FC<AdminViewProps> = async ({
     const params = new URLSearchParams({
       locale: locale?.code,
     })
+
     if (globalConfig.versions?.drafts) {
       params.append('draft', 'true')
     }
+
     if (locale?.code) {
       params.append('locale', locale.code)
     }
@@ -181,10 +182,18 @@ export const Document: React.FC<AdminViewProps> = async ({
 
     apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
 
-    const editConfig = globalConfig?.admin?.components?.views?.edit
-    ViewOverride = typeof editConfig === 'function' ? editConfig : null
+    RootViewOverride =
+      globalConfig?.admin?.components?.views?.edit?.root &&
+      'Component' in globalConfig.admin.components.views.edit.root
+        ? createMappedComponent(
+            globalConfig?.admin?.components?.views?.edit?.root?.Component as EditViewComponent, // some type info gets lost from Config => SanitizedConfig due to our usage of Deep type operations from ts-essentials. Despite .Component being defined as EditViewComponent, this info is lost and we need cast it here.
+            undefined,
+            undefined,
+            'globalConfig?.admin?.components?.views?.edit?.root',
+          )
+        : null
 
-    if (!ViewOverride) {
+    if (!RootViewOverride) {
       const globalViews = getViewsFromConfig({
         config,
         docPermissions,
@@ -213,7 +222,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         'globalViews?.ErrorView.payloadComponent',
       )
 
-      if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
+      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
         ErrorView = createMappedComponent(undefined, undefined, NotFoundView, 'NotFoundView')
       }
     }
@@ -268,7 +277,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialState={formState}
       isEditing={isEditing}
     >
-      {!ViewOverride && (
+      {!RootViewOverride && (
         <DocumentHeader
           collectionConfig={collectionConfig}
           globalConfig={globalConfig}
@@ -294,7 +303,9 @@ export const Document: React.FC<AdminViewProps> = async ({
           <RenderComponent mappedComponent={ErrorView} />
         ) : (
           <RenderComponent
-            mappedComponent={ViewOverride ? ViewOverride : CustomView ? CustomView : DefaultView}
+            mappedComponent={
+              RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
+            }
           />
         )}
       </EditDepthProvider>
