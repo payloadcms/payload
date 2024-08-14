@@ -255,9 +255,10 @@ export const createClientCollectionConfig = ({
 
   clientCollection.admin.components.views.edit.default = {
     Component: createMappedComponent(
-      hasEditView &&
-        'Component' in collection.admin.components.views.edit.default &&
-        collection.admin.components.views.edit.default.Component,
+      hasEditView
+        ? 'Component' in collection.admin.components.views.edit.default &&
+            collection.admin.components.views.edit.default.Component
+        : null,
       {
         collectionSlug: collection.slug,
       },
@@ -310,9 +311,10 @@ export const createClientCollectionConfig = ({
   }
 
   clientCollection.admin.components.views.list.Component = createMappedComponent(
-    hasListView &&
-      'Component' in collection.admin.components.views.list &&
-      collection.admin.components.views.list.Component,
+    hasListView
+      ? 'Component' in collection.admin.components.views.list &&
+          collection.admin.components.views.list.Component
+      : null,
     {
       collectionSlug: collection.slug,
     },
