@@ -65,7 +65,7 @@
   "types": "./src/index.ts",
   "bin": {
     "payload": "bin.js",
-    "payload-bun": "bun-bin.js"
+    "payload-bun": "bin-bun.js"
   },
   "files": [
     "dist",
