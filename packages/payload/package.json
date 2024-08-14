@@ -86,7 +86,7 @@
   "dependencies": {
     "@next/env": "^15.0.0-canary.104",
     "@payloadcms/translations": "workspace:*",
-    "@swc-node/register": "1.10.9",
+    "tsx": "4.17.0",
     "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
