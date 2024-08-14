@@ -33,8 +33,10 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
-    routes: { admin: adminRoute, api },
-    serverURL,
+    config: {
+      routes: { admin: adminRoute, api },
+      serverURL,
+    },
   } = useConfig()
 
   const { setModified } = useForm()

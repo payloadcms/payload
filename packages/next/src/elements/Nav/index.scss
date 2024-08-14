@@ -10,6 +10,7 @@
   border-right: 1px solid var(--theme-elevation-100);
   opacity: 0;
   transition: opacity var(--nav-trans-time) ease-in-out;
+  overflow: hidden;
 
   &--nav-open {
     opacity: 1;
@@ -18,7 +19,7 @@
   &__header {
     position: absolute;
     top: 0;
-    width: 100%;
+    width: 100vw;
     height: var(--app-header-height);
   }
 
@@ -26,6 +27,7 @@
     z-index: 1;
     position: relative;
     height: 100%;
+    width: 100%;
   }
 
   &__mobile-close {
@@ -33,7 +35,7 @@
     background: none;
     border: 0;
     outline: 0;
-    padding: calc(var(--base) * 0.75) var(--gutter-h);
+    padding: base(0.8) 0;
   }
 
   &__scroll {
@@ -85,7 +87,9 @@
   nav {
     a {
       position: relative;
-      padding: base(0.125) base(1.5) base(0.125) 0;
+      padding-block: base(0.125);
+      padding-inline-start: 0;
+      padding-inline-end: base(1.5);
       display: flex;
       text-decoration: none;
 
@@ -110,19 +114,18 @@
   &__link {
     display: flex;
     align-items: center;
-
-    &.active {
-      .nav__link-icon {
-        display: block;
-      }
-    }
   }
 
-  &__link-icon {
-    display: none;
-    margin-right: calc(var(--base) * 0.25);
-    top: -1px;
-    position: relative;
+  &__link-indicator {
+    position: absolute;
+    display: block;
+    // top: 0;
+    inset-inline-start: base(-1);
+    width: 2px;
+    height: 16px;
+    border-start-end-radius: 2px;
+    border-end-end-radius: 2px;
+    background: var(--theme-text);
   }
 
   @include mid-break {

@@ -1,5 +1,4 @@
- 
-import type { Field, SanitizedConfig , TabAsField } from 'payload'
+import type { Field, SanitizedConfig, TabAsField } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 

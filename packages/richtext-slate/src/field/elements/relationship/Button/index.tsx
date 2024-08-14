@@ -31,7 +31,7 @@ type Props = {
   enabledCollectionSlugs: string[]
   path: string
 }
-const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
+const RelationshipButtonComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation()
   const editor = useSlate()
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
@@ -81,10 +81,10 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export const Button = (props: Props): React.ReactNode => {
+export const RelationshipButton = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
-      <RelationshipButton {...props} />
+      <RelationshipButtonComponent {...props} />
     </EnabledRelationshipsCondition>
   )
 }

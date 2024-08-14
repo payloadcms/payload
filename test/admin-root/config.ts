@@ -12,6 +12,16 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   collections: [PostsCollection],
+  admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [MenuGlobal],
   routes: {

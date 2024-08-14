@@ -52,9 +52,19 @@ type FieldSchemaGenerator = (
   buildSchemaOptions: BuildSchemaOptions,
 ) => void
 
+/**
+ * get a field's defaultValue only if defined and not dynamic so that it can be set on the field schema
+ * @param field
+ */
+const formatDefaultValue = (field: FieldAffectingData) =>
+  typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
+    ? field.defaultValue
+    : undefined
+
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions
   const schema: SchemaTypeOptions<unknown> = {
+    default: formatDefaultValue(field),
     index: field.index || (!disableUnique && field.unique) || indexSortableFields || false,
     required: false,
     unique: (!disableUnique && field.unique) || false,
@@ -159,7 +169,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           },
         }),
       ],
-      default: undefined,
     }
 
     schema.add({
@@ -174,7 +183,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   ): void => {
     const fieldSchema = {
       type: [new mongoose.Schema({}, { _id: false, discriminatorKey: 'blockType' })],
-      default: undefined,
     }
 
     schema.add({
@@ -339,7 +347,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       },
       coordinates: {
         type: [Number],
-        default: field.defaultValue || undefined,
+        default: formatDefaultValue(field),
         required: false,
       },
     }
@@ -420,7 +428,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
+            [locale]: field.hasMany
+              ? { type: [localeSchema], default: formatDefaultValue(field) }
+              : localeSchema,
           }
         }, {}),
         localized: true,
@@ -440,7 +450,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       if (field.hasMany) {
         schemaToReturn = {
           type: [schemaToReturn],
-          default: undefined,
+          default: formatDefaultValue(field),
         }
       }
     } else {
@@ -453,7 +463,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       if (field.hasMany) {
         schemaToReturn = {
           type: [schemaToReturn],
-          default: undefined,
+          default: formatDefaultValue(field),
         }
       }
     }

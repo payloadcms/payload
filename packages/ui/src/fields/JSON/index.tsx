@@ -1,5 +1,5 @@
 'use client'
-import type { ClientValidate, JSONField as JSONFieldType } from 'payload'
+import type { JSONFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -12,48 +12,35 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type JSONFieldProps = {
-  editorOptions?: JSONFieldType['admin']['editorOptions']
-  jsonSchema?: Record<string, unknown>
-  name?: string
-  path?: string
-  width?: string
-} & FormFieldBase
-
-const _JSONField: React.FC<JSONFieldProps> = (props) => {
+const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
-    editorOptions,
     errorProps,
-    jsonSchema,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: { className, description, editorOptions, readOnly: readOnlyFromAdmin, style, width },
+      jsonSchema,
+      label,
+      required,
+    },
     labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, jsonError, required })
@@ -133,14 +120,18 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
@@ -149,15 +140,15 @@ const _JSONField: React.FC<JSONFieldProps> = (props) => {
           readOnly={disabled}
           value={stringValue}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }
 
-export const JSONField = withCondition(_JSONField)
+export const JSONField = withCondition(JSONFieldComponent)

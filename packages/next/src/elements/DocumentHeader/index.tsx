@@ -1,8 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Payload,
   Permissions,
   SanitizedCollectionConfig,
-  SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -16,14 +16,14 @@ const baseClass = `doc-header`
 
 export const DocumentHeader: React.FC<{
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   customHeader?: React.ReactNode
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   i18n: I18n
+  payload: Payload
   permissions: Permissions
 }> = (props) => {
-  const { collectionConfig, config, customHeader, globalConfig, hideTabs, i18n, permissions } =
+  const { collectionConfig, customHeader, globalConfig, hideTabs, i18n, payload, permissions } =
     props
 
   return (
@@ -35,9 +35,9 @@ export const DocumentHeader: React.FC<{
           {!hideTabs && (
             <DocumentTabs
               collectionConfig={collectionConfig}
-              config={config}
               globalConfig={globalConfig}
               i18n={i18n}
+              payload={payload}
               permissions={permissions}
             />
           )}

@@ -36,7 +36,9 @@ export const SetDocumentStepNav: React.FC<{
   const { i18n, t } = useTranslation()
 
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const drawerDepth = useEditDepth()

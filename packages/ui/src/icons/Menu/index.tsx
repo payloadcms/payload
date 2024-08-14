@@ -6,13 +6,15 @@ export const MenuIcon: React.FC = () => (
   <svg
     className="icon icon--menu"
     fill="none"
-    height="25"
-    viewBox="0 0 25 25"
-    width="25"
+    height="20"
+    viewBox="0 0 20 20"
+    width="20"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect className="fill" height="2" width="18" x="3.5" y="4.5" />
-    <rect className="fill" height="2" width="18" x="3.5" y="11.5" />
-    <rect className="fill" height="2" width="18" x="3.5" y="18.5" />
+    <path
+      className="stroke"
+      d="M4.66667 10H15.3333M4.66667 6H15.3333M4.66667 14H15.3333"
+      strokeLinecap="square"
+    />
   </svg>
 )

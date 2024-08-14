@@ -1,8 +1,6 @@
-import { load } from './load.js'
-
 async function init() {
   try {
-    const result = await load(process.env.LOADER_TEST_FILE_PATH)
+    const result = await (await import(process.env.LOADER_TEST_FILE_PATH)).default
     process.exit(0)
   } catch (err) {
     console.error(err)
@@ -10,4 +8,4 @@ async function init() {
   }
 }
 
-init()
+void init()

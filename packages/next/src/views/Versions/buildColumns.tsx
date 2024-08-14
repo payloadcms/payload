@@ -28,30 +28,46 @@ export const buildVersionColumns = ({
 
   const columns: Column[] = [
     {
-      name: '',
-      type: 'date',
       Label: '',
       accessor: 'updatedAt',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'date',
+        },
+      },
       components: {
-        Cell: (
-          <CreatedAtCell
-            collectionSlug={collectionConfig?.slug}
-            docID={docID}
-            globalSlug={globalConfig?.slug}
-          />
-        ),
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: (
+            <CreatedAtCell
+              collectionSlug={collectionConfig?.slug}
+              docID={docID}
+              globalSlug={globalConfig?.slug}
+            />
+          ),
+        },
         Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
       },
     },
     {
-      name: '',
-      type: 'text',
       Label: '',
       accessor: 'id',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'text',
+        },
+      },
       components: {
-        Cell: <IDCell />,
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: <IDCell />,
+        },
         Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
       },
     },
@@ -62,18 +78,27 @@ export const buildVersionColumns = ({
     (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
   ) {
     columns.push({
-      name: '',
-      type: 'checkbox',
       Label: '',
       accessor: '_status',
       active: true,
+      cellProps: {
+        field: {
+          name: '',
+          type: 'checkbox',
+        },
+      },
       components: {
-        Cell: (
-          <AutosaveCell
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-          />
-        ),
+        Cell: {
+          type: 'client',
+          Component: null,
+          RenderedComponent: (
+            <AutosaveCell
+              latestDraftVersion={latestDraftVersion}
+              latestPublishedVersion={latestPublishedVersion}
+            />
+          ),
+        },
+
         Heading: <SortColumn Label={t('version:status')} disable name="status" />,
       },
     })

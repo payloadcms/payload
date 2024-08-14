@@ -1,13 +1,19 @@
 'use client'
 
-import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload'
+import type {
+  ClientCollectionConfig,
+  FilterOptionsResult,
+  MappedComponent,
+  StaticDescription,
+  StaticLabel,
+  UploadField,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
-import type { UploadFieldProps } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -23,26 +29,39 @@ import './index.scss'
 const baseClass = 'upload'
 
 export type UploadInputProps = {
+  readonly Description?: MappedComponent
+  readonly Error?: MappedComponent
+  readonly Label?: MappedComponent
   /**
    * Controls the visibility of the "Create new collection" button
    */
-  allowNewUpload?: boolean
-  api?: string
-  collection?: ClientCollectionConfig
-  customUploadActions?: React.ReactNode[]
-  filterOptions?: FilterOptionsResult
-  onChange?: (e) => void
-  relationTo?: UploadField['relationTo']
-  serverURL?: string
-  showError?: boolean
-  value?: string
-} & Omit<UploadFieldProps, 'filterOptions'>
+  readonly allowNewUpload?: boolean
+  readonly api?: string
+  readonly className?: string
+  readonly collection?: ClientCollectionConfig
+  readonly customUploadActions?: React.ReactNode[]
+  readonly description?: StaticDescription
+  readonly descriptionProps?: Record<string, unknown>
+  readonly errorProps?: Record<string, unknown>
+  readonly filterOptions?: FilterOptionsResult
+  readonly label: StaticLabel
+  readonly labelProps?: Record<string, unknown>
+  readonly onChange?: (e) => void
+  readonly readOnly?: boolean
+  readonly relationTo?: UploadField['relationTo']
+  readonly required?: boolean
+  readonly serverURL?: string
+  readonly showError?: boolean
+  readonly style?: React.CSSProperties
+  readonly value?: string
+  readonly width?: string
+}
 
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
     allowNewUpload,
     api = '/api',
     className,
@@ -140,14 +159,9 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldLabel
-          CustomLabel={CustomLabel}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
+        <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
         <div className={`${fieldBaseClass}__wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+          <FieldError CustomError={Error} {...(errorProps || {})} />
 
           {collection?.upload && (
             <React.Fragment>
@@ -189,11 +203,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                   </div>
                 </div>
               )}
-              {CustomDescription !== undefined ? (
-                CustomDescription
-              ) : (
-                <FieldDescription {...(descriptionProps || {})} />
-              )}
+              <FieldDescription Description={Description} {...(descriptionProps || {})} />
             </React.Fragment>
           )}
           {!readOnly && <DocumentDrawer onSave={onSave} />}

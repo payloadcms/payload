@@ -76,16 +76,25 @@ describe('fields', () => {
     // TODO - This test is flaky. Rarely, but sometimes it randomly fails.
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
-      await payload.create({
+      const doc = await payload.create({
         collection: 'indexed-fields',
         data: {
           group: {
             unique: uniqueText,
           },
+          localizedUniqueRequiredText: 'text',
           text: 'text',
           uniqueRequiredText: 'text',
           uniqueText,
         },
+      })
+      await payload.update({
+        id: doc.id,
+        collection: 'indexed-fields',
+        data: {
+          localizedUniqueRequiredText: 'es text',
+        },
+        locale: 'es',
       })
 
       await page.goto(url.create)

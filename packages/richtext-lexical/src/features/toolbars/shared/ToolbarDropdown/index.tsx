@@ -29,6 +29,9 @@ const ToolbarItem = ({
   item: ToolbarGroupItem
 }) => {
   const { i18n } = useTranslation()
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
   if (item.Component) {
     return (
@@ -47,7 +50,8 @@ const ToolbarItem = ({
 
   let title = item.key
   if (item.label) {
-    title = typeof item.label === 'function' ? item.label({ i18n }) : item.label
+    title =
+      typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {

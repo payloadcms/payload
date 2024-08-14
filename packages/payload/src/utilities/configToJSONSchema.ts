@@ -619,24 +619,6 @@ const generateAuthFieldTypes = ({
   loginWithUsername: Auth['loginWithUsername']
   type: 'forgotOrUnlock' | 'login' | 'register'
 }): JSONSchema4 => {
-  const emailAuthFields = {
-    additionalProperties: false,
-    properties: { email: fieldType },
-    required: ['email'],
-  }
-  const usernameAuthFields = {
-    additionalProperties: false,
-    properties: { username: fieldType },
-    required: ['username'],
-  }
-
-  if (['login', 'register'].includes(type)) {
-    emailAuthFields.properties['password'] = fieldType
-    emailAuthFields.required.push('password')
-    usernameAuthFields.properties['password'] = fieldType
-    usernameAuthFields.required.push('password')
-  }
-
   if (loginWithUsername) {
     switch (type) {
       case 'login': {
@@ -644,38 +626,57 @@ const generateAuthFieldTypes = ({
           // allow username or email and require password for login
           return {
             additionalProperties: false,
-            oneOf: [emailAuthFields, usernameAuthFields],
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: { email: fieldType, password: fieldType },
+                required: ['email', 'password'],
+              },
+              {
+                additionalProperties: false,
+                properties: { password: fieldType, username: fieldType },
+                required: ['username', 'password'],
+              },
+            ],
           }
         } else {
           // allow only username and password for login
-          return usernameAuthFields
+          return {
+            additionalProperties: false,
+            properties: {
+              password: fieldType,
+              username: fieldType,
+            },
+            required: ['username', 'password'],
+          }
         }
       }
 
       case 'register': {
+        const requiredFields: ('email' | 'password' | 'username')[] = ['password']
+        const properties: {
+          email?: JSONSchema4['properties']
+          password?: JSONSchema4['properties']
+          username?: JSONSchema4['properties']
+        } = {
+          password: fieldType,
+          username: fieldType,
+        }
+
         if (loginWithUsername.requireEmail) {
-          // require username, email and password for registration
-          return {
-            additionalProperties: false,
-            properties: {
-              ...usernameAuthFields.properties,
-              ...emailAuthFields.properties,
-            },
-            required: [...usernameAuthFields.required, ...emailAuthFields.required],
-          }
-        } else if (loginWithUsername.allowEmailLogin) {
-          // allow both but only require username for registration
-          return {
-            additionalProperties: false,
-            properties: {
-              ...usernameAuthFields.properties,
-              ...emailAuthFields.properties,
-            },
-            required: usernameAuthFields.required,
-          }
-        } else {
-          // require only username and password for registration
-          return usernameAuthFields
+          requiredFields.push('email')
+        }
+        if (loginWithUsername.requireUsername) {
+          requiredFields.push('username')
+        }
+        if (loginWithUsername.requireEmail || loginWithUsername.allowEmailLogin) {
+          properties.email = fieldType
+        }
+
+        return {
+          additionalProperties: false,
+          properties,
+          required: requiredFields,
         }
       }
 
@@ -684,18 +685,37 @@ const generateAuthFieldTypes = ({
           // allow email or username for unlock/forgot-password
           return {
             additionalProperties: false,
-            oneOf: [emailAuthFields, usernameAuthFields],
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: { email: fieldType },
+                required: ['email'],
+              },
+              {
+                additionalProperties: false,
+                properties: { username: fieldType },
+                required: ['username'],
+              },
+            ],
           }
         } else {
           // allow only username for unlock/forgot-password
-          return usernameAuthFields
+          return {
+            additionalProperties: false,
+            properties: { username: fieldType },
+            required: ['username'],
+          }
         }
       }
     }
   }
 
   // default email (and password for login/register)
-  return emailAuthFields
+  return {
+    additionalProperties: false,
+    properties: { email: fieldType, password: fieldType },
+    required: ['email', 'password'],
+  }
 }
 
 export function authCollectionToOperationsJSONSchema(

@@ -196,6 +196,7 @@ jobs:
           - postgres-custom-schema
           - postgres-uuid
           - supabase
+          - sqlite
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -548,3 +549,16 @@ jobs:
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 1
+
+  publish-canary:
+    name: Publish Canary
+    runs-on: ubuntu-latest
+    needs:
+      - all-green
+
+    steps:
+      # debug github.ref output
+      - run: |
+          echo github.ref: ${{ github.ref }}
+          echo isBeta: ${{ github.ref == 'refs/heads/beta' }}
+          echo isMain: ${{ github.ref == 'refs/heads/main' }}

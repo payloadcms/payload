@@ -22,9 +22,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const hasMultipleRelations = Array.isArray(relationTo)
@@ -61,11 +63,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
       abortController: AbortController
       relationSlug: string
     }) => {
-      const collection = collections.find((coll) => coll.slug === relationSlug)
-      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-      const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
+      if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
+        const collection = collections.find((coll) => coll.slug === relationSlug)
+        const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+        const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-      if (partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
         const query: {
           depth?: number
           limit?: number
@@ -248,7 +250,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
     return () => {
       abortControllers.forEach((controller) => {
-        if (controller.signal) controller.abort()
+        if (controller.signal) {
+          try {
+            controller.abort()
+          } catch (error) {
+            // swallow error
+          }
+        }
       })
     }
   }, [i18n, loadRelationOptions, relationTo])

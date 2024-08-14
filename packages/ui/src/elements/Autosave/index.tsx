@@ -40,8 +40,10 @@ export const Autosave: React.FC<Props> = ({
   publishedDocUpdatedAt,
 }) => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()
@@ -220,7 +222,13 @@ export const Autosave: React.FC<Props> = ({
 
     return () => {
       if (autosaveTimeout) clearTimeout(autosaveTimeout)
-      if (abortController.signal) abortController.abort()
+      if (abortController.signal) {
+        try {
+          abortController.abort()
+        } catch (error) {
+          // swallow error
+        }
+      }
       setSaving(false)
     }
   }, [

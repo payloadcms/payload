@@ -1,3 +1,4 @@
+import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
@@ -153,14 +154,24 @@ export const sanitizeCollection = async (
       sanitized.auth.strategies = []
     }
 
-    sanitized.auth.loginWithUsername = sanitized.auth.loginWithUsername
-      ? {
+    if (sanitized.auth.loginWithUsername) {
+      if (sanitized.auth.loginWithUsername === true) {
+        sanitized.auth.loginWithUsername = loginWithUsernameDefaults
+      } else {
+        const loginWithUsernameWithDefaults = {
           ...loginWithUsernameDefaults,
-          ...(typeof sanitized.auth.loginWithUsername === 'boolean'
-            ? {}
-            : sanitized.auth.loginWithUsername),
+          ...sanitized.auth.loginWithUsername,
+        } as LoginWithUsernameOptions
+
+        // if allowEmailLogin is false, requireUsername must be true
+        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
+          loginWithUsernameWithDefaults.requireUsername = true
         }
-      : false
+        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
+      }
+    } else {
+      sanitized.auth.loginWithUsername = false
+    }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }

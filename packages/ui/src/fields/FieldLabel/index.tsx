@@ -1,18 +1,19 @@
 'use client'
 
-import type { LabelProps } from 'payload'
+import type { GenericLabelProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import './index.scss'
 
-const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
+const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
     as: Element = 'label',
     htmlFor: htmlForFromProps,
@@ -40,12 +41,12 @@ const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
   return null
 }
 
-export const FieldLabel: React.FC<LabelProps> = (props) => {
-  const { CustomLabel } = props
+export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
+  const { Label, ...rest } = props
 
-  if (CustomLabel !== undefined) {
-    return CustomLabel
+  if (Label) {
+    return <RenderComponent clientProps={rest} mappedComponent={Label} />
   }
 
-  return <DefaultFieldLabel {...props} />
+  return <DefaultFieldLabel {...rest} />
 }

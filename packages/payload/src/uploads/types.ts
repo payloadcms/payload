@@ -49,12 +49,24 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
+export type GenerateImageName = (args: {
+  extension: string
+  height: number
+  originalName: string
+  sizeName: string
+  width: number
+}) => string
+
 export type ImageSize = {
   /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
+  /**
+   * Generate a custom name for the file of this image size.
+   */
+  generateImageName?: GenerateImageName
   name: string
   trimOptions?: ImageUploadTrimOptions
   /**
@@ -94,12 +106,22 @@ export type UploadConfig = {
    */
   disableLocalStorage?: boolean
   /**
+   * Enable displaying preview of the uploaded file in Upload fields related to this Collection.
+   * Can be locally overridden by `displayPreview` option in Upload field.
+   * @default false
+   */
+  displayPreview?: boolean
+  /**
    * Ability to filter/modify Request Headers when fetching a file.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
+  /**
+   * Field slugs to use for a compount index instead of the default filename index.
+   */
+  filenameCompoundIndex?: string[]
   /**
    * Require files to be uploaded when creating a document.
    * @default true

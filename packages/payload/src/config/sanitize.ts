@@ -47,7 +47,34 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults: Config = deepMergeWithReactComponents(defaults, incomingConfig)
+  const configWithDefaults = {
+    ...defaults,
+    ...incomingConfig,
+    admin: {
+      ...defaults.admin,
+      ...incomingConfig?.admin,
+      meta: {
+        ...defaults.admin.meta,
+        ...incomingConfig?.admin?.meta,
+      },
+      routes: {
+        ...defaults.admin.routes,
+        ...incomingConfig?.admin?.routes,
+      },
+    },
+    graphQL: {
+      ...defaults.graphQL,
+      ...incomingConfig?.graphQL,
+    },
+    routes: {
+      ...defaults.routes,
+      ...incomingConfig?.routes,
+    },
+    typescript: {
+      ...defaults.typescript,
+      ...incomingConfig?.typescript,
+    },
+  }
 
   if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''

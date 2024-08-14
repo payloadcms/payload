@@ -396,6 +396,7 @@ export const arTranslations: DefaultTranslationsObject = {
     publishChanges: 'نشر التّغييرات',
     published: 'تمّ النّشر',
     publishing: 'نشر',
+    restoreAsDraft: 'استعادة كمسودة',
     restoreThisVersion: 'استعادة هذه النّسخة',
     restoredSuccessfully: 'تمّت الاستعادة بنحاح.',
     restoring: 'تتمّ الاستعادة...',

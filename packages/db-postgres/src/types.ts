@@ -4,7 +4,7 @@ import type {
   DrizzleAdapter,
   TransactionPg,
 } from '@payloadcms/drizzle/types'
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type {
   ColumnBaseConfig,
   ColumnDataType,
@@ -21,6 +21,7 @@ import type {
   PgSchema,
   PgTableWithColumns,
   PgTransactionConfig,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
@@ -32,6 +33,11 @@ export type Args = {
   logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push?: boolean
   relationshipsSuffix?: string
   /**
@@ -106,6 +112,13 @@ type PostgresDrizzleAdapter = Omit<
   | 'relations'
 >
 
+type Schema =
+  | {
+      enum: typeof pgEnum
+      table: PgTableFn
+    }
+  | PgSchema
+
 export type PostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
@@ -125,15 +138,19 @@ export type PostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: { table: PgTableFn } | PgSchema
+  pgSchema?: Schema
   pool: Pool
   poolOptions: Args['pool']
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
-  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
@@ -156,6 +173,8 @@ declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
+    beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
+    drizzle: PostgresDB
     enums: Record<string, GenericEnum>
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
@@ -169,11 +188,16 @@ declare module 'payload' {
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
     poolOptions: Args['pool']
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+    schema: Record<string, unknown>
     schemaName?: Args['schemaName']
     tableNameMap: Map<string, string>
     versionsSuffix?: string

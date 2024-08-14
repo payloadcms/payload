@@ -1,12 +1,14 @@
 import type {
-  AdminViewComponent,
+  AdminViewProps,
   CollectionPermission,
-  EditViewComponent,
   GlobalPermission,
+  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  ServerSideEditViewProps,
 } from 'payload'
+import type React from 'react'
 
 import { notFound } from 'next/navigation.js'
 
@@ -19,6 +21,11 @@ import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
+export type ViewFromConfig<TProps extends object> = {
+  Component?: React.FC<TProps>
+  payloadComponent?: PayloadComponent<TProps>
+}
+
 export const getViewsFromConfig = ({
   collectionConfig,
   config,
@@ -28,22 +35,21 @@ export const getViewsFromConfig = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-
   docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
 }): {
-  CustomView: EditViewComponent
-  DefaultView: EditViewComponent
+  CustomView: ViewFromConfig<ServerSideEditViewProps>
+  DefaultView: ViewFromConfig<ServerSideEditViewProps>
   /**
    * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
-  ErrorView: AdminViewComponent
+  ErrorView: ViewFromConfig<AdminViewProps>
 } | null => {
   // Conditionally import and lazy load the default view
-  let DefaultView: EditViewComponent = null
-  let CustomView: EditViewComponent = null
-  let ErrorView: AdminViewComponent = null
+  let DefaultView: ViewFromConfig<ServerSideEditViewProps> = null
+  let CustomView: ViewFromConfig<ServerSideEditViewProps> = null
+  let ErrorView: ViewFromConfig<AdminViewProps> = null
 
   const {
     routes: { admin: adminRoute },
@@ -60,7 +66,7 @@ export const getViewsFromConfig = ({
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
   if (collectionConfig) {
-    const editConfig = collectionConfig?.admin?.components?.views?.Edit
+    const editConfig = collectionConfig?.admin?.components?.views?.edit
     const EditOverride = typeof editConfig === 'function' ? editConfig : null
 
     if (EditOverride) {
@@ -80,17 +86,27 @@ export const getViewsFromConfig = ({
             switch (segment3) {
               case 'create': {
                 if ('create' in docPermissions && docPermissions?.create?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Default')
-                  DefaultView = DefaultEditView
+                  CustomView = {
+                    payloadComponent: getCustomViewByKey(views, 'default'),
+                  }
+                  DefaultView = {
+                    Component: DefaultEditView,
+                  }
                 } else {
-                  ErrorView = UnauthorizedView
+                  ErrorView = {
+                    Component: UnauthorizedView,
+                  }
                 }
                 break
               }
 
               default: {
-                CustomView = getCustomViewByKey(views, 'Default')
-                DefaultView = DefaultEditView
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'default'),
+                }
+                DefaultView = {
+                  Component: DefaultEditView,
+                }
                 break
               }
             }
@@ -102,25 +118,37 @@ export const getViewsFromConfig = ({
             switch (segment4) {
               case 'api': {
                 if (collectionConfig?.admin?.hideAPIURL !== true) {
-                  CustomView = getCustomViewByKey(views, 'API')
-                  DefaultView = DefaultAPIView
+                  CustomView = {
+                    payloadComponent: getCustomViewByKey(views, 'api'),
+                  }
+                  DefaultView = {
+                    Component: DefaultAPIView,
+                  }
                 }
                 break
               }
 
               case 'preview': {
                 if (livePreviewEnabled) {
-                  DefaultView = DefaultLivePreviewView
+                  DefaultView = {
+                    Component: DefaultLivePreviewView,
+                  }
                 }
                 break
               }
 
               case 'versions': {
                 if (docPermissions?.readVersions?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Versions')
-                  DefaultView = DefaultVersionsView
+                  CustomView = {
+                    payloadComponent: getCustomViewByKey(views, 'versions'),
+                  }
+                  DefaultView = {
+                    Component: DefaultVersionsView,
+                  }
                 } else {
-                  ErrorView = UnauthorizedView
+                  ErrorView = {
+                    Component: UnauthorizedView,
+                  }
                 }
                 break
               }
@@ -139,11 +167,13 @@ export const getViewsFromConfig = ({
                   .filter(Boolean)
                   .join('/')
 
-                CustomView = getCustomViewByRoute({
-                  baseRoute,
-                  currentRoute,
-                  views,
-                })
+                CustomView = {
+                  payloadComponent: getCustomViewByRoute({
+                    baseRoute,
+                    currentRoute,
+                    views,
+                  }),
+                }
                 break
               }
             }
@@ -154,10 +184,16 @@ export const getViewsFromConfig = ({
           default: {
             if (segment4 === 'versions') {
               if (docPermissions?.readVersions?.permission) {
-                CustomView = getCustomViewByKey(views, 'Version')
-                DefaultView = DefaultVersionView
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'version'),
+                }
+                DefaultView = {
+                  Component: DefaultVersionView,
+                }
               } else {
-                ErrorView = UnauthorizedView
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
               }
             } else {
               const baseRoute = [
@@ -173,11 +209,13 @@ export const getViewsFromConfig = ({
                 .filter(Boolean)
                 .join('/')
 
-              CustomView = getCustomViewByRoute({
-                baseRoute,
-                currentRoute,
-                views,
-              })
+              CustomView = {
+                payloadComponent: getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                }),
+              }
             }
             break
           }
@@ -187,7 +225,7 @@ export const getViewsFromConfig = ({
   }
 
   if (globalConfig) {
-    const editConfig = globalConfig?.admin?.components?.views?.Edit
+    const editConfig = globalConfig?.admin?.components?.views?.edit
     const EditOverride = typeof editConfig === 'function' ? editConfig : null
 
     if (EditOverride) {
@@ -202,8 +240,12 @@ export const getViewsFromConfig = ({
       } else {
         switch (routeSegments.length) {
           case 2: {
-            CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = DefaultEditView
+            CustomView = {
+              payloadComponent: getCustomViewByKey(views, 'default'),
+            }
+            DefaultView = {
+              Component: DefaultEditView,
+            }
             break
           }
 
@@ -212,25 +254,37 @@ export const getViewsFromConfig = ({
             switch (segment3) {
               case 'api': {
                 if (globalConfig?.admin?.hideAPIURL !== true) {
-                  CustomView = getCustomViewByKey(views, 'API')
-                  DefaultView = DefaultAPIView
+                  CustomView = {
+                    payloadComponent: getCustomViewByKey(views, 'api'),
+                  }
+                  DefaultView = {
+                    Component: DefaultAPIView,
+                  }
                 }
                 break
               }
 
               case 'preview': {
                 if (livePreviewEnabled) {
-                  DefaultView = DefaultLivePreviewView
+                  DefaultView = {
+                    Component: DefaultLivePreviewView,
+                  }
                 }
                 break
               }
 
               case 'versions': {
                 if (docPermissions?.readVersions?.permission) {
-                  CustomView = getCustomViewByKey(views, 'Versions')
-                  DefaultView = DefaultVersionsView
+                  CustomView = {
+                    payloadComponent: getCustomViewByKey(views, 'versions'),
+                  }
+                  DefaultView = {
+                    Component: DefaultVersionsView,
+                  }
                 } else {
-                  ErrorView = UnauthorizedView
+                  ErrorView = {
+                    Component: UnauthorizedView,
+                  }
                 }
                 break
               }
@@ -245,14 +299,20 @@ export const getViewsFromConfig = ({
                     .filter(Boolean)
                     .join('/')
 
-                  CustomView = getCustomViewByRoute({
-                    baseRoute,
-                    currentRoute,
-                    views,
-                  })
-                  DefaultView = DefaultEditView
+                  CustomView = {
+                    payloadComponent: getCustomViewByRoute({
+                      baseRoute,
+                      currentRoute,
+                      views,
+                    }),
+                  }
+                  DefaultView = {
+                    Component: DefaultEditView,
+                  }
                 } else {
-                  ErrorView = UnauthorizedView
+                  ErrorView = {
+                    Component: UnauthorizedView,
+                  }
                 }
                 break
               }
@@ -264,10 +324,16 @@ export const getViewsFromConfig = ({
             // `../:slug/versions/:version`, etc
             if (segment3 === 'versions') {
               if (docPermissions?.readVersions?.permission) {
-                CustomView = getCustomViewByKey(views, 'Version')
-                DefaultView = DefaultVersionView
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'version'),
+                }
+                DefaultView = {
+                  Component: DefaultVersionView,
+                }
               } else {
-                ErrorView = UnauthorizedView
+                ErrorView = {
+                  Component: UnauthorizedView,
+                }
               }
             } else {
               const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
@@ -278,11 +344,13 @@ export const getViewsFromConfig = ({
                 .filter(Boolean)
                 .join('/')
 
-              CustomView = getCustomViewByRoute({
-                baseRoute,
-                currentRoute,
-                views,
-              })
+              CustomView = {
+                payloadComponent: getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                }),
+              }
             }
             break
           }

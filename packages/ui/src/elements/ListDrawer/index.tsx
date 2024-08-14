@@ -57,7 +57,9 @@ export const useListDrawer: UseListDrawer = ({
   selectedCollection,
   uploads,
 }) => {
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()

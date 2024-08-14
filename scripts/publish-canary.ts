@@ -2,24 +2,12 @@ import type { ExecSyncOptions } from 'child_process'
 import type execa from 'execa'
 
 import chalk from 'chalk'
-import { loadChangelogConfig } from 'changelogen'
-import { execSync } from 'child_process'
-import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
 import pLimit from 'p-limit'
 import path from 'path'
-import prompts from 'prompts'
-import semver from 'semver'
 
-import type { PackageDetails } from './lib/getPackageDetails.js'
-
-import { getPackageDetails } from './lib/getPackageDetails.js'
-import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
-import { packagePublishList } from './lib/publishList.js'
-import { getRecommendedBump } from './utils/getRecommendedBump.js'
-import { updateChangelog } from './utils/updateChangelog.js'
 
 const npmPublishLimit = pLimit(5)
 
@@ -42,8 +30,6 @@ const args = minimist(process.argv.slice(2))
 // } = args
 
 const dryRun = true
-
-const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
 
 async function main() {
   const workspace = await getWorkspace()

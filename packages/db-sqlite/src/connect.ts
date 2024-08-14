@@ -52,4 +52,8 @@ export const connect: Connect = async function connect(
   }
 
   if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+
+  if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
+    await this.migrate({ migrations: this.prodMigrations })
+  }
 }

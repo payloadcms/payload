@@ -15,6 +15,11 @@ import {
 } from './shared.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: collectionSlug,

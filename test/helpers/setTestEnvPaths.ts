@@ -2,7 +2,7 @@
 import fs from 'fs'
 import path from 'path'
 
-export function setTestEnvPaths(dir) {
+export function setTestEnvPaths(dir: string) {
   const configPath = path.resolve(dir, 'config.ts')
   const outputPath = path.resolve(dir, 'payload-types.ts')
   const schemaPath = path.resolve(dir, 'schema.graphql')

@@ -1,17 +1,17 @@
-import type { SlateNodeConverterProvider } from './types.js'
+import type { SlateNodeConverter } from './types.js'
 
-import { SlateBlockquoteConverter } from './converters/blockquote/index.js'
-import { SlateHeadingConverter } from './converters/heading/index.js'
-import { SlateIndentConverter } from './converters/indent/index.js'
-import { SlateLinkConverter } from './converters/link/index.js'
-import { SlateListItemConverter } from './converters/listItem/index.js'
-import { SlateOrderedListConverter } from './converters/orderedList/index.js'
-import { SlateRelationshipConverter } from './converters/relationship/index.js'
-import { SlateUnknownConverter } from './converters/unknown/index.js'
-import { SlateUnorderedListConverter } from './converters/unorderedList/index.js'
-import { SlateUploadConverter } from './converters/upload/index.js'
+import { SlateBlockquoteConverter } from './converters/blockquote/converter.js'
+import { SlateHeadingConverter } from './converters/heading/converter.js'
+import { SlateIndentConverter } from './converters/indent/converter.js'
+import { SlateLinkConverter } from './converters/link/converter.js'
+import { SlateListItemConverter } from './converters/listItem/converter.js'
+import { SlateOrderedListConverter } from './converters/orderedList/converter.js'
+import { SlateRelationshipConverter } from './converters/relationship/converter.js'
+import { SlateUnknownConverter } from './converters/unknown/converter.js'
+import { SlateUnorderedListConverter } from './converters/unorderedList/converter.js'
+import { SlateUploadConverter } from './converters/upload/converter.js'
 
-export const defaultSlateConverters: SlateNodeConverterProvider[] = [
+export const defaultSlateConverters: SlateNodeConverter[] = [
   SlateBlockquoteConverter,
   SlateHeadingConverter,
   SlateIndentConverter,

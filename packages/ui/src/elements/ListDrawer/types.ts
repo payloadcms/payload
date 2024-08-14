@@ -3,12 +3,15 @@ import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
 export type ListDrawerProps = {
-  collectionSlugs: string[]
-  customHeader?: React.ReactNode
-  drawerSlug?: string
-  filterOptions?: FilterOptionsResult
-  onSelect?: (args: { collectionSlug: SanitizedCollectionConfig['slug']; docID: string }) => void
-  selectedCollection?: string
+  readonly collectionSlugs: string[]
+  readonly customHeader?: React.ReactNode
+  readonly drawerSlug?: string
+  readonly filterOptions?: FilterOptionsResult
+  readonly onSelect?: (args: {
+    collectionSlug: SanitizedCollectionConfig['slug']
+    docID: string
+  }) => void
+  readonly selectedCollection?: string
 }
 
 export type ListTogglerProps = {

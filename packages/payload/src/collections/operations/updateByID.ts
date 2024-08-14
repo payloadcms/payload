@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type {
   Collection,
@@ -11,6 +11,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -143,6 +144,17 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       showHiddenFields: true,
     })
 
+    if (args.collection.config.auth) {
+      ensureUsernameOrEmail<TSlug>({
+        authOptions: args.collection.config.auth,
+        collectionSlug: args.collection.config.slug,
+        data: args.data,
+        operation: 'update',
+        originalDoc,
+        req: args.req,
+      })
+    }
+
     // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
@@ -263,6 +275,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       const { hash, salt } = await generatePasswordSaltHash({
         collection: collectionConfig,
         password,
+        req,
       })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash

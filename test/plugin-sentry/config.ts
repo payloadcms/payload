@@ -8,12 +8,14 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
-import { testErrors } from './components.js'
 
 export default buildConfigWithDefaults({
   admin: {
     components: {
-      beforeDashboard: [testErrors],
+      beforeDashboard: ['/components.js#testErrors'],
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: Users.slug,
   },

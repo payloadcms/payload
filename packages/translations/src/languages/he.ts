@@ -390,6 +390,7 @@ export const heTranslations: DefaultTranslationsObject = {
     publishChanges: 'פרסם שינויים',
     published: 'פורסם',
     publishing: 'מפרסם',
+    restoreAsDraft: 'שחזר כטיוטה',
     restoreThisVersion: 'שחזר גרסה זו',
     restoredSuccessfully: 'שוחזר בהצלחה.',
     restoring: 'משחזר...',

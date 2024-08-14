@@ -2,7 +2,7 @@
 
 .icon--plus {
   .stroke {
-    stroke: var(--theme-elevation-800);
+    stroke: currentColor;
     stroke-width: $style-stroke-width;
   }
 }

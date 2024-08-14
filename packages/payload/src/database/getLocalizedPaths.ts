@@ -109,11 +109,13 @@ export async function getLocalizedPaths({
             if (typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid =
                 ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
-                pathSegments.length === 1
+                pathSegments.length === 1 ||
+                (pathSegments.length === 2 && pathSegments[0] === 'version')
+
+              lastIncompletePath.path = pathSegments.join('.')
 
               if (lastSegmentIsValid) {
                 lastIncompletePath.complete = true
-                lastIncompletePath.path = pathSegments.join('.')
               } else {
                 lastIncompletePath.invalid = true
                 return paths

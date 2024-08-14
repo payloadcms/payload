@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
+import type { FieldType, Options } from '@payloadcms/ui'
+import type { TextFieldProps } from 'payload'
 
 import {
   FieldLabel,
@@ -25,10 +26,20 @@ const { maxLength, minLength } = defaults.title
 
 type MetaTitleProps = {
   hasGenerateTitleFn: boolean
-} & FormFieldBase
+} & TextFieldProps
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}
+  const {
+    field: {
+      admin: {
+        components: { Label },
+      },
+      label,
+      required,
+    },
+    hasGenerateTitleFn,
+    labelProps,
+  } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
@@ -77,12 +88,14 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+          <FieldLabel Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                onClick={regenerateTitle}
+                onClick={() => {
+                  void regenerateTitle()
+                }}
                 style={{
                   background: 'none',
                   backgroundColor: 'transparent',
@@ -122,7 +135,12 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          CustomError={errorMessage}
+          Error={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: errorMessage,
+          }}
+          label={label}
           onChange={setValue}
           path={pathFromContext}
           required={required}

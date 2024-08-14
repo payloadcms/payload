@@ -12,7 +12,7 @@ Currently, Payload officially supports the following Database Adapters:
 
 - [MongoDB](/docs/database/mongodb) with [Mongoose](https://mongoosejs.com/)
 - [Postgres](/docs/database/postgres) with [Drizzle](https://drizzle.team/)
-- Coming soon: SQLite and MySQL using Drizzle.
+- [SQLite](/docs/database/sqlite) with [Drizzle](https://drizzle.team/)
 
 To configure a Database Adapter, use the `db` property in your [Payload Config](../configuration/overview):
 
@@ -59,7 +59,7 @@ You should prefer MongoDB if:
 
 Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
 
-You should prefer a relational DB like Postgres if:
+You should prefer a relational DB like Postgres or SQLite if:
 
 - You are comfortable with [Migrations](./migrations)
 - You require enforced data consistency at the database level

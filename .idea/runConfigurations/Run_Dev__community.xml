@@ -1,8 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Dev _community" type="NodeJSConfigurationType" application-parameters="--no-deprecation _community" path-to-js-file="test/dev.js" working-dir="$PROJECT_DIR$">
-    <envs>
-      <env name="NODE_OPTIONS" value="--no-deprecation" />
-    </envs>
+  <configuration default="false" name="Run Dev _community" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/package.json" />
+    <command value="run" />
+    <scripts>
+      <script value="dev" />
+    </scripts>
+    <arguments value="_community" />
+    <node-interpreter value="project" />
+    <envs />
     <method v="2" />
   </configuration>
 </component>

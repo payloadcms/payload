@@ -407,6 +407,7 @@ export const esTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publicar cambios',
     published: 'Publicado',
     publishing: 'Publicación',
+    restoreAsDraft: 'Restaurar como borrador',
     restoreThisVersion: 'Restaurar esta versión',
     restoredSuccessfully: 'Restaurado éxito.',
     restoring: 'Restaurando...',

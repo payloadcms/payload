@@ -8,7 +8,7 @@ import './index.scss'
 
 const baseClass = 'condition-value-text'
 
-const Text: React.FC<Props> = ({ disabled, onChange, value }) => {
+export const Text: React.FC<Props> = ({ disabled, onChange, value }) => {
   const { t } = useTranslation()
   return (
     <input
@@ -21,5 +21,3 @@ const Text: React.FC<Props> = ({ disabled, onChange, value }) => {
     />
   )
 }
-
-export default Text

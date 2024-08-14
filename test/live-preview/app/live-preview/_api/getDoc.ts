@@ -1,10 +1,10 @@
-import type { Where } from 'payload'
+import type { CollectionSlug, Where } from 'payload'
 
 import config from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
 
 export const getDoc = async <T>(args: {
-  collection: string
+  collection: CollectionSlug
   depth?: number
   draft?: boolean
   slug?: string

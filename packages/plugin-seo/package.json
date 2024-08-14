@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "3.0.0-beta.68",
+  "version": "3.0.0-beta.78",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -34,6 +34,11 @@
       "import": "./src/exports/fields.ts",
       "types": "./src/exports/fields.ts",
       "default": "./src/exports/fields.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -64,8 +69,8 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
+    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
   "publishConfig": {
     "exports": {
@@ -83,6 +88,11 @@
         "import": "./dist/exports/fields.js",
         "types": "./dist/exports/fields.d.ts",
         "default": "./dist/exports/fields.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",

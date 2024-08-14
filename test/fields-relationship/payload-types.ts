@@ -24,12 +24,16 @@ export interface Config {
     videos: Video;
     podcasts: Podcast;
     'mixed-media': MixedMedia;
+    'versioned-relationship-field': VersionedRelationshipField;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {};
-  locale: null;
+  locale: 'en';
   user: User & {
     collection: 'users';
   };
@@ -37,12 +41,17 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -251,6 +260,23 @@ export interface MixedMedia {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-relationship-field".
+ */
+export interface VersionedRelationshipField {
+  id: string;
+  title: string;
+  relationshipField?:
+    | {
+        relationTo: 'collection-1';
+        value: string | Collection1;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

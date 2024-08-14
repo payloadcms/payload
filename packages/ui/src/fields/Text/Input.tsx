@@ -7,6 +7,7 @@ import React from 'react'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -16,12 +17,13 @@ import './index.scss'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
+    description,
     descriptionProps,
     errorProps,
     hasMany,
@@ -62,15 +64,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -97,28 +94,25 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             value={valueToRender}
           />
         ) : (
-          <div>
-            {BeforeInput}
-            <input
-              data-rtl={rtl}
-              disabled={readOnly}
-              id={`field-${path?.replace(/\./g, '__')}`}
-              name={path}
-              onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
-              onKeyDown={onKeyDown}
-              placeholder={getTranslation(placeholder, i18n)}
-              ref={inputRef}
-              type="text"
-              value={value || ''}
-            />
-            {AfterInput}
-          </div>
+          <input
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path?.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onKeyDown={onKeyDown}
+            placeholder={getTranslation(placeholder, i18n)}
+            ref={inputRef}
+            type="text"
+            value={value || ''}
+          />
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <RenderComponent mappedComponent={afterInput} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

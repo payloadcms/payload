@@ -2,7 +2,7 @@
 
 html[data-theme='light'] {
   .slash-menu-popup {
-    @include shadow-m;
+    @include shadow-lg;
   }
 }
 

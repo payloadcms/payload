@@ -1,18 +1,16 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
 import type { Element } from 'slate'
 
 import React from 'react'
 
+import type { LoadedSlateFieldProps } from '../types.js'
+
 type ElementContextType<T> = {
   attributes: Record<string, unknown>
   children: React.ReactNode
-  editorRef: React.MutableRefObject<HTMLDivElement>
+  editorRef: React.RefObject<HTMLDivElement>
   element: T
-  fieldProps: {
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  fieldProps: LoadedSlateFieldProps
   path: string
   schemaPath: string
 }

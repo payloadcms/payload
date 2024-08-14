@@ -1,12 +1,12 @@
 'use client'
-import type { PaginatedDocs, Where } from 'payload'
+import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
-import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
+import type { GetResults, Option, Value } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -33,33 +33,36 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-export { RelationshipFieldProps }
-
-const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    allowCreate = true,
-    className,
     descriptionProps,
     errorProps,
-    hasMany,
-    isSortable = true,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        allowCreate = true,
+        className,
+        description,
+        isSortable = true,
+        readOnly: readOnlyFromAdmin,
+        sortOptions,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      relationTo,
+      required,
+    },
     labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    sortOptions,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     collections,
@@ -474,6 +477,7 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         showError && 'error',
         errorLoading && 'error-loading',
         readOnly && `${baseClass}--read-only`,
+        !readOnly && allowCreate && `${baseClass}--allow-create`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -484,14 +488,17 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -596,14 +603,14 @@ const _RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )
 }
 
-export const RelationshipField = withCondition(_RelationshipField)
+export const RelationshipField = withCondition(RelationshipFieldComponent)

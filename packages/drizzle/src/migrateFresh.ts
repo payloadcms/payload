@@ -42,7 +42,7 @@ export async function migrateFresh(
 
   await this.dropDatabase({ adapter: this })
 
-  const migrationFiles = (await readMigrationFiles({ payload })) as Migration[]
+  const migrationFiles = await readMigrationFiles({ payload })
   payload.logger.debug({
     msg: `Found ${migrationFiles.length} migration files.`,
   })
