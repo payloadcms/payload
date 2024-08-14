@@ -427,8 +427,8 @@ jobs:
       - name: Pack and build app
         run: |
           set -ex
-          pnpm run script:pack --dest templates/blank-3.0
-          cd templates/blank-3.0
+          pnpm run script:pack --dest templates/blank
+          cd templates/blank
           cp .env.example .env
           ls -la
           pnpm add ./*.tgz --ignore-workspace

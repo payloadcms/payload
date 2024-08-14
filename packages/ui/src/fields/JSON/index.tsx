@@ -25,7 +25,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     field: {
       name,
       _path: pathFromProps,
-      admin: { className, description, editorOptions, readOnly: readOnlyFromAdmin, style, width },
+      admin: {
+        className,
+        description,
+        editorOptions,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {},
       jsonSchema,
       label,
       required,

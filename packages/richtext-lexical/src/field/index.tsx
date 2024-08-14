@@ -17,7 +17,7 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
-    admin,
+    admin = {},
     field: { richTextComponentMap },
     lexicalEditorConfig,
   } = props

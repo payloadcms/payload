@@ -35,7 +35,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },
