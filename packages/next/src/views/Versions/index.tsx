@@ -1,4 +1,4 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
 import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -13,7 +13,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: EditViewComponent = async (props) => {
+export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {
@@ -62,13 +62,18 @@ export const VersionsView: EditViewComponent = async (props) => {
         },
       })
       if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, collectionSlug, 'draft', 'collection')
-        latestPublishedVersion = await getLatestVersion(
+        latestDraftVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
           payload,
-          collectionSlug,
-          'published',
-          'collection',
-        )
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
@@ -90,8 +95,18 @@ export const VersionsView: EditViewComponent = async (props) => {
       })
 
       if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion(payload, globalSlug, 'draft', 'global')
-        latestPublishedVersion = await getLatestVersion(payload, globalSlug, 'published', 'global')
+        latestDraftVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
       }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console

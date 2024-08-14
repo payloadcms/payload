@@ -5,7 +5,7 @@ import React from 'react'
 import { useElement } from '../../providers/ElementProvider.js'
 import './index.scss'
 
-export const UnorderedList: React.FC = () => {
+export const UnorderedListElement: React.FC = () => {
   const { attributes, children } = useElement()
 
   return (

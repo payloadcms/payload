@@ -1,12 +1,12 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n, rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
-import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
+import { createClientConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { createClientConfig, parseCookies } from 'payload'
+import { createLocalReq, parseCookies } from 'payload'
 import React from 'react'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
@@ -23,9 +23,11 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  importMap,
 }: {
-  children: React.ReactNode
-  config: Promise<SanitizedConfig>
+  readonly children: React.ReactNode
+  readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
 }) => {
   const config = await configPromise
 
@@ -52,7 +54,29 @@ export const RootLayout = async ({
     language: languageCode,
   })
 
-  const clientConfig = await createClientConfig({ config, t: i18n.t })
+  const req = await createLocalReq(
+    {
+      fallbackLocale: null,
+      req: {
+        headers,
+        host: headers.get('host'),
+        i18n,
+        url: `${payload.config.serverURL}`,
+      } as PayloadRequest,
+    },
+    payload,
+  )
+  const { permissions, user } = await payload.auth({ headers, req })
+
+  const { clientConfig, render } = await createClientConfig({
+    DefaultEditView,
+    DefaultListView,
+    children,
+    config,
+    i18n,
+    importMap,
+    payload,
+  })
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -82,29 +106,56 @@ export const RootLayout = async ({
     })
   }
 
-  const { componentMap, wrappedChildren } = buildComponentMap({
-    DefaultEditView,
-    DefaultListView,
-    children,
-    i18n,
-    payload,
-  })
+  const navPreferences = user
+    ? (
+        await payload.find({
+          collection: 'payload-preferences',
+          depth: 0,
+          limit: 1,
+          req,
+          user,
+          where: {
+            and: [
+              {
+                key: {
+                  equals: 'nav',
+                },
+              },
+              {
+                'user.relationTo': {
+                  equals: user.collection,
+                },
+              },
+              {
+                'user.value': {
+                  equals: user.id,
+                },
+              },
+            ],
+          },
+        })
+      )?.docs?.[0]
+    : null
+
+  const isNavOpen = (navPreferences?.value as any)?.open ?? true
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
-          componentMap={componentMap}
           config={clientConfig}
           dateFNSKey={i18n.dateFNSKey}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
+          isNavOpen={isNavOpen}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          permissions={permissions}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={i18n.translations}
+          user={user}
         >
-          {wrappedChildren}
+          {render}
         </RootProvider>
         <div id="portal" />
       </body>

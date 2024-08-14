@@ -4,13 +4,14 @@ import { LogOutIcon, useConfig } from '@payloadcms/ui'
 import React from 'react'
 
 export const Logout: React.FC = () => {
-  const config = useConfig()
   const {
-    admin: {
-      routes: { logout: logoutRoute },
+    config: {
+      admin: {
+        routes: { logout: logoutRoute },
+      },
+      routes: { admin },
     },
-    routes: { admin },
-  } = config
+  } = useConfig()
 
   return (
     <a href={`${admin}${logoutRoute}#custom`}>

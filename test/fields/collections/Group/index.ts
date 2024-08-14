@@ -140,7 +140,6 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-
     {
       type: 'tabs',
       tabs: [

@@ -1,4 +1,3 @@
-import type { ClientFieldConfig } from '../fields/config/client.js'
 import type { Field } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
@@ -16,8 +15,8 @@ type Ref = {
  * @param parentRef
  */
 export const traverseFields = (
-  fields: (ClientFieldConfig | Field)[],
-  callback?: (field: ClientFieldConfig | Field, ref: Ref, parentRef: Ref) => boolean | void,
+  fields: (Field)[],
+  callback?: (field: Field, ref: Ref, parentRef: Ref) => boolean | void,
   ref: Ref = {},
   parentRef: Ref = {},
 ): void => {

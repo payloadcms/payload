@@ -1,17 +1,17 @@
 'use client'
-import type { FieldTypes } from 'payload'
 
 import React, { createContext, useContext } from 'react'
 
-import { fieldComponents } from '../../fields/index.js'
+import type { FieldTypesComponents } from '../../fields/index.js'
 
-export type IFieldComponentsContext = FieldTypes
+export type IFieldComponentsContext = FieldTypesComponents
 
-const FieldComponentsContext = createContext<IFieldComponentsContext>(fieldComponents)
+const FieldComponentsContext = createContext<IFieldComponentsContext>(null)
 
 export const FieldComponentsProvider: React.FC<{
-  children: React.ReactNode
-}> = ({ children }) => {
+  readonly children: React.ReactNode
+  readonly fieldComponents: FieldTypesComponents
+}> = ({ children, fieldComponents }) => {
   return (
     <FieldComponentsContext.Provider value={fieldComponents}>
       {children}

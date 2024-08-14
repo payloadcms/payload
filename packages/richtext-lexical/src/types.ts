@@ -58,7 +58,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps, any>
+} & RichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -72,12 +72,10 @@ export type LexicalRichTextAdapterProvider =
     isRoot?: boolean
   }) => Promise<LexicalRichTextAdapter>
 
-export type FieldProps = {
-  fieldTypes: FieldTypes
-  indexPath: string
-  path?: string
-  permissions: FieldPermissions
-} & RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps>
+export type LexicalRichTextFieldProps = {
+  admin: LexicalFieldAdminProps
+  lexicalEditorConfig: LexicalEditorConfig
+} & RichTextFieldProps<SerializedEditorState, AdapterProps, object>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

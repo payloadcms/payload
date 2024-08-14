@@ -31,7 +31,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
   const pendingUpdate = useRef({})
-  const config = useConfig()
+  const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
 

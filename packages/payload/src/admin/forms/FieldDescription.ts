@@ -1,23 +1,23 @@
-import type React from 'react'
-
 import type { CustomComponent, LabelFunction, ServerProps } from '../../config/types.js'
-import type { FieldComponentProps } from '../types.js'
-import type { FieldTypes } from './FieldTypes.js'
+import type { FieldTypes } from '../../fields/config/types.js'
+import type { MappedComponent } from '../types.js'
 
 export type DescriptionFunction = LabelFunction
 
-export type DescriptionComponent<T extends keyof FieldTypes = any> = CustomComponent<
+export type DescriptionComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<
   FieldDescriptionProps<T>
 >
 
-export type Description = DescriptionFunction | Record<string, string> | string
+export type StaticDescription = Record<string, string> | string
+
+export type Description = DescriptionFunction | StaticDescription
 export type GenericDescriptionProps = {
-  CustomDescription?: React.ReactNode
-  className?: string
-  description?: Record<string, string> | string
-  marginPlacement?: 'bottom' | 'top'
+  readonly Description?: MappedComponent
+  readonly className?: string
+  readonly description?: StaticDescription
+  readonly marginPlacement?: 'bottom' | 'top'
 }
-export type FieldDescriptionProps<T extends keyof FieldTypes = any> = {
+export type FieldDescriptionProps<T extends 'hidden' | FieldTypes = any> = {
   type: T
 } & GenericDescriptionProps &
   Partial<ServerProps>

@@ -10,7 +10,7 @@ export const WatchCondition: React.FC<{
   indexPath: string
   name?: string
   path?: string
-  type: keyof FieldTypes
+  type: FieldTypes
 }> = (props) => {
   const { name, type, children, indexPath, path: pathFromProps } = props
 

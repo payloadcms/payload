@@ -4,7 +4,7 @@ export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
   /**
-   * If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.
+   * If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldProps` hook.
    **/
   path?: string
   validate?: Validate

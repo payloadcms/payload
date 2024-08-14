@@ -7,6 +7,7 @@ import React, { useCallback } from 'react'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -16,26 +17,30 @@ import './index.scss'
 
 const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     autoComplete,
-    className,
     descriptionProps,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        readOnly: readOnlyFromAdmin,
+
+        className,
+        description,
+        placeholder,
+        style,
+        width,
+      } = {} as EmailFieldProps['field']['admin'],
+      label,
+      required,
+    } = {} as EmailFieldProps['field'],
     labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -68,14 +73,20 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
+        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {/* disable eslint here because the label is dynamic */}
+        {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
           disabled={disabled}
@@ -83,16 +94,17 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
           name={path}
           onChange={setValue}
           placeholder={getTranslation(placeholder, i18n)}
+          required={required}
           type="email"
           value={(value as string) || ''}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

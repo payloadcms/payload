@@ -14,7 +14,7 @@ const baseClass = 'popup'
 
 export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
-  boundingRef?: React.MutableRefObject<HTMLElement>
+  boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   buttonClassName?: string
   buttonType?: 'custom' | 'default' | 'none'

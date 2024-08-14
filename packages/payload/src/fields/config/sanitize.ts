@@ -62,6 +62,10 @@ export const sanitizeFields = async ({
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
+    if ('_sanitized' in field && field._sanitized === true) {
+      continue
+    }
+
     if (!field.type) throw new MissingFieldType(field)
 
     // assert that field names do not contain forbidden characters
@@ -133,15 +137,6 @@ export const sanitizeFields = async ({
       }
     }
 
-    if (field.type === 'blocks' && field.blocks) {
-      field.blocks = field.blocks.map((block) => {
-        return {
-          ...block,
-          fields: block.fields.concat(baseBlockFields),
-        }
-      })
-    }
-
     if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField)
     }
@@ -208,6 +203,26 @@ export const sanitizeFields = async ({
       }
     }
 
+    if (field.type === 'blocks' && field.blocks) {
+      for (const block of field.blocks) {
+        if (block._sanitized === true) {
+          continue
+        }
+        block._sanitized = true
+        block.fields = block.fields.concat(baseBlockFields)
+        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
+
+        block.fields = await sanitizeFields({
+          config,
+          existingFieldNames: new Set(),
+          fields: block.fields,
+          requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
+          validRelationships,
+        })
+      }
+    }
+
     if ('fields' in field && field.fields) {
       if ('name' in field && field.name) {
         schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
@@ -248,21 +263,8 @@ export const sanitizeFields = async ({
       }
     }
 
-    if ('blocks' in field && field.blocks) {
-      for (let j = 0; j < field.blocks.length; j++) {
-        const block = field.blocks[j]
-        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
-        block.fields = await sanitizeFields({
-          config,
-          existingFieldNames: new Set(),
-          fields: block.fields,
-          requireFieldLevelRichTextEditor,
-          richTextSanitizationPromises,
-          validRelationships,
-        })
-        field.blocks[j] = block
-      }
+    if ('_sanitized' in field) {
+      field._sanitized = true
     }
 
     fields[i] = field

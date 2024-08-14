@@ -15,7 +15,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: base(0.75);
+    gap: base(0.8);
 
     h1 {
       margin: 0;
@@ -95,18 +95,18 @@
     position: fixed;
     bottom: 0;
     z-index: 10;
-    padding: base(0.75) 0;
+    padding: base(0.8) 0;
     width: 100%;
     background-color: var(--theme-bg);
 
     .btn {
-      margin: 0 0 0 base(0.5);
+      margin: 0 0 0 base(0.4);
     }
 
     .btn {
       background-color: var(--theme-elevation-100);
       cursor: pointer;
-      padding: 0 base(0.25);
+      padding: 0 base(0.4);
       border-radius: $style-radius-s;
 
       &:hover {
@@ -180,13 +180,6 @@
   }
 
   @include small-break {
-    margin-top: 0;
-    margin-bottom: base(3);
-
-    &__header {
-      .pill {
-        top: -6px;
-      }
-    }
+    margin-bottom: base(2.4);
   }
 }

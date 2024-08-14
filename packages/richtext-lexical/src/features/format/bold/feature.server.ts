@@ -1,5 +1,3 @@
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { BoldFeatureClient } from '../../../exports/client/index.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import {
   BOLD_ITALIC_STAR,
@@ -17,7 +15,7 @@ export const BoldFeature = createServerFeature({
     }
 
     return {
-      ClientFeature: BoldFeatureClient,
+      ClientFeature: '@payloadcms/richtext-lexical/client#BoldFeatureClient',
       markdownTransformers,
     }
   },

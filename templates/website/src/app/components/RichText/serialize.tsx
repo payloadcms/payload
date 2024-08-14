@@ -21,6 +21,7 @@ import type { Page } from '../../../payload-types'
 export type NodeTypes =
   | DefaultNodeTypes
   | SerializedBlockNode<
+      // @ts-ignore // TODO: Fix this
       | Extract<Page['layout'][0], { blockType: 'cta' }>
       | Extract<Page['layout'][0], { blockType: 'mediaBlock' }>
       | BannerBlockProps

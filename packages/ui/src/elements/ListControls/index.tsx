@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldMap, Where } from 'payload'
+import type { ClientCollectionConfig, ClientField, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -35,7 +35,7 @@ export type ListControlsProps = {
   collectionConfig: ClientCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
-  fieldMap: FieldMap
+  fields: ClientField[]
   handleSearchChange?: (search: string) => void
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
@@ -47,12 +47,12 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
+  const { collectionConfig, enableColumns = true, enableSort = false, fields } = props
 
   const { handleSearchChange } = useListQuery()
   const { collectionSlug } = useListInfo()
   const { searchParams } = useSearchParams()
-  const titleField = useUseTitleField(collectionConfig, fieldMap)
+  const titleField = useUseTitleField(collectionConfig, fields)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
@@ -64,17 +64,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField.fieldComponentProps &&
-          typeof titleField.fieldComponentProps.label === 'string'
-          ? titleField.fieldComponentProps.label
-          : titleField.name,
+        'label' in titleField && typeof titleField.label === 'string'
+          ? titleField.label
+          : 'name' in titleField
+            ? titleField.name
+            : null,
         i18n,
       )) ??
     'ID'
 
   const listSearchableFields = getTextFieldsToBeSearched(
     collectionConfig.admin.listSearchableFields,
-    fieldMap,
+    fields,
   )
 
   const searchLabelTranslated = useRef(
@@ -102,11 +103,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       searchLabelTranslated.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
           const label =
-            'fieldComponentProps' in field &&
-            'label' in field.fieldComponentProps &&
-            field.fieldComponentProps.label
-              ? field.fieldComponentProps.label
-              : field.name
+            'label' in field && field.label ? field.label : 'name' in field ? field.name : null
 
           if (i === 0) {
             return `${t('general:searchBy', {
@@ -134,7 +131,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <SearchIcon />
         <SearchFilter
-          fieldName={titleField?.name}
+          fieldName={'name' in titleField ? titleField?.name : null}
           handleChange={(search) => {
             return void handleSearchChange(search)
           }}
@@ -148,7 +145,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} fieldMap={fieldMap} />
+                <EditMany collection={collectionConfig} fields={fields} />
                 <PublishMany collection={collectionConfig} />
                 <UnpublishMany collection={collectionConfig} />
                 <DeleteMany collection={collectionConfig} />
@@ -214,7 +211,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          fieldMap={fieldMap}
+          fields={fields}
           key={String(hasWhereParam.current && !searchParams?.where)}
         />
       </AnimateHeight>

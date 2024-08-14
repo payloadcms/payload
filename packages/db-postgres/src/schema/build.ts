@@ -38,6 +38,10 @@ export type RelationMap = Map<string, { localized: boolean; target: string; type
 type Args = {
   adapter: PostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
+  /**
+   * After table is created, run these functions to add extra config to the table
+   * ie. indexes, multiple columns, etc
+   */
   baseExtraConfig?: BaseExtraConfig
   buildNumbers?: boolean
   buildRelationships?: boolean

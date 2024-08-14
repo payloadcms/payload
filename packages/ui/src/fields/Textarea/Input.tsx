@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -13,12 +14,13 @@ import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
+    description,
     descriptionProps,
     errorProps,
     label,
@@ -54,15 +56,10 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
             <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -79,12 +76,12 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        {AfterInput}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <RenderComponent mappedComponent={afterInput} />
+        <FieldDescription
+          Description={Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

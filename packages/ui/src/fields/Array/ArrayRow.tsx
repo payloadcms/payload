@@ -1,5 +1,5 @@
 'use client'
-import type { ArrayField, FieldMap, FieldPermissions, Row } from 'payload'
+import type { ArrayField, ClientField, FieldPermissions, MappedComponent, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -18,35 +18,35 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  CustomRowLabel?: React.ReactNode
-  addRow: (rowIndex: number) => Promise<void> | void
-  duplicateRow: (rowIndex: number) => void
-  errorCount: number
-  fieldMap: FieldMap
-  forceRender?: boolean
-  hasMaxRows?: boolean
-  indexPath: string
-  isSortable?: boolean
-  labels: ArrayField['labels']
-  moveRow: (fromIndex: number, toIndex: number) => void
-  path: string
-  permissions: FieldPermissions
-  readOnly?: boolean
-  removeRow: (rowIndex: number) => void
-  row: Row
-  rowCount: number
-  rowIndex: number
-  schemaPath: string
-  setCollapse: (rowID: string, collapsed: boolean) => void
+  readonly RowLabel?: MappedComponent
+  readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly duplicateRow: (rowIndex: number) => void
+  readonly errorCount: number
+  readonly fields: ClientField[]
+  readonly forceRender?: boolean
+  readonly hasMaxRows?: boolean
+  readonly indexPath: string
+  readonly isSortable?: boolean
+  readonly labels: Partial<ArrayField['labels']>
+  readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly path: string
+  readonly permissions: FieldPermissions
+  readonly readOnly?: boolean
+  readonly removeRow: (rowIndex: number) => void
+  readonly row: Row
+  readonly rowCount: number
+  readonly rowIndex: number
+  readonly schemaPath: string
+  readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
-  CustomRowLabel,
+  RowLabel: CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
   errorCount,
-  fieldMap,
+  fields,
   forceRender = false,
   hasMaxRows,
   indexPath,
@@ -126,7 +126,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel
-              RowLabelComponent={CustomRowLabel}
+              RowLabel={CustomRowLabel}
               i18n={i18n}
               path={path}
               rowLabel={fallbackLabel}
@@ -140,7 +140,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
+          fields={fields}
           forceRender={forceRender}
           indexPath={indexPath}
           margins="small"

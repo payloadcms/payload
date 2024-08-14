@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { customUploadFieldSlug } from '../../shared.js'
-import { CustomUploadRSC } from './components/CustomUpload/index.js'
 
 export const CustomUploadFieldCollection: CollectionConfig = {
   slug: customUploadFieldSlug,
@@ -9,7 +8,7 @@ export const CustomUploadFieldCollection: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        Upload: CustomUploadRSC,
+        Upload: '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC',
       },
     },
   },

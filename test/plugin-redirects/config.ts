@@ -11,6 +11,11 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Users, Pages],
   localization: {
     defaultLocale: 'en',
@@ -41,6 +46,10 @@ export default buildConfigWithDefaults({
             },
           ]
         },
+      },
+      redirectTypes: ['301', '302'],
+      redirectTypeFieldOverride: {
+        label: 'Redirect Type (Overridden)',
       },
     }),
   ],

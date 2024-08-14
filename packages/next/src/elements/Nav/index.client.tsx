@@ -14,6 +14,7 @@ import {
 } from '@payloadcms/ui'
 import { EntityType, formatAdminURL, groupNavItems } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
+import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
@@ -21,11 +22,14 @@ const baseClass = 'nav'
 export const DefaultNavClient: React.FC = () => {
   const { permissions } = useAuth()
   const { isEntityVisible } = useEntityVisibility()
+  const pathname = usePathname()
 
   const {
-    collections,
-    globals,
-    routes: { admin: adminRoute },
+    config: {
+      collections,
+      globals,
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()
@@ -84,17 +88,11 @@ export const DefaultNavClient: React.FC = () => {
                 LinkWithDefault) as typeof LinkWithDefault.default
 
               const LinkElement = Link || 'a'
-
-              const activeCollection = window?.location?.pathname
-                ?.split('/')
-                .find(
-                  (_, index, arr) =>
-                    arr[index - 1] === 'collections' || arr[index - 1] === 'globals',
-                )
+              const activeCollection = pathname.endsWith(href)
 
               return (
                 <LinkElement
-                  className={[`${baseClass}__link`, activeCollection === entity?.slug && `active`]
+                  className={[`${baseClass}__link`, activeCollection && `active`]
                     .filter(Boolean)
                     .join(' ')}
                   href={href}
@@ -102,9 +100,7 @@ export const DefaultNavClient: React.FC = () => {
                   key={i}
                   tabIndex={!navOpen ? -1 : undefined}
                 >
-                  <span className={`${baseClass}__link-icon`}>
-                    <ChevronIcon direction="right" />
-                  </span>
+                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
                   <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                 </LinkElement>
               )

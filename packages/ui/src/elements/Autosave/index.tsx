@@ -40,8 +40,10 @@ export const Autosave: React.FC<Props> = ({
   publishedDocUpdatedAt,
 }) => {
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
   const { reportUpdate } = useDocumentEvents()

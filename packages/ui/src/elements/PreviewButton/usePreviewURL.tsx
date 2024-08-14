@@ -20,8 +20,10 @@ export const usePreviewURL = (): {
   const { code: locale } = useLocale()
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const { t } = useTranslation()

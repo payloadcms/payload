@@ -1,7 +1,10 @@
+import type { MappedComponent } from 'payload'
+
+import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const OGImage: React.FC<{
-  Icon: React.ComponentType<any>
+  Icon: MappedComponent
   description?: string
   fontFamily?: string
   leader?: string
@@ -82,7 +85,12 @@ export const OGImage: React.FC<{
           width: '38px',
         }}
       >
-        <Icon fill="white" />
+        <RenderComponent
+          clientProps={{
+            fill: 'white',
+          }}
+          mappedComponent={Icon}
+        />
       </div>
     </div>
   )

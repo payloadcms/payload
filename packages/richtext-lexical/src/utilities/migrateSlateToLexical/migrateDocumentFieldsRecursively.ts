@@ -2,10 +2,7 @@ import type { Field } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
-import type {
-  SlateNodeConverter,
-  SlateNodeConverterProvider,
-} from '../../features/migrations/slateToLexical/converter/types.js'
+import type { SlateNodeConverter } from '../../features/migrations/slateToLexical/converter/types.js'
 import type { LexicalRichTextAdapter } from '../../types.js'
 
 import { convertSlateToLexical } from '../../features/migrations/slateToLexical/converter/index.js'
@@ -80,16 +77,8 @@ export const migrateDocumentFieldsRecursively = ({
           if (slateToLexicalFeature) {
             // DO CONVERSION
 
-            const converterProviders = (
-              slateToLexicalFeature.sanitizedServerFeatureProps as {
-                converters?: SlateNodeConverterProvider[]
-              }
-            ).converters
-
-            const converters: SlateNodeConverter[] = []
-
-            for (const converter of converterProviders) {
-              converters.push(converter.converter)
+            const { converters } = slateToLexicalFeature.sanitizedServerFeatureProps as {
+              converters?: SlateNodeConverter[]
             }
 
             data[field.name] = convertSlateToLexical({

@@ -1,14 +1,16 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   DocumentControls,
   DocumentFields,
   Form,
   type FormProps,
   OperationProvider,
+  RenderComponent,
   Upload,
   useAuth,
-  useComponentMap,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
@@ -56,9 +58,18 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const config = useConfig()
+
+  const {
+    config,
+    config: {
+      admin: { user: userSlug },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
+
   const router = useRouter()
-  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
@@ -66,29 +77,11 @@ export const DefaultEditView: React.FC = () => {
 
   const locale = params.get('locale')
 
-  const {
-    admin: { user: userSlug },
-    collections,
-    globals,
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
-  } = config
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
-
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
 
   const operation = collectionSlug && !id ? 'create' : 'update'
 
@@ -100,7 +93,10 @@ export const DefaultEditView: React.FC = () => {
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
 
-  const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+  const classes = [baseClass, id && `${baseClass}--is-editing`]
+
+  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
+  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
 
   const [schemaPath, setSchemaPath] = React.useState(entitySlug)
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
@@ -187,7 +183,7 @@ export const DefaultEditView: React.FC = () => {
   )
 
   return (
-    <main className={classes}>
+    <main className={classes.filter(Boolean).join(' ')}>
       <OperationProvider operation={operation}>
         <Form
           action={action}
@@ -250,8 +246,10 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {componentMap.Upload !== undefined ? (
-                        componentMap.Upload
+                      {collectionConfig?.admin?.components?.edit?.Upload ? (
+                        <RenderComponent
+                          mappedComponent={collectionConfig.admin.components.edit.Upload}
+                        />
                       ) : (
                         <Upload
                           collectionSlug={collectionConfig.slug}
@@ -265,7 +263,7 @@ export const DefaultEditView: React.FC = () => {
               )
             }
             docPermissions={docPermissions}
-            fieldMap={fieldMap}
+            fields={(collectionConfig || globalConfig)?.fields}
             readOnly={!hasSavePermission}
             schemaPath={schemaPath}
           />

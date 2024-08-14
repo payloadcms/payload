@@ -1,6 +1,6 @@
 'use client'
 
-import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -15,12 +15,13 @@ import {
   Pill,
   PublishMany,
   RelationshipProvider,
+  RenderComponent,
   SelectionProvider,
   SetViewActions,
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  useComponentMap,
+  ViewDescription,
   useConfig,
   useEditDepth,
   useListInfo,
@@ -44,27 +45,27 @@ export const DefaultListView: React.FC = () => {
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
-  const config = useConfig()
+  const { getEntityConfig } = useConfig()
 
-  const { getComponentMap } = useComponentMap()
-
-  const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const {
-    AfterList,
-    AfterListTable,
-    BeforeList,
-    BeforeListTable,
-    Description,
-    actionsMap,
-    fieldMap,
-  } = componentMap || {}
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
-
-  const { labels } = collectionConfig
+    admin: {
+      components: {
+        Description,
+        afterList,
+        afterListTable,
+        beforeList,
+        beforeListTable,
+        views: {
+          list: { actions },
+        },
+      },
+      description,
+    },
+    fields,
+    labels,
+  } = collectionConfig
 
   const { i18n } = useTranslation()
 
@@ -98,9 +99,9 @@ export const DefaultListView: React.FC = () => {
   }, [setStepNav, labels, drawerDepth])
 
   return (
-    <div className={baseClass}>
-      <SetViewActions actions={actionsMap?.List} />
-      {BeforeList}
+    <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+      <SetViewActions actions={actions} />
+      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
@@ -120,12 +121,20 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
+                {description && (
+                  <div className={`${baseClass}__sub-header`}>
+                    <RenderComponent
+                      Component={ViewDescription}
+                      clientProps={{ description }}
+                      mappedComponent={Description}
+                    />
+                  </div>
+                )}
               </Fragment>
             )}
           </header>
-          <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
-          {BeforeListTable}
+          <ListControls collectionConfig={collectionConfig} fields={fields} />
+          <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -140,7 +149,7 @@ export const DefaultListView: React.FC = () => {
                   uploadConfig: collectionConfig.upload,
                 }}
                 data={docs}
-                fieldMap={fieldMap}
+                fields={fields}
               />
             </RelationshipProvider>
           )}
@@ -156,7 +165,7 @@ export const DefaultListView: React.FC = () => {
               )}
             </div>
           )}
-          {AfterListTable}
+          <RenderComponent mappedComponent={afterListTable} />
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
@@ -189,17 +198,13 @@ export const DefaultListView: React.FC = () => {
                   />
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
-                      <Fragment>
-                        <ListSelection
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany collection={collectionConfig} fieldMap={fieldMap} />
-                          <PublishMany collection={collectionConfig} />
-                          <UnpublishMany collection={collectionConfig} />
-                          <DeleteMany collection={collectionConfig} />
-                        </div>
-                      </Fragment>
+                      <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        <EditMany collection={collectionConfig} fields={fields} />
+                        <PublishMany collection={collectionConfig} />
+                        <UnpublishMany collection={collectionConfig} />
+                        <DeleteMany collection={collectionConfig} />
+                      </div>
                     </div>
                   )}
                 </Fragment>
@@ -208,7 +213,7 @@ export const DefaultListView: React.FC = () => {
           )}
         </Gutter>
       </SelectionProvider>
-      {AfterList}
+      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }

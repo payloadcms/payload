@@ -40,6 +40,11 @@ export const pointSlug = 'point'
 export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'users',

@@ -61,15 +61,17 @@ export const LinkButton: React.FC = () => {
 
   const { t } = useTranslation()
   const editor = useSlate()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
   const { schemaPath } = useFieldProps()
 
-  const { richTextComponentMap } = fieldProps
+  const {
+    field: { richTextComponentMap },
+  } = fieldProps
 
-  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
+  const fields = richTextComponentMap.get(linkFieldsSchemaPath)
 
   return (
     <Fragment>
@@ -82,10 +84,12 @@ export const LinkButton: React.FC = () => {
           } else {
             openModal(drawerSlug)
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
+
             if (!isCollapsed) {
               const data = {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
+
               const state = await getFormState({
                 apiRoute: config.routes.api,
                 body: {
@@ -95,6 +99,7 @@ export const LinkButton: React.FC = () => {
                 },
                 serverURL: config.serverURL,
               })
+
               setInitialState(state)
             }
           }
@@ -105,7 +110,7 @@ export const LinkButton: React.FC = () => {
       </ElementButton>
       <LinkDrawer
         drawerSlug={drawerSlug}
-        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+        fields={Array.isArray(fields) ? fields : []}
         handleClose={() => {
           closeModal(drawerSlug)
         }}
