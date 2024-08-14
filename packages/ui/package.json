@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.80",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -24,10 +24,10 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
-    "./utilities/buildComponentMap": {
-      "import": "./src/utilities/buildComponentMap.ts",
-      "types": "./src/utilities/buildComponentMap.ts",
-      "default": "./src/utilities/buildComponentMap.ts"
+    "./utilities/createClientConfig": {
+      "import": "./src/providers/Config/createClientConfig/index.tsx",
+      "types": "./src/providers/Config/createClientConfig/index.tsx",
+      "default": "./src/providers/Config/createClientConfig/index.tsx"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -91,6 +91,7 @@
     "react-select": "5.8.0",
     "scheduler": "0.25.0-rc-f994737d14-20240522",
     "sonner": "^1.5.0",
+    "ts-essentials": "7.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
@@ -113,10 +114,10 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0-canary.53",
+    "next": "^15.0.0-canary.104",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-6230622a1a-20240610"
+    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -132,6 +133,11 @@
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
+      },
+      "./utilities/createClientConfig": {
+        "import": "./dist/providers/Config/createClientConfig/index.js",
+        "types": "./dist/providers/Config/createClientConfig/index.d.ts",
+        "default": "./dist/providers/Config/createClientConfig/index.js"
       },
       "./css": {
         "import": "./dist/prod/styles.css",

@@ -1,11 +1,11 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload } from 'payload'
+import { type Payload, getPayload } from 'payload'
 import { wait } from 'payload/shared'
 import { parse } from 'url'
 
+import { runInit } from '../runInit.js'
 import { createTestHooks } from '../testHooks.js'
 import startMemoryDB from './startMemoryDB.js'
 
@@ -20,12 +20,15 @@ type Result = {
 
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = path.basename(dirname)
+
+  await runInit(testSuiteName, true)
+
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
   await startMemoryDB()
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const port = 3000
   process.env.PORT = String(port)

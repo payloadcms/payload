@@ -57,12 +57,14 @@ export const useBeforeUnload = (enabled: (() => boolean) | boolean = true, messa
 export const usePreventLeave = ({
   hasAccepted = false,
   message = 'Are you sure want to leave this page?',
+  onAccept,
   onPrevent,
   prevent = true,
 }: {
   hasAccepted: boolean
   // if no `onPrevent` is provided, the message will be displayed in a confirm dialog
   message?: string
+  onAccept?: () => void
   // to use a custom confirmation dialog, provide a function that returns a boolean
   onPrevent?: () => void
   prevent: boolean
@@ -142,7 +144,8 @@ export const usePreventLeave = ({
 
   useEffect(() => {
     if (hasAccepted && cancelledURL.current) {
+      if (onAccept) onAccept()
       router.push(cancelledURL.current)
     }
-  }, [hasAccepted, router])
+  }, [hasAccepted, onAccept, router])
 }

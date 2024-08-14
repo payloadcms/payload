@@ -1,20 +1,24 @@
+import type { CollectionBeforeChangeHook } from 'payload'
+
 import type { Email, FormBuilderPluginConfig, FormattedEmail } from '../../../types.js'
 
 import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
+type BeforeChangeParams = Parameters<CollectionBeforeChangeHook>[0]
+
 export const sendEmail = async (
-  beforeChangeData: any,
+  beforeChangeParameters: BeforeChangeParams,
   formConfig: FormBuilderPluginConfig,
-): Promise<any> => {
-  const { data, operation, req } = beforeChangeData
+): Promise<BeforeChangeParams['data']> => {
+  const { data, operation, req } = beforeChangeParameters
 
   if (operation === 'create') {
     const {
       data: { id: formSubmissionID },
       req: { locale, payload },
-    } = beforeChangeData
+    } = beforeChangeParameters
 
     const { form: formID, submissionData } = data || {}
 
@@ -28,7 +32,7 @@ export const sendEmail = async (
         req,
       })
 
-      const { emails } = form
+      const emails = form.emails as Email[]
 
       if (emails && emails.length) {
         const formattedEmails: FormattedEmail[] = await Promise.all(
@@ -70,10 +74,8 @@ export const sendEmail = async (
         let emailsToSend = formattedEmails
 
         if (typeof beforeEmail === 'function') {
-          emailsToSend = await beforeEmail(formattedEmails)
+          emailsToSend = await beforeEmail(formattedEmails, beforeChangeParameters)
         }
-
-        // const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
 
         await Promise.all(
           emailsToSend.map(async (email) => {

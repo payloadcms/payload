@@ -54,6 +54,10 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
+
+    if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
+      await this.migrate({ migrations: this.prodMigrations })
+    }
   } catch (err) {
     console.log(err)
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)

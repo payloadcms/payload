@@ -57,7 +57,7 @@
     height: 100%;
     flex-grow: 1;
     justify-content: space-between;
-    overflow: hidden;
+    width: 100%;
   }
 
   &__account {
@@ -90,12 +90,14 @@
     align-items: center;
     flex-grow: 1;
     overflow: hidden;
+    width: 100%;
   }
 
   &__step-nav-wrapper {
-    flex: 1;
+    flex-grow: 0;
     overflow: auto;
     display: flex;
+    width: 100%;
 
     &::-webkit-scrollbar {
       display: none;
@@ -156,7 +158,7 @@
   }
 
   @include small-break {
-    &__localizer {
+    &__localizer.localizer {
       right: base(2);
     }
 

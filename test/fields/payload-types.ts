@@ -74,6 +74,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -85,6 +86,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -592,6 +594,19 @@ export interface BlockField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'text';
+      }[]
+    | null;
+  blocksWithLocalizedArray?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedArray';
       }[]
     | null;
   blocksWithSimilarConfigs?:

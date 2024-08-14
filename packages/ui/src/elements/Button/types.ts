@@ -17,7 +17,7 @@ export type Props = {
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   round?: boolean
-  size?: 'medium' | 'small'
+  size?: 'large' | 'medium' | 'small'
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'

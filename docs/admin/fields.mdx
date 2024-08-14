@@ -117,7 +117,7 @@ export const CollectionConfig: CollectionConfig = {
       // ...
       admin: {
         components: {
-          Field: MyFieldComponent, // highlight-line
+          Field: '/path/to/MyFieldComponent', // highlight-line
         },
       },
     }
@@ -135,32 +135,12 @@ All Field Components receive the following props:
 
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`AfterInput`** | The rendered result of the `admin.components.afterInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
-| **`BeforeInput`** | The rendered result of the `admin.components.beforeInput` property. [More details](#afterinput-and-beforeinput).                                                                                                      |
-| **`CustomDescription`** | The rendered result of the `admin.components.Description` property. [More details](#the-description-component).                                                                                                      |
-| **`CustomError`** | The rendered result of the `admin.components.Error` property. [More details](#the-error-component).                                                                                                      |
-| **`CustomLabel`** | The rendered result of the `admin.components.Label` property. [More details](#the-label-component).
-| **`path`**       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
-| **`disabled`**   | The `admin.disabled` property defined in the [Field Config](../fields/overview). |
-| **`required`**   | The `admin.required` property defined in the [Field Config](../fields/overview). |
-| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
-| **`style`**      | The `admin.style` property defined in the [Field Config](../fields/overview).                                                                                                                                                      |
-| **`custom`**     | The `admin.custom` property defined in the [Field Config](../fields/overview).
-| **`placeholder`** | The `admin.placeholder` property defined in the [Field Config](../fields/overview). |
-| **`descriptionProps`** | An object that contains the props for the `FieldDescription` component.                                                                                                                                                                   |
-| **`labelProps`** | An object that contains the props needed for the `FieldLabel` component.                                                                                                                                                                         |
-| **`errorProps`** | An object that contains the props for the `FieldError` component.                                                                                                                                                                         |
-| **`docPreferences`** | An object that contains the preferences for the document.                                                                                                                                                                         |
-| **`label`**      | The label value provided in the field, it can be used with i18n.                                                                                                                                                                   |
+| **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
+| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
-| **`localized`**  | A boolean value that represents if the field is localized or not. [More details](../fields/localized).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
-| **`rtl`**        | A boolean value that represents if the field should be rendered right-to-left or not. [More details](../configuration/i18n).                                                                                           |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
 | **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
-| **`hasMany`**    | If a [`relationship`](../fields/relationship) field, the `hasMany` property defined in the [Field Config](../fields/overview). |
-| **`maxLength`**  | If a [`text`](../fields/text) field, the `maxLength` property defined in the [Field Config](../fields/overview). |
-| **`minLength`**  | If a [`text`](../fields/text) field, the `minLength` property defined in the [Field Config](../fields/overview). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -193,6 +173,105 @@ export const CustomTextField: React.FC = () => {
   For a complete list of all available React hooks, see the [Payload React Hooks](./hooks) documentation. For additional help, see [Building Custom Components](./components#building-custom-components).
 </Banner>
 
+#### TypeScript
+
+When building Custom Field Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview). The convention is to append `Props` to the type of field, i.e. `TextFieldProps`.
+
+```tsx
+import type {
+  ArrayFieldProps,
+  BlocksFieldProps,
+  CheckboxFieldProps,
+  CodeFieldProps,
+  CollapsibleFieldProps,
+  DateFieldProps,
+  EmailFieldProps,
+  GroupFieldProps,
+  HiddenFieldProps,
+  JSONFieldProps,
+  NumberFieldProps,
+  PointFieldProps,
+  RadioFieldProps,
+  RelationshipFieldProps,
+  RichTextFieldProps,
+  RowFieldProps,
+  SelectFieldProps,
+  TabsFieldProps,
+  TextFieldProps,
+  TextareaFieldProps,
+  UploadFieldProps
+} from 'payload'
+```
+
+### The `field` Prop
+
+All Field Components are passed a client-friendly version of their Field Config through a common `field` prop. Since the raw Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), Payload sanitized it into a [Client Config](./components#accessing-the-payload-config) that is safe to pass into Client Components.
+
+The exact shape of this prop is unique to the specific [Field Type](../fields/overview) being rendered, minus all non-serializable properties. Any [Custom Components](../components) are also resolved into a "mapped component" that is safe to pass.
+
+```tsx
+'use client'
+import React from 'react'
+import type { TextFieldProps } from 'payload'
+
+export const MyClientFieldComponent: React.FC<TextFieldProps> = ({ field: { name } }) => {
+  return (
+    <p>
+      {`This field's name is ${name}`}
+    </p>
+  )
+}
+```
+
+The following additional properties are also provided to the `field` prop:
+
+| Property         | Description                                                                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`_isPresentational`** | A boolean indicating that the field is purely visual and does not directly affect data or change data shape, i.e. the [UI Field](../fields/ui). |
+| **`_path`** | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray[0].myField`. |
+| **`_schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `myGroup.myArray.myField` |
+
+<Banner type="info">
+  <strong>Note:</strong>
+  These properties are underscored to denote that they are not part of the original Field Config, and instead are attached during client sanitization to make fields easier to work with on the front-end.
+</Banner>
+
+#### TypeScript
+
+When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every [Field Type](../fields/overview). The convention is to append `Client` to the type of field, i.e. `TextFieldClient`.
+
+```tsx
+import type {
+  ArrayFieldClient,
+  BlocksFieldClient,
+  CheckboxFieldClient,
+  CodeFieldClient,
+  CollapsibleFieldClient,
+  DateFieldClient,
+  EmailFieldClient,
+  GroupFieldClient,
+  HiddenFieldClient,
+  JSONFieldClient,
+  NumberFieldClient,
+  PointFieldClient,
+  RadioFieldClient,
+  RelationshipFieldClient,
+  RichTextFieldClient,
+  RowFieldClient,
+  SelectFieldClient,
+  TabsFieldClient,
+  TextFieldClient,
+  TextareaFieldClient,
+  UploadFieldClient
+} from 'payload'
+```
+
+When working on the client, you will never have access to objects of type `Field`. This is reserved for the server-side. Instead, you can use `ClientField` which is a union type of all the client fields:
+
+```tsx
+import type { ClientField } from 'payload'
+```
+
 ### The Cell Component
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
@@ -207,7 +286,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Cell: MyCustomCell, // highlight-line
+      Cell: '/path/to/MyCustomCellComponent', // highlight-line
     },
   },
 }
@@ -219,20 +298,9 @@ All Cell Components receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`name`** | The name of the field. |
-| **`className`**  | The `admin.className` property defined in the [Field Config](../fields/overview). |
-| **`fieldType`** | The `type` property defined in the [Field Config](../fields/overview). |
-| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
-| **`isFieldAffectingData`** | A boolean value that represents if the field is affecting the data or not. |
-| **`label`** | The label value provided in the field, it can be used with i18n. |
-| **`labels`** | An object that contains the labels for the field. |
+| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
-| **`dateDisplayFormat`** | If a [`date`](../fields/date) field, the `admin.dateDisplayFormat` property defined in the [Field Config](../fields/overview). |
-| **`options`** | If a [`select`](../fields/select) field, this is an array of options defined in the [Field Config](../fields/overview). [More details](../fields/select). |
-| **`relationTo`** | If a [`relationship`](../fields/relationship). or [`upload`](../fields/upload) field, this is the collection(s) the field is related to. |
-| **`richTextComponentMap`** | If a [`richText`](../fields/rich-text) field, this is an object that maps the rich text components. [More details](../fields/rich-text). |
-| **`blocks`** | If a [`blocks`](../fields/blocks) field, this is an array of labels and slugs representing the blocks defined in the [Field Config](../fields/overview). [More details](../fields/blocks). |
 
 <Banner type="info">
   <strong>Tip:</strong>
@@ -258,7 +326,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Label: MyCustomLabel, // highlight-line
+      Label: '/path/to/MyCustomLabelComponent', // highlight-line
     },
   },
 }
@@ -270,7 +338,7 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`schemaPath`** | The path to the field in the schema. Similar to `path`, but without dynamic indices. |
+| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -279,7 +347,7 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 #### TypeScript
 
-When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+When building Custom Label Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview). The convention is to append `LabelComponent` to the type of field, i.e. `TextFieldLabelComponent`.
 
 ```tsx
 import type {
@@ -321,7 +389,7 @@ export const myField: Field = {
   type: 'text',
   admin: {
     components: {
-      Error: MyCustomError, // highlight-line
+      Error: '/path/to/MyCustomErrorComponent', // highlight-line
     },
   },
 }
@@ -333,7 +401,7 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`path`***       | The static path of the field at render time. [More details](./hooks#usefieldprops). |
+| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -443,7 +511,6 @@ To easily add a Description Component to a field, use the `admin.components.Desc
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomDescription } from './MyCustomDescription'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
@@ -454,7 +521,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Description: MyCustomDescription, // highlight-line
+          Description: '/path/to/MyCustomDescriptionComponent', // highlight-line
         }
       }
     }
@@ -468,7 +535,7 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`description`**    | The `description` property defined in the [Field Config](../fields/overview).         |
+| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -524,8 +591,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       admin: {
         components: {
           // highlight-start
-          beforeInput: [MyCustomComponent],
-          afterInput: [MyOtherCustomComponent],
+          beforeInput: ['/path/to/MyCustomComponent'],
+          afterInput: ['/path/to/MyOtherCustomComponent'],
           // highlight-end
         }
       }

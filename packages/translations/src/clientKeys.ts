@@ -314,6 +314,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:publishChanges',
   'version:published',
   'version:publishing',
+  'version:restoreAsDraft',
   'version:restoredSuccessfully',
   'version:restoreThisVersion',
   'version:restoring',

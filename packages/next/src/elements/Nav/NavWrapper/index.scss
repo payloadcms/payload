@@ -9,7 +9,10 @@
   width: var(--nav-width);
   border-right: 1px solid var(--theme-elevation-100);
   opacity: 0;
-  transition: opacity var(--nav-trans-time) ease-in-out;
+
+  &--nav-animate {
+    transition: opacity var(--nav-trans-time) ease-in-out;
+  }
 
   &--nav-open {
     opacity: 1;

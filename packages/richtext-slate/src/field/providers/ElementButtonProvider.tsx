@@ -1,15 +1,12 @@
 'use client'
 
-import type { FormFieldBase } from 'payload'
-
 import React from 'react'
+
+import type { LoadedSlateFieldProps } from '../types.js'
 
 type ElementButtonContextType = {
   disabled?: boolean
-  fieldProps: {
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  fieldProps: LoadedSlateFieldProps
   path: string
   schemaPath: string
 }

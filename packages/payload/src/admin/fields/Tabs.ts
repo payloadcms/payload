@@ -1,21 +1,21 @@
-import type { TabsField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type {
+  ClientField,
+  NamedTab,
+  TabsFieldClient,
+  UnnamedTab,
+} from '../../fields/config/types.js'
 import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
-export type TabsFieldProps = {
-  forceRender?: boolean
-  name?: string
-  path?: string
-  tabs?: MappedTab[]
-  width?: string
-} & FormFieldBase
+export type ClientTab =
+  | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
+  | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-export type MappedTab = {
-  fieldMap?: FieldMap
-  label: TabsField['tabs'][0]['label']
-  name?: string
-}
+export type TabsFieldProps = {
+  readonly field: MarkOptional<TabsFieldClient, 'type'>
+} & FormFieldBase
 
 export type TabsFieldLabelComponent = LabelComponent<'tabs'>
 

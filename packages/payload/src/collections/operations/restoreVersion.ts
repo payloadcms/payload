@@ -18,6 +18,7 @@ export type Arguments = {
   currentDepth?: number
   depth?: number
   disableErrors?: boolean
+  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
@@ -31,6 +32,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     id,
     collection: { config: collectionConfig },
     depth,
+    draft,
     overrideAccess = false,
     req,
     req: { fallbackLocale, locale, payload },
@@ -126,7 +128,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       parent: parentDocID,
       req,
       updatedAt: new Date().toISOString(),
-      versionData: rawVersion.version,
+      versionData: draft ? { ...rawVersion.version, _status: 'draft' } : rawVersion.version,
     })
 
     // /////////////////////////////////////

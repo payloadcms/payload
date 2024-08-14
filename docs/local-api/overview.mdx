@@ -62,19 +62,16 @@ If you are accessing Payload via function arguments or `req.payload`, HMR is aut
 
 **Option 2 - outside of Next.js**
 
-If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality.
+If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality. Instead of using `getPayloadHMR`, you can use `getPayload`.
 
 ```ts
 import { getPayload } from 'payload'
-import { importConfig } from 'payload/node'
+import config from '@payload-config'
 
-const config = await importConfig('./payload.config.ts')
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. However, when you import your Payload Config, you need to make sure that you can import it safely.
-
-For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
+Both options function in exactly the same way outside of one having HMR support and the other not. For more information about using Payload outside of Next.js, [click here](/docs/beta/local-api/outside-nextjs).
 
 ## Local options available
 

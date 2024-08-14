@@ -45,15 +45,13 @@
     padding: 0;
     cursor: pointer;
     overflow: hidden;
-    width: base(1);
-    height: base(1);
+    width: base(2);
+    height: base(2);
 
     svg {
-      width: base(2.75);
-      height: base(2.75);
+      width: base(2);
+      height: base(2);
       position: relative;
-      left: base(-0.825);
-      top: base(-0.825);
 
       .stroke {
         stroke-width: 2px;

@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
@@ -8,45 +8,43 @@ import {
   FormSubmit,
   PasswordField,
   RenderFields,
-  useComponentMap,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { LoginField } from '../Login/LoginField/index.js'
+import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
-  loginType: 'email' | 'emailOrUsername' | 'username'
-  requireEmail?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
-}> = ({ initialState, loginType, requireEmail = true, userSlug }) => {
-  const { getFieldMap } = useComponentMap()
-
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const {
-    routes: { admin, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
   const { t } = useTranslation()
 
-  const fieldMap = getFieldMap({ collectionSlug: userSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
-      return getFormState({
+    async ({ formState: prevFormState }) =>
+      getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
-          schemaPath: userSlug,
+          schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      })
-    },
+      }),
     [apiRoute, userSlug, serverURL],
   )
 
@@ -59,25 +57,30 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      {['emailOrUsername', 'username'].includes(loginType) && <LoginField type="username" />}
-      {['email', 'emailOrUsername'].includes(loginType) && (
-        <LoginField required={requireEmail} type="email" />
-      )}
+      <RenderEmailAndUsernameFields
+        className="emailAndUsername"
+        loginWithUsername={loginWithUsername}
+        operation="create"
+        readOnly={false}
+      />
       <PasswordField
-        autoComplete="off"
-        label={t('authentication:newPassword')}
-        name="password"
-        required
+        autoComplete={'off'}
+        field={{
+          name: 'password',
+          label: t('authentication:newPassword'),
+          required: true,
+        }}
       />
       <ConfirmPasswordField />
       <RenderFields
-        fieldMap={fieldMap}
+        fields={collectionConfig.fields}
+        forceRender
         operation="create"
         path=""
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

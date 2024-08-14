@@ -22,7 +22,7 @@ const customJestConfig = {
   },
   testEnvironment: 'node',
   testMatch: ['<rootDir>/**/*spec.ts'],
-  testTimeout: 90000,
+  testTimeout: 160000,
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },

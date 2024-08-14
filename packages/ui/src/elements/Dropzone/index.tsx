@@ -107,7 +107,7 @@ export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPa
         onClick={() => {
           inputRef.current.click()
         }}
-        size="small"
+        size="medium"
       >
         {t('upload:selectFile')}
       </Button>
@@ -115,7 +115,7 @@ export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPa
         buttonStyle="secondary"
         className={`${baseClass}__file-button`}
         onClick={onPasteUrlClick}
-        size="small"
+        size="medium"
       >
         {t('upload:pasteURL')}
       </Button>

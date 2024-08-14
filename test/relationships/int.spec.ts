@@ -1,6 +1,8 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes } from 'crypto'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
@@ -14,7 +16,6 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -31,11 +32,14 @@ import {
 let restClient: NextRESTClient
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     await restClient.login({ slug: usersSlug })
   })

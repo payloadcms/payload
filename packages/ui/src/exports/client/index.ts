@@ -5,6 +5,9 @@
 // IMPORTANT: do _not_ alias any of the exports in this file, this will cause a mismatch between the unbundled exports
 
 // hooks
+
+export { fieldComponents } from '../../fields/index.js'
+
 export { useDebounce } from '../../hooks/useDebounce.js'
 export { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 export { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
@@ -18,6 +21,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { useTableColumns } from '../../elements/TableColumns/index.js'
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
 export { ViewDescription } from '../../elements/ViewDescription/index.js'
@@ -37,7 +41,7 @@ export { ErrorPill } from '../../elements/ErrorPill/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
-export { HydrateClientUser } from '../../elements/HydrateClientUser/index.js'
+export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export { ListSelection } from '../../elements/ListSelection/index.js'
@@ -72,6 +76,7 @@ export type { StepNavItem } from '../../elements/StepNav/types.js'
 export { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 export { TableCellProvider, useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 export { type Column, Table } from '../../elements/Table/index.js'
+export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -146,6 +151,8 @@ export { withCondition } from '../../forms/withCondition/index.js'
 
 // graphics
 export { Account } from '../../graphics/Account/index.js'
+export { PayloadIcon } from '../../graphics/Icon/index.js'
+
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
 export { File } from '../../graphics/File/index.js'
 
@@ -174,14 +181,8 @@ export { ActionsProvider, SetViewActions, useActions } from '../../providers/Act
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
-export type {
-  ActionMap,
-  CollectionComponentMap,
-  ComponentMap,
-  ConfigComponentMapBase,
-  GlobalComponentMap,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
-export { ComponentMapProvider, useComponentMap } from '../../providers/ComponentMap/index.js'
+export { RenderComponent } from '../../providers/Config/RenderComponent.js'
+
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -218,3 +219,8 @@ export { SelectionProvider, useSelection } from '../../providers/Selection/index
 export { type Theme, ThemeProvider, defaultTheme, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { WindowInfoProvider, useWindowInfo } from '../../providers/WindowInfo/index.js'
+export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
+export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition/Select/index.js'
+export { RelationshipField as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'
+export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
+export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'

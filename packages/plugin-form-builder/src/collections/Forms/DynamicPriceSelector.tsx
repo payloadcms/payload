@@ -11,7 +11,7 @@ type FieldWithID = {
 }
 
 export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
-  const { label, path } = props
+  const { field } = props
 
   const { fields, getData, getDataByPath } = useWatchForm()
 
@@ -22,8 +22,8 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
 
   // only number fields can use 'valueOfField`
   useEffect(() => {
-    if (path) {
-      const parentPath = path.split('.').slice(0, -1).join('.')
+    if (field?._path) {
+      const parentPath = field._path.split('.').slice(0, -1).join('.')
       const paymentFieldData: any = getDataByPath(parentPath)
 
       if (paymentFieldData) {
@@ -40,7 +40,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
         }
       }
     }
-  }, [fields, path, getDataByPath, getData])
+  }, [fields, field._path, getDataByPath, getData])
 
   // TODO: make this a number field, block by Payload
   if (valueType === 'static') {
@@ -49,7 +49,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
 
   const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
 
-  const localLabels = typeof label === 'object' ? label : { [localeCode]: label }
+  const localLabels = typeof field.label === 'object' ? field.label : { [localeCode]: field.label }
 
   const labelValue = localLabels[localeCode] || localLabels['en'] || ''
 

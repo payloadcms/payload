@@ -8,6 +8,9 @@ import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 export type ConvertLexicalToHTMLArgs = {
   converters: HTMLConverter[]
   data: SerializedEditorState
+  draft?: boolean // default false
+  overrideAccess?: boolean // default false
+  showHiddenFields?: boolean // default false
 } & (
   | {
       /**
@@ -40,8 +43,11 @@ export type ConvertLexicalToHTMLArgs = {
 export async function convertLexicalToHTML({
   converters,
   data,
+  draft,
+  overrideAccess,
   payload,
   req,
+  showHiddenFields,
 }: ConvertLexicalToHTMLArgs): Promise<string> {
   if (data?.root?.children?.length) {
     if (req === undefined && payload) {
@@ -50,9 +56,12 @@ export async function convertLexicalToHTML({
 
     return await convertLexicalNodesToHTML({
       converters,
+      draft: draft === undefined ? false : draft,
       lexicalNodes: data?.root?.children,
+      overrideAccess: overrideAccess === undefined ? false : overrideAccess,
       parent: data?.root,
       req,
+      showHiddenFields: showHiddenFields === undefined ? false : showHiddenFields,
     })
   }
   return ''
@@ -60,17 +69,23 @@ export async function convertLexicalToHTML({
 
 export async function convertLexicalNodesToHTML({
   converters,
+  draft,
   lexicalNodes,
+  overrideAccess,
   parent,
   req,
+  showHiddenFields,
 }: {
   converters: HTMLConverter[]
+  draft: boolean
   lexicalNodes: SerializedLexicalNode[]
+  overrideAccess: boolean
   parent: SerializedLexicalNodeWithParent
   /**
    * When the converter is called, req CAN be passed in depending on where it's run.
    */
   req: PayloadRequest | null
+  showHiddenFields: boolean
 }): Promise<string> {
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
 
@@ -85,9 +100,12 @@ export async function convertLexicalNodesToHTML({
             return await unknownConverter.converter({
               childIndex: i,
               converters,
+              draft,
               node,
+              overrideAccess,
               parent,
               req,
+              showHiddenFields,
             })
           }
           return '<span>unknown node</span>'
@@ -95,9 +113,12 @@ export async function convertLexicalNodesToHTML({
         return await converterForNode.converter({
           childIndex: i,
           converters,
+          draft,
           node,
+          overrideAccess,
           parent,
           req,
+          showHiddenFields,
         })
       } catch (error) {
         console.error('Error converting lexical node to HTML:', error, 'node:', node)

@@ -401,6 +401,7 @@ export const csTranslations: DefaultTranslationsObject = {
     publishChanges: 'Publikovat změny',
     published: 'Publikováno',
     publishing: 'Publikování',
+    restoreAsDraft: 'Obnovit jako koncept',
     restoreThisVersion: 'Obnovit tuto verzi',
     restoredSuccessfully: 'Úspěšně obnoveno.',
     restoring: 'Obnovování...',

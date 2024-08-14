@@ -1,10 +1,10 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
 import { createRequire } from 'module'
 import path from 'path'
-import { getPredefinedMigration } from 'payload'
+import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
@@ -25,7 +25,7 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration, upPgSnapshot } = require('drizzle-kit/api')
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -49,6 +49,12 @@ export const createMigration: CreateMigration = async function createMigration(
 
   let drizzleJsonBefore = defaultDrizzleSnapshot
 
+  if (this.schemaName) {
+    drizzleJsonBefore.schemas = {
+      [this.schemaName]: this.schemaName,
+    }
+  }
+
   if (!upSQL) {
     // Get latest migration snapshot
     const latestSnapshot = fs
@@ -58,9 +64,11 @@ export const createMigration: CreateMigration = async function createMigration(
       .reverse()?.[0]
 
     if (latestSnapshot) {
-      drizzleJsonBefore = JSON.parse(
-        fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
-      ) as DrizzleSnapshotJSON
+      drizzleJsonBefore = JSON.parse(fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'))
+
+      if (drizzleJsonBefore.version < drizzleJsonAfter.version) {
+        drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
+      }
     }
 
     const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
@@ -107,5 +115,8 @@ export const createMigration: CreateMigration = async function createMigration(
       upSQL: upSQL || `  // Migration code`,
     }),
   )
+
+  writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+
   payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
 }

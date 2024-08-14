@@ -1,14 +1,15 @@
-import type { EmailField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { EmailFieldClient } from '../../fields/config/types.js'
+import type { EmailFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type EmailFieldProps = {
-  autoComplete?: string
-  name?: string
-  path?: string
-  placeholder?: EmailField['admin']['placeholder']
-  width?: string
-} & FormFieldBase
+  readonly autoComplete?: string
+  readonly field: MarkOptional<EmailFieldClient, 'type'>
+  readonly validate?: EmailFieldValidation
+} & Omit<FormFieldBase, 'validate'>
 
 export type EmailFieldLabelComponent = LabelComponent<'email'>
 

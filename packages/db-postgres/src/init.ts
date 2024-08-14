@@ -1,22 +1,18 @@
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import { createTableName } from '@payloadcms/drizzle'
-import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import { uniqueIndex } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
+import type { BaseExtraConfig } from './schema/build.js'
 import type { PostgresAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
 
 export const init: Init = function init(this: PostgresAdapter) {
-  if (this.schemaName) {
-    this.pgSchema = pgSchema(this.schemaName)
-  } else {
-    this.pgSchema = { table: pgTable }
-  }
   if (this.payload.config.localization) {
-    this.enums.enum__locales = pgEnum(
+    this.enums.enum__locales = this.pgSchema.enum(
       '_locales',
       this.payload.config.localization.locales.map(({ code }) => code) as [string, ...string[]],
     )
@@ -40,8 +36,22 @@ export const init: Init = function init(this: PostgresAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
+    const baseExtraConfig: BaseExtraConfig = {}
+
+    if (collection.upload.filenameCompoundIndex) {
+      const indexName = `${tableName}_filename_compound_idx`
+
+      baseExtraConfig.filename_compound_index = (cols) => {
+        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
+          return cols[f]
+        })
+        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
+      }
+    }
+
     buildTable({
       adapter: this,
+      baseExtraConfig,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,

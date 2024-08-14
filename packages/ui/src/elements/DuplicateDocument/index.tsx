@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -23,11 +23,11 @@ import './index.scss'
 const baseClass = 'duplicate'
 
 export type Props = {
-  id: string
-  onDuplicate?: DocumentInfoContext['onDuplicate']
-  redirectAfterDuplicate?: boolean
-  singularLabel: SanitizedCollectionConfig['labels']['singular']
-  slug: string
+  readonly id: string
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly redirectAfterDuplicate?: boolean
+  readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
+  readonly slug: string
 }
 
 export const DuplicateDocument: React.FC<Props> = ({
@@ -44,12 +44,14 @@ export const DuplicateDocument: React.FC<Props> = ({
   const { setModified } = useForm()
 
   const {
-    collections,
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = collections.find((collection) => collection.slug === slug)
+  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()

@@ -1,6 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import { CustomEditView } from '../components/views/CustomEdit/index.js'
 import { customGlobalViews1GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews1: GlobalConfig = {
@@ -8,7 +7,11 @@ export const CustomGlobalViews1: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: CustomEditView,
+        edit: {
+          default: {
+            Component: '/components/views/CustomEdit/index.js#CustomEditView',
+          },
+        },
       },
     },
   },

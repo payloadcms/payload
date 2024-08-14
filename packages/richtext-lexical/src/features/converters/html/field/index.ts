@@ -4,7 +4,7 @@ import type { Field, FieldAffectingData, RichTextField } from 'payload'
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
 import type { HTMLConverter } from '../converter/types.js'
-import type { HTMLConverterFeatureProps } from '../feature.server.js'
+import type { HTMLConverterFeatureProps } from '../index.js'
 
 import { defaultHTMLConverters } from '../converter/defaultConverters.js'
 import { convertLexicalToHTML } from '../converter/index.js'
@@ -160,7 +160,16 @@ export const lexicalHTML: (
     },
     hooks: {
       afterRead: [
-        async ({ collection, field, global, req, siblingData }) => {
+        async ({
+          collection,
+          draft,
+          field,
+          global,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingData,
+        }) => {
           const fields = collection ? collection.fields : global.fields
 
           const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
@@ -209,7 +218,10 @@ export const lexicalHTML: (
           return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
+            draft,
+            overrideAccess,
             req,
+            showHiddenFields,
           })
         },
       ],

@@ -41,6 +41,7 @@
     margin: 0;
     padding: 0;
     display: flex;
+    color: var(--theme-elevation-800);
   }
 
   &__header-action {
@@ -51,6 +52,7 @@
     &:hover,
     &:focus-visible {
       text-decoration: underline;
+      color: var(--theme-elevation-600);
     }
   }
 
@@ -74,7 +76,7 @@
   &__add-row {
     align-self: flex-start;
     color: var(--theme-elevation-400);
-    margin: 0;
+    margin: 2px 0;
 
     &:hover {
       color: var(--theme-elevation-800);

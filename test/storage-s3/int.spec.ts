@@ -5,7 +5,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -14,11 +13,12 @@ const dirname = path.dirname(filename)
 let payload: Payload
 
 describe('@payloadcms/storage-s3', () => {
-  const TEST_BUCKET = process.env.S3_BUCKET
+  let TEST_BUCKET: string
   let client: AWS.S3Client
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
+    TEST_BUCKET = process.env.S3_BUCKET
 
     client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,

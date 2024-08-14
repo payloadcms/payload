@@ -246,5 +246,11 @@ You can import types from Payload to help make writing your config easier and ty
 The `Config` type represents a raw Payload Config in its full form. Only the bare minimum properties are marked as required. The `SanitizedConfig` type represents a Payload Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
 ```ts
-import { Config, SanitizedConfig } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 ```
+
+## Server vs. Client
+
+The Payload Config only lives on the server and is not allowed to contain any client-side code. That way, you can load up the Payload Config in any server environment or standalone script, without having to use Bundlers or Node.js loaders to handle importing client-only modules (e.g. scss files or React Components) without any errors.
+
+Behind the curtains, the Next.js-based Admin Panel generates a ClientConfig, which strips away any server-only code and enriches the config with React Components.

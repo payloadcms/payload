@@ -6,7 +6,6 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AuthDebug } from './AuthDebug.js'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -15,6 +14,9 @@ export default buildConfigWithDefaults({
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: 'users',
   },
@@ -165,7 +167,7 @@ export default buildConfigWithDefaults({
           type: 'ui',
           admin: {
             components: {
-              Field: AuthDebug,
+              Field: '/AuthDebug.js#AuthDebug',
             },
           },
           label: 'Auth Debug',

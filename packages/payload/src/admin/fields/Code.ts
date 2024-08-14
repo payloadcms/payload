@@ -1,14 +1,15 @@
-import type { CodeField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { CodeFieldClient } from '../../fields/config/types.js'
+import type { CodeFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type CodeFieldProps = {
-  editorOptions?: CodeField['admin']['editorOptions']
-  language?: CodeField['admin']['language']
-  name?: string
-  path?: string
-  width: string
-} & FormFieldBase
+  readonly autoComplete?: string
+  readonly field: MarkOptional<CodeFieldClient, 'type'>
+  readonly validate?: CodeFieldValidation
+} & Omit<FormFieldBase, 'validate'>
 
 export type CodeFieldLabelComponent = LabelComponent<'code'>
 

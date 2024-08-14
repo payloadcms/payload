@@ -1,11 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
-import { CustomTabComponentView } from '../components/views/CustomTabComponent/index.js'
-import { CustomTabLabelView } from '../components/views/CustomTabLabel/index.js'
-import { CustomNestedTabView } from '../components/views/CustomTabNested/index.js'
-import { CustomTabWithParamView } from '../components/views/CustomTabWithParam/index.js'
-import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import {
   customCollectionParamViewPath,
   customCollectionParamViewPathBase,
@@ -21,43 +15,47 @@ export const CustomViews2: CollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
+        edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-          CustomViewWithParam: {
-            Component: CustomTabWithParamView,
-            Tab: {
+          customViewWithParam: {
+            Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
+            tab: {
               href: `${customCollectionParamViewPathBase}/123`,
               label: 'Custom Param View',
             },
             path: customCollectionParamViewPath,
           },
-          Default: {
-            Tab: {
+          default: {
+            tab: {
               label: customEditLabel,
             },
           },
-          MyCustomView: {
-            Component: CustomTabLabelView,
-            Tab: {
+          myCustomView: {
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            tab: {
               href: '/custom-tab-view',
               label: customTabLabel,
             },
             path: '/custom-tab-view',
           },
-          MyCustomViewWithCustomTab: {
-            Component: CustomTabComponentView,
-            Tab: CustomTabComponent,
+          myCustomViewWithCustomTab: {
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
             path: customTabViewPath,
           },
-          MyCustomViewWithNestedPath: {
-            Component: CustomNestedTabView,
-            Tab: {
+          myCustomViewWithNestedPath: {
+            Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
+            tab: {
               href: customNestedTabViewPath,
               label: 'Custom Nested Tab View',
             },
             path: customNestedTabViewPath,
           },
-          Versions: CustomVersionsView,
+          versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+          },
         },
       },
     },

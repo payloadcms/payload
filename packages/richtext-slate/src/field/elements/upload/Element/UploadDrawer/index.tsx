@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig, FormFieldBase } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -22,19 +22,17 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
+import type { LoadedSlateFieldProps } from '../../../../types.js'
 import type { UploadElementType } from '../../types.js'
 
 import { uploadFieldsSchemaPath } from '../../shared.js'
 
 export const UploadDrawer: React.FC<{
-  drawerSlug: string
-  element: UploadElementType
-  fieldProps: {
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
-  relatedCollection: ClientCollectionConfig
-  schemaPath: string
+  readonly drawerSlug: string
+  readonly element: UploadElementType
+  readonly fieldProps: LoadedSlateFieldProps
+  readonly relatedCollection: ClientCollectionConfig
+  readonly schemaPath: string
 }> = (props) => {
   const editor = useSlateStatic()
 
@@ -46,12 +44,14 @@ export const UploadDrawer: React.FC<{
   const { closeModal } = useModal()
   const { id, collectionSlug } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const { richTextComponentMap } = fieldProps
+  const {
+    field: { richTextComponentMap },
+  } = fieldProps
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const fieldMap = richTextComponentMap.get(relatedFieldSchemaPath)
+  const fields = richTextComponentMap.get(relatedFieldSchemaPath)
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -131,7 +131,7 @@ export const UploadDrawer: React.FC<{
         onSubmit={handleUpdateEditData}
       >
         <RenderFields
-          fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+          fields={Array.isArray(fields) ? fields : []}
           path=""
           readOnly={false}
           schemaPath=""

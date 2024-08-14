@@ -23,6 +23,7 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    padding: base(2);
 
     &__toggle {
       @extend %btn-reset;

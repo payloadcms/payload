@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, SelectFieldProps } from 'payload'
+import type { MappedComponent, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -7,6 +7,7 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -15,34 +16,41 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectInputProps = {
-  onChange?: ReactSelectAdapterProps['onChange']
-  options?: OptionObject[]
-  showError?: boolean
-  value?: string | string[]
-} & Omit<
-  SelectFieldProps,
-  | 'custom'
-  | 'disabled'
-  | 'docPreferences'
-  | 'locale'
-  | 'localized'
-  | 'onChange'
-  | 'options'
-  | 'rtl'
-  | 'type'
-  | 'user'
-  | 'validate'
-  | 'value'
->
+  readonly Description?: MappedComponent
+  readonly Error?: MappedComponent
+  readonly Label?: MappedComponent
+  readonly afterInput?: MappedComponent[]
+  readonly beforeInput?: MappedComponent[]
+  readonly className?: string
+  readonly description?: StaticDescription
+  readonly descriptionProps?: Record<string, unknown>
+  readonly errorProps?: Record<string, unknown>
+  readonly hasMany?: boolean
+  readonly isClearable?: boolean
+  readonly isSortable?: boolean
+  readonly label: StaticLabel
+  readonly labelProps?: Record<string, unknown>
+  readonly name: string
+  readonly onChange?: ReactSelectAdapterProps['onChange']
+  readonly options?: OptionObject[]
+  readonly path: string
+  readonly readOnly?: boolean
+  readonly required?: boolean
+  readonly showError?: boolean
+  readonly style?: React.CSSProperties
+  readonly value?: string | string[]
+  readonly width?: string
+}
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    Description,
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
+    description,
     descriptionProps,
     errorProps,
     hasMany = false,
@@ -98,15 +106,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        CustomLabel={CustomLabel}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-        {BeforeInput}
+        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <RenderComponent mappedComponent={beforeInput} />
         <ReactSelect
           disabled={readOnly}
           isClearable={isClearable}
@@ -120,13 +123,13 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           showError={showError}
           value={valueToRender as OptionObject}
         />
-        {AfterInput}
+        <RenderComponent mappedComponent={afterInput} />
       </div>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

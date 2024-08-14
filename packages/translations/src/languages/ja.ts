@@ -401,6 +401,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     publishChanges: '変更内容を公開',
     published: '公開済み',
     publishing: '公開',
+    restoreAsDraft: '下書きとして復元',
     restoreThisVersion: 'このバージョンを復元',
     restoredSuccessfully: '正常に復元されました。',
     restoring: '復元しています...',

@@ -1,14 +1,16 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+
 import {
   DocumentControls,
   DocumentFields,
   Form,
   type FormProps,
   OperationProvider,
+  RenderComponent,
   Upload,
   useAuth,
-  useComponentMap,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
@@ -17,7 +19,7 @@ import {
 } from '@payloadcms/ui'
 import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
@@ -58,9 +60,18 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const config = useConfig()
+
+  const {
+    config,
+    config: {
+      admin: { user: userSlug },
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
+
   const router = useRouter()
-  const { getComponentMap, getFieldMap } = useComponentMap()
   const depth = useEditDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
@@ -68,29 +79,11 @@ export const DefaultEditView: React.FC = () => {
 
   const locale = params.get('locale')
 
-  const {
-    admin: { user: userSlug },
-    collections,
-    globals,
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
-  } = config
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
-
-  const componentMap = getComponentMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
 
   const operation = collectionSlug && !id ? 'create' : 'update'
 
@@ -102,7 +95,21 @@ export const DefaultEditView: React.FC = () => {
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
 
-  const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+  const classes = [baseClass, id && `${baseClass}--is-editing`]
+
+  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
+  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
+
+  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
+    if (
+      operation === 'create' &&
+      collectionConfig.auth &&
+      !collectionConfig.auth.disableLocalStrategy
+    )
+      return true
+    return false
+  })
 
   const onSave = useCallback(
     (json) => {
@@ -160,7 +167,6 @@ export const DefaultEditView: React.FC = () => {
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
-
       return getFormState({
         apiRoute,
         body: {
@@ -170,21 +176,21 @@ export const DefaultEditView: React.FC = () => {
           formState: prevFormState,
           globalSlug,
           operation,
-          schemaPath: entitySlug,
+          schemaPath,
         },
         serverURL,
       })
     },
-    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug, getDocPreferences],
+    [apiRoute, collectionSlug, schemaPath, getDocPreferences, globalSlug, id, operation, serverURL],
   )
 
   return (
-    <main className={classes}>
+    <main className={classes.filter(Boolean).join(' ')}>
       <OperationProvider operation={operation}>
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit
+          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isInitializing || !hasSavePermission}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
@@ -235,6 +241,8 @@ export const DefaultEditView: React.FC = () => {
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
+                      setSchemaPath={setSchemaPath}
+                      setValidateBeforeSubmit={setValidateBeforeSubmit}
                       useAPIKey={auth.useAPIKey}
                       username={data?.username}
                       verify={auth.verify}
@@ -242,8 +250,10 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {componentMap.Upload !== undefined ? (
-                        componentMap.Upload
+                      {collectionConfig?.admin?.components?.edit?.Upload ? (
+                        <RenderComponent
+                          mappedComponent={collectionConfig.admin.components.edit.Upload}
+                        />
                       ) : (
                         <Upload
                           collectionSlug={collectionConfig.slug}
@@ -257,9 +267,9 @@ export const DefaultEditView: React.FC = () => {
               )
             }
             docPermissions={docPermissions}
-            fieldMap={fieldMap}
+            fields={(collectionConfig || globalConfig)?.fields}
             readOnly={!hasSavePermission}
-            schemaPath={entitySlug}
+            schemaPath={schemaPath}
           />
           {AfterDocument}
         </Form>

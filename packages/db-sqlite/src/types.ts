@@ -1,10 +1,10 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
 import type { Operators } from '@payloadcms/drizzle'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { ColumnDataType, DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
-  SQLiteColumn,
+  AnySQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -18,6 +18,11 @@ export type Args = {
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
@@ -25,24 +30,8 @@ export type Args = {
   versionsSuffix?: string
 }
 
-export type GenericColumn = SQLiteColumn<
-  {
-    baseColumn: never
-    columnType: string
-    data: unknown
-    dataType: ColumnDataType
-    driverParam: unknown
-    enumValues: string[]
-    hasDefault: false
-    name: string
-    notNull: false
-    tableName: string
-  },
-  object
->
-
 export type GenericColumns = {
-  [x: string]: GenericColumn
+  [x: string]: AnySQLiteColumn
 }
 
 export type GenericTable = SQLiteTableWithColumns<{
@@ -116,6 +105,11 @@ export type SQLiteAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
   push: boolean
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
@@ -155,6 +149,11 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     push: boolean
     rejectInitializing: () => void
     relationshipsSuffix?: string

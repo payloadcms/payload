@@ -22,12 +22,10 @@ export const LocalizerLabel: React.FC<{
       aria-label={ariaLabel || t('general:locale')}
       className={[baseClass, className].filter(Boolean).join(' ')}
     >
-      <div className={`${baseClass}__label`}>{`${t('general:locale')}:`}</div>
-      &nbsp;&nbsp;
+      <div className={`${baseClass}__label`}>{`${t('general:locale')}:`}&nbsp;</div>
       <span className={`${baseClass}__current-label`}>
         {`${getTranslation(locale.label, i18n)}`}
       </span>
-      &nbsp;
       <ChevronIcon className={`${baseClass}__chevron`} />
     </div>
   )

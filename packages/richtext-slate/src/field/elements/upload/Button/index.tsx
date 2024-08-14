@@ -74,7 +74,7 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export const Button = (props: ButtonProps): React.ReactNode => {
+export const UploadElementButton = (props: ButtonProps): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <UploadButton {...props} />

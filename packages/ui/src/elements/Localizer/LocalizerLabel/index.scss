@@ -5,12 +5,18 @@
   align-items: center;
   white-space: nowrap;
   display: flex;
+  padding-inline-start: base(0.4);
+  padding-inline-end: base(0.1);
+  gap: 0;
+  background-color: var(--theme-elevation-100);
+  border-radius: var(--style-radius-s);
 
   &__label {
     color: var(--theme-elevation-500);
   }
 
   &__chevron {
+    padding: base(0.1);
     .stroke {
       stroke: currentColor;
     }

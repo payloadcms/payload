@@ -18,6 +18,7 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  collectionSlug?: string
   data: Data
   fields: FieldSchema[]
   filter?: (args: AddFieldStatePromiseArgs) => boolean
@@ -64,6 +65,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  collectionSlug,
   data,
   fields,
   filter,
@@ -98,6 +100,7 @@ export const iterateFields = async ({
           id,
           addErrorPathToParent: addErrorPathToParentArg,
           anyParentLocalized,
+          collectionSlug,
           data,
           field,
           fieldIndex,

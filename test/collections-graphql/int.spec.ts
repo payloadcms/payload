@@ -3,13 +3,14 @@ import type { Payload } from 'payload'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
+import { wait } from 'payload/shared'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import config, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const title = 'title'
 
@@ -21,7 +22,7 @@ const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -634,17 +635,16 @@ describe('collections-graphql', () => {
 
           it('should sort find results by nearest distance', async () => {
             // creating twice as many records as we are querying to get a random sample
-            await mapAsync([...Array(10)], () => {
-              // setTimeout used to randomize the creation timestamp
-              setTimeout(async () => {
-                await payload.create({
-                  collection: pointSlug,
-                  data: {
-                    // only randomize longitude to make distance comparison easy
-                    point: [Math.random(), 0],
-                  },
-                })
-              }, Math.random())
+            await mapAsync([...Array(10)], async () => {
+              // randomize the creation timestamp
+              await wait(Math.random())
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              })
             })
 
             const nearQuery = `
@@ -1185,7 +1185,7 @@ describe('collections-graphql', () => {
       expect(errors[0].message).toEqual('The following field is invalid: password')
       expect(errors[0].path[0]).toEqual('test2')
       expect(errors[0].extensions.name).toEqual('ValidationError')
-      expect(errors[0].extensions.data.errors[0].message).toEqual('No password was given')
+      expect(errors[0].extensions.data.errors[0].message).toEqual('This field is required.')
       expect(errors[0].extensions.data.errors[0].field).toEqual('password')
 
       expect(Array.isArray(errors[1].locations)).toEqual(true)

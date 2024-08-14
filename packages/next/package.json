@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.71",
+  "version": "3.0.0-beta.80",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -90,11 +90,11 @@
     "esbuild": "0.23.0",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "1.14.0"
+    "swc-plugin-transform-remove-imports": "1.15.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.0.0-canary.53",
+    "next": "^15.0.0-canary.104",
     "payload": "workspace:*"
   },
   "engines": {
