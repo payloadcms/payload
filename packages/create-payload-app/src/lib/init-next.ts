@@ -182,7 +182,7 @@ async function installAndConfigurePayload(
   const templateFilesPath =
     dirname.endsWith('dist') || useDistFiles
       ? path.resolve(dirname, '../..', 'dist/template')
-      : path.resolve(dirname, '../../../../templates/blank-3.0')
+      : path.resolve(dirname, '../../../../templates/blank')
 
   logDebug(`Using template files from: ${templateFilesPath}`)
 
