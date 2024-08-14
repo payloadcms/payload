@@ -106,34 +106,36 @@ export const RootLayout = async ({
     })
   }
 
-  const navPreferences = (
-    await payload.find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      req,
-      user,
-      where: {
-        and: [
-          {
-            key: {
-              equals: 'nav',
-            },
+  const navPreferences = user
+    ? (
+        await payload.find({
+          collection: 'payload-preferences',
+          depth: 0,
+          limit: 1,
+          req,
+          user,
+          where: {
+            and: [
+              {
+                key: {
+                  equals: 'nav',
+                },
+              },
+              {
+                'user.relationTo': {
+                  equals: user.collection,
+                },
+              },
+              {
+                'user.value': {
+                  equals: user.id,
+                },
+              },
+            ],
           },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: user?.id,
-            },
-          },
-        ],
-      },
-    })
-  )?.docs?.[0]
+        })
+      )?.docs?.[0]
+    : null
 
   const isNavOpen = (navPreferences?.value as any)?.open ?? true
 
