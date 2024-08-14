@@ -912,30 +912,41 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig = {
-  [key: string]: Partial<EditViewConfig>
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `root` - `/admin/collections/:collection/:id/**\/*`
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
-  root?: Partial<EditViewConfig>
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
-  // TODO: uncomment these as they are built
-  // references?: EditView
-  // relationships?: EditView
-}
+export type EditConfig =
+  | {
+      api?: Partial<EditViewConfig>
+      default?: Partial<EditViewConfig>
+      livePreview?: Partial<EditViewConfig>
+      /**
+       * Replace or modify individual nested routes, or add new ones:
+       * + `default` - `/admin/collections/:collection/:id`
+       * + `api` - `/admin/collections/:collection/:id/api`
+       * + `livePreview` - `/admin/collections/:collection/:id/preview`
+       * + `references` - `/admin/collections/:collection/:id/references`
+       * + `relationships` - `/admin/collections/:collection/:id/relationships`
+       * + `versions` - `/admin/collections/:collection/:id/versions`
+       * + `version` - `/admin/collections/:collection/:id/versions/:version`
+       * + `customView` - `/admin/collections/:collection/:id/:path`
+       */
+      root?: never
+      version?: Partial<EditViewConfig>
+      versions?: Partial<EditViewConfig>
+      // TODO: uncomment these as they are built
+      // references?: EditView
+      // relationships?: EditView
+    }
+  | {
+      api?: never
+      default?: never
+      livePreview?: never
+      /**
+       * Replace or modify all nested routes, including the document header and controls. This cannot be used in conjunction with other nested views.
+       * + `root` - `/admin/collections/:collection/:id/**\/*`
+       */
+      root: Partial<EditViewConfig>
+      version?: never
+      versions?: never
+    }
 
 export type EntityDescriptionComponent = CustomComponent
 
