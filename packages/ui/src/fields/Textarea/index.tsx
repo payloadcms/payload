@@ -32,7 +32,7 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
         rtl,
         style,
         width,
-      },
+      } = {},
       label,
       localized,
       maxLength,

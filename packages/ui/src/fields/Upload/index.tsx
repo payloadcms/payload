@@ -22,7 +22,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, readOnly: readOnlyFromAdmin, style, width },
+      admin: { className, readOnly: readOnlyFromAdmin, style, width } = {},
       label,
       relationTo,
       required,

@@ -37,7 +37,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },
