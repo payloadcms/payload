@@ -26,7 +26,7 @@ export const verificationFields: Field[] = [
     },
     admin: {
       components: {
-        Field: () => null,
+        Field: '@payloadcms/ui/shared#emptyComponent',
       },
     },
     label: ({ t }) => t('authentication:verified'),

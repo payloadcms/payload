@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -43,6 +43,7 @@
   "dependencies": {
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
+    "@swc-node/register": "1.10.9",
     "ts-essentials": "7.0.3"
   },
   "devDependencies": {

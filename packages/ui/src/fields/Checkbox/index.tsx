@@ -24,28 +24,31 @@ export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     checked: checkedFromProps,
-    className,
     descriptionProps,
     disableFormData,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as CheckboxFieldProps['field']['admin'],
+      label,
+      required,
+    } = {} as CheckboxFieldProps['field'],
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
@@ -98,11 +101,16 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <CheckboxInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
+        afterInput={field?.admin?.components?.afterInput}
+        beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
@@ -114,11 +122,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }

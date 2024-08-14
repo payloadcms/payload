@@ -2,9 +2,9 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientCollectionConfig, PaginatedDocs, RelationshipField } from 'payload'
 
 export type Props = {
-  disabled?: boolean
-  onChange: (val: unknown) => void
-  value: unknown
+  readonly disabled?: boolean
+  readonly onChange: (val: unknown) => void
+  readonly value: unknown
 } & RelationshipField
 
 export type Option = {

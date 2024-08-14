@@ -31,7 +31,9 @@ const config = buildConfig({
   admin: {
     components: {
       views: {
-        Dashboard: MyCustomDashboardView, // highlight-line
+        dashboard: {
+          Component: '/path/to/MyCustomDashboardView#MyCustomDashboardViewComponent', // highlight-line
+        }
       },
     },
   },
@@ -44,8 +46,8 @@ The following options are available:
 
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
-| **`Dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
+| **`account`**   | The Account view is used to show the currently logged in user's Account page. |
+| **`dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
@@ -72,9 +74,9 @@ const config = buildConfig({
     components: {
       views: {
         // highlight-start
-        MyCustomView: {
+        myCustomView: {
         // highlight-end
-          Component: MyCustomView,
+          Component: '/path/to/MyCustomView#MyCustomViewComponent',
           path: '/my-custom-view',
         },
       },
@@ -108,7 +110,9 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: MyCustomEditView, // highlight-line
+        edit: {
+          Component: '/path/to/MyCustomEditView', // highlight-line
+        }
       },
     },
   },
@@ -126,8 +130,8 @@ The following options are available:
 
 | Property   | Description                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| **`Edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
-| **`List`** | The List View is used to show a list of documents for any given Collection.                                         |
+| **`edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
+| **`list`** | The List View is used to show a list of documents for any given Collection.                                         |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -148,7 +152,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: MyCustomEditView, // highlight-line
+        edit: '/path/to/MyCustomEditView', // highlight-line
       },
     },
   },
@@ -166,7 +170,7 @@ The following options are available:
 
 | Property   | Description                                                         |
 | ---------- | ------------------------------------------------------------------- |
-| **`Edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
+| **`edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -187,9 +191,9 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          API: {
-            Component: MyCustomAPIView, // highlight-line
+        edit: {
+          api: {
+            Component: '/path/to/MyCustomAPIViewComponent', // highlight-line
           },
         },
       },
@@ -209,15 +213,15 @@ The following options are available:
 
 | Property          | Description                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **`Default`**     | The Default view is the primary view in which your document is edited.                                                      |
-| **`Versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions).                    |
-| **`Version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
-| **`API`**         | The API view is used to display the REST API JSON response for a given document.                                            |
-| **`LivePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview).                        |
+| **`default`**     | The Default view is the primary view in which your document is edited.                                                      |
+| **`versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions).                    |
+| **`version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
+| **`api`**         | The API view is used to display the REST API JSON response for a given document.                                            |
+| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview).                        |
 
 ### Document Tabs
 
-Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `Component.Tab` key:
+Each Document View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `tab` key:
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -227,17 +231,19 @@ export const MyCollection: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          MyCustomTab: {
-            Component: MyCustomTab,
+        edit: {
+          myCustomTab: {
+            Component: '/path/to/MyCustomTab',
             path: '/my-custom-tab',
-            Tab: MyCustomTab // highlight-line
+            tab: {
+              Component: '/path/to/MyCustomTabComponent' // highlight-line
+            }
           },
-          AnotherCustomView: {
-            Component: AnotherCustomView,
+          anotherCustomTab: {
+            Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start
-            Tab: {
+            tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
             }
@@ -261,14 +267,15 @@ Custom Views are just [Custom Components](./components) rendered at the page-lev
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
-import { MyCustomView } from './MyCustomView'
 
 export const MyCollectionConfig: SanitizedCollectionConfig = {
   // ...
   admin: {
     components: {
       views: {
-        Edit: MyCustomView, // highlight-line
+        edit: {
+          Component: '/path/to/MyCustomView' // highlight-line
+        }
       },
     },
   },

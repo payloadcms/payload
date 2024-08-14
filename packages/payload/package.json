@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -86,8 +86,7 @@
   "dependencies": {
     "@next/env": "^15.0.0-canary.104",
     "@payloadcms/translations": "workspace:*",
-    "@swc-node/core": "1.13.1",
-    "@swc-node/sourcemap-support": "0.5.0",
+    "@swc-node/register": "1.10.9",
     "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
@@ -131,13 +130,7 @@
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "@swc/core": "^1.6.13",
     "graphql": "^16.8.1"
-  },
-  "peerDependenciesMeta": {
-    "@swc/core": {
-      "optional": true
-    }
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

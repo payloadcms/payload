@@ -19,6 +19,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
+<<<<<<< HEAD
 import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterNavLinks } from './components/AfterNavLinks/index.js'
@@ -33,6 +34,8 @@ import { CustomNestedView } from './components/views/CustomViewNested/index.js'
 import { CustomViewWithParam } from './components/views/CustomViewWithParam/index.js'
 import { default as customFaviconDark } from './custom-favicon-dark.png'
 import { default as customFaviconLight } from './custom-favicon-light.png'
+=======
+>>>>>>> beta
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -47,43 +50,55 @@ import {
   customParamViewPath,
   customViewPath,
 } from './shared.js'
-
 export default buildConfigWithDefaults({
   admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     components: {
+<<<<<<< HEAD
       actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       afterNavLinks: [AfterNavLinks],
       beforeLogin: [BeforeLogin],
       header: [CustomHeader],
+=======
+      actions: ['/components/AdminButton/index.js#AdminButton'],
+      afterDashboard: ['/components/AfterDashboard/index.js#AfterDashboard'],
+      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+>>>>>>> beta
       logout: {
-        Button: Logout,
+        Button: '/components/Logout/index.js#Logout',
       },
-      providers: [CustomProvider, CustomProvider],
+      providers: [
+        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProvider/index.js#CustomProvider',
+      ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
         CustomDefaultView: {
-          Component: CustomDefaultView,
+          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
         },
         CustomMinimalView: {
-          Component: CustomMinimalView,
+          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
           path: '/custom-minimal-view',
         },
         CustomNestedView: {
-          Component: CustomNestedView,
+          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
           exact: true,
           path: customNestedViewPath,
         },
         CustomView: {
-          Component: CustomView,
+          Component: '/components/views/CustomView/index.js#CustomView',
           exact: true,
           path: customViewPath,
           strict: true,
         },
         CustomViewWithParam: {
-          Component: CustomViewWithParam,
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
           path: customParamViewPath,
         },
       },
@@ -94,13 +109,13 @@ export default buildConfigWithDefaults({
         {
           type: 'image/png',
           rel: 'icon',
-          url: customFaviconDark.src,
+          url: '/custom-favicon-dark.png',
         },
         {
           type: 'image/png',
           media: '(prefers-color-scheme: dark)',
           rel: 'icon',
-          url: customFaviconLight.src,
+          url: '/custom-favicon-light.png',
         },
       ],
       openGraph: {

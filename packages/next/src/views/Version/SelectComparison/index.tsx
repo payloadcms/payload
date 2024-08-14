@@ -30,7 +30,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
   } = props
 
   const {
-    admin: { dateFormat },
+    config: {
+      admin: { dateFormat },
+    },
   } = useConfig()
 
   const [options, setOptions] = useState<

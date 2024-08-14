@@ -1,3 +1,4 @@
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -13,8 +14,82 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
     PostsCollection,
+    {
+      slug: 'simple',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
     // MediaCollection
   ],
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    avatar: {
+      Component: '/collections/Posts/MyAvatar.js#MyAvatar',
+    },
+  },
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        inlineBlocks: [
+          {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  }),
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

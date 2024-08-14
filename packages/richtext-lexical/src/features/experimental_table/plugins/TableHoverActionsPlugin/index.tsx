@@ -27,7 +27,7 @@ import * as React from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { useDebounce } from '../../utils/useDebounce.js'
+import { useDebounce } from '../../client/utils/useDebounce.js'
 
 const BUTTON_WIDTH_PX = 20
 

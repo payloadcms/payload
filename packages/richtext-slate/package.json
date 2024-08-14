@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -16,6 +16,12 @@
       "import": "./src/index.tsx",
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
+    },
+    "./generateComponentMap": "./src/generateComponentMap.tsx",
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -62,6 +68,16 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./generateComponentMap": {
+        "import": "./dist/generateComponentMap.js",
+        "types": "./dist/generateComponentMap.d.ts",
+        "default": "./dist/generateComponentMap.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client/index.js",
+        "types": "./dist/exports/client/index.d.ts",
+        "default": "./dist/exports/client/index.js"
       }
     },
     "main": "./dist/index.js",

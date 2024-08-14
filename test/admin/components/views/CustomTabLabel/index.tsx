@@ -1,4 +1,4 @@
-import type { EditViewComponent } from 'payload'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -6,7 +6,9 @@ import React, { Fragment } from 'react'
 
 import { customTabLabelViewTitle } from '../../../shared.js'
 
-export const CustomTabLabelView: EditViewComponent = ({ initPageResult }) => {
+export const CustomTabLabelView: PayloadServerReactComponent<EditViewComponent> = ({
+  initPageResult,
+}) => {
   if (!initPageResult) {
     notFound()
   }

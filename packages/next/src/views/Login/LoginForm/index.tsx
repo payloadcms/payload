@@ -22,7 +22,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {
@@ -81,7 +81,13 @@ export const LoginForm: React.FC<{
     >
       <div className={`${baseClass}__inputWrap`}>
         <LoginField type={loginType} />
-        <PasswordField label={t('general:password')} name="password" required />
+        <PasswordField
+          field={{
+            name: 'password',
+            label: t('general:password'),
+            required: true,
+          }}
+        />
       </div>
       <Link
         href={formatAdminURL({

@@ -35,29 +35,34 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    allowCreate = true,
-    className,
     descriptionProps,
     errorProps,
-    hasMany,
-    isSortable = true,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        allowCreate = true,
+        className,
+        description,
+        isSortable = true,
+        readOnly: readOnlyFromAdmin,
+        sortOptions,
+        style,
+        width,
+      },
+      hasMany,
+      label,
+      relationTo,
+      required,
+    },
     labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    sortOptions,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     collections,
@@ -483,14 +488,17 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          path={path}
+          {...(errorProps || {})}
+        />
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -595,11 +603,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

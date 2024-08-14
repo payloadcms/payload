@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,7 +42,7 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepack": "pnpm clean && pnpm turbo build",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "renamePredefinedMigrations": "tsx ./scripts/renamePredefinedMigrations.ts"
+    "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",

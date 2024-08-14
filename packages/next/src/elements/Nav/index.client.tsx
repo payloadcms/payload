@@ -25,9 +25,11 @@ export const DefaultNavClient: React.FC = () => {
   const pathname = usePathname()
 
   const {
-    collections,
-    globals,
-    routes: { admin: adminRoute },
+    config: {
+      collections,
+      globals,
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()

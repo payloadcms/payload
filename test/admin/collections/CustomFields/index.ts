@@ -1,13 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { customFieldsSlug } from '../../slugs.js'
-import { AfterInput } from './AfterInput.js'
-import { BeforeInput } from './BeforeInput.js'
-import { CustomError } from './CustomError.js'
-import { FieldDescriptionComponent } from './FieldDescription/index.js'
-import { CustomSelect } from './fields/Select/index.js'
-import { CustomDescription } from './fields/Text/Description.js'
-import { CustomLabel } from './fields/Text/Label.js'
 
 export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
@@ -17,12 +10,13 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       maxLength: 100,
       admin: {
+        placeholder: 'This is a placeholder',
         components: {
-          afterInput: [AfterInput],
-          beforeInput: [BeforeInput],
-          Label: CustomLabel,
-          Description: CustomDescription,
-          Error: CustomError,
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+          Label: '/collections/CustomFields/fields/Text/Label.js#CustomLabel',
+          Description: '/collections/CustomFields/fields/Text/Description.js#CustomDescription',
+          Error: '/collections/CustomFields/CustomError.js#CustomError',
         },
       },
       minLength: 3,
@@ -46,7 +40,8 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Description: FieldDescriptionComponent,
+          Description:
+            '/collections/CustomFields/FieldDescription/index.js#FieldDescriptionComponent',
         },
       },
     },
@@ -55,7 +50,7 @@ export const CustomFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: CustomSelect,
+          Field: '/collections/CustomFields/fields/Select/index.js#CustomSelect',
         },
       },
     },

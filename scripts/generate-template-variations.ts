@@ -33,6 +33,7 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  configureConfig?: boolean
 }
 
 main().catch((error) => {
@@ -93,6 +94,9 @@ async function main() {
       db: 'mongodb',
       storage: 'localDisk',
       sharp: true,
+      // The blank template will later be used by CPA as a base. That's when we want to
+      // configure the config - not here
+      configureConfig: false,
     },
     {
       name: 'payload-cloud-mongodb-template',
@@ -111,21 +115,24 @@ async function main() {
     vercelDeployButtonLink,
     envNames,
     sharp,
+    configureConfig,
   } of variations) {
     console.log(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
     copyRecursiveSync(path.join(templatesDir, '_template'), destDir)
     console.log(`Generated ${name} in ${destDir}`)
 
-    // Configure payload config
-    await configurePayloadConfig({
-      dbType: db,
-      packageJsonName: name,
-      projectDirOrConfigPath: { projectDir: destDir },
-      storageAdapter: storage,
-      sharp,
-      envNames,
-    })
+    if (configureConfig !== false) {
+      // Configure payload config
+      await configurePayloadConfig({
+        dbType: db,
+        packageJsonName: name,
+        projectDirOrConfigPath: { projectDir: destDir },
+        storageAdapter: storage,
+        sharp,
+        envNames,
+      })
+    }
 
     await generateReadme({
       destDir,

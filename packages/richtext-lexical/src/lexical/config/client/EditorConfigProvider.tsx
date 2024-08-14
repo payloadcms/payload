@@ -1,12 +1,13 @@
 'use client'
 
 import type { LexicalEditor } from 'lexical'
-import type { FormFieldBase } from 'payload'
+import type { RichTextFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
 import { createContext, useContext, useMemo, useRef, useState } from 'react'
 
+import type { LexicalRichTextFieldProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 // Should always produce a 20 character pseudo-random string
@@ -21,11 +22,7 @@ export interface EditorConfigContextType {
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  field: {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  field: LexicalRichTextFieldProps['field']
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void
   focusedEditor: EditorConfigContextType | null
@@ -45,17 +42,13 @@ export const EditorConfigProvider = ({
   children,
   editorConfig,
   editorContainerRef,
-  fieldProps,
+  field,
   parentContext,
 }: {
   children: React.ReactNode
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
-  fieldProps: {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  } & FormFieldBase
+  field: LexicalRichTextFieldProps['field']
   parentContext?: EditorConfigContextType
 }): React.ReactNode => {
   const [editor] = useLexicalComposerContext()
@@ -77,7 +70,7 @@ export const EditorConfigProvider = ({
         editor,
         editorConfig,
         editorContainerRef,
-        field: fieldProps,
+        field,
         focusEditor: (editorContext: EditorConfigContextType) => {
           const editorUUID = editorContext.uuid
 
@@ -124,7 +117,7 @@ export const EditorConfigProvider = ({
       childrenEditors,
       editorConfig,
       editorContainerRef,
-      fieldProps,
+      field,
       focusedEditor,
       parentContext,
       uuid,

@@ -1,20 +1,13 @@
-import type {
-  DescriptionComponent,
-  FormFieldBase,
-  LabelComponent,
-  UploadField,
-  UploadFieldValidation,
-} from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
+import type { UploadFieldClient } from '../../fields/config/types.js'
+import type { UploadFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
+import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type UploadFieldProps = {
-  filterOptions?: UploadField['filterOptions']
-  name?: string
-  path?: string
-  relationTo?: UploadField['relationTo']
-  validate?: UploadFieldValidation
-  width?: string
+  readonly field: MarkOptional<UploadFieldClient, 'type'>
+  readonly validate?: UploadFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
 export type UploadFieldLabelComponent = LabelComponent<'upload'>

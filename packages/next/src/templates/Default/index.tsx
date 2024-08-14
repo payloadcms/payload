@@ -1,10 +1,10 @@
-import type { ServerProps, VisibleEntities } from 'payload'
+import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderCustomComponent, WithServerSideProps } from '@payloadcms/ui/shared'
+import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
+import { DefaultNav } from '../../elements/Nav/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 import './index.scss'
@@ -38,33 +38,25 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
-  const CustomHeader = Array.isArray(header)
-    ? header.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
 
-  const navProps: NavProps = {
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-  }
+  const MappedDefaultNav: MappedComponent = createMappedComponent(
+    CustomNav,
+    undefined,
+    DefaultNav,
+    'CustomNav',
+  )
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
@@ -78,20 +70,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           </div>
         </div>
         <Wrapper baseClass={baseClass} className={className}>
-          <RenderCustomComponent
-            CustomComponent={CustomNav}
-            DefaultComponent={DefaultNav}
-            componentProps={navProps}
-            serverOnlyProps={{
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            }}
-          />
+          <RenderComponent mappedComponent={MappedDefaultNav} />
+
           <div className={`${baseClass}__wrap`}>
             <AppHeader />
             {children}

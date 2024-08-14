@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.77",
+  "version": "3.0.0-beta.79",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -22,7 +22,13 @@
       "import": "./src/exports/client/index.ts",
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
-    }
+    },
+    "./migrate": {
+      "import": "./src/exports/server/migrate.ts",
+      "types": "./src/exports/server/migrate.ts",
+      "default": "./src/exports/server/migrate.ts"
+    },
+    "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -38,7 +44,7 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "tsx scripts/translateNewKeys.ts"
+    "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
   "dependencies": {
     "@lexical/headless": "0.17.0",
@@ -70,7 +76,7 @@
     "esbuild": "0.23.0",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "1.14.0"
+    "swc-plugin-transform-remove-imports": "1.15.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
@@ -107,6 +113,16 @@
         "import": "./dist/exports/client/index.js",
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
+      },
+      "./migrate": {
+        "import": "./dist/exports/server/migrate.js",
+        "types": "./dist/exports/server/migrate.d.ts",
+        "default": "./dist/exports/server/migrate.js"
+      },
+      "./generateComponentMap": {
+        "import": "./dist/utilities/generateComponentMap.js",
+        "types": "./dist/utilities/generateComponentMap.d.ts",
+        "default": "./dist/utilities/generateComponentMap.js"
       }
     },
     "main": "./dist/index.js",

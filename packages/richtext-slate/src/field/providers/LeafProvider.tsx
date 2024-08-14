@@ -1,16 +1,14 @@
 'use client'
 
-import type { FormFieldBase } from 'payload'
-
 import React from 'react'
+
+import type { LoadedSlateFieldProps } from '../types.js'
 
 type LeafContextType = {
   attributes: Record<string, unknown>
   children: React.ReactNode
-  editorRef: React.MutableRefObject<HTMLDivElement>
-  fieldProps: {
-    name: string
-  } & FormFieldBase
+  editorRef: React.RefObject<HTMLDivElement>
+  fieldProps: LoadedSlateFieldProps
   leaf: string
   path: string
   schemaPath: string

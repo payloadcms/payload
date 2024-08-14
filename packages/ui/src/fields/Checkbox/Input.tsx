@@ -1,27 +1,28 @@
 'use client'
-import type { LabelProps, SanitizedLabelProps } from 'payload'
+import type { LabelProps, MappedComponent, SanitizedLabelProps } from 'payload'
 
 import React from 'react'
 
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
-  AfterInput?: React.ReactNode
-  BeforeInput?: React.ReactNode
-  CustomLabel?: React.ReactNode
-  checked?: boolean
-  className?: string
-  id?: string
-  inputRef?: React.RefObject<HTMLInputElement | null>
-  label?: LabelProps<'checkbox'>['label']
-  labelProps?: SanitizedLabelProps
-  name?: string
-  onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
-  partialChecked?: boolean
-  readOnly?: boolean
-  required?: boolean
+  readonly Label?: MappedComponent
+  readonly afterInput?: MappedComponent[]
+  readonly beforeInput?: MappedComponent[]
+  readonly checked?: boolean
+  readonly className?: string
+  readonly id?: string
+  readonly inputRef?: React.RefObject<HTMLInputElement | null>
+  readonly label?: LabelProps<'checkbox'>['label']
+  readonly labelProps?: SanitizedLabelProps
+  readonly name?: string
+  readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
+  readonly partialChecked?: boolean
+  readonly readOnly?: boolean
+  readonly required?: boolean
 }
 
 export const inputBaseClass = 'checkbox-input'
@@ -29,9 +30,9 @@ export const inputBaseClass = 'checkbox-input'
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
-  AfterInput,
-  BeforeInput,
-  CustomLabel,
+  Label,
+  afterInput,
+  beforeInput,
   checked,
   className,
   inputRef,
@@ -54,7 +55,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         .join(' ')}
     >
       <div className={`${inputBaseClass}__input`}>
-        {BeforeInput}
+        <RenderComponent mappedComponent={beforeInput} />
         <input
           aria-label=""
           defaultChecked={Boolean(checked)}
@@ -74,10 +75,10 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {checked && <CheckIcon />}
           {!checked && partialChecked && <LineIcon />}
         </span>
-        {AfterInput}
+        <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={Label}
         htmlFor={id}
         label={label}
         required={required}

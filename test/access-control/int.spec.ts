@@ -6,12 +6,14 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
+import path from 'path'
 import { Forbidden } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise, { requestHeaders } from './config.js'
+import { requestHeaders } from './config.js'
 import {
   firstArrayText,
   fullyRestrictedSlug,
@@ -26,13 +28,14 @@ import {
 } from './shared.js'
 
 let payload: Payload
-
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 describe('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {

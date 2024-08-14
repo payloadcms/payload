@@ -42,8 +42,8 @@
     }
   },
   "files.insertFinalNewline": true,
-  "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--experimental-vm-modules --no-deprecation\" node 'node_modules/jest/bin/jest.js'",
+  "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
   "jestrunner.debugOptions": {
-    "runtimeArgs": ["--experimental-vm-modules", "--no-deprecation"]
+    "runtimeArgs": ["--no-deprecation"]
   }
 }

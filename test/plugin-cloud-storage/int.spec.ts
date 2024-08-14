@@ -8,7 +8,6 @@ import type { Config } from './payload-types.js'
 
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -18,8 +17,11 @@ const dirname = path.dirname(filename)
 let payload: Payload
 
 describe('@payloadcms/plugin-cloud-storage', () => {
+  let TEST_BUCKET: string
+
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
+    TEST_BUCKET = process.env.S3_BUCKET
   })
 
   afterAll(async () => {
@@ -27,8 +29,6 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       await payload.db.destroy()
     }
   })
-
-  const TEST_BUCKET = process.env.S3_BUCKET
 
   let client: AWS.S3Client
   describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {

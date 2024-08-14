@@ -49,7 +49,7 @@ export function AuthProvider({
   const pathname = usePathname()
   const router = useRouter()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {

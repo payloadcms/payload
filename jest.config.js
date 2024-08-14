@@ -1,8 +1,28 @@
+const esModules = [
+  // file-type and all dependencies: https://github.com/sindresorhus/file-type
+  'file-type',
+  'strtok3',
+  'readable-web-to-node-stream',
+  'token-types',
+  'peek-readable',
+  'find-up',
+  'locate-path',
+  'p-locate',
+  'p-limit',
+  'yocto-queue',
+  'unicorn-magic',
+  'path-exists',
+  'qs-esm',
+].join('|')
+
 /** @type {import('jest').Config}  */
 const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  setupFiles: ['<rootDir>/test/jest.setup.env.js'],
   setupFilesAfterEnv: ['<rootDir>/test/jest.setup.js'],
+  transformIgnorePatterns: [
+    `/node_modules/(?!.pnpm)(?!(${esModules})/)`,
+    `/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
+  ],
   moduleNameMapper: {
     '\\.(css|scss)$': '<rootDir>/test/helpers/mocks/emptyModule.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':

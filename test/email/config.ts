@@ -13,7 +13,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [PostsCollection, MediaCollection],
   email: nodemailerAdapter(),
   globals: [MenuGlobal],
