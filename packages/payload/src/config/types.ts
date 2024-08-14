@@ -914,6 +914,7 @@ export type SanitizedConfig = {
 
 export type EditConfig =
   | {
+      [key: string]: EditViewConfig
       /**
        * Replace or modify individual nested routes, or add new ones:
        * + `default` - `/admin/collections/:collection/:id`
