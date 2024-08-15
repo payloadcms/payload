@@ -1,8 +1,9 @@
 'use client'
 import type { MappedComponent } from 'payload'
 
-import { useConfig } from '@payloadcms/ui'
 import React, { createContext, useContext, useEffect, useState } from 'react'
+
+import { useConfig } from '../../providers/Config/index.js'
 
 export { SetViewActions } from './SetViewActions/index.js'
 
@@ -18,7 +19,9 @@ const ActionsContext = createContext<ActionsContextType>({
 
 export const useActions = () => useContext(ActionsContext)
 
-export const ActionsProvider = ({ children }) => {
+export const ActionsProvider: React.FC<{
+  readonly children: React.ReactNode
+}> = ({ children }) => {
   const [viewActions, setViewActions] = useState([])
   const [adminActions, setAdminActions] = useState([])
 

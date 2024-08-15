@@ -73,6 +73,7 @@
     "qs-esm": "7.0.2",
     "server-only": "^0.0.1",
     "slate": "0.91.4",
+    "drizzle-kit": "0.23.2-df9e596",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
     "typescript": "5.5.4",

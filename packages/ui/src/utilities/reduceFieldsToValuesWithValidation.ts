@@ -1,6 +1,6 @@
 import type { Data, FormState } from 'payload'
 
-import { unflatten as flatleyUnflatten } from '../../../payload/src/utilities/unflatten.js'
+import { unflatten as flatleyUnflatten } from 'payload/shared'
 
 type ReturnType = {
   data: Data
