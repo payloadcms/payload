@@ -194,6 +194,7 @@ export type FindArgs = {
   locale?: string
   page?: number
   pagination?: boolean
+  projection?: Record<string, unknown>
   req: PayloadRequest
   skip?: number
   sort?: string

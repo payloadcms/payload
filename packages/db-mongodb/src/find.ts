@@ -19,6 +19,7 @@ export const find: Find = async function find(
     locale,
     page,
     pagination,
+    projection,
     req = {} as PayloadRequest,
     sort: sortArg,
     where,
@@ -61,6 +62,7 @@ export const find: Find = async function find(
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
@@ -109,11 +111,8 @@ export const find: Find = async function find(
         collection,
         doc,
         joins,
-        options: {
-          lean: true,
-          session: options.session,
-        },
         payload: this.payload,
+        req,
       }),
     )
   })

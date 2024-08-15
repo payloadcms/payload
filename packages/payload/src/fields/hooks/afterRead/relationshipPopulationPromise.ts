@@ -90,7 +90,7 @@ const populate = async ({
       if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][index ?? key].value = relationshipValue
       } else {
-        dataToUpdate[field.name][index ?? key] = relationshipValue
+        dataToUpdate[field.name].docs[index ?? key] = relationshipValue
       }
     } else if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
@@ -160,13 +160,19 @@ export const relationshipPopulationPromise = async ({
           })
         }
       })
-    } else if (Array.isArray(siblingDoc[field.name])) {
-      siblingDoc[field.name].forEach((relatedDoc, index) => {
+    } else if (
+      Array.isArray(siblingDoc[field.name]) ||
+      Array.isArray(siblingDoc[field.name]?.docs)
+    ) {
+      ;(Array.isArray(siblingDoc[field.name])
+        ? siblingDoc[field.name]
+        : siblingDoc[field.name].docs
+      ).forEach((relatedDoc, index) => {
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
               currentDepth,
-              data: relatedDoc,
+              data: relatedDoc?.id ? relatedDoc.id : relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
               draft,

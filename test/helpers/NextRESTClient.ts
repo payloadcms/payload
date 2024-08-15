@@ -1,4 +1,4 @@
-import type { SanitizedConfig, Where } from 'payload'
+import type { JoinQuery, SanitizedConfig, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
 import {
@@ -18,6 +18,7 @@ type RequestOptions = {
   query?: {
     depth?: number
     fallbackLocale?: string
+    joins?: JoinQuery
     limit?: number
     locale?: string
     page?: number

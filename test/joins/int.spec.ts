@@ -1,11 +1,17 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category } from './payload-types.js'
+import type { Category, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let payload: Payload
 let token: string
@@ -19,8 +25,7 @@ describe('Joins Field Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const initialized = await initPayloadInt(configPromise)
-    ;({ payload, restClient } = initialized)
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     const data = await restClient
       .POST('/users/login', {
@@ -36,41 +41,20 @@ describe('Joins Field Tests', () => {
     category = await payload.create({
       collection: 'categories',
       data: {
-        name: 'example',
+        name: 'paginate example',
         group: {},
       },
     })
 
-    await payload.create({
-      collection: 'posts',
-      data: {
+    for (let i = 0; i < 10; i++) {
+      await createPost({
+        title: `test ${i}`,
         category: category.id,
         group: {
           category: category.id,
         },
-        title: 'test a',
-      },
-    })
-    await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        group: {
-          category: category.id,
-        },
-        title: 'test b',
-      },
-    })
-    await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        group: {
-          category: category.id,
-        },
-        title: 'test c',
-      },
-    })
+      })
+    }
   })
 
   afterAll(async () => {
@@ -82,19 +66,18 @@ describe('Joins Field Tests', () => {
   it('should populate joins using findByID', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
+      joins: {
+        posts: {
+          sort: '-title',
+        },
+      },
       collection: 'categories',
     })
 
-    expect(Array.isArray(categoryWithPosts.group.posts)).toBeDefined()
-    expect(Array.isArray(categoryWithPosts.posts)).toBeDefined()
-    const joinedIDs = categoryWithPosts.group.posts.map((post) => post.id)
-
-    expect(categoryWithPosts.group.posts).toHaveLength(3)
-    expect(categoryWithPosts.group.posts[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts[0].title).toBe('test a')
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
+    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.posts.docs[0].title).toStrictEqual('test 9')
   })
 
   it('should populate joins using find', async () => {
@@ -104,31 +87,87 @@ describe('Joins Field Tests', () => {
 
     const [categoryWithPosts] = result.docs
 
-    expect(Array.isArray(categoryWithPosts.group.posts)).toBeDefined()
-    expect(Array.isArray(categoryWithPosts.posts)).toBeDefined()
-    const joinedIDs = categoryWithPosts.group.posts.map((post) => post.id)
-
-    expect(categoryWithPosts.group.posts).toHaveLength(3)
-    expect(categoryWithPosts.group.posts[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts[0].title).toBe('test a')
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[0].id)
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[1].id)
-    expect(joinedIDs).toContain(categoryWithPosts.group.posts[2].id)
+    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.posts.docs[0].title).toBe('test 9')
   })
 
   describe('REST', () => {
     it('should paginate joins', async () => {
-      const response = await restClient
-        .GET(`/categories/${category.id}?joins[posts][limit]=1[page]=2`)
-        .then((res) => res.json())
-      expect(response.posts).toHaveLength(1)
-      expect(response.posts[0].title).toStrictEqual('test b')
+      let page = 1
+      const query = {
+        depth: 1,
+        where: {
+          name: { equals: 'paginate example' },
+        },
+        joins: {
+          posts: {
+            limit: 4,
+            sort: 'createdAt',
+            get page() {
+              return page
+            },
+          },
+        },
+      }
+
+      const page1 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+      page = 2
+      const page2 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+      page = 3
+      const page3 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(page1.docs[0].posts.docs).toHaveLength(4)
+      expect(page1.docs[0].posts.docs[0].title).toStrictEqual('test 0')
+      expect(page1.docs[0].posts.hasNextPage).toStrictEqual(true)
+      expect(page1.docs[0].posts.hasPrevPage).toStrictEqual(false)
+      expect(page1.docs[0].posts.limit).toStrictEqual(4)
+      expect(page1.docs[0].posts.nextPage).toStrictEqual(2)
+      expect(page1.docs[0].posts.page).toStrictEqual(1)
+      expect(page1.docs[0].posts.pagingCounter).toStrictEqual(1)
+      expect(page1.docs[0].posts.prevPage).toStrictEqual(null)
+      expect(page1.docs[0].posts.totalDocs).toStrictEqual(10)
+      expect(page1.docs[0].posts.totalPages).toStrictEqual(3)
+
+      expect(page2.docs[0].posts.docs).toHaveLength(4)
+      expect(page2.docs[0].posts.docs[0].title).toStrictEqual('test 4')
+      expect(page2.docs[0].posts.hasNextPage).toStrictEqual(true)
+      expect(page2.docs[0].posts.hasPrevPage).toStrictEqual(true)
+      expect(page2.docs[0].posts.limit).toStrictEqual(4)
+      expect(page2.docs[0].posts.nextPage).toStrictEqual(3)
+      expect(page2.docs[0].posts.page).toStrictEqual(2)
+      expect(page2.docs[0].posts.pagingCounter).toStrictEqual(5)
+      expect(page2.docs[0].posts.prevPage).toStrictEqual(1)
+      expect(page2.docs[0].posts.totalDocs).toStrictEqual(10)
+      expect(page2.docs[0].posts.totalPages).toStrictEqual(3)
+
+      expect(page3.docs[0].posts.docs).toHaveLength(2)
+      expect(page3.docs[0].posts.docs[0].title).toStrictEqual('test 8')
+      expect(page3.docs[0].posts.hasNextPage).toStrictEqual(false)
+      expect(page3.docs[0].posts.hasPrevPage).toStrictEqual(true)
+      expect(page3.docs[0].posts.limit).toStrictEqual(4)
+      expect(page3.docs[0].posts.nextPage).toStrictEqual(null)
+      expect(page3.docs[0].posts.page).toStrictEqual(3)
+      expect(page3.docs[0].posts.pagingCounter).toStrictEqual(9)
+      expect(page3.docs[0].posts.prevPage).toStrictEqual(2)
+      expect(page3.docs[0].posts.totalDocs).toStrictEqual(10)
+      expect(page3.docs[0].posts.totalPages).toStrictEqual(3)
     })
     it('should sort joins', async () => {
       const response = await restClient
         .GET(`/categories/${category.id}?joins[posts][sort]=-title`)
         .then((res) => res.json())
-      expect(response.posts[0].title).toStrictEqual('test c')
+      expect(response.posts.docs[0].title).toStrictEqual('test 9')
     })
   })
 })
+
+async function createPost(overrides?: Partial<Post>) {
+  return payload.create({
+    collection: 'posts',
+    data: {
+      title: 'test',
+      ...overrides,
+    },
+  })
+}

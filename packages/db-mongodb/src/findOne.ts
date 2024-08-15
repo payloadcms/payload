@@ -33,8 +33,9 @@ export const findOne: FindOne = async function findOne(
     collection,
     doc,
     joins,
-    options,
+    locale,
     payload: this.payload,
+    req,
   })
 
   result = JSON.parse(JSON.stringify(result))

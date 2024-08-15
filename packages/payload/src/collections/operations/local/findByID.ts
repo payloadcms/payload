@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, JoinQuery, Payload, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -18,6 +18,7 @@ export type Options<TSlug extends CollectionSlug> = {
   draft?: boolean
   fallbackLocale?: TypedLocale
   id: number | string
+  joins?: JoinQuery
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -36,6 +37,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors = false,
     draft = false,
+    joins,
     overrideAccess = true,
     showHiddenFields,
   } = options
@@ -55,6 +57,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft,
+    joins,
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,
