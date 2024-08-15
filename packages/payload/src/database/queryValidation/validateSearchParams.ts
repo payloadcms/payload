@@ -105,7 +105,10 @@ export async function validateSearchParam({
           fieldPath = path.slice(0, -(req.locale.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
-        if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          Array.isArray(field.relationTo)
+        ) {
           fieldPath = fieldPath.replace('.value', '')
         }
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'

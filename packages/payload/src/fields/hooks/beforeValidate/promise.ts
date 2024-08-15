@@ -138,7 +138,7 @@ export const promise = async <T>({
           siblingData[field.name] === 'null' ||
           siblingData[field.name] === null
         ) {
-          if (field.type === 'relationship' && field.hasMany === true) {
+          if (field.hasMany === true) {
             siblingData[field.name] = []
           } else {
             siblingData[field.name] = null
@@ -165,11 +165,7 @@ export const promise = async <T>({
               }
             })
           }
-          if (
-            field.type === 'relationship' &&
-            field.hasMany !== true &&
-            valueIsValueWithRelation(value)
-          ) {
+          if (field.hasMany !== true && valueIsValueWithRelation(value)) {
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === value.relationTo,
             )
@@ -196,7 +192,7 @@ export const promise = async <T>({
               }
             })
           }
-          if (field.type === 'relationship' && field.hasMany !== true && value) {
+          if (field.hasMany !== true && value) {
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === field.relationTo,
             )
