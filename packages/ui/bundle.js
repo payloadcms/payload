@@ -64,22 +64,16 @@ async function build() {
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
-    outdir: 'dist',
+    outdir: 'dist-styles',
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
 
   try {
-    fs.renameSync('dist/index.css', 'dist/styles.css')
+    fs.renameSync('dist-styles/index.css', 'dist/styles.css')
+    fs.rmdirSync('dist-styles', { recursive: true })
   } catch (err) {
-    console.error(`Error while renaming index.css: ${err}`)
-    throw err
-  }
-
-  try {
-    fs.unlinkSync('dist/index.js')
-  } catch (err) {
-    console.error(`Error while deleting index.js: ${err}`)
+    console.error(`Error while renaming index.css and dist-styles: ${err}`)
     throw err
   }
 
