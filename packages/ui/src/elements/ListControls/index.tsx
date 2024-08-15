@@ -9,11 +9,10 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useListInfo } from '@payloadcms/ui'
-
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
+import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -32,13 +31,13 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  collectionConfig: ClientCollectionConfig
-  enableColumns?: boolean
-  enableSort?: boolean
-  fields: ClientField[]
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+  readonly collectionConfig: ClientCollectionConfig
+  readonly enableColumns?: boolean
+  readonly enableSort?: boolean
+  readonly fields: ClientField[]
+  readonly handleSearchChange?: (search: string) => void
+  readonly handleSortChange?: (sort: string) => void
+  readonly handleWhereChange?: (where: Where) => void
 }
 
 /**

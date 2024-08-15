@@ -61,6 +61,8 @@ export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
+export { unflatten } from '../utilities/unflatten.js'
+
 export { wait } from '../utilities/wait.js'
 
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
