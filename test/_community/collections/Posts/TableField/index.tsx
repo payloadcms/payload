@@ -29,9 +29,9 @@ const initialData: PaginatedDocs = {
     {
       id: '123',
       context: {},
-      createdAt: new Date(),
+      createdAt: '2021-01-01T00:00:00.000Z',
       title: 'Hello',
-      updatedAt: new Date(),
+      updatedAt: '2021-01-01T00:00:00.000Z',
     },
   ],
   hasNextPage: false,
