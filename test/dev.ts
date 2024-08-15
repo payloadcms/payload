@@ -38,7 +38,7 @@ if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg)
+const { beforeTest } = await createTestHooks(testSuiteArg, prod)
 await beforeTest()
 
 const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg, prod)
