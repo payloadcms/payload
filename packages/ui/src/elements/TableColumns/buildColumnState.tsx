@@ -128,16 +128,23 @@ export const buildColumnState = (args: Args): Column[] => {
           field: {
             ...(field || ({} as ClientField)),
             ...(cellProps?.[index]?.field || ({} as ClientField)),
+            admin: {
+              ...(field.admin || {}),
+              components: {
+                ...(field.admin?.components || {}),
+                Cell: field.admin?.components?.Cell || {
+                  type: 'client',
+                  Component: DefaultCell,
+                  RenderedComponent: null,
+                },
+                ...(cellProps?.[index]?.field?.admin?.components || {}),
+              },
+            },
           } as ClientField,
           ...cellProps?.[index],
           link: isFirstActiveColumn,
         },
         components: {
-          Cell: field.admin?.components?.Cell || {
-            type: 'client',
-            Component: DefaultCell,
-            RenderedComponent: null,
-          },
           Heading,
         },
       }
@@ -153,12 +160,20 @@ export const buildColumnState = (args: Args): Column[] => {
       Label: null,
       accessor: '_select',
       active: true,
+      cellProps: {
+        field: {
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <SelectRow />,
+              },
+            },
+          },
+        } as ClientField,
+      },
       components: {
-        Cell: {
-          type: 'client',
-          Component: null,
-          RenderedComponent: <SelectRow />,
-        },
         Heading: <SelectAll />,
       },
     })

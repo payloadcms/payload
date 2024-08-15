@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs, Where } from 'payload'
+import type { ClientCollectionConfig, ClientField, PaginatedDocs, Where } from 'payload'
 
 import {
   ListQueryProvider,
@@ -10,7 +10,8 @@ import {
 } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-import { TableComponent } from './MyTable.js'
+import { MyCell } from './MyCell.js'
+import { MyTableComponent } from './MyTable.js'
 import './index.scss'
 
 const baseClass = 'table-field-header'
@@ -86,8 +87,25 @@ export const TableField: React.FC<RelationshipTableComponentProps> = ({
         modifySearchParams={false}
         preferenceKey={preferenceKey}
       >
-        <TableColumnsProvider collectionSlug={relationTo} preferenceKey={preferenceKey}>
-          <TableComponent collectionConfig={collectionConfig} field={field} />
+        <TableColumnsProvider
+          cellProps={[
+            {
+              field: {
+                admin: {
+                  components: {
+                    Cell: {
+                      type: 'client',
+                      Component: MyCell,
+                    },
+                  },
+                },
+              } as ClientField,
+            },
+          ]}
+          collectionSlug={relationTo}
+          preferenceKey={preferenceKey}
+        >
+          <MyTableComponent collectionConfig={collectionConfig} field={field} />
         </TableColumnsProvider>
       </ListQueryProvider>
       <ListDrawer />

@@ -12,7 +12,7 @@ type RelationshipTableComponentProps = {
   }
 }
 
-export const TableComponent: React.FC<RelationshipTableComponentProps> = ({
+export const MyTableComponent: React.FC<RelationshipTableComponentProps> = ({
   collectionConfig,
   field: { relationTo },
 }) => {

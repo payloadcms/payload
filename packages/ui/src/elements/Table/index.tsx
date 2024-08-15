@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, ClientField, MappedComponent } from 'payload'
+import type { CellComponentProps, ClientField } from 'payload'
 
 import React from 'react'
 
@@ -20,7 +20,6 @@ export type Column = {
   readonly active: boolean
   readonly cellProps?: Partial<CellComponentProps>
   readonly components: {
-    Cell: MappedComponent
     Heading: React.ReactNode
   }
 }
@@ -71,7 +70,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
                       >
                         <RenderComponent
                           clientProps={{ ...col?.cellProps }}
-                          mappedComponent={col.components.Cell}
+                          mappedComponent={col.cellProps?.field?.admin?.components?.Cell}
                         />
                       </TableCellProvider>
                     </td>
