@@ -441,6 +441,15 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | StaticLabel
     singular?: LabelFunction | StaticLabel
   }
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockWhenEditing?:
+    | {
+        lockDuration: number
+      }
+    | boolean
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
