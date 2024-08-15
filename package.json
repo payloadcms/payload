@@ -79,7 +79,7 @@
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=\" --no-deprecation\" jest --config=jest.components.config.js",
     "test:e2e": "pnpm runts ./test/runE2E.ts",
-    "test:e2e:prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && pnpm runts ./test/runE2E.ts --prod",
+    "test:e2e:prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd .. && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
