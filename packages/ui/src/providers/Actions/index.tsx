@@ -19,7 +19,9 @@ const ActionsContext = createContext<ActionsContextType>({
 
 export const useActions = () => useContext(ActionsContext)
 
-export const ActionsProvider = ({ children }) => {
+export const ActionsProvider: React.FC<{
+  readonly children: React.ReactNode
+}> = ({ children }) => {
   const [viewActions, setViewActions] = useState([])
   const [adminActions, setAdminActions] = useState([])
 
