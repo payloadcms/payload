@@ -26,8 +26,6 @@ export async function getPackageManager(args: {
         detected = 'pnpm'
       } else if (await commandExists('yarn')) {
         detected = 'yarn'
-      } else if (await commandExists('bun')) {
-        detected = 'bun'
       } else {
         detected = 'npm'
       }
