@@ -6,7 +6,6 @@ import type {
   StaticLabel,
 } from 'payload'
 
-import { DefaultCell } from '@payloadcms/ui'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -17,6 +16,7 @@ import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
+import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
   cellProps: Partial<CellComponentProps>[]

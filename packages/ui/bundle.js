@@ -86,11 +86,11 @@ async function build() {
   console.log('styles.css bundled successfully')
   // Bundle `client.ts`
   const resultClient = await esbuild.build({
-    entryPoints: ['src/exports/client/index.ts'],
+    entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports/client',
+    outdir: 'dist/exports/client_optimized',
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,

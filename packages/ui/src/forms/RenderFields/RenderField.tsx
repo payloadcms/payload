@@ -2,10 +2,11 @@
 
 import type { ClientField, FieldPermissions } from 'payload'
 
-import { HiddenField, useFieldComponents } from '@payloadcms/ui'
 import React from 'react'
 
+import { HiddenField } from '../../fields/Hidden/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 

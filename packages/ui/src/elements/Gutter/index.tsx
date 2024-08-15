@@ -1,3 +1,4 @@
+'use client'
 import React, { forwardRef } from 'react'
 
 import './index.scss'

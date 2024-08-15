@@ -1,16 +1,17 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
-import { useForm, useUploadEdits } from '@payloadcms/ui'
 import { isImage, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
+import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'

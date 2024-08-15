@@ -9,11 +9,10 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useListInfo } from '@payloadcms/ui'
-
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
+import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
