@@ -893,6 +893,189 @@ describe('Fields', () => {
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
     })
+
+    it('should not duplicate block rows for blocks within localized array fields', async () => {
+      const randomTextDoc = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomTextDoc2 = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const blocksWithinArrayEN = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc.id,
+        },
+      ]
+
+      const blocksWithinArrayES = [
+        {
+          blockName: '1',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
+        },
+        {
+          blockName: '2',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
+        },
+        {
+          blockName: '3',
+          blockType: 'someBlock',
+          relationWithinBlock: randomTextDoc2.id,
+        },
+      ]
+
+      const createdEnDoc = await payload.create({
+        collection,
+        locale: 'en',
+        depth: 0,
+        data: {
+          items: [
+            {
+              text: 'hello',
+              localizedText: 'hello',
+            },
+          ],
+          localized: [
+            {
+              text: 'hello',
+            },
+          ],
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArrayEN as any,
+            },
+          ],
+        },
+      })
+
+      const updatedEsDoc = await payload.update({
+        collection,
+        id: createdEnDoc.id,
+        depth: 0,
+        locale: 'es',
+        data: {
+          arrayWithBlocks: [
+            {
+              blocksWithinArray: blocksWithinArrayES as any,
+            },
+          ],
+        },
+      })
+
+      const esArrayBlocks = updatedEsDoc.arrayWithBlocks[0].blocksWithinArray
+      // recursively remove any id field within esArrayRow
+      const removeId = (obj) => {
+        if (obj instanceof Object) {
+          delete obj.id
+          Object.values(obj).forEach(removeId)
+        }
+      }
+      removeId(esArrayBlocks)
+      removeId(createdEnDoc.arrayWithBlocks[0].blocksWithinArray)
+
+      expect(esArrayBlocks).toEqual(blocksWithinArrayES)
+      expect(createdEnDoc.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
+
+      // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
+      const enDoc2 = await payload.findByID({
+        id: createdEnDoc.id,
+        collection,
+        locale: 'en',
+        depth: 0,
+      })
+      removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
+      expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
+    })
+
+    it('should update localized relation within unLocalized array', async () => {
+      const randomTextDoc = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomTextDoc2 = (
+        await payload.find({
+          collection: 'text-fields',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const createdEnDoc = await payload.create({
+        collection,
+        locale: 'en',
+        depth: 0,
+        data: {
+          items: [
+            {
+              text: 'hello',
+              localizedText: 'hello',
+            },
+          ],
+          localized: [
+            {
+              text: 'hello',
+            },
+          ],
+          arrayWithLocalizedRelation: [
+            {
+              localizedRelation: randomTextDoc.id,
+            },
+          ],
+        },
+      })
+
+      const updatedEsDoc = await payload.update({
+        collection,
+        id: createdEnDoc.id,
+        depth: 0,
+        locale: 'es',
+        data: {
+          arrayWithLocalizedRelation: [
+            {
+              id: createdEnDoc.arrayWithLocalizedRelation[0].id,
+              localizedRelation: randomTextDoc2.id,
+            },
+          ],
+        },
+      })
+
+      expect(updatedEsDoc.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(updatedEsDoc.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc2.id)
+
+      expect(createdEnDoc.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(createdEnDoc.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
+
+      // pull enDoc again and make sure the update of esDoc did not mess with the data of enDoc
+      const enDoc2 = await payload.findByID({
+        id: createdEnDoc.id,
+        collection,
+        locale: 'en',
+        depth: 0,
+      })
+      expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
+      expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
+    })
   })
 
   describe('group', () => {
