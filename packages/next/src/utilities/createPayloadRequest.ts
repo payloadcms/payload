@@ -61,7 +61,7 @@ export const createPayloadRequest = async ({
 
   if (config.localization) {
     const locales = sanitizeLocales({
-      fallbackLocale: searchParams.get('fallback-locale'),
+      fallbackLocale: searchParams.get('fallback-locale') || searchParams.get('fallbackLocale'),
       locale: searchParams.get('locale'),
       localization: payload.config.localization,
     })
@@ -71,6 +71,7 @@ export const createPayloadRequest = async ({
     // Override if query params are present, in order to respect HTTP method override
     if (query.locale) locale = query.locale
     if (query?.['fallback-locale']) fallbackLocale = query['fallback-locale']
+    if (query?.['fallbackLocale']) fallbackLocale = query['fallbackLocale']
   }
 
   const customRequest: CustomPayloadRequestProperties = {

@@ -17,12 +17,12 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
       localeOnReq = data.locale
     }
 
-    if (
-      !fallbackLocaleOnReq &&
-      data?.['fallback-locale'] &&
-      typeof data?.['fallback-locale'] === 'string'
-    ) {
-      fallbackLocaleOnReq = data['fallback-locale']
+    if (!fallbackLocaleOnReq) {
+      if (data?.['fallback-locale'] && typeof data?.['fallback-locale'] === 'string')
+        fallbackLocaleOnReq = data['fallback-locale']
+
+      if (data?.['fallbackLocale'] && typeof data?.['fallbackLocale'] === 'string')
+        fallbackLocaleOnReq = data['fallbackLocale']
     }
 
     const { fallbackLocale, locale } = sanitizeLocales({
@@ -53,12 +53,25 @@ export const sanitizeLocales = ({
   if (['none', 'null'].includes(fallbackLocale)) {
     fallbackLocale = 'null'
   } else if (localization && !localization.localeCodes.includes(fallbackLocale)) {
-    fallbackLocale = localization.defaultLocale
+    if ('fallback' in localization && localization.fallback) {
+      fallbackLocale = localization.defaultLocale
+    }
+  }
+
+  if (!fallbackLocale) {
+    const localeHasFallback =
+      localization && localization?.locales?.length
+        ? localization.locales.find((localeConfig) => localeConfig.code === locale)?.fallbackLocale
+        : false
+
+    if (localeHasFallback) {
+      fallbackLocale = localeHasFallback
+    }
   }
 
   if (locale === '*') {
     locale = 'all'
-  } else if (localization && !localization.localeCodes.includes(locale)) {
+  } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
     locale = localization.defaultLocale
   }
 

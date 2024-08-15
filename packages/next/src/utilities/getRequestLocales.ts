@@ -10,7 +10,7 @@ export function getRequestLocales({ data, localization, searchParams }: GetReque
   locale: string
 } {
   let locale = searchParams.get('locale')
-  let fallbackLocale = searchParams.get('fallback-locale')
+  let fallbackLocale = searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
 
   if (data) {
     if (data?.locale) {
@@ -19,12 +19,17 @@ export function getRequestLocales({ data, localization, searchParams }: GetReque
     if (data?.['fallback-locale']) {
       fallbackLocale = data['fallback-locale']
     }
+    if (data?.['fallbackLocale']) {
+      fallbackLocale = data['fallbackLocale']
+    }
   }
 
   if (fallbackLocale === 'none') {
     fallbackLocale = 'null'
   } else if (!localization.localeCodes.includes(fallbackLocale)) {
-    fallbackLocale = localization.defaultLocale
+    if ('fallback' in localization && localization.fallback !== false) {
+      fallbackLocale = localization.defaultLocale
+    }
   }
 
   if (locale === '*') {
