@@ -64,7 +64,6 @@ export function setupProd() {
       for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
         if (tgzToPkgNameMap[packageName]) {
           const actualTgzPath = findActualTgzName(tgzToPkgNameMap[packageName])
-          console.log('actualTgzPath', actualTgzPath)
           if (actualTgzPath) {
             dependencies[packageName] = actualTgzPath
             allDependencies[packageName] = actualTgzPath
