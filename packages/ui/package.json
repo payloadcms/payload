@@ -58,7 +58,7 @@
   ],
   "scripts": {
     "build": "pnpm build:reactcompiler",
-    "build2": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
+    "build2": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:esbuild": "node bundle.js && mv dist/exports/client dist/exports/client2 && mv dist/exports/client_optimized dist/exports/client",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm build:esbuild && pnpm build:types && pnpm copyfiles",
