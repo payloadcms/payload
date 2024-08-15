@@ -62,7 +62,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         ...docInfo,
         doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateTitle>[0]),
+      } satisfies Omit<Parameters<GenerateTitle>[0], 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
