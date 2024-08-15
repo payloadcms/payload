@@ -53,7 +53,7 @@
     "clean:all": "node ./scripts/delete-recursively.js '@node_modules' 'media/*' '**/dist/' '**/.cache/*' '**/.next/*' '**/.turbo/*' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:build": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:cache": "node ./scripts/delete-recursively.js node_modules/.cache! packages/payload/node_modules/.cache! .next/*",
-    "dev": "pnpm runts ./test/dev.ts",
+    "dev": "tsx ./test/dev.ts",
     "runts": "node --no-deprecation --import @swc-node/register/esm-register",
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
