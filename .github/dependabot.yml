@@ -8,7 +8,7 @@ updates:
     schedule:
       interval: monthly
       timezone: US/Michigan
-      time: '6:00'
+      time: '06:00'
     groups:
       github_actions:
         patterns:
@@ -22,7 +22,7 @@ updates:
       interval: weekly
       day: sunday
       timezone: US/Michigan
-      time: '6:00'
+      time: '06:00'
     commit-message:
       prefix: 'chore(deps)'
     labels:
