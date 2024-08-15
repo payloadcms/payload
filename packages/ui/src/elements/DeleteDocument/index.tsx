@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -7,6 +7,8 @@ import { useEditDepth } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -26,6 +28,7 @@ export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly id?: string
+  readonly onDelete?: DocumentInfoContext['onDelete']
   readonly redirectAfterDelete?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly title?: string
@@ -37,6 +40,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     id,
     buttonId,
     collectionSlug,
+    onDelete,
     redirectAfterDelete = true,
     singularLabel,
     title: titleFromProps,
@@ -47,7 +51,10 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       routes: { admin: adminRoute, api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
@@ -100,6 +107,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 )
               }
 
+              if (typeof onDelete === 'function') {
+                await onDelete({ id, collectionConfig })
+              }
+
+              toggleModal(modalSlug)
+
               return
             }
 
@@ -134,6 +147,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     adminRoute,
     addDefaultError,
     redirectAfterDelete,
+    onDelete,
+    collectionConfig,
   ])
 
   if (id) {

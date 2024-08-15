@@ -121,20 +121,24 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
     }
 
     case 'REMOVE': {
-      const {
-        collection,
-        doc: { id },
-      } = action
+      const { id, collection } = action
+
       const newOptions = [...state]
-      const optionsToRemoveFrom = newOptions.find(
+
+      const indexOfGroup = newOptions.findIndex(
         (optionGroup) => optionGroup.label === collection.labels.plural,
       )
 
-      if (optionsToRemoveFrom) {
-        optionsToRemoveFrom.options = optionsToRemoveFrom.options.filter(
-          (option) => option.value !== id,
-        )
+      if (indexOfGroup === -1) {
+        return newOptions
       }
+
+      newOptions[indexOfGroup] = {
+        ...newOptions[indexOfGroup],
+        options: newOptions[indexOfGroup].options.filter((option) => option.value !== id),
+      }
+
+      console.log('newOptions', newOptions)
 
       return newOptions
     }

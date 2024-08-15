@@ -45,8 +45,8 @@ type ADD = {
 type REMOVE = {
   collection: ClientCollectionConfig
   config: ClientConfig
-  doc: any
   i18n: I18nClient
+  id: string
   type: 'REMOVE'
 }
 

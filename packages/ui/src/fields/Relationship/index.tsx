@@ -436,17 +436,31 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     [i18n, config],
   )
 
-  const onDelete = useCallback<DocumentDrawerProps['onSave']>(
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       dispatchOptions({
+        id: args.id,
         type: 'REMOVE',
         collection: args.collectionConfig,
         config,
-        doc: args.doc,
         i18n,
       })
+
+      if (hasMany) {
+        // setValue(
+        //   value
+        //     ? (value as Option[]).filter((option) => {
+        //         return option.value !== args.id
+        //       })
+        //     : null,
+        // )
+      } else {
+        setValue(null)
+      }
+
+      return
     },
-    [i18n, config],
+    [i18n, config, hasMany, setValue],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {

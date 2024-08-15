@@ -39,6 +39,7 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  readonly onDelete: DocumentInfoContext['onDelete']
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly permissions: CollectionPermission | GlobalPermission | null
@@ -54,6 +55,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    onDelete,
     onDuplicate,
     permissions,
     redirectAfterDelete,
@@ -252,6 +254,7 @@ export const DocumentControls: React.FC<{
                     buttonId="action-delete"
                     collectionSlug={collectionConfig?.slug}
                     id={id.toString()}
+                    onDelete={onDelete}
                     redirectAfterDelete={redirectAfterDelete}
                     singularLabel={collectionConfig?.labels?.singular}
                     useAsTitle={collectionConfig?.admin?.useAsTitle}

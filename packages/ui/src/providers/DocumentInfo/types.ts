@@ -39,7 +39,7 @@ export type DocumentInfoProps = {
   }) => Promise<void> | void
   onDelete?: (args: {
     collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
+    id: string
   }) => Promise<void> | void
   /* only available if `redirectAfterDuplicate` is `false` */
   onDuplicate?: (args: {
