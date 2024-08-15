@@ -153,14 +153,16 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
-              const relationshipIDField = relatedCollection.fields.find(
-                (collectionField) =>
-                  fieldAffectsData(collectionField) && collectionField.name === 'id',
-              )
-              if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = {
-                  ...relatedDoc,
-                  value: parseFloat(relatedDoc.value as string),
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = {
+                    ...relatedDoc,
+                    value: parseFloat(relatedDoc.value as string),
+                  }
                 }
               }
             })
@@ -169,12 +171,14 @@ export const promise = async <T>({
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === value.relationTo,
             )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
+            if (relatedCollection?.fields) {
+              const relationshipIDField = relatedCollection.fields.find(
+                (collectionField) =>
+                  fieldAffectsData(collectionField) && collectionField.name === 'id',
+              )
+              if (relationshipIDField?.type === 'number') {
+                siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
+              }
             }
           }
         } else {
@@ -183,12 +187,15 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === field.relationTo,
               )
-              const relationshipIDField = relatedCollection.fields.find(
-                (collectionField) =>
-                  fieldAffectsData(collectionField) && collectionField.name === 'id',
-              )
-              if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = parseFloat(relatedDoc as string)
+
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = parseFloat(relatedDoc as string)
+                }
               }
             })
           }
@@ -196,12 +203,15 @@ export const promise = async <T>({
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === field.relationTo,
             )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = parseFloat(value as string)
+
+            if (relatedCollection?.fields) {
+              const relationshipIDField = relatedCollection.fields.find(
+                (collectionField) =>
+                  fieldAffectsData(collectionField) && collectionField.name === 'id',
+              )
+              if (relationshipIDField?.type === 'number') {
+                siblingData[field.name] = parseFloat(value as string)
+              }
             }
           }
         }
