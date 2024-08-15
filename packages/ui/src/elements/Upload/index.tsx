@@ -266,7 +266,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 <div className={`${baseClass}__add-file-wrap`}>
                   <button
                     className={`${baseClass}__add-file`}
-                    onClick={handleUrlSubmit}
+                    onClick={() => {
+                      void handleUrlSubmit()
+                    }}
                     type="button"
                   >
                     {t('upload:addFile')}
