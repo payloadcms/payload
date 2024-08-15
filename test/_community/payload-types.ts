@@ -53,38 +53,6 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  text?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  myBlocks?:
-    | (
-        | {
-            test?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'test';
-          }
-        | {
-            test2?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'someBlock2';
-          }
-      )[]
-    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;

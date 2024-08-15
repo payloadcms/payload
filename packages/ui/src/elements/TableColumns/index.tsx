@@ -48,9 +48,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     config: { collections },
   } = useConfig()
 
-  const collectionConfig = collections.find(
-    (collectionConfig) => collectionConfig.slug === collectionSlug,
-  )
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
 
   const {
     admin: { defaultColumns, useAsTitle },
