@@ -7,13 +7,12 @@ updates:
     target-branch: beta
     schedule:
       interval: monthly
-      timezone: US/Michigan
+      timezone: America/Detroit
       time: '06:00'
     groups:
       github_actions:
         patterns:
           - '*'
-    versioning-strategy: increase
 
   - package-ecosystem: npm
     directory: /
@@ -21,7 +20,7 @@ updates:
     schedule:
       interval: weekly
       day: sunday
-      timezone: US/Michigan
+      timezone: America/Detroit
       time: '06:00'
     commit-message:
       prefix: 'chore(deps)'
@@ -42,4 +41,3 @@ updates:
           - patch
         patterns:
           - '*'
-    versioning-strategy: widen
