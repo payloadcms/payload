@@ -34,7 +34,10 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await runInitSeparateProcess(testSuiteName, true)
 
-  const { beforeTest } = await createTestHooks(testSuiteName)
+  const { beforeTest } = await createTestHooks(
+    testSuiteName,
+    process.env.PAYLOAD_TEST_PROD === 'true',
+  )
   await beforeTest()
 
   const port = 3000

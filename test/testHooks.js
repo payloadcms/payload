@@ -10,8 +10,8 @@ const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const createTestHooks = async (testSuiteName = '_community') => {
-  const tsConfigPath = path.resolve(dirname, '../tsconfig.json')
+export const createTestHooks = async (testSuiteName = '_community', forTestDir = false) => {
+  const tsConfigPath = path.resolve(dirname, forTestDir ? '' : '..', './tsconfig.json')
   const tsConfigContent = await readFile(tsConfigPath, 'utf8')
   const tsConfig = parse(tsConfigContent)
 
@@ -21,7 +21,7 @@ export const createTestHooks = async (testSuiteName = '_community') => {
      */
     beforeTest: async () => {
       // Delete entire .next cache folder
-      const nextCache = path.resolve(dirname, '../.next')
+      const nextCache = path.resolve(dirname, forTestDir ? '' : '..', './.next')
       if (existsSync(nextCache)) {
         await rm(nextCache, { recursive: true })
       }
@@ -29,7 +29,9 @@ export const createTestHooks = async (testSuiteName = '_community') => {
       // Set '@payload-config' in tsconfig.json
 
       // @ts-expect-error
-      tsConfig.compilerOptions.paths['@payload-config'] = [`./test/${testSuiteName}/config.ts`]
+      tsConfig.compilerOptions.paths['@payload-config'] = [
+        forTestDir ? `./${testSuiteName}/config.ts` : `./test/${testSuiteName}/config.ts`,
+      ]
       await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
 
       process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, 'config.ts')
