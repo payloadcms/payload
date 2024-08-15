@@ -28,6 +28,9 @@ async function main() {
   const all = process.argv.includes('--all')
   process.argv = process.argv.filter((arg) => arg !== '--all')
 
+  const noBuild = process.argv.includes('--no-build')
+  process.argv = process.argv.filter((arg) => arg !== '--no-build')
+
   const args = minimist(process.argv.slice(2))
   const { dest } = args
   if (!dest) throw new Error('--dest is required')
@@ -63,8 +66,9 @@ async function main() {
 
 ${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 `)
-
-  execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+  if (!noBuild) {
+    execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+  }
 
   header(`\n 📦 Packing all packages to ${dest}...`)
 
