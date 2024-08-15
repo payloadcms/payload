@@ -11,7 +11,6 @@ import React from 'react'
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
-import { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
