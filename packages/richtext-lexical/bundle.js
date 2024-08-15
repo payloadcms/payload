@@ -36,6 +36,7 @@ async function build() {
 
   try {
     fs.renameSync('dist/bundled_scss/index.css', 'dist/field/bundled.css')
+    fs.copyFileSync('dist/field/bundled.css', 'dist/exports/client_optimized/bundled.css')
     fs.rmSync('dist/bundled_scss', { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css: ${err}`)
