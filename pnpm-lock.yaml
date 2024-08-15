@@ -30,6 +30,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: 15.0.0-canary.104
         version: 15.0.0-canary.104
+      '@payloadcms/db-postgres':
+        specifier: workspace:*
+        version: link:packages/db-postgres
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -99,6 +102,9 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
         version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
@@ -1672,6 +1678,9 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       eslint-plugin-playwright:
         specifier: 1.6.2
         version: 1.6.2(eslint-plugin-jest@28.6.0(@typescript-eslint/eslint-plugin@7.16.0(@typescript-eslint/parser@7.16.0(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4))(eslint@9.6.0)

@@ -103,6 +103,8 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
+    "@payloadcms/db-postgres": "workspace:*",
+    "drizzle-kit": "0.23.2-df9e596",
     "@playwright/test": "1.46.0",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.4.0",
