@@ -1,7 +1,6 @@
 'use client'
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
-import { useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { password } from 'payload/shared'
 import React, { useCallback } from 'react'
 
@@ -9,6 +8,9 @@ import type { PasswordFieldProps } from './types.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
 import './index.scss'
 import { PasswordInput } from './input.js'

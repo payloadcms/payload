@@ -1,16 +1,17 @@
 'use client'
-import { CloseMenuIcon, MenuIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { CloseMenuIcon } from '../../icons/CloseMenu/index.js'
+import { MenuIcon } from '../../icons/Menu/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'hamburger'
 
 export const Hamburger: React.FC<{
-  closeIcon?: 'collapse' | 'x'
-  isActive?: boolean
+  readonly closeIcon?: 'collapse' | 'x'
+  readonly isActive?: boolean
 }> = (props) => {
   const { t } = useTranslation()
   const { closeIcon = 'x', isActive = false } = props
