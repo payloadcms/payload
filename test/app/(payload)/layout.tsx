@@ -1,5 +1,6 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 import configPromise from '@payload-config'
+import '@payloadcms/next/css'
 import { RootLayout } from '@payloadcms/next/layouts'
 
 import { importMap } from './admin/importMap.js'

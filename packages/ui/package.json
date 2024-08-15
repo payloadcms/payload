@@ -141,8 +141,8 @@
         "default": "./dist/providers/Config/createClientConfig/index.js"
       },
       "./css": {
-        "import": "./dist/prod/styles.css",
-        "default": "./dist/prod/styles.css"
+        "import": "./dist/styles.css",
+        "default": "./dist/styles.css"
       },
       "./scss": {
         "import": "./dist/scss/styles.scss",
