@@ -447,13 +447,13 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       })
 
       if (hasMany) {
-        // setValue(
-        //   value
-        //     ? (value as Option[]).filter((option) => {
-        //         return option.value !== args.id
-        //       })
-        //     : null,
-        // )
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).filter((option) => {
+                return option.value !== args.id
+              })
+            : null,
+        )
       } else {
         setValue(null)
       }

@@ -1,7 +1,8 @@
 'use client'
+import type { DocumentInfoContext } from '@payloadcms/ui'
 import type { SingleValueProps } from 'react-select'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
 import type { Option } from '../../types.js'
@@ -20,8 +21,19 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     children,
     data: { label, relationTo, value },
     selectProps: {
-      // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
-      customProps: { onCreate, onDelete, onDuplicate, onSave, setDrawerIsOpen } = {},
+      // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
+      customProps: {
+        // @ts-expect-error
+        onCreate,
+        // @ts-expect-error
+        onDelete: onDeleteFromProps,
+        // @ts-expect-error
+        onDuplicate,
+        // @ts-expect-error
+        onSave,
+        // @ts-expect-error
+        setDrawerIsOpen,
+      } = {},
     } = {},
   } = props
 
@@ -30,7 +42,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
-  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, isDrawerOpen }] = useDocumentDrawer({
     id: value.toString(),
     collectionSlug: relationTo,
   })
@@ -40,6 +52,19 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       setDrawerIsOpen(isDrawerOpen)
     }
   }, [isDrawerOpen, setDrawerIsOpen])
+
+  const onDelete = useCallback<DocumentInfoContext['onDelete']>(
+    async (args) => {
+      setDrawerIsOpen(false)
+
+      if (typeof onDeleteFromProps === 'function') {
+        void onDeleteFromProps(args)
+      }
+
+      // closeDrawer() // TODO: determine if this is needed
+    },
+    [onDeleteFromProps, setDrawerIsOpen],
+  )
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>

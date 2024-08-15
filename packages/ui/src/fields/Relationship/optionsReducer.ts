@@ -138,8 +138,6 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
         options: newOptions[indexOfGroup].options.filter((option) => option.value !== id),
       }
 
-      console.log('newOptions', newOptions)
-
       return newOptions
     }
 
