@@ -18,7 +18,7 @@ concurrency:
 
 env:
   NODE_VERSION: 18.20.2
-  PNPM_VERSION: 9.7.0
+  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -222,8 +222,8 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - run: pnpm install
-      - run: pnpm run bf
+      - run: pnpm build
+      - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
