@@ -61,7 +61,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         ...docInfo,
         doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateDescription>[0]),
+      } satisfies Omit<Parameters<GenerateDescription>[0], 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
