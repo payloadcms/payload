@@ -11,6 +11,12 @@ import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
 import { runInit } from './runInit.js'
 import { createTestHooks } from './testHooks.js'
 
+const prod = process.argv.includes('--prod')
+process.argv = process.argv.filter((arg) => arg !== '--prod')
+if (prod) {
+  process.env.PAYLOAD_TEST_PROD = 'true'
+}
+
 loadEnv()
 
 const filename = fileURLToPath(import.meta.url)
@@ -35,7 +41,7 @@ if (args.turbo === true) {
 const { beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg)
+const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg, prod)
 
 await runInit(testSuiteArg, true)
 

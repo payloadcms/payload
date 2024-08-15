@@ -75,18 +75,22 @@ export async function initDevAndTest(
 
   switch (testSuiteArg) {
     case 'live-preview':
-      appPath = './live-preview/app/(payload)/admin/importMap.js'
+      appPath = path.resolve(dirname, './live-preview/app/(payload)/admin/importMap.js')
       break
     case 'admin-root':
-      appPath = './admin-root/app/(payload)/admin/importMap.js'
+      appPath = path.resolve(dirname, './admin-root/app/(payload)/admin/importMap.js')
       break
     default:
-      appPath = '../app/(payload)/admin/importMap.js'
+      appPath = path.resolve(
+        dirname,
+        process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '.',
+        './app/(payload)/admin/importMap.js',
+      )
       break
   }
 
   try {
-    fs.writeFileSync(path.resolve(dirname, appPath), 'export const importMap = {}')
+    fs.writeFileSync(appPath, 'export const importMap = {}')
   } catch (error) {
     console.log('Error writing importMap.js', error)
   }
@@ -127,7 +131,7 @@ export async function initDevAndTest(
   process.env.ROOT_DIR =
     testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root'
       ? testDir
-      : path.resolve(dirname, '..')
+      : path.resolve(dirname, process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '.')
 
   await generateImportMap(config, { log: true, force: true })
 

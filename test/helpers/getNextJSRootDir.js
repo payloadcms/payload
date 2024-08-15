@@ -7,7 +7,7 @@ import { adminRoute as rootAdminRoute } from '../admin-root/shared.js'
 const _filename = fileURLToPath(import.meta.url)
 const _dirname = dirname(_filename)
 
-export const getNextJSRootDir = (testSuite) => {
+export const getNextJSRootDir = (testSuite, prod) => {
   const testSuiteDir = resolve(_dirname, `../${testSuite}`)
 
   let hasNextConfig = false
@@ -35,7 +35,7 @@ export const getNextJSRootDir = (testSuite) => {
   // If no next config found in test suite,
   // return monorepo root dir
   return {
-    rootDir: resolve(_dirname, '../../'),
+    rootDir: prod ? resolve(_dirname) : resolve(_dirname, '../../'),
     adminRoute,
   }
 }

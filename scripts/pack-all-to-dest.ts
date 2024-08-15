@@ -25,25 +25,30 @@ main().catch((error) => {
 })
 
 async function main() {
+  const all = process.argv.includes('--all')
+  process.argv = process.argv.filter((arg) => arg !== '--all')
+
   const args = minimist(process.argv.slice(2))
   const { dest } = args
   if (!dest) throw new Error('--dest is required')
 
   const resolvedDest = path.resolve(dest)
 
-  const packageWhitelist = [
-    'payload',
-    'ui',
-    'next',
-    'db-mongodb',
-    'drizzle',
-    'db-sqlite',
-    'db-postgres',
-    'richtext-lexical',
-    'translations',
-    'plugin-cloud',
-    'graphql',
-  ]
+  const packageWhitelist = all
+    ? null
+    : [
+        'payload',
+        'ui',
+        'next',
+        'db-mongodb',
+        'drizzle',
+        'db-sqlite',
+        'db-postgres',
+        'richtext-lexical',
+        'translations',
+        'plugin-cloud',
+        'graphql',
+      ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)
 

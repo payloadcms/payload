@@ -35,7 +35,9 @@ export const getPackageDetails = async (packages: string[]): Promise<PackageDeta
       const isPublic = packageJson.private !== true
       if (!isPublic) return null
 
-      const isInWhitelist = packages.includes(path.basename(path.dirname(packageJsonPath)))
+      const isInWhitelist = packages
+        ? packages.includes(path.basename(path.dirname(packageJsonPath)))
+        : true
       if (!isInWhitelist) return null
 
       return {
