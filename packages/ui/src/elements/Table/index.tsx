@@ -15,13 +15,10 @@ export { TableCellProvider }
 const baseClass = 'table'
 
 export type Column = {
-  readonly Label: React.ReactNode
+  readonly Heading: React.ReactNode
   readonly accessor: string
   readonly active: boolean
   readonly cellProps?: Partial<CellComponentProps>
-  readonly components: {
-    Heading: React.ReactNode
-  }
 }
 
 export type Props = {
@@ -49,7 +46,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
           <tr>
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
-                {col.components.Heading}
+                {col.Heading}
               </th>
             ))}
           </tr>

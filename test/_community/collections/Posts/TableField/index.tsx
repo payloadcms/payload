@@ -27,7 +27,7 @@ type RelationshipTableComponentProps = {
 const initialData: PaginatedDocs = {
   docs: [
     {
-      _id: '',
+      id: '123',
       context: {},
       createdAt: new Date(),
       title: 'Hello',
@@ -105,7 +105,7 @@ export const TableField: React.FC<RelationshipTableComponentProps> = ({
           collectionSlug={relationTo}
           preferenceKey={preferenceKey}
         >
-          <MyTableComponent collectionConfig={collectionConfig} field={field} />
+          <MyTableComponent collectionConfig={collectionConfig} />
         </TableColumnsProvider>
       </ListQueryProvider>
       <ListDrawer />
