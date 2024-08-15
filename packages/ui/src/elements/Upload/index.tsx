@@ -34,10 +34,10 @@ const validate = (value) => {
 }
 
 type UploadActionsArgs = {
-  customActions?: React.ReactNode[]
-  enableAdjustments: boolean
-  enablePreviewSizes: boolean
-  mimeType: string
+  readonly customActions?: React.ReactNode[]
+  readonly enableAdjustments: boolean
+  readonly enablePreviewSizes: boolean
+  readonly mimeType: string
 }
 
 export const UploadActions = ({
@@ -78,11 +78,11 @@ export const UploadActions = ({
 }
 
 export type UploadProps = {
-  collectionSlug: string
-  customActions?: React.ReactNode[]
-  initialState?: FormState
-  onChange?: (file?: File) => void
-  uploadConfig: SanitizedCollectionConfig['upload']
+  readonly collectionSlug: string
+  readonly customActions?: React.ReactNode[]
+  readonly initialState?: FormState
+  readonly onChange?: (file?: File) => void
+  readonly uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {

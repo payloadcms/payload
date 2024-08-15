@@ -8,7 +8,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
-
 import type { StepNavItem } from './types.js'
 
 import { PayloadIcon } from '../../graphics/Icon/index.js'

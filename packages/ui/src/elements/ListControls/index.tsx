@@ -31,13 +31,13 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  collectionConfig: ClientCollectionConfig
-  enableColumns?: boolean
-  enableSort?: boolean
-  fields: ClientField[]
-  handleSearchChange?: (search: string) => void
-  handleSortChange?: (sort: string) => void
-  handleWhereChange?: (where: Where) => void
+  readonly collectionConfig: ClientCollectionConfig
+  readonly enableColumns?: boolean
+  readonly enableSort?: boolean
+  readonly fields: ClientField[]
+  readonly handleSearchChange?: (search: string) => void
+  readonly handleSortChange?: (sort: string) => void
+  readonly handleWhereChange?: (where: Where) => void
 }
 
 /**

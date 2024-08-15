@@ -10,8 +10,8 @@ import './index.scss'
 const baseClass = 'hamburger'
 
 export const Hamburger: React.FC<{
-  closeIcon?: 'collapse' | 'x'
-  isActive?: boolean
+  readonly closeIcon?: 'collapse' | 'x'
+  readonly isActive?: boolean
 }> = (props) => {
   const { t } = useTranslation()
   const { closeIcon = 'x', isActive = false } = props
