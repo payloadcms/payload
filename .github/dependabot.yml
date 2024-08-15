@@ -5,7 +5,9 @@ updates:
   - package-ecosystem: github-actions
     directories:
       - /
-      - .github/workflows
+      - /.github/workflows
+      - /.github/actions/* # Not working until resolved: https://github.com/dependabot/dependabot-core/issues/6345
+      - /.github/actions/setup
     target-branch: beta
     schedule:
       interval: monthly
