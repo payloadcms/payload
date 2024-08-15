@@ -43,7 +43,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
-  const { rootDir } = getNextJSRootDir(testSuiteName)
+  const { rootDir } = getNextJSRootDir(testSuiteName, process.env.PAYLOAD_TEST_PROD === 'true')
 
   if (prebuild) {
     await new Promise<void>((res, rej) => {

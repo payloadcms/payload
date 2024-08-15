@@ -35,7 +35,7 @@ export const getNextJSRootDir = (testSuite, prod) => {
   // If no next config found in test suite,
   // return monorepo root dir
   return {
-    rootDir: prod ? resolve(_dirname) : resolve(_dirname, '../../'),
+    rootDir: prod ? resolve(_dirname, '../') : resolve(_dirname, '../../'),
     adminRoute,
   }
 }
