@@ -7,6 +7,7 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation } from '../findOne.js'
 
 export type Options<TSlug extends GlobalSlug> = {
+  cache?: boolean
   context?: RequestContext
   depth?: number
   draft?: boolean
@@ -25,6 +26,7 @@ export default async function findOneLocal<TSlug extends GlobalSlug>(
 ): Promise<DataFromGlobalSlug<TSlug>> {
   const {
     slug: globalSlug,
+    cache = false,
     depth,
     draft = false,
     overrideAccess = true,
@@ -39,6 +41,7 @@ export default async function findOneLocal<TSlug extends GlobalSlug>(
 
   return findOneOperation({
     slug: globalSlug as string,
+    cache,
     depth,
     draft,
     globalConfig,
