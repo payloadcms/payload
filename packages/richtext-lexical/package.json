@@ -85,6 +85,7 @@
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.0",
     "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-d0e920e-20240815",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },
