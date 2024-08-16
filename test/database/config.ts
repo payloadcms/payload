@@ -275,6 +275,57 @@ export default buildConfigWithDefaults({
         drafts: true,
       },
     },
+    {
+      slug: 'json-store',
+      fields: [
+        {
+          name: 'textMany',
+          type: 'text',
+          hasMany: true,
+          dbJsonColumn: true,
+        },
+        {
+          name: 'numberMany',
+          type: 'number',
+          hasMany: true,
+          dbJsonColumn: true,
+        },
+        {
+          name: 'selectMany',
+          type: 'select',
+          hasMany: true,
+          dbJsonColumn: true,
+          options: [{ label: 'a', value: 'x' }],
+        },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [],
+          dbJsonColumn: true,
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          dbJsonColumn: true,
+          blocks: [{ slug: 'test-block', fields: [] }],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              dbJsonColumn: true,
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {

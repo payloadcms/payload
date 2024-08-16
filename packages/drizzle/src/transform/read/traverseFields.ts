@@ -126,6 +126,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
         table: Record<string, unknown>
       }[] = []
 
+      if ('dbJsonColumn' in field && field.dbJsonColumn) {
+        result[field.name] = table[`${fieldPrefix || ''}${field.name}`]
+        return result
+      }
+
       if (fieldPrefix) {
         deletions.push(() => delete table[fieldName])
       }

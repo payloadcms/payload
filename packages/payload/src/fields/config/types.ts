@@ -358,19 +358,21 @@ export type NumberField = {
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
-      hasMany: true
-      /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-      maxRows?: number
-      /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-      minRows?: number
-    }
-  | {
-      /** Makes this field an ordered array of numbers instead of just a single number. */
       hasMany?: false | undefined
       /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
       maxRows?: undefined
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: undefined
+    }
+  | {
+      /** Store this field in a JSON column in the SQL databases */
+      dbJsonColumn?: boolean
+      /** Makes this field an ordered array of numbers instead of just a single number. */
+      hasMany: true
+      /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+      maxRows?: number
+      /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+      minRows?: number
     }
 ) &
   FieldBase
@@ -407,19 +409,21 @@ export type TextField = {
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
-      hasMany: true
-      /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
-      maxRows?: number
-      /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
-      minRows?: number
-    }
-  | {
-      /** Makes this field an ordered array of strings instead of just a single string. */
       hasMany?: false | undefined
       /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
       maxRows?: undefined
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: undefined
+    }
+  | {
+      /** Store this field in a JSON column in the SQL databases */
+      dbJsonColumn?: boolean
+      /** Makes this field an ordered array of strings instead of just a single string. */
+      hasMany: true
+      /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+      maxRows?: number
+      /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+      minRows?: number
     }
 ) &
   FieldBase
@@ -556,6 +560,8 @@ export type GroupField = {
     } & Admin['components']
     hideGutter?: boolean
   } & Admin
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
@@ -647,6 +653,8 @@ type TabBase = {
 } & Omit<FieldBase, 'required' | 'validate'>
 
 export type NamedTab = {
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
@@ -843,6 +851,8 @@ export type SelectField = {
     isClearable?: boolean
     isSortable?: boolean
   } & Admin
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   /**
    * Customize the SQL table name
    */
@@ -883,6 +893,8 @@ type SharedRelationshipProperties = {
   validate?: Validate<unknown, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
+      /** Store this field in a JSON column in the SQL databases */
+      dbJsonColumn?: boolean
       hasMany: true
       /**
        * @deprecated Use 'maxRows' instead
@@ -938,6 +950,8 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: { [collectionSlug: CollectionSlug]: string }
   } & RelationshipAdmin
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 
@@ -1034,6 +1048,8 @@ export type ArrayField = {
      */
     isSortable?: boolean
   } & Admin
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   /**
    * Customize the SQL table name
    */
@@ -1166,6 +1182,8 @@ export type BlockField = {
     isSortable?: boolean
   } & Admin
   blocks: Block[]
+  /** Store this field in a JSON column in the SQL databases */
+  dbJsonColumn?: boolean
   defaultValue?: unknown
   labels?: Labels
   maxRows?: number

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Field } from 'payload'
 
 import { fieldAffectsData, tabHasName } from 'payload/shared'
@@ -83,6 +82,8 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
+          if (field.dbJsonColumn) break
+
           const withArray: Result = {
             columns: {
               _parentID: false,
@@ -124,6 +125,7 @@ export const traverseFields = ({
         }
 
         case 'select': {
+          if (field.dbJsonColumn) break
           if (field.hasMany) {
             const withSelect: Result = {
               columns: {
@@ -141,6 +143,7 @@ export const traverseFields = ({
         }
 
         case 'blocks':
+          if (field.dbJsonColumn) break
           field.blocks.forEach((block) => {
             const blockKey = `_blocks_${block.slug}`
 
@@ -181,6 +184,7 @@ export const traverseFields = ({
           break
 
         case 'group':
+          if (field.dbJsonColumn) break
           traverseFields({
             _locales,
             adapter,
