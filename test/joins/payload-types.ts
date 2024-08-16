@@ -13,6 +13,8 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    'localized-posts': LocalizedPost;
+    'localized-categories': LocalizedCategory;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -21,7 +23,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
@@ -93,6 +95,40 @@ export interface Category {
       totalPages?: number | null;
     } | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | LocalizedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories".
+ */
+export interface LocalizedCategory {
+  id: string;
+  name?: string | null;
+  posts?: {
+    docs?: (string | LocalizedPost)[] | null;
+    hasNextPage?: boolean | null;
+    hasPrevPage?: boolean | null;
+    limit?: number | null;
+    nextPage?: number | null;
+    offset?: number | null;
+    page?: number | null;
+    pagingCounter?: number | null;
+    prevPage?: number | null;
+    totalDocs?: number | null;
+    totalPages?: number | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }

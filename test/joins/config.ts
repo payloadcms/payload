@@ -3,6 +3,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -66,7 +67,47 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'localized-posts',
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'category',
+          type: 'relationship',
+          localized: true,
+          relationTo: 'localized-categories',
+        },
+      ],
+    },
+    {
+      slug: 'localized-categories',
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'posts',
+          type: 'join',
+          collection: 'localized-posts',
+          on: 'category',
+        },
+      ],
+    },
   ],
+  localization: {
+    locales: ['en', 'es'],
+    defaultLocale: 'en',
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

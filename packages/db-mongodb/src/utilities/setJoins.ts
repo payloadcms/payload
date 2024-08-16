@@ -24,8 +24,8 @@ export const setJoins = async ({
 
   const promises = []
 
-  Object.keys(joinConfig).map(async (slug) => {
-    for (const join of joinConfig[slug]) {
+  Object.keys(joinConfig).forEach((slug) => {
+    joinConfig[slug].forEach((join) => {
       // get the query options for the join off of req
       // TODO: allow disabling the join completely
       // if (joins[join.schemaPath] === false || req.query[join.schemaPath] === 'false') {
@@ -67,7 +67,7 @@ export const setJoins = async ({
             }
           }),
       )
-    }
+    })
   })
 
   await Promise.all(promises)

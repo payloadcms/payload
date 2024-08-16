@@ -8,7 +8,6 @@ import type { Category, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -90,6 +89,60 @@ describe('Joins Field Tests', () => {
     expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
     expect(categoryWithPosts.group.posts.docs[0].title).toBe('test 9')
+  })
+
+  describe('Joins with localization', () => {
+    let localizedCategory: Category
+
+    beforeAll(async () => {
+      localizedCategory = await payload.create({
+        collection: 'localized-categories',
+        locale: 'en',
+        data: {
+          name: 'localized category',
+        },
+      })
+      const post1 = await payload.create({
+        collection: 'localized-posts',
+        locale: 'en',
+        data: {
+          title: 'english post',
+          category: localizedCategory.id,
+        },
+      })
+      await payload.update({
+        collection: 'localized-posts',
+        id: post1.id,
+        locale: 'es',
+        data: {
+          title: 'spanish post',
+          category: localizedCategory.id,
+        },
+      })
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'en',
+        data: {
+          title: 'spanish post',
+          category: localizedCategory.id,
+        },
+      })
+    })
+
+    it('should populate joins using findByID with localization on the relationship', async () => {
+      const enCategory = await payload.findByID({
+        id: localizedCategory.id,
+        collection: 'localized-categories',
+        locale: 'en',
+      })
+      const esCategory = await payload.findByID({
+        id: localizedCategory.id,
+        collection: 'localized-categories',
+        locale: 'es',
+      })
+      expect(enCategory.posts.docs).toHaveLength(2)
+      expect(esCategory.posts.docs).toHaveLength(1)
+    })
   })
 
   describe('REST', () => {
