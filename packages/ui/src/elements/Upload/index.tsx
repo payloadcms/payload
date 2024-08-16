@@ -109,15 +109,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
-        const fileReader = new FileReader()
-        fileReader.onload = (e) => {
-          const imgSrc = e.target?.result
-
-          if (typeof imgSrc === 'string') {
-            setFileSrc(imgSrc)
-          }
-        }
-        fileReader.readAsDataURL(newFile)
+        setFileSrc(URL.createObjectURL(newFile))
       }
 
       setValue(newFile)
@@ -202,6 +194,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(initialState || {}, true))
+    if (initialState?.file?.value instanceof File) {
+      setFileSrc(URL.createObjectURL(initialState.file.value))
+    }
     setReplacingFile(false)
   }, [initialState])
 

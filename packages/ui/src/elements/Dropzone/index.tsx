@@ -13,13 +13,20 @@ const handleDragOver = (e: DragEvent) => {
 const baseClass = 'dropzone'
 
 export type Props = {
-  className?: string
-  mimeTypes?: string[]
-  onChange: (e: FileList) => void
-  onPasteUrlClick?: () => void
+  readonly className?: string
+  readonly mimeTypes?: string[]
+  readonly multipleFiles?: boolean
+  readonly onChange: (e: FileList) => void
+  readonly onPasteUrlClick?: () => void
 }
 
-export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPasteUrlClick }) => {
+export const Dropzone: React.FC<Props> = ({
+  className,
+  mimeTypes,
+  multipleFiles,
+  onChange,
+  onPasteUrlClick,
+}) => {
   const dropRef = React.useRef<HTMLDivElement>(null)
   const [dragging, setDragging] = React.useState(false)
   const inputRef = React.useRef(null)
@@ -111,17 +118,21 @@ export const Dropzone: React.FC<Props> = ({ className, mimeTypes, onChange, onPa
       >
         {t('upload:selectFile')}
       </Button>
-      <Button
-        buttonStyle="secondary"
-        className={`${baseClass}__file-button`}
-        onClick={onPasteUrlClick}
-        size="medium"
-      >
-        {t('upload:pasteURL')}
-      </Button>
+      {typeof onPasteUrlClick === 'function' && (
+        <Button
+          buttonStyle="secondary"
+          className={`${baseClass}__file-button`}
+          onClick={onPasteUrlClick}
+          size="medium"
+        >
+          {t('upload:pasteURL')}
+        </Button>
+      )}
       <input
         accept={mimeTypes?.join(',')}
+        aria-hidden="true"
         className={`${baseClass}__hidden-input`}
+        multiple={multipleFiles}
         onChange={handleFileSelection}
         ref={inputRef}
         type="file"
