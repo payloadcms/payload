@@ -1,11 +1,9 @@
-// @ts-check
-
-import { existsSync, promises } from 'fs'
 import { parse, stringify } from 'comment-json'
-
+import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { getNextRootDir } from './helpers/getNextRootDir.ts'
+
+import { getNextRootDir } from './helpers/getNextRootDir.js'
 
 const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
@@ -31,7 +29,9 @@ export const createTestHooks = async (testSuiteName = '_community') => {
 
       // @ts-expect-error
       tsConfig.compilerOptions.paths['@payload-config'] = [
-        forTestDir ? `./${testSuiteName}/config.ts` : `./test/${testSuiteName}/config.ts`,
+        process.env.PAYLOAD_TEST_PROD === 'true'
+          ? `./${testSuiteName}/config.ts`
+          : `./test/${testSuiteName}/config.ts`,
       ]
       await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
 
