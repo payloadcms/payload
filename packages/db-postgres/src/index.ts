@@ -52,8 +52,6 @@ import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
 export { sql } from 'drizzle-orm'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {

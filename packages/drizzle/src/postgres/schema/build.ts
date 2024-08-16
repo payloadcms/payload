@@ -4,11 +4,9 @@ import type {
   IndexBuilder,
   PgColumnBuilder,
   PgTableWithColumns,
-  UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core'
 import type { Field } from 'payload'
 
-import { createTableName } from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
 import {
   foreignKey,
@@ -22,21 +20,22 @@ import {
 } from 'drizzle-orm/pg-core'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
+import type {
+  BaseExtraConfig,
+  BasePostgresAdapter,
+  GenericColumns,
+  GenericTable,
+  IDType,
+  RelationMap,
+} from '../types.js'
 
+import { createTableName } from '../../createTableName.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
 
-export type BaseExtraConfig = Record<
-  string,
-  (cols: GenericColumns) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
->
-
-export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
-
 type Args = {
-  adapter: PostgresAdapter
+  adapter: BasePostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
   /**
    * After table is created, run these functions to add extra config to the table

@@ -9,12 +9,14 @@ import type {
 } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type {
+  ForeignKeyBuilder,
+  IndexBuilder,
   PgColumn,
   PgEnum,
   PgInsertOnConflictDoUpdateConfig,
   PgSchema,
   PgTableWithColumns,
-  PgTransactionConfig,
+  UniqueConstraintBuilder,
   pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
@@ -23,6 +25,13 @@ import type { QueryResult } from 'pg'
 
 import type { Operators } from '../index.js'
 import type { BuildQueryJoinAliases, DrizzleAdapter, TransactionPg } from '../types.js'
+
+export type BaseExtraConfig = Record<
+  string,
+  (cols: GenericColumns) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
+>
+
+export type RelationMap = Map<string, { localized: boolean; target: string; type: 'many' | 'one' }>
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -59,7 +68,7 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropDatabase = (args: { adapter: PostgresAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: BasePostgresAdapter }) => Promise<void>
 
 export type Execute<T> = (args: {
   db?: PostgresDB | TransactionPg
@@ -82,7 +91,7 @@ type Schema =
     }
   | PgSchema
 
-export type PostgresAdapter = {
+export type BasePostgresAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
