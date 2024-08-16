@@ -25,7 +25,7 @@
   ],
   "include": [
     "src",
-    "src/**/*.ts",
+    "src/**/*.ts", "../drizzle/src/postgres/createJSONQuery",
   ],
   "references": [
     {

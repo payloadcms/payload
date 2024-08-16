@@ -17,6 +17,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./postgres": {
+      "import": "./src/exports/postgres.ts",
+      "types": "./src/exports/postgres.ts",
+      "default": "./src/exports/postgres.ts"
+    },
     "./types": {
       "import": "./src/types.ts",
       "types": "./src/types.ts",
@@ -60,6 +65,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./postgres": {
+        "import": "./dist/exports/postgres.js",
+        "types": "./dist/exports/postgres.d.ts",
+        "default": "./dist/exports/postgres.js"
       },
       "./types": {
         "import": "./dist/types.js",
