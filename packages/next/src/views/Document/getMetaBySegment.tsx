@@ -10,6 +10,7 @@ import { generateMetadata as livePreviewMeta } from '../LivePreview/meta.js'
 import { generateNotFoundMeta } from '../NotFound/meta.js'
 import { generateMetadata as versionMeta } from '../Version/meta.js'
 import { generateMetadata as versionsMeta } from '../Versions/meta.js'
+import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export type GenerateEditViewMetadata = (
   args: {
@@ -58,10 +59,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           fn = versionsMeta
           break
         default:
-          // `/:collection/:id/:custom-view`
-          // TODO: look up the custom view config by path?
-          // return editMeta({ view: viewKey })
-          // If not found, use not found meta fallbacks at the end of this file
           break
       }
     }
@@ -74,10 +71,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           fn = versionMeta
           break
         default:
-          // `/:collection/:id/:slug-1/:custom-view`
-          // TODO: look up the custom view config by path?
-          // return editMeta({ view: viewKey })
-          // If not found, use not found meta fallbacks at the end of this file
           break
       }
     }
@@ -105,10 +98,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           fn = versionsMeta
           break
         default:
-          // /:global/:custom-view
-          // TODO: look up the custom view config by path?
-          // return editMeta({ view: viewKey })
-          // If not found, use not found meta fallbacks at the end of this file
           break
       }
     }
@@ -131,6 +120,31 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       i18n,
       isEditing,
     })
+  } else {
+    const { CustomView, viewKey } = getViewsFromConfig({
+      collectionConfig,
+      config,
+      globalConfig,
+      overrideDocPermissions: true,
+      routeSegments: typeof segments === 'string' ? [segments] : segments,
+    })
+
+    if (CustomView) {
+      const customViewConfig =
+        collectionConfig?.admin?.components?.views?.edit?.[viewKey] ||
+        globalConfig?.admin?.components?.views?.edit?.[viewKey]
+
+      if (customViewConfig) {
+        return editMeta({
+          collectionConfig,
+          config,
+          globalConfig,
+          i18n,
+          isEditing,
+          view: viewKey as keyof EditConfig,
+        })
+      }
+    }
   }
 
   return generateNotFoundMeta({ config, i18n })
