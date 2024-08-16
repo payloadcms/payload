@@ -131,7 +131,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const isOpen = isModalOpen(drawerSlug)
   const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
-  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {})
+  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
+    initialParams: {
+      depth: 0,
+    },
+  })
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
@@ -142,13 +146,16 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     } = selectedCollectionConfig
     const params: {
       cacheBust?: number
+      depth?: number
       draft?: string
       limit?: number
       page?: number
       search?: string
       sort?: string
       where?: unknown
-    } = {}
+    } = {
+      depth: 0,
+    }
 
     let copyOfWhere = { ...(where || {}) }
     const filterOption = filterOptions?.[slug]

@@ -26,6 +26,6 @@ export const ChevronIcon: React.FC<{
     width={20}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M6 9L10 13L14 9" strokeLinecap="square" />
+    <path className="stroke" d="M6 8L10 12.5L14 8" strokeLinecap="square" />
   </svg>
 )

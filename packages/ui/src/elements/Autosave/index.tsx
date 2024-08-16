@@ -224,7 +224,7 @@ export const Autosave: React.FC<Props> = ({
       if (autosaveTimeout) clearTimeout(autosaveTimeout)
       if (abortController.signal) {
         try {
-          abortController.abort()
+          abortController.abort('Autosave closed early.')
         } catch (error) {
           // swallow error
         }

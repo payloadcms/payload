@@ -57,7 +57,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         ...docInfo,
         doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateImage>[0]),
+      } satisfies Omit<Parameters<GenerateImage>[0], 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
