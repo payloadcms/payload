@@ -53,5 +53,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   return meta({
     ...metaToUse,
     serverURL: config.serverURL,
+    titleSuffix: config.admin?.meta?.titleSuffix,
   })
 }

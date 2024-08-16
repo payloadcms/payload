@@ -37,54 +37,83 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     isGlobal || Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
 
   if (isCollection) {
-    // `/:id`
+    // `/:collection/:id`
     if (params.segments.length === 3) {
       fn = editMeta
     }
 
-    // `/:id/api`
-    if (params.segments.length === 4 && params.segments[3] === 'api') {
-      fn = apiMeta
+    // `/:collection/:id/:view`
+    if (params.segments.length === 4) {
+      switch (params.segments[3]) {
+        case 'api':
+          // `/:collection/:id/api`
+          fn = apiMeta
+          break
+        case 'preview':
+          // `/:collection/:id/preview`
+          fn = livePreviewMeta
+          break
+        case 'versions':
+          // `/:collection/:id/versions`
+          fn = versionsMeta
+          break
+        default:
+          // `/:collection/:id/:custom-view`
+          // TODO: look up the custom view config by path?
+          // return editMeta({ view: viewKey })
+          // If not found, use not found meta fallbacks at the end of this file
+          break
+      }
     }
 
-    // `/:id/preview`
-    if (params.segments.length === 4 && params.segments[3] === 'preview') {
-      fn = livePreviewMeta
-    }
-
-    // `/:id/versions`
-    if (params.segments.length === 4 && params.segments[3] === 'versions') {
-      fn = versionsMeta
-    }
-
-    // `/:id/versions/:version`
-    if (params.segments.length === 5 && params.segments[3] === 'versions') {
-      fn = versionMeta
+    // `/:collection/:id/:slug-1/:slug-2`
+    if (params.segments.length === 5) {
+      switch (params.segments[3]) {
+        case 'versions':
+          // `/:collection/:id/versions/:version`
+          fn = versionMeta
+          break
+        default:
+          // `/:collection/:id/:slug-1/:custom-view`
+          // TODO: look up the custom view config by path?
+          // return editMeta({ view: viewKey })
+          // If not found, use not found meta fallbacks at the end of this file
+          break
+      }
     }
   }
 
   if (isGlobal) {
-    // `/:slug`
+    // `/:global`
     if (params.segments?.length === 2) {
       fn = editMeta
     }
 
-    // `/:slug/api`
-    if (params.segments?.length === 3 && params.segments[2] === 'api') {
-      fn = apiMeta
+    // `/:global/:view`
+    if (params.segments?.length === 3) {
+      switch (params.segments[2]) {
+        case 'api':
+          // `/:global/api`
+          fn = apiMeta
+          break
+        case 'preview':
+          // `/:global/preview`
+          fn = livePreviewMeta
+          break
+        case 'versions':
+          // `/:global/versions`
+          fn = versionsMeta
+          break
+        default:
+          // /:global/:custom-view
+          // TODO: look up the custom view config by path?
+          // return editMeta({ view: viewKey })
+          // If not found, use not found meta fallbacks at the end of this file
+          break
+      }
     }
 
-    // `/:slug/preview`
-    if (params.segments?.length === 3 && params.segments[2] === 'preview') {
-      fn = livePreviewMeta
-    }
-
-    // `/:slug/versions`
-    if (params.segments?.length === 3 && params.segments[2] === 'versions') {
-      fn = versionsMeta
-    }
-
-    // `/:slug/versions/:version`
+    // `/:global/versions/:version`
     if (params.segments?.length === 4 && params.segments[2] === 'versions') {
       fn = versionMeta
     }

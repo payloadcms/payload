@@ -14,7 +14,7 @@ export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
     meta: {
-      title: 'Custom Doc Title',
+      title: 'Custom View',
     },
     components: {
       views: {
@@ -41,7 +41,7 @@ export const CustomViews2: CollectionConfig = {
             },
             path: '/custom-tab-view',
             meta: {
-              title: 'Custom Doc Title',
+              title: 'Custom Tab',
             },
           },
           myCustomViewWithCustomTab: {

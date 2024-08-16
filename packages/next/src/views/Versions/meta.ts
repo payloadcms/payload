@@ -15,6 +15,8 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
+  console.log(collectionConfig.labels.singular)
+
   const entityLabel = collectionConfig
     ? getTranslation(collectionConfig.labels.singular, i18n)
     : globalConfig
@@ -51,8 +53,11 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     }
   }
 
+  console.log(metaToUse)
+
   return meta({
     ...metaToUse,
     serverURL: config.serverURL,
+    titleSuffix: config.admin?.meta?.titleSuffix,
   })
 }
