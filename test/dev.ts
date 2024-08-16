@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
 
-import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
+import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
 import { createTestHooks } from './testHooks.js'
 
@@ -38,10 +38,10 @@ if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg, prod)
+const { beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg, prod)
+const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
 await runInit(testSuiteArg, true)
 

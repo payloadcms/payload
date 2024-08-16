@@ -5,13 +5,14 @@ import { parse, stringify } from 'comment-json'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { getNextRootDir } from './helpers/getNextRootDir.ts'
 
 const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const createTestHooks = async (testSuiteName = '_community', forTestDir = false) => {
-  const tsConfigPath = path.resolve(dirname, forTestDir ? '' : '..', './tsconfig.json')
+export const createTestHooks = async (testSuiteName = '_community') => {
+  const tsConfigPath = path.resolve(getNextRootDir().rootDir, './tsconfig.json')
   const tsConfigContent = await readFile(tsConfigPath, 'utf8')
   const tsConfig = parse(tsConfigContent)
 
@@ -21,7 +22,7 @@ export const createTestHooks = async (testSuiteName = '_community', forTestDir =
      */
     beforeTest: async () => {
       // Delete entire .next cache folder
-      const nextCache = path.resolve(dirname, forTestDir ? '' : '..', './.next')
+      const nextCache = path.resolve(getNextRootDir().rootDir, './.next')
       if (existsSync(nextCache)) {
         await rm(nextCache, { recursive: true })
       }

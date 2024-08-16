@@ -3,6 +3,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { type SanitizedConfig, generateImportMap } from 'payload'
 
+import { getNextRootDir } from './helpers/getNextRootDir.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -71,23 +73,7 @@ export async function initDevAndTest(
   writeDBAdapter: string,
   skipGenImportMap: string,
 ): Promise<void> {
-  let appPath: string
-
-  switch (testSuiteArg) {
-    case 'live-preview':
-      appPath = path.resolve(dirname, './live-preview/app/(payload)/admin/importMap.js')
-      break
-    case 'admin-root':
-      appPath = path.resolve(dirname, './admin-root/app/(payload)/admin/importMap.js')
-      break
-    default:
-      appPath = path.resolve(
-        dirname,
-        process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '..',
-        './app/(payload)/admin/importMap.js',
-      )
-      break
-  }
+  const appPath: string = getNextRootDir(testSuiteArg).rootDir
 
   try {
     fs.writeFileSync(appPath, 'export const importMap = {}')
@@ -128,10 +114,7 @@ export async function initDevAndTest(
 
   const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
-  process.env.ROOT_DIR =
-    testSuiteArg === 'live-preview' || testSuiteArg === 'admin-root'
-      ? testDir
-      : path.resolve(dirname, process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '.')
+  process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
 
   await generateImportMap(config, { log: true, force: true })
 
