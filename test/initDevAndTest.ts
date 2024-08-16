@@ -73,10 +73,13 @@ export async function initDevAndTest(
   writeDBAdapter: string,
   skipGenImportMap: string,
 ): Promise<void> {
-  const appPath: string = getNextRootDir(testSuiteArg).rootDir
+  const importMapPath: string = path.resolve(
+    getNextRootDir(testSuiteArg).rootDir,
+    './app/(payload)/admin/importMap.js',
+  )
 
   try {
-    fs.writeFileSync(appPath, 'export const importMap = {}')
+    fs.writeFileSync(importMapPath, 'export const importMap = {}')
   } catch (error) {
     console.log('Error writing importMap.js', error)
   }
