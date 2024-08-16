@@ -426,7 +426,10 @@ export class BasePayload {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    if (process.env.NODE_ENV !== 'production') {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+    ) {
       // First load. First check if there are mismatching dependency versions of payload packages
       const resolvedDependencies = await getDependencies(dirname, [
         '@payloadcms/ui/shared',
