@@ -473,7 +473,6 @@ export class BasePayload {
           foundVersions[version] = _pkg
         }
       }
-      console.log('foundVersions', foundVersions, resolvedDependencies)
       if (Object.keys(foundVersions).length > 1) {
         const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
           .map(([version, pkg]) => `${pkg}@${version}`)
