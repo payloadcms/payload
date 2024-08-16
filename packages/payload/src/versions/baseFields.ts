@@ -17,7 +17,7 @@ const baseVersionFields: Field[] = [
     type: 'select',
     admin: {
       components: {
-        Field: '@payloadcms/ui/shared#emptyComponent',
+        Field: false,
       },
       disableBulkEdit: true,
     },

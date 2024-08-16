@@ -58,6 +58,10 @@ export const RenderComponent: React.FC<{
     ))
   }
 
+  if (mappedComponent.type === 'empty') {
+    return null
+  }
+
   if (mappedComponent.RenderedComponent) {
     return mappedComponent.RenderedComponent
   }

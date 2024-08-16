@@ -234,8 +234,13 @@ export type MappedClientComponent<TComponentClientProps extends JsonObject = Jso
   type: 'client'
 }
 
+export type MappedEmptyComponent = {
+  type: 'empty'
+}
+
 export type MappedComponent<TComponentClientProps extends JsonObject = JsonObject> =
   | MappedClientComponent<TComponentClientProps>
+  | MappedEmptyComponent
   | MappedServerComponent<TComponentClientProps>
   | undefined
 

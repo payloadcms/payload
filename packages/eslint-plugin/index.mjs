@@ -3,6 +3,7 @@ import noNonRetryableAssertions from './customRules/no-non-retryable-assertions.
 import noRelativeMonorepoImports from './customRules/no-relative-monorepo-imports.js'
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
+import noImportsFromSelf from './customRules/no-imports-from-self.js'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -13,6 +14,7 @@ const index = {
     'no-non-retryable-assertions': noNonRetryableAssertions,
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
+    'no-imports-from-self': noImportsFromSelf,
     'no-flaky-assertions': noFlakyAssertions,
     'no-wait-function': {
       create: function (context) {

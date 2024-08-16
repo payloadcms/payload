@@ -13,7 +13,7 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, MappedComponent, RichTextAdapter } from '../admin/types.js'
+import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
@@ -38,12 +38,12 @@ import type { PayloadLogger } from '../utilities/logger.js'
 /**
  * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
  *
- * If the path is an empty string, it will be treated as () => null
+ * If it is `false` an empty component will be rendered.
  */
 export type PayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
-> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
+> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | false | string
 
 // We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
 // We also NEED to actually use those generics for this to work, thus they are part of the props.
@@ -912,28 +912,44 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig = {
-  [key: string]: Partial<EditViewConfig>
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
-  // TODO: uncomment these as they are built
-  // references?: EditView
-  // relationships?: EditView
-}
+export type EditConfig =
+  | {
+      [key: string]: EditViewConfig
+      /**
+       * Replace or modify individual nested routes, or add new ones:
+       * + `default` - `/admin/collections/:collection/:id`
+       * + `api` - `/admin/collections/:collection/:id/api`
+       * + `livePreview` - `/admin/collections/:collection/:id/preview`
+       * + `references` - `/admin/collections/:collection/:id/references`
+       * + `relationships` - `/admin/collections/:collection/:id/relationships`
+       * + `versions` - `/admin/collections/:collection/:id/versions`
+       * + `version` - `/admin/collections/:collection/:id/versions/:version`
+       * + `customView` - `/admin/collections/:collection/:id/:path`
+       *
+       * To override the entire Edit View including all nested views, use the `root` key.
+       */
+      api?: Partial<EditViewConfig>
+      default?: Partial<EditViewConfig>
+      livePreview?: Partial<EditViewConfig>
+      root?: never
+      version?: Partial<EditViewConfig>
+      versions?: Partial<EditViewConfig>
+      // TODO: uncomment these as they are built
+      // references?: EditView
+      // relationships?: EditView
+    }
+  | {
+      api?: never
+      default?: never
+      livePreview?: never
+      /**
+       * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+       * + `root` - `/admin/collections/:collection/:id/**\/*`
+       */
+      root: Partial<EditViewConfig>
+      version?: never
+      versions?: never
+    }
 
 export type EntityDescriptionComponent = CustomComponent
 

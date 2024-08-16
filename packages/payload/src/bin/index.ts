@@ -1,4 +1,5 @@
 import minimist from 'minimist'
+import { pathToFileURL } from 'node:url'
 import path from 'path'
 
 import type { BinScript } from '../config/types.js'
@@ -29,7 +30,7 @@ export const bin = async () => {
     process.argv = [process.argv[0], process.argv[1], ...args._.slice(2)]
 
     try {
-      await import(absoluteScriptPath)
+      await import(pathToFileURL(absoluteScriptPath).toString())
     } catch (error) {
       console.error(`Error running script: ${absoluteScriptPath}`)
       console.error(error)
@@ -42,7 +43,7 @@ export const bin = async () => {
   }
 
   const configPath = findConfig()
-  const configPromise = await import(configPath)
+  const configPromise = await import(pathToFileURL(configPath).toString())
   let config = await configPromise
   if (config.default) config = await config.default
 
@@ -52,7 +53,7 @@ export const bin = async () => {
 
   if (userBinScript) {
     try {
-      const script: BinScript = await import(userBinScript.scriptPath)
+      const script: BinScript = await import(pathToFileURL(userBinScript.scriptPath).toString())
       await script(config)
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
