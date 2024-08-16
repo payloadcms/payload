@@ -34,7 +34,6 @@ export type Args = {
    */
   schemaName?: string
   transactionOptions?: PgTransactionConfig | false
-
   versionsSuffix?: string
 }
 
