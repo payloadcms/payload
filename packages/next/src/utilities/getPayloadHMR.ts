@@ -91,6 +91,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     return cached.payload
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
