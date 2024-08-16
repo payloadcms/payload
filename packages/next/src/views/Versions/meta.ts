@@ -38,6 +38,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       }),
       title: `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
       ...(collectionConfig?.admin.meta || {}),
+      ...(collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
     }
   }
 
@@ -46,6 +47,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
       ...(globalConfig?.admin.meta || {}),
+      ...(globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
     }
   }
 

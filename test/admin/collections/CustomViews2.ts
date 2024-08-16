@@ -13,6 +13,9 @@ import { customViews2CollectionSlug } from '../slugs.js'
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
+    meta: {
+      title: 'Custom Doc Title',
+    },
     components: {
       views: {
         edit: {
@@ -37,6 +40,9 @@ export const CustomViews2: CollectionConfig = {
               label: customTabLabel,
             },
             path: '/custom-tab-view',
+            meta: {
+              title: 'Custom Doc Title',
+            },
           },
           myCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',

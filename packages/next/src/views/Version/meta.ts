@@ -35,6 +35,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
       ...(collectionConfig?.admin?.meta || {}),
+      ...(collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}),
     }
   }
 
@@ -45,6 +46,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
       ...(globalConfig?.admin?.meta || {}),
+      ...(globalConfig?.admin?.components?.views?.edit?.version?.meta || {}),
     }
   }
 

@@ -23,8 +23,18 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       keywords: 'API',
       serverURL: config.serverURL,
       title: `API - ${entityLabel}`,
-      ...(collectionConfig?.admin.meta || {}),
-      ...(globalConfig?.admin.meta || {}),
+      ...(collectionConfig
+        ? {
+            ...(collectionConfig?.admin.meta || {}),
+            ...(collectionConfig?.admin?.components?.views?.edit?.api?.meta || {}),
+          }
+        : {}),
+      ...(globalConfig
+        ? {
+            ...(globalConfig?.admin.meta || {}),
+            ...(globalConfig?.admin?.components?.views?.edit?.api?.meta || {}),
+          }
+        : {}),
     }),
   )
 }

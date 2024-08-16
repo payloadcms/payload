@@ -13,6 +13,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   globalConfig,
   i18n,
   isEditing,
+  view = 'default',
 }): Promise<Metadata> => {
   const { t } = i18n
 
@@ -32,15 +33,35 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   const ogToUse: MetaConfig['openGraph'] = {
     title: `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`,
     ...(config.admin.meta.openGraph || {}),
-    ...(collectionConfig?.admin?.meta?.openGraph || {}),
-    ...(globalConfig?.admin?.meta?.openGraph || {}),
+    ...(collectionConfig
+      ? {
+          ...(collectionConfig?.admin.meta?.openGraph || {}),
+          ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
+        }
+      : {}),
+    ...(globalConfig
+      ? {
+          ...(globalConfig?.admin.meta?.openGraph || {}),
+          ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
+        }
+      : {}),
   }
 
   return meta({
     ...metaToUse,
     openGraph: ogToUse,
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
+    ...(collectionConfig
+      ? {
+          ...(collectionConfig?.admin.meta || {}),
+          ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
+        }
+      : {}),
+    ...(globalConfig
+      ? {
+          ...(globalConfig?.admin.meta || {}),
+          ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
+        }
+      : {}),
     serverURL: config.serverURL,
   })
 }

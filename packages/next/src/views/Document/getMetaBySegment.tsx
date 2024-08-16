@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
@@ -15,6 +15,7 @@ export type GenerateEditViewMetadata = (
   args: {
     collectionConfig?: SanitizedCollectionConfig | null
     globalConfig?: SanitizedGlobalConfig | null
+    view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
 
