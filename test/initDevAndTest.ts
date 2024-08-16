@@ -83,7 +83,7 @@ export async function initDevAndTest(
     default:
       appPath = path.resolve(
         dirname,
-        process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '.',
+        process.env.PAYLOAD_TEST_PROD === 'true' ? '' : '..',
         './app/(payload)/admin/importMap.js',
       )
       break
