@@ -32,6 +32,7 @@ import {
   customTabViewPath,
   customTabViewTitle,
   customVersionsTabMetaTitle,
+  customViewMetaTitle,
   customViewPath,
   customViewTitle,
   slugPluralLabel,
@@ -234,16 +235,23 @@ describe('admin1', () => {
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
-      test('should render custom meta title from default edit view config', async () => {
+      test('should render custom meta title from default edit view', async () => {
         await navigateToDoc(page, customViewsURL)
         const pattern = new RegExp(`^${customDefaultTabMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
 
-      test('should render custom meta title from edit view tabs config', async () => {
+      test('should render custom meta title from nested edit view', async () => {
         await navigateToDoc(page, customViewsURL)
         await page.goto(`${page.url()}/versions`)
         const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
+
+      test('should render custom meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/custom-tab-view`)
+        const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
     })

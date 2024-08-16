@@ -10,6 +10,7 @@ import {
   customTabLabel,
   customTabViewPath,
   customVersionsTabMetaTitle,
+  customViewMetaTitle,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
@@ -47,7 +48,7 @@ export const CustomViews2: CollectionConfig = {
             },
             path: '/custom-tab-view',
             meta: {
-              title: 'Custom Tab Meta Title',
+              title: customViewMetaTitle,
             },
           },
           myCustomViewWithCustomTab: {
