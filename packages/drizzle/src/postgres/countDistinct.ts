@@ -1,12 +1,12 @@
-import type { ChainedMethods, TransactionPg } from '@payloadcms/drizzle/types'
-
-import { chainMethods } from '@payloadcms/drizzle'
 import { sql } from 'drizzle-orm'
 
-import type { CountDistinct, PostgresAdapter } from './types.js'
+import type { ChainedMethods, TransactionPg } from '../types.js'
+import type { BasePostgresAdapter, CountDistinct } from './types.js'
+
+import { chainMethods } from '../find/chainMethods.js'
 
 export const countDistinct: CountDistinct = async function countDistinct(
-  this: PostgresAdapter,
+  this: BasePostgresAdapter,
   { db, joins, tableName, where },
 ) {
   const chainedMethods: ChainedMethods = []
