@@ -27,7 +27,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./_community/config.ts", "./versions/config.ts"],
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": [
