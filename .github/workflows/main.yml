@@ -225,6 +225,8 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
+      - run: pnpm install
+
       - run: pnpm build
       - run: pnpm run build:all
         env:
