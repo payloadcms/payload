@@ -6,6 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  cache?: boolean
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth: number
@@ -34,6 +35,7 @@ type Args = {
 }
 
 export const traverseFields = ({
+  cache,
   collection,
   context,
   currentDepth,
@@ -60,6 +62,7 @@ export const traverseFields = ({
   fields.forEach((field) => {
     fieldPromises.push(
       promise({
+        cache,
         collection,
         context,
         currentDepth,

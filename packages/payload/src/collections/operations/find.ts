@@ -205,6 +205,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       docs: await Promise.all(
         result.docs.map(async (doc) =>
           afterRead<DataFromCollectionSlug<TSlug>>({
+            cache,
             collection: collectionConfig,
             context: req.context,
             currentDepth,

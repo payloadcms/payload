@@ -55,6 +55,7 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        cache,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -67,6 +68,7 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        cache,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -101,11 +103,13 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        cache,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
 
       const result = await payload.find({
+        cache,
         collection,
         currentDepth,
         depth,
@@ -129,6 +133,7 @@ const batchAndLoadDocs =
 
       result.docs.forEach((doc) => {
         const docKey = createDataloaderCacheKey({
+          cache,
           collectionSlug: collection,
           currentDepth,
           depth,
@@ -157,6 +162,7 @@ const batchAndLoadDocs =
 export const getDataLoader = (req: PayloadRequest) => new DataLoader(batchAndLoadDocs(req))
 
 type CreateCacheKeyArgs = {
+  cache?: boolean
   collectionSlug: string
   currentDepth: number
   depth: number
@@ -169,6 +175,7 @@ type CreateCacheKeyArgs = {
   transactionID: Promise<number | string> | number | string
 }
 export const createDataloaderCacheKey = ({
+  cache,
   collectionSlug,
   currentDepth,
   depth,
@@ -191,4 +198,5 @@ export const createDataloaderCacheKey = ({
     overrideAccess,
     showHiddenFields,
     draft,
+    cache,
   ])

@@ -6,6 +6,7 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
+  cache?: boolean
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth?: number
@@ -34,6 +35,7 @@ type Args<T extends JsonObject> = {
 
 export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T> {
   const {
+    cache,
     collection,
     context,
     currentDepth: incomingCurrentDepth,
@@ -63,6 +65,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
   const currentDepth = incomingCurrentDepth || 1
 
   traverseFields({
+    cache,
     collection,
     context,
     currentDepth,

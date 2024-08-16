@@ -5,6 +5,7 @@ import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
 
 type PopulateArgs = {
+  cache?: boolean
   currentDepth: number
   data: Record<string, unknown>
   dataReference: Record<string, any>
@@ -21,6 +22,7 @@ type PopulateArgs = {
 }
 
 const populate = async ({
+  cache,
   currentDepth,
   data,
   dataReference,
@@ -56,6 +58,7 @@ const populate = async ({
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
+          cache,
           collectionSlug: relatedCollection.config.slug,
           currentDepth: currentDepth + 1,
           depth,
@@ -96,6 +99,7 @@ const populate = async ({
 }
 
 type PromiseArgs = {
+  cache?: boolean
   currentDepth: number
   depth: number
   draft: boolean
@@ -109,6 +113,7 @@ type PromiseArgs = {
 }
 
 export const relationshipPopulationPromise = async ({
+  cache,
   currentDepth,
   depth,
   draft,
@@ -136,6 +141,7 @@ export const relationshipPopulationPromise = async ({
           siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
             const rowPromise = async () => {
               await populate({
+                cache,
                 currentDepth,
                 data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
@@ -160,6 +166,7 @@ export const relationshipPopulationPromise = async ({
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
+              cache,
               currentDepth,
               data: relatedDoc,
               dataReference: resultingDoc,
@@ -188,6 +195,7 @@ export const relationshipPopulationPromise = async ({
     Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
       const rowPromise = async () => {
         await populate({
+          cache,
           currentDepth,
           data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
@@ -208,6 +216,7 @@ export const relationshipPopulationPromise = async ({
     await Promise.all(rowPromises)
   } else if (siblingDoc[field.name]) {
     await populate({
+      cache,
       currentDepth,
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
