@@ -1,4 +1,4 @@
-#!/usr/bin/env node --no-deprecation
+#!/usr/bin/env node
 
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
