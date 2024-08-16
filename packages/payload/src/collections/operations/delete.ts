@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, DeleteOneArgs } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -157,7 +157,7 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
         // Delete document
         // /////////////////////////////////////
 
-        await payload.db.deleteOne({
+        const deleteArgs: DeleteOneArgs = {
           collection: collectionConfig.slug,
           req,
           where: {
@@ -165,6 +165,14 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
               equals: id,
             },
           },
+        }
+
+        await payload.db.deleteOne(deleteArgs)
+
+        await payload.cache.invalidateCache(req, {
+          args: deleteArgs,
+          draft: 'all',
+          operation: 'deleteOne',
         })
 
         // /////////////////////////////////////

@@ -10,6 +10,7 @@ import type {
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
+  | 'cache'
   | 'cors'
   | 'csrf'
   | 'custom'
@@ -61,6 +62,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'csrf',
   'email',
   'custom',
+  'cache',
   'graphQL',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]

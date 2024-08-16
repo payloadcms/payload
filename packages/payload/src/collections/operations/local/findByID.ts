@@ -7,6 +7,7 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findByIDOperation } from '../findByID.js'
 
 export type Options<TSlug extends CollectionSlug> = {
+  cache?: boolean
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -31,6 +32,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
 ): Promise<DataFromCollectionSlug<TSlug>> {
   const {
     id,
+    cache = false,
     collection: collectionSlug,
     currentDepth,
     depth,
@@ -50,6 +52,7 @@ export default async function findByIDLocal<TSlug extends CollectionSlug>(
 
   return findByIDOperation<TSlug>({
     id,
+    cache,
     collection,
     currentDepth,
     depth,

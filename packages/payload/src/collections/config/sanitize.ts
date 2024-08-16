@@ -10,6 +10,7 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { getFieldsCacheIndexes } from '../../utilities/getFieldsCacheIndexes.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
@@ -81,6 +82,14 @@ export const sanitizeCollection = async (
   }
 
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
+
+  const cacheIndexes = getFieldsCacheIndexes(collection.fields)
+
+  if (!cacheIndexes.includes('id')) {
+    cacheIndexes.push('id')
+  }
+
+  ;(sanitized as SanitizedCollectionConfig).cacheIndexes = cacheIndexes
 
   if (sanitized.versions) {
     if (sanitized.versions === true) sanitized.versions = { drafts: false }

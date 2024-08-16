@@ -42,6 +42,11 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
+    },
+    "./cache": {
+      "import": "./src/exports/cache.ts",
+      "types": "./src/exports/cache.ts",
+      "default": "./src/exports/cache.ts"
     }
   },
   "main": "./src/index.js",
@@ -135,6 +140,11 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
+      },
+      "./cache": {
+        "import": "./dist/exports/cache.js",
+        "types": "./dist/exports/cache.d.ts",
+        "default": "./dist/exports/cache.js"
       }
     },
     "main": "./dist/index.js",

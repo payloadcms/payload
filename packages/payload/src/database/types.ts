@@ -1,6 +1,7 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
+import type { DatabaseCache } from './cache/types.js'
 
 export type { TypeWithVersion }
 
@@ -10,6 +11,7 @@ export interface BaseDatabaseAdapter {
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction?: BeginTransaction
+
   /**
    * Persist the changes made since the start of the transaction.
    */
@@ -25,8 +27,8 @@ export interface BaseDatabaseAdapter {
   create: Create
 
   createGlobal: CreateGlobal
-
   createGlobalVersion: CreateGlobalVersion
+
   /**
    * Output a migration file
    */
@@ -42,8 +44,8 @@ export interface BaseDatabaseAdapter {
   deleteMany: DeleteMany
 
   deleteOne: DeleteOne
-
   deleteVersions: DeleteVersions
+
   /**
    * Terminate the connection with the database
    */
@@ -78,16 +80,15 @@ export interface BaseDatabaseAdapter {
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
-
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
+
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
-
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -100,16 +101,17 @@ export interface BaseDatabaseAdapter {
    * The name of the database adapter
    */
   name: string
+
   /**
    * reference to the instance of payload
    */
   payload: Payload
-
   queryDrafts: QueryDrafts
   /**
    * Abort any changes since the start of the transaction.
    */
   rollbackTransaction?: RollbackTransaction
+
   /**
    * A key-value store of all sessions open (used for transactions)
    */

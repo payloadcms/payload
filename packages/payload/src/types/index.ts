@@ -5,6 +5,7 @@ import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types
 import type payload from '../index.js'
 import type { TypedLocale, TypedUser } from '../index.js'
 import type { validOperators } from './constants.js'
+
 export type { Payload as Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {

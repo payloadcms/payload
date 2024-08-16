@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
+import type { CollectionSlug, CreateArgs, JsonObject } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
@@ -236,11 +236,14 @@ export const createOperation = async <TSlug extends CollectionSlug>(
         req,
       })
     } else {
-      doc = await payload.db.create({
+      const createArgs: CreateArgs = {
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-      })
+      }
+      doc = await payload.db.create(createArgs)
+
+      await payload.cache.invalidateCache(req, { args: createArgs, draft, operation: 'create' })
     }
 
     const verificationToken = doc._verificationToken

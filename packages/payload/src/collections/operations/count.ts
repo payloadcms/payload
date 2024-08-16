@@ -1,5 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, CountArgs } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
@@ -10,6 +10,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
+  cache?: boolean
   collection: Collection
   disableErrors?: boolean
   overrideAccess?: boolean
@@ -41,6 +42,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     }, Promise.resolve())
 
     const {
+      cache = false,
       collection: { config: collectionConfig },
       disableErrors,
       overrideAccess,
@@ -77,11 +79,10 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       where,
     })
 
-    result = await payload.db.count({
-      collection: collectionConfig.slug,
-      req,
-      where: fullWhere,
-    })
+    const dbArgs: CountArgs = { collection: collectionConfig.slug, req, where: fullWhere }
+
+    if (cache) result = await payload.cache.count(dbArgs)
+    else result = await payload.db.count(dbArgs)
 
     // /////////////////////////////////////
     // afterOperation - Collection

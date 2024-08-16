@@ -31,8 +31,8 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypedUser } from '../index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { DatabaseCache, Payload, TypedUser } from '../index.js'
+import type { CacheAdapter, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -704,6 +704,7 @@ export type Config = {
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  cache?: DatabaseCache
   /**
    * Manage the datamodel of your application
    *
@@ -886,6 +887,7 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
+  cache: DatabaseCache
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
