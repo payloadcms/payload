@@ -36,6 +36,7 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createJSONQuery,
+  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
@@ -46,7 +47,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, createMigration } from 'payload'
+import { createDatabaseAdapter } from 'payload'
 
 import type { Args, PostgresAdapter } from './types.js'
 
