@@ -1,7 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
 import type { FindArgs, PaginatedDocs, QueryDraftsArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'

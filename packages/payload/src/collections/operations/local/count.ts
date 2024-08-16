@@ -6,6 +6,7 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countOperation } from '../count.js'
 
 export type Options<TSlug extends CollectionSlug> = {
+  cache?: boolean
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -24,7 +25,13 @@ export default async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const {
+    cache = false,
+    collection: collectionSlug,
+    disableErrors,
+    overrideAccess = true,
+    where,
+  } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -35,6 +42,7 @@ export default async function countLocal<TSlug extends CollectionSlug>(
   }
 
   return countOperation<TSlug>({
+    cache,
     collection,
     disableErrors,
     overrideAccess,
