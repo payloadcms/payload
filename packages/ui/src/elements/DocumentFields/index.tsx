@@ -1,6 +1,7 @@
 'use client'
-import type { Description, DocumentPermissions, FieldMap } from 'payload'
+import type { ClientField, Description, DocumentPermissions } from 'payload'
 
+import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -10,14 +11,14 @@ import './index.scss'
 const baseClass = 'document-fields'
 
 type Args = {
-  AfterFields?: React.ReactNode
-  BeforeFields?: React.ReactNode
-  description?: Description
-  docPermissions: DocumentPermissions
-  fieldMap: FieldMap
-  forceSidebarWrap?: boolean
-  readOnly: boolean
-  schemaPath: string
+  readonly AfterFields?: React.ReactNode
+  readonly BeforeFields?: React.ReactNode
+  readonly description?: Description
+  readonly docPermissions: DocumentPermissions
+  readonly fields: ClientField[]
+  readonly forceSidebarWrap?: boolean
+  readonly readOnly: boolean
+  readonly schemaPath: string
 }
 
 export const DocumentFields: React.FC<Args> = ({
@@ -25,14 +26,14 @@ export const DocumentFields: React.FC<Args> = ({
   BeforeFields,
   description,
   docPermissions,
-  fieldMap,
+  fields,
   forceSidebarWrap,
   readOnly,
   schemaPath,
 }) => {
-  const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
+  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
 
-  const sidebarFields = fieldMap.filter(({ isSidebar }) => isSidebar)
+  const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 
@@ -58,7 +59,7 @@ export const DocumentFields: React.FC<Args> = ({
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}
-            fieldMap={mainFields}
+            fields={mainFields}
             forceRender={10}
             path=""
             permissions={docPermissions?.fields}
@@ -73,7 +74,7 @@ export const DocumentFields: React.FC<Args> = ({
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
               <RenderFields
-                fieldMap={sidebarFields}
+                fields={sidebarFields}
                 forceRender={10}
                 path=""
                 permissions={docPermissions?.fields}

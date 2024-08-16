@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { FormFieldBase } from 'payload'
+import type { TextFieldProps } from 'payload'
 
 import {
   FieldLabel,
@@ -26,10 +26,20 @@ const { maxLength, minLength } = defaults.title
 
 type MetaTitleProps = {
   hasGenerateTitleFn: boolean
-} & FormFieldBase
+} & TextFieldProps
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
-  const { CustomLabel, hasGenerateTitleFn, label, labelProps, required } = props || {}
+  const {
+    field: {
+      admin: {
+        components: { Label },
+      },
+      label,
+      required,
+    },
+    hasGenerateTitleFn,
+    labelProps,
+  } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
@@ -52,7 +62,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         ...docInfo,
         doc: { ...getData() },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateTitle>[0]),
+      } satisfies Omit<Parameters<GenerateTitle>[0], 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +88,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+          <FieldLabel Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -125,7 +135,12 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          CustomError={errorMessage}
+          Error={{
+            type: 'client',
+            Component: null,
+            RenderedComponent: errorMessage,
+          }}
+          label={label}
           onChange={setValue}
           path={pathFromContext}
           required={required}

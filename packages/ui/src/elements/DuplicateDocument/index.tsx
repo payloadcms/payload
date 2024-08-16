@@ -34,12 +34,10 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
   const { setModified } = useForm()
 
   const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = useConfig()
-
-  const {
-    routes: { admin: adminRoute },
+    config: {
+      serverURL,
+      routes: { admin: adminRoute, api: apiRoute },
+    },
   } = useConfig()
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)

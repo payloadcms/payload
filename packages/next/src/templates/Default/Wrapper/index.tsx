@@ -10,11 +10,17 @@ export const Wrapper: React.FC<{
   className?: string
 }> = (props) => {
   const { baseClass, children, className } = props
-  const { navOpen } = useNav()
+  const { hydrated, navOpen, shouldAnimate } = useNav()
 
   return (
     <div
-      className={[baseClass, className, navOpen && `${baseClass}--nav-open`]
+      className={[
+        baseClass,
+        className,
+        navOpen && `${baseClass}--nav-open`,
+        shouldAnimate && `${baseClass}--nav-animate`,
+        hydrated && `${baseClass}--nav-hydrated`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >

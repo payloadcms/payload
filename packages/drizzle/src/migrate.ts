@@ -74,15 +74,11 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
-  const db = payload.db as DrizzleAdapter
-  const { generateDrizzleJson } = db.requireDrizzleKit()
   const start = Date.now()
   const req = { payload } as PayloadRequest
   const adapter = payload.db as DrizzleAdapter
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
-
-  const drizzleJSON = await generateDrizzleJson({ schema: adapter.schema })
 
   try {
     await initTransaction(req)
@@ -94,7 +90,6 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
       data: {
         name: migration.name,
         batch,
-        schema: drizzleJSON,
       },
       req,
     })

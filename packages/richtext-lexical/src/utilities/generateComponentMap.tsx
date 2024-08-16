@@ -1,17 +1,19 @@
-import type { RichTextAdapter } from 'payload'
+import type { ClientField, MappedComponent, RichTextGenerateComponentMap } from 'payload'
 
-import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
-import React from 'react'
+import { getComponent } from '@payloadcms/ui/shared'
+import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
+import { deepCopyObjectSimple } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
 export const getGenerateComponentMap =
-  (args: {
-    resolvedFeatureMap: ResolvedServerFeatureMap
-  }): RichTextAdapter['generateComponentMap'] =>
-  ({ WithServerSideProps, config, i18n, payload, schemaPath }) => {
-    const componentMap = new Map()
+  (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextGenerateComponentMap =>
+  ({ createMappedComponent, field, i18n, importMap, payload, schemaPath }) => {
+    const componentMap: Map<
+      string,
+      ClientField[] | GeneratedFeatureProviderComponent[] | MappedComponent
+    > = new Map()
 
     // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
     const resolvedFeatureMapArray = Array.from(args.resolvedFeatureMap.entries()).sort(
@@ -22,36 +24,38 @@ export const getGenerateComponentMap =
       `features`,
       resolvedFeatureMapArray
         .map(([featureKey, resolvedFeature]) => {
-          const ClientComponent = resolvedFeature.ClientFeature
-          const clientComponentProps = resolvedFeature.clientFeatureProps
-
           /**
            * Handle Feature Component Maps
            */
-          if (
-            'generateComponentMap' in resolvedFeature &&
-            typeof resolvedFeature.generateComponentMap === 'function'
-          ) {
-            const components = resolvedFeature.generateComponentMap({
-              config,
-              i18n,
-              payload,
-              props: resolvedFeature.sanitizedServerFeatureProps,
-              schemaPath,
-            })
+          if ('componentMap' in resolvedFeature) {
+            const components =
+              typeof resolvedFeature.componentMap === 'function'
+                ? resolvedFeature.componentMap({
+                    i18n,
+                    payload,
+                    props: resolvedFeature.sanitizedServerFeatureProps,
+                    schemaPath,
+                  })
+                : resolvedFeature.componentMap
 
             for (const componentKey in components) {
-              const Component = components[componentKey]
+              const payloadComponent = components[componentKey]
 
-              if (Component) {
+              const mappedComponent: MappedComponent = createMappedComponent(
+                payloadComponent,
+                {
+                  componentKey,
+                  featureKey: resolvedFeature.key,
+                  key: `${resolvedFeature.key}-${componentKey}`,
+                },
+                undefined,
+                'lexical-from-resolvedFeature',
+              )
+
+              if (mappedComponent) {
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.lexical_internal_components.${componentKey}`,
-                  <WithServerSideProps
-                    Component={Component}
-                    componentKey={componentKey}
-                    featureKey={resolvedFeature.key}
-                    key={`${resolvedFeature.key}-${componentKey}`}
-                  />,
+                  mappedComponent,
                 )
               }
             }
@@ -65,7 +69,8 @@ export const getGenerateComponentMap =
             typeof resolvedFeature.generateSchemaMap === 'function'
           ) {
             const schemas = resolvedFeature.generateSchemaMap({
-              config,
+              config: payload.config,
+              field,
               i18n,
               props: resolvedFeature.sanitizedServerFeatureProps,
               schemaMap: new Map(),
@@ -74,24 +79,35 @@ export const getGenerateComponentMap =
 
             if (schemas) {
               for (const [schemaKey, fields] of schemas.entries()) {
-                const mappedFields = mapFields({
-                  WithServerSideProps,
-                  config,
+                let clientFields: ClientField[] = deepCopyObjectSimple(
+                  fields,
+                ) as unknown as ClientField[]
+                clientFields = createClientFields({
+                  clientFields,
+                  createMappedComponent,
                   disableAddingID: true,
-                  fieldSchema: fields,
+                  fields,
                   i18n,
+                  importMap,
                   parentPath: `${schemaPath}.lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
                   payload,
-                  readOnly: false,
                 })
 
                 componentMap.set(
                   `lexical_internal_feature.${featureKey}.fields.${schemaKey}`,
-                  mappedFields,
+                  clientFields,
                 )
               }
             }
           }
+
+          const ClientComponent = resolvedFeature.ClientFeature
+          const ResolvedClientComponent = getComponent({
+            identifier: 'lexical-clientComponent',
+            importMap,
+            payloadComponent: ClientComponent,
+          })
+          const clientComponentProps = resolvedFeature.clientFeatureProps
 
           if (!ClientComponent) {
             return null
@@ -100,17 +116,19 @@ export const getGenerateComponentMap =
           return {
             ClientFeature:
               clientComponentProps && typeof clientComponentProps === 'object' ? (
-                <ClientComponent
+                <ResolvedClientComponent.Component
                   {...clientComponentProps}
                   featureKey={resolvedFeature.key}
                   key={resolvedFeature.key}
                   order={resolvedFeature.order}
+                  {...(ResolvedClientComponent?.clientProps || {})}
                 />
               ) : (
-                <ClientComponent
+                <ResolvedClientComponent.Component
                   featureKey={resolvedFeature.key}
                   key={resolvedFeature.key}
                   order={resolvedFeature.order}
+                  {...(ResolvedClientComponent?.clientProps || {})}
                 />
               ),
             key: resolvedFeature.key,

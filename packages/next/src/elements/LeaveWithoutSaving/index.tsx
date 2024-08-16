@@ -50,6 +50,7 @@ const Component: React.FC<{
 }
 
 export const LeaveWithoutSaving: React.FC = () => {
+  const { closeModal } = useModal()
   const modified = useFormModified()
   const { user } = useAuth()
   const [show, setShow] = React.useState(false)
@@ -61,7 +62,11 @@ export const LeaveWithoutSaving: React.FC = () => {
     setShow(true)
   }, [])
 
-  usePreventLeave({ hasAccepted, onPrevent, prevent })
+  const handleAccept = useCallback(() => {
+    closeModal(modalSlug)
+  }, [closeModal])
+
+  usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent, prevent })
 
   return (
     <Component

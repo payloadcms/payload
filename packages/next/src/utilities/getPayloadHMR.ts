@@ -1,6 +1,6 @@
 import type { InitOptions, Payload, SanitizedConfig } from 'payload'
 
-import { BasePayload } from 'payload'
+import { BasePayload, generateImportMap } from 'payload'
 import WebSocket from 'ws'
 
 let cached: {
@@ -45,6 +45,13 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
     })
   }
 
+  // Generate component map
+  if (config.admin?.importMap?.autoGenerate !== false) {
+    await generateImportMap(config, {
+      log: true,
+    })
+  }
+
   await payload.db.init()
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -74,6 +81,9 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
       await cached.reload
     }
 
+    if (options?.importMap) {
+      cached.payload.importMap = options.importMap
+    }
     return cached.payload
   }
 
@@ -113,6 +123,10 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   } catch (e) {
     cached.promise = null
     throw e
+  }
+
+  if (options?.importMap) {
+    cached.payload.importMap = options.importMap
   }
 
   return cached.payload

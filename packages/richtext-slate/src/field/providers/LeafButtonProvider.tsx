@@ -1,13 +1,11 @@
 'use client'
 
-import type { FormFieldBase } from 'payload'
-
 import React from 'react'
 
+import type { LoadedSlateFieldProps } from '../types.js'
+
 type LeafButtonContextType = {
-  fieldProps: {
-    name: string
-  } & FormFieldBase
+  fieldProps: LoadedSlateFieldProps
   path: string
   schemaPath: string
 }

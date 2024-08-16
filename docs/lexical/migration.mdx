@@ -20,7 +20,7 @@ IMPORTANT: This will overwrite all slate data. We recommend doing the following 
 3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the Admin Panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
 
 ```ts
-import { migrateSlateToLexical } from '@payloadcms/richtext-lexical'
+import { migrateSlateToLexical } from '@payloadcms/richtext-lexical/migrate'
 
 await migrateSlateToLexical({ payload })
 ```
@@ -34,7 +34,8 @@ Simply add the `SlateToLexicalFeature` to your editor:
 ```ts
 import type { CollectionConfig } from 'payload'
 
-import { SlateToLexicalFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { SlateToLexicalFeature } from '@payloadcms/richtext-lexical/migrate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
   slug: 'pages',
@@ -64,8 +65,8 @@ The easy way to solve this: Edit the richText field and save the document! This 
 If you have custom Slate nodes, create a custom converter for them. Here's the Upload converter as an example:
 
 ```ts
-import type { SerializedUploadNode } from '../uploadNode.'
-import type { SlateNodeConverter } from '@payloadcms/richtext-lexical'
+import type { SerializedUploadNode } from '../uploadNode'
+import type { SlateNodeConverter } from '@payloadcms/richtext-lexical/migrate'
 
 export const SlateUploadConverter: SlateNodeConverter = {
   converter({ slateNode }) {
@@ -95,9 +96,9 @@ When using the `SlateToLexicalFeature`, you can add your custom converters to th
 ```ts
 import type { CollectionConfig } from 'payload'
 
+import {  lexicalEditor } from '@payloadcms/richtext-lexical'
 import {
   SlateToLexicalFeature,
-  lexicalEditor,
   defaultSlateConverters,
 } from '@payloadcms/richtext-lexical'
 

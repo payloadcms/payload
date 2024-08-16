@@ -111,7 +111,14 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     index: true,
     label: ({ t }) => t('upload:fileName'),
-    unique: true,
+  }
+
+  // Only set unique: true if the collection does not have a compound index
+  if (
+    collection.upload === true ||
+    (typeof collection.upload === 'object' && !collection.upload.filenameCompoundIndex)
+  ) {
+    filename.unique = true
   }
 
   const url: Field = {

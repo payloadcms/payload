@@ -11,11 +11,6 @@ describe('Loader', () => {
     expect(code).toStrictEqual(0)
   })
 
-  it('should import server-only without breaking', async () => {
-    const code = await startChildProcess('./server-only-test.ts')
-    expect(code).toStrictEqual(0)
-  })
-
   it('should import configs that rely on custom components', async () => {
     const code = await startChildProcess('../admin/config.ts')
     expect(code).toStrictEqual(0)

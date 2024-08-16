@@ -1,21 +1,25 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { ValidationError } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Form } from './payload-types.js'
 
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { formSubmissionsSlug, formsSlug } from './shared.js'
 
 let payload: Payload
 let form: Form
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('@payloadcms/plugin-form-builder', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationMessage: [

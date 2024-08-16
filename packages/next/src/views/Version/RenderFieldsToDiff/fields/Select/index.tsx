@@ -1,10 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { MappedField, OptionObject, SelectField, SelectFieldProps } from 'payload'
+import type {
+  ClientField,
+  OptionObject,
+  SelectField,
+  SelectFieldClient,
+  SelectFieldProps,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
@@ -44,16 +50,19 @@ const getTranslatedOptions = (
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-const Select: React.FC<
-  {
-    field: MappedField & SelectFieldProps
-  } & Omit<Props, 'field'>
-> = ({ comparison, diffMethod, field, i18n, locale, version }) => {
+const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
+  comparison,
+  diffMethod,
+  field,
+  i18n,
+  locale,
+  version,
+}) => {
   let placeholder = ''
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
-  const options = 'options' in field.fieldComponentProps && field.fieldComponentProps.options
+  const options = 'options' in field && field.options
 
   const comparisonToRender =
     typeof comparison !== 'undefined'

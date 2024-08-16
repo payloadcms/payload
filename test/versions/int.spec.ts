@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { ValidationError } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -8,7 +10,6 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './clearAndSeedEverything.js'
 import AutosavePosts from './collections/Autosave.js'
-import configPromise from './config.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import { autosaveCollectionSlug, draftCollectionSlug } from './slugs.js'
 
@@ -32,13 +33,16 @@ let globalGraphQLVersionID
 const globalGraphQLOriginalTitle = 'updated global title'
 const updatedTitle = 'Here is an updated post title in EN'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 describe('Versions', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {

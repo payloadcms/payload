@@ -1,17 +1,13 @@
-import type { RelationshipField } from '../../fields/config/types.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { RelationshipFieldClient } from '../../fields/config/types.js'
 import type { RelationshipFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type RelationshipFieldProps = {
-  allowCreate?: RelationshipField['admin']['allowCreate']
-  hasMany?: boolean
-  isSortable?: boolean
-  name: string
-  relationTo?: RelationshipField['relationTo']
-  sortOptions?: RelationshipField['admin']['sortOptions']
-  validate?: RelationshipFieldValidation
-  width?: string
+  readonly field: MarkOptional<RelationshipFieldClient, 'type'>
+  readonly validate?: RelationshipFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
 export type RelationshipFieldLabelComponent = LabelComponent<'relationship'>

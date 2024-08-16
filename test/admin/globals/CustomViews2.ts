@@ -1,10 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
-import { CustomDefaultEditView } from '../components/views/CustomEditDefault/index.js'
-import { CustomTabComponentView } from '../components/views/CustomTabComponent/index.js'
-import { CustomTabLabelView } from '../components/views/CustomTabLabel/index.js'
-import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import { customGlobalViews2GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews2: GlobalConfig = {
@@ -12,22 +7,28 @@ export const CustomGlobalViews2: GlobalConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
-          Default: CustomDefaultEditView,
-          MyCustomView: {
-            Component: CustomTabLabelView,
-            Tab: {
+        edit: {
+          default: {
+            Component: '/components/views/CustomEditDefault/index.js#CustomDefaultEditView',
+          },
+          myCustomView: {
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            tab: {
               href: '/custom-tab-view',
               label: 'Custom',
             },
             path: '/custom-tab-view',
           },
-          MyCustomViewWithCustomTab: {
-            Component: CustomTabComponentView,
-            Tab: CustomTabComponent,
+          myCustomViewWithCustomTab: {
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
             path: '/custom-tab-component',
           },
-          Versions: CustomVersionsView,
+          versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+          },
         },
       },
     },

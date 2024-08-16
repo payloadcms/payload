@@ -18,7 +18,7 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'blank',
       type: 'starter',
       description: 'Blank 3.0 Template',
-      url: 'https://github.com/payloadcms/payload/templates/blank-3.0#beta',
+      url: 'https://github.com/payloadcms/payload/templates/blank#beta',
     },
     {
       name: 'website',
