@@ -5,7 +5,6 @@ import {
   FieldLabel,
   ListQueryProvider,
   LoadingOverlay,
-  Pagination,
   TableColumnsProvider,
   useConfig,
   useDocumentDrawer,
@@ -48,6 +47,8 @@ const relationTo = 'posts'
 
 const filterOptions: Where = {}
 
+const defaultLimit = 5
+
 export const TableField: React.FC<RelationshipTableComponentProps> = (props) => {
   const { field } = props
 
@@ -59,7 +60,7 @@ export const TableField: React.FC<RelationshipTableComponentProps> = (props) => 
     getEntityConfig,
   } = useConfig()
 
-  const [limit, setLimit] = useState<number>()
+  const [limit, setLimit] = useState<number>(defaultLimit)
   const [sort, setSort] = useState<string | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
   const [where, setWhere] = useState<Where | null>(null)
@@ -117,6 +118,7 @@ export const TableField: React.FC<RelationshipTableComponentProps> = (props) => 
       }
     }
 
+    if (limit) params.limit = limit
     if (page) params.page = page
     if (sort) params.sort = sort
     if (cacheBust) params.cacheBust = cacheBust
@@ -124,7 +126,7 @@ export const TableField: React.FC<RelationshipTableComponentProps> = (props) => 
     if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
-  }, [page, sort, where, search, cacheBust, collectionConfig, setParams])
+  }, [page, sort, where, search, cacheBust, collectionConfig, setParams, limit])
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     collectionSlug: relationTo,
