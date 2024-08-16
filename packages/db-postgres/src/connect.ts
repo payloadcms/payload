@@ -7,6 +7,8 @@ import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
+import { createDatabase } from './createDatabase.js'
+
 const connectWithReconnect = async function ({
   adapter,
   payload,
@@ -76,6 +78,15 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
+    if (err.message?.match(/database .* does not exist/i) && this.createDatabase) {
+      const isCreated = await createDatabase(this)
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else
+      this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
     this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
     if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
     process.exit(1)

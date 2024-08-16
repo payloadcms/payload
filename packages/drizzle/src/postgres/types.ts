@@ -93,6 +93,7 @@ type Schema =
 
 export type BasePostgresAdapter = {
   countDistinct: CountDistinct
+  createDatabase: boolean
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   drizzle: PostgresDB

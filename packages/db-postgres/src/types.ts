@@ -11,6 +11,11 @@ import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-co
 import type { Pool, PoolConfig } from 'pg'
 
 export type Args = {
+  /**
+   * Create the provided database if it doesn't exist
+   * @default true
+   */
+  createDatabase?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -29,6 +34,7 @@ export type Args = {
    */
   schemaName?: string
   transactionOptions?: PgTransactionConfig | false
+
   versionsSuffix?: string
 }
 
