@@ -227,11 +227,6 @@ jobs:
 
       - run: pnpm install
 
-      - run: pnpm build
-      - run: pnpm run build:all
-        env:
-          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
-
       - name: Start LocalStack
         run: pnpm docker:start
 
