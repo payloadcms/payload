@@ -15,8 +15,6 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
-  console.log(collectionConfig.labels.singular)
-
   const entityLabel = collectionConfig
     ? getTranslation(collectionConfig.labels.singular, i18n)
     : globalConfig
@@ -34,6 +32,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = data?.[useAsTitle]
 
     metaToUse = {
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersions', {
         documentTitle: data?.[useAsTitle],
         entitySlug: collectionConfig.slug,
@@ -46,6 +45,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   if (globalConfig) {
     metaToUse = {
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
       ...(globalConfig?.admin.meta || {}),
@@ -53,11 +53,8 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     }
   }
 
-  console.log(metaToUse)
-
   return meta({
     ...metaToUse,
     serverURL: config.serverURL,
-    titleSuffix: config.admin?.meta?.titleSuffix,
   })
 }

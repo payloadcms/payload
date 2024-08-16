@@ -32,6 +32,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = doc?.[useAsTitle]
 
     metaToUse = {
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
       ...(collectionConfig?.admin?.meta || {}),
@@ -43,6 +44,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const entityLabel = getTranslation(globalConfig.label, i18n)
 
     metaToUse = {
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
       ...(globalConfig?.admin?.meta || {}),
@@ -53,6 +55,5 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   return meta({
     ...metaToUse,
     serverURL: config.serverURL,
-    titleSuffix: config.admin?.meta?.titleSuffix,
   })
 }
