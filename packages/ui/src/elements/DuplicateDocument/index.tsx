@@ -35,8 +35,8 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   const {
     config: {
-      serverURL,
       routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
   } = useConfig()
 
