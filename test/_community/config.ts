@@ -1,3 +1,4 @@
+import { nextDatabaseCache } from '@payloadcms/next/cache'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'

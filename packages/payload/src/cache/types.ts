@@ -94,6 +94,6 @@ export type DatabaseCacheOptions = {
   /** @default false */
   logging?: boolean
 
-  /** @default 3600  */
+  /** @default 3600000 - '1 hour'  */
   ttl?: false | number
 }

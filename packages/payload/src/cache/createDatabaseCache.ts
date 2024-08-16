@@ -100,7 +100,7 @@ const getTTLResolver = (options: DatabaseCacheOptions) => {
   if (typeof options.ttl === 'function') return options.ttl
 
   const ttlResolver: TTLResolveFunction = () => {
-    if (typeof options.ttl === 'undefined') return 3600
+    if (typeof options.ttl === 'undefined') return 3600000
 
     return options.ttl
   }
