@@ -1,12 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  customCollectionMetaTitle,
   customCollectionParamViewPath,
   customCollectionParamViewPathBase,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
+  customVersionsTabMetaTitle,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
@@ -14,7 +17,7 @@ export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
     meta: {
-      title: 'Custom View',
+      title: customCollectionMetaTitle,
     },
     components: {
       views: {
@@ -32,6 +35,9 @@ export const CustomViews2: CollectionConfig = {
             tab: {
               label: customEditLabel,
             },
+            meta: {
+              title: customDefaultTabMetaTitle,
+            },
           },
           myCustomView: {
             Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
@@ -41,7 +47,7 @@ export const CustomViews2: CollectionConfig = {
             },
             path: '/custom-tab-view',
             meta: {
-              title: 'Custom Tab',
+              title: 'Custom Tab Meta Title',
             },
           },
           myCustomViewWithCustomTab: {
@@ -61,6 +67,9 @@ export const CustomViews2: CollectionConfig = {
           },
           versions: {
             Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+            meta: {
+              title: customVersionsTabMetaTitle,
+            },
           },
         },
       },

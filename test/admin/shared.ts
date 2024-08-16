@@ -31,6 +31,12 @@ export const customTabViewComponentTitle = 'Custom View With Tab Component'
 
 export const customNestedTabViewPath = `${customTabViewPath}/nested-view`
 
+export const customCollectionMetaTitle = 'Custom Meta Title'
+
+export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
+
+export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'
+
 export const customNestedTabViewTitle = 'Custom Nested Tab View'
 
 export const customCollectionParamViewPathBase = '/custom-param'

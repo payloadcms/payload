@@ -97,7 +97,7 @@ export default buildConfigWithDefaults({
         description: 'This is a custom OG description',
         title: 'This is a custom OG title',
       },
-      titleSuffix: '- Custom CMS',
+      titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
   },
