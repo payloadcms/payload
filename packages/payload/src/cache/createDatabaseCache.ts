@@ -102,7 +102,7 @@ const getTTLResolver = (options: DatabaseCacheOptions) => {
   const ttlResolver: TTLResolveFunction = () => {
     if (typeof options.ttl === 'undefined') return 3600000
 
-    return options.ttl
+    return options.ttl as number
   }
 
   return ttlResolver
@@ -110,17 +110,17 @@ const getTTLResolver = (options: DatabaseCacheOptions) => {
 
 export const createDatabaseCache = ({
   options = {},
-  storage: adapter,
+  storage,
 }: {
   options: DatabaseCacheOptions
   storage: DatabaseCacheStorage
 }): DatabaseCache => {
   const invalidateCache: InvalidateCacheFunction = async (req, { args, draft, operation }) => {
     if (operation === 'updateGlobal') {
-      return adapter.invalidateTags(tagsWithDraft([`find-global-${args.slug}`], draft))
+      return storage.invalidateTags(tagsWithDraft([`find-global-${args.slug}`], draft))
     }
 
-    await adapter.invalidateTags(tagsWithDraft([`find-many-${args.collection}`], draft))
+    await storage.invalidateTags(tagsWithDraft([`find-many-${args.collection}`], draft))
 
     if (operation === 'create') return
 
@@ -128,13 +128,13 @@ export const createDatabaseCache = ({
 
     const indexes = sanitizeCachedIndexesFromWhere(cachedIndexes, args.where)
 
-    await adapter.invalidateTags(generateFindOneTags(indexes, draft))
+    await storage.invalidateTags(generateFindOneTags(indexes, draft))
   }
 
   const ttl = getTTLResolver(options)
 
   return {
-    ...adapter,
+    ...storage,
     count: async (args) => {
       const { collection, req, where } = args
       const keyParts: string[] = ['count', collection, JSON.stringify(where), req.locale]
@@ -146,7 +146,7 @@ export const createDatabaseCache = ({
         req,
       })
 
-      const cachedCount = adapter.cacheFn<Count>(
+      const cachedCount = storage.cacheFn<Count>(
         (args) => {
           cacheHitLogger.setCacheSkip()
           return req.payload.db.count(args)
@@ -181,7 +181,7 @@ export const createDatabaseCache = ({
         req,
       })
 
-      const cachedFind = adapter.cacheFn<Find>(
+      const cachedFind = storage.cacheFn<Find>(
         (args) => {
           cacheHitLogger.setCacheSkip()
           return draft ? req.payload.db.queryDrafts(args) : req.payload.db.find(args)
@@ -211,7 +211,7 @@ export const createDatabaseCache = ({
         req,
       })
 
-      const cachedFindGlobal = adapter.cacheFn<FindGlobal>(
+      const cachedFindGlobal = storage.cacheFn<FindGlobal>(
         (args) => {
           cacheHitLogger.setCacheSkip()
           return req.payload.db.findGlobal(args)
@@ -249,7 +249,7 @@ export const createDatabaseCache = ({
         req,
       })
 
-      const cachedFind = adapter.cacheFn<FindOne>(
+      const cachedFind = storage.cacheFn<FindOne>(
         (args) => {
           cacheHitLogger.setCacheSkip()
           return req.payload.db.findOne(args)

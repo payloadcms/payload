@@ -9,7 +9,6 @@ import type {
   FindGlobalArgs,
   FindOneArgs,
   PaginatedDocs,
-  QueryDraftsArgs,
   UpdateGlobalArgs,
   UpdateOneArgs,
 } from '../database/types.js'
@@ -43,7 +42,7 @@ export type DatabaseCacheStorage = {
     callback: T,
     keyParts: string[],
     tags: string[],
-    ttl?: TTLResolveFunction | false | number,
+    ttl?: false | number,
   ): T
   invalidateTags(tags: string[]): Promise<void> | void
 }
@@ -95,5 +94,5 @@ export type DatabaseCacheOptions = {
   logging?: boolean
 
   /** @default 3600000 - '1 hour'  */
-  ttl?: false | number
+  ttl?: TTLResolveFunction | false | number
 }
