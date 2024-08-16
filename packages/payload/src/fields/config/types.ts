@@ -962,7 +962,9 @@ export type SingleRelationshipFieldClient = {
 
 export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
-export type RelationshipFieldClient = PolymorphicRelationshipFieldClient
+export type RelationshipFieldClient =
+  | PolymorphicRelationshipFieldClient
+  | SingleRelationshipFieldClient
 
 export type ValueWithRelation = {
   relationTo: CollectionSlug
