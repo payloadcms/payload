@@ -764,6 +764,18 @@ export const traverseFields = ({
 
         break
 
+      case 'join': {
+        // fieldName could be 'posts' or 'group_posts'
+        // using on as the key for the relation
+        rootRelationsToBuild.set(toSnakeCase(field.on), {
+          type: 'many',
+          // joins are not localized on the parent table
+          localized: false,
+          target: adapter.tableNameMap.get(toSnakeCase(field.collection)),
+        })
+        break
+      }
+
       default:
         break
     }

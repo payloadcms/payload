@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { Field } from 'payload'
+import type { Field, JoinQuery } from 'payload'
 
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -14,6 +13,7 @@ type TraverseFieldArgs = {
   currentTableName: string
   depth?: number
   fields: Field[]
+  joinQuery: JoinQuery
   path: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
@@ -26,6 +26,7 @@ export const traverseFields = ({
   currentTableName,
   depth,
   fields,
+  joinQuery,
   path,
   topLevelArgs,
   topLevelTableName,
@@ -52,6 +53,7 @@ export const traverseFields = ({
         currentTableName,
         depth,
         fields: field.fields,
+        joinQuery,
         path,
         topLevelArgs,
         topLevelTableName,
@@ -71,6 +73,7 @@ export const traverseFields = ({
           currentTableName,
           depth,
           fields: tab.fields,
+          joinQuery,
           path: tabPath,
           topLevelArgs,
           topLevelTableName,
@@ -115,6 +118,7 @@ export const traverseFields = ({
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
+            joinQuery,
             path: '',
             topLevelArgs,
             topLevelTableName,
@@ -171,6 +175,7 @@ export const traverseFields = ({
                 currentTableName: tableName,
                 depth,
                 fields: block.fields,
+                joinQuery,
                 path: '',
                 topLevelArgs,
                 topLevelTableName,
@@ -188,12 +193,33 @@ export const traverseFields = ({
             currentTableName,
             depth,
             fields: field.fields,
+            joinQuery,
             path: `${path}${field.name}_`,
             topLevelArgs,
             topLevelTableName,
           })
 
           break
+
+        case 'join': {
+          // if `joinsQuery` is false, do not join
+          if (joinQuery !== false) {
+            // TODO: field.on is the incorrect property for the join field. It needs to be assigned as toSnakeCase(fieldName)
+            //  but this breaks the relation disambiguation in the query builder. This needs to be fixed.
+            topLevelArgs.with[toSnakeCase(field.on)] = {
+              columns: {
+                id: true,
+              },
+            }
+            // topLevelArgs.with[`${path}${field.name}`] = {
+            //   // sort
+            //   orderBy: ({ order }, { asc }) => [asc(order)],
+            //   // page
+            //   // limit
+            // }
+          }
+          break
+        }
 
         default: {
           break

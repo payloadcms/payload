@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field } from 'payload'
+import type { Field, JoinQuery } from 'payload'
 
 import type { DrizzleAdapter } from '../types.js'
 
@@ -9,14 +9,15 @@ type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   depth: number
   fields: Field[]
+  joinQuery?: JoinQuery
   tableName: string
 }
 
-export type Result = DBQueryConfig<'many', true, any, any> & {
-  with?: DBQueryConfig<'many', true, any, any> & {
+export type Result = {
+  with?: {
     _locales?: DBQueryConfig<'many', true, any, any>
-  }
-}
+  } & DBQueryConfig<'many', true, any, any>
+} & DBQueryConfig<'many', true, any, any>
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure
@@ -24,6 +25,7 @@ export const buildFindManyArgs = ({
   adapter,
   depth,
   fields,
+  joinQuery,
   tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
@@ -79,6 +81,7 @@ export const buildFindManyArgs = ({
     currentTableName: tableName,
     depth,
     fields,
+    joinQuery,
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,

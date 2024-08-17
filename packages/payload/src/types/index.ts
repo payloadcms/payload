@@ -112,14 +112,16 @@ export type Where = {
 /**
  * Applies pagination for join fields for including collection relationships
  */
-export type JoinQuery = {
-  [schemaPath: string]: {
-    limit?: number
-    page?: number
-    pagination?: boolean
-    sort?: string
-  }
-}
+export type JoinQuery =
+  | {
+      [schemaPath: string]: {
+        limit?: number
+        page?: number
+        pagination?: boolean
+        sort?: string
+      }
+    }
+  | false
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
