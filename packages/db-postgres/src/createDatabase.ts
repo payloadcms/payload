@@ -1,6 +1,6 @@
 import type { ClientConfig } from 'pg'
 
-import * as pg from 'pg'
+import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
