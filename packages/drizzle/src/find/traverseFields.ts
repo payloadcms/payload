@@ -202,21 +202,17 @@ export const traverseFields = ({
           break
 
         case 'join': {
-          // if `joinsQuery` is false, do not join
+          // when `joinsQuery` is false, do not join
           if (joinQuery !== false) {
-            // TODO: field.on is the incorrect property for the join field. It needs to be assigned as toSnakeCase(fieldName)
-            //  but this breaks the relation disambiguation in the query builder. This needs to be fixed.
-            topLevelArgs.with[toSnakeCase(field.on)] = {
+            topLevelArgs.with[toSnakeCase(`${path}${field.name}`)] = {
               columns: {
                 id: true,
               },
             }
-            // topLevelArgs.with[`${path}${field.name}`] = {
             //   // sort
             //   orderBy: ({ order }, { asc }) => [asc(order)],
             //   // page
             //   // limit
-            // }
           }
           break
         }
