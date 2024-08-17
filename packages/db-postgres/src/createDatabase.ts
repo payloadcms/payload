@@ -1,6 +1,6 @@
 import type { ClientConfig } from 'pg'
 
-import { Client } from 'pg'
+import * as pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
@@ -25,7 +25,7 @@ export const createDatabase = async (adapter: PostgresAdapter): Promise<boolean>
     }
   }
 
-  const managementClient = new Client(managementClientConfig)
+  const managementClient = new pg.Client(managementClientConfig)
 
   try {
     await managementClient.connect()
