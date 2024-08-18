@@ -31,10 +31,9 @@ export const getCustomViewByRoute = ({
 
         if (isMatching) {
           viewKey = key
-          return true
         }
 
-        return false
+        return isMatching
       }
 
       return false

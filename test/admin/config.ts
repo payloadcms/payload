@@ -31,6 +31,7 @@ import {
   customAdminRoutes,
   customNestedViewPath,
   customParamViewPath,
+  customRootViewMetaTitle,
   customViewPath,
 } from './shared.js'
 export default buildConfigWithDefaults({
@@ -61,7 +62,7 @@ export default buildConfigWithDefaults({
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
           path: '/custom-minimal-view',
           meta: {
-            title: 'Custom Minimal Meta Title',
+            title: customRootViewMetaTitle,
           },
         },
         CustomNestedView: {

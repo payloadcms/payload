@@ -34,6 +34,8 @@ export const customNestedTabViewPath = `${customTabViewPath}/nested-view`
 
 export const customCollectionMetaTitle = 'Custom Meta Title'
 
+export const customRootViewMetaTitle = 'Custom Root View Meta Title'
+
 export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
 
 export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'

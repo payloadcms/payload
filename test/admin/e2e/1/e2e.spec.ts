@@ -28,6 +28,7 @@ import {
   customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
+  customRootViewMetaTitle,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
@@ -155,7 +156,8 @@ describe('admin1', () => {
 
       test('should render custom meta title from custom root views', async () => {
         await page.goto(`${serverURL}/admin/custom-minimal-view`)
-        await expect(page.title()).resolves.toMatch(/Custom Meta Title/)
+        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
       })
     })
 
