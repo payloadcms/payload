@@ -60,6 +60,9 @@ export default buildConfigWithDefaults({
         CustomMinimalView: {
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
           path: '/custom-minimal-view',
+          meta: {
+            title: 'Custom Meta Title',
+          },
         },
         CustomNestedView: {
           Component: '/components/views/CustomViewNested/index.js#CustomNestedView',

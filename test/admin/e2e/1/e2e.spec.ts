@@ -147,6 +147,16 @@ describe('admin1', () => {
           /This is a custom meta description for posts/,
         )
       })
+
+      test('should fallback to root meta for custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-default-view`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta title from custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-minimal-view`)
+        await expect(page.title()).resolves.toMatch(/Custom Meta Title/)
+      })
     })
 
     describe('favicons', () => {
