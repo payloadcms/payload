@@ -62,7 +62,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@dnd-kit/core": "6.0.8",
+    "@dnd-kit/core": "6.1.0",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -70,11 +70,11 @@
     "file-type": "17.1.6",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
-    "http-status": "1.6.2",
+    "http-status": "1.7.4",
     "path-to-regexp": "^6.2.1",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "3.2.6",
-    "sass": "1.77.4",
+    "react-diff-viewer-continued": "3.4.0",
+    "sass": "1.77.8",
     "sonner": "^1.5.0",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
