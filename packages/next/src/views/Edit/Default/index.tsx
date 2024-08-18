@@ -14,12 +14,13 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
+  useDocumentLock,
   useEditDepth,
   useUploadEdits,
 } from '@payloadcms/ui'
 import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
@@ -58,6 +59,8 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
+  const { lockDocument, unlockDocument } = useDocumentLock()
+  const hasLocked = useRef(false)
 
   const {
     config,
@@ -108,6 +111,20 @@ export const DefaultEditView: React.FC = () => {
       return true
     return false
   })
+
+  useEffect(() => {
+    if (id && collectionSlug && !hasLocked.current) {
+      void lockDocument(id)
+      hasLocked.current = true
+    }
+
+    return () => {
+      if (id && collectionSlug && hasLocked.current) {
+        void unlockDocument(id)
+        hasLocked.current = false
+      }
+    }
+  }, [id, collectionSlug, lockDocument, unlockDocument])
 
   const onSave = useCallback(
     (json) => {
