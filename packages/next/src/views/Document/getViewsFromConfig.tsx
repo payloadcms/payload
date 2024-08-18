@@ -108,12 +108,44 @@ export const getViewsFromConfig = ({
             }
 
             default: {
-              CustomView = {
-                payloadComponent: getCustomViewByKey(views, 'default'),
+              const baseRoute = [
+                adminRoute !== '/' && adminRoute,
+                'collections',
+                collectionSlug,
+                segment3,
+              ]
+                .filter(Boolean)
+                .join('/')
+
+              const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+                .filter(Boolean)
+                .join('/')
+
+              const { Component: CustomViewComponent, viewKey: customViewKey } =
+                getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                })
+
+              console.log('CustomViewComponent', customViewKey)
+
+              if (customViewKey) {
+                viewKey = customViewKey
+
+                CustomView = {
+                  payloadComponent: CustomViewComponent,
+                }
+              } else {
+                CustomView = {
+                  payloadComponent: getCustomViewByKey(views, 'default'),
+                }
+
+                DefaultView = {
+                  Component: DefaultEditView,
+                }
               }
-              DefaultView = {
-                Component: DefaultEditView,
-              }
+
               break
             }
           }
@@ -174,16 +206,19 @@ export const getViewsFromConfig = ({
                 .filter(Boolean)
                 .join('/')
 
-              const viewByRoute = getCustomViewByRoute({
-                baseRoute,
-                currentRoute,
-                views,
-              })
+              const { Component: CustomViewComponent, viewKey: customViewKey } =
+                getCustomViewByRoute({
+                  baseRoute,
+                  currentRoute,
+                  views,
+                })
 
-              viewKey = viewByRoute.viewKey
+              if (customViewKey) {
+                viewKey = customViewKey
 
-              CustomView = {
-                payloadComponent: viewByRoute.Component,
+                CustomView = {
+                  payloadComponent: CustomViewComponent,
+                }
               }
 
               break
@@ -221,16 +256,20 @@ export const getViewsFromConfig = ({
               .filter(Boolean)
               .join('/')
 
-            const viewByRoute = getCustomViewByRoute({
-              baseRoute,
-              currentRoute,
-              views,
-            })
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getCustomViewByRoute(
+              {
+                baseRoute,
+                currentRoute,
+                views,
+              },
+            )
 
-            viewKey = viewByRoute.viewKey
+            if (customViewKey) {
+              viewKey = customViewKey
 
-            CustomView = {
-              payloadComponent: viewByRoute.Component,
+              CustomView = {
+                payloadComponent: CustomViewComponent,
+              }
             }
           }
 
@@ -308,20 +347,23 @@ export const getViewsFromConfig = ({
                   .filter(Boolean)
                   .join('/')
 
-                const viewByRoute = getCustomViewByRoute({
-                  baseRoute,
-                  currentRoute,
-                  views,
-                })
+                const { Component: CustomViewComponent, viewKey: customViewKey } =
+                  getCustomViewByRoute({
+                    baseRoute,
+                    currentRoute,
+                    views,
+                  })
 
-                viewKey = viewByRoute.viewKey
+                if (customViewKey) {
+                  viewKey = customViewKey
 
-                CustomView = {
-                  payloadComponent: viewByRoute.Component,
-                }
-
-                DefaultView = {
-                  Component: DefaultEditView,
+                  CustomView = {
+                    payloadComponent: CustomViewComponent,
+                  }
+                } else {
+                  DefaultView = {
+                    Component: DefaultEditView,
+                  }
                 }
               } else {
                 ErrorView = {
@@ -358,16 +400,20 @@ export const getViewsFromConfig = ({
               .filter(Boolean)
               .join('/')
 
-            const viewByRoute = getCustomViewByRoute({
-              baseRoute,
-              currentRoute,
-              views,
-            })
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getCustomViewByRoute(
+              {
+                baseRoute,
+                currentRoute,
+                views,
+              },
+            )
 
-            viewKey = viewByRoute.viewKey
+            if (customViewKey) {
+              viewKey = customViewKey
 
-            CustomView = {
-              payloadComponent: viewByRoute.Component,
+              CustomView = {
+                payloadComponent: CustomViewComponent,
+              }
             }
           }
 

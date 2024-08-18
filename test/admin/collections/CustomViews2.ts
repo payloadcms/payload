@@ -65,6 +65,9 @@ export const CustomViews2: CollectionConfig = {
               label: 'Custom Nested Tab View',
             },
             path: customNestedTabViewPath,
+            meta: {
+              title: 'Custom Nested Meta Title',
+            },
           },
           versions: {
             Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
