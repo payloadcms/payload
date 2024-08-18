@@ -1,16 +1,17 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
-import { useForm, useUploadEdits } from '@payloadcms/ui'
 import { isImage, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
+import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -33,10 +34,10 @@ const validate = (value) => {
 }
 
 type UploadActionsArgs = {
-  customActions?: React.ReactNode[]
-  enableAdjustments: boolean
-  enablePreviewSizes: boolean
-  mimeType: string
+  readonly customActions?: React.ReactNode[]
+  readonly enableAdjustments: boolean
+  readonly enablePreviewSizes: boolean
+  readonly mimeType: string
 }
 
 export const UploadActions = ({
@@ -77,11 +78,11 @@ export const UploadActions = ({
 }
 
 export type UploadProps = {
-  collectionSlug: string
-  customActions?: React.ReactNode[]
-  initialState?: FormState
-  onChange?: (file?: File) => void
-  uploadConfig: SanitizedCollectionConfig['upload']
+  readonly collectionSlug: string
+  readonly customActions?: React.ReactNode[]
+  readonly initialState?: FormState
+  readonly onChange?: (file?: File) => void
+  readonly uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
@@ -108,15 +109,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
-        const fileReader = new FileReader()
-        fileReader.onload = (e) => {
-          const imgSrc = e.target?.result
-
-          if (typeof imgSrc === 'string') {
-            setFileSrc(imgSrc)
-          }
-        }
-        fileReader.readAsDataURL(newFile)
+        setFileSrc(URL.createObjectURL(newFile))
       }
 
       setValue(newFile)
@@ -201,6 +194,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(initialState || {}, true))
+    if (initialState?.file?.value instanceof File) {
+      setFileSrc(URL.createObjectURL(initialState.file.value))
+    }
     setReplacingFile(false)
   }, [initialState])
 
@@ -265,7 +261,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 <div className={`${baseClass}__add-file-wrap`}>
                   <button
                     className={`${baseClass}__add-file`}
-                    onClick={handleUrlSubmit}
+                    onClick={() => {
+                      void handleUrlSubmit()
+                    }}
                     type="button"
                   >
                     {t('upload:addFile')}

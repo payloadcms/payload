@@ -49,7 +49,7 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
           ...docInfo,
           doc: { ...getData() },
           locale: typeof locale === 'object' ? locale?.code : locale,
-        } satisfies Parameters<GenerateURL>[0]),
+        } satisfies Omit<Parameters<GenerateURL>[0], 'req'>),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

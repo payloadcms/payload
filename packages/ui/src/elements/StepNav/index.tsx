@@ -8,10 +8,9 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
-import { PayloadIcon } from '@payloadcms/ui'
-
 import type { StepNavItem } from './types.js'
 
+import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 
 const baseClass = 'step-nav'
