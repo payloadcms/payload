@@ -180,11 +180,12 @@ export const getViewsFromConfig = ({
                 views,
               })
 
+              viewKey = viewByRoute.viewKey
+
               CustomView = {
                 payloadComponent: viewByRoute.Component,
               }
 
-              viewKey = viewByRoute.viewKey
               break
             }
           }
@@ -220,14 +221,19 @@ export const getViewsFromConfig = ({
               .filter(Boolean)
               .join('/')
 
+            const viewByRoute = getCustomViewByRoute({
+              baseRoute,
+              currentRoute,
+              views,
+            })
+
+            viewKey = viewByRoute.viewKey
+
             CustomView = {
-              payloadComponent: getCustomViewByRoute({
-                baseRoute,
-                currentRoute,
-                views,
-              }).Component,
+              payloadComponent: viewByRoute.Component,
             }
           }
+
           break
         }
       }
@@ -280,6 +286,7 @@ export const getViewsFromConfig = ({
                 CustomView = {
                   payloadComponent: getCustomViewByKey(views, 'versions'),
                 }
+
                 DefaultView = {
                   Component: DefaultVersionsView,
                 }
@@ -307,11 +314,11 @@ export const getViewsFromConfig = ({
                   views,
                 })
 
+                viewKey = viewByRoute.viewKey
+
                 CustomView = {
                   payloadComponent: viewByRoute.Component,
                 }
-
-                viewKey = viewByRoute.viewKey
 
                 DefaultView = {
                   Component: DefaultEditView,
@@ -357,12 +364,13 @@ export const getViewsFromConfig = ({
               views,
             })
 
+            viewKey = viewByRoute.viewKey
+
             CustomView = {
               payloadComponent: viewByRoute.Component,
             }
-
-            viewKey = viewByRoute.viewKey
           }
+
           break
         }
       }

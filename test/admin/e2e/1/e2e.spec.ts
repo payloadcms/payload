@@ -254,6 +254,13 @@ describe('admin1', () => {
         const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
+
+      test('should render fallback meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}${customTabViewPath}`)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
   })
 

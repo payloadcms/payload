@@ -121,7 +121,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       isEditing,
     })
   } else {
-    const { CustomView, viewKey } = getViewsFromConfig({
+    const { viewKey } = getViewsFromConfig({
       collectionConfig,
       config,
       globalConfig,
@@ -129,7 +129,9 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 
-    if (CustomView) {
+    console.log('viewKey', viewKey)
+
+    if (viewKey) {
       const customViewConfig =
         collectionConfig?.admin?.components?.views?.edit?.[viewKey] ||
         globalConfig?.admin?.components?.views?.edit?.[viewKey]
