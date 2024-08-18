@@ -1,5 +1,4 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
-
+import type { TransactionPg } from '../types.js'
 import type { DeleteWhere } from './types.js'
 
 export const deleteWhere: DeleteWhere = async function deleteWhere({ db, tableName, where }) {

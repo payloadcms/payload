@@ -8,7 +8,7 @@ import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 import { fileURLToPath } from 'url'
 
-import type { PostgresAdapter } from './types.js'
+import type { BasePostgresAdapter } from './types.js'
 
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
@@ -16,7 +16,7 @@ import { getMigrationTemplate } from './getMigrationTemplate.js'
 const require = createRequire(import.meta.url)
 
 export const createMigration: CreateMigration = async function createMigration(
-  this: PostgresAdapter,
+  this: BasePostgresAdapter,
   { file, forceAcceptWarning, migrationName, payload },
 ) {
   const filename = fileURLToPath(import.meta.url)

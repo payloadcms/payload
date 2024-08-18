@@ -1,16 +1,15 @@
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
-import { createTableName } from '@payloadcms/drizzle'
 import { uniqueIndex } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { BaseExtraConfig } from './schema/build.js'
-import type { PostgresAdapter } from './types.js'
+import type { BaseExtraConfig, BasePostgresAdapter } from './types.js'
 
+import { createTableName } from '../createTableName.js'
 import { buildTable } from './schema/build.js'
 
-export const init: Init = function init(this: PostgresAdapter) {
+export const init: Init = function init(this: BasePostgresAdapter) {
   if (this.payload.config.localization) {
     this.enums.enum__locales = this.pgSchema.enum(
       '_locales',

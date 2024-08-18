@@ -47,7 +47,10 @@ const dirname = path.dirname(filename)
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot }) => {
-    if (process.env.NODE_ENV !== 'production') {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+    ) {
       const resolvedDependencies = await getDependencies(dirname, [
         'lexical',
         '@lexical/headless',
