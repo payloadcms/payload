@@ -99,7 +99,7 @@ export const getViewFromConfig = ({
     case 1: {
       // users can override the default routes via `admin.routes` config
       // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
-      let viewToRender: keyof typeof oneSegmentViews
+      let viewKey: keyof typeof oneSegmentViews
 
       if (config.admin.routes) {
         const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
@@ -111,11 +111,11 @@ export const getViewFromConfig = ({
         })
 
         if (matchedRoute) {
-          viewToRender = matchedRoute[0] as keyof typeof oneSegmentViews
+          viewKey = matchedRoute[0] as keyof typeof oneSegmentViews
         }
       }
 
-      if (oneSegmentViews[viewToRender]) {
+      if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
         // --> /forgot
@@ -125,12 +125,13 @@ export const getViewFromConfig = ({
         // --> /unauthorized
 
         ViewToRender = {
-          Component: oneSegmentViews[viewToRender],
+          Component: oneSegmentViews[viewKey],
         }
-        templateClassName = baseClasses[viewToRender]
+
+        templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
-        if (viewToRender === 'account') {
+        if (viewKey === 'account') {
           initPageOptions.redirectUnauthenticatedUser = true
           templateType = 'default'
         }
@@ -150,17 +151,21 @@ export const getViewFromConfig = ({
       if (isCollection) {
         // --> /collections/:collectionSlug
         initPageOptions.redirectUnauthenticatedUser = true
+
         ViewToRender = {
           Component: ListView,
         }
+
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
         initPageOptions.redirectUnauthenticatedUser = true
+
         ViewToRender = {
           Component: DocumentView,
         }
+
         templateClassName = 'global-edit'
         templateType = 'default'
       }
@@ -172,6 +177,7 @@ export const getViewFromConfig = ({
         ViewToRender = {
           Component: Verify,
         }
+
         templateClassName = 'verify'
         templateType = 'minimal'
       } else if (isCollection) {
@@ -182,9 +188,11 @@ export const getViewFromConfig = ({
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
         initPageOptions.redirectUnauthenticatedUser = true
+
         ViewToRender = {
           Component: DocumentView,
         }
+
         templateClassName = `collection-default-edit`
         templateType = 'default'
       } else if (isGlobal) {
@@ -194,9 +202,11 @@ export const getViewFromConfig = ({
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
         initPageOptions.redirectUnauthenticatedUser = true
+
         ViewToRender = {
           Component: DocumentView,
         }
+
         templateClassName = `global-edit`
         templateType = 'default'
       }
@@ -204,7 +214,7 @@ export const getViewFromConfig = ({
   }
 
   if (!ViewToRender) {
-    ViewToRender = getCustomViewByRoute({ config, currentRoute })
+    ViewToRender = getCustomViewByRoute({ config, currentRoute })?.view
   }
 
   return {

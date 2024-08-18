@@ -206,6 +206,7 @@ export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
 export type {
   AdminViewComponent,
+  AdminViewConfig,
   AdminViewProps,
   EditViewProps,
   InitPageResult,
