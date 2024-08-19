@@ -85,9 +85,10 @@ export const connect: Connect = async function connect(
         await this.connect(options)
         return
       }
-    } else
+    } else {
       this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    }
+
     if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
     process.exit(1)
   }
