@@ -1,5 +1,5 @@
 'use client'
-import type { CheckboxFieldProps, LabelProps, MappedComponent, StaticLabel } from 'payload'
+import type { CheckboxFieldProps, FieldLabelProps, MappedComponent, StaticLabel } from 'payload'
 
 import React from 'react'
 
@@ -17,7 +17,7 @@ export type CheckboxInputProps = {
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly label?: StaticLabel
-  readonly labelProps?: LabelProps<CheckboxFieldProps>
+  readonly labelProps?: FieldLabelProps<CheckboxFieldProps>
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean

@@ -13,14 +13,18 @@ export type GenericLabelProps = {
   readonly unstyled?: boolean
 }
 
-type ClientFieldWithoutType = MarkOptional<ClientField, 'type'>
-
-export type LabelProps<T extends ClientFieldWithoutType = ClientFieldWithoutType> = {
+export type FieldLabelProps<
+  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = {
   field: T
 } & GenericLabelProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps<T extends ClientField> = Omit<LabelProps<T>, 'label' | 'required'>
+export type SanitizedLabelProps<T extends ClientField> = Omit<
+  FieldLabelProps<T>,
+  'label' | 'required'
+>
 
-export type LabelComponent<T extends ClientFieldWithoutType = ClientFieldWithoutType> =
-  React.ComponentType<LabelProps<T>>
+export type LabelComponent<
+  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = React.ComponentType<FieldLabelProps<T>>

@@ -180,7 +180,7 @@ export type {
   UploadFieldProps,
 } from './fields/Upload.js'
 
-export type { ErrorComponent, ErrorProps, GenericErrorProps } from './forms/Error.js'
+export type { ErrorComponent, FieldErrorProps, GenericErrorProps } from './forms/Error.js'
 
 export type { FormFieldBase } from './forms/Field.js'
 
@@ -196,9 +196,9 @@ export type {
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
 export type {
+  FieldLabelProps,
   GenericLabelProps,
   LabelComponent,
-  LabelProps,
   SanitizedLabelProps,
 } from './forms/Label.js'
 

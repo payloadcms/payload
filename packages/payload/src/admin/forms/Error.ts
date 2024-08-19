@@ -12,12 +12,13 @@ export type GenericErrorProps = {
   readonly showError?: boolean
 }
 
-type ClientFieldWithoutType = MarkOptional<ClientField, 'type'>
-
-export type ErrorProps<T extends ClientFieldWithoutType = ClientFieldWithoutType> = {
+export type FieldErrorProps<
+  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = {
   field: T
 } & GenericErrorProps &
   Partial<ServerProps>
 
-export type ErrorComponent<T extends ClientFieldWithoutType = ClientFieldWithoutType> =
-  React.ComponentType<ErrorProps<T>>
+export type ErrorComponent<
+  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = React.ComponentType<FieldErrorProps<T>>

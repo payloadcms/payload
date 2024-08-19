@@ -15,9 +15,7 @@ export type ClientTab =
 
 export type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
-export type TabsFieldProps = {
-  readonly field: TabsFieldClientWithoutType
-} & FormFieldBase
+export type TabsFieldProps = FormFieldBase<TabsFieldClientWithoutType>
 
 export type TabsFieldLabelComponent = LabelComponent<TabsFieldClientWithoutType>
 

@@ -1,9 +1,9 @@
 import type {
-  ErrorProps,
   FieldBaseClient,
   FieldDescriptionProps,
+  FieldErrorProps,
+  FieldLabelProps,
   FormFieldBase,
-  LabelProps,
   MappedComponent,
   PasswordFieldValidation,
   StaticDescription,
@@ -16,10 +16,10 @@ import type { MarkOptional } from 'ts-essentials'
 export type PasswordFieldProps = {
   readonly autoComplete?: string
   readonly descriptionProps?: FieldDescriptionProps<PasswordFieldProps>
-  readonly errorProps?: ErrorProps<PasswordFieldProps>
+  readonly errorProps?: FieldErrorProps<PasswordFieldProps>
   readonly field: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly labelProps?: LabelProps<PasswordFieldProps>
+  readonly labelProps?: FieldLabelProps<PasswordFieldProps>
   readonly validate?: PasswordFieldValidation
 } & FormFieldBase
 
@@ -32,10 +32,10 @@ export type PasswordInputProps = {
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
   readonly description?: StaticDescription
-  readonly errorProps: ErrorProps<PasswordFieldProps>
+  readonly errorProps: FieldErrorProps<PasswordFieldProps>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly label: FieldBaseClient['label']
-  readonly labelProps: LabelProps<PasswordFieldProps>
+  readonly labelProps: FieldLabelProps<PasswordFieldProps>
   readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string
