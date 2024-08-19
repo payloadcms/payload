@@ -1,22 +1,22 @@
 const fs = require('fs')
 
+// Plugin options can be found here: https://github.com/facebook/react/blob/main/compiler/packages/babel-plugin-react-compiler/src/Entrypoint/Options.ts#L38
 const ReactCompilerConfig = {
   sources: (filename) => {
-    if (!filename.endsWith('.tsx') && !filename.endsWith('.jsx') && !filename.endsWith('.js')) {
+    const isInNodeModules = filename.includes('node_modules')
+    if (isInNodeModules || ( !filename.endsWith('.tsx') && !filename.endsWith('.jsx') && !filename.endsWith('.js'))) {
       return false
     }
 
-    // read file and check if 'use client' is at top. if not, return false
-    // if it is, return true
+    // Only compile files with 'use client' directives. We do not want to
+    // accidentally compile React Server Components
     const file = fs.readFileSync(filename, 'utf8')
     if (file.includes("'use client'")) {
-      //console.log("Compiling: " + filename)
       return true
     }
-    console.log('Skipping: ' + filename)
+    console.log('React compiler - skipping file: ' + filename)
     return false
   },
-  //runtimeModule: "react"
 }
 
 module.exports = function (api) {
