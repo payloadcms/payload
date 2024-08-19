@@ -80,6 +80,37 @@ describe('configToJSONSchema', () => {
               blocks: [],
               required: true,
             },
+            {
+              name: 'blockFieldWithFields',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'test',
+                  fields: [
+                    {
+                      name: 'field',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'blockFieldWithFieldsRequired',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'test',
+                  fields: [
+                    {
+                      name: 'field',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
           ],
           timestamps: false,
         },
@@ -103,6 +134,58 @@ describe('configToJSONSchema', () => {
         blockFieldRequired: {
           type: 'array',
           items: {},
+        },
+        blockFieldWithFields: {
+          type: ['array', 'null'],
+          items: {
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: ['string', 'null'],
+                  },
+                  blockName: {
+                    type: ['string', 'null'],
+                  },
+                  blockType: {
+                    const: 'test',
+                  },
+                  field: {
+                    type: ['string', 'null'],
+                  },
+                },
+                required: ['blockType'],
+              },
+            ],
+          },
+        },
+        blockFieldWithFieldsRequired: {
+          type: ['array', 'null'],
+          items: {
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: ['string', 'null'],
+                  },
+                  blockName: {
+                    type: ['string', 'null'],
+                  },
+                  blockType: {
+                    const: 'test',
+                  },
+                  field: {
+                    type: 'string',
+                  },
+                },
+                required: ['blockType', 'field'],
+              },
+            ],
+          },
         },
       },
       required: ['id', 'blockFieldRequired'],
