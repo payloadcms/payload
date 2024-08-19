@@ -60,6 +60,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
         id: docInfo.id,
+        slug: docInfo.slug,
         doc: { ...getData() },
         docPermissions: docInfo.docPermissions,
         hasPublishPermission: docInfo.hasPublishPermission,

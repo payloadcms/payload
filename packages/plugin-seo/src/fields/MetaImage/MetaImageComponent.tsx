@@ -55,6 +55,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
         id: docInfo.id,
+        slug: docInfo.slug,
         doc: { ...getData() },
         docPermissions: docInfo.docPermissions,
         hasPublishPermission: docInfo.hasPublishPermission,

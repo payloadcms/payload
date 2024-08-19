@@ -59,6 +59,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
         id: docInfo.id,
+        slug: docInfo.slug,
         doc: { ...getData() },
         docPermissions: docInfo.docPermissions,
         hasPublishPermission: docInfo.hasPublishPermission,

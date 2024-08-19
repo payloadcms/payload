@@ -113,7 +113,7 @@ export const createClientField = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label
 
-  const serverProps = { field: clientField }
+  const serverProps = { field: incomingField }
 
   switch (incomingField.type) {
     case 'array':
@@ -223,20 +223,6 @@ export const createClientField = ({
         field.admin.components = {}
       }
 
-      field.admin.components.Field = createMappedComponent(
-        incomingField.editor.FieldComponent,
-        serverProps,
-        undefined,
-        'incomingField.editor.FieldComponent',
-      )
-
-      field.admin.components.Cell = createMappedComponent(
-        incomingField.editor.CellComponent,
-        serverProps,
-        undefined,
-        'incomingField.editor.CellComponent',
-      )
-
       if (incomingField.editor.generateComponentMap) {
         const { Component: generateComponentMap, serverProps } = getComponent({
           identifier: 'richText-generateComponentMap',
@@ -244,6 +230,20 @@ export const createClientField = ({
           payloadComponent: incomingField.editor.generateComponentMap,
           silent: true,
         })
+
+        field.admin.components.Field = createMappedComponent(
+          incomingField.editor.FieldComponent,
+          serverProps,
+          undefined,
+          'incomingField.editor.FieldComponent',
+        )
+
+        field.admin.components.Cell = createMappedComponent(
+          incomingField.editor.CellComponent,
+          serverProps,
+          undefined,
+          'incomingField.editor.CellComponent',
+        )
 
         if (generateComponentMap) {
           const actualGenerateComponentMap: RichTextGenerateComponentMap = (
