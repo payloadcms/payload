@@ -11,8 +11,8 @@ export type HiddenFieldProps = {
   readonly value?: unknown
 } & FormFieldBase
 
-export type HiddenFieldLabelComponent = LabelComponent<'hidden'>
+export type HiddenFieldLabelComponent = LabelComponent<HiddenFieldProps>
 
-export type HiddenFieldDescriptionComponent = DescriptionComponent<'hidden'>
+export type HiddenFieldDescriptionComponent = DescriptionComponent<HiddenFieldProps>
 
-export type HiddenFieldErrorComponent = ErrorComponent<'hidden'>
+export type HiddenFieldErrorComponent = ErrorComponent<HiddenFieldProps>

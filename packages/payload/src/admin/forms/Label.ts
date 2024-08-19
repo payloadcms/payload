@@ -1,5 +1,5 @@
-import type { CustomComponent, ServerProps, StaticLabel } from '../../config/types.js'
-import type { FieldTypes } from '../../fields/config/types.js'
+import type { ServerProps, StaticLabel } from '../../config/types.js'
+import type { ClientFieldProps } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 
 export type GenericLabelProps = {
@@ -11,14 +11,13 @@ export type GenericLabelProps = {
   readonly unstyled?: boolean
 }
 
-export type LabelProps<T extends 'hidden' | FieldTypes = any> = {
-  type: T
-} & GenericLabelProps &
-  Partial<ServerProps>
+export type LabelProps<T extends ClientFieldProps> = GenericLabelProps & Partial<ServerProps> & T
 
-export type SanitizedLabelProps<T extends 'hidden' | FieldTypes = any> = Omit<
+export type SanitizedLabelProps<T extends ClientFieldProps> = Omit<
   LabelProps<T>,
   'label' | 'required'
 >
 
-export type LabelComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<LabelProps<T>>
+export type LabelComponent<T extends ClientFieldProps = ClientFieldProps> = React.ComponentType<
+  LabelProps<T>
+>

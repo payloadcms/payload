@@ -386,6 +386,7 @@ export const createClientField = ({
     incomingField.admin.components.Error !== undefined
   ) {
     ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
+      // @ts-expect-error
       incomingField.admin.components.Error,
       undefined,
       undefined,

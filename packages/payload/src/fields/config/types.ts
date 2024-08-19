@@ -6,16 +6,66 @@ import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
-import type { ErrorComponent } from '../../admin/forms/Error.js'
 import type {
+  ArrayFieldErrorComponent,
+  ArrayFieldLabelComponent,
+  ArrayFieldProps,
+  BlockFieldErrorComponent,
+  BlockFieldProps,
+  CheckboxFieldErrorComponent,
+  CheckboxFieldLabelComponent,
+  CheckboxFieldProps,
   ClientTab,
+  CodeFieldErrorComponent,
+  CodeFieldLabelComponent,
+  CodeFieldProps,
+  CollapsibleFieldLabelComponent,
+  CollapsibleFieldProps,
   ConditionalDateProps,
+  DateFieldErrorComponent,
+  DateFieldLabelComponent,
+  DateFieldProps,
   Description,
-  DescriptionComponent,
-  LabelComponent,
+  EmailFieldErrorComponent,
+  EmailFieldLabelComponent,
+  EmailFieldProps,
+  GroupFieldLabelComponent,
+  GroupFieldProps,
+  HiddenFieldProps,
+  JSONFieldErrorComponent,
+  JSONFieldLabelComponent,
+  JSONFieldProps,
   MappedComponent,
+  NumberFieldErrorComponent,
+  NumberFieldLabelComponent,
+  NumberFieldProps,
+  PointFieldErrorComponent,
+  PointFieldLabelComponent,
+  PointFieldProps,
+  RadioFieldErrorComponent,
+  RadioFieldLabelComponent,
+  RadioFieldProps,
+  RelationshipFieldErrorComponent,
+  RelationshipFieldLabelComponent,
+  RelationshipFieldProps,
+  RichTextFieldErrorComponent,
+  RichTextFieldLabelComponent,
+  RichTextFieldProps,
+  RowFieldProps,
   RowLabelComponent,
+  SelectFieldErrorComponent,
+  SelectFieldLabelComponent,
+  SelectFieldProps,
   StaticDescription,
+  TabsFieldProps,
+  TextFieldErrorComponent,
+  TextFieldLabelComponent,
+  TextareaFieldErrorComponent,
+  TextareaFieldLabelComponent,
+  TextareaFieldProps,
+  UploadFieldErrorComponent,
+  UploadFieldLabelComponent,
+  UploadFieldProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
@@ -148,7 +198,7 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
-    Description?: DescriptionComponent
+    Description?: CustomComponent
     Field?: CustomComponent
     /**
      * The Filter component has to be a client component
@@ -339,8 +389,8 @@ export type NumberField = {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<NumberFieldErrorComponent>
+      Label?: CustomComponent<NumberFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -392,8 +442,8 @@ export type TextField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<TextFieldErrorComponent>
+      Label?: CustomComponent<TextFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -441,8 +491,8 @@ export type EmailField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<EmailFieldErrorComponent>
+      Label?: CustomComponent<EmailFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -468,8 +518,8 @@ export type EmailFieldClient = {
 export type TextareaField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<TextareaFieldErrorComponent>
+      Label?: CustomComponent<TextareaFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -499,8 +549,8 @@ export type TextareaFieldClient = {
 export type CheckboxField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<CheckboxFieldErrorComponent>
+      Label?: CustomComponent<CheckboxFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -524,8 +574,8 @@ export type CheckboxFieldClient = {
 export type DateField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<DateFieldErrorComponent>
+      Label?: CustomComponent<DateFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -552,7 +602,7 @@ export type DateFieldClient = {
 export type GroupField = {
   admin?: {
     components?: {
-      Label?: LabelComponent
+      Label?: CustomComponent<GroupFieldLabelComponent>
     } & Admin['components']
     hideGutter?: boolean
   } & Admin
@@ -598,7 +648,7 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
-          Label?: LabelComponent
+          Label?: CustomComponent<CollapsibleFieldLabelComponent>
           RowLabel: RowLabelComponent
         } & Admin['components']
         initCollapsed?: boolean
@@ -608,7 +658,7 @@ export type CollapsibleField = {
   | {
       admin?: {
         components?: {
-          Label?: LabelComponent
+          Label?: CustomComponent<CollapsibleFieldLabelComponent>
         } & Admin['components']
         initCollapsed?: boolean
       } & Admin
@@ -742,8 +792,8 @@ export type UIFieldClient = {
 export type UploadField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<UploadFieldErrorComponent>
+      Label?: CustomComponent<UploadFieldLabelComponent>
     } & Admin['components']
   }
   displayPreview?: boolean
@@ -772,8 +822,8 @@ export type UploadFieldClient = {
 export type CodeField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<CodeFieldErrorComponent>
+      Label?: CustomComponent<CodeFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -802,8 +852,8 @@ export type CodeFieldClient = {
 export type JSONField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<JSONFieldErrorComponent>
+      Label?: CustomComponent<JSONFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -835,8 +885,8 @@ export type JSONFieldClient = {
 export type SelectField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<SelectFieldErrorComponent>
+      Label?: CustomComponent<SelectFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -920,8 +970,8 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   components?: {
-    Error?: ErrorComponent
-    Label?: LabelComponent
+    Error?: CustomComponent<RelationshipFieldErrorComponent>
+    Label?: CustomComponent<RelationshipFieldLabelComponent>
   } & Admin['components']
   isSortable?: boolean
 } & Admin
@@ -988,8 +1038,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<RichTextFieldErrorComponent>
+      Label?: CustomComponent<RichTextFieldLabelComponent>
     } & Admin['components']
   } & Admin
   editor?:
@@ -1024,8 +1074,8 @@ export type RichTextFieldClient<
 export type ArrayField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<ArrayFieldErrorComponent>
+      Label?: CustomComponent<ArrayFieldLabelComponent>
       RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
@@ -1070,8 +1120,8 @@ export type ArrayFieldClient = {
 export type RadioField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<RadioFieldErrorComponent>
+      Label?: CustomComponent<RadioFieldLabelComponent>
     } & Admin['components']
     layout?: 'horizontal' | 'vertical'
   } & Admin
@@ -1157,7 +1207,7 @@ export type ClientBlock = {
 export type BlockField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
+      Error?: CustomComponent<BlockFieldErrorComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1189,8 +1239,8 @@ export type BlockFieldClient = {
 export type PointField = {
   admin?: {
     components?: {
-      Error?: ErrorComponent
-      Label?: LabelComponent
+      Error?: CustomComponent<PointFieldErrorComponent>
+      Label?: CustomComponent<PointFieldLabelComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -1259,6 +1309,28 @@ export type ClientField =
   | TextareaFieldClient
   | UIFieldClient
   | UploadFieldClient
+
+export type ClientFieldProps =
+  | ArrayFieldProps
+  | BlockFieldProps
+  | CheckboxFieldProps
+  | CodeFieldProps
+  | CollapsibleFieldProps
+  | DateFieldProps
+  | EmailFieldProps
+  | GroupFieldProps
+  | HiddenFieldProps
+  | JSONFieldProps
+  | NumberFieldProps
+  | PointFieldProps
+  | RadioFieldProps
+  | RelationshipFieldProps
+  | RichTextFieldProps
+  | RowFieldProps
+  | SelectFieldProps
+  | TabsFieldProps
+  | TextareaFieldProps
+  | UploadFieldProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
 

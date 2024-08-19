@@ -17,8 +17,8 @@ export type TabsFieldProps = {
   readonly field: MarkOptional<TabsFieldClient, 'type'>
 } & FormFieldBase
 
-export type TabsFieldLabelComponent = LabelComponent<'tabs'>
+export type TabsFieldLabelComponent = LabelComponent<TabsFieldProps>
 
-export type TabsFieldDescriptionComponent = DescriptionComponent<'tabs'>
+export type TabsFieldDescriptionComponent = DescriptionComponent<TabsFieldProps>
 
-export type TabsFieldErrorComponent = ErrorComponent<'tabs'>
+export type TabsFieldErrorComponent = ErrorComponent<TabsFieldProps>
