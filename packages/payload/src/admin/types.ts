@@ -33,107 +33,144 @@ export type {
 } from './elements/WithServerSideProps.js'
 
 export type {
-  ArrayFieldDescriptionComponent,
-  ArrayFieldErrorComponent,
-  ArrayFieldLabelComponent,
+  ArrayFieldDescriptionClientComponent,
+  ArrayFieldDescriptionServerComponent,
+  ArrayFieldErrorClientComponent,
+  ArrayFieldErrorServerComponent,
+  ArrayFieldLabelClientComponent,
+  ArrayFieldLabelServerComponent,
   ArrayFieldProps,
 } from './fields/Array.js'
 
 export type {
-  BlockFieldDescriptionComponent,
-  BlockFieldErrorComponent,
-  BlockFieldLabelComponent,
+  BlockFieldDescriptionClientComponent,
+  BlockFieldDescriptionServerComponent,
+  BlockFieldErrorClientComponent,
+  BlockFieldErrorServerComponent,
+  BlockFieldLabelClientComponent,
+  BlockFieldLabelServerComponent,
   BlockFieldProps,
 } from './fields/Blocks.js'
 
 export type {
-  CheckboxFieldDescriptionComponent,
-  CheckboxFieldErrorComponent,
-  CheckboxFieldLabelComponent,
+  CheckboxFieldDescriptionClientComponent,
+  CheckboxFieldDescriptionServerComponent,
+  CheckboxFieldErrorClientComponent,
+  CheckboxFieldErrorServerComponent,
+  CheckboxFieldLabelClientComponent,
+  CheckboxFieldLabelServerComponent,
   CheckboxFieldProps,
 } from './fields/Checkbox.js'
 
 export type {
-  CodeFieldDescriptionComponent,
-  CodeFieldErrorComponent,
-  CodeFieldLabelComponent,
+  CodeFieldDescriptionClientComponent,
+  CodeFieldDescriptionServerComponent,
+  CodeFieldErrorClientComponent,
+  CodeFieldErrorServerComponent,
+  CodeFieldLabelClientComponent,
+  CodeFieldLabelServerComponent,
   CodeFieldProps,
 } from './fields/Code.js'
 
 export type {
-  CollapsibleFieldDescriptionComponent,
-  CollapsibleFieldErrorComponent,
-  CollapsibleFieldLabelComponent,
+  CollapsibleFieldDescriptionClientComponent,
+  CollapsibleFieldDescriptionServerComponent,
+  CollapsibleFieldErrorClientComponent,
+  CollapsibleFieldErrorServerComponent,
+  CollapsibleFieldLabelClientComponent,
+  CollapsibleFieldLabelServerComponent,
   CollapsibleFieldProps,
 } from './fields/Collapsible.js'
 
 export type {
-  DateFieldDescriptionComponent,
-  DateFieldErrorComponent,
-  DateFieldLabelComponent,
+  DateFieldDescriptionClientComponent,
+  DateFieldDescriptionServerComponent,
+  DateFieldErrorClientComponent,
+  DateFieldErrorServerComponent,
+  DateFieldLabelClientComponent,
+  DateFieldLabelServerComponent,
   DateFieldProps,
 } from './fields/Date.js'
 
 export type {
-  EmailFieldDescriptionComponent,
-  EmailFieldErrorComponent,
-  EmailFieldLabelComponent,
+  EmailFieldDescriptionClientComponent,
+  EmailFieldDescriptionServerComponent,
+  EmailFieldErrorClientComponent,
+  EmailFieldErrorServerComponent,
+  EmailFieldLabelClientComponent,
+  EmailFieldLabelServerComponent,
   EmailFieldProps,
 } from './fields/Email.js'
 
 export type {
-  GroupFieldDescriptionComponent,
-  GroupFieldErrorComponent,
-  GroupFieldLabelComponent,
+  GroupFieldDescriptionClientComponent,
+  GroupFieldDescriptionServerComponent,
+  GroupFieldErrorClientComponent,
+  GroupFieldErrorServerComponent,
+  GroupFieldLabelClientComponent,
+  GroupFieldLabelServerComponent,
   GroupFieldProps,
 } from './fields/Group.js'
 
-export type {
-  HiddenFieldDescriptionComponent,
-  HiddenFieldErrorComponent,
-  HiddenFieldLabelComponent,
-  HiddenFieldProps,
-} from './fields/Hidden.js'
+export type { HiddenFieldProps } from './fields/Hidden.js'
 
 export type {
-  JSONFieldDescriptionComponent,
-  JSONFieldErrorComponent,
-  JSONFieldLabelComponent,
+  JSONFieldDescriptionClientComponent,
+  JSONFieldDescriptionServerComponent,
+  JSONFieldErrorClientComponent,
+  JSONFieldErrorServerComponent,
+  JSONFieldLabelClientComponent,
+  JSONFieldLabelServerComponent,
   JSONFieldProps,
 } from './fields/JSON.js'
 
 export type {
-  NumberFieldDescriptionComponent,
-  NumberFieldErrorComponent,
-  NumberFieldLabelComponent,
+  NumberFieldDescriptionClientComponent,
+  NumberFieldDescriptionServerComponent,
+  NumberFieldErrorClientComponent,
+  NumberFieldErrorServerComponent,
+  NumberFieldLabelClientComponent,
+  NumberFieldLabelServerComponent,
   NumberFieldProps,
 } from './fields/Number.js'
 
 export type {
-  PointFieldDescriptionComponent,
-  PointFieldErrorComponent,
-  PointFieldLabelComponent,
+  PointFieldDescriptionClientComponent,
+  PointFieldDescriptionServerComponent,
+  PointFieldErrorClientComponent,
+  PointFieldErrorServerComponent,
+  PointFieldLabelClientComponent,
+  PointFieldLabelServerComponent,
   PointFieldProps,
 } from './fields/Point.js'
 
 export type {
-  RadioFieldDescriptionComponent,
-  RadioFieldErrorComponent,
-  RadioFieldLabelComponent,
+  RadioFieldDescriptionClientComponent,
+  RadioFieldDescriptionServerComponent,
+  RadioFieldErrorClientComponent,
+  RadioFieldErrorServerComponent,
+  RadioFieldLabelClientComponent,
+  RadioFieldLabelServerComponent,
   RadioFieldProps,
 } from './fields/Radio.js'
 
 export type {
-  RelationshipFieldDescriptionComponent,
-  RelationshipFieldErrorComponent,
-  RelationshipFieldLabelComponent,
+  RelationshipFieldDescriptionClientComponent,
+  RelationshipFieldDescriptionServerComponent,
+  RelationshipFieldErrorClientComponent,
+  RelationshipFieldErrorServerComponent,
+  RelationshipFieldLabelClientComponent,
+  RelationshipFieldLabelServerComponent,
   RelationshipFieldProps,
 } from './fields/Relationship.js'
 
 export type {
-  RichTextFieldDescriptionComponent,
-  RichTextFieldErrorComponent,
-  RichTextFieldLabelComponent,
+  RichTextFieldDescriptionClientComponent,
+  RichTextFieldDescriptionServerComponent,
+  RichTextFieldErrorClientComponent,
+  RichTextFieldErrorServerComponent,
+  RichTextFieldLabelClientComponent,
+  RichTextFieldLabelServerComponent,
   RichTextFieldProps,
 } from './fields/RichText.js'
 

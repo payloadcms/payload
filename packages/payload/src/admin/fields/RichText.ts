@@ -1,9 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RichTextFieldClient } from '../../fields/config/types.js'
+import type { RichTextField, RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
 
@@ -15,8 +21,17 @@ export type RichTextFieldProps<
   readonly validate?: RichTextFieldValidation
 } & Omit<FormFieldBase<RichTextFieldClientWithoutType>, 'validate'>
 
-export type RichTextFieldLabelComponent = LabelComponent
+export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<RichTextField>
 
-export type RichTextFieldDescriptionComponent = DescriptionComponent
+export type RichTextFieldLabelClientComponent =
+  FieldLabelClientComponent<RichTextFieldClientWithoutType>
 
-export type RichTextFieldErrorComponent = ErrorComponent
+export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<RichTextField>
+
+export type RichTextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<RichTextField>
+
+export type RichTextFieldErrorClientComponent =
+  FieldErrorClientComponent<RichTextFieldClientWithoutType>
