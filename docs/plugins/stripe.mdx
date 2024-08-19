@@ -76,7 +76,7 @@ The following custom endpoints are automatically opened for you:
 | Endpoint | Method | Description |
 | --- | --- | --- |
 | `/api/stripe/rest` | `POST` | Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. See the [REST Proxy](#stripe-rest-proxy) section for more details. |
-| `/api/stripe/webhooks` | `POST` | Handles all Stripe webhook events |
+| `/stripe/webhooks` | `POST` | Handles all Stripe webhook events |
 
 ##### Stripe REST Proxy
 
@@ -114,13 +114,13 @@ const res = await fetch(`/api/stripe/rest`, {
 Development:
 
 1. Login using Stripe cli `stripe login`
-1. Forward events to localhost `stripe listen --forward-to localhost:3000/api/stripe/webhooks`
+1. Forward events to localhost `stripe listen --forward-to localhost:3000/stripe/webhooks`
 1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 
 Production:
 
 1. Login and [create a new webhook](https://dashboard.stripe.com/test/webhooks/create) from the Stripe dashboard
-1. Paste `YOUR_DOMAIN_NAME/api/stripe/webhooks` as the "Webhook Endpoint URL"
+1. Paste `YOUR_DOMAIN_NAME/stripe/webhooks` as the "Webhook Endpoint URL"
 1. Select which events to broadcast
 1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
