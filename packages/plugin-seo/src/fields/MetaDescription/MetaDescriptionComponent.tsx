@@ -24,7 +24,7 @@ import { LengthIndicator } from '../../ui/LengthIndicator.js'
 const { maxLength, minLength } = defaults.description
 
 type MetaDescriptionProps = {
-  hasGenerateDescriptionFn: boolean
+  readonly hasGenerateDescriptionFn: boolean
 } & TextareaFieldProps
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
@@ -58,9 +58,15 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
-        ...docInfo,
+        id: docInfo.id,
         doc: { ...getData() },
+        docPermissions: docInfo.docPermissions,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
+        title: docInfo.title,
       } satisfies Omit<Parameters<GenerateDescription>[0], 'req'>),
       credentials: 'include',
       headers: {

@@ -21,7 +21,7 @@ import type { GenerateImage } from '../../types.js'
 import { Pill } from '../../ui/Pill.js'
 
 type MetaImageProps = {
-  hasGenerateImageFn: boolean
+  readonly hasGenerateImageFn: boolean
 } & UploadFieldProps
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
@@ -54,9 +54,15 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
-        ...docInfo,
+        id: docInfo.id,
         doc: { ...getData() },
+        docPermissions: docInfo.docPermissions,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
+        title: docInfo.title,
       } satisfies Omit<Parameters<GenerateImage>[0], 'req'>),
       credentials: 'include',
       headers: {
