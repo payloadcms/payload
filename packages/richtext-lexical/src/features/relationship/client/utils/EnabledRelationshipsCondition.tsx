@@ -1,3 +1,4 @@
+'use client'
 import type { ClientCollectionConfig, ClientUser, VisibleEntities } from 'payload'
 
 import { useAuth, useConfig, useEntityVisibility } from '@payloadcms/ui'

@@ -1,3 +1,4 @@
+'use client'
 export function getBoundingClientRectWithoutTransform(elem: HTMLElement): DOMRect {
   const rect = elem.getBoundingClientRect()
 

@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalEditor, LexicalNode } from 'lexical'
 
 import { $getNodeByKey } from 'lexical'

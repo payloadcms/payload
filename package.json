@@ -53,7 +53,7 @@
     "clean:all": "node ./scripts/delete-recursively.js '@node_modules' 'media/*' '**/dist/' '**/.cache/*' '**/.next/*' '**/.turbo/*' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:build": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:cache": "node ./scripts/delete-recursively.js node_modules/.cache! packages/payload/node_modules/.cache! .next/*",
-    "dev": "pnpm runts ./test/dev.ts",
+    "dev": "tsx ./test/dev.ts",
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
@@ -81,6 +81,8 @@
     "test:e2e": "pnpm runts ./test/runE2E.ts",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
+    "test:e2e:prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd .. && pnpm runts ./test/runE2E.ts --prod",
+    "test:e2e:prod:ci": "rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd .. && pnpm runts ./test/runE2E.ts --prod",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
@@ -162,7 +164,6 @@
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
     "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
-  "packageManager": "pnpm@9.7.0",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9.7.0"

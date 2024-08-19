@@ -1,7 +1,7 @@
 import type { Payload, SanitizedConfig } from 'payload'
 
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import path from 'path'
-import { getPayload } from 'payload'
 
 import { runInit } from '../runInit.js'
 import { NextRESTClient } from './NextRESTClient.js'
@@ -19,7 +19,9 @@ export async function initPayloadInt(
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
   console.log('starting payload')
 
-  const payload = await getPayload({ config })
+  // need to use getPayloadHMR and not getPayload, as getPayloadHMR will be used in next handlers. If we use getPayload
+  // here, payload would be cached somewhere else
+  const payload = await getPayloadHMR({ config })
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')

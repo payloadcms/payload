@@ -36,11 +36,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:esbuild": "node bundle.js",
+    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build_without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
@@ -64,6 +67,11 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
     "@lexical/eslint-plugin": "0.17.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
@@ -73,8 +81,11 @@
     "@types/node": "20.12.5",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-1cd8995-20240814",
+    "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.0",
     "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-d0e920e-20240815",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },

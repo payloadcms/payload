@@ -1,3 +1,4 @@
+'use client'
 import type { Row } from 'payload'
 
 export const extractRowsAndCollapsedIDs = ({

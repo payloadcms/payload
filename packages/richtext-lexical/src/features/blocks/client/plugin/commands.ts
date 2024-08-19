@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalCommand } from 'lexical'
 
 import { createCommand } from 'lexical'
