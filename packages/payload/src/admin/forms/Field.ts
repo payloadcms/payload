@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { User } from '../../auth/types.js'
 import type { Locale } from '../../config/types.js'
 import type { ClientField, Validate } from '../../fields/config/types.js'
@@ -6,7 +8,9 @@ import type { FieldErrorClientProps } from './Error.js'
 import type { FieldDescriptionClientProps } from './FieldDescription.js'
 import type { FieldLabelClientProps } from './Label.js'
 
-export type FormFieldClientPropsBase<T extends ClientField = ClientField> = {
+export type FormFieldBase<
+  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = {
   readonly descriptionProps?: FieldDescriptionClientProps<T>
   readonly docPreferences?: DocumentPreferences
   readonly errorProps?: FieldErrorClientProps<T>

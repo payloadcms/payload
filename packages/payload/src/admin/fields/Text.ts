@@ -20,15 +20,15 @@ export type TextFieldProps = {
   readonly validate?: TextFieldValidation
 } & Omit<FormFieldBase<TextFieldClientWithoutType>, 'validate'>
 
+export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
+
 export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
+export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextField>
 
 export type TextFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextField>
+export type TextFieldErrorServerComponent = FieldErrorServerComponent<TextField>
 
 export type TextFieldErrorClientComponent = FieldErrorClientComponent<TextFieldClientWithoutType>
-
-export type TextFieldErrorServerComponent = FieldErrorServerComponent<TextField>

@@ -2,8 +2,12 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { EmailFieldClient } from '../../fields/config/types.js'
 import type { EmailFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldLabelClientComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 
@@ -12,8 +16,9 @@ export type EmailFieldProps = {
   readonly validate?: EmailFieldValidation
 } & Omit<FormFieldBase<EmailFieldClient>, 'validate'>
 
-export type EmailFieldLabelComponent = LabelComponent<EmailFieldClientWithoutType>
+export type EmailFieldLabelClientComponent = FieldLabelClientComponent<EmailFieldClientWithoutType>
 
-export type EmailFieldDescriptionComponent = DescriptionComponent<EmailFieldClientWithoutType>
+export type EmailFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<EmailFieldClientWithoutType>
 
-export type EmailFieldErrorComponent = ErrorComponent<EmailFieldClientWithoutType>
+export type EmailFieldErrorClientComponent = FieldErrorClientComponent<EmailFieldClientWithoutType>

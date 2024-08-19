@@ -138,24 +138,33 @@ export type {
 } from './fields/RichText.js'
 
 export type {
-  RowFieldDescriptionComponent,
-  RowFieldErrorComponent,
-  RowFieldLabelComponent,
+  RowFieldDescriptionClientComponent,
+  RowFieldDescriptionServerComponent,
+  RowFieldErrorClientComponent,
+  RowFieldErrorServerComponent,
+  RowFieldLabelClientComponent,
+  RowFieldLabelServerComponent,
   RowFieldProps,
 } from './fields/Row.js'
 
 export type {
-  SelectFieldDescriptionComponent,
-  SelectFieldErrorComponent,
-  SelectFieldLabelComponent,
+  SelectFieldDescriptionClientComponent,
+  SelectFieldDescriptionServerComponent,
+  SelectFieldErrorClientComponent,
+  SelectFieldErrorServerComponent,
+  SelectFieldLabelClientComponent,
+  SelectFieldLabelServerComponent,
   SelectFieldProps,
 } from './fields/Select.js'
 
 export type {
   ClientTab,
-  TabsFieldDescriptionComponent,
-  TabsFieldErrorComponent,
-  TabsFieldLabelComponent,
+  TabsFieldDescriptionClientComponent,
+  TabsFieldDescriptionServerComponent,
+  TabsFieldErrorClientComponent,
+  TabsFieldErrorServerComponent,
+  TabsFieldLabelClientComponent,
+  TabsFieldLabelServerComponent,
   TabsFieldProps,
 } from './fields/Tabs.js'
 
@@ -180,13 +189,22 @@ export type {
 } from './fields/Textarea.js'
 
 export type {
-  UploadFieldDescriptionComponent,
-  UploadFieldErrorComponent,
-  UploadFieldLabelComponent,
+  UploadFieldDescriptionClientComponent,
+  UploadFieldDescriptionServerComponent,
+  UploadFieldErrorClientComponent,
+  UploadFieldErrorServerComponent,
+  UploadFieldLabelClientComponent,
+  UploadFieldLabelServerComponent,
   UploadFieldProps,
 } from './fields/Upload.js'
 
-export type { ErrorComponent, FieldErrorProps, GenericErrorProps } from './forms/Error.js'
+export type {
+  FieldErrorClientComponent,
+  FieldErrorClientProps,
+  FieldErrorServerComponent,
+  FieldErrorServerProps,
+  GenericErrorProps,
+} from './forms/Error.js'
 
 export type { FormFieldBase } from './forms/Field.js'
 

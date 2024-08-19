@@ -1,9 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { CheckboxFieldClient } from '../../fields/config/types.js'
+import type { CheckboxField, CheckboxFieldClient } from '../../fields/config/types.js'
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type CheckboxFieldClientWithoutType = MarkOptional<CheckboxFieldClient, 'type'>
 
@@ -16,8 +22,17 @@ export type CheckboxFieldProps = {
   readonly validate?: CheckboxFieldValidation
 } & Omit<FormFieldBase<CheckboxFieldClientWithoutType>, 'validate'>
 
-export type CheckboxFieldLabelComponent = LabelComponent<CheckboxFieldClientWithoutType>
+export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<CheckboxField>
 
-export type CheckboxFieldDescriptionComponent = DescriptionComponent<CheckboxFieldClientWithoutType>
+export type CheckboxFieldLabelClientComponent =
+  FieldLabelClientComponent<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldErrorComponent = ErrorComponent<CheckboxFieldProps>
+export type CheckboxFieldDescriptionServerComponent = FieldDescriptionServerComponent<CheckboxField>
+
+export type CheckboxFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<CheckboxFieldClientWithoutType>
+
+export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<CheckboxField>
+
+export type CheckboxFieldErrorClientComponent =
+  FieldErrorClientComponent<CheckboxFieldClientWithoutType>

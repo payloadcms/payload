@@ -1,12 +1,14 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RowFieldClient } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
+import type { RowField, RowFieldClient } from '../../fields/config/types.js'
 import type {
-  DescriptionComponent,
-  FieldLabelProps,
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldErrorClientComponent,
+  FieldErrorServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
   FormFieldBase,
-  LabelComponent,
 } from '../types.js'
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
@@ -14,11 +16,17 @@ type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 export type RowFieldProps = {
   forceRender?: boolean
   indexPath: string
-  readonly labelProps?: FieldLabelProps<RowFieldClientWithoutType>
 } & FormFieldBase<RowFieldClientWithoutType>
 
-export type RowFieldLabelComponent = LabelComponent<RowFieldClientWithoutType>
+export type RowFieldLabelServerComponent = FieldLabelServerComponent<RowField>
 
-export type RowFieldDescriptionComponent = DescriptionComponent<RowFieldClientWithoutType>
+export type RowFieldLabelClientComponent = FieldLabelClientComponent<RowFieldClientWithoutType>
 
-export type RowFieldErrorComponent = ErrorComponent<RowFieldClientWithoutType>
+export type RowFieldDescriptionServerComponent = FieldDescriptionServerComponent<RowField>
+
+export type RowFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RowFieldClientWithoutType>
+
+export type RowFieldErrorServerComponent = FieldErrorServerComponent<RowField>
+
+export type RowFieldErrorClientComponent = FieldErrorClientComponent<RowFieldClientWithoutType>

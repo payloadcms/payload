@@ -1,9 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RadioFieldClient } from '../../fields/config/types.js'
+import type { RadioField, RadioFieldClient } from '../../fields/config/types.js'
 import type { RadioFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
 
@@ -15,8 +21,15 @@ export type RadioFieldProps = {
 
 export type OnChange<T = string> = (value: T) => void
 
-export type RadioFieldLabelComponent = LabelComponent<RadioFieldClientWithoutType>
+export type RadioFieldLabelServerComponent = FieldLabelServerComponent<RadioField>
 
-export type RadioFieldDescriptionComponent = DescriptionComponent<RadioFieldClientWithoutType>
+export type RadioFieldLabelClientComponent = FieldLabelClientComponent<RadioFieldClientWithoutType>
 
-export type RadioFieldErrorComponent = ErrorComponent<RadioFieldProps>
+export type RadioFieldDescriptionServerComponent = FieldDescriptionServerComponent<RadioField>
+
+export type RadioFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RadioFieldClientWithoutType>
+
+export type RadioFieldErrorServerComponent = FieldErrorServerComponent<RadioField>
+
+export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>

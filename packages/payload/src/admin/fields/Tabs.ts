@@ -24,15 +24,15 @@ export type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
 export type TabsFieldProps = FormFieldBase<TabsFieldClientWithoutType>
 
+export type TabsFieldLabelServerComponent = FieldLabelServerComponent<TabsField>
+
 export type TabsFieldLabelClientComponent = FieldLabelClientComponent<TabsFieldClientWithoutType>
 
-export type TabsFieldLabelServerComponent = FieldLabelServerComponent<TabsField>
+export type TabsFieldDescriptionServerComponent = FieldDescriptionServerComponent<TabsField>
 
 export type TabsFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<TabsFieldClientWithoutType>
 
-export type TabsFieldDescriptionServerComponent = FieldDescriptionServerComponent<TabsField>
+export type TabsFieldErrorServerComponent = FieldErrorServerComponent<TabsField>
 
 export type TabsFieldErrorClientComponent = FieldErrorClientComponent<TabsFieldClientWithoutType>
-
-export type TabsFieldErrorServerComponent = FieldErrorServerComponent<TabsField>

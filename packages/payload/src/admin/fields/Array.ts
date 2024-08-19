@@ -1,11 +1,13 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { ArrayFieldClient } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
+import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
-  DescriptionComponent,
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
   FormFieldBase,
-  LabelComponent,
   MappedComponent,
 } from '../types.js'
 
@@ -15,8 +17,15 @@ export type ArrayFieldProps = {
   readonly CustomRowLabel?: MappedComponent
 } & Omit<FormFieldBase<ArrayFieldClientWithoutType>, 'validate'>
 
-export type ArrayFieldLabelComponent = LabelComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<ArrayField>
 
-export type ArrayFieldDescriptionComponent = DescriptionComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorComponent = ErrorComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<ArrayField>
+
+export type ArrayFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<ArrayField>
+
+export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>

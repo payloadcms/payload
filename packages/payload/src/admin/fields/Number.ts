@@ -1,9 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { NumberFieldClient } from '../../fields/config/types.js'
+import type { NumberField, NumberFieldClient } from '../../fields/config/types.js'
 import type { NumberFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
 
@@ -12,8 +18,17 @@ export type NumberFieldProps = {
   readonly validate?: NumberFieldValidation
 } & Omit<FormFieldBase<NumberFieldClientWithoutType>, 'validate'>
 
-export type NumberFieldLabelComponent = LabelComponent<NumberFieldClientWithoutType>
+export type NumberFieldLabelServerComponent = FieldLabelServerComponent<NumberField>
 
-export type NumberFieldDescriptionComponent = DescriptionComponent<NumberFieldClientWithoutType>
+export type NumberFieldLabelClientComponent =
+  FieldLabelClientComponent<NumberFieldClientWithoutType>
 
-export type NumberFieldErrorComponent = ErrorComponent<NumberFieldClientWithoutType>
+export type NumberFieldDescriptionServerComponent = FieldDescriptionServerComponent<NumberField>
+
+export type NumberFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<NumberFieldClientWithoutType>
+
+export type NumberFieldErrorServerComponent = FieldErrorServerComponent<NumberField>
+
+export type NumberFieldErrorClientComponent =
+  FieldErrorClientComponent<NumberFieldClientWithoutType>
