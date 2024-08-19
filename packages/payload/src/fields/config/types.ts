@@ -41,6 +41,8 @@ import type {
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
   EmailFieldProps,
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
   GroupFieldProps,
@@ -231,7 +233,7 @@ type Admin = {
   className?: string
   components?: {
     Cell?: CustomComponent
-    Description?: CustomComponent
+    Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
     Field?: CustomComponent
     /**
      * The Filter component has to be a client component
@@ -1080,7 +1082,7 @@ export type RichTextField<
   admin?: {
     components?: {
       Error?: CustomComponent<RichTextFieldErrorClientComponent>
-      Label?: CustomComponent<RichTextFieldLabelClientComponent>
+      Label?: CustomComponent<RichTextFieldLabelClientComponent | RichTextFieldLabelServerComponent>
     } & Admin['components']
   } & Admin
   editor?:

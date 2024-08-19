@@ -4,8 +4,8 @@ import type { User } from '../../auth/types.js'
 import type { Locale } from '../../config/types.js'
 import type { ClientField, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
+import type { FieldDescriptionClientProps } from './Description.js'
 import type { FieldErrorClientProps } from './Error.js'
-import type { FieldDescriptionClientProps } from './FieldDescription.js'
 import type { FieldLabelClientProps } from './Label.js'
 
 export type FormFieldBase<

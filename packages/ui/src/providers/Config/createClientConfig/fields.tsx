@@ -345,9 +345,9 @@ export const createClientField = ({
       typeof incomingField.admin?.description === 'string' ||
       typeof incomingField.admin?.description === 'object'
     ) {
-      ;(clientField).admin.description = incomingField.admin.description
+      clientField.admin.description = incomingField.admin.description
     } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField).admin.description = incomingField.admin?.description({
+      clientField.admin.description = incomingField.admin?.description({
         t: i18n.t,
       })
     }
@@ -371,13 +371,12 @@ export const createClientField = ({
     'Description' in incomingField.admin.components &&
     incomingField?.admin?.components?.Description !== undefined
   ) {
-    ;(clientField).admin.components.Description =
-      createMappedComponent(
-        incomingField.admin.components.Description,
-        serverProps,
-        undefined,
-        'incomingField.admin.components.Description',
-      )
+    clientField.admin.components.Description = createMappedComponent(
+      incomingField.admin.components.Description,
+      serverProps,
+      undefined,
+      'incomingField.admin.components.Description',
+    )
   }
 
   type FieldWithErrorComponent = {
@@ -392,8 +391,7 @@ export const createClientField = ({
     'Error' in incomingField.admin.components &&
     incomingField.admin.components.Error !== undefined
   ) {
-    ;(clientField).admin.components.Error = createMappedComponent(
-      // @ts-expect-error
+    clientField.admin.components.Error = createMappedComponent(
       incomingField.admin.components.Error,
       serverProps,
       undefined,
@@ -435,7 +433,7 @@ export const createClientField = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label !== undefined
   ) {
-    ;(clientField).admin.components.Label = createMappedComponent(
+    clientField.admin.components.Label = createMappedComponent(
       CustomLabel,
       serverProps,
       undefined,
@@ -455,13 +453,12 @@ export const createClientField = ({
     'beforeInput' in incomingField.admin.components &&
     incomingField.admin.components.beforeInput !== undefined
   ) {
-    ;(clientField).admin.components.beforeInput =
-      createMappedComponent(
-        incomingField.admin?.components?.beforeInput,
-        serverProps,
-        undefined,
-        'incomingField.admin.components.beforeInput',
-      )
+    clientField.admin.components.beforeInput = createMappedComponent(
+      incomingField.admin?.components?.beforeInput,
+      serverProps,
+      undefined,
+      'incomingField.admin.components.beforeInput',
+    )
   }
 
   type FieldWithAfterInputComponent = {
@@ -476,13 +473,12 @@ export const createClientField = ({
     'afterInput' in incomingField.admin.components &&
     incomingField.admin.components.afterInput !== undefined
   ) {
-    ;(clientField).admin.components.afterInput =
-      createMappedComponent(
-        incomingField.admin?.components?.afterInput,
-        serverProps,
-        undefined,
-        'incomingField.admin.components.afterInput',
-      )
+    clientField.admin.components.afterInput = createMappedComponent(
+      incomingField.admin?.components?.afterInput,
+      serverProps,
+      undefined,
+      'incomingField.admin.components.afterInput',
+    )
   }
 
   return clientField

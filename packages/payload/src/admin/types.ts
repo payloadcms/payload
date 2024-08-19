@@ -236,16 +236,6 @@ export type {
 } from './fields/Upload.js'
 
 export type {
-  FieldErrorClientComponent,
-  FieldErrorClientProps,
-  FieldErrorServerComponent,
-  FieldErrorServerProps,
-  GenericErrorProps,
-} from './forms/Error.js'
-
-export type { FormFieldBase } from './forms/Field.js'
-
-export type {
   Description,
   DescriptionFunction,
   FieldDescriptionClientComponent,
@@ -254,7 +244,17 @@ export type {
   FieldDescriptionServerProps,
   GenericDescriptionProps,
   StaticDescription,
-} from './forms/FieldDescription.js'
+} from './forms/Description.js'
+
+export type {
+  FieldErrorClientComponent,
+  FieldErrorClientProps,
+  FieldErrorServerComponent,
+  FieldErrorServerProps,
+  GenericErrorProps,
+} from './forms/Error.js'
+
+export type { FormFieldBase } from './forms/Field.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
