@@ -62,6 +62,54 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should handle block fields with no blocks', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'blockField',
+              type: 'blocks',
+              blocks: [],
+            },
+            {
+              name: 'blockFieldRequired',
+              type: 'blocks',
+              blocks: [],
+              required: true,
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: {
+          type: 'string',
+        },
+        blockField: {
+          type: ['array', 'null'],
+          items: {},
+        },
+        blockFieldRequired: {
+          type: 'array',
+          items: {},
+        },
+      },
+      required: ['id', 'blockFieldRequired'],
+      title: 'Test',
+    })
+  })
+
   it('should handle tabs and named tabs with required fields', async () => {
     // @ts-expect-error
     const config: Config = {
