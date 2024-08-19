@@ -1,10 +1,16 @@
 import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { TextFieldClient } from '../../fields/config/types.js'
+import type { TextField, TextFieldClient } from '../../fields/config/types.js'
 import type { TextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
 
@@ -14,8 +20,15 @@ export type TextFieldProps = {
   readonly validate?: TextFieldValidation
 } & Omit<FormFieldBase<TextFieldClientWithoutType>, 'validate'>
 
-export type TextFieldLabelComponent = LabelComponent<TextFieldClientWithoutType>
+export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldDescriptionComponent = DescriptionComponent<TextFieldClientWithoutType>
+export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
 
-export type TextFieldErrorComponent = ErrorComponent<TextFieldClientWithoutType>
+export type TextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<TextFieldClientWithoutType>
+
+export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextField>
+
+export type TextFieldErrorClientComponent = FieldErrorClientComponent<TextFieldClientWithoutType>
+
+export type TextFieldErrorServerComponent = FieldErrorServerComponent<TextField>

@@ -160,16 +160,22 @@ export type {
 } from './fields/Tabs.js'
 
 export type {
-  TextFieldDescriptionComponent,
-  TextFieldErrorComponent,
-  TextFieldLabelComponent,
+  TextFieldDescriptionClientComponent,
+  TextFieldDescriptionServerComponent,
+  TextFieldErrorClientComponent,
+  TextFieldErrorServerComponent,
+  TextFieldLabelClientComponent,
+  TextFieldLabelServerComponent,
   TextFieldProps,
 } from './fields/Text.js'
 
 export type {
-  TextareaFieldDescriptionComponent,
-  TextareaFieldErrorComponent,
-  TextareaFieldLabelComponent,
+  TextareaFieldDescriptionClientComponent,
+  TextareaFieldDescriptionServerComponent,
+  TextareaFieldErrorClientComponent,
+  TextareaFieldErrorServerComponent,
+  TextareaFieldLabelClientComponent,
+  TextareaFieldLabelServerComponent,
   TextareaFieldProps,
 } from './fields/Textarea.js'
 
@@ -186,9 +192,11 @@ export type { FormFieldBase } from './forms/Field.js'
 
 export type {
   Description,
-  DescriptionComponent,
   DescriptionFunction,
-  FieldDescriptionProps,
+  FieldDescriptionClientComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerComponent,
+  FieldDescriptionServerProps,
   GenericDescriptionProps,
   StaticDescription,
 } from './forms/FieldDescription.js'
@@ -196,9 +204,11 @@ export type {
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
 export type {
-  FieldLabelProps,
+  FieldLabelClientComponent,
+  FieldLabelClientProps,
+  FieldLabelServerComponent,
+  FieldLabelServerProps,
   GenericLabelProps,
-  LabelComponent,
   SanitizedLabelProps,
 } from './forms/Label.js'
 

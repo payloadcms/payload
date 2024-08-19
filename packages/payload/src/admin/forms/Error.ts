@@ -1,7 +1,7 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import type { ServerProps } from '../../config/types.js'
-import type { ClientField } from '../../fields/config/types.js'
+import type { ClientField, Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 
 export type GenericErrorProps = {
@@ -12,13 +12,21 @@ export type GenericErrorProps = {
   readonly showError?: boolean
 }
 
-export type FieldErrorProps<
+export type FieldErrorClientProps<
   T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
 > = {
+  field: T
+} & GenericErrorProps
+
+export type FieldErrorServerProps<T extends Field> = {
   field: T
 } & GenericErrorProps &
   Partial<ServerProps>
 
-export type ErrorComponent<
+export type FieldErrorClientComponent<
   T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
-> = React.ComponentType<FieldErrorProps<T>>
+> = React.ComponentType<FieldErrorClientProps<T>>
+
+export type FieldErrorServerComponent<T extends Field = Field> = React.ComponentType<
+  FieldErrorServerProps<T>
+>

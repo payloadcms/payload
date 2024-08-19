@@ -112,6 +112,8 @@ export const createClientField = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label
 
+  const serverProps = { field: clientField }
+
   switch (incomingField.type) {
     case 'array':
     case 'group':
@@ -133,7 +135,7 @@ export const createClientField = ({
       if (incomingField?.admin?.components && 'RowLabel' in incomingField.admin.components) {
         ;(field as unknown as ArrayFieldClient).admin.components.RowLabel = createMappedComponent(
           incomingField.admin.components.RowLabel,
-          undefined,
+          serverProps,
           undefined,
           'incomingField.admin.components.RowLabel',
         )
@@ -178,7 +180,7 @@ export const createClientField = ({
           if (block.admin?.components?.Label) {
             clientBlock.admin.components.Label = createMappedComponent(
               block.admin.components.Label,
-              undefined,
+              serverProps,
               undefined,
               'block.admin.components.Label',
             )
@@ -207,25 +209,29 @@ export const createClientField = ({
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
+
       if (typeof incomingField?.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
+
       if (!field.admin) {
         field.admin = {}
       }
+
       if (!field.admin.components) {
         field.admin.components = {}
       }
 
       field.admin.components.Field = createMappedComponent(
         incomingField.editor.FieldComponent,
-        undefined,
+        serverProps,
         undefined,
         'incomingField.editor.FieldComponent',
       )
+
       field.admin.components.Cell = createMappedComponent(
         incomingField.editor.CellComponent,
-        undefined,
+        serverProps,
         undefined,
         'incomingField.editor.CellComponent',
       )
@@ -349,7 +355,7 @@ export const createClientField = ({
   if (incomingField?.admin?.components?.Cell !== undefined) {
     clientField.admin.components.Cell = createMappedComponent(
       incomingField.admin.components.Cell,
-      undefined,
+      serverProps,
       undefined,
       'incomingField.admin.components.Cell',
     )
@@ -367,7 +373,7 @@ export const createClientField = ({
     ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
       createMappedComponent(
         incomingField.admin.components.Description,
-        undefined,
+        serverProps,
         undefined,
         'incomingField.admin.components.Description',
       )
@@ -388,7 +394,7 @@ export const createClientField = ({
     ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
       // @ts-expect-error
       incomingField.admin.components.Error,
-      undefined,
+      serverProps,
       undefined,
       'incomingField.admin.components.Error',
     )
@@ -397,7 +403,7 @@ export const createClientField = ({
   if (incomingField?.admin?.components?.Field !== undefined) {
     clientField.admin.components.Field = createMappedComponent(
       incomingField.admin.components.Field,
-      undefined,
+      serverProps,
       undefined,
       'incomingField.admin.components.Field',
     )
@@ -410,7 +416,7 @@ export const createClientField = ({
   ) {
     clientField.admin.components.Filter = createMappedComponent(
       incomingField.admin.components.Filter,
-      undefined,
+      serverProps,
       undefined,
       'incomingField.admin.components.Filter',
     )
@@ -430,7 +436,7 @@ export const createClientField = ({
   ) {
     ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
       CustomLabel,
-      undefined,
+      serverProps,
       undefined,
       'incomingField.admin.components.Label',
     )
@@ -451,7 +457,7 @@ export const createClientField = ({
     ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
       createMappedComponent(
         incomingField.admin?.components?.beforeInput,
-        undefined,
+        serverProps,
         undefined,
         'incomingField.admin.components.beforeInput',
       )
@@ -472,7 +478,7 @@ export const createClientField = ({
     ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
       createMappedComponent(
         incomingField.admin?.components?.afterInput,
-        undefined,
+        serverProps,
         undefined,
         'incomingField.admin.components.afterInput',
       )
@@ -513,10 +519,12 @@ export const createClientFields = ({
       parentPath,
       payload,
     })
+
     if (newField) {
       newClientFields.push({ ...newField })
     }
   }
+
   const hasID = newClientFields.findIndex((f) => fieldAffectsData(f) && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
