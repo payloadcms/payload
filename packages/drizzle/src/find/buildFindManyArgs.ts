@@ -10,6 +10,7 @@ type BuildFindQueryArgs = {
   depth: number
   fields: Field[]
   joinQuery?: JoinQuery
+  locale?: string
   tableName: string
 }
 
@@ -26,6 +27,7 @@ export const buildFindManyArgs = ({
   depth,
   fields,
   joinQuery,
+  locale,
   tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
@@ -82,6 +84,7 @@ export const buildFindManyArgs = ({
     depth,
     fields,
     joinQuery,
+    locale,
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,

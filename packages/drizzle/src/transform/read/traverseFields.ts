@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig, TabAsField } from 'payload'
+import type { Field, PaginatedDocs, SanitizedConfig, TabAsField } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
@@ -371,6 +371,53 @@ export const traverseFields = <T extends Record<string, unknown>>({
           })
         }
 
+        return result
+      }
+
+      if (field.type === 'join') {
+        let fieldResult: PaginatedDocs | Record<string, PaginatedDocs>
+        if (Array.isArray(fieldData)) {
+          if (field.localized) {
+            fieldResult = fieldData.reduce((joinResult, row) => {
+              if (typeof row._locale === 'string') {
+                if (!joinResult[row._locale]) {
+                  // TODO: handle pagination
+                  joinResult[row._locale] = {
+                    docs: [],
+                    hasNextPage: false,
+                    hasPrevPage: false,
+                    limit: 0,
+                    nextPage: 0,
+                    page: 1,
+                    pagingCounter: 0,
+                    prevPage: 0,
+                    totalDocs: 0,
+                    totalPages: 0,
+                  }
+                }
+                joinResult[row._locale].docs.push(row.id)
+              }
+
+              return joinResult
+            }, {})
+          } else {
+            // TODO: handle pagination
+            fieldResult = {
+              docs: fieldData,
+              hasNextPage: false,
+              hasPrevPage: false,
+              limit: 0,
+              nextPage: 0,
+              page: 1,
+              pagingCounter: 0,
+              prevPage: 0,
+              totalDocs: 0,
+              totalPages: 0,
+            }
+          }
+        }
+
+        result[field.name] = fieldResult
         return result
       }
 

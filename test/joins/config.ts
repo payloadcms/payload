@@ -100,6 +100,7 @@ export default buildConfigWithDefaults({
           type: 'join',
           collection: 'localized-posts',
           on: 'category',
+          localized: true,
         },
       ],
     },

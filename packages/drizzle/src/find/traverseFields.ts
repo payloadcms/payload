@@ -1,10 +1,14 @@
+import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field, JoinQuery } from 'payload'
 
+import { APIError } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
+
+import { buildOrderBy } from '../queries/buildOrderBy.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -14,6 +18,7 @@ type TraverseFieldArgs = {
   depth?: number
   fields: Field[]
   joinQuery: JoinQuery
+  locale?: string
   path: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
@@ -26,7 +31,8 @@ export const traverseFields = ({
   currentTableName,
   depth,
   fields,
-  joinQuery,
+  joinQuery = {},
+  locale,
   path,
   topLevelArgs,
   topLevelTableName,
@@ -204,15 +210,39 @@ export const traverseFields = ({
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery !== false) {
-            topLevelArgs.with[toSnakeCase(`${path}${field.name}`)] = {
+            const { limit = 10, page = 1, sort } = joinQuery[`${path}${field.name}`] || {}
+            if (page !== 1) {
+              // we need a second query in read step to complete the join because drizzle doesn't support offset
+              throw new APIError('Pagination is not supported for joins')
+            }
+            const fields = adapter.payload.collections[field.collection].config.fields
+            const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
+              field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''
+            }`
+            const selectFields = {}
+            const orderBy = buildOrderBy({
+              adapter,
+              fields,
+              joins: [],
+              locale,
+              selectFields,
+              sort,
+              tableName: joinTableName,
+            })
+            const withJoin: DBQueryConfig<'many', true, any, any> = {
               columns: {
                 id: true,
+                ...selectFields,
               },
+              // TODO: join a custom query to handle count
+              // extras: {},
+              limit,
+              orderBy: () => [orderBy.order(orderBy.column)],
             }
-            //   // sort
-            //   orderBy: ({ order }, { asc }) => [asc(order)],
-            //   // page
-            //   // limit
+            if (field.localized) {
+              withJoin.columns._locale = true
+            }
+            currentArgs.with[toSnakeCase(`${path}${field.name}`)] = withJoin
           }
           break
         }
