@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { pathToFileURL } from 'node:url'
 import path from 'path'
 
 import type { Payload } from '../../index.js'
@@ -35,9 +36,10 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
+      const filename = pathToFileURL(filePath)
       // eval used to circumvent errors bundling
       let migration = await eval(
-        `${typeof require === 'function' ? 'require' : 'import'}('${filePath.replaceAll('\\', '/')}')`,
+        `${typeof require === 'function' ? 'require' : 'import'}('${filename.href}')`,
       )
       if ('default' in migration) migration = migration.default
 
