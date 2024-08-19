@@ -129,6 +129,8 @@ const DocumentInfo: React.FC<
     }
   }
 
+  console.log({ docprefskey: preferencesKey })
+
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
@@ -558,6 +560,7 @@ const DocumentInfo: React.FC<
     isInitializing,
     isLoading,
     onSave,
+    preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,
