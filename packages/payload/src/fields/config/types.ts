@@ -7,64 +7,97 @@ import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
-  ArrayFieldErrorComponent,
-  ArrayFieldLabelComponent,
+  ArrayFieldErrorClientComponent,
+  ArrayFieldErrorServerComponent,
+  ArrayFieldLabelClientComponent,
+  ArrayFieldLabelServerComponent,
   ArrayFieldProps,
-  BlockFieldErrorComponent,
+  BlockFieldErrorClientComponent,
+  BlockFieldErrorServerComponent,
   BlockFieldProps,
-  CheckboxFieldErrorComponent,
-  CheckboxFieldLabelComponent,
+  CheckboxFieldErrorClientComponent,
+  CheckboxFieldErrorServerComponent,
+  CheckboxFieldLabelClientComponent,
+  CheckboxFieldLabelServerComponent,
   CheckboxFieldProps,
   ClientTab,
-  CodeFieldErrorComponent,
-  CodeFieldLabelComponent,
+  CodeFieldErrorClientComponent,
+  CodeFieldErrorServerComponent,
+  CodeFieldLabelClientComponent,
+  CodeFieldLabelServerComponent,
   CodeFieldProps,
-  CollapsibleFieldLabelComponent,
+  CollapsibleFieldLabelClientComponent,
+  CollapsibleFieldLabelServerComponent,
   CollapsibleFieldProps,
   ConditionalDateProps,
-  DateFieldErrorComponent,
-  DateFieldLabelComponent,
+  DateFieldErrorClientComponent,
+  DateFieldErrorServerComponent,
+  DateFieldLabelClientComponent,
+  DateFieldLabelServerComponent,
   DateFieldProps,
   Description,
-  EmailFieldErrorComponent,
-  EmailFieldLabelComponent,
+  EmailFieldErrorClientComponent,
+  EmailFieldErrorServerComponent,
+  EmailFieldLabelClientComponent,
+  EmailFieldLabelServerComponent,
   EmailFieldProps,
-  GroupFieldLabelComponent,
+  GroupFieldLabelClientComponent,
+  GroupFieldLabelServerComponent,
   GroupFieldProps,
   HiddenFieldProps,
-  JSONFieldErrorComponent,
-  JSONFieldLabelComponent,
+  JSONFieldErrorClientComponent,
+  JSONFieldErrorServerComponent,
+  JSONFieldLabelClientComponent,
+  JSONFieldLabelServerComponent,
   JSONFieldProps,
   MappedComponent,
-  NumberFieldErrorComponent,
-  NumberFieldLabelComponent,
+  NumberFieldErrorClientComponent,
+  NumberFieldErrorServerComponent,
+  NumberFieldLabelClientComponent,
+  NumberFieldLabelServerComponent,
   NumberFieldProps,
-  PointFieldErrorComponent,
-  PointFieldLabelComponent,
+  PointFieldErrorClientComponent,
+  PointFieldErrorServerComponent,
+  PointFieldLabelClientComponent,
+  PointFieldLabelServerComponent,
   PointFieldProps,
-  RadioFieldErrorComponent,
-  RadioFieldLabelComponent,
+  RadioFieldErrorClientComponent,
+  RadioFieldErrorServerComponent,
+  RadioFieldLabelClientComponent,
+  RadioFieldLabelServerComponent,
   RadioFieldProps,
-  RelationshipFieldErrorComponent,
-  RelationshipFieldLabelComponent,
+  RelationshipFieldErrorClientComponent,
+  RelationshipFieldErrorServerComponent,
+  RelationshipFieldLabelClientComponent,
+  RelationshipFieldLabelServerComponent,
   RelationshipFieldProps,
-  RichTextFieldErrorComponent,
-  RichTextFieldLabelComponent,
+  RichTextFieldErrorClientComponent,
+  RichTextFieldErrorServerComponent,
+  RichTextFieldLabelClientComponent,
+  RichTextFieldLabelServerComponent,
   RichTextFieldProps,
   RowFieldProps,
   RowLabelComponent,
-  SelectFieldErrorComponent,
-  SelectFieldLabelComponent,
+  SelectFieldErrorClientComponent,
+  SelectFieldErrorServerComponent,
+  SelectFieldLabelClientComponent,
+  SelectFieldLabelServerComponent,
   SelectFieldProps,
   StaticDescription,
   TabsFieldProps,
-  TextFieldErrorComponent,
-  TextFieldLabelComponent,
-  TextareaFieldErrorComponent,
-  TextareaFieldLabelComponent,
+  TextFieldErrorClientComponent,
+  TextFieldErrorServerComponent,
+  TextFieldLabelClientComponent,
+  TextFieldLabelServerComponent,
+  TextareaFieldErrorClientComponent,
+  TextareaFieldErrorServerComponent,
+  TextareaFieldLabelClientComponent,
+  TextareaFieldLabelServerComponent,
   TextareaFieldProps,
-  UploadFieldErrorComponent,
-  UploadFieldLabelComponent,
+  UploadFieldErrorClientComponent,
+  UploadFieldErrorServerComponent,
+  UploadFieldLabelClientComponent,
+  UploadFieldLabelServerComponent,
   UploadFieldProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
@@ -389,8 +422,8 @@ export type NumberField = {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<NumberFieldErrorComponent>
-      Label?: CustomComponent<NumberFieldLabelComponent>
+      Error?: CustomComponent<NumberFieldErrorClientComponent | NumberFieldErrorServerComponent>
+      Label?: CustomComponent<NumberFieldLabelClientComponent | NumberFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -442,8 +475,8 @@ export type TextField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<TextFieldErrorComponent>
-      Label?: CustomComponent<TextFieldLabelComponent>
+      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
+      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -491,8 +524,8 @@ export type EmailField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<EmailFieldErrorComponent>
-      Label?: CustomComponent<EmailFieldLabelComponent>
+      Error?: CustomComponent<EmailFieldErrorClientComponent | EmailFieldErrorServerComponent>
+      Label?: CustomComponent<EmailFieldLabelClientComponent | EmailFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -518,8 +551,8 @@ export type EmailFieldClient = {
 export type TextareaField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<TextareaFieldErrorComponent>
-      Label?: CustomComponent<TextareaFieldLabelComponent>
+      Error?: CustomComponent<TextareaFieldErrorClientComponent | TextareaFieldErrorServerComponent>
+      Label?: CustomComponent<TextareaFieldLabelClientComponent | TextareaFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -549,8 +582,8 @@ export type TextareaFieldClient = {
 export type CheckboxField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<CheckboxFieldErrorComponent>
-      Label?: CustomComponent<CheckboxFieldLabelComponent>
+      Error?: CustomComponent<CheckboxFieldErrorClientComponent | CheckboxFieldErrorServerComponent>
+      Label?: CustomComponent<CheckboxFieldLabelClientComponent | CheckboxFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -574,8 +607,8 @@ export type CheckboxFieldClient = {
 export type DateField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<DateFieldErrorComponent>
-      Label?: CustomComponent<DateFieldLabelComponent>
+      Error?: CustomComponent<DateFieldErrorClientComponent | DateFieldErrorServerComponent>
+      Label?: CustomComponent<DateFieldLabelClientComponent | DateFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -602,7 +635,7 @@ export type DateFieldClient = {
 export type GroupField = {
   admin?: {
     components?: {
-      Label?: CustomComponent<GroupFieldLabelComponent>
+      Label?: CustomComponent<GroupFieldLabelClientComponent | GroupFieldLabelServerComponent>
     } & Admin['components']
     hideGutter?: boolean
   } & Admin
@@ -648,7 +681,9 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
-          Label?: CustomComponent<CollapsibleFieldLabelComponent>
+          Label?: CustomComponent<
+            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          >
           RowLabel: RowLabelComponent
         } & Admin['components']
         initCollapsed?: boolean
@@ -658,7 +693,9 @@ export type CollapsibleField = {
   | {
       admin?: {
         components?: {
-          Label?: CustomComponent<CollapsibleFieldLabelComponent>
+          Label?: CustomComponent<
+            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          >
         } & Admin['components']
         initCollapsed?: boolean
       } & Admin
@@ -792,8 +829,8 @@ export type UIFieldClient = {
 export type UploadField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<UploadFieldErrorComponent>
-      Label?: CustomComponent<UploadFieldLabelComponent>
+      Error?: CustomComponent<UploadFieldErrorClientComponent | UploadFieldErrorServerComponent>
+      Label?: CustomComponent<UploadFieldLabelClientComponent | UploadFieldLabelServerComponent>
     } & Admin['components']
   }
   displayPreview?: boolean
@@ -822,8 +859,8 @@ export type UploadFieldClient = {
 export type CodeField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<CodeFieldErrorComponent>
-      Label?: CustomComponent<CodeFieldLabelComponent>
+      Error?: CustomComponent<CodeFieldErrorClientComponent | CodeFieldErrorServerComponent>
+      Label?: CustomComponent<CodeFieldLabelClientComponent | CodeFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -852,8 +889,8 @@ export type CodeFieldClient = {
 export type JSONField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<JSONFieldErrorComponent>
-      Label?: CustomComponent<JSONFieldLabelComponent>
+      Error?: CustomComponent<JSONFieldErrorClientComponent | JSONFieldErrorServerComponent>
+      Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -885,8 +922,8 @@ export type JSONFieldClient = {
 export type SelectField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<SelectFieldErrorComponent>
-      Label?: CustomComponent<SelectFieldLabelComponent>
+      Error?: CustomComponent<SelectFieldErrorClientComponent | SelectFieldErrorServerComponent>
+      Label?: CustomComponent<SelectFieldLabelClientComponent | SelectFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']
@@ -970,8 +1007,12 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   components?: {
-    Error?: CustomComponent<RelationshipFieldErrorComponent>
-    Label?: CustomComponent<RelationshipFieldLabelComponent>
+    Error?: CustomComponent<
+      RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
+    >
+    Label?: CustomComponent<
+      RelationshipFieldLabelClientComponent | RelationshipFieldLabelServerComponent
+    >
   } & Admin['components']
   isSortable?: boolean
 } & Admin
@@ -1038,8 +1079,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
-      Error?: CustomComponent<RichTextFieldErrorComponent>
-      Label?: CustomComponent<RichTextFieldLabelComponent>
+      Error?: CustomComponent<RichTextFieldErrorClientComponent>
+      Label?: CustomComponent<RichTextFieldLabelClientComponent>
     } & Admin['components']
   } & Admin
   editor?:
@@ -1074,8 +1115,8 @@ export type RichTextFieldClient<
 export type ArrayField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<ArrayFieldErrorComponent>
-      Label?: CustomComponent<ArrayFieldLabelComponent>
+      Error?: CustomComponent<ArrayFieldErrorClientComponent | ArrayFieldErrorServerComponent>
+      Label?: CustomComponent<ArrayFieldLabelClientComponent | ArrayFieldLabelServerComponent>
       RowLabel?: RowLabelComponent
     } & Admin['components']
     initCollapsed?: boolean
@@ -1120,8 +1161,8 @@ export type ArrayFieldClient = {
 export type RadioField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<RadioFieldErrorComponent>
-      Label?: CustomComponent<RadioFieldLabelComponent>
+      Error?: CustomComponent<RadioFieldErrorClientComponent | RadioFieldErrorServerComponent>
+      Label?: CustomComponent<RadioFieldLabelClientComponent | RadioFieldLabelServerComponent>
     } & Admin['components']
     layout?: 'horizontal' | 'vertical'
   } & Admin
@@ -1207,7 +1248,7 @@ export type ClientBlock = {
 export type BlockField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<BlockFieldErrorComponent>
+      Error?: CustomComponent<BlockFieldErrorClientComponent | BlockFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1239,8 +1280,8 @@ export type BlockFieldClient = {
 export type PointField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<PointFieldErrorComponent>
-      Label?: CustomComponent<PointFieldLabelComponent>
+      Error?: CustomComponent<PointFieldErrorClientComponent | PointFieldErrorServerComponent>
+      Label?: CustomComponent<PointFieldLabelClientComponent | PointFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
     } & Admin['components']

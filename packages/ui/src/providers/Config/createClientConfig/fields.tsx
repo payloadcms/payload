@@ -7,8 +7,9 @@ import type {
   ClientField,
   CreateMappedComponent,
   Field,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
   ImportMap,
-  LabelComponent,
   LabelsClient,
   MappedComponent,
   Payload,
@@ -106,7 +107,7 @@ export const createClientField = ({
     clientField.label = incomingField.label({ t: i18n.t })
   }
 
-  const CustomLabel: LabelComponent | RowLabelComponent =
+  const CustomLabel: FieldLabelClientComponent | FieldLabelServerComponent | RowLabelComponent =
     'admin' in incomingField &&
     'components' in incomingField.admin &&
     'Label' in incomingField.admin.components &&
@@ -204,7 +205,7 @@ export const createClientField = ({
     }
 
     case 'richText': {
-      const field = clientField as RichTextFieldClient
+      const field = clientField
 
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -344,9 +345,9 @@ export const createClientField = ({
       typeof incomingField.admin?.description === 'string' ||
       typeof incomingField.admin?.description === 'object'
     ) {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
+      ;(clientField).admin.description = incomingField.admin.description
     } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
+      ;(clientField).admin.description = incomingField.admin?.description({
         t: i18n.t,
       })
     }
@@ -370,7 +371,7 @@ export const createClientField = ({
     'Description' in incomingField.admin.components &&
     incomingField?.admin?.components?.Description !== undefined
   ) {
-    ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
+    ;(clientField).admin.components.Description =
       createMappedComponent(
         incomingField.admin.components.Description,
         serverProps,
@@ -391,7 +392,7 @@ export const createClientField = ({
     'Error' in incomingField.admin.components &&
     incomingField.admin.components.Error !== undefined
   ) {
-    ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
+    ;(clientField).admin.components.Error = createMappedComponent(
       // @ts-expect-error
       incomingField.admin.components.Error,
       serverProps,
@@ -434,7 +435,7 @@ export const createClientField = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label !== undefined
   ) {
-    ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
+    ;(clientField).admin.components.Label = createMappedComponent(
       CustomLabel,
       serverProps,
       undefined,
@@ -454,7 +455,7 @@ export const createClientField = ({
     'beforeInput' in incomingField.admin.components &&
     incomingField.admin.components.beforeInput !== undefined
   ) {
-    ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
+    ;(clientField).admin.components.beforeInput =
       createMappedComponent(
         incomingField.admin?.components?.beforeInput,
         serverProps,
@@ -475,7 +476,7 @@ export const createClientField = ({
     'afterInput' in incomingField.admin.components &&
     incomingField.admin.components.afterInput !== undefined
   ) {
-    ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
+    ;(clientField).admin.components.afterInput =
       createMappedComponent(
         incomingField.admin?.components?.afterInput,
         serverProps,
