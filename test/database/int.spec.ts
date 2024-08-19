@@ -121,24 +121,21 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
-    })
-
-    afterAll(() => {
       removeFiles(path.join(dirname, './migrations'))
-    })
 
-    it('should run migrate:create', async () => {
       await payload.db.createMigration({
         forceAcceptWarning: true,
         migrationName: 'test',
         payload,
       })
+    })
 
+    it('should run migrate:create', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
