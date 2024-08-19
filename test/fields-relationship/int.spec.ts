@@ -1,21 +1,26 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Collection1 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './collectionSlugs.js'
-import configPromise from './config.js'
 
 let payload: Payload
 let restClient: NextRESTClient
 
 const { email, password } = devUser
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Relationship Fields', () => {
   beforeAll(async () => {
-    const initialized = await initPayloadInt(configPromise)
+    const initialized = await initPayloadInt(dirname)
     ;({ payload, restClient } = initialized)
 
     await restClient.login({

@@ -79,7 +79,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
-  const config = useConfig()
+  const { config } = useConfig()
   const {
     routes: { api: apiRoute },
     serverURL,
@@ -138,7 +138,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 },
                 t,
                 user,
-              } as PayloadRequest,
+              } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
             })
 

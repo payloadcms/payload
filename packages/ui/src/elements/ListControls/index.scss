@@ -48,10 +48,22 @@
     &__wrap {
       flex-wrap: wrap;
       background-color: unset;
+      padding: 0;
+      position: relative;
+    }
+
+    .icon--search {
+      position: absolute;
+      top: base(0.4);
+      inset-inline-start: base(0.4);
+      z-index: 1;
     }
 
     .search-filter {
       width: 100%;
+      input {
+        padding: base(0.4) base(2);
+      }
     }
 
     &__buttons-wrap {
@@ -64,11 +76,8 @@
       }
 
       .pill {
-        padding: base(0.5) base(1);
-
-        svg {
-          margin-left: auto;
-        }
+        padding: base(0.2) base(0.2) base(0.2) base(0.4);
+        justify-content: space-between;
       }
     }
 

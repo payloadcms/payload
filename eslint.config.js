@@ -28,6 +28,7 @@ export const rootParserOptions = {
   EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
   EXPERIMENTAL_useProjectService: {
     allowDefaultProjectForFiles: ['./src/*.ts', './src/*.tsx'],
+    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100,
   },
   sourceType: 'module',
   ecmaVersion: 'latest',
@@ -61,6 +62,7 @@ export const rootEslintConfig = [
       'payload/no-jsx-import-statements': 'warn',
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
+      'payload/no-imports-from-self': 'error',
     },
   },
   {

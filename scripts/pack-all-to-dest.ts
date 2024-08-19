@@ -59,7 +59,7 @@ async function main() {
 ${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 `)
 
-  //execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+  execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
 
   header(`\n 📦 Packing all packages to ${dest}...`)
 

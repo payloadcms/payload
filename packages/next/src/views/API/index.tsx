@@ -1,9 +1,9 @@
-import type { EditViewComponent } from 'payload'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
 import React from 'react'
 
 import { APIViewClient } from './index.client.js'
 
-export const APIView: EditViewComponent = () => {
+export const APIView: PayloadServerReactComponent<EditViewComponent> = () => {
   return <APIViewClient />
 }

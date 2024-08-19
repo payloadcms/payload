@@ -67,31 +67,6 @@ export type FieldGenerator<TSchema, TField> = {
   schema: TSchema
 }
 
-/**
- * Field config types that need representation in the database
- */
-type FieldType =
-  | 'array'
-  | 'blocks'
-  | 'checkbox'
-  | 'code'
-  | 'collapsible'
-  | 'date'
-  | 'email'
-  | 'group'
-  | 'json'
-  | 'number'
-  | 'point'
-  | 'radio'
-  | 'relationship'
-  | 'richText'
-  | 'row'
-  | 'select'
-  | 'tabs'
-  | 'text'
-  | 'textarea'
-  | 'upload'
-
 export type FieldGeneratorFunction<TSchema, TField extends Field> = (
   args: FieldGenerator<TSchema, TField>,
 ) => void

@@ -9,7 +9,6 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { get } from 'http'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -50,7 +49,7 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
           ...docInfo,
           doc: { ...getData() },
           locale: typeof locale === 'object' ? locale?.code : locale,
-        } satisfies Parameters<GenerateURL>[0]),
+        } satisfies Omit<Parameters<GenerateURL>[0], 'req'>),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

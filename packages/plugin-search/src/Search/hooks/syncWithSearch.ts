@@ -82,11 +82,11 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
           depth: 0,
           req,
           where: {
-            'doc.value': {
-              equals: id,
-            },
             'doc.relationTo': {
               equals: collection,
+            },
+            'doc.value': {
+              equals: id,
             },
           },
         })

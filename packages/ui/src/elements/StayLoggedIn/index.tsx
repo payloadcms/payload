@@ -19,7 +19,7 @@ export const StayLoggedInModal: React.FC = () => {
   const { refreshCookie } = useAuth()
 
   const router = useRouter()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {

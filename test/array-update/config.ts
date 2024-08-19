@@ -7,6 +7,11 @@ import { devUser } from '../credentials.js'
 import { arraySlug } from './shared.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: arraySlug,

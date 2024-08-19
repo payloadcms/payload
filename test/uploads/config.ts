@@ -13,6 +13,7 @@ import { Uploads2 } from './collections/Upload2/index.js'
 import {
   animatedTypeMedia,
   audioSlug,
+  customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
@@ -28,6 +29,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: relationSlug,
@@ -87,6 +93,36 @@ export default buildConfigWithDefaults({
           width: 200,
         },
         staticDir: path.resolve(dirname, './media-gif'),
+      },
+    },
+    {
+      slug: 'filename-compound-index',
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+          admin: {
+            description: 'Alt text to be used for compound index',
+          },
+        },
+      ],
+      upload: {
+        filenameCompoundIndex: ['filename', 'alt'],
+        imageSizes: [
+          {
+            name: 'small',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
+          },
+          {
+            name: 'large',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
+          },
+        ],
+        mimeTypes: ['image/*'],
       },
     },
     {
@@ -506,6 +542,23 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: customFileNameMediaSlug,
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'custom',
+            height: 500,
+            width: 500,
+            generateImageName: ({ extension, height, width, sizeName }) =>
+              `${sizeName}-${width}x${height}.${extension}`,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
+      },
+    },
+    {
       slug: unstoredMediaSlug,
       fields: [],
       upload: {
@@ -763,6 +816,14 @@ export default buildConfigWithDefaults({
         imageWithPreview3: uploadedImageWithoutPreview,
         imageWithoutPreview3: uploadedImageWithoutPreview,
       },
+    })
+
+    await payload.create({
+      collection: 'filename-compound-index',
+      data: {
+        alt: 'alt-1',
+      },
+      file: imageFile,
     })
   },
   serverURL: undefined,

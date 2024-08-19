@@ -1,15 +1,14 @@
 'use client'
 import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 
-import { useTranslation } from '@payloadcms/ui'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { buildColumnState } from './buildColumnState.js'
 import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
@@ -30,12 +29,12 @@ export type ListPreferences = {
 }
 
 type Props = {
-  cellProps?: Partial<CellComponentProps>[]
-  children: React.ReactNode
-  collectionSlug: string
-  enableRowSelections?: boolean
-  listPreferences?: ListPreferences
-  preferenceKey: string
+  readonly cellProps?: Partial<CellComponentProps>[]
+  readonly children: React.ReactNode
+  readonly collectionSlug: string
+  readonly enableRowSelections?: boolean
+  readonly listPreferences?: ListPreferences
+  readonly preferenceKey: string
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
@@ -46,26 +45,25 @@ export const TableColumnsProvider: React.FC<Props> = ({
   listPreferences,
   preferenceKey,
 }) => {
-  const config = useConfig()
-
-  const { componentMap } = useComponentMap()
+  const {
+    config: { collections },
+  } = useConfig()
   const { i18n } = useTranslation()
 
-  const { fieldMap } = componentMap.collections[collectionSlug]
-
-  const collectionConfig = config.collections.find(
+  const collectionConfig = collections.find(
     (collectionConfig) => collectionConfig.slug === collectionSlug,
   )
 
   const {
     admin: { defaultColumns, useAsTitle },
+    fields,
   } = collectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference, setPreference } = usePreferences()
 
   const [initialColumns] = useState<ColumnPreferences>(() =>
-    getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
+    getInitialColumns(filterFields(fields), useAsTitle, defaultColumns),
   )
 
   const [tableColumns, setTableColumns] = React.useState(() =>
@@ -74,7 +72,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       enableRowSelections,
-      fieldMap,
+      fields,
       i18n,
       useAsTitle,
     }),
@@ -130,7 +128,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
       const toggledColumns = tableColumns.map((col) => {
         return {
           ...col,
-          active: col?.name === column ? !col.active : col.active,
+          active:
+            col?.cellProps?.field &&
+            'name' in col.cellProps.field &&
+            col?.cellProps?.field?.name === column
+              ? !col.active
+              : col.active,
         }
       })
 
@@ -177,7 +180,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
               enableRowSelections: true,
-              fieldMap,
+              fields,
               i18n,
               useAsTitle,
             }),
@@ -191,7 +194,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     preferenceKey,
     getPreference,
     collectionSlug,
-    fieldMap,
+    fields,
     cellProps,
     defaultColumns,
     i18n,

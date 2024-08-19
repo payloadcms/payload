@@ -1,18 +1,17 @@
-import type { ClientCollectionConfig, FieldMap, MappedField } from 'payload'
+import type { ClientCollectionConfig, ClientField } from 'payload'
 
-import { useTranslation } from '@payloadcms/ui'
-
+import { useTranslation } from '../providers/Translation/index.js'
 import { flattenFieldMap } from '../utilities/flattenFieldMap.js'
 
 export const useUseTitleField = (
   collection: ClientCollectionConfig,
-  fieldMap: FieldMap,
-): MappedField => {
+  fields: ClientField[],
+): ClientField => {
   const {
     admin: { useAsTitle },
   } = collection
   const { i18n } = useTranslation()
 
-  const topLevelFields = flattenFieldMap({ fieldMap, i18n })
-  return topLevelFields.find((field) => field.name === useAsTitle)
+  const topLevelFields = flattenFieldMap({ fields, i18n })
+  return topLevelFields.find((field) => 'name' in field && field.name === useAsTitle)
 }

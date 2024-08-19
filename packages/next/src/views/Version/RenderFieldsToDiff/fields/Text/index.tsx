@@ -1,7 +1,9 @@
+import type { TextFieldClient } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
@@ -10,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'text-diff'
 
-const Text: React.FC<Props> = ({
+const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
   comparison,
   diffMethod,
   field,
@@ -35,9 +37,9 @@ const Text: React.FC<Props> = ({
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {'label' in field.fieldComponentProps &&
-          typeof field.fieldComponentProps.label !== 'function' &&
-          getTranslation(field.fieldComponentProps.label || '', i18n)}
+        {'label' in field &&
+          typeof field.label !== 'function' &&
+          getTranslation(field.label || '', i18n)}
       </Label>
       <DiffViewer
         comparisonToRender={comparisonToRender}

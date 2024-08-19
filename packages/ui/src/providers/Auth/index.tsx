@@ -49,7 +49,7 @@ export function AuthProvider({
   const pathname = usePathname()
   const router = useRouter()
 
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     admin: {
@@ -262,6 +262,11 @@ export function AuthProvider({
       refreshCookie()
     }
   }, [debouncedLocationChange, refreshCookie, id])
+
+  // When initialUser changes, reset in state
+  useEffect(() => {
+    setUser(initialUser)
+  }, [initialUser])
 
   useEffect(() => {
     setLastLocationChange(Date.now())

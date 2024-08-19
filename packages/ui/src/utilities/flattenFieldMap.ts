@@ -1,10 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { FieldMap, MappedField } from 'payload'
+import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
 export type FlattenFieldMapArgs = {
-  fieldMap: FieldMap
+  fields: ClientField[]
   i18n: I18nClient
   keepPresentationalFields?: boolean
   labelPrefix?: string
@@ -12,7 +12,7 @@ export type FlattenFieldMapArgs = {
 
 export type FlattenFieldMapResult = ({
   labelWithPrefix?: string
-} & MappedField)[]
+} & ClientField)[]
 
 /**
  * Flattens a collection's fields into a single array of fields, as long
@@ -22,16 +22,14 @@ export type FlattenFieldMapResult = ({
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
 export const flattenFieldMap = ({
-  fieldMap,
+  fields,
   i18n,
   keepPresentationalFields,
   labelPrefix,
 }: FlattenFieldMapArgs): FlattenFieldMapResult => {
-  return fieldMap.reduce((acc, field) => {
-    if ('fieldMap' in field.fieldComponentProps && field.type !== 'array') {
-      const translatedLabel = field.fieldComponentProps.label
-        ? getTranslation(field.fieldComponentProps.label, i18n)
-        : undefined
+  return fields.reduce((acc, field) => {
+    if ('fields' in field && field.type !== 'array') {
+      const translatedLabel = 'label' in field ? getTranslation(field.label, i18n) : undefined
       const labelWithPrefix = labelPrefix
         ? translatedLabel
           ? labelPrefix + ' > ' + translatedLabel
@@ -40,21 +38,19 @@ export const flattenFieldMap = ({
 
       acc.push(
         ...flattenFieldMap({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           i18n,
           keepPresentationalFields,
           labelPrefix: labelWithPrefix,
         }),
       )
-    } else if ('name' in field || (keepPresentationalFields && field.fieldIsPresentational)) {
+    } else if ('name' in field || (keepPresentationalFields && field._isPresentational)) {
       if (field.name === 'id' && labelPrefix !== undefined) {
         // ignore nested id fields
         return acc
       }
 
-      const translatedLabel = field.fieldComponentProps.label
-        ? getTranslation(field.fieldComponentProps.label, i18n)
-        : undefined
+      const translatedLabel = field.label ? getTranslation(field.label, i18n) : undefined
 
       const labelWithPrefix = labelPrefix
         ? translatedLabel
@@ -62,31 +58,24 @@ export const flattenFieldMap = ({
           : labelPrefix
         : translatedLabel
 
-      const path =
-        'fieldComponentProps' in field &&
-        'path' in field.fieldComponentProps &&
-        field.fieldComponentProps.path !== undefined
-          ? field.fieldComponentProps.path
+      const name = field._schemaPath
+        ? field._schemaPath.replaceAll('.', '-')
+        : 'name' in field
+          ? field.name
           : undefined
-
-      const name = path ? path.replaceAll('.', '-') : 'name' in field ? field.name : undefined
 
       acc.push({ ...field, name, labelWithPrefix })
       return acc
-    } else if (
-      field.type === 'tabs' &&
-      'tabs' in field.fieldComponentProps &&
-      Array.isArray(field.fieldComponentProps.tabs)
-    ) {
+    } else if (field.type === 'tabs' && 'tabs' in field && Array.isArray(field.tabs)) {
       return [
         ...acc,
-        ...field.fieldComponentProps.tabs.reduce((tabAcc, tab) => {
+        ...field.tabs.reduce((tabAcc, tab) => {
           return [
             ...tabAcc,
             ...('name' in tab
               ? [{ ...tab }]
               : flattenFieldMap({
-                  fieldMap: tab.fieldMap,
+                  fields: tab.fields,
                   i18n,
                   keepPresentationalFields,
                   labelPrefix,

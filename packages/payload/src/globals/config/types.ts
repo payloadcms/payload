@@ -15,6 +15,7 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
+  MetaConfig,
   OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -100,10 +101,10 @@ export type GlobalAdminOptions = {
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?: EditConfig
+      edit?: EditConfig
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
@@ -121,17 +122,14 @@ export type GlobalAdminOptions = {
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit view
+   * Hide the API URL within the Edit View
    */
   hideAPIURL?: boolean
   /**
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   /**
    * Function to generate custom preview URL
    */

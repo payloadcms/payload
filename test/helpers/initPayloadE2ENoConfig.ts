@@ -7,6 +7,7 @@ import { fileURLToPath, parse } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 
+import { runInitSeparateProcess } from '../runInitSeparateProcess.js'
 import { createTestHooks } from '../testHooks.js'
 import { getNextJSRootDir } from './getNextJSRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
@@ -30,11 +31,16 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   prebuild,
 }: Args): Promise<Result<T>> {
   const testSuiteName = path.basename(dirname)
+
+  await runInitSeparateProcess(testSuiteName, true)
+
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
 
   const port = 3000
   process.env.PORT = String(port)
+  process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER = 'true'
+
   const serverURL = `http://localhost:${port}`
 
   await startMemoryDB()
@@ -82,6 +88,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   // which seeds test data twice + other bad things.
   // We initialize Payload above so we can have access to it in the tests
   void app.prepare().then(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     createServer(async (req, res) => {
       const parsedUrl = parse(req.url, true)
       await handle(req, res, parsedUrl)

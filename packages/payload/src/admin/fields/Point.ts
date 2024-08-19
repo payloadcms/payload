@@ -1,14 +1,13 @@
+import type { MarkOptional } from 'ts-essentials'
+
+import type { PointFieldClient } from '../../fields/config/types.js'
 import type { PointFieldValidation } from '../../fields/validations.js'
 import type { ErrorComponent } from '../forms/Error.js'
 import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
 
 export type PointFieldProps = {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  validate?: PointFieldValidation
-  width?: string
+  readonly field: MarkOptional<PointFieldClient, 'type'>
+  readonly validate?: PointFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
 export type PointFieldLabelComponent = LabelComponent<'point'>

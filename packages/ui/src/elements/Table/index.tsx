@@ -1,10 +1,11 @@
 'use client'
-import type { CellComponentProps, FieldBase, FieldMap, FieldTypes } from 'payload'
+import type { CellComponentProps, ClientField, MappedComponent } from 'payload'
 
 import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
@@ -14,24 +15,21 @@ export { TableCellProvider }
 const baseClass = 'table'
 
 export type Column = {
-  Label: React.ReactNode
-  accessor: string
-  active: boolean
-  admin?: FieldBase['admin']
-  cellProps?: Partial<CellComponentProps>
-  components: {
-    Cell: React.ReactNode
+  readonly Label: React.ReactNode
+  readonly accessor: string
+  readonly active: boolean
+  readonly cellProps?: Partial<CellComponentProps>
+  readonly components: {
+    Cell: MappedComponent
     Heading: React.ReactNode
   }
-  name: FieldBase['name']
-  type: keyof FieldTypes
 }
 
 export type Props = {
-  columns?: Column[]
-  customCellContext?: Record<string, unknown>
-  data: Record<string, unknown>[]
-  fieldMap: FieldMap
+  readonly columns?: Column[]
+  readonly customCellContext?: Record<string, unknown>
+  readonly data: Record<string, unknown>[]
+  readonly fields: ClientField[]
 }
 
 export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {
@@ -63,8 +61,8 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
                   function getCellData(row: Record<string, unknown>, col: Column) {
-                    if (col.cellProps?.schemaPath) {
-                      return col.cellProps.schemaPath.split('.').reduce((acc, key) => {
+                    if (col.cellProps?.field?._schemaPath) {
+                      return col.cellProps.field._schemaPath.split('.').reduce((acc, key) => {
                         return acc?.[key]
                       }, row)
                     } else {
@@ -81,7 +79,10 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
                         customCellContext={customCellContext}
                         rowData={row}
                       >
-                        {col.components.Cell}
+                        <RenderComponent
+                          clientProps={{ ...col?.cellProps }}
+                          mappedComponent={col.components.Cell}
+                        />
                       </TableCellProvider>
                     </td>
                   )
