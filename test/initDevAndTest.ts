@@ -3,70 +3,15 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { type SanitizedConfig, generateImportMap } from 'payload'
 
+import type { allDatabaseAdapters } from './getDatabaseAdapter.js'
+
+import { getDatabaseAdapter } from './getDatabaseAdapter.js'
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const runImmediately = process.argv[2]
-
-const databaseAdapters = {
-  mongodb: `
-  import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-  export const databaseAdapter = mongooseAdapter({
-    url:
-      process.env.MONGODB_MEMORY_SERVER_URI ||
-      process.env.DATABASE_URI ||
-      'mongodb://127.0.0.1/payloadtests',
-    collation: {
-      strength: 1,
-    },
-  })`,
-  postgres: `
-  import { postgresAdapter } from '@payloadcms/db-postgres'
-
-  export const databaseAdapter = postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  })`,
-  'postgres-custom-schema': `
-  import { postgresAdapter } from '@payloadcms/db-postgres'
-
-  export const databaseAdapter = postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-    schemaName: 'custom',
-  })`,
-  'postgres-uuid': `
-    import { postgresAdapter } from '@payloadcms/db-postgres'
-
-  export const databaseAdapter = postgresAdapter({
-    idType: 'uuid',
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  })`,
-  sqlite: `
-  import { sqliteAdapter } from '@payloadcms/db-sqlite'
-
-  export const databaseAdapter = sqliteAdapter({
-    client: {
-      url: process.env.SQLITE_URL || 'file:./payloadtests.db',
-    },
-  })`,
-  supabase: `
-  import { postgresAdapter } from '@payloadcms/db-postgres'
-
-  export const databaseAdapter = postgresAdapter({
-    pool: {
-      connectionString:
-        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-    },
-  })`,
-}
 
 export async function initDevAndTest(
   testSuiteArg: string,
@@ -85,11 +30,11 @@ export async function initDevAndTest(
   }
 
   if (writeDBAdapter === 'true') {
-    const dbAdapter: keyof typeof databaseAdapters =
-      (process.env.PAYLOAD_DATABASE as keyof typeof databaseAdapters) || 'mongodb'
+    const dbAdapter: keyof typeof allDatabaseAdapters =
+      (process.env.PAYLOAD_DATABASE as keyof typeof allDatabaseAdapters) || 'mongodb'
 
     // Generate databaseAdapter.ts
-    const databaseAdapter = databaseAdapters[dbAdapter]
+    const databaseAdapter = getDatabaseAdapter(dbAdapter)
 
     // Write to databaseAdapter.ts
     fs.writeFileSync(
