@@ -13,12 +13,14 @@ export type ClientTab =
   | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
+export type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
+
 export type TabsFieldProps = {
-  readonly field: MarkOptional<TabsFieldClient, 'type'>
+  readonly field: TabsFieldClientWithoutType
 } & FormFieldBase
 
-export type TabsFieldLabelComponent = LabelComponent<TabsFieldProps>
+export type TabsFieldLabelComponent = LabelComponent<TabsFieldClientWithoutType>
 
-export type TabsFieldDescriptionComponent = DescriptionComponent<TabsFieldProps>
+export type TabsFieldDescriptionComponent = DescriptionComponent<TabsFieldClientWithoutType>
 
-export type TabsFieldErrorComponent = ErrorComponent<TabsFieldProps>
+export type TabsFieldErrorComponent = ErrorComponent<TabsFieldClientWithoutType>

@@ -11,16 +11,18 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
+
 export type UploadFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<UploadFieldProps>
-  readonly errorProps?: ErrorProps<UploadFieldProps>
-  readonly field: MarkOptional<UploadFieldClient, 'type'>
-  readonly labelProps?: LabelProps<UploadFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<UploadFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<UploadFieldClient>
+  readonly field: UploadFieldClientWithoutType
+  readonly labelProps?: LabelProps<UploadFieldClientWithoutType>
   readonly validate?: UploadFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type UploadFieldLabelComponent = LabelComponent<UploadFieldProps>
+export type UploadFieldLabelComponent = LabelComponent<UploadFieldClientWithoutType>
 
-export type UploadFieldDescriptionComponent = DescriptionComponent<UploadFieldProps>
+export type UploadFieldDescriptionComponent = DescriptionComponent<UploadFieldClientWithoutType>
 
-export type UploadFieldErrorComponent = ErrorComponent<UploadFieldProps>
+export type UploadFieldErrorComponent = ErrorComponent<UploadFieldClientWithoutType>

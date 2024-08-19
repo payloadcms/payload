@@ -11,16 +11,18 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
+
 export type JSONFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<JSONFieldProps>
-  readonly errorProps?: ErrorProps<JSONFieldProps>
-  readonly field: MarkOptional<JSONFieldClient, 'type'>
-  readonly labelProps?: LabelProps<JSONFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<JSONFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<JSONFieldClientWithoutType>
+  readonly field: JSONFieldClientWithoutType
+  readonly labelProps?: LabelProps<JSONFieldClientWithoutType>
   readonly validate?: JSONFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type JSONFieldLabelComponent = LabelComponent<JSONFieldProps>
+export type JSONFieldLabelComponent = LabelComponent<JSONFieldClientWithoutType>
 
-export type JSONFieldDescriptionComponent = DescriptionComponent<JSONFieldProps>
+export type JSONFieldDescriptionComponent = DescriptionComponent<JSONFieldClientWithoutType>
 
-export type JSONFieldErrorComponent = ErrorComponent<JSONFieldProps>
+export type JSONFieldErrorComponent = ErrorComponent<JSONFieldClientWithoutType>

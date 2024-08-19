@@ -1,5 +1,7 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { ServerProps, StaticLabel } from '../../config/types.js'
-import type { ClientFieldProps } from '../../fields/config/types.js'
+import type { ClientField } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 
 export type GenericLabelProps = {
@@ -11,13 +13,14 @@ export type GenericLabelProps = {
   readonly unstyled?: boolean
 }
 
-export type LabelProps<T extends ClientFieldProps> = GenericLabelProps & Partial<ServerProps> & T
+type ClientFieldWithoutType = MarkOptional<ClientField, 'type'>
 
-export type SanitizedLabelProps<T extends ClientFieldProps> = Omit<
-  LabelProps<T>,
-  'label' | 'required'
->
+export type LabelProps<T extends ClientFieldWithoutType = ClientFieldWithoutType> = {
+  field: T
+} & GenericLabelProps &
+  Partial<ServerProps>
 
-export type LabelComponent<T extends ClientFieldProps = ClientFieldProps> = React.ComponentType<
-  LabelProps<T>
->
+export type SanitizedLabelProps<T extends ClientField> = Omit<LabelProps<T>, 'label' | 'required'>
+
+export type LabelComponent<T extends ClientFieldWithoutType = ClientFieldWithoutType> =
+  React.ComponentType<LabelProps<T>>

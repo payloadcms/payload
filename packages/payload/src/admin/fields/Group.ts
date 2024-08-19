@@ -10,15 +10,17 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
+
 export type GroupFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<GroupFieldProps>
-  readonly errorProps?: ErrorProps<GroupFieldProps>
-  readonly field: MarkOptional<GroupFieldClient, 'type'>
-  readonly labelProps?: LabelProps<GroupFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<GroupFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<GroupFieldClientWithoutType>
+  readonly field: GroupFieldClientWithoutType
+  readonly labelProps?: LabelProps<GroupFieldClientWithoutType>
 } & FormFieldBase
 
-export type GroupFieldLabelComponent = LabelComponent<GroupFieldProps>
+export type GroupFieldLabelComponent = LabelComponent<GroupFieldClientWithoutType>
 
-export type GroupFieldDescriptionComponent = DescriptionComponent<GroupFieldProps>
+export type GroupFieldDescriptionComponent = DescriptionComponent<GroupFieldClientWithoutType>
 
-export type GroupFieldErrorComponent = ErrorComponent<GroupFieldProps>
+export type GroupFieldErrorComponent = ErrorComponent<GroupFieldClientWithoutType>

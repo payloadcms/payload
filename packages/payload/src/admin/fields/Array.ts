@@ -12,17 +12,19 @@ import type {
   MappedComponent,
 } from '../types.js'
 
+type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
+
 export type ArrayFieldProps = {
   readonly CustomRowLabel?: MappedComponent
-  readonly descriptionProps?: FieldDescriptionProps<ArrayFieldProps>
-  readonly errorProps?: ErrorProps<ArrayFieldProps>
-  readonly field: MarkOptional<ArrayFieldClient, 'type'>
-  readonly labelProps?: LabelProps<ArrayFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<ArrayFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<ArrayFieldClientWithoutType>
+  readonly field: ArrayFieldClientWithoutType
+  readonly labelProps?: LabelProps<ArrayFieldClientWithoutType>
   readonly validate?: ArrayFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type ArrayFieldLabelComponent = LabelComponent<ArrayFieldProps>
+export type ArrayFieldLabelComponent = LabelComponent<ArrayFieldClientWithoutType>
 
-export type ArrayFieldDescriptionComponent = DescriptionComponent<ArrayFieldProps>
+export type ArrayFieldDescriptionComponent = DescriptionComponent<ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorComponent = ErrorComponent<ArrayFieldProps>
+export type ArrayFieldErrorComponent = ErrorComponent<ArrayFieldClientWithoutType>

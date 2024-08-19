@@ -1,6 +1,6 @@
 'use client'
 
-import type { GenericLabelProps } from 'payload'
+import type { GenericLabelProps, LabelComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -41,7 +41,7 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   return null
 }
 
-export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
+export const FieldLabel: LabelComponent = (props) => {
   const { Label, ...rest } = props
 
   if (Label) {

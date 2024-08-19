@@ -10,15 +10,18 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
+
 export type CollapsibleFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<CollapsibleFieldProps>
-  readonly errorProps?: ErrorProps<CollapsibleFieldProps>
-  readonly field: MarkOptional<CollapsibleFieldClient, 'type'>
-  readonly labelProps?: LabelProps<CollapsibleFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<CollapsibleFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<CollapsibleFieldClientWithoutType>
+  readonly field: CollapsibleFieldClientWithoutType
+  readonly labelProps?: LabelProps<CollapsibleFieldClientWithoutType>
 } & FormFieldBase
 
-export type CollapsibleFieldLabelComponent = LabelComponent<CollapsibleFieldProps>
+export type CollapsibleFieldLabelComponent = LabelComponent<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldDescriptionComponent = DescriptionComponent<CollapsibleFieldProps>
+export type CollapsibleFieldDescriptionComponent =
+  DescriptionComponent<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldErrorComponent = ErrorComponent<CollapsibleFieldProps>
+export type CollapsibleFieldErrorComponent = ErrorComponent<CollapsibleFieldClientWithoutType>

@@ -10,17 +10,19 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
+
 export type RowFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<RowFieldProps>
-  readonly errorProps?: ErrorProps<RowFieldProps>
-  field: MarkOptional<RowFieldClient, 'type'>
+  readonly descriptionProps?: FieldDescriptionProps<RowFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<RowFieldClientWithoutType>
+  field: RowFieldClientWithoutType
   forceRender?: boolean
   indexPath: string
-  readonly labelProps?: LabelProps<RowFieldProps>
+  readonly labelProps?: LabelProps<RowFieldClientWithoutType>
 } & FormFieldBase
 
-export type RowFieldLabelComponent = LabelComponent<RowFieldProps>
+export type RowFieldLabelComponent = LabelComponent<RowFieldClientWithoutType>
 
-export type RowFieldDescriptionComponent = DescriptionComponent<RowFieldProps>
+export type RowFieldDescriptionComponent = DescriptionComponent<RowFieldClientWithoutType>
 
-export type RowFieldErrorComponent = ErrorComponent<RowFieldProps>
+export type RowFieldErrorComponent = ErrorComponent<RowFieldClientWithoutType>

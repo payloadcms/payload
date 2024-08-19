@@ -11,16 +11,19 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type RelationshipFieldClientWithoutType = MarkOptional<RelationshipFieldClient, 'type'>
+
 export type RelationshipFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<RelationshipFieldProps>
-  readonly errorProps?: ErrorProps<RelationshipFieldProps>
-  readonly field: MarkOptional<RelationshipFieldClient, 'type'>
-  readonly labelProps?: LabelProps<RelationshipFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<RelationshipFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<RelationshipFieldClientWithoutType>
+  readonly field: RelationshipFieldClientWithoutType
+  readonly labelProps?: LabelProps<RelationshipFieldClientWithoutType>
   readonly validate?: RelationshipFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type RelationshipFieldLabelComponent = LabelComponent<RelationshipFieldProps>
+export type RelationshipFieldLabelComponent = LabelComponent<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldDescriptionComponent = DescriptionComponent<RelationshipFieldProps>
+export type RelationshipFieldDescriptionComponent =
+  DescriptionComponent<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldErrorComponent = ErrorComponent<RelationshipFieldProps>
+export type RelationshipFieldErrorComponent = ErrorComponent<RelationshipFieldClientWithoutType>

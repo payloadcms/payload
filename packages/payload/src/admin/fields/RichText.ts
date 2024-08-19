@@ -11,20 +11,21 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
+
 export type RichTextFieldProps<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
 > = {
-  readonly descriptionProps?: FieldDescriptionProps<RichTextFieldProps>
-  readonly errorProps?: ErrorProps<RichTextFieldProps>
-  readonly field: MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
-  readonly labelProps?: LabelProps<RichTextFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<RichTextFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<RichTextFieldClientWithoutType>
+  readonly labelProps?: LabelProps<RichTextFieldClientWithoutType>
   readonly validate?: RichTextFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type RichTextFieldLabelComponent = LabelComponent<RichTextFieldProps>
+export type RichTextFieldLabelComponent = LabelComponent<RichTextFieldClient>
 
-export type RichTextFieldDescriptionComponent = DescriptionComponent<RichTextFieldProps>
+export type RichTextFieldDescriptionComponent = DescriptionComponent<RichTextFieldClient>
 
-export type RichTextFieldErrorComponent = ErrorComponent<RichTextFieldProps>
+export type RichTextFieldErrorComponent = ErrorComponent<RichTextFieldClient>

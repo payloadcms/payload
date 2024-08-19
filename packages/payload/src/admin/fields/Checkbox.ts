@@ -11,21 +11,23 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type CheckboxFieldClientWithoutType = MarkOptional<CheckboxFieldClient, 'type'>
+
 export type CheckboxFieldProps = {
   readonly checked?: boolean
-  readonly descriptionProps?: FieldDescriptionProps<CheckboxFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<CheckboxFieldClientWithoutType>
   readonly disableFormData?: boolean
-  readonly errorProps?: ErrorProps<CheckboxFieldProps>
-  readonly field: MarkOptional<CheckboxFieldClient, 'type'>
+  readonly errorProps?: ErrorProps<CheckboxFieldClientWithoutType>
+  readonly field: CheckboxFieldClientWithoutType
   readonly id?: string
-  readonly labelProps?: LabelProps<CheckboxFieldProps>
+  readonly labelProps?: LabelProps<CheckboxFieldClientWithoutType>
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean
   readonly validate?: CheckboxFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type CheckboxFieldLabelComponent = LabelComponent<CheckboxFieldProps>
+export type CheckboxFieldLabelComponent = LabelComponent<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldDescriptionComponent = DescriptionComponent<CheckboxFieldProps>
+export type CheckboxFieldDescriptionComponent = DescriptionComponent<CheckboxFieldClientWithoutType>
 
 export type CheckboxFieldErrorComponent = ErrorComponent<CheckboxFieldProps>

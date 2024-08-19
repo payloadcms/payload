@@ -11,17 +11,19 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
+
 export type NumberFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<NumberFieldProps>
-  readonly errorProps?: ErrorProps<NumberFieldProps>
-  readonly field: MarkOptional<NumberFieldClient, 'type'>
-  readonly labelProps?: LabelProps<NumberFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<NumberFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<NumberFieldClientWithoutType>
+  readonly field: NumberFieldClientWithoutType
+  readonly labelProps?: LabelProps<NumberFieldClientWithoutType>
   readonly onChange?: (e: number) => void
   readonly validate?: NumberFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type NumberFieldLabelComponent = LabelComponent<NumberFieldProps>
+export type NumberFieldLabelComponent = LabelComponent<NumberFieldClientWithoutType>
 
-export type NumberFieldDescriptionComponent = DescriptionComponent<NumberFieldProps>
+export type NumberFieldDescriptionComponent = DescriptionComponent<NumberFieldClientWithoutType>
 
-export type NumberFieldErrorComponent = ErrorComponent<NumberFieldProps>
+export type NumberFieldErrorComponent = ErrorComponent<NumberFieldClientWithoutType>

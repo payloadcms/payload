@@ -12,18 +12,20 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
+
 export type TextFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<TextFieldProps>
-  readonly errorProps?: ErrorProps<TextFieldProps>
-  readonly field: MarkOptional<TextFieldClient, 'type'>
+  readonly descriptionProps?: FieldDescriptionProps<TextFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<TextFieldClientWithoutType>
+  readonly field: TextFieldClientWithoutType
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly labelProps?: LabelProps<TextFieldProps>
+  readonly labelProps?: LabelProps<TextFieldClientWithoutType>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type TextFieldLabelComponent = LabelComponent<TextFieldProps>
+export type TextFieldLabelComponent = LabelComponent<TextFieldClientWithoutType>
 
-export type TextFieldDescriptionComponent = DescriptionComponent<TextFieldProps>
+export type TextFieldDescriptionComponent = DescriptionComponent<TextFieldClientWithoutType>
 
-export type TextFieldErrorComponent = ErrorComponent<TextFieldProps>
+export type TextFieldErrorComponent = ErrorComponent<TextFieldClientWithoutType>

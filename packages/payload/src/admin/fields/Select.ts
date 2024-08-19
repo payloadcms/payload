@@ -11,18 +11,20 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
+
 export type SelectFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<SelectFieldProps>
-  readonly errorProps?: ErrorProps<SelectFieldProps>
-  readonly field: MarkOptional<SelectFieldClient, 'type'>
-  readonly labelProps?: LabelProps<SelectFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<SelectFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<SelectFieldClientWithoutType>
+  readonly field: SelectFieldClientWithoutType
+  readonly labelProps?: LabelProps<SelectFieldClientWithoutType>
   readonly onChange?: (e: string | string[]) => void
   readonly validate?: SelectFieldValidation
   readonly value?: string
 } & Omit<FormFieldBase, 'validate'>
 
-export type SelectFieldLabelComponent = LabelComponent<SelectFieldProps>
+export type SelectFieldLabelComponent = LabelComponent<SelectFieldClientWithoutType>
 
-export type SelectFieldDescriptionComponent = DescriptionComponent<SelectFieldProps>
+export type SelectFieldDescriptionComponent = DescriptionComponent<SelectFieldClientWithoutType>
 
-export type SelectFieldErrorComponent = ErrorComponent<SelectFieldProps>
+export type SelectFieldErrorComponent = ErrorComponent<SelectFieldClientWithoutType>

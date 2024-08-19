@@ -11,17 +11,19 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
+
 export type CodeFieldProps = {
   readonly autoComplete?: string
-  readonly descriptionProps?: FieldDescriptionProps<CodeFieldProps>
-  readonly errorProps?: ErrorProps<CodeFieldProps>
-  readonly field: MarkOptional<CodeFieldClient, 'type'>
-  readonly labelProps?: LabelProps<CodeFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<CodeFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<CodeFieldClientWithoutType>
+  readonly field: CodeFieldClientWithoutType
+  readonly labelProps?: LabelProps<CodeFieldClientWithoutType>
   readonly validate?: CodeFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type CodeFieldLabelComponent = LabelComponent<CodeFieldProps>
+export type CodeFieldLabelComponent = LabelComponent<CodeFieldClientWithoutType>
 
-export type CodeFieldDescriptionComponent = DescriptionComponent<CodeFieldProps>
+export type CodeFieldDescriptionComponent = DescriptionComponent<CodeFieldClientWithoutType>
 
-export type CodeFieldErrorComponent = ErrorComponent<CodeFieldProps>
+export type CodeFieldErrorComponent = ErrorComponent<CodeFieldClientWithoutType>

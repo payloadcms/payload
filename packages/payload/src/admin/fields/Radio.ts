@@ -11,11 +11,13 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
+
 export type RadioFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<RadioFieldProps>
-  readonly errorProps?: ErrorProps<RadioFieldProps>
-  readonly field: MarkOptional<RadioFieldClient, 'type'>
-  readonly labelProps?: LabelProps<RadioFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<RadioFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<RadioFieldClientWithoutType>
+  readonly field: RadioFieldClientWithoutType
+  readonly labelProps?: LabelProps<RadioFieldClientWithoutType>
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string
@@ -23,8 +25,8 @@ export type RadioFieldProps = {
 
 export type OnChange<T = string> = (value: T) => void
 
-export type RadioFieldLabelComponent = LabelComponent<RadioFieldProps>
+export type RadioFieldLabelComponent = LabelComponent<RadioFieldClientWithoutType>
 
-export type RadioFieldDescriptionComponent = DescriptionComponent<RadioFieldProps>
+export type RadioFieldDescriptionComponent = DescriptionComponent<RadioFieldClientWithoutType>
 
 export type RadioFieldErrorComponent = ErrorComponent<RadioFieldProps>

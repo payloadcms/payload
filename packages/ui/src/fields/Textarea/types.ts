@@ -1,5 +1,14 @@
-import type { MappedComponent, StaticDescription, StaticLabel } from 'payload'
+import type {
+  ErrorProps,
+  FieldDescriptionProps,
+  LabelProps,
+  MappedComponent,
+  StaticDescription,
+  StaticLabel,
+  TextareaFieldClient,
+} from 'payload'
 import type React from 'react'
+import type { MarkOptional } from 'ts-essentials'
 
 import { type ChangeEvent } from 'react'
 
@@ -11,11 +20,12 @@ export type TextAreaInputProps = {
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
   readonly description?: StaticDescription
-  readonly descriptionProps?: Record<string, unknown>
-  readonly errorProps?: Record<string, unknown>
+  readonly descriptionProps?: FieldDescriptionProps<MarkOptional<TextareaFieldClient, 'type'>>
+  readonly errorProps?: ErrorProps<MarkOptional<TextareaFieldClient, 'type'>>
+  readonly field?: MarkOptional<TextareaFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly label: StaticLabel
-  readonly labelProps?: Record<string, unknown>
+  readonly labelProps?: LabelProps<MarkOptional<TextareaFieldClient, 'type'>>
   readonly onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string

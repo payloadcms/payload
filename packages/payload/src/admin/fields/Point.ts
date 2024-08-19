@@ -11,16 +11,18 @@ import type {
   LabelProps,
 } from '../types.js'
 
+type PointFieldClientWithoutType = MarkOptional<PointFieldClient, 'type'>
+
 export type PointFieldProps = {
-  readonly descriptionProps?: FieldDescriptionProps<PointFieldProps>
-  readonly errorProps?: ErrorProps<PointFieldProps>
-  readonly field: MarkOptional<PointFieldClient, 'type'>
-  readonly labelProps?: LabelProps<PointFieldProps>
+  readonly descriptionProps?: FieldDescriptionProps<PointFieldClientWithoutType>
+  readonly errorProps?: ErrorProps<PointFieldClientWithoutType>
+  readonly field: PointFieldClientWithoutType
+  readonly labelProps?: LabelProps<PointFieldClientWithoutType>
   readonly validate?: PointFieldValidation
 } & Omit<FormFieldBase, 'validate'>
 
-export type PointFieldLabelComponent = LabelComponent<PointFieldProps>
+export type PointFieldLabelComponent = LabelComponent<PointFieldClientWithoutType>
 
-export type PointFieldDescriptionComponent = DescriptionComponent<PointFieldProps>
+export type PointFieldDescriptionComponent = DescriptionComponent<PointFieldClientWithoutType>
 
-export type PointFieldErrorComponent = ErrorComponent<PointFieldProps>
+export type PointFieldErrorComponent = ErrorComponent<PointFieldClientWithoutType>
