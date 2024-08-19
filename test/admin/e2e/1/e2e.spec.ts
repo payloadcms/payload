@@ -21,14 +21,19 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
   customAdminRoutes,
+  customCollectionMetaTitle,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
+  customRootViewMetaTitle,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
   customViewPath,
   customViewTitle,
   slugPluralLabel,
@@ -120,102 +125,154 @@ describe('admin1', () => {
   })
 
   describe('metadata', () => {
-    test('should render custom page title suffix', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
+    describe('root title and description', () => {
+      test('should render custom page title suffix', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description/,
+        )
+      })
+
+      test('should render custom meta description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description for posts/,
+        )
+      })
+
+      test('should fallback to root meta for custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-default-view`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta title from custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-minimal-view`)
+        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
 
-    test('should render custom meta description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description/,
-      )
+    describe('favicons', () => {
+      test('should render custom favicons', async () => {
+        await page.goto(postsUrl.admin)
+        const favicons = page.locator('link[rel="icon"]')
+
+        await expect(favicons).toHaveCount(2)
+        await expect(favicons.nth(0)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
+        )
+        await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
+        await expect(favicons.nth(1)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
+        )
+      })
     })
 
-    test('should render custom meta description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
+    describe('og meta', () => {
+      test('should render custom og:title from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title/,
+        )
+      })
 
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description for posts/,
-      )
+      test('should render custom og:description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description/,
+        )
+      })
+
+      test('should render custom og:title from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title for posts/,
+        )
+      })
+
+      test('should render custom og:description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description for posts/,
+        )
+      })
+
+      test('should render og:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
+
+      test('should render twitter:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
     })
 
-    test('should render custom favicons', async () => {
-      await page.goto(postsUrl.admin)
-      const favicons = page.locator('link[rel="icon"]')
+    describe('document meta', () => {
+      test('should render custom meta title from collection config', async () => {
+        await page.goto(customViewsURL.list)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-      await expect(favicons).toHaveCount(2)
-      await expect(favicons.nth(0)).toHaveAttribute(
-        'href',
-        /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
-      )
-      await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute(
-        'href',
-        /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
-      )
-    })
+      test('should render custom meta title from default edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        const pattern = new RegExp(`^${customDefaultTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:title from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title/,
-      )
-    })
+      test('should render custom meta title from nested edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/versions`)
+        const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description/,
-      )
-    })
+      test('should render custom meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/custom-tab-view`)
+        const pattern = new RegExp(`^${customViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:title from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title for posts/,
-      )
-    })
-
-    test('should render custom og:description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description for posts/,
-      )
-    })
-
-    test('should render og:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
-    })
-
-    test('should render twitter:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
+      test('should render fallback meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}${customTabViewPath}`)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
   })
 

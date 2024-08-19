@@ -1,5 +1,4 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
-
+import type { TransactionPg } from '../types.js'
 import type { Insert } from './types.js'
 
 export const insert: Insert = async function insert({

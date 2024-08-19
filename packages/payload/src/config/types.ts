@@ -375,7 +375,9 @@ export type Endpoint = {
 
 export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
 
-export type EditViewConfig =
+export type EditViewConfig = {
+  meta?: MetaConfig
+} & (
   | {
       Component: EditViewComponent
       path?: string
@@ -393,6 +395,7 @@ export type EditViewConfig =
        */
       tab?: DocumentTabConfig
     }
+)
 
 export type ServerProps = {
   [key: string]: unknown

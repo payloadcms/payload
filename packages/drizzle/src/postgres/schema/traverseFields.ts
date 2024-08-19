@@ -2,11 +2,6 @@ import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { Field, TabAsField } from 'payload'
 
-import {
-  createTableName,
-  hasLocalesTable,
-  validateExistingBlockIsIdentical,
-} from '@payloadcms/drizzle'
 import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
@@ -26,9 +21,17 @@ import { InvalidConfiguration } from 'payload'
 import { fieldAffectsData, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
-import type { BaseExtraConfig, RelationMap } from './build.js'
+import type {
+  BaseExtraConfig,
+  BasePostgresAdapter,
+  GenericColumns,
+  IDType,
+  RelationMap,
+} from '../types.js'
 
+import { createTableName } from '../../createTableName.js'
+import { hasLocalesTable } from '../../utilities/hasLocalesTable.js'
+import { validateExistingBlockIsIdentical } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
 import { createIndex } from './createIndex.js'
 import { idToUUID } from './idToUUID.js'
@@ -36,7 +39,7 @@ import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { withDefault } from './withDefault.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: BasePostgresAdapter
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableNotNull: boolean

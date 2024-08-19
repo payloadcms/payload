@@ -24,6 +24,7 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
+  MetaConfig,
   OpenGraphConfig,
   PayloadComponent,
   StaticLabel,
@@ -329,10 +330,7 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   pagination?: {
     defaultLimit?: number
     limits?: number[]

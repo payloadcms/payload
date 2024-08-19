@@ -4,9 +4,13 @@ import { numeric, serial, uuid, varchar } from 'drizzle-orm/pg-core'
 import { type Field, flattenTopLevelFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
-import type { IDType, PostgresAdapter } from '../types.js'
+import type { BasePostgresAdapter, IDType } from '../types.js'
 
-type Args = { adapter: PostgresAdapter; columns: Record<string, PgColumnBuilder>; fields: Field[] }
+type Args = {
+  adapter: BasePostgresAdapter
+  columns: Record<string, PgColumnBuilder>
+  fields: Field[]
+}
 export const setColumnID = ({ adapter, columns, fields }: Args): IDType => {
   const idField = flattenTopLevelFields(fields).find(
     (field) => fieldAffectsData(field) && field.name === 'id',

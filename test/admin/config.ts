@@ -31,6 +31,7 @@ import {
   customAdminRoutes,
   customNestedViewPath,
   customParamViewPath,
+  customRootViewMetaTitle,
   customViewPath,
 } from './shared.js'
 export default buildConfigWithDefaults({
@@ -60,6 +61,9 @@ export default buildConfigWithDefaults({
         CustomMinimalView: {
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
           path: '/custom-minimal-view',
+          meta: {
+            title: customRootViewMetaTitle,
+          },
         },
         CustomNestedView: {
           Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
@@ -97,7 +101,7 @@ export default buildConfigWithDefaults({
         description: 'This is a custom OG description',
         title: 'This is a custom OG title',
       },
-      titleSuffix: '- Custom CMS',
+      titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
   },
