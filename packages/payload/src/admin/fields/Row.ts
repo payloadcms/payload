@@ -14,8 +14,8 @@ import type {
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 export type RowFieldProps = {
-  forceRender?: boolean
-  indexPath: string
+  readonly forceRender?: boolean
+  readonly indexPath: string
 } & FormFieldBase<RowFieldClientWithoutType>
 
 export type RowFieldLabelServerComponent = FieldLabelServerComponent<RowField>

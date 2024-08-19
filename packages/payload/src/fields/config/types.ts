@@ -1081,8 +1081,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
-      Error?: CustomComponent<RichTextFieldErrorClientComponent>
-      Label?: CustomComponent<RichTextFieldLabelClientComponent | RichTextFieldLabelServerComponent>
+      Error?: CustomComponent
+      Label?: CustomComponent
     } & Admin['components']
   } & Admin
   editor?:

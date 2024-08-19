@@ -1,6 +1,6 @@
 'use client'
 
-import type { ErrorComponent, GenericErrorProps } from 'payload'
+import type { FieldErrorClientComponent, GenericErrorProps } from 'payload'
 
 import React from 'react'
 
@@ -42,7 +42,7 @@ const DefaultFieldError: React.FC<GenericErrorProps> = (props) => {
   return null
 }
 
-export const FieldError: ErrorComponent = (props) => {
+export const FieldError: FieldErrorClientComponent = (props) => {
   const { CustomError, ...rest } = props
 
   if (CustomError) {

@@ -100,6 +100,7 @@ export const buildColumnState = (args: Args): Column[] => {
     const Label = (
       <FieldLabel
         Label={CustomLabelToRender}
+        field={field}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         unstyled
       />

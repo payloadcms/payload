@@ -544,31 +544,13 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 #### TypeScript
 
-When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview). The convention is to append `DescriptionComponent` to the type of field, i.e. `TextFieldDescriptionComponent`.
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for each and every [Field Type](../fields/overview) and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldDescriptionComponent,
-  BlocksFieldDescriptionComponent,
-  CheckboxFieldDescriptionComponent,
-  CodeFieldDescriptionComponent,
-  CollapsibleFieldDescriptionComponent,
-  DateFieldDescriptionComponent,
-  EmailFieldDescriptionComponent,
-  GroupFieldDescriptionComponent,
-  HiddenFieldDescriptionComponent,
-  JSONFieldDescriptionComponent,
-  NumberFieldDescriptionComponent,
-  PointFieldDescriptionComponent,
-  RadioFieldDescriptionComponent,
-  RelationshipFieldDescriptionComponent,
-  RichTextFieldDescriptionComponent,
-  RowFieldDescriptionComponent,
-  SelectFieldDescriptionComponent,
-  TabsFieldDescriptionComponent,
-  TextFieldDescriptionComponent,
-  TextareaFieldDescriptionComponent,
-  UploadFieldDescriptionComponent
+  TextFieldDescriptionServerComponent,
+  TextFieldDescriptionClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 

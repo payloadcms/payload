@@ -2,9 +2,9 @@
 
 import type {
   ClientCollectionConfig,
-  FieldDescriptionProps,
-  FieldErrorProps,
-  FieldLabelProps,
+  FieldDescriptionClientProps,
+  FieldErrorClientProps,
+  FieldLabelClientProps,
   FilterOptionsResult,
   MappedComponent,
   StaticDescription,
@@ -46,12 +46,12 @@ export type UploadInputProps = {
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
   readonly description?: StaticDescription
-  readonly descriptionProps?: FieldDescriptionProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly errorProps?: FieldErrorProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly field?: MarkOptional<UploadFieldClient, 'type'>
   readonly filterOptions?: FilterOptionsResult
   readonly label: StaticLabel
-  readonly labelProps?: FieldLabelProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly onChange?: (e) => void
   readonly readOnly?: boolean
   readonly relationTo?: UploadField['relationTo']
