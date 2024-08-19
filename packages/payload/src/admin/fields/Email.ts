@@ -16,7 +16,7 @@ type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 export type EmailFieldProps = {
   readonly autoComplete?: string
   readonly validate?: EmailFieldValidation
-} & Omit<FormFieldBase<EmailFieldClient>, 'validate'>
+} & Omit<FormFieldBase<EmailFieldClientWithoutType>, 'validate'>
 
 export type EmailFieldLabelServerComponent = FieldLabelServerComponent<EmailField>
 

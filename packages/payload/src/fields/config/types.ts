@@ -73,10 +73,6 @@ import type {
   RelationshipFieldLabelClientComponent,
   RelationshipFieldLabelServerComponent,
   RelationshipFieldProps,
-  RichTextFieldErrorClientComponent,
-  RichTextFieldErrorServerComponent,
-  RichTextFieldLabelClientComponent,
-  RichTextFieldLabelServerComponent,
   RichTextFieldProps,
   RowFieldProps,
   RowLabelComponent,
@@ -1108,6 +1104,7 @@ export type RichTextFieldClient<
       Error?: MappedComponent
       Label?: MappedComponent
     } & AdminClient['components']
+    placeholder?: Record<string, string> | string
   } & AdminClient
   richTextComponentMap?: Map<string, any>
 } & FieldBaseClient &
