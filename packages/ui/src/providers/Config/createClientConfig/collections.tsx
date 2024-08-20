@@ -210,6 +210,7 @@ export const createClientCollectionConfig = ({
   }
 
   let description = undefined
+
   if (collection.admin?.description) {
     if (
       typeof collection.admin?.description === 'string' ||
@@ -220,13 +221,16 @@ export const createClientCollectionConfig = ({
       description = collection.admin?.description({ t: i18n.t })
     }
   }
+
   clientCollection.admin.description = description
 
   if (collection.admin.components.edit?.Description) {
     clientCollection.admin.components.edit.Description = createMappedComponent(
       collection.admin.components.edit.Description,
       {
-        description,
+        clientProps: {
+          description,
+        },
       },
       undefined,
       'collection.admin.components.edit.Description',

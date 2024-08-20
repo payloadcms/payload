@@ -306,14 +306,20 @@ export type MappedComponent<TComponentClientProps extends JsonObject = JsonObjec
 export type CreateMappedComponent = {
   <T extends JsonObject>(
     component: { Component: React.FC<T> } | PayloadComponent<T> | null,
-    props: object,
+    props: {
+      clientProps?: JsonObject
+      serverProps?: object
+    },
     fallback: React.FC,
     identifier: string,
   ): MappedComponent<T>
 
   <T extends JsonObject>(
     components: ({ Component: React.FC<T> } | PayloadComponent<T>)[],
-    props: object,
+    props: {
+      clientProps?: JsonObject
+      serverProps?: object
+    },
     fallback: React.FC,
     identifier: string,
   ): MappedComponent<T>[]
