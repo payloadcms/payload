@@ -16,25 +16,25 @@ export type GenericLabelProps = {
 type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldLabelClientProps<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  field: T
+  field: TFieldClient
 } & GenericLabelProps
 
-export type FieldLabelServerProps<T extends Field> = {
-  field: T
+export type FieldLabelServerProps<TFieldServer extends Field> = {
+  field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps<T extends ClientField> = Omit<
-  FieldLabelClientProps<T>,
+export type SanitizedLabelProps<TFieldClient extends ClientField> = Omit<
+  FieldLabelClientProps<TFieldClient>,
   'label' | 'required'
 >
 
 export type FieldLabelClientComponent<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldLabelClientProps<T>>
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelClientProps<TFieldClient>>
 
-export type FieldLabelServerComponent<T extends Field = Field> = React.ComponentType<
-  FieldLabelServerProps<T>
+export type FieldLabelServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
+  FieldLabelServerProps<TFieldServer>
 >

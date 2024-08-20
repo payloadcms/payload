@@ -9,12 +9,11 @@ export type DescriptionFunction = LabelFunction
 type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldDescriptionClientComponent<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldDescriptionClientProps<T>>
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldDescriptionClientProps<TFieldClient>>
 
-export type FieldDescriptionServerComponent<T extends Field = Field> = React.ComponentType<
-  FieldDescriptionServerProps<T>
->
+export type FieldDescriptionServerComponent<TFieldServer extends Field = Field> =
+  React.ComponentType<FieldDescriptionServerProps<TFieldServer>>
 
 export type StaticDescription = Record<string, string> | string
 
@@ -27,13 +26,13 @@ export type GenericDescriptionProps = {
   readonly marginPlacement?: 'bottom' | 'top'
 }
 
-export type FieldDescriptionServerProps<T extends Field = Field> = {
-  field: T
+export type FieldDescriptionServerProps<TFieldServer extends Field = Field> = {
+  field: TFieldServer
 } & GenericDescriptionProps &
   Partial<ServerProps>
 
 export type FieldDescriptionClientProps<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  field: T
+  field: TFieldClient
 } & GenericDescriptionProps

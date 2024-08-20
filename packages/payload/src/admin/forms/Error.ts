@@ -15,20 +15,20 @@ export type GenericErrorProps = {
 type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldErrorClientProps<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  field: T
+  field: TFieldClient
 } & GenericErrorProps
 
-export type FieldErrorServerProps<T extends Field> = {
-  field: T
+export type FieldErrorServerProps<TFieldServer extends Field> = {
+  field: TFieldServer
 } & GenericErrorProps &
   Partial<ServerProps>
 
 export type FieldErrorClientComponent<
-  T extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldErrorClientProps<T>>
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldErrorClientProps<TFieldClient>>
 
-export type FieldErrorServerComponent<T extends Field = Field> = React.ComponentType<
-  FieldErrorServerProps<T>
+export type FieldErrorServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
+  FieldErrorServerProps<TFieldServer>
 >

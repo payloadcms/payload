@@ -9,17 +9,17 @@ import type { FieldErrorClientProps } from './Error.js'
 import type { FieldLabelClientProps } from './Label.js'
 
 export type FormFieldBase<
-  T extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+  TFieldClient extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
 > = {
-  readonly descriptionProps?: FieldDescriptionClientProps<T>
+  readonly descriptionProps?: FieldDescriptionClientProps<TFieldClient>
   readonly docPreferences?: DocumentPreferences
-  readonly errorProps?: FieldErrorClientProps<T>
-  readonly field: T
+  readonly errorProps?: FieldErrorClientProps<TFieldClient>
+  readonly field: TFieldClient
   /**
    * `forceRender` is added by RenderField automatically.
    */
   readonly forceRender?: boolean
-  readonly labelProps?: FieldLabelClientProps<T>
+  readonly labelProps?: FieldLabelClientProps<TFieldClient>
   readonly locale?: Locale
   /**
    * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.

@@ -1485,9 +1485,9 @@ export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 export type FieldWithMaxDepth = RelationshipField | UploadField
 export type FieldWithMaxDepthClient = RelationshipFieldClient | UploadFieldClient
 
-export function fieldHasSubFields<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
+export function fieldHasSubFields<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -1496,21 +1496,21 @@ export function fieldHasSubFields<T extends ClientField | Field>(
   )
 }
 
-export function fieldIsArrayType<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? ArrayFieldClient : ArrayField) {
+export function fieldIsArrayType<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField) {
   return field.type === 'array'
 }
 
-export function fieldIsBlockType<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? BlockFieldClient : BlockField) {
+export function fieldIsBlockType<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? BlockFieldClient : BlockField) {
   return field.type === 'blocks'
 }
 
-export function fieldIsGroupType<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? GroupFieldClient : GroupField) {
+export function fieldIsGroupType<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField) {
   return field.type === 'group'
 }
 
@@ -1526,40 +1526,44 @@ export function optionIsValue(option: Option): option is string {
   return typeof option === 'string'
 }
 
-export function fieldSupportsMany<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? FieldWithManyClient : FieldWithMany) {
+export function fieldSupportsMany<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
   return field.type === 'select' || field.type === 'relationship'
 }
 
-export function fieldHasMaxDepth<T extends ClientField | Field>(
-  field: T,
-): field is T & (T extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
+export function fieldHasMaxDepth<TField extends ClientField | Field>(
+  field: TField,
+): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
   return (
     (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number'
   )
 }
 
 export function fieldIsPresentationalOnly<
-  T extends ClientField | Field | TabAsField | TabAsFieldClient,
->(field: T): field is T & (T extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
+  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+>(
+  field: TField,
+): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
   return field.type === 'ui'
 }
 
-export function fieldIsSidebar<T extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: T,
-): field is { admin: { position: 'sidebar' } } & T {
+export function fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
+  field: TField,
+): field is { admin: { position: 'sidebar' } } & TField {
   return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
 }
 
-export function fieldAffectsData<T extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: T,
-): field is T &
-  (T extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
+export function fieldAffectsData<
+  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+>(
+  field: TField,
+): field is TField &
+  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 
-export function tabHasName<T extends ClientTab | Tab>(tab: T): tab is NamedTab & T {
+export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is NamedTab & TField {
   return 'name' in tab
 }
 
