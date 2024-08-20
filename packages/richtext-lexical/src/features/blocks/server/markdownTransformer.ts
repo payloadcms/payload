@@ -61,8 +61,6 @@ export const getBlockMarkdownTransformers = ({
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
-          //console.log('propsString', openMatch, `${tag} `, '1111', propsString)
-
           const blockFields = block.jsx.import({
             children: childrenString,
             props: propsString
@@ -73,8 +71,6 @@ export const getBlockMarkdownTransformers = ({
             markdownToLexical: markdownToLexical,
             htmlToLexical: null, // TODO
           })
-
-          // console.log('blockFields', blockFields)
 
           const node = $createServerBlockNode({
             blockType: block.slug,
@@ -100,9 +96,6 @@ export function getMarkdownToLexical(
   allTransformers: Transformer[],
 ): (args: { markdown: string }) => SerializedEditorState {
   const markdownToLexical = ({ markdown }: { markdown: string }): SerializedEditorState => {
-    console.log('ALLNODES', allNodes)
-    console.log('ALLTRANSFORMERS', allTransformers)
-
     const headlessEditor = createHeadlessEditor({
       nodes: getEnabledNodesFromServerNodes({
         nodes: allNodes,
