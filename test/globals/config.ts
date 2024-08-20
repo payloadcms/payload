@@ -116,6 +116,7 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
+    fallback: true,
     defaultLocale: englishLocale,
     locales: [englishLocale, spanishLocale],
   },
