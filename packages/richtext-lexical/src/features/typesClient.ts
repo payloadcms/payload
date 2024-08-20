@@ -62,7 +62,13 @@ export type ClientFeature<ClientFeatureProps> = {
       incomingEditorState: SerializedEditorState
     }) => SerializedEditorState
   }
-  markdownTransformers?: Transformer[]
+  markdownTransformers?: (
+    | ((props: {
+        allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+        allTransformers: Transformer[]
+      }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -227,6 +233,7 @@ export type SanitizedClientFeatures = {
       }) => SerializedEditorState
     >
   }
+  markdownTransformers: Transformer[]
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
@@ -248,8 +255,5 @@ export type SanitizedClientFeatures = {
     groups: SlashMenuGroup[]
   }
 } & Required<
-  Pick<
-    ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
-  >
+  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
 >
