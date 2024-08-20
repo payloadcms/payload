@@ -8,8 +8,8 @@
   .editor-container {
     position: relative;
 
-    font-family: var(--font-serif);
-    font-size: base(0.8);
+    font-family: var(--font-body);
+    font-size: base(1.0);
     letter-spacing: 0.02em;
 
     h1,
@@ -37,7 +37,7 @@
   .editor-placeholder {
     position: absolute;
     top: 8px;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--theme-elevation-500);
     /* Prevent text selection */
     user-select: none;
