@@ -7,6 +7,12 @@ import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
+  JoinFieldErrorClientComponent,
+  JoinFieldErrorServerComponent,
+  JoinFieldLabelClientComponent,
+  JoinFieldLabelServerComponent,
+} from '../../admin/fields/Join.js'
+import type {
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
@@ -1314,6 +1320,10 @@ export type JoinField = {
     update?: never
   }
   admin?: {
+    components?: {
+      Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
+      Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
+    } & Admin['components']
     disableBulkEdit?: never
     readOnly?: never
   } & Admin

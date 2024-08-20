@@ -1,15 +1,30 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { JoinFieldClient } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { JoinField, JoinFieldClient } from '../../fields/config/types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
 export type JoinFieldProps = {
   readonly field: MarkOptional<JoinFieldClient, 'type'>
 } & FormFieldBase
 
-export type JoinFieldLabelComponent = LabelComponent<'join'>
+export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>
 
-export type JoinFieldDescriptionComponent = DescriptionComponent<'join'>
+export type JoinFieldLabelClientComponent = FieldLabelClientComponent<JoinFieldClientWithoutType>
 
-export type JoinFieldErrorComponent = ErrorComponent<'join'>
+export type JoinFieldDescriptionServerComponent = FieldDescriptionServerComponent<JoinField>
+
+export type JoinFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<JoinFieldClientWithoutType>
+
+export type JoinFieldErrorServerComponent = FieldErrorServerComponent<JoinField>
+
+export type JoinFieldErrorClientComponent = FieldErrorClientComponent<JoinFieldClientWithoutType>

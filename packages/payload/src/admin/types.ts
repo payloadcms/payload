@@ -125,9 +125,12 @@ export type {
 } from './fields/JSON.js'
 
 export type {
-  JoinFieldDescriptionComponent,
-  JoinFieldErrorComponent,
-  JoinFieldLabelComponent,
+  JoinFieldDescriptionClientComponent,
+  JoinFieldDescriptionServerComponent,
+  JoinFieldErrorClientComponent,
+  JoinFieldErrorServerComponent,
+  JoinFieldLabelClientComponent,
+  JoinFieldLabelServerComponent,
   JoinFieldProps,
 } from './fields/Join.js'
 
