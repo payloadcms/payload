@@ -659,8 +659,8 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
+        edit: {
+          tab: {
             pillLabel: '',
           },
         },
@@ -675,9 +675,11 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
-            Pill: MyPill,
+        edit: {
+          tab: {
+            pill: {
+              Component: './path/to/CustomPill.js',
+            },
           },
         },
       },
