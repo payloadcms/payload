@@ -210,6 +210,7 @@ export const createClientCollectionConfig = ({
   }
 
   let description = undefined
+
   if (collection.admin?.description) {
     if (
       typeof collection.admin?.description === 'string' ||
@@ -220,13 +221,16 @@ export const createClientCollectionConfig = ({
       description = collection.admin?.description({ t: i18n.t })
     }
   }
+
   clientCollection.admin.description = description
 
   if (collection.admin.components.edit?.Description) {
     clientCollection.admin.components.edit.Description = createMappedComponent(
       collection.admin.components.edit.Description,
       {
-        description,
+        clientProps: {
+          description,
+        },
       },
       undefined,
       'collection.admin.components.edit.Description',
@@ -257,9 +261,13 @@ export const createClientCollectionConfig = ({
     Component: createMappedComponent(
       hasEditView &&
         'Component' in collection.admin.components.views.edit.default &&
-        collection.admin.components.views.edit.default.Component,
+        collection.admin.components.views.edit.default.Component
+        ? collection.admin.components.views.edit.default.Component
+        : null,
       {
-        collectionSlug: collection.slug,
+        clientProps: {
+          collectionSlug: collection.slug,
+        },
       },
       DefaultEditView,
       'collection.admin.components.views.edit.default',
@@ -278,7 +286,9 @@ export const createClientCollectionConfig = ({
         clientCollection.admin.components.views.edit[key].Component = createMappedComponent(
           view.Component,
           {
-            collectionSlug: collection.slug,
+            clientProps: {
+              collectionSlug: collection.slug,
+            },
           },
           undefined,
           'collection.admin.components.views.edit.key.Component',
@@ -312,9 +322,13 @@ export const createClientCollectionConfig = ({
   clientCollection.admin.components.views.list.Component = createMappedComponent(
     hasListView &&
       'Component' in collection.admin.components.views.list &&
-      collection.admin.components.views.list.Component,
+      collection.admin.components.views.list.Component
+      ? collection.admin.components.views.list.Component
+      : null,
     {
-      collectionSlug: collection.slug,
+      clientProps: {
+        collectionSlug: collection.slug,
+      },
     },
     DefaultListView,
     'collection.admin.components.views.list',

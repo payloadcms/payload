@@ -138,9 +138,13 @@ export const createClientGlobalConfig = ({
       Component: createMappedComponent(
         hasEditView &&
           'Component' in global.admin.components.views.edit.default &&
-          global.admin.components.views.edit.default.Component,
+          global.admin.components.views.edit.default.Component
+          ? global.admin.components.views.edit.default.Component
+          : null,
         {
-          globalSlug: global.slug,
+          clientProps: {
+            globalSlug: global.slug,
+          },
         },
         DefaultEditView,
         'global.admin.components.views.edit.default',
@@ -158,7 +162,9 @@ export const createClientGlobalConfig = ({
           clientGlobal.admin.components.views.edit[key].Component = createMappedComponent(
             view.Component,
             {
-              globalSlug: global.slug,
+              clientProps: {
+                globalSlug: global.slug,
+              },
             },
             undefined,
             'global.admin.components.views.edit.key.Component',

@@ -141,12 +141,7 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   return (
     <React.Fragment>
-      <PopupList.Button
-        id="action-duplicate"
-        onClick={() => {
-          void handleClick(false)
-        }}
-      >
+      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
@@ -168,12 +163,7 @@ export const DuplicateDocument: React.FC<Props> = ({
             >
               {t('general:cancel')}
             </Button>
-            <Button
-              id="confirm-duplicate"
-              onClick={() => {
-                void confirm()
-              }}
-            >
+            <Button id="confirm-duplicate" onClick={() => void confirm()}>
               {t('general:duplicateWithoutSaving')}
             </Button>
           </div>

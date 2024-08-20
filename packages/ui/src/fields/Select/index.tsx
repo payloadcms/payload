@@ -101,6 +101,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
       description={description}
+      field={field}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}

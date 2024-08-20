@@ -3,7 +3,7 @@ import type { ImportMap, PayloadComponent, ResolvedComponent } from 'payload'
 import { parsePayloadComponent } from 'payload/shared'
 
 /**
- * Gets th resolved React component from `PayloadComponent` from the importMap
+ * Gets the resolved React component from `PayloadComponent` from the importMap
  */
 export const getComponent = <
   TComponentServerProps extends object,
@@ -23,6 +23,7 @@ export const getComponent = <
   silent?: boolean
 }): ResolvedComponent<TComponentServerProps, TComponentClientProps> => {
   if (!payloadComponent) {
+    // undefined, null or false
     return {
       Component: undefined,
       clientProps: undefined,

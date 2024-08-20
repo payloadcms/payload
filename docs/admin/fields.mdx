@@ -347,31 +347,13 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 #### TypeScript
 
-When building Custom Label Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview). The convention is to append `LabelComponent` to the type of field, i.e. `TextFieldLabelComponent`.
+When building Custom Label Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Label Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `LabelServerComponent` or `LabelClientComponent` to the type of field, i.e. `TextFieldLabelClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldLabelComponent,
-  BlocksFieldLabelComponent,
-  CheckboxFieldLabelComponent,
-  CodeFieldLabelComponent,
-  CollapsibleFieldLabelComponent,
-  DateFieldLabelComponent,
-  EmailFieldLabelComponent,
-  GroupFieldLabelComponent,
-  HiddenFieldLabelComponent,
-  JSONFieldLabelComponent,
-  NumberFieldLabelComponent,
-  PointFieldLabelComponent,
-  RadioFieldLabelComponent,
-  RelationshipFieldLabelComponent,
-  RichTextFieldLabelComponent,
-  RowFieldLabelComponent,
-  SelectFieldLabelComponent,
-  TabsFieldLabelComponent,
-  TextFieldLabelComponent,
-  TextareaFieldLabelComponent,
-  UploadFieldLabelComponent
+  TextFieldLabelServerComponent,
+  TextFieldLabelClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 
@@ -410,31 +392,13 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 #### TypeScript
 
-When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview). The convention is to append `ErrorComponent` to the type of field, i.e. `TextFieldErrorComponent`.
+When building Custom Error Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Error Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `ErrorServerComponent` or `ErrorClientComponent` to the type of field, i.e. `TextFieldErrorClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldErrorComponent,
-  BlocksFieldErrorComponent,
-  CheckboxFieldErrorComponent,
-  CodeFieldErrorComponent,
-  CollapsibleFieldErrorComponent,
-  DateFieldErrorComponent,
-  EmailFieldErrorComponent,
-  GroupFieldErrorComponent,
-  HiddenFieldErrorComponent,
-  JSONFieldErrorComponent,
-  NumberFieldErrorComponent,
-  PointFieldErrorComponent,
-  RadioFieldErrorComponent,
-  RelationshipFieldErrorComponent,
-  RichTextFieldErrorComponent,
-  RowFieldErrorComponent,
-  SelectFieldErrorComponent,
-  TabsFieldErrorComponent,
-  TextFieldErrorComponent,
-  TextareaFieldErrorComponent,
-  UploadFieldErrorComponent
+  TextFieldErrorServerComponent,
+  TextFieldErrorClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 
@@ -544,31 +508,13 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 #### TypeScript
 
-When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview). The convention is to append `DescriptionComponent` to the type of field, i.e. `TextFieldDescriptionComponent`.
+When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every [Field Type](../fields/overview) and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
 
 ```tsx
 import type {
-  ArrayFieldDescriptionComponent,
-  BlocksFieldDescriptionComponent,
-  CheckboxFieldDescriptionComponent,
-  CodeFieldDescriptionComponent,
-  CollapsibleFieldDescriptionComponent,
-  DateFieldDescriptionComponent,
-  EmailFieldDescriptionComponent,
-  GroupFieldDescriptionComponent,
-  HiddenFieldDescriptionComponent,
-  JSONFieldDescriptionComponent,
-  NumberFieldDescriptionComponent,
-  PointFieldDescriptionComponent,
-  RadioFieldDescriptionComponent,
-  RelationshipFieldDescriptionComponent,
-  RichTextFieldDescriptionComponent,
-  RowFieldDescriptionComponent,
-  SelectFieldDescriptionComponent,
-  TabsFieldDescriptionComponent,
-  TextFieldDescriptionComponent,
-  TextareaFieldDescriptionComponent,
-  UploadFieldDescriptionComponent
+  TextFieldDescriptionServerComponent,
+  TextFieldDescriptionClientComponent,
+  // And so on for each Field Type
 } from 'payload'
 ```
 

@@ -4,6 +4,9 @@ export function parsePayloadComponent(payloadComponent: PayloadComponent): {
   exportName: string
   path: string
 } {
+  if (!payloadComponent) {
+    return null
+  }
   const pathAndMaybeExport =
     typeof payloadComponent === 'string' ? payloadComponent : payloadComponent.path
 

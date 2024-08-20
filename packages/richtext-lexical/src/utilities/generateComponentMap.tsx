@@ -44,9 +44,11 @@ export const getGenerateComponentMap =
               const mappedComponent: MappedComponent = createMappedComponent(
                 payloadComponent,
                 {
-                  componentKey,
-                  featureKey: resolvedFeature.key,
-                  key: `${resolvedFeature.key}-${componentKey}`,
+                  clientProps: {
+                    componentKey,
+                    featureKey: resolvedFeature.key,
+                    key: `${resolvedFeature.key}-${componentKey}`,
+                  },
                 },
                 undefined,
                 'lexical-from-resolvedFeature',

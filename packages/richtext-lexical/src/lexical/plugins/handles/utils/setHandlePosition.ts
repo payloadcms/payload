@@ -1,3 +1,4 @@
+'use client'
 import { doesLineHeightAffectElement } from './doesLineHeightAffectElement.js'
 
 export function setHandlePosition(

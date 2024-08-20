@@ -558,6 +558,7 @@ const DocumentInfo: React.FC<
     isInitializing,
     isLoading,
     onSave,
+    preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,

@@ -7,7 +7,7 @@ export const emailFieldConfig: EmailField = {
   type: 'email',
   admin: {
     components: {
-      Field: '@payloadcms/ui/shared#emptyComponent',
+      Field: false,
     },
   },
   hooks: {

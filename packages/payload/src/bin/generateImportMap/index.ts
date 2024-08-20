@@ -67,7 +67,7 @@ export function addPayloadComponentToImportMap({
   imports[importIdentifier] = {
     path:
       componentPath.startsWith('.') || componentPath.startsWith('/')
-        ? path.join(baseDir, componentPath.slice(1))
+        ? path.posix.join(baseDir.replace(/\\/g, '/'), componentPath.slice(1))
         : componentPath,
     specifier: exportName,
   }

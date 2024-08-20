@@ -1,3 +1,4 @@
+'use client'
 // Copied & modified from https://github.com/lodash/lodash/blob/main/src/debounce.ts
 /*
 The MIT License
