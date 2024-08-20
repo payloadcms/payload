@@ -56,7 +56,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       body: JSON.stringify({
         id: docInfo.id,
         slug: docInfo.slug,
-        doc: { ...getData() },
+        doc: getData(),
         docPermissions: docInfo.docPermissions,
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
