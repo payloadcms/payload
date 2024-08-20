@@ -53,7 +53,7 @@ import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 
-export { sql } from 'drizzle-orm'
+export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -159,3 +159,5 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     init: adapter,
   }
 }
+
+export { sql } from 'drizzle-orm'
