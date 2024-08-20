@@ -448,7 +448,9 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
-  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
+  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`.
+   * Defaults to `true` if not specified and `defaultLocale` is set.
+   */
   fallback?: boolean
 }
 
