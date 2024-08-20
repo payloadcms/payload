@@ -2,20 +2,15 @@
 
 .section-title {
   position: relative;
-  width: 100%;
-  max-width: 100%;
+  min-width: 0;
   pointer-events: all;
-  display: flex;
-  overflow: hidden;
 
   &:after {
     display: block;
     content: attr(data-value) ' ';
     visibility: hidden;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+    min-width: base(2.5);
   }
 
   &:after,

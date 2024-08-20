@@ -81,15 +81,18 @@
 
   &__removeButton.btn {
     margin: 0;
+    pointer-events: all;
+    border-radius: 100px;
+
+    &:hover {
+      background: var(--theme-elevation-0);
+    }
   }
 
   &__block-header {
     pointer-events: none;
   }
 
-  &__block-header * {
-    pointer-events: all;
-  }
 
   &__block-header,
   &__block-header > div {
@@ -98,7 +101,6 @@
     width: 100%;
     overflow: hidden;
     gap: calc(var(--base) * 0.375);
-    justify-content: space-between;
   }
 
   &__block-number {
