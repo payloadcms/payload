@@ -28,15 +28,13 @@ export function getCreateMappedComponent({
     payloadComponent: { ReactComponent: React.FC<any> } | PayloadComponent,
     key: number | string,
     props: {
-      serverProps: JsonObject
-    } & JsonObject,
+      clientProps: JsonObject
+      serverProps: object
+    },
     Fallback: React.FC<any>,
     identifier: string,
   ): MappedComponent => {
-    const {
-      serverProps: componentServerProps, // must keep this in place to ensure it is omitted from the spread
-      ...clientProps
-    } = props || {}
+    const { clientProps, serverProps: componentServerProps } = props || {}
 
     if (payloadComponent === undefined || payloadComponent === null) {
       if (!Fallback) {

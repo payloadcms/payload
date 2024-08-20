@@ -261,7 +261,9 @@ export const createClientCollectionConfig = ({
         ? collection.admin.components.views.edit.default.Component
         : null,
       {
-        collectionSlug: collection.slug,
+        clientProps: {
+          collectionSlug: collection.slug,
+        },
       },
       DefaultEditView,
       'collection.admin.components.views.edit.default',
@@ -280,7 +282,9 @@ export const createClientCollectionConfig = ({
         clientCollection.admin.components.views.edit[key].Component = createMappedComponent(
           view.Component,
           {
-            collectionSlug: collection.slug,
+            clientProps: {
+              collectionSlug: collection.slug,
+            },
           },
           undefined,
           'collection.admin.components.views.edit.key.Component',
@@ -318,7 +322,9 @@ export const createClientCollectionConfig = ({
       ? collection.admin.components.views.list.Component
       : null,
     {
-      collectionSlug: collection.slug,
+      clientProps: {
+        collectionSlug: collection.slug,
+      },
     },
     DefaultListView,
     'collection.admin.components.views.list',
