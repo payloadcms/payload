@@ -258,7 +258,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
           {moreThanOneAvailableCollection && (
             <div className={`${baseClass}__select-collection-wrap`}>
-              <FieldLabel label={t('upload:selectCollectionToBrowse')} />
+              <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
               <ReactSelect
                 className={`${baseClass}__select-collection`}
                 onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect

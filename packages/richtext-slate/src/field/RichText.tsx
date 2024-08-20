@@ -54,6 +54,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     descriptionProps,
     elements,
     errorProps,
+    field,
     field: {
       name,
       _path: pathFromProps,
@@ -316,9 +317,15 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+        field={field}
+      />
       <div className={`${baseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
@@ -449,7 +456,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        <FieldDescription Description={Description} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} field={field} {...(descriptionProps || {})} />
       </div>
     </div>
   )

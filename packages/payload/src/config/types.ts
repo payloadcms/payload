@@ -398,14 +398,14 @@ export type EditViewConfig = {
 )
 
 export type ServerProps = {
-  [key: string]: unknown
-  i18n: I18nClient
-  locale?: Locale
-  params?: { [key: string]: string | string[] | undefined }
-  payload: Payload
-  permissions?: Permissions
-  searchParams?: { [key: string]: string | string[] | undefined }
-  user?: TypedUser
+  readonly i18n: I18nClient
+  readonly locale?: Locale
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly payload: Payload
+  readonly permissions?: Permissions
+  readonly [key: string]: unknown
+  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly user?: TypedUser
 }
 
 export const serverProps: (keyof ServerProps)[] = [

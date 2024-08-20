@@ -103,6 +103,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     >
       <FieldError
         CustomError={field?.admin?.components?.Error}
+        field={field}
         path={path}
         {...(errorProps || {})}
         alignCaret="left"
@@ -125,6 +126,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

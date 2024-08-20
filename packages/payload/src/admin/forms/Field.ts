@@ -1,24 +1,28 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { User } from '../../auth/types.js'
 import type { Locale } from '../../config/types.js'
-import type { Validate } from '../../fields/config/types.js'
+import type { ClientField, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { ErrorProps } from './Error.js'
-import type { FieldDescriptionProps } from './FieldDescription.js'
-import type { LabelProps } from './Label.js'
+import type { FieldDescriptionClientProps } from './Description.js'
+import type { FieldErrorClientProps } from './Error.js'
+import type { FieldLabelClientProps } from './Label.js'
 
-// TODO: Check if we still need this. Shouldnt most of it be present in the field type?
-export type FormFieldBase = {
-  readonly descriptionProps?: FieldDescriptionProps
+export type FormFieldBase<
+  TFieldClient extends MarkOptional<ClientField, 'type'> = MarkOptional<ClientField, 'type'>,
+> = {
+  readonly descriptionProps?: FieldDescriptionClientProps<TFieldClient>
   readonly docPreferences?: DocumentPreferences
-  readonly errorProps?: ErrorProps
+  readonly errorProps?: FieldErrorClientProps<TFieldClient>
+  readonly field: TFieldClient
   /**
-   * forceRender is added by RenderField automatically
+   * `forceRender` is added by RenderField automatically.
    */
   readonly forceRender?: boolean
-  readonly labelProps?: LabelProps
+  readonly labelProps?: FieldLabelClientProps<TFieldClient>
   readonly locale?: Locale
   /**
-   * forceRender is added by RenderField automatically. This should be used instead of field.admin.readOnly
+   * `readOnly` is added by RenderField automatically. This should be used instead of `field.admin.readOnly`.
    */
   readonly readOnly?: boolean
   readonly user?: User

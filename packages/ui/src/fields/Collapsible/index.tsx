@@ -163,6 +163,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

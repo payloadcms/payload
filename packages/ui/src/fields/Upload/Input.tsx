@@ -2,12 +2,17 @@
 
 import type {
   ClientCollectionConfig,
+  FieldDescriptionClientProps,
+  FieldErrorClientProps,
+  FieldLabelClientProps,
   FilterOptionsResult,
   MappedComponent,
   StaticDescription,
   StaticLabel,
   UploadField,
+  UploadFieldClient,
 } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -41,11 +46,12 @@ export type UploadInputProps = {
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
   readonly description?: StaticDescription
-  readonly descriptionProps?: Record<string, unknown>
-  readonly errorProps?: Record<string, unknown>
+  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly field?: MarkOptional<UploadFieldClient, 'type'>
   readonly filterOptions?: FilterOptionsResult
   readonly label: StaticLabel
-  readonly labelProps?: Record<string, unknown>
+  readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly onChange?: (e) => void
   readonly readOnly?: boolean
   readonly relationTo?: UploadField['relationTo']
@@ -69,6 +75,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     customUploadActions,
     descriptionProps,
     errorProps,
+    field,
     filterOptions,
     label,
     labelProps,
@@ -159,10 +166,15 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+        <FieldLabel
+          Label={Label}
+          field={field}
+          label={label}
+          required={required}
+          {...(labelProps || {})}
+        />
         <div className={`${fieldBaseClass}__wrap`}>
-          <FieldError CustomError={Error} {...(errorProps || {})} />
-
+          <FieldError CustomError={Error} field={field} {...(errorProps || {})} />
           {collection?.upload && (
             <React.Fragment>
               {fileDoc && !missingFile && (
@@ -203,7 +215,11 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                   </div>
                 </div>
               )}
-              <FieldDescription Description={Description} {...(descriptionProps || {})} />
+              <FieldDescription
+                Description={Description}
+                field={field}
+                {...(descriptionProps || {})}
+              />
             </React.Fragment>
           )}
           {!readOnly && <DocumentDrawer onSave={onSave} />}

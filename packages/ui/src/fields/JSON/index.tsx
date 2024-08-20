@@ -128,6 +128,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     >
       <FieldLabel
         Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -135,6 +136,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -152,6 +154,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>
