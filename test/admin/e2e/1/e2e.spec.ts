@@ -980,21 +980,6 @@ describe('admin1', () => {
       const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
     })
-
-    test('can duplicate document within a drawer', async () => {
-      await navigateToDoc(page, postsUrl)
-      await page
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
-        .click()
-      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
-      const originalID = await drawer1Content.locator('.id-label').textContent()
-      await wait(500)
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-duplicate').click()
-      await expect(drawer1Content.locator('.id-label')).not.toHaveText(originalID)
-    })
   })
 
   describe('CRUD', () => {

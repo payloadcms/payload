@@ -40,12 +40,12 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      ...[...Array(11)].map(() => async () => {
+      ...[...Array(11)].map((_, i) => async () => {
         const postDoc = await _payload.create({
           collection: postsCollectionSlug,
           data: {
             description: 'Description',
-            title: 'Title',
+            title: `Post ${i + 1}`,
           },
           depth: 0,
           overrideAccess: true,

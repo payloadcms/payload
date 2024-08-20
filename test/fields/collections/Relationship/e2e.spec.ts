@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -237,110 +239,238 @@ describe('relationship', () => {
     await saveDocAndAssert(page)
   })
 
-  // Related issue: https://github.com/payloadcms/payload/issues/2815
-  test('should modify fields in relationship drawer', async () => {
-    await page.goto(url.create)
-    await page.waitForURL(`**/${url.create}`)
-    // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
-    await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
-      .click()
+  describe('drawers actions', () => {
+    // Related issue: https://github.com/payloadcms/payload/issues/2815
+    test('should modify fields in relationship drawer', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
+      // First fill out the relationship field, as it's required
+      await openCreateDocDrawer(page, '#field-relationship')
+      await page
+        .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+        .click()
 
-    await page.locator('.drawer__content #field-text').fill('something')
+      await page.locator('.drawer__content #field-text').fill('something')
 
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
-    await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+      await page.locator('#action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
-    // Create a new doc for the `relationshipHasMany` field
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await openCreateDocDrawer(page, '#field-relationshipHasMany')
-    const value = 'Hello, world!'
-    await page.locator('.drawer__content #field-text').fill(value)
+      // Create a new doc for the `relationshipHasMany` field
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+      await openCreateDocDrawer(page, '#field-relationshipHasMany')
+      const value = 'Hello, world!'
+      await page.locator('.drawer__content #field-text').fill(value)
 
-    // Save and close the drawer
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+      // Save and close the drawer
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
 
-    // Now open the drawer again to edit the `text` field _using the keyboard_
-    // Mimic real user behavior by typing into the field with spaces and backspaces
-    // Explicitly use both `down` and `type` to cover edge cases
-    await page
-      .locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler')
-      .click()
-    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click()
-    await page.keyboard.down('1')
-    await page.keyboard.type('23')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
-      `${value}123`,
-    )
-    await page.keyboard.type('4567')
-    await page.keyboard.press('Backspace')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
-      `${value}123456`,
-    )
+      // Now open the drawer again to edit the `text` field _using the keyboard_
+      // Mimic real user behavior by typing into the field with spaces and backspaces
+      // Explicitly use both `down` and `type` to cover edge cases
+      await page
+        .locator(
+          '#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler',
+        )
+        .click()
+      await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click()
+      await page.keyboard.down('1')
+      await page.keyboard.type('23')
+      await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+        `${value}123`,
+      )
+      await page.keyboard.type('4567')
+      await page.keyboard.press('Backspace')
+      await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+        `${value}123456`,
+      )
 
-    // save drawer
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    // close drawer
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
-    // save document and reload
-    await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.reload()
+      // save drawer
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      // close drawer
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+      // save document and reload
+      await page.locator('#action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await page.reload()
 
-    // check if the value is saved
-    await expect(
-      page.locator('#field-relationshipHasMany .relationship--multi-value-label__text'),
-    ).toHaveText(`${value}123456`)
-  })
+      // check if the value is saved
+      await expect(
+        page.locator('#field-relationshipHasMany .relationship--multi-value-label__text'),
+      ).toHaveText(`${value}123456`)
+    })
 
-  // Drawers opened through the edit button are prone to issues due to the use of stopPropagation for certain
-  // events - specifically for drawers opened through the edit button. This test is to ensure that drawers
-  // opened through the edit button can be saved using the hotkey.
-  test('should save using hotkey in edit document drawer', async () => {
-    await page.goto(url.create)
-    // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
-    await page.locator('#field-relationship .value-container').click()
-    await wait(500)
-    // Select "Seeded text document" relationship
-    await page.getByText('Seeded text document', { exact: true }).click()
+    // Drawers opened through the edit button are prone to issues due to the use of stopPropagation for certain
+    // events - specifically for drawers opened through the edit button. This test is to ensure that drawers
+    // opened through the edit button can be saved using the hotkey.
+    test('should save using hotkey in edit document drawer', async () => {
+      await page.goto(url.create)
+      // First fill out the relationship field, as it's required
+      await openCreateDocDrawer(page, '#field-relationship')
+      await page.locator('#field-relationship .value-container').click()
+      await wait(500)
+      // Select "Seeded text document" relationship
+      await page.getByText('Seeded text document', { exact: true }).click()
 
-    // Need to wait to properly open drawer - without this the drawer state is flakey and closes before
-    // the text below can be filled before the save on the drawer
-    await wait(1000)
+      // Need to wait to properly open drawer - without this the drawer state is flakey and closes before
+      // the text below can be filled before the save on the drawer
+      await wait(1000)
 
-    // Click edit button which opens drawer
-    await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
+      // Click edit button which opens drawer
+      await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
 
-    // Fill 'text' field of 'Seeded text document'
-    await page.locator('.drawer__content #field-text').fill('some updated text value')
+      // Fill 'text' field of 'Seeded text document'
+      await page.locator('.drawer__content #field-text').fill('some updated text value')
 
-    // Save drawer (not parent page) with hotkey
-    await saveDocHotkeyAndAssert(page)
+      // Save drawer (not parent page) with hotkey
+      await saveDocHotkeyAndAssert(page)
 
-    const seededTextDocument = await payload.find({
-      collection: textFieldsSlug,
-      where: {
-        text: {
-          equals: 'some updated text value',
+      const seededTextDocument = await payload.find({
+        collection: textFieldsSlug,
+        where: {
+          text: {
+            equals: 'some updated text value',
+          },
         },
-      },
-    })
-    const relationshipDocuments = await payload.find({
-      collection: relationshipFieldsSlug,
+      })
+      const relationshipDocuments = await payload.find({
+        collection: relationshipFieldsSlug,
+      })
+
+      // The Seeded text document should now have a text field with value 'some updated text value',
+      expect(seededTextDocument.docs.length).toEqual(1)
+      // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
+      expect(relationshipDocuments.docs.length).toEqual(0)
     })
 
-    // The Seeded text document should now have a text field with value 'some updated text value',
-    expect(seededTextDocument.docs.length).toEqual(1)
-    // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
-    expect(relationshipDocuments.docs.length).toEqual(0)
+    test('should duplicate document within a drawer', async () => {
+      await navigateToDoc(page, url)
+      const originalValue = await page
+        .locator('.field-type.relationship .relationship--single-value')
+        .textContent()
+
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      const originalID = await drawer1Content.locator('.id-label').textContent()
+      const originalTitle = await drawer1Content.locator('#field-title').textContent()
+      await wait(500)
+      await openDocControls(drawer1Content)
+      await drawer1Content.locator('#action-duplicate').click()
+      await expect(drawer1Content.locator('.id-label')).not.toHaveText(originalID)
+      const newValue = `${originalTitle} - duplicate`
+      await drawer1Content.locator('#field-title').fill(newValue)
+      await page.locator('[id^=doc-drawer_posts_1_] #action-save').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+
+      await expect(
+        page.locator('.field-type.relationship .relationship--single-value', {
+          hasText: exactText(originalValue),
+        }),
+      ).toBeHidden()
+
+      await expect(
+        page.locator('.field-type.relationship .relationship--single-value', {
+          hasText: exactText(newValue),
+        }),
+      ).toBeVisible()
+
+      // click the relationship field and check the rs options for the new value
+      await page.locator('.field-type.relationship .relationship--single-value').click()
+
+      await expect(
+        page.locator('.rs__option', {
+          hasText: exactText(newValue),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should delete document within document drawer', async () => {
+      await navigateToDoc(page, url)
+
+      const originalValue = await page
+        .locator('.field-type.relationship .relationship--single-value')
+        .textContent()
+
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await openDocControls(drawer1Content)
+      await drawer1Content.locator('#action-delete').click()
+      await expect(drawer1Content).toBeHidden()
+
+      await expect(
+        page.locator('.field-type.relationship .relationship--single-value', {
+          hasText: exactText(originalValue),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should create document within document drawer', async () => {
+      await navigateToDoc(page, url)
+
+      const originalValue = await page
+        .locator('.field-type.relationship .relationship--single-value')
+        .textContent()
+
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
+
+      await openDocControls(drawer1Content)
+      await drawer1Content.locator('#action-create').click()
+
+      const title = 'Created from drawer'
+
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+
+      const newDrawerID = drawer1Content.locator('.id-label')
+
+      await expect(newDrawerID).not.toHaveText(originalDrawerID)
+
+      // close the drawer and check that the new value is visible
+      await page.locator('[id^=close-drawer_posts_1_] .drawer__close').click()
+
+      await expect(
+        page.locator('.field-type.relationship .relationship--single-value', {
+          hasText: exactText(originalValue),
+        }),
+      ).toBeHidden()
+
+      await expect(
+        page.locator('.field-type.relationship .relationship--single-value', {
+          hasText: exactText(title),
+        }),
+      ).toBeVisible()
+
+      await page.locator('.field-type.relationship .relationship--single-value').click()
+
+      await expect(
+        page.locator('.rs__option', {
+          hasText: exactText(title),
+        }),
+      ).toBeVisible()
+    })
   })
 
   // TODO: Fix this. This test flakes due to react select
