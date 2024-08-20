@@ -7,9 +7,16 @@ import { isNumber } from 'payload/shared'
  * @param joins
  */
 export const sanitizeJoinParams = (
-  joins: {
-    [schemaPath: string]: { limit?: unknown; page?: unknown; pagination?: unknown; sort?: string }
-  } = {},
+  joins:
+    | {
+        [schemaPath: string]: {
+          limit?: unknown
+          page?: unknown
+          pagination?: unknown
+          sort?: string
+        }
+      }
+    | false = {},
 ): JoinQuery => {
   const joinQuery = {}
 
