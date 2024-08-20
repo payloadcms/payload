@@ -1,3 +1,4 @@
+'use client'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../toolbars/types.js'
 
 export const toolbarFormatGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {

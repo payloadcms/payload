@@ -1,17 +1,33 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { UploadFieldClient } from '../../fields/config/types.js'
+import type { UploadField, UploadFieldClient } from '../../fields/config/types.js'
 import type { UploadFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
 
 export type UploadFieldProps = {
-  readonly field: MarkOptional<UploadFieldClient, 'type'>
   readonly validate?: UploadFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<UploadFieldClientWithoutType>, 'validate'>
 
-export type UploadFieldLabelComponent = LabelComponent<'upload'>
+export type UploadFieldLabelServerComponent = FieldLabelServerComponent<UploadField>
 
-export type UploadFieldDescriptionComponent = DescriptionComponent<'upload'>
+export type UploadFieldLabelClientComponent =
+  FieldLabelClientComponent<UploadFieldClientWithoutType>
 
-export type UploadFieldErrorComponent = ErrorComponent<'upload'>
+export type UploadFieldDescriptionServerComponent = FieldDescriptionServerComponent<UploadField>
+
+export type UploadFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<UploadFieldClientWithoutType>
+
+export type UploadFieldErrorServerComponent = FieldErrorServerComponent<UploadField>
+
+export type UploadFieldErrorClientComponent =
+  FieldErrorClientComponent<UploadFieldClientWithoutType>

@@ -1,3 +1,4 @@
+'use client'
 import type { FieldTypes } from 'payload'
 import type React from 'react'
 

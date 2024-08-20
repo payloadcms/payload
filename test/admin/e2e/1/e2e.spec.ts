@@ -555,25 +555,47 @@ describe('admin1', () => {
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-label')).toBeVisible()
+      await expect(page.locator('#custom-client-field-label')).toBeVisible()
+      await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
     test('renders custom description component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-description')).toBeVisible()
+      await expect(page.locator('#custom-client-field-description')).toBeVisible()
+      await expect(page.locator('#custom-server-field-description')).toBeVisible()
     })
 
-    // test('ensure custom components receive field props', async () => {
-    //   await page.goto(customFieldsURL.create)
-    //   await page.waitForURL(customFieldsURL.create)
-    //   await expect(page.locator('#custom-field-label')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    //   await expect(page.locator('#custom-field-description')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    // })
+    test('custom server components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-server-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#custom-server-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('custom client components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-client-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('#custom-client-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
 
     describe('field descriptions', () => {
       test('should render static field description', async () => {
@@ -606,10 +628,10 @@ describe('admin1', () => {
     test('should render custom error component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
       await input.fill('ab')
       await expect(input).toHaveValue('ab')
-      const error = page.locator('.custom-error:near(input[id="field-customTextField"])')
+      const error = page.locator('.custom-error:near(input[id="field-customTextClientField"])')
       const submit = page.locator('button[type="button"][id="action-save"]')
       await submit.click()
       await expect(error).toHaveText('#custom-error')
@@ -617,17 +639,19 @@ describe('admin1', () => {
 
     test('should render beforeInput and afterInput', async () => {
       await page.goto(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
 
       const prevSibling = await input.evaluateHandle((el) => {
         return el.previousElementSibling
       })
+
       const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
       expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
+
       const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })

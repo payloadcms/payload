@@ -133,11 +133,13 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         <li>
           <FieldLabel
             Label={field?.admin?.components?.Label}
+            field={field}
             {...getCoordinateFieldLabel('latitude')}
           />
           <div className="input-wrapper">
             <FieldError
               CustomError={field?.admin?.components?.Error}
+              field={field}
               path={path}
               {...(errorProps || {})}
             />
@@ -161,6 +163,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

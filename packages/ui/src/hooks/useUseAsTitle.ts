@@ -1,3 +1,4 @@
+'use client'
 import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { useTranslation } from '../providers/Translation/index.js'

@@ -129,6 +129,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
             Component: null,
             RenderedComponent: APIKeyLabel,
           }}
+          field={null}
           htmlFor={path}
         />
         <input

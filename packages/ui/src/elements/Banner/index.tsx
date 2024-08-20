@@ -12,7 +12,7 @@ const baseClass = 'banner'
 
 type onClick = (event: MouseEvent) => void
 
-export type Props = {
+export type Props = Readonly<{
   alignIcon?: 'left' | 'right'
   children?: React.ReactNode
   className?: string
@@ -20,7 +20,7 @@ export type Props = {
   onClick?: onClick
   to?: string
   type?: 'default' | 'error' | 'info' | 'success'
-}
+}>
 
 export type RenderedTypeProps = {
   children?: React.ReactNode

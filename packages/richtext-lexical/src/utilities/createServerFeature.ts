@@ -75,8 +75,11 @@ export const createServerFeature: <
         return toReturn
       }
     } else {
-      ;(feature as ServerFeature<any, any>).sanitizedServerFeatureProps = props
-      featureProviderServer.feature = feature as ServerFeature<any, any>
+      // For explanation why we have to spread feature, see createClientFeature.ts
+      const newFeature: ServerFeature<any, any> = { ...feature }
+
+      newFeature.sanitizedServerFeatureProps = props
+      featureProviderServer.feature = newFeature
     }
     return featureProviderServer as FeatureProviderServer<any, any, any>
   }

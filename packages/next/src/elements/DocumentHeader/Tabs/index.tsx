@@ -7,7 +7,6 @@ import type {
 } from 'payload'
 
 import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
-import { isPlainObject } from 'payload'
 import React from 'react'
 
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'

@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react'
 import type { WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -28,7 +27,6 @@ export { WhereBuilderProps }
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields } = props
   const { i18n, t } = useTranslation()
-  const { code: currentLocale } = useLocale()
 
   const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
 
@@ -116,8 +114,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         }
 
         if (JSON.stringify(existingRowCondition) !== JSON.stringify(newRowCondition)) {
-          conditions[orIndex].and[andIndex] = newRowCondition
-          setConditions(conditions)
+          const newConditions = [...conditions]
+          newConditions[orIndex].and[andIndex] = newRowCondition
+          setConditions(newConditions)
           if (![null, undefined].includes(value)) {
             // only update query when field/operator/value are filled out
             setShouldUpdateQuery(true)
