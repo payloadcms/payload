@@ -28,6 +28,11 @@
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
     },
+    "./jsx": {
+      "import": "./src/exports/server/jsx.ts",
+      "types": "./src/exports/server/jsx.ts",
+      "default": "./src/exports/server/jsx.ts"
+    },
     "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
@@ -54,15 +59,19 @@
     "@lexical/link": "0.17.0",
     "@lexical/list": "0.17.0",
     "@lexical/mark": "0.17.0",
-    "@lexical/markdown": "0.17.0",
+    "@lexical/markdown": "file:./lexical-markdown-0.17.0.tgz",
     "@lexical/react": "0.17.0",
     "@lexical/rich-text": "0.17.0",
     "@lexical/selection": "0.17.0",
     "@lexical/utils": "0.17.0",
     "@types/uuid": "10.0.0",
+    "acorn": "8.12.1",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "lexical": "0.17.0",
+    "mdast-util-from-markdown": "2.0.1",
+    "mdast-util-mdx-jsx": "3.1.2",
+    "micromark-extension-mdx-jsx": "3.0.0",
     "react-error-boundary": "4.0.13",
     "uuid": "10.0.0"
   },
@@ -96,7 +105,7 @@
     "@lexical/link": "0.17.0",
     "@lexical/list": "0.17.0",
     "@lexical/mark": "0.17.0",
-    "@lexical/markdown": "0.17.0",
+    "@lexical/markdown": "file:./lexical-markdown-0.17.0.tgz",
     "@lexical/react": "0.17.0",
     "@lexical/rich-text": "0.17.0",
     "@lexical/selection": "0.17.0",
@@ -129,6 +138,11 @@
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
+      },
+      "./jsx": {
+        "import": "./dist/exports/server/jsx.js",
+        "types": "./dist/exports/server/jsx.d.ts",
+        "default": "./dist/exports/server/jsx.js"
       },
       "./generateComponentMap": {
         "import": "./dist/utilities/generateComponentMap.js",

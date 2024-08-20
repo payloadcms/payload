@@ -963,7 +963,7 @@ export type {
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-export { getEnabledNodes } from './lexical/nodes/index.js'
+export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
 export type { AdapterProps }
 
 export type {
@@ -995,4 +995,5 @@ export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 
+export { extractPropsFromJSXPropsString } from './utilities/jsx.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

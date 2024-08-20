@@ -1189,6 +1189,12 @@ export type RadioFieldClient = {
 } & FieldBaseClient &
   Pick<RadioField, 'options' | 'type'>
 
+type BlockFields = {
+  [key: string]: any
+  blockName?: string
+  blockType?: string
+}
+
 export type Block = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -1231,6 +1237,18 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  jsx?: {
+    export: (props: { data: BlockFields; serialize: () => void }) => {
+      children?: object
+      props?: object
+    }
+    import: (props: {
+      children: string
+      htmlToLexical?: (props: { html: string }) => any
+      markdownToLexical?: (props: { markdown: string }) => any
+      props: Record<string, any>
+    }) => BlockFields
+  }
   labels?: Labels
   slug: string
 }
