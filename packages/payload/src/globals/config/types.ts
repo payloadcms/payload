@@ -15,6 +15,7 @@ import type {
   EntityDescriptionComponent,
   GeneratePreviewURL,
   LivePreviewConfig,
+  MetaConfig,
   OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -128,10 +129,7 @@ export type GlobalAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   /**
    * Function to generate custom preview URL
    */

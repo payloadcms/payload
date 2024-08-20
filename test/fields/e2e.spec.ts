@@ -20,6 +20,7 @@ import {
   blockFieldsSlug,
   collapsibleFieldsSlug,
   tabsFields2Slug,
+  tabsFieldsSlug,
 } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -479,13 +480,18 @@ describe('fields', () => {
   })
 
   describe('tabs', () => {
-    let url: AdminUrlUtil
+    // tabsFieldsSlug is used for testing tabs
+    let tabsFieldsUrl: AdminUrlUtil
+    // tabsFields2Slug is used for testing nested tabs
+    let tabsFieldsUrl2: AdminUrlUtil
+
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsFields2Slug)
+      tabsFieldsUrl = new AdminUrlUtil(serverURL, tabsFieldsSlug)
+      tabsFieldsUrl2 = new AdminUrlUtil(serverURL, tabsFields2Slug)
     })
 
     test('should correctly save nested unnamed and named tabs', async () => {
-      await page.goto(url.create)
+      await page.goto(tabsFieldsUrl2.create)
 
       await page.locator('#field-tabsInArray .array-field__add-row').click()
       await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
@@ -497,6 +503,28 @@ describe('fields', () => {
       await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
       await page.locator('.tabs-field__tabs button:nth-child(2)').click()
       await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
+    })
+
+    test('should save preferences for tab order', async () => {
+      await page.goto(tabsFieldsUrl.list)
+
+      const firstItem = page.locator('.cell-id a').nth(0)
+      const href = await firstItem.getAttribute('href')
+      await firstItem.click()
+
+      const regex = new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+
+      await page.waitForURL(regex)
+
+      await page.locator('.tabs-field__tabs button:nth-child(2)').nth(0).click()
+
+      await page.reload()
+
+      const tab2 = page.locator('.tabs-field__tabs button:nth-child(2)').nth(0)
+
+      await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 })

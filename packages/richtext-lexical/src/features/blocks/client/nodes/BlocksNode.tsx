@@ -1,3 +1,4 @@
+'use client'
 import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 
 import ObjectID from 'bson-objectid'

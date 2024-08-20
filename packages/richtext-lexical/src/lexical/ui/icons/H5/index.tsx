@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 
 export const H5Icon: React.FC = () => (

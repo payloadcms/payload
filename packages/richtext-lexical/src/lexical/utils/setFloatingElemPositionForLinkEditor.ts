@@ -1,3 +1,4 @@
+'use client'
 const VERTICAL_GAP = 10
 const HORIZONTAL_OFFSET = 5
 

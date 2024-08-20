@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { MetaConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -12,6 +13,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   globalConfig,
   i18n,
   isEditing,
+  view = 'default',
 }): Promise<Metadata> => {
   const { t } = i18n
 
@@ -21,34 +23,45 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       ? getTranslation(globalConfig.label, i18n)
       : ''
 
-  const metaTitle = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
+  const metaToUse: MetaConfig = {
+    ...(config.admin.meta || {}),
+    description: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
+    keywords: `${entityLabel}, Payload, CMS`,
+    title: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
+  }
 
-  const ogTitle = `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`
-
-  const description = `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`
-
-  const keywords = `${entityLabel}, Payload, CMS`
-
-  const baseOGOverrides = config.admin.meta.openGraph || {}
-
-  const entityOGOverrides = collectionConfig
-    ? collectionConfig.admin?.meta?.openGraph
-    : globalConfig
-      ? globalConfig.admin?.meta?.openGraph
-      : {}
+  const ogToUse: MetaConfig['openGraph'] = {
+    title: `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`,
+    ...(config.admin.meta.openGraph || {}),
+    ...(collectionConfig
+      ? {
+          ...(collectionConfig?.admin.meta?.openGraph || {}),
+          ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
+        }
+      : {}),
+    ...(globalConfig
+      ? {
+          ...(globalConfig?.admin.meta?.openGraph || {}),
+          ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
+        }
+      : {}),
+  }
 
   return meta({
-    ...(config.admin.meta || {}),
-    description,
-    keywords,
-    openGraph: {
-      title: ogTitle,
-      ...baseOGOverrides,
-      ...entityOGOverrides,
-    },
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
+    ...metaToUse,
+    openGraph: ogToUse,
+    ...(collectionConfig
+      ? {
+          ...(collectionConfig?.admin.meta || {}),
+          ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
+        }
+      : {}),
+    ...(globalConfig
+      ? {
+          ...(globalConfig?.admin.meta || {}),
+          ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
+        }
+      : {}),
     serverURL: config.serverURL,
-    title: metaTitle,
   })
 }

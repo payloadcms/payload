@@ -1,3 +1,4 @@
+'use client'
 import type { Data, FormField, FormState } from 'payload'
 
 import type {

@@ -1,0 +1,216 @@
+---
+title: Page Metadata
+label: Metadata
+order: 70
+desc: Customize the metadata of your pages within the Admin Panel
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more, without any additional configuration. This includes the page title, description, og:image and everything in between. Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views, allowing for the ability to control metadata on any page with high precision.
+
+Within the Admin Panel, metadata can be customized at the following levels:
+
+- [Root Metadata](#root-metadata)
+- [Collection Metadata](#collection-metadata)
+- [Global Metadata](#global-metadata)
+- [View Metadata](#view-metadata)
+
+All of these types of metadata share a similar structure, with a few key differences on the Root level. To customize metadata, consult the list of available scopes. Determine the scope that corresponds to what you are trying to accomplish, then author your metadata within the Payload Config accordingly.
+
+## Root Metadata
+
+Root Metadata is the metadata that is applied to all pages within the Admin Panel. This is where you can control things like the suffix appended onto each page's title, the favicon displayed in the browser's tab, and the Open Graph data that is used when sharing the Admin Panel on social media.
+
+To customize Root Metadata, use the `admin.meta` key in your Payload Config:
+
+```ts
+{
+  // ...
+  admin: {
+    // highlight-start
+    meta: {
+    // highlight-end
+      title: 'My Admin Panel',
+      description: 'The best admin panel in the world',
+      icons: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon.png',
+        },
+      ],
+    },
+  },
+}
+```
+
+The following options are available for Root Metadata:
+
+| Key | Type | Description |
+| --- | --- | --- |
+| **`title`** | `string` | The title of the Admin Panel. |
+| **`description`** | `string` | The description of the Admin Panel. |
+| **`defaultOGImageType`** | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
+| **`icons`** | `IconConfig[]` | An array of icon objects. [More details](#icons) |
+| **`keywords`** | `string` | A comma-separated list of keywords to include in the metadata of the Admin Panel. |
+| **`openGraph`** | `OpenGraphConfig` | An object containing Open Graph metadata. [More details](#open-graph) |
+| **`titleSuffix`** | `string` | A suffix to append to the end of the title of every page. Defaults to "- Payload". |
+
+<Banner type="success">
+  <strong>Reminder:</strong>
+  These are the _root-level_ options for the Admin Panel. You can also customize [Collection Metadata](./collections), [Global Metadata](./globals), and [Document Metadata](./documents) in their respective configs.
+</Banner>
+
+### Icons
+
+The Icons Config corresponds to the `<link>` tags that are used to specify icons for the Admin Panel. The `icons` key is an array of objects, each of which represents an individual icon. Icons are differentiated from one another by their `rel` attribute, which specifies the relationship between the document and the icon.
+
+The most common icon type is the favicon, which is displayed in the browser tab. This is specified by the `rel` attribute `icon`. Other common icon types include `apple-touch-icon`, which is used by Apple devices when the Admin Panel is saved to the home screen, and `mask-icon`, which is used by Safari to mask the Admin Panel icon.
+
+To customize icons, use the `icons` key within the `admin.meta` object in your Payload Config:
+
+```ts
+{
+  // ...
+  admin: {
+    meta: {
+      // highlight-start
+      icons: [
+      // highlight-end
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon.png',
+        },
+        {
+          rel: 'apple-touch-icon',
+          type: 'image/png',
+          href: '/apple-touch-icon.png',
+        },
+      ],
+    },
+  },
+}
+```
+
+The following options are available for Icons:
+
+| Key | Type | Description |
+| --- | --- | --- |
+| **`rel`** | `string` | The HTML `rel` attribute of the icon. |
+| **`type`** | `string` | The MIME type of the icon. |
+| **`color`** | `string` | The color of the icon. |
+| **`fetchPriority`** | `string` | The [fetch priority](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/fetchPriority) of the icon. |
+| **`media`** | `string` | The [media query](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries) of the icon. |
+| **`sizes`** | `string` | The [sizes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/sizes) of the icon. |
+| **`url`** | `string` | The URL pointing the resource of the icon. |
+
+### Open Graph
+
+Open Graph metadata is a set of tags that are used to control how URLs are displayed when shared on social media platforms. Open Graph metadata is automatically generated by Payload, but can be customized at the Root level.
+
+To customize Open Graph metadata, use the `openGraph` key within the `admin.meta` object in your Payload Config:
+
+```ts
+{
+  // ...
+  admin: {
+    meta: {
+      // highlight-start
+      openGraph: {
+      // highlight-end
+        description: 'The best admin panel in the world',
+        images: [
+          {
+            url: 'https://example.com/image.jpg',
+            width: 800,
+            height: 600,
+          },
+        ],
+        siteName: 'Payload',
+        title: 'My Admin Panel',
+      },
+    },
+  },
+}
+```
+
+The following options are available for Open Graph Metadata:
+
+| Key | Type | Description |
+| --- | --- | --- |
+| **`description`** | `string` | The description of the Admin Panel. |
+| **`images`** | `OGImageConfig | OGImageConfig[]` | An array of image objects. |
+| **`siteName`** | `string` | The name of the site. |
+| **`title`** | `string` | The title of the Admin Panel. |
+
+## Collection Metadata
+
+Collection Metadata is the metadata that is applied to all pages within any given Collection within the Admin Panel. This metadata is used to customize the title and description of all views within any given Collection, unless overridden by the view itself.
+
+To customize Collection Metadata, use the `admin.meta` key within your Collection Config:
+
+```ts
+import { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    meta: {
+    // highlight-end
+      title: 'My Collection',
+      description: 'The best collection in the world',
+    },
+  },
+}
+```
+
+The Collection Meta config has the same options as the [Root Metadata](#root-metadata) config.
+
+## Global Metadata
+
+Global Metadata is the metadata that is applied to all pages within any given Global within the Admin Panel. This metadata is used to customize the title and description of all views within any given Global, unless overridden by the view itself.
+
+To customize Global Metadata, use the `admin.meta` key within your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+export const MyGlobal: GlobalConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    meta: {
+    // highlight-end
+      title: 'My Global',
+      description: 'The best
+    },
+  },
+}
+```
+
+The Global Meta config has the same options as the [Root Metadata](#root-metadata) config.
+
+## View Metadata
+
+View Metadata is the metadata that is applied to specific [Views](./views) within the Admin Panel. This metadata is used to customize the title and description of a specific view, overriding any metadata set at the [Root](#root-metadata), [Collection](#collection-metadata), or [Global](#global-metadata) level.
+
+To customize View Metadata, use the `meta` key within your View Config:
+
+```ts
+{
+  // ...
+  admin: {
+    views: {
+      dashboard: {
+        // highlight-start
+        meta: {
+        // highlight-end
+          title: 'My Dashboard',
+          description: 'The best dashboard in the world',
+        }
+      },
+    },
+  },
+}

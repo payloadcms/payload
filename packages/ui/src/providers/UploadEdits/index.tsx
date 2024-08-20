@@ -1,3 +1,4 @@
+'use client'
 import type { UploadEdits } from 'payload'
 
 import React from 'react'

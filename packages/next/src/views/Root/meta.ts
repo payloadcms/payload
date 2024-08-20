@@ -13,6 +13,8 @@ import { generateNotFoundMeta } from '../NotFound/meta.js'
 import { generateResetPasswordMetadata } from '../ResetPassword/index.js'
 import { generateUnauthorizedMetadata } from '../Unauthorized/index.js'
 import { generateVerifyMetadata } from '../Verify/index.js'
+import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserMetadata,
@@ -38,6 +40,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
+  const currentRoute = `/${segments.join('/')}`
   const [segmentOne, segmentTwo] = segments
 
   const isGlobal = segmentOne === 'globals'
@@ -130,7 +133,22 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
   }
 
   if (!meta) {
-    meta = await generateNotFoundMeta({ config, i18n })
+    const { viewConfig, viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute,
+    })
+
+    if (viewKey) {
+      // Custom Views
+      // --> /:path
+      meta = await generateCustomViewMetadata({
+        config,
+        i18n,
+        viewConfig,
+      })
+    } else {
+      meta = await generateNotFoundMeta({ config, i18n })
+    }
   }
 
   return meta

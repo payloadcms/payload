@@ -1,8 +1,10 @@
 'use client'
-import React, { useEffect } from 'react'
+import type { MappedComponent } from 'payload'
+import type React from 'react'
+
+import { useEffect } from 'react'
 
 import { useActions } from '../index.js'
-import type { MappedComponent } from 'payload'
 
 export const SetViewActions: React.FC<{ actions: MappedComponent[] }> = ({ actions }) => {
   const { setViewActions } = useActions()

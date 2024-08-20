@@ -23,6 +23,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     beforeInput,
     className,
     errorProps,
+    field,
     inputRef,
     label,
     labelProps,
@@ -59,13 +60,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     >
       <FieldLabel
         Label={Label}
+        field={field}
         htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <div>
           <RenderComponent mappedComponent={beforeInput} />
           <input

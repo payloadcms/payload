@@ -1,17 +1,31 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { PointFieldClient } from '../../fields/config/types.js'
+import type { PointField, PointFieldClient } from '../../fields/config/types.js'
 import type { PointFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type PointFieldClientWithoutType = MarkOptional<PointFieldClient, 'type'>
 
 export type PointFieldProps = {
-  readonly field: MarkOptional<PointFieldClient, 'type'>
   readonly validate?: PointFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<PointFieldClientWithoutType>, 'validate'>
 
-export type PointFieldLabelComponent = LabelComponent<'point'>
+export type PointFieldLabelServerComponent = FieldLabelServerComponent<PointField>
 
-export type PointFieldDescriptionComponent = DescriptionComponent<'point'>
+export type PointFieldLabelClientComponent = FieldLabelClientComponent<PointFieldClientWithoutType>
 
-export type PointFieldErrorComponent = ErrorComponent<'point'>
+export type PointFieldDescriptionServerComponent = FieldDescriptionServerComponent<PointField>
+
+export type PointFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<PointFieldClientWithoutType>
+
+export type PointFieldErrorServerComponent = FieldErrorServerComponent<PointField>
+
+export type PointFieldErrorClientComponent = FieldErrorClientComponent<PointFieldClientWithoutType>
