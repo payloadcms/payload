@@ -27,7 +27,7 @@ export function getRequestLocales({ data, localization, searchParams }: GetReque
   if (fallbackLocale === 'none') {
     fallbackLocale = 'null'
   } else if (!localization.localeCodes.includes(fallbackLocale)) {
-    if ('fallback' in localization && localization.fallback !== false) {
+    if ('fallback' in localization && localization.fallback) {
       fallbackLocale = localization.defaultLocale
     }
   }
