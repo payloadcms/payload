@@ -96,11 +96,19 @@ From there, create the adapter, passing in all of its required properties:
 ```js
 import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
 
+// if you need to obtain credentials you may do so by following the instructions here: https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app?tabs=javascript
+// or you can use the connection string directly.
+
 const adapter = azureBlobStorageAdapter({
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
   containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
   allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
   baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+  /**
+   * Optional: You may wish to obtain credentials that cannot be passed through in the connectionString connection option. In that case the connectionString will only be the URL to the storage account.
+   * Can be one of AnonymousCredential | StorageSharedKeyCredential | TokenCredential
+   **/
+  credentials: new StorageSharedKeyCredential(process.env.AZURE_STORAGE_ACCOUNT_NAME, process.env.AZURE_STORAGE_ACCOUNT_KEY),
 })
 
 // Now you can pass this adapter to the plugin
