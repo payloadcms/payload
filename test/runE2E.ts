@@ -10,6 +10,13 @@ const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
+const prod = process.argv.includes('--prod')
+process.argv = process.argv.filter((arg) => arg !== '--prod')
+if (prod) {
+  process.env.PAYLOAD_TEST_PROD = 'true'
+  shelljs.env.PAYLOAD_TEST_PROD = 'true'
+}
+
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []

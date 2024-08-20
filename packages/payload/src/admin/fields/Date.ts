@@ -1,17 +1,31 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { DateFieldClient } from '../../fields/config/types.js'
+import type { DateField, DateFieldClient } from '../../fields/config/types.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
 
 export type DateFieldProps = {
-  readonly field: MarkOptional<DateFieldClient, 'type'>
   readonly validate?: DateFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<DateFieldClientWithoutType>, 'validate'>
 
-export type DateFieldLabelComponent = LabelComponent<'date'>
+export type DateFieldLabelServerComponent = FieldLabelServerComponent<DateField>
 
-export type DateFieldDescriptionComponent = DescriptionComponent<'date'>
+export type DateFieldLabelClientComponent = FieldLabelClientComponent<DateFieldClientWithoutType>
 
-export type DateFieldErrorComponent = ErrorComponent<'date'>
+export type DateFieldDescriptionServerComponent = FieldDescriptionServerComponent<DateField>
+
+export type DateFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<DateFieldClientWithoutType>
+
+export type DateFieldErrorServerComponent = FieldErrorServerComponent<DateField>
+
+export type DateFieldErrorClientComponent = FieldErrorClientComponent<DateFieldClientWithoutType>

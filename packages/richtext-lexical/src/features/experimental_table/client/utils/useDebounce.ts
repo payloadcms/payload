@@ -1,3 +1,4 @@
+'use client'
 import { useMemo, useRef } from 'react'
 
 import debounce from './debounce.js'

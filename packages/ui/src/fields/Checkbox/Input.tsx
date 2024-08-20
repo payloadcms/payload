@@ -1,5 +1,11 @@
 'use client'
-import type { LabelProps, MappedComponent, SanitizedLabelProps } from 'payload'
+import type {
+  CheckboxFieldClient,
+  FieldLabelClientProps,
+  MappedComponent,
+  StaticLabel,
+} from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import React from 'react'
 
@@ -14,10 +20,11 @@ export type CheckboxInputProps = {
   readonly beforeInput?: MappedComponent[]
   readonly checked?: boolean
   readonly className?: string
+  readonly field?: MarkOptional<CheckboxFieldClient, 'type'>
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
-  readonly label?: LabelProps<'checkbox'>['label']
-  readonly labelProps?: SanitizedLabelProps
+  readonly label?: StaticLabel
+  readonly labelProps?: FieldLabelClientProps<MarkOptional<CheckboxFieldClient, 'type'>>
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean
@@ -35,6 +42,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   beforeInput,
   checked,
   className,
+  field,
   inputRef,
   label,
   labelProps,
@@ -79,6 +87,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       </div>
       <FieldLabel
         Label={Label}
+        field={field}
         htmlFor={id}
         label={label}
         required={required}

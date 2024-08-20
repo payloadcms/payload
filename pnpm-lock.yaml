@@ -26,10 +26,13 @@ importers:
         version: 29.7.0
       '@libsql/client':
         specifier: 0.6.2
-        version: 0.6.2
+        version: 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@next/bundle-analyzer':
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104
+        version: 15.0.0-canary.104(bufferutil@4.0.8)
+      '@payloadcms/db-postgres':
+        specifier: workspace:*
+        version: link:packages/db-postgres
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -99,9 +102,12 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -125,7 +131,7 @@ importers:
         version: 29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0)
       jest-environment-jsdom:
         specifier: 29.7.0
-        version: 29.7.0
+        version: 29.7.0(bufferutil@4.0.8)
       lint-staged:
         specifier: 15.2.7
         version: 15.2.7
@@ -137,7 +143,7 @@ importers:
         version: 9.4.1(@aws-sdk/credential-providers@3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0)))
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -304,7 +310,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -341,7 +347,7 @@ importers:
     dependencies:
       '@libsql/client':
         specifier: ^0.6.2
-        version: 0.6.2
+        version: 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@payloadcms/drizzle':
         specifier: workspace:*
         version: link:../drizzle
@@ -353,7 +359,7 @@ importers:
         version: 0.23.2-df9e596
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -384,7 +390,7 @@ importers:
         version: 2.11.2
       drizzle-orm:
         specifier: 0.32.1
-        version: 0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -397,7 +403,7 @@ importers:
     devDependencies:
       '@libsql/client':
         specifier: ^0.6.2
-        version: 0.6.2
+        version: 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -662,7 +668,7 @@ importers:
         version: 1.6.2
       next:
         specifier: ^15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.2
@@ -683,7 +689,7 @@ importers:
         version: 10.0.0
       ws:
         specifier: ^8.16.0
-        version: 8.18.0
+        version: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
     devDependencies:
       '@next/eslint-plugin-next':
         specifier: ^14.1.0
@@ -1226,6 +1232,21 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
     devDependencies:
+      '@babel/cli':
+        specifier: ^7.24.5
+        version: 7.24.8(@babel/core@7.25.2)
+      '@babel/core':
+        specifier: ^7.24.5
+        version: 7.25.2
+      '@babel/preset-env':
+        specifier: ^7.24.5
+        version: 7.25.3(@babel/core@7.25.2)
+      '@babel/preset-react':
+        specifier: ^7.24.1
+        version: 7.24.7(@babel/core@7.25.2)
+      '@babel/preset-typescript':
+        specifier: ^7.24.1
+        version: 7.24.7(@babel/core@7.25.2)
       '@lexical/eslint-plugin':
         specifier: 0.17.0
         version: 0.17.0(eslint@9.6.0)
@@ -1253,12 +1274,21 @@ importers:
       '@types/react-dom':
         specifier: npm:types-react-dom@19.0.0-rc.0
         version: types-react-dom@19.0.0-rc.0
+      babel-plugin-react-compiler:
+        specifier: 0.0.0-experimental-1cd8995-20240814
+        version: 0.0.0-experimental-1cd8995-20240814
+      babel-plugin-transform-remove-imports:
+        specifier: ^1.8.0
+        version: 1.8.0(@babel/core@7.25.2)
       esbuild:
         specifier: 0.23.0
         version: 0.23.0
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.23.0)(sass-embedded@1.77.8)
+      eslint-plugin-react-compiler:
+        specifier: 0.0.0-experimental-d0e920e-20240815
+        version: 0.0.0-experimental-d0e920e-20240815(eslint@9.6.0)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1457,7 +1487,7 @@ importers:
         version: 2.3.0
       next:
         specifier: ^15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -1535,14 +1565,17 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
       babel-plugin-react-compiler:
-        specifier: 0.0.0-experimental-592953e-20240517
-        version: 0.0.0-experimental-592953e-20240517
+        specifier: 0.0.0-experimental-1cd8995-20240814
+        version: 0.0.0-experimental-1cd8995-20240814
       esbuild:
         specifier: 0.23.0
         version: 0.23.0
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.23.0)(sass-embedded@1.77.8)
+      eslint-plugin-react-compiler:
+        specifier: 0.0.0-experimental-d0e920e-20240815
+        version: 0.0.0-experimental-d0e920e-20240815(eslint@9.6.0)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1661,8 +1694,8 @@ importers:
         specifier: npm:types-react-dom@19.0.0-rc.0
         version: types-react-dom@19.0.0-rc.0
       babel-plugin-react-compiler:
-        specifier: 0.0.0-experimental-592953e-20240517
-        version: 0.0.0-experimental-592953e-20240517
+        specifier: 0.0.0-experimental-1cd8995-20240814
+        version: 0.0.0-experimental-1cd8995-20240814
       comment-json:
         specifier: ^4.2.3
         version: 4.2.5
@@ -1672,6 +1705,9 @@ importers:
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
       eslint-plugin-playwright:
         specifier: 1.6.2
         version: 1.6.2(eslint-plugin-jest@28.6.0(@typescript-eslint/eslint-plugin@7.16.0(@typescript-eslint/parser@7.16.0(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4))(eslint@9.6.0)
@@ -1690,12 +1726,21 @@ importers:
       lexical:
         specifier: 0.17.0
         version: 0.17.0
+      next:
+        specifier: 15.0.0-canary.104
+        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../packages/payload
       qs-esm:
         specifier: 7.0.2
         version: 7.0.2
+      react:
+        specifier: 19.0.0-rc-06d0b89e-20240801
+        version: 19.0.0-rc-06d0b89e-20240801
+      react-dom:
+        specifier: 19.0.0-rc-06d0b89e-20240801
+        version: 19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801)
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -2121,6 +2166,13 @@ packages:
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
+
+  '@babel/plugin-proposal-private-methods@7.18.6':
+    resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
+    engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
 
   '@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2':
     resolution: {integrity: sha512-SOSkfJDddaM7mak6cPEpswyTRnuRltl429hMraQEglW+OkovnCzsiszTmsrlY//qLFjCpQDFRvjdm2wA5pPm9w==}
@@ -3643,6 +3695,9 @@ packages:
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
 
+  '@neondatabase/serverless@0.9.4':
+    resolution: {integrity: sha512-D0AXgJh6xkf+XTlsO7iwE2Q1w8981E1cLCPAALMU2YKtkF/1SF6BiAzYARZFYo175ON+b1RNIy9TdSFHm5nteg==}
+
   '@next/bundle-analyzer@15.0.0-canary.104':
     resolution: {integrity: sha512-p/KzdaP6UCqTXm6cAZC6Ae+hJ4LkcdcoJ9qAeQ5UHQikCk4BB05Tt0WROf/agrj0lzX8bdMLluR24FixXffiLQ==}
 
@@ -4340,6 +4395,9 @@ packages:
   '@types/pg@8.10.2':
     resolution: {integrity: sha512-MKFs9P6nJ+LAeHLU3V0cODEOgyThJ3OAnmOlsZsxux6sfQs3HRXR5bBn7xG5DjckEFhTAxsXi7k7cd0pCMxpJw==}
 
+  '@types/pg@8.11.6':
+    resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
+
   '@types/pluralize@0.0.33':
     resolution: {integrity: sha512-JOqsl+ZoCpP4e8TDke9W79FDcSgPAR0l6pixx2JHkhnRjvShyYiAYw2LVsnA7K08Y6DeOnaU6ujmENO4os/cYg==}
 
@@ -4513,6 +4571,10 @@ packages:
   '@vercel/blob@0.22.3':
     resolution: {integrity: sha512-l0t2KhbOO/I8ZNOl9zypYf1NE0837aO4/CPQNGR/RAxtj8FpdYKjhyUADUXj2gERLQmnhun+teaVs/G7vZJ/TQ==}
     engines: {node: '>=16.14'}
+
+  '@vercel/postgres@0.9.0':
+    resolution: {integrity: sha512-WiI2g3+ce2g1u1gP41MoDj2DsMuQQ+us7vHobysRixKECGaLHpfTI7DuVZmHU087ozRAGr3GocSyqmWLLo+fig==}
+    engines: {node: '>=14.6'}
 
   '@vue/compiler-core@3.4.37':
     resolution: {integrity: sha512-ZDDT/KiLKuCRXyzWecNzC5vTcubGz4LECAtfGPENpo0nrmqJHwuWtRLxk/Sb9RAKtR9iFflFycbkjkY+W/PZUQ==}
@@ -4762,8 +4824,13 @@ packages:
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
 
-  babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517:
-    resolution: {integrity: sha512-OjG1SVaeQZaJrqkMFJatg8W/MTow8Ak5rx2SI0ETQBO1XvOk/XZGMbltNCPdFJLKghBYoBjC+Y3Ap/Xr7B01mA==}
+  babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814:
+    resolution: {integrity: sha512-4DWAliKzk3ACtvOn0pbUStj8DRy//bA9Icze8u/8+hCYNR2xNWupnocP+FpoCC8tDNkFDSAzQyrQZS5uBeyH9A==}
+
+  babel-plugin-transform-remove-imports@1.8.0:
+    resolution: {integrity: sha512-QdE5ZnIjON1pSgTPU8KzLnl/LEzdq9PLmZNuHgGKTx0LOI9PBrHBj0fz9uCg2CdssiTw7v/zVRYs8GJxbvhKnQ==}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
 
   babel-preset-current-node-syntax@1.1.0:
     resolution: {integrity: sha512-ldYss8SbBlWva1bs28q78Ju5Zq1F+8BrqBZZ0VFhLBvhh6lCpC2o3gDJi/5DRLs9FgYZCnmPYIVFU4lRXCkyUw==}
@@ -4897,6 +4964,10 @@ packages:
 
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
+
+  bufferutil@4.0.8:
+    resolution: {integrity: sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==}
+    engines: {node: '>=6.14.2'}
 
   bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
@@ -5764,6 +5835,12 @@ packages:
       eslint-plugin-jest:
         optional: true
 
+  eslint-plugin-react-compiler@0.0.0-experimental-d0e920e-20240815:
+    resolution: {integrity: sha512-ICIcejquXmO2ednUy2wZ1I0i8NgExZeS+eYMQmygTpUEihxw0pxsKCCzIVBcwzdHYqPzrgkP/GLUEYgPQn2iQA==}
+    engines: {node: ^14.17.0 || ^16.0.0 || >= 18.0.0}
+    peerDependencies:
+      eslint: '>=7'
+
   eslint-plugin-react-debug@1.5.25-next.4:
     resolution: {integrity: sha512-xdv36T0Fyh1mlLrE8k+Mw+6wq/YTowuI45lGqKySKQEuQ1IhNu/LmBpf9K/OW9FU7tOPaTvK4RYl+QBT0zuJHg==}
     engines: {bun: '>=1.0.15', node: '>=18.18.0'}
@@ -6367,6 +6444,12 @@ packages:
 
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
+
+  hermes-estree@0.20.1:
+    resolution: {integrity: sha512-SQpZK4BzR48kuOg0v4pb3EAGNclzIlqMj3Opu/mu7bbAoFw6oig6cEt/RAi0zTFW/iW6Iz9X9ggGuZTAZ/yZHg==}
+
+  hermes-parser@0.20.1:
+    resolution: {integrity: sha512-BL5P83cwCogI8D7rrDCgsFY0tdYUtmFP9XaXtl2IQjC+2Xo+4okjfXintlTxcIwl4qeGddEl28Z11kbVIw0aNA==}
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -9224,6 +9307,10 @@ packages:
       '@types/react':
         optional: true
 
+  utf-8-validate@6.0.4:
+    resolution: {integrity: sha512-xu9GQDeFp+eZ6LnCywXN/zBancWvOpUMzgjLPSjy4BRHSmTelvn2E0DG0o1sTiw5hkCKBHo8rwSKncfRfv2EEQ==}
+    engines: {node: '>=6.14.2'}
+
   utf8-byte-length@1.0.5:
     resolution: {integrity: sha512-Xn0w3MtiQ6zoz2vFyUVruaCL53O/DwUvkEeOvj+uulMm0BkUGYWmBYVyElqZaSLhY6ZD0ulfU3aBra2aVT4xfA==}
 
@@ -9458,6 +9545,12 @@ packages:
 
   zod-validation-error@2.1.0:
     resolution: {integrity: sha512-VJh93e2wb4c3tWtGgTa0OF/dTt/zoPCPzXq4V11ZjxmEAFaPi/Zss1xIZdEB5RD8GD00U0/iVXgqkF77RV7pdQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      zod: ^3.18.0
+
+  zod-validation-error@3.3.1:
+    resolution: {integrity: sha512-uFzCZz7FQis256dqw4AhPQgD6f3pzNca/Zh62RNELavlumQB3nDIUFbF5JQfFLcMbO1s02Q7Xg/gpcOBlEnYZA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.18.0
@@ -10393,6 +10486,14 @@ snapshots:
       '@babel/core': 7.25.2
       '@babel/helper-plugin-utils': 7.24.8
       '@babel/traverse': 7.25.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@babel/plugin-proposal-private-methods@7.18.6(@babel/core@7.25.2)':
+    dependencies:
+      '@babel/core': 7.25.2
+      '@babel/helper-create-class-features-plugin': 7.25.0(@babel/core@7.25.2)
+      '@babel/helper-plugin-utils': 7.24.8
     transitivePeerDependencies:
       - supports-color
 
@@ -12043,10 +12144,10 @@ snapshots:
       lexical: 0.17.0
       yjs: 13.6.18
 
-  '@libsql/client@0.6.2':
+  '@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)':
     dependencies:
       '@libsql/core': 0.6.2
-      '@libsql/hrana-client': 0.6.2
+      '@libsql/hrana-client': 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       js-base64: 3.7.7
       libsql: 0.3.19
     transitivePeerDependencies:
@@ -12063,10 +12164,10 @@ snapshots:
   '@libsql/darwin-x64@0.3.19':
     optional: true
 
-  '@libsql/hrana-client@0.6.2':
+  '@libsql/hrana-client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)':
     dependencies:
       '@libsql/isomorphic-fetch': 0.2.5
-      '@libsql/isomorphic-ws': 0.1.5
+      '@libsql/isomorphic-ws': 0.1.5(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       js-base64: 3.7.7
       node-fetch: 3.3.2
     transitivePeerDependencies:
@@ -12075,10 +12176,10 @@ snapshots:
 
   '@libsql/isomorphic-fetch@0.2.5': {}
 
-  '@libsql/isomorphic-ws@0.1.5':
+  '@libsql/isomorphic-ws@0.1.5(bufferutil@4.0.8)(utf-8-validate@6.0.4)':
     dependencies:
       '@types/ws': 8.5.12
-      ws: 8.18.0
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -12135,9 +12236,14 @@ snapshots:
 
   '@neon-rs/load@0.0.4': {}
 
-  '@next/bundle-analyzer@15.0.0-canary.104':
+  '@neondatabase/serverless@0.9.4':
     dependencies:
-      webpack-bundle-analyzer: 4.10.1
+      '@types/pg': 8.11.6
+    optional: true
+
+  '@next/bundle-analyzer@15.0.0-canary.104(bufferutil@4.0.8)':
+    dependencies:
+      webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -12977,6 +13083,13 @@ snapshots:
       pg-protocol: 1.6.1
       pg-types: 4.0.2
 
+  '@types/pg@8.11.6':
+    dependencies:
+      '@types/node': 20.12.5
+      pg-protocol: 1.6.1
+      pg-types: 4.0.2
+    optional: true
+
   '@types/pluralize@0.0.33': {}
 
   '@types/prettier@2.7.3': {}
@@ -13206,6 +13319,14 @@ snapshots:
       bytes: 3.1.2
       is-buffer: 2.0.5
       undici: 5.28.4
+
+  '@vercel/postgres@0.9.0':
+    dependencies:
+      '@neondatabase/serverless': 0.9.4
+      bufferutil: 4.0.8
+      utf-8-validate: 6.0.4
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+    optional: true
 
   '@vue/compiler-core@3.4.37':
     dependencies:
@@ -13522,7 +13643,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517:
+  babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814:
     dependencies:
       '@babel/generator': 7.2.0
       '@babel/types': 7.25.2
@@ -13531,6 +13652,10 @@ snapshots:
       pretty-format: 24.9.0
       zod: 3.23.8
       zod-validation-error: 2.1.0(zod@3.23.8)
+
+  babel-plugin-transform-remove-imports@1.8.0(@babel/core@7.25.2):
+    dependencies:
+      '@babel/core': 7.25.2
 
   babel-preset-current-node-syntax@1.1.0(@babel/core@7.25.2):
     dependencies:
@@ -13703,6 +13828,11 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+
+  bufferutil@4.0.8:
+    dependencies:
+      node-gyp-build: 4.8.1
+    optional: true
 
   bundle-name@3.0.0:
     dependencies:
@@ -14249,11 +14379,23 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.32.1(@libsql/client@0.6.2)(@types/pg@8.10.2)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0):
+  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0):
     optionalDependencies:
-      '@libsql/client': 0.6.2
+      '@libsql/client': 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      '@neondatabase/serverless': 0.9.4
       '@types/pg': 8.10.2
       '@types/react': types-react@19.0.0-rc.0
+      '@vercel/postgres': 0.9.0
+      pg: 8.11.3
+      react: 19.0.0-rc-06d0b89e-20240801
+
+  drizzle-orm@0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8))(@neondatabase/serverless@0.9.4)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0):
+    optionalDependencies:
+      '@libsql/client': 0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      '@neondatabase/serverless': 0.9.4
+      '@types/pg': 8.11.6
+      '@types/react': types-react@19.0.0-rc.0
+      '@vercel/postgres': 0.9.0
       pg: 8.11.3
       react: 19.0.0-rc-06d0b89e-20240801
 
@@ -14637,6 +14779,18 @@ snapshots:
       globals: 13.24.0
     optionalDependencies:
       eslint-plugin-jest: 28.6.0(@typescript-eslint/eslint-plugin@7.16.0(@typescript-eslint/parser@7.16.0(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(typescript@5.5.4))(eslint@9.6.0)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
+
+  eslint-plugin-react-compiler@0.0.0-experimental-d0e920e-20240815(eslint@9.6.0):
+    dependencies:
+      '@babel/core': 7.25.2
+      '@babel/parser': 7.25.3
+      '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.25.2)
+      eslint: 9.6.0
+      hermes-parser: 0.20.1
+      zod: 3.23.8
+      zod-validation-error: 3.3.1(zod@3.23.8)
+    transitivePeerDependencies:
+      - supports-color
 
   eslint-plugin-react-debug@1.5.25-next.4(eslint@9.6.0)(typescript@5.5.4):
     dependencies:
@@ -15423,6 +15577,12 @@ snapshots:
 
   help-me@5.0.0: {}
 
+  hermes-estree@0.20.1: {}
+
+  hermes-parser@0.20.1:
+    dependencies:
+      hermes-estree: 0.20.1
+
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
@@ -15934,7 +16094,7 @@ snapshots:
       jest-util: 29.7.0
       pretty-format: 29.7.0
 
-  jest-environment-jsdom@29.7.0:
+  jest-environment-jsdom@29.7.0(bufferutil@4.0.8):
     dependencies:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
@@ -15943,7 +16103,7 @@ snapshots:
       '@types/node': 20.12.5
       jest-mock: 29.7.0
       jest-util: 29.7.0
-      jsdom: 20.0.3
+      jsdom: 20.0.3(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -16190,7 +16350,7 @@ snapshots:
 
   jsdoc-type-pratt-parser@4.1.0: {}
 
-  jsdom@20.0.3:
+  jsdom@20.0.3(bufferutil@4.0.8):
     dependencies:
       abab: 2.0.6
       acorn: 8.12.1
@@ -16216,7 +16376,7 @@ snapshots:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.18.0
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -16691,7 +16851,7 @@ snapshots:
 
   next-tick@1.1.0: {}
 
-  next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4):
+  next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4):
     dependencies:
       '@next/env': 15.0.0-canary.104
       '@swc/counter': 0.1.3
@@ -16714,7 +16874,37 @@ snapshots:
       '@next/swc-win32-ia32-msvc': 15.0.0-canary.104
       '@next/swc-win32-x64-msvc': 15.0.0-canary.104
       '@playwright/test': 1.46.0
-      babel-plugin-react-compiler: 0.0.0-experimental-592953e-20240517
+      babel-plugin-react-compiler: 0.0.0-experimental-1cd8995-20240814
+      sass: 1.77.4
+      sharp: 0.33.4
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4):
+    dependencies:
+      '@next/env': 15.0.0-canary.104
+      '@swc/counter': 0.1.3
+      '@swc/helpers': 0.5.12
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001651
+      graceful-fs: 4.2.11
+      postcss: 8.4.31
+      react: 19.0.0-rc-06d0b89e-20240801
+      react-dom: 19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801)
+      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-06d0b89e-20240801)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.0.0-canary.104
+      '@next/swc-darwin-x64': 15.0.0-canary.104
+      '@next/swc-linux-arm64-gnu': 15.0.0-canary.104
+      '@next/swc-linux-arm64-musl': 15.0.0-canary.104
+      '@next/swc-linux-x64-gnu': 15.0.0-canary.104
+      '@next/swc-linux-x64-musl': 15.0.0-canary.104
+      '@next/swc-win32-arm64-msvc': 15.0.0-canary.104
+      '@next/swc-win32-ia32-msvc': 15.0.0-canary.104
+      '@next/swc-win32-x64-msvc': 15.0.0-canary.104
+      '@playwright/test': 1.46.0
+      babel-plugin-react-compiler: 0.0.0-experimental-1cd8995-20240814
       sass: 1.77.4
       sharp: 0.33.4
     transitivePeerDependencies:
@@ -18509,7 +18699,7 @@ snapshots:
       std-env: 3.7.0
     optionalDependencies:
       express: 4.19.2
-      next: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-592953e-20240517)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+      next: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-1cd8995-20240814)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
@@ -18530,6 +18720,11 @@ snapshots:
       react: 19.0.0-rc-06d0b89e-20240801
     optionalDependencies:
       '@types/react': types-react@19.0.0-rc.0
+
+  utf-8-validate@6.0.4:
+    dependencies:
+      node-gyp-build: 4.8.1
+    optional: true
 
   utf8-byte-length@1.0.5: {}
 
@@ -18581,7 +18776,7 @@ snapshots:
 
   webidl-conversions@7.0.0: {}
 
-  webpack-bundle-analyzer@4.10.1:
+  webpack-bundle-analyzer@4.10.1(bufferutil@4.0.8):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
       acorn: 8.12.1
@@ -18595,7 +18790,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.0.1
       sirv: 2.0.4
-      ws: 7.5.10
+      ws: 7.5.10(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -18689,9 +18884,14 @@ snapshots:
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
 
-  ws@7.5.10: {}
+  ws@7.5.10(bufferutil@4.0.8):
+    optionalDependencies:
+      bufferutil: 4.0.8
 
-  ws@8.18.0: {}
+  ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4):
+    optionalDependencies:
+      bufferutil: 4.0.8
+      utf-8-validate: 6.0.4
 
   xml-name-validator@4.0.0: {}
 
@@ -18756,6 +18956,10 @@ snapshots:
   yocto-queue@1.1.1: {}
 
   zod-validation-error@2.1.0(zod@3.23.8):
+    dependencies:
+      zod: 3.23.8
+
+  zod-validation-error@3.3.1(zod@3.23.8):
     dependencies:
       zod: 3.23.8
 

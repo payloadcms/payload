@@ -93,12 +93,14 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
     >
       <FieldError
         CustomError={field?.admin?.components?.Error}
+        field={field}
         path={path}
         {...(errorProps || {})}
         alignCaret="left"
       />
       <FieldLabel
         Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -144,6 +146,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

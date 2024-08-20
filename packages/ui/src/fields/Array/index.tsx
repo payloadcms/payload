@@ -215,6 +215,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       {showError && (
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -226,6 +227,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
               <FieldLabel
                 Label={field?.admin?.components?.Label}
                 as="span"
+                field={field}
                 label={label}
                 required={required}
                 unstyled
@@ -262,6 +264,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </header>

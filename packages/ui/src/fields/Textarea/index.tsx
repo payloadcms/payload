@@ -19,6 +19,8 @@ export { TextAreaInputProps, TextareaInput }
 
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
     field,
     field: {
       name,
@@ -39,10 +41,12 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       minLength,
       required,
     },
+    labelProps,
     locale,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
@@ -84,7 +88,10 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
       description={description}
+      descriptionProps={descriptionProps}
+      errorProps={errorProps}
       label={label}
+      labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)
       }}

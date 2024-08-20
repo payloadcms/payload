@@ -1,5 +1,12 @@
 'use client'
-import type { MappedComponent, OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type {
+  MappedComponent,
+  OptionObject,
+  SelectFieldClient,
+  StaticDescription,
+  StaticLabel,
+} from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -25,6 +32,7 @@ export type SelectInputProps = {
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
   readonly errorProps?: Record<string, unknown>
+  readonly field?: MarkOptional<SelectFieldClient, 'type'>
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
@@ -53,6 +61,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     description,
     descriptionProps,
     errorProps,
+    field,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -106,9 +115,15 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        Label={Label}
+        field={field}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
         <ReactSelect
           disabled={readOnly}
@@ -128,6 +143,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       <FieldDescription
         Description={Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

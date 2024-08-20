@@ -967,7 +967,7 @@ describe('Fields', () => {
         collection: tabsFieldsSlug,
       })
 
-      await reload(payload.config, payload)
+      await reload(payload.config, payload, true)
 
       const testDoc2 = await payload.findByID({
         id: document.id,

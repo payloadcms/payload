@@ -1,18 +1,25 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  customCollectionMetaTitle,
   customCollectionParamViewPath,
   customCollectionParamViewPathBase,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
+    meta: {
+      title: customCollectionMetaTitle,
+    },
     components: {
       views: {
         edit: {
@@ -29,6 +36,9 @@ export const CustomViews2: CollectionConfig = {
             tab: {
               label: customEditLabel,
             },
+            meta: {
+              title: customDefaultTabMetaTitle,
+            },
           },
           myCustomView: {
             Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
@@ -37,6 +47,9 @@ export const CustomViews2: CollectionConfig = {
               label: customTabLabel,
             },
             path: '/custom-tab-view',
+            meta: {
+              title: customViewMetaTitle,
+            },
           },
           myCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
@@ -52,9 +65,15 @@ export const CustomViews2: CollectionConfig = {
               label: 'Custom Nested Tab View',
             },
             path: customNestedTabViewPath,
+            meta: {
+              title: 'Custom Nested Meta Title',
+            },
           },
           versions: {
             Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+            meta: {
+              title: customVersionsTabMetaTitle,
+            },
           },
         },
       },
