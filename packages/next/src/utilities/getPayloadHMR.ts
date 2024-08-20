@@ -14,7 +14,11 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
-export const reload = async (config: SanitizedConfig, payload: Payload): Promise<void> => {
+export const reload = async (
+  config: SanitizedConfig,
+  payload: Payload,
+  skipImportMapGeneration?: boolean,
+): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     await payload.db.destroy()
   }
@@ -46,7 +50,7 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
   }
 
   // Generate component map
-  if (config.admin?.importMap?.autoGenerate !== false) {
+  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
     await generateImportMap(config, {
       log: true,
     })
@@ -87,6 +91,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     return cached.payload
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)

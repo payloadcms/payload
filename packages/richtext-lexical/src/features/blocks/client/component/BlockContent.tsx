@@ -1,3 +1,4 @@
+'use client'
 import type { ClientBlock, ClientField, CollapsedPreferences, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'

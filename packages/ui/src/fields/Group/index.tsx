@@ -96,6 +96,7 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
                 <FieldDescription
                   Description={field?.admin?.components?.Description}
                   description={description}
+                  field={field}
                   {...(descriptionProps || {})}
                 />
               </header>

@@ -1,4 +1,4 @@
-import type { MappedComponent } from '../../admin/types.js'
+import type { MappedComponent, StaticDescription } from '../../admin/types.js'
 import type { MappedView } from '../../admin/views/types.js'
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
@@ -46,7 +46,7 @@ export type ClientCollectionConfig = {
         }
       }
     }
-    description?: Record<string, string> | string
+    description?: StaticDescription
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<
     SanitizedCollectionConfig['admin'],

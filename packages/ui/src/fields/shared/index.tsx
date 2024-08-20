@@ -1,3 +1,4 @@
+'use client'
 import type { Locale, SanitizedLocalizationConfig } from 'payload'
 
 export const fieldBaseClass = 'field-type'

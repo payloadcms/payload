@@ -1,3 +1,4 @@
+'use client'
 export class Point {
   private readonly _x: number
 

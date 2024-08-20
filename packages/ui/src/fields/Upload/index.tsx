@@ -19,6 +19,8 @@ export type { UploadInputProps }
 
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
+    descriptionProps,
+    errorProps,
     field,
     field: {
       _path: pathFromProps,
@@ -27,9 +29,11 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
       relationTo,
       required,
     },
+    labelProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
@@ -92,8 +96,11 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         api={apiRoute}
         className={className}
         collection={collection}
+        descriptionProps={descriptionProps}
+        errorProps={errorProps}
         filterOptions={filterOptions}
         label={label}
+        labelProps={labelProps}
         onChange={onChange}
         readOnly={disabled}
         relationTo={relationTo}
