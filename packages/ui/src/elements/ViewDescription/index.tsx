@@ -23,10 +23,10 @@ export function isComponent(description: Description): description is ViewDescri
 
 export const ViewDescription: React.FC<ViewDescriptionProps> = (props) => {
   const { i18n } = useTranslation()
-  const { Description, description } = props
+  const { Description, description, ...rest } = props
 
   if (Description) {
-    return <RenderComponent mappedComponent={Description} />
+    return <RenderComponent clientProps={{ description, ...rest }} mappedComponent={Description} />
   }
 
   if (description) {
