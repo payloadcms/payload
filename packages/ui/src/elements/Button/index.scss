@@ -4,7 +4,7 @@ a.btn {
   display: inline-block;
 }
 
-.btn__wrap {
+.btn--withPopup {
   margin-block: 24px;
   .btn {
     margin: 0;
@@ -12,7 +12,85 @@ a.btn {
 }
 
 .btn {
-  background: transparent;
+  // colors
+  &--style-primary {
+    --color: var(--theme-elevation-0);
+    --bg-color: var(--theme-elevation-800);
+    --box-shadow: none;
+    --hover-bg: var(--theme-elevation-600);
+    --hover-color: var(--color);
+
+    &.btn--disabled {
+      --bg-color: var(--theme-elevation-200);
+      --color: var(--theme-elevation-800);
+      --hover-bg: var(--bg-color);
+      --hover-color: var(--color);
+    }
+  }
+
+  &--style-secondary {
+    --color: var(--theme-text);
+    --bg-color: transparent;
+    --box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
+    --hover-color: var(--theme-elevation-600);
+    --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
+
+    &.btn--disabled {
+      --color: var(--theme-elevation-200);
+      --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-color: var(--theme-elevation-200);
+    }
+  }
+
+  &--style-pill {
+    --bg-color: var(--theme-elevation-150);
+    --color: var(--theme-elevation-800);
+    --hover-color: var(--color);
+    --hover-bg: var(--theme-elevation-100);
+  }
+}
+
+.btn--withPopup {
+  .popup-button {
+    color: var(--color, inherit);
+    background-color: var(--bg-color);
+    box-shadow: var(--box-shadow);
+    border-radius: $style-radius-m;
+    border-left: 1px solid var(--theme-bg);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    align-items: center;
+
+    &:hover,
+    &:focus-visible,
+    &:focus,
+    &:active {
+      background-color: var(--hover-bg);
+      color: var(--hover-color);
+      box-shadow: var(--hover-box-shadow);
+    }
+  }
+}
+
+.btn,
+.btn--withPopup .btn {
+  &:hover,
+  &:focus-visible,
+  &:focus,
+  &:active {
+    color: var(--hover-color);
+    box-shadow: var(--hover-box-shadow);
+    background-color: var(--hover-bg);
+  }
+}
+
+.btn--disabled,
+.btn--disabled .btn {
+  cursor: not-allowed;
+}
+
+.btn {
   border-radius: $style-radius-s;
   font-size: var(--base-body-size);
   margin-block: base(1.2);
@@ -21,10 +99,17 @@ a.btn {
   cursor: pointer;
   font-weight: normal;
   text-decoration: none;
-  color: inherit;
   transition-property: border, color, box-shadow, background;
   transition-duration: 100ms;
   transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+  color: var(--color, inherit);
+  background-color: var(--bg-color, transparent);
+  box-shadow: var(--box-shadow);
+
+  .icon {
+    @include color-svg(var(--color));
+  }
 
   &__content {
     display: flex;
@@ -54,7 +139,7 @@ a.btn {
     }
   }
 
-  &__wrap {
+  &--withPopup {
     display: flex;
   }
 
@@ -138,51 +223,9 @@ a.btn {
     }
   }
 
-  &--has-secondary-actions {
+  &--withPopup .btn {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-  }
-
-  &--style-primary {
-    background: var(--theme-elevation-800);
-    color: var(--theme-elevation-0);
-
-    &.btn--disabled {
-      background: var(--theme-elevation-200);
-    }
-
-    &:not(.btn--disabled) {
-      &:hover,
-      &:focus-visible,
-      &:focus,
-      &:active {
-        background: var(--theme-elevation-600);
-      }
-    }
-
-    .icon {
-      @include color-svg(var(--theme-elevation-0));
-    }
-  }
-
-  &--style-secondary {
-    box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
-    color: var(--theme-text);
-
-    &.btn--disabled {
-      color: var(--theme-elevation-200);
-      box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
-    }
-
-    &:not(.btn--disabled) {
-      &:hover,
-      &:focus-visible,
-      &:focus,
-      &:active {
-        color: var(--theme-elevation-600);
-        box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
-      }
-    }
   }
 
   &--style-icon-label,
@@ -198,40 +241,6 @@ a.btn {
 
   &--style-none {
     padding: 0;
-  }
-
-  &__chevron {
-    @include color-svg(currentColor);
-    border-radius: $style-radius-m;
-    border-left: 1px solid var(--theme-bg) !important;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    align-items: center;
-
-    .icon {
-      vertical-align: middle;
-
-      & path {
-        stroke-width: 1px;
-      }
-    }
-
-    &--disabled {
-      .popup__trigger-wrap {
-        display: none;
-      }
-    }
-
-    &--open {
-      .icon {
-        transform: rotate(180deg);
-      }
-    }
-
-    &:focus:not(:focus-visible) {
-      box-shadow: none;
-      background: var(--theme-elevation-700);
-    }
   }
 
   &:focus:not(:focus-visible) {

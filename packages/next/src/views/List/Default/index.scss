@@ -16,7 +16,8 @@
       text-decoration: none;
     }
 
-    .btn__wrap {
+    .btn--withoutPopup,
+    .btn--withPopup {
       position: relative;
       margin: 0 0 base(0.2);
     }

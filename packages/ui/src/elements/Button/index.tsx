@@ -48,52 +48,12 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   )
 }
 
-const SecondaryActions = ({ className, disabled, secondaryActions }) => {
-  const [showSecondaryActions, setShowSecondaryActions] = React.useState<boolean>(false)
-  const multipleActions = secondaryActions.length >= 1
-
-  React.useEffect(() => {
-    if (disabled) setShowSecondaryActions(false)
-  }, [disabled])
-
-  return (
-    <Popup
-      button={<ChevronIcon />}
-      buttonClassName={[
-        className && className,
-        `${baseClass}__chevron`,
-        showSecondaryActions && `${baseClass}__chevron--open`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      className={disabled ? `${baseClass}--popup-disabled` : ''}
-      disabled={disabled}
-      horizontalAlign="right"
-      noBackground
-      onToggleOpen={(active) => (!disabled ? setShowSecondaryActions(active) : undefined)}
-      size="large"
-      verticalAlign="bottom"
-    >
-      <ButtonGroup>
-        {multipleActions ? (
-          secondaryActions.map((action, i) => (
-            <PopupButton key={i} onClick={action.onClick}>
-              {action.label}
-            </PopupButton>
-          ))
-        ) : (
-          <PopupButton onClick={secondaryActions.onClick}>{secondaryActions.label}</PopupButton>
-        )}
-      </ButtonGroup>
-    </Popup>
-  )
-}
-
 export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
     id,
     type = 'button',
     Link,
+    SubMenuPopupContent,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -106,7 +66,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     newTab,
     onClick,
     round,
-    secondaryActions,
     size = 'medium',
     to,
     tooltip,
@@ -118,16 +77,13 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const classes = [
     baseClass,
     className && className,
-    buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
     iconStyle && `${baseClass}--icon-style-${iconStyle}`,
     icon && !children && `${baseClass}--icon-only`,
-    disabled && `${baseClass}--disabled`,
-    round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
     icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
-    secondaryActions && `${baseClass}--has-secondary-actions`,
+    !SubMenuPopupContent && `${baseClass}--withoutPopup`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -138,12 +94,21 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     if (onClick) onClick(event)
   }
 
+  const styleClasses = [
+    buttonStyle && `${baseClass}--style-${buttonStyle}`,
+    disabled && `${baseClass}--disabled`,
+    round && `${baseClass}--round`,
+    SubMenuPopupContent ? `${baseClass}--withPopup` : `${baseClass}--withoutPopup`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   const buttonProps = {
     id,
     type,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
-    className: classes,
+    className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled,
     onClick: !disabled ? handleClick : undefined,
     onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
@@ -161,18 +126,26 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         return null
       }
 
+      let LinkTag = Link // eslint-disable-line no-case-declarations
+
+      if (disabled) LinkTag = 'div'
+
       buttonElement = (
-        <Link {...buttonProps} href={to || url} to={to || url}>
+        <LinkTag {...buttonProps} href={to || url} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
-        </Link>
+        </LinkTag>
       )
       break
 
     case 'anchor':
       buttonElement = (
-        <a {...buttonProps} href={url} ref={ref as React.Ref<HTMLAnchorElement>}>
+        <a
+          {...buttonProps}
+          href={!disabled ? url : undefined}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
@@ -192,11 +165,20 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       )
       break
   }
-  if (secondaryActions)
+  if (SubMenuPopupContent)
     return (
-      <div className={`${baseClass}__wrap`}>
+      <div className={styleClasses}>
         {buttonElement}
-        <SecondaryActions {...buttonProps} secondaryActions={secondaryActions} />
+        <Popup
+          button={<ChevronIcon />}
+          className={disabled ? `${baseClass}--popup-disabled` : ''}
+          horizontalAlign="right"
+          noBackground
+          size="large"
+          verticalAlign="bottom"
+        >
+          {SubMenuPopupContent}
+        </Popup>
       </div>
     )
 

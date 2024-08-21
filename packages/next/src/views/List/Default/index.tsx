@@ -13,7 +13,7 @@ import {
   ListSelection,
   Pagination,
   PerPage,
-  Pill,
+  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -108,14 +108,18 @@ export const DefaultListView: React.FC = () => {
           {Header || (
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
               {hasCreatePermission && (
-                <Pill
+                <Button
+                  Link={Link}
                   aria-label={i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
+                  buttonStyle="pill"
+                  el="link"
+                  size="small"
                   to={newDocumentURL}
                 >
                   {i18n.t('general:createNew')}
-                </Pill>
+                </Button>
               )}
               {!smallBreak && (
                 <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
