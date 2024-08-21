@@ -18,7 +18,6 @@ import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { drawerSlug } from '../index.js'
-import { strings } from '../strings.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
 
@@ -84,7 +83,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
   } = config
   const { code } = useLocale()
   const { closeModal } = useModal()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const [isLoadingFiles, setIsLoadingFiles] = React.useState(false)
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
@@ -238,7 +237,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
           toggleLoadingOverlay({
             isLoading: true,
             key: 'saveAllDocs',
-            loadingText: strings.uploadingFiles,
+            loadingText: t('general:uploading'),
           })
           const req = await fetch(actionURL, {
             body: createFormData(form.formState, overrides),

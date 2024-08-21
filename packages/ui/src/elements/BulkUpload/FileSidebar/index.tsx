@@ -15,7 +15,6 @@ import { Pill } from '../../Pill/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { strings } from '../strings.js'
 import './index.scss'
 
 const AnimateHeight = (AnimateHeightImport.default ||
@@ -66,8 +65,11 @@ export function FileSidebar() {
           <div className={`${baseClass}__header__text`}>
             <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
             <p>
-              <strong title={`${forms.length} ${strings.filesToUpload}`}>
-                {forms.length} {strings.filesToUpload}
+              <strong
+                title={`${forms.length} ${t(forms.length > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+              >
+                {forms.length}{' '}
+                {t(forms.length > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
               </strong>
             </p>
           </div>

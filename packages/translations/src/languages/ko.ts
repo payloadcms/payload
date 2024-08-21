@@ -245,6 +245,7 @@ export const koTranslations: DefaultTranslationsObject = {
     moveDown: '아래로 이동',
     moveUp: '위로 이동',
     newPassword: '새 비밀번호',
+    next: '다음',
     noFiltersSet: '설정된 필터 없음',
     noLabel: '<{{label}} 없음>',
     noOptions: '옵션 없음',
@@ -262,6 +263,7 @@ export const koTranslations: DefaultTranslationsObject = {
     password: '비밀번호',
     payloadSettings: 'Payload 설정',
     perPage: '페이지당 개수: {{limit}}',
+    previous: '이전',
     remove: '제거',
     reset: '초기화',
     row: '행',
@@ -319,6 +321,8 @@ export const koTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: '파일 추가',
+    addFiles: '파일 추가',
+    bulkUpload: '일괄 업로드',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',
@@ -327,6 +331,8 @@ export const koTranslations: DefaultTranslationsObject = {
     editImage: '이미지 수정',
     fileName: '파일 이름',
     fileSize: '파일 크기',
+    fileToUpload: '업로드할 파일',
+    filesToUpload: '업로드할 파일들',
     focalPoint: '초점',
     focalPointDescription: '미리보기에서 초점을 직접 드래그하거나 아래의 값을 조정하세요.',
     height: '높이',

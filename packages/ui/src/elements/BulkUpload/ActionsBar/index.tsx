@@ -7,13 +7,13 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { strings } from '../strings.js'
 import './index.scss'
 
 const baseClass = 'bulk-upload--actions-bar'
 
 export function ActionsBar() {
   const { activeIndex, forms, setActiveIndex } = useFormsManager()
+  const { t } = useTranslation()
 
   return (
     <div className={baseClass}>
@@ -26,7 +26,7 @@ export function ActionsBar() {
 
         <div className={`${baseClass}__controls`}>
           <Button
-            aria-label={strings.previous}
+            aria-label={t('general:previous')}
             buttonStyle="none"
             onClick={() => {
               const nextIndex = activeIndex - 1
@@ -38,7 +38,7 @@ export function ActionsBar() {
             <ChevronIcon direction="left" />
           </Button>
           <Button
-            aria-label={strings.next}
+            aria-label={t('general:next')}
             buttonStyle="none"
             onClick={() => {
               const nextIndex = activeIndex + 1

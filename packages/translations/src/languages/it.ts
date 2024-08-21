@@ -248,6 +248,7 @@ export const itTranslations: DefaultTranslationsObject = {
     moveDown: 'Sposta sotto',
     moveUp: 'Sposta sopra',
     newPassword: 'Nuova Password',
+    next: 'Successivo',
     noFiltersSet: 'Nessun filtro impostato',
     noLabel: '<No {{label}}>',
     noOptions: 'Nessuna opzione',
@@ -265,6 +266,7 @@ export const itTranslations: DefaultTranslationsObject = {
     password: 'Password',
     payloadSettings: 'Impostazioni di Payload',
     perPage: 'Per Pagina: {{limit}}',
+    previous: 'Precedente',
     remove: 'Rimuovi',
     reset: 'Ripristina',
     row: 'Riga',
@@ -322,6 +324,8 @@ export const itTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Aggiungi file',
+    addFiles: 'Aggiungi File',
+    bulkUpload: 'Caricamento in Blocco',
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",
@@ -330,6 +334,8 @@ export const itTranslations: DefaultTranslationsObject = {
     editImage: 'Modifica immagine',
     fileName: 'Nome File',
     fileSize: 'Dimensione File',
+    fileToUpload: 'File da caricare',
+    filesToUpload: 'File da caricare',
     focalPoint: 'Punto Focale',
     focalPointDescription:
       "Trascina il punto focale direttamente sull'anteprima o regola i valori sottostanti.",

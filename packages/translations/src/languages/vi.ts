@@ -244,6 +244,7 @@ export const viTranslations: DefaultTranslationsObject = {
     moveDown: 'Di chuyển xuống',
     moveUp: 'Di chuyển lên',
     newPassword: 'Mật khảu mới',
+    next: 'Tiếp theo',
     noFiltersSet: 'Không có bộ lọc nào được áp dụng',
     noLabel: '<Không có {{label}}>',
     noOptions: 'Không có lựa chọn',
@@ -261,6 +262,7 @@ export const viTranslations: DefaultTranslationsObject = {
     password: 'Mật khẩu',
     payloadSettings: 'Cài đặt',
     perPage: 'Hiển thị mỗi trang: {{limit}}',
+    previous: 'Trước đó',
     remove: 'Loại bỏ',
     reset: 'Đặt lại',
     row: 'Hàng',
@@ -318,6 +320,8 @@ export const viTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Thêm tập tin',
+    addFiles: 'Thêm tệp',
+    bulkUpload: 'Tải lên số lượng lớn',
     crop: 'Mùa vụ',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',
@@ -326,6 +330,8 @@ export const viTranslations: DefaultTranslationsObject = {
     editImage: 'Chỉnh sửa hình ảnh',
     fileName: 'Tên file',
     fileSize: 'Dung lượng file',
+    fileToUpload: 'Tệp để Tải lên',
+    filesToUpload: 'Tệp để Tải lên',
     focalPoint: 'Điểm trọng tâm',
     focalPointDescription:
       'Kéo điểm tiêu cực trực tiếp trên trình xem trước hoặc điều chỉnh các giá trị bên dưới.',

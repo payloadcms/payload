@@ -1,11 +1,8 @@
 'use client'
-
-import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { discardBulkUploadModalSlug } from '../DiscardWithoutSaving/index.js'
 import './index.scss'
 
 const baseClass = 'drawer-close-button'

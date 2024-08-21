@@ -245,6 +245,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     moveDown: 'Помери доле',
     moveUp: 'Помери горе',
     newPassword: 'Нова лозинка',
+    next: 'Следећи',
     noFiltersSet: 'Нема постављених филтера',
     noLabel: '<Нема {{label}}>',
     noOptions: 'Нема опција',
@@ -262,6 +263,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     password: 'Лозинка',
     payloadSettings: 'Payload поставке',
     perPage: 'По страници: {{limit}}',
+    previous: 'Prethodni',
     remove: 'Уклони',
     reset: 'Поново постави',
     row: 'Ред',
@@ -319,6 +321,8 @@ export const rsTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Додај датотеку',
+    addFiles: 'Dodaj datoteke',
+    bulkUpload: 'Masovno otpremanje',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',
@@ -327,6 +331,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     editImage: 'Уреди слику',
     fileName: 'Име датотеке',
     fileSize: 'Величина датотеке',
+    fileToUpload: 'Fajl za otpremanje',
+    filesToUpload: 'Fajlovi za otpremanje',
     focalPoint: 'Централна тачка',
     focalPointDescription:
       'Превуците средишњу тачку директно на преглед или прилагодите вредности испод.',

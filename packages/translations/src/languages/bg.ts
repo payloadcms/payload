@@ -245,6 +245,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     moveDown: 'Надолу',
     moveUp: 'Нагоре',
     newPassword: 'Нова парола',
+    next: 'Следващ',
     noFiltersSet: 'Няма зададени филтри',
     noLabel: '<Няма {{label}}>',
     noOptions: 'Няма опции',
@@ -262,6 +263,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     password: 'Парола',
     payloadSettings: 'Настройки на Payload',
     perPage: 'На страница: {{limit}}',
+    previous: 'Предишен',
     remove: 'Премахни',
     reset: 'Нулиране',
     row: 'ред',
@@ -319,6 +321,8 @@ export const bgTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Добавяне на файл',
+    addFiles: 'Добави файлове',
+    bulkUpload: 'Масово Качване',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
@@ -327,6 +331,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     editImage: 'Редактирай изображение',
     fileName: 'Име на файла',
     fileSize: 'Големина на файла',
+    fileToUpload: 'Файл за качване',
+    filesToUpload: 'Файлове за качване',
     focalPoint: 'Фокусна точка',
     focalPointDescription:
       'Премести фокусната точка директно върху визуализацията или регулирай стойностите по-долу.',

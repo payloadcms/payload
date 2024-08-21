@@ -74,7 +74,7 @@ export const DefaultListView: React.FC = () => {
     labels,
   } = collectionConfig
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const drawerDepth = useEditDepth()
 
@@ -122,7 +122,7 @@ export const DefaultListView: React.FC = () => {
                     isUploadCollection && collectionConfig.upload.bulkUpload ? (
                       <PopupList.ButtonGroup>
                         <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
-                          Bulk Uploads (!)
+                          {t('upload:bulkUpload')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     ) : null

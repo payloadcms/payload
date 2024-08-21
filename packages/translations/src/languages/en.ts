@@ -248,6 +248,7 @@ export const enTranslations = {
     moveDown: 'Move Down',
     moveUp: 'Move Up',
     newPassword: 'New Password',
+    next: 'Next',
     noFiltersSet: 'No filters set',
     noLabel: '<No {{label}}>',
     noOptions: 'No options',
@@ -265,6 +266,7 @@ export const enTranslations = {
     password: 'Password',
     payloadSettings: 'Payload Settings',
     perPage: 'Per Page: {{limit}}',
+    previous: 'Previous',
     remove: 'Remove',
     reset: 'Reset',
     row: 'Row',
@@ -322,6 +324,8 @@ export const enTranslations = {
   },
   upload: {
     addFile: 'Add File',
+    addFiles: 'Add Files',
+    bulkUpload: 'Bulk Upload',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',
@@ -330,6 +334,8 @@ export const enTranslations = {
     editImage: 'Edit Image',
     fileName: 'File Name',
     fileSize: 'File Size',
+    fileToUpload: 'File to Upload',
+    filesToUpload: 'Files to Upload',
     focalPoint: 'Focal Point',
     focalPointDescription:
       'Drag the focal point directly on the preview or adjust the values below.',
