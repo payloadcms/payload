@@ -113,6 +113,15 @@ export const sanitizeFields = async ({
       field.maxRows = field.maxRows || field.max
     }
 
+    if (field.type === 'upload') {
+      if (!field.admin || !('isSortable' in field.admin)) {
+        field.admin = {
+          isSortable: true,
+          ...field.admin,
+        }
+      }
+    }
+
     if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField)
     }

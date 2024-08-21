@@ -9,20 +9,21 @@ import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
 import { AddNewRelation } from '../../../elements/AddNewRelation/index.js'
 import { Button } from '../../../elements/Button/index.js'
-import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
 import { FileDetails } from '../../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { FieldLabel } from '../../FieldLabel/index.js'
-import { baseClass } from '../index.js'
+
+const baseClass = 'upload upload--has-many'
+
 import './index.scss'
 
 export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string[]>> = (props) => {
   const {
+    canCreate,
     field,
     field: {
       _path,
@@ -115,15 +116,26 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
   }, [value, relationTo, api, serverURL, i18n, code])
 
   function moveItemInArray<T>(array: T[], moveFromIndex: number, moveToIndex: number): T[] {
-    const item = array.splice(moveFromIndex, 1)[0]
-    array.splice(moveToIndex, 0, item)
+    const newArray = [...array]
+    const [item] = newArray.splice(moveFromIndex, 1)
 
-    return array
+    newArray.splice(moveToIndex, 0, item)
+
+    return newArray
   }
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
       const updatedArray = moveItemInArray(value, moveFromIndex, moveToIndex)
+      setValue(updatedArray)
+    },
+    [value, setValue],
+  )
+
+  const removeItem = useCallback(
+    (index: number) => {
+      const updatedArray = [...value]
+      updatedArray.splice(index, 1)
       setValue(updatedArray)
     },
     [value, setValue],
@@ -159,51 +171,29 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
           <div>
             <DraggableSortable
               className={`${baseClass}__draggable-rows`}
-              ids={fileDocs.map((doc) => doc.id)}
+              ids={value}
               onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
             >
               {Boolean(value.length) &&
-                value.map((id) => {
+                value.map((id, index) => {
                   const doc = fileDocs.find((doc) => doc.id === id)
                   const uploadConfig = collection?.upload
+
+                  if (!doc) {
+                    return null
+                  }
+
                   return (
-                    <DraggableSortableItem id={id} key={id}>
-                      {(draggableSortableItemProps) => (
-                        <div
-                          className={[
-                            baseClass,
-                            draggableSortableItemProps && `${baseClass}--has-drag-handle`,
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          ref={draggableSortableItemProps.setNodeRef}
-                          style={{
-                            transform: draggableSortableItemProps.transform,
-                            transition: draggableSortableItemProps.transition,
-                            zIndex: draggableSortableItemProps.isDragging ? 1 : undefined,
-                          }}
-                        >
-                          {draggableSortableItemProps && (
-                            <div
-                              className={`${baseClass}__drag`}
-                              {...draggableSortableItemProps.attributes}
-                              {...draggableSortableItemProps.listeners}
-                            >
-                              <DragHandleIcon />
-                            </div>
-                          )}
-                          {doc && (
-                            <FileDetails
-                              collectionSlug={relationTo}
-                              doc={doc}
-                              hasMany={true}
-                              isSortable={isSortable}
-                              uploadConfig={uploadConfig}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </DraggableSortableItem>
+                    <FileDetails
+                      collectionSlug={relationTo}
+                      doc={doc}
+                      hasMany={true}
+                      isSortable={isSortable}
+                      key={id}
+                      removeItem={removeItem}
+                      rowIndex={index}
+                      uploadConfig={uploadConfig}
+                    />
                   )
                 })}
             </DraggableSortable>
@@ -212,27 +202,29 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
 
         <div className={[`${baseClass}__controls`].join(' ')}>
           <div className={[`${baseClass}__buttons`].join(' ')}>
-            <div className={[`${baseClass}__add-new`].join(' ')}>
-              <AddNewRelation
-                Button={
-                  <Button
-                    buttonStyle="icon-label"
-                    el="span"
-                    icon="plus"
-                    iconPosition="left"
-                    iconStyle="with-border"
-                  >
-                    {t('fields:addNew')}
-                  </Button>
-                }
-                hasMany={hasMany}
-                path={_path}
-                relationTo={relationTo}
-                setValue={setValue}
-                unstyled
-                value={value}
-              />
-            </div>
+            {canCreate && (
+              <div className={[`${baseClass}__add-new`].join(' ')}>
+                <AddNewRelation
+                  Button={
+                    <Button
+                      buttonStyle="icon-label"
+                      el="span"
+                      icon="plus"
+                      iconPosition="left"
+                      iconStyle="with-border"
+                    >
+                      {t('fields:addNew')}
+                    </Button>
+                  }
+                  hasMany={hasMany}
+                  path={_path}
+                  relationTo={relationTo}
+                  setValue={setValue}
+                  unstyled
+                  value={value}
+                />
+              </div>
+            )}
             <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
               <div>
                 <Button

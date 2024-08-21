@@ -1,6 +1,6 @@
 @import '../../../scss/styles.scss';
 
-.upload {
+.upload--has-many {
   position: relative;
   max-width: 100%;
 
@@ -27,6 +27,12 @@
     font-family: inherit;
     color: inherit;
     cursor: pointer;
+  }
+
+  &__draggable-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 }
 
