@@ -161,13 +161,6 @@ export default buildConfigWithDefaults({
       },
     })
 
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'example post',
-      },
-    })
-
     // // Create image
     // const imageFilePath = path.resolve(dirname, '../uploads/image.png')
     // const imageFile = await getFileByPath(imageFilePath)

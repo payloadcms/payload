@@ -98,7 +98,13 @@ export interface Media {
  */
 export interface Post {
   id: string;
-  text?: string | null;
+  frontMatter?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   richText?: {
     root: {
       type: string;

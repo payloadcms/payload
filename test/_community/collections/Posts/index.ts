@@ -9,12 +9,16 @@ import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/m
 import {
   BlocksFeature,
   EXPERIMENTAL_TableFeature,
+  extractFrontmatter,
+  frontmatterToObject,
   getEnabledNodes,
   lexicalEditor,
+  objectToFrontmatter,
 } from '@payloadcms/richtext-lexical'
 import * as fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { deepCopyObjectSimple } from 'payload'
 
 export const postsSlug = 'posts'
 const filename = fileURLToPath(import.meta.url)
@@ -24,19 +28,134 @@ const CODE_BLOCK_REG_EXP = /^[ \t]*```(\w{1,10})?\s?$/
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  admin: {
-    useAsTitle: 'text',
+  hooks: {
+    beforeChange: [
+      ({ collection, data, req }) => {
+        const field: RichTextField = collection.fields.find(
+          (field) => 'name' in field && field.name === 'richText',
+        ) as RichTextField
+        const value = data[field.name]
+
+        const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
+          .editorConfig
+
+        const headlessEditor = createHeadlessEditor({
+          nodes: getEnabledNodes({
+            editorConfig,
+          }),
+        })
+
+        // Convert lexical state to markdown
+        // Import editor state into your headless editor
+        try {
+          headlessEditor.setEditorState(headlessEditor.parseEditorState(value)) // This should commit the editor state immediately
+        } catch (e) {
+          req.payload.logger.error({ err: e }, 'ERROR parsing editor state')
+        }
+
+        // Export to markdown
+        let markdown: string
+        headlessEditor.getEditorState().read(() => {
+          markdown = $convertToMarkdownString(editorConfig?.features?.markdownTransformers)
+        })
+
+        const frontMatterOriginalData = deepCopyObjectSimple(data.frontMatter)
+
+        //Frontmatter
+        const frontmatterData = {}
+
+        if (frontMatterOriginalData) {
+          for (const frontMatterArrayEntry of frontMatterOriginalData) {
+            frontmatterData[frontMatterArrayEntry.key] = frontMatterArrayEntry.value
+          }
+
+          const frontmatterString = objectToFrontmatter(frontmatterData)
+
+          if (frontmatterString?.length) {
+            markdown = frontmatterString + '\n' + markdown
+          }
+        }
+
+        if (markdown?.trim()?.length) {
+          // Write markdown to '../../../../docs/admin/overview.mdx'
+          fs.writeFileSync(path.resolve(dirname, '../../../../docs/admin/overview.mdx'), markdown, {
+            encoding: 'utf-8',
+          })
+        }
+
+        return null // Do not save anything to database
+      },
+    ],
+    afterRead: [
+      ({ collection, doc }) => {
+        const field: RichTextField = collection.fields.find(
+          (field) => 'name' in field && field.name === 'richText',
+        ) as RichTextField
+        const mdxWithFrontmatter = fs.readFileSync(
+          path.resolve(dirname, '../../../../docs/admin/overview.mdx'),
+          {
+            encoding: 'utf-8',
+          },
+        )
+
+        const frontMatter = extractFrontmatter(mdxWithFrontmatter)
+
+        const mdx = frontMatter.content
+
+        const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
+          .editorConfig
+
+        const headlessEditor = createHeadlessEditor({
+          nodes: getEnabledNodes({
+            editorConfig,
+          }),
+        })
+
+        headlessEditor.update(
+          () => {
+            $convertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
+          },
+          { discrete: true },
+        )
+
+        const frontMatterArray = frontMatter?.frontmatter?.length
+          ? Object.entries(frontmatterToObject(frontMatter.frontmatter)).map(([key, value]) => ({
+              key,
+              value,
+            }))
+          : []
+
+        return {
+          ...doc,
+          richText: headlessEditor.getEditorState().toJSON(),
+          frontMatter: frontMatterArray,
+        }
+      },
+    ],
   },
   fields: [
     {
+      type: 'collapsible',
+      label: 'FrontMatter',
       admin: {
-        components: {
-          Label: '/collections/Posts/MyComponent.js#MyComponent',
-        },
-        description: 'This is a description',
+        position: 'sidebar',
       },
-      name: 'text',
-      type: 'text',
+      fields: [
+        {
+          name: 'frontMatter',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'key',
+            },
+            {
+              type: 'text',
+              name: 'value',
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'richText',
@@ -108,71 +227,6 @@ export const PostsCollection: CollectionConfig = {
           }),
         ],
       }),
-      hooks: {
-        beforeChange: [
-          ({ value, field, req }) => {
-            const editorConfig: SanitizedServerEditorConfig = (
-              (field as RichTextField).editor as LexicalRichTextAdapter
-            ).editorConfig
-
-            const headlessEditor = createHeadlessEditor({
-              nodes: getEnabledNodes({
-                editorConfig,
-              }),
-            })
-
-            // Convert lexical state to markdown
-            // Import editor state into your headless editor
-            try {
-              headlessEditor.setEditorState(headlessEditor.parseEditorState(value)) // This should commit the editor state immediately
-            } catch (e) {
-              req.payload.logger.error({ err: e }, 'ERROR parsing editor state')
-            }
-
-            // Export to markdown
-            let markdown: string
-            headlessEditor.getEditorState().read(() => {
-              markdown = $convertToMarkdownString(editorConfig?.features?.markdownTransformers)
-            })
-
-            // Write markdown to '../../../../docs/admin/overview.mdx'
-            fs.writeFileSync(
-              path.resolve(dirname, '../../../../docs/admin/overview.mdx'),
-              markdown,
-              { encoding: 'utf-8' },
-            )
-
-            return value
-          },
-        ],
-        afterRead: [
-          ({ field }) => {
-            const mdx = fs.readFileSync(
-              path.resolve(dirname, '../../../../docs/admin/overview.mdx'),
-              { encoding: 'utf-8' },
-            )
-
-            const editorConfig: SanitizedServerEditorConfig = (
-              (field as RichTextField).editor as LexicalRichTextAdapter
-            ).editorConfig
-
-            const headlessEditor = createHeadlessEditor({
-              nodes: getEnabledNodes({
-                editorConfig,
-              }),
-            })
-
-            headlessEditor.update(
-              () => {
-                $convertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
-              },
-              { discrete: true },
-            )
-
-            return headlessEditor.getEditorState().toJSON()
-          },
-        ],
-      },
     },
   ],
   versions: {

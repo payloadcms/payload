@@ -995,5 +995,11 @@ export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 
-export { extractPropsFromJSXPropsString, propsToJSXString } from './utilities/jsx.js'
+export {
+  extractFrontmatter,
+  extractPropsFromJSXPropsString,
+  frontmatterToObject,
+  objectToFrontmatter,
+  propsToJSXString,
+} from './utilities/jsx.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

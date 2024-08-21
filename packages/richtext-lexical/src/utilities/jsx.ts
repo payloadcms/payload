@@ -59,3 +59,71 @@ function replacer(key: string, value: any): any {
   }
   return value
 }
+
+/**
+ * Converts a frontmatter string to an object.
+ */
+export function frontmatterToObject(frontmatter: string): Record<string, any> {
+  const lines = frontmatter.trim().split('\n')
+  const result = {}
+  let inFrontmatter = false
+
+  for (const line of lines) {
+    if (line.trim() === '---') {
+      inFrontmatter = !inFrontmatter
+      continue
+    }
+
+    if (inFrontmatter) {
+      const [key, ...valueParts] = line.split(':')
+      const value = valueParts.join(':').trim()
+
+      result[key.trim()] = value
+    }
+  }
+
+  return result
+}
+
+/**
+ * Converts an object to a frontmatter string.
+ */
+export function objectToFrontmatter(obj: Record<string, any>): string {
+  let frontmatter = '---\n'
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (Array.isArray(value)) {
+      frontmatter += `${key}: ${value.join(', ')}\n`
+    } else {
+      frontmatter += `${key}: ${value}\n`
+    }
+  }
+
+  frontmatter += '---\n'
+  return frontmatter
+}
+
+/**
+ * Takes an MDX content string and extracts the frontmatter and content.
+ *
+ * The resulting object contains the mdx content without the frontmatter and the frontmatter itself.
+ */
+export function extractFrontmatter(mdxContent: string) {
+  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/
+  const match = mdxContent.match(frontmatterRegex)
+
+  if (match) {
+    const frontmatter = match[0]
+    const contentWithoutFrontmatter = mdxContent.slice(frontmatter.length).trim()
+    return {
+      content: contentWithoutFrontmatter,
+      frontmatter: frontmatter.trim(),
+    }
+  } else {
+    // If no frontmatter is found, return the original content
+    return {
+      content: mdxContent.trim(),
+      frontmatter: '',
+    }
+  }
+}
