@@ -1,9 +1,10 @@
 'use client'
-import type { DescriptionFunction, StaticDescription } from 'payload'
+import type { DescriptionFunction, MappedComponent, StaticDescription } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -12,7 +13,8 @@ export type ViewDescriptionComponent = React.ComponentType<any>
 type Description = DescriptionFunction | StaticDescription | ViewDescriptionComponent | string
 
 export type ViewDescriptionProps = {
-  readonly description?: Description
+  readonly Description?: MappedComponent
+  readonly description?: StaticDescription
 }
 
 export function isComponent(description: Description): description is ViewDescriptionComponent {
@@ -21,11 +23,10 @@ export function isComponent(description: Description): description is ViewDescri
 
 export const ViewDescription: React.FC<ViewDescriptionProps> = (props) => {
   const { i18n } = useTranslation()
-  const { description } = props
+  const { Description, description, ...rest } = props
 
-  if (isComponent(description)) {
-    const Description = description
-    return <Description />
+  if (Description) {
+    return <RenderComponent clientProps={{ description, ...rest }} mappedComponent={Description} />
   }
 
   if (description) {

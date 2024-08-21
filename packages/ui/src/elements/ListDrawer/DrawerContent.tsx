@@ -251,9 +251,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               <XIcon />
             </button>
           </div>
-          {selectedCollectionConfig?.admin?.description && (
+          {(selectedCollectionConfig?.admin?.description ||
+            selectedCollectionConfig?.admin?.components?.Description) && (
             <div className={`${baseClass}__sub-header`}>
-              <ViewDescription description={selectedCollectionConfig.admin.description} />
+              <ViewDescription
+                Description={selectedCollectionConfig.admin?.components?.Description}
+                description={selectedCollectionConfig.admin?.description}
+              />
             </div>
           )}
           {moreThanOneAvailableCollection && (

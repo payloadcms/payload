@@ -21,9 +21,11 @@ export type PopupProps = {
   caret?: boolean
   children?: React.ReactNode
   className?: string
+  disabled?: boolean
   forceOpen?: boolean
   horizontalAlign?: 'center' | 'left' | 'right'
   initActive?: boolean
+  noBackground?: boolean
   onToggleOpen?: (active: boolean) => void
   render?: (any) => React.ReactNode
   showOnHover?: boolean
@@ -41,9 +43,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
     caret = true,
     children,
     className,
+    disabled,
     forceOpen,
     horizontalAlign: horizontalAlignFromProps = 'left',
     initActive = false,
+    noBackground,
     onToggleOpen,
     render,
     showOnHover = false,
@@ -168,12 +172,28 @@ export const Popup: React.FC<PopupProps> = (props) => {
             onMouseLeave={() => setActive(false)}
           >
             <PopupTrigger
-              {...{ active, button, buttonType, className: buttonClassName, setActive }}
+              {...{
+                active,
+                button,
+                buttonType,
+                className: buttonClassName,
+                disabled,
+                noBackground,
+                setActive,
+              }}
             />
           </div>
         ) : (
           <PopupTrigger
-            {...{ active, button, buttonType, className: buttonClassName, setActive }}
+            {...{
+              active,
+              button,
+              buttonType,
+              className: buttonClassName,
+              disabled,
+              noBackground,
+              setActive,
+            }}
           />
         )}
       </div>

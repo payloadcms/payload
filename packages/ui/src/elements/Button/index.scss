@@ -4,8 +4,99 @@ a.btn {
   display: inline-block;
 }
 
+.btn--withPopup {
+  margin-block: 24px;
+  .btn {
+    margin: 0;
+  }
+}
+
 .btn {
-  background: transparent;
+  // colors
+  &--style-primary {
+    --color: var(--theme-elevation-0);
+    --bg-color: var(--theme-elevation-800);
+    --box-shadow: none;
+    --hover-bg: var(--theme-elevation-600);
+    --hover-color: var(--color);
+
+    &.btn--disabled {
+      --bg-color: var(--theme-elevation-200);
+      --color: var(--theme-elevation-800);
+      --hover-bg: var(--bg-color);
+      --hover-color: var(--color);
+    }
+  }
+
+  &--style-secondary {
+    --color: var(--theme-text);
+    --bg-color: transparent;
+    --box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
+    --hover-color: var(--theme-elevation-600);
+    --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
+
+    &.btn--disabled {
+      --color: var(--theme-elevation-200);
+      --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-color: var(--color);
+    }
+  }
+
+  &--style-pill {
+    --bg-color: var(--theme-elevation-150);
+    --color: var(--theme-elevation-800);
+    --hover-color: var(--color);
+    --hover-bg: var(--theme-elevation-100);
+
+    &.btn--disabled {
+      --color: var(--theme-elevation-600);
+      --hover-bg: var(--bg-color);
+      --hover-color: var(--color);
+    }
+  }
+}
+
+.btn--withPopup {
+  .popup-button {
+    color: var(--color, inherit);
+    background-color: var(--bg-color);
+    box-shadow: var(--box-shadow);
+    border-radius: $style-radius-m;
+    border-left: 1px solid var(--theme-bg);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    align-items: center;
+
+    &:hover,
+    &:focus-visible,
+    &:focus,
+    &:active {
+      background-color: var(--hover-bg);
+      color: var(--hover-color);
+      box-shadow: var(--hover-box-shadow);
+    }
+  }
+}
+
+.btn,
+.btn--withPopup .btn {
+  &:hover,
+  &:focus-visible,
+  &:focus,
+  &:active {
+    color: var(--hover-color);
+    box-shadow: var(--hover-box-shadow);
+    background-color: var(--hover-bg);
+  }
+}
+
+.btn--disabled,
+.btn--disabled .btn {
+  cursor: not-allowed;
+}
+
+.btn {
   border-radius: $style-radius-s;
   font-size: var(--base-body-size);
   margin-block: base(1.2);
@@ -14,10 +105,19 @@ a.btn {
   cursor: pointer;
   font-weight: normal;
   text-decoration: none;
-  color: inherit;
   transition-property: border, color, box-shadow, background;
   transition-duration: 100ms;
   transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+  color: var(--color, inherit);
+  background-color: var(--bg-color, transparent);
+  box-shadow: var(--box-shadow, none);
+
+  .icon {
+    @include color-svg(var(--color, currentColor));
+    width: 100%;
+    height: 100%;
+  }
 
   &__content {
     display: flex;
@@ -33,7 +133,6 @@ a.btn {
     justify-content: center;
     border: 1px solid;
     border-radius: 100%;
-    @include color-svg(currentColor);
     padding: base(0.1);
     color: inherit;
 
@@ -45,6 +144,10 @@ a.btn {
     &.btn--size-small {
       padding: base(0.2);
     }
+  }
+
+  &--withPopup {
+    display: flex;
   }
 
   &--has-tooltip {
@@ -127,46 +230,9 @@ a.btn {
     }
   }
 
-  &--style-primary {
-    background: var(--theme-elevation-800);
-    color: var(--theme-elevation-0);
-
-    &.btn--disabled {
-      background: var(--theme-elevation-200);
-    }
-
-    &:not(.btn--disabled) {
-      &:hover,
-      &:focus-visible,
-      &:focus,
-      &:active {
-        background: var(--theme-elevation-600);
-      }
-    }
-
-    .icon {
-      @include color-svg(var(--theme-elevation-0));
-    }
-  }
-
-  &--style-secondary {
-    box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
-    color: var(--theme-text);
-
-    &.btn--disabled {
-      color: var(--theme-elevation-200);
-      box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
-    }
-
-    &:not(.btn--disabled) {
-      &:hover,
-      &:focus-visible,
-      &:focus,
-      &:active {
-        color: var(--theme-elevation-600);
-        box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
-      }
-    }
+  &--withPopup .btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   &--style-icon-label,
