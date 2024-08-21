@@ -1,0 +1,15 @@
+.bulk-upload--add-files {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__dropArea {
+    height: 100%;
+    padding: calc(var(--base) * 2) var(--gutter-h);
+  }
+
+  .dropzone {
+    flex-direction: column;
+    justify-content: center;
+  }
+}

@@ -4,6 +4,7 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
+  BulkUploadDrawer,
   Button,
   DeleteMany,
   EditMany,
@@ -13,6 +14,7 @@ import {
   ListSelection,
   Pagination,
   PerPage,
+  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -22,10 +24,13 @@ import {
   Table,
   UnpublishMany,
   ViewDescription,
+  bulkUploadDrawerSlug,
   useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
+  useModal,
+  useRouteCache,
   useSearchParams,
   useStepNav,
   useTranslation,
@@ -44,6 +49,8 @@ export const DefaultListView: React.FC = () => {
   const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
+  const { openModal } = useModal()
+  const { clearRouteCache } = useRouteCache()
 
   const { getEntityConfig } = useConfig()
 
@@ -67,7 +74,7 @@ export const DefaultListView: React.FC = () => {
     labels,
   } = collectionConfig
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const drawerDepth = useEditDepth()
 
@@ -79,7 +86,9 @@ export const DefaultListView: React.FC = () => {
 
   let docs = data.docs || []
 
-  if (collectionConfig.upload) {
+  const isUploadCollection = Boolean(collectionConfig.upload)
+
+  if (isUploadCollection) {
     docs = docs?.map((doc) => {
       return {
         ...doc,
@@ -109,6 +118,15 @@ export const DefaultListView: React.FC = () => {
               {hasCreatePermission && (
                 <Button
                   Link={Link}
+                  SubMenuPopupContent={
+                    isUploadCollection && collectionConfig.upload.bulkUpload ? (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
+                          {t('upload:bulkUpload')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    ) : null
+                  }
                   aria-label={i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
@@ -128,6 +146,12 @@ export const DefaultListView: React.FC = () => {
                   <ViewDescription Description={Description} description={description} />
                 </div>
               )}
+              {isUploadCollection && collectionConfig.upload.bulkUpload ? (
+                <BulkUploadDrawer
+                  collectionSlug={collectionSlug}
+                  onSuccess={() => clearRouteCache()}
+                />
+              ) : null}
             </ListHeader>
           )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />

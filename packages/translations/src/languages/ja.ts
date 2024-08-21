@@ -246,6 +246,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     moveDown: '下へ移動',
     moveUp: '上へ移動',
     newPassword: '新しいパスワード',
+    next: '次',
     noFiltersSet: '絞り込みが未設定です。',
     noLabel: '<No {{label}}>',
     noOptions: '選択肢なし',
@@ -263,6 +264,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     password: 'パスワード',
     payloadSettings: 'Payload 設定',
     perPage: '表示件数: {{limit}}',
+    previous: '前の',
     remove: '削除',
     reset: 'リセット',
     row: '列',
@@ -320,6 +322,8 @@ export const jaTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'ファイルを追加',
+    addFiles: 'ファイルを追加する',
+    bulkUpload: '一括アップロード',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',
@@ -328,6 +332,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     editImage: '画像を編集する',
     fileName: 'ファイル名',
     fileSize: 'ファイル容量',
+    fileToUpload: 'アップロードするファイル',
+    filesToUpload: 'アップロードするファイル',
     focalPoint: '焦点',
     focalPointDescription: 'プレビュー上で焦点を直接ドラッグするか、下の値を調整してください。',
     height: '高さ',

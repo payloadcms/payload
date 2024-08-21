@@ -246,6 +246,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     moveDown: 'Перемістити нижче',
     moveUp: 'Перемістити вище',
     newPassword: 'Новий пароль',
+    next: 'Наступний',
     noFiltersSet: 'Відсусті фільтри',
     noLabel: '<без {{label}}>',
     noOptions: 'Немає варіантів',
@@ -263,6 +264,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     password: 'Пароль',
     payloadSettings: 'Налаштування Payload',
     perPage: 'На сторінці: {{limit}}',
+    previous: 'Попередній',
     remove: 'Видалити',
     reset: 'Скидання',
     row: 'Рядок',
@@ -320,6 +322,8 @@ export const ukTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Додати файл',
+    addFiles: 'Додати файли',
+    bulkUpload: 'Масове завантаження',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',
@@ -328,6 +332,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     editImage: 'Редагувати зображення',
     fileName: 'Назва файлу',
     fileSize: 'Розмір файлу',
+    fileToUpload: 'Файл для завантаження',
+    filesToUpload: 'Файли для завантаження',
     focalPoint: 'Точка фокусу',
     focalPointDescription:
       'Перетягніть точку фокусу безпосередньо на попередньому перегляді або налаштуйте значення нижче.',

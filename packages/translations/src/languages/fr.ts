@@ -253,6 +253,7 @@ export const frTranslations: DefaultTranslationsObject = {
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
     newPassword: 'Nouveau mot de passe',
+    next: 'Prochain',
     noFiltersSet: 'Aucun filtre défini',
     noLabel: '<Pas de {{label}}>',
     noOptions: 'Aucune option',
@@ -270,6 +271,7 @@ export const frTranslations: DefaultTranslationsObject = {
     password: 'Mot de passe',
     payloadSettings: 'Paramètres de Payload',
     perPage: 'Par Page: {{limit}}',
+    previous: 'Précédent',
     remove: 'Retirer',
     reset: 'Réinitialiser',
     row: 'Ligne',
@@ -328,6 +330,8 @@ export const frTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Ajouter un fichier',
+    addFiles: 'Ajouter des fichiers',
+    bulkUpload: 'Téléchargement en masse',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',
@@ -336,6 +340,8 @@ export const frTranslations: DefaultTranslationsObject = {
     editImage: 'Modifier l’image',
     fileName: 'Nom du fichier',
     fileSize: 'Taille du fichier',
+    fileToUpload: 'Fichier à télécharger',
+    filesToUpload: 'Fichiers à télécharger',
     focalPoint: 'Point focal',
     focalPointDescription:
       'Faites glisser le point focal directement sur l’aperçu ou ajustez les valeurs ci-dessous.',
