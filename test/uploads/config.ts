@@ -688,7 +688,7 @@ export default buildConfigWithDefaults({
         {
           type: 'upload',
           name: 'upload',
-          relationTo: ['media', 'optional-file'],
+          relationTo: ['media', 'optional-file', 'versions'],
         },
       ],
     },
@@ -699,7 +699,7 @@ export default buildConfigWithDefaults({
           type: 'upload',
           name: 'upload',
           hasMany: true,
-          relationTo: ['media', 'optional-file'],
+          relationTo: ['media', 'optional-file', 'versions'],
         },
       ],
     },
@@ -856,6 +856,41 @@ export default buildConfigWithDefaults({
         alt: 'alt-1',
       },
       file: imageFile,
+    })
+
+    // Create a has many uploads collection
+    await payload.create({
+      collection: 'multi-upload-relation',
+      data: {
+        upload: [uploadedImage, file.id, uploadedImage],
+      },
+    })
+
+    // Create a has many poly uploads collection
+    await payload.create({
+      collection: 'multi-poly-upload-relation',
+      data: {
+        upload: [
+          { value: uploadedImage, relationTo: 'media' },
+          { value: file.id, relationTo: 'media' },
+          { value: versionedImage, relationTo: 'versions' },
+        ],
+      },
+    })
+
+    // Create a few poly uploads
+    await payload.create({
+      collection: 'poly-upload-relation',
+      data: {
+        upload: { value: uploadedImage, relationTo: 'media' },
+      },
+    })
+
+    await payload.create({
+      collection: 'poly-upload-relation',
+      data: {
+        upload: { value: versionedImage, relationTo: 'versions' },
+      },
     })
   },
   serverURL: undefined,
