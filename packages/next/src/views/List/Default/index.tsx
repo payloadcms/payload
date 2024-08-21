@@ -14,6 +14,7 @@ import {
   ListSelection,
   Pagination,
   PerPage,
+  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -29,6 +30,7 @@ import {
   useListInfo,
   useListQuery,
   useModal,
+  useRouteCache,
   useSearchParams,
   useStepNav,
   useTranslation,
@@ -48,6 +50,7 @@ export const DefaultListView: React.FC = () => {
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
   const { openModal } = useModal()
+  const { clearRouteCache } = useRouteCache()
 
   const { getEntityConfig } = useConfig()
 
@@ -144,7 +147,10 @@ export const DefaultListView: React.FC = () => {
                 </div>
               )}
               {isUploadCollection ? (
-                <BulkUploadDrawer collectionSlug={collectionSlug} onSuccess={() => void null} />
+                <BulkUploadDrawer
+                  collectionSlug={collectionSlug}
+                  onSuccess={() => clearRouteCache()}
+                />
               ) : null}
             </ListHeader>
           )}
