@@ -79,7 +79,7 @@ export function FileSidebar() {
               className={`${baseClass}__toggler`}
               onClick={() => setShowFiles((prev) => !prev)}
             >
-              <ChevronIcon direction="down" />
+              <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
             <Drawer Header={null} gutter={false} slug={drawerSlug}>
