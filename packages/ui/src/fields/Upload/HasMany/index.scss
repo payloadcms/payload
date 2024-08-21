@@ -6,12 +6,22 @@
 
   &__controls {
     display: flex;
-    gap: base(0.5);
+    gap: base(2);
+    margin-top: base(1);
   }
 
   &__buttons {
     display: flex;
+    gap: base(1);
+  }
+
+  &__add-new {
+    display: flex;
     gap: base(0.5);
+  }
+
+  &__clear-all {
+    flex-shrink: 0;
   }
 }
 

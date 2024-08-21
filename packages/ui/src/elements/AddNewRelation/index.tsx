@@ -21,7 +21,15 @@ import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
 
-export const AddNewRelation: React.FC<Props> = ({ hasMany, path, relationTo, setValue, value }) => {
+export const AddNewRelation: React.FC<Props> = ({
+  Button: ButtonFromProps,
+  hasMany,
+  path,
+  relationTo,
+  setValue,
+  unstyled,
+  value,
+}) => {
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
@@ -122,23 +130,34 @@ export const AddNewRelation: React.FC<Props> = ({ hasMany, path, relationTo, set
     }
   }, [isDrawerOpen, relatedToMany])
 
+  const label = t('fields:addNewLabel', {
+    label: getTranslation(relatedCollections[0].labels.singular, i18n),
+  })
+
   if (show) {
     return (
       <div className={baseClass} id={`${path}-add-new`}>
         {relatedCollections.length === 1 && (
           <Fragment>
             <DocumentDrawerToggler
-              className={`${baseClass}__add-button`}
+              className={[
+                `${baseClass}__add-button`,
+                !unstyled && `${baseClass}__add-button--styled`,
+              ].join(' ')}
               onClick={() => setShowTooltip(false)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
-              <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                {t('fields:addNewLabel', {
-                  label: getTranslation(relatedCollections[0].labels.singular, i18n),
-                })}
-              </Tooltip>
-              <PlusIcon />
+              {ButtonFromProps ? (
+                ButtonFromProps
+              ) : (
+                <Fragment>
+                  <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+                    {label}
+                  </Tooltip>
+                  <PlusIcon />
+                </Fragment>
+              )}
             </DocumentDrawerToggler>
             <DocumentDrawer onSave={onSave} />
           </Fragment>
@@ -147,13 +166,17 @@ export const AddNewRelation: React.FC<Props> = ({ hasMany, path, relationTo, set
           <Fragment>
             <Popup
               button={
-                <Button
-                  buttonStyle="none"
-                  className={`${baseClass}__add-button`}
-                  tooltip={popupOpen ? undefined : t('fields:addNew')}
-                >
-                  <PlusIcon />
-                </Button>
+                ButtonFromProps ? (
+                  ButtonFromProps
+                ) : (
+                  <Button
+                    buttonStyle="none"
+                    className={`${baseClass}__add-button`}
+                    tooltip={popupOpen ? undefined : t('fields:addNew')}
+                  >
+                    <PlusIcon />
+                  </Button>
+                )
               }
               buttonType="custom"
               horizontalAlign="center"
