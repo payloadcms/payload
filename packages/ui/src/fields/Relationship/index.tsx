@@ -591,15 +591,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             />
             {!readOnly && allowCreate && (
               <AddNewRelation
-                {...{
-                  dispatchOptions,
-                  hasMany,
-                  options,
-                  path,
-                  relationTo,
-                  setValue,
-                  value,
-                }}
+                hasMany={hasMany}
+                path={path}
+                relationTo={relationTo}
+                setValue={setValue}
+                value={value}
               />
             )}
           </div>

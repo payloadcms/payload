@@ -1,38 +1,62 @@
+import { Fragment } from 'react'
+
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
+import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { FieldLabel } from '../../FieldLabel/index.js'
+import { AddNewRelation } from '../../Relationship/AddNew/index.js'
 import { baseClass } from '../index.js'
 import './index.scss'
 
 export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext> = (props) => {
   const {
-    field: { relationTo },
+    field,
+    field: {
+      _path,
+      admin: {
+        components: { Label },
+      },
+      hasMany,
+      label,
+      relationTo,
+    },
+    fieldHookResult: { setValue, value },
   } = props
 
   const {
     config: { collections },
   } = useConfig()
 
-  if (typeof relationTo === 'string') {
-    const collection = collections.find((coll) => coll.slug === relationTo)
+  const [ListDrawer, ListDrawerToggler] = useListDrawer({
+    collectionSlugs:
+      typeof relationTo === 'string'
+        ? [relationTo]
+        : collections.map((collection) => collection.slug),
+  })
 
-    if (collection.upload) {
-      return (
-        <div className={[baseClass].join(' ')}>
-          <div>Draggable / Sortable Rows Go Here</div>
-          <div className={[`${baseClass}__controls`].join(' ')}>
-            <div className={[`${baseClass}__buttons`].join(' ')}>
-              <div>Create new</div>
-              <div>Add existing</div>
-            </div>
-            <div>Clear all</div>
+  return (
+    <Fragment>
+      <div className={[baseClass].join(' ')}>
+        <FieldLabel Label={Label} field={field} label={label} />
+        <div>Draggable / Sortable Rows Go Here</div>
+        <div className={[`${baseClass}__controls`].join(' ')}>
+          <div className={[`${baseClass}__buttons`].join(' ')}>
+            <AddNewRelation
+              hasMany={hasMany}
+              path={_path}
+              relationTo={relationTo}
+              setValue={setValue}
+              value={value}
+            />
+            <ListDrawerToggler>
+              <div>Add Existing</div>
+            </ListDrawerToggler>
           </div>
+          <div>Clear all</div>
         </div>
-      )
-    }
-
-    return null
-  }
-
-  return <div>Polymorphic Has Many Uploads Go Here</div>
+      </div>
+      <ListDrawer />
+    </Fragment>
+  )
 }

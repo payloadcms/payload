@@ -21,14 +21,7 @@ import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
 
-export const AddNewRelation: React.FC<Props> = ({
-  // dispatchOptions,
-  hasMany,
-  path,
-  relationTo,
-  setValue,
-  value,
-}) => {
+export const AddNewRelation: React.FC<Props> = ({ hasMany, path, relationTo, setValue, value }) => {
   const relatedCollections = useRelatedCollections(relationTo)
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
