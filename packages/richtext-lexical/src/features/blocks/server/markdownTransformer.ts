@@ -1,10 +1,14 @@
 /* eslint-disable */
-import { $convertFromMarkdownString, type MultilineElementTransformer } from '@lexical/markdown'
+import {
+  $convertFromMarkdownString,
+  type MultilineElementTransformer,
+  $convertToMarkdownString,
+} from '@lexical/markdown'
 import type { Block } from 'payload'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import type { Transformer } from '@lexical/markdown'
 
-import { extractPropsFromJSXPropsString } from '../../../utilities/jsx.js'
+import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
@@ -45,15 +49,27 @@ export const getBlockMarkdownTransformers = ({
         if (!$isServerBlockNode(node)) {
           return null
         }
-        if (node.getTextContent().startsWith('From HTML:')) {
-          return `<MyComponent>${node.getTextContent().replace('From HTML: ', '')}</MyComponent>`
+
+        const nodeFields = node.getFields()
+        const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)
+
+        const exportResult = block.jsx.export({
+          fields: nodeFields,
+          lexicalToMarkdown,
+        })
+        if (exportResult === false) {
+          return null
         }
-        return null // Run next transformer
+
+        if (exportResult?.children?.length) {
+          return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
+        }
+
+        return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
       },
       regExpEnd: regex.regExpEnd,
       regExpStart: regex.regExpStart,
       replace: (rootNode, openMatch, closeMatch, linesInBetween) => {
-        const tag = openMatch[1]?.toLocaleLowerCase()
         if (block.jsx.import) {
           const childrenString = linesInBetween.join('\n').trim()
 
@@ -71,6 +87,9 @@ export const getBlockMarkdownTransformers = ({
             markdownToLexical: markdownToLexical,
             htmlToLexical: null, // TODO
           })
+          if (blockFields === false) {
+            return false
+          }
 
           const node = $createServerBlockNode({
             blockType: block.slug,
@@ -114,4 +133,31 @@ export function getMarkdownToLexical(
     return editorJSON
   }
   return markdownToLexical
+}
+
+export function getLexicalToMarkdown(
+  allNodes: Array<NodeWithHooks>,
+  allTransformers: Transformer[],
+): (args: { editorState: Record<string, any> }) => string {
+  const lexicalToMarkdown = ({ editorState }: { editorState: Record<string, any> }): string => {
+    const headlessEditor = createHeadlessEditor({
+      nodes: getEnabledNodesFromServerNodes({
+        nodes: allNodes,
+      }),
+    })
+
+    try {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(editorState as any)) // This should commit the editor state immediately
+    } catch (e) {
+      console.error('getLexicalToMarkdown: ERROR parsing editor state', e)
+    }
+
+    let markdown: string
+    headlessEditor.getEditorState().read(() => {
+      markdown = $convertToMarkdownString(allTransformers)
+    })
+
+    return markdown
+  }
+  return lexicalToMarkdown
 }

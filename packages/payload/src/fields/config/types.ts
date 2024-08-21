@@ -1238,16 +1238,21 @@ export type Block = {
    */
   interfaceName?: string
   jsx?: {
-    export: (props: { data: BlockFields; serialize: () => void }) => {
-      children?: object
-      props?: object
-    }
+    export: (props: {
+      fields: BlockFields
+      lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+    }) =>
+      | {
+          children?: string
+          props?: object
+        }
+      | false
     import: (props: {
       children: string
       htmlToLexical?: (props: { html: string }) => any
-      markdownToLexical?: (props: { markdown: string }) => any
+      markdownToLexical?: (props: { markdown: string }) => Record<string, any>
       props: Record<string, any>
-    }) => BlockFields
+    }) => BlockFields | false
   }
   labels?: Labels
   slug: string
