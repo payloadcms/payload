@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
@@ -11,7 +11,7 @@ import { FieldLabel } from '../../FieldLabel/index.js'
 import { baseClass } from '../index.js'
 import './index.scss'
 
-export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext> = (props) => {
+export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string[]>> = (props) => {
   const {
     field,
     field: {
@@ -23,7 +23,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext> = (pr
       label,
       relationTo,
     },
-    fieldHookResult: { setValue, value },
+    fieldHookResult: { filterOptions: filterOptionsFromProps, setValue, value },
     readOnly,
   } = props
 
@@ -33,11 +33,28 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext> = (pr
     config: { collections },
   } = useConfig()
 
+  const filterOptions = useMemo(() => {
+    if (typeof relationTo === 'string') {
+      return {
+        [relationTo]: {
+          where: [
+            {
+              id: {
+                not_in: value,
+              },
+            },
+          ],
+        },
+      }
+    }
+  }, [value, relationTo])
+
   const [ListDrawer, ListDrawerToggler] = useListDrawer({
     collectionSlugs:
       typeof relationTo === 'string'
         ? [relationTo]
         : collections.map((collection) => collection.slug),
+    filterOptions,
   })
 
   return (

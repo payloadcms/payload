@@ -10,10 +10,10 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { UploadInputHasOne } from './Input.js'
 import './index.scss'
 
-export type UploadFieldPropsWithContext = {
+export type UploadFieldPropsWithContext<TValue extends string | string[] = string> = {
   readonly canCreate: boolean
   readonly disabled: boolean
-  readonly fieldHookResult: ReturnType<typeof useField<string>>
+  readonly fieldHookResult: ReturnType<typeof useField<TValue>>
   readonly onChange: (value: unknown) => void
 } & UploadFieldProps
 

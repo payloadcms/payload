@@ -60,7 +60,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     return false
   }, [relationTo, permissions])
 
-  const fieldHookResult = useField<string>({
+  const fieldHookResult = useField<string | string[]>({
     path: pathFromContext ?? pathFromProps,
     validate: memoizedValidate,
   })
@@ -87,6 +87,8 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         {...props}
         canCreate={canCreate}
         disabled={disabled}
+        // Note: the below TS error is thrown bc the field hook return result varies based on `hasMany`
+        // @ts-expect-error
         fieldHookResult={fieldHookResult}
         onChange={onChange}
       />
@@ -98,6 +100,8 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
       {...props}
       canCreate={canCreate}
       disabled={disabled}
+      // Note: the below TS error is thrown bc the field hook return result varies based on `hasMany`
+      // @ts-expect-error
       fieldHookResult={fieldHookResult}
       onChange={onChange}
     />
