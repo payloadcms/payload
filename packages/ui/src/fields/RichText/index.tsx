@@ -1,3 +1,4 @@
+'use client'
 import type { RichTextFieldProps } from 'payload'
 import type React from 'react'
 

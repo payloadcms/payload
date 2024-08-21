@@ -1,3 +1,4 @@
+'use client'
 import { type Point, isPoint } from './point.js'
 
 interface ContainsPointReturn {

@@ -1,3 +1,4 @@
+'use client'
 import type { ClientCollectionConfig } from 'payload'
 
 import { useState } from 'react'

@@ -56,6 +56,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
@@ -217,6 +218,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
       {showError && (
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -228,6 +230,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
               <FieldLabel
                 Label={field?.admin?.components?.Description}
                 as="span"
+                field={field}
                 label={label}
                 required={required}
                 unstyled
@@ -264,6 +267,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </header>

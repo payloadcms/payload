@@ -98,14 +98,18 @@ export const DefaultEditView: React.FC = () => {
   if (globalSlug) classes.push(`global-edit--${globalSlug}`)
   if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
 
-  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [schemaPath, setSchemaPath] = React.useState(() => {
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
+      return `_${entitySlug}.auth`
+    }
+
+    return entitySlug
+  })
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (
-      operation === 'create' &&
-      collectionConfig.auth &&
-      !collectionConfig.auth.disableLocalStrategy
-    )
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
+    }
+
     return false
   })
 

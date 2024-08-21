@@ -2,8 +2,8 @@
 
 .doc-header {
   width: 100%;
-  margin-top: base(0.5);
-  padding-bottom: calc(var(--base) * 1.5);
+  margin-top: base(0.4);
+  padding-bottom: calc(var(--base) * 1.2);
   display: flex;
   align-items: center;
   position: relative;
@@ -27,6 +27,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0;
+    padding-bottom: base(0.4);
+    line-height: 1;
+    vertical-align: top;
   }
 
   @include mid-break {

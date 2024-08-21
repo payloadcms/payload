@@ -18,8 +18,8 @@ import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
   {
-    admin?: LexicalFieldAdminProps
-    lexicalEditorConfig: LexicalEditorConfig
+    readonly admin?: LexicalFieldAdminProps
+    readonly lexicalEditorConfig: LexicalEditorConfig
   } & CellComponentProps<RichTextFieldClient>
 > = (props) => {
   const {

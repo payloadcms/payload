@@ -263,6 +263,11 @@ export function AuthProvider({
     }
   }, [debouncedLocationChange, refreshCookie, id])
 
+  // When initialUser changes, reset in state
+  useEffect(() => {
+    setUser(initialUser)
+  }, [initialUser])
+
   useEffect(() => {
     setLastLocationChange(Date.now())
   }, [pathname])

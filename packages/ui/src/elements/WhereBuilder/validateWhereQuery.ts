@@ -1,3 +1,4 @@
+'use client'
 import type { Operator, Where } from 'payload'
 
 import { validOperators } from 'payload/shared'

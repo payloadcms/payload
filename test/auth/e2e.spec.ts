@@ -120,7 +120,7 @@ describe('auth', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  describe('authenticated users', () => {
+  describe('passwords', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, slug)
     })
@@ -153,6 +153,29 @@ describe('auth', () => {
 
       // should still have the same email
       await expect(page.locator('#field-email')).toHaveValue(emailBeforeSave)
+    })
+
+    test('should prevent new user creation without confirm password', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-email').fill('dev2@payloadcms.com')
+      await page.locator('#field-password').fill('password')
+      // should fail to save without confirm password
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-type.confirm-password .tooltip--show', {
+          hasText: exactText('This field is required.'),
+        }),
+      ).toBeVisible()
+
+      // should succeed with matching confirm password
+      await page.locator('#field-confirm-password').fill('password')
+      await saveDocAndAssert(page, '#action-save')
+    })
+  })
+
+  describe('authenticated users', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, slug)
     })
 
     test('should have up-to-date user in `useAuth` hook', async () => {

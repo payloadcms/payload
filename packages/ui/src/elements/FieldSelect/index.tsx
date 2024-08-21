@@ -175,7 +175,7 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected })
 
   return (
     <div className={baseClass}>
-      <FieldLabel label={t('fields:selectFieldsToEdit')} />
+      <FieldLabel field={null} label={t('fields:selectFieldsToEdit')} />
       <ReactSelect
         getOptionValue={(option) => {
           if (typeof option.value === 'object' && 'path' in option.value) {

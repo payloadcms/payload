@@ -12,25 +12,42 @@ export const getCustomViewByRoute = ({
   views:
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views']
-}): EditViewComponent => {
-  if (typeof views?.edit === 'object' && typeof views?.edit !== 'function') {
-    const foundViewConfig = Object.entries(views.edit).find(([, view]) => {
-      if (typeof view === 'object' && typeof view !== 'function' && 'path' in view) {
+}): {
+  Component: EditViewComponent
+  viewKey?: string
+} => {
+  if (typeof views?.edit === 'object') {
+    let viewKey: string
+
+    const foundViewConfig = Object.entries(views.edit).find(([key, view]) => {
+      if (typeof view === 'object' && 'path' in view) {
         const viewPath = `${baseRoute}${view.path}`
 
-        return isPathMatchingRoute({
+        const isMatching = isPathMatchingRoute({
           currentRoute,
           exact: true,
           path: viewPath,
         })
+
+        if (isMatching) {
+          viewKey = key
+        }
+
+        return isMatching
       }
+
       return false
     })?.[1]
 
     if (foundViewConfig && 'Component' in foundViewConfig) {
-      return foundViewConfig.Component
+      return {
+        Component: foundViewConfig.Component,
+        viewKey,
+      }
     }
   }
 
-  return null
+  return {
+    Component: null,
+  }
 }

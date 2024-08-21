@@ -1,3 +1,4 @@
+'use client'
 import type { Value } from './types.js'
 
 type RelationMap = {

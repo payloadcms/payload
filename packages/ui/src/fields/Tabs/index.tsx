@@ -154,7 +154,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} />
+              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

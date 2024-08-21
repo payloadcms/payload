@@ -489,6 +489,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     >
       <FieldLabel
         Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -496,6 +497,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -606,6 +608,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

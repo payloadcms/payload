@@ -1,3 +1,4 @@
+'use client'
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { DOMConversionMap, DOMConversionOutput, LexicalNode, Spread } from 'lexical'
 import type { JSX } from 'react'

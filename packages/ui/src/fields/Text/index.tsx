@@ -127,6 +127,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
       description={description}
+      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
       label={label}

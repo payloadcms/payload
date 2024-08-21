@@ -83,6 +83,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
     >
       <FieldLabel
         Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -90,6 +91,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -108,6 +110,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>
