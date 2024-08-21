@@ -671,6 +671,38 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'multi-upload-relation',
+      fields: [
+        {
+          type: 'upload',
+          name: 'upload',
+          hasMany: true,
+          relationTo: 'media',
+        },
+      ],
+    },
+    {
+      slug: 'poly-upload-relation',
+      fields: [
+        {
+          type: 'upload',
+          name: 'upload',
+          relationTo: ['media', 'optional-file'],
+        },
+      ],
+    },
+    {
+      slug: 'multi-poly-upload-relation',
+      fields: [
+        {
+          type: 'upload',
+          name: 'upload',
+          hasMany: true,
+          relationTo: ['media', 'optional-file'],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
