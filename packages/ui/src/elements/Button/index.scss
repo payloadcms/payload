@@ -39,7 +39,7 @@ a.btn {
       --color: var(--theme-elevation-200);
       --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
       --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
-      --hover-color: var(--theme-elevation-200);
+      --hover-color: var(--color);
     }
   }
 
@@ -48,6 +48,12 @@ a.btn {
     --color: var(--theme-elevation-800);
     --hover-color: var(--color);
     --hover-bg: var(--theme-elevation-100);
+
+    &.btn--disabled {
+      --color: var(--theme-elevation-600);
+      --hover-bg: var(--bg-color);
+      --hover-color: var(--color);
+    }
   }
 }
 
