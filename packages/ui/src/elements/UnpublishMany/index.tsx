@@ -39,7 +39,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getQueryParams, selectAll } = useSelection()
+  const { count, getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
   const { stringifyParams } = useSearchParams()
   const router = useRouter()
@@ -109,7 +109,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     stringifyParams,
   ])
 
-  if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
+  if (count === 0 || !versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
     return null
   }
 

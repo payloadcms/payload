@@ -38,7 +38,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getQueryParams, selectAll } = useSelection()
+  const { count, getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
   const { stringifyParams } = useSearchParams()
@@ -111,7 +111,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
     clearRouteCache,
   ])
 
-  if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
+  if (count === 0 || !versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
     return null
   }
 
