@@ -119,7 +119,7 @@ export const DefaultListView: React.FC = () => {
                 <Button
                   Link={Link}
                   SubMenuPopupContent={
-                    isUploadCollection ? (
+                    isUploadCollection && collectionConfig.upload.bulkUpload ? (
                       <PopupList.ButtonGroup>
                         <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
                           Bulk Uploads (!)
@@ -146,7 +146,7 @@ export const DefaultListView: React.FC = () => {
                   <ViewDescription Description={Description} description={description} />
                 </div>
               )}
-              {isUploadCollection ? (
+              {isUploadCollection && collectionConfig.upload.bulkUpload ? (
                 <BulkUploadDrawer
                   collectionSlug={collectionSlug}
                   onSuccess={() => clearRouteCache()}
