@@ -19,6 +19,9 @@ export const Posts: CollectionConfig = {
         title: 'This is a custom OG title for posts',
       },
     },
+    components: {
+      Description: '/components/ViewDescription/index.js#ViewDescription',
+    },
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
   },

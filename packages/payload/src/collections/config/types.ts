@@ -250,6 +250,7 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
+    Description?: EntityDescriptionComponent
     afterList?: CustomComponent[]
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]

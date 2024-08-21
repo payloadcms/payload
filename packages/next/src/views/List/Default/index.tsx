@@ -121,13 +121,9 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {description && (
+                {(description || Description) && (
                   <div className={`${baseClass}__sub-header`}>
-                    <RenderComponent
-                      Component={ViewDescription}
-                      clientProps={{ description }}
-                      mappedComponent={Description}
-                    />
+                    <ViewDescription Description={Description} description={description} />
                   </div>
                 )}
               </Fragment>
@@ -174,6 +170,7 @@ export const DefaultListView: React.FC = () => {
                 limit={data.limit}
                 nextPage={data.nextPage}
                 numberOfNeighbors={1}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onChange={handlePageChange}
                 page={data.page}
                 prevPage={data.prevPage}
@@ -189,6 +186,7 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
+                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
                     handleChange={handlePerPageChange}
                     limit={
                       isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
