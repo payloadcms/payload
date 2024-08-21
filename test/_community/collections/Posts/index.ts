@@ -21,23 +21,13 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { deepCopyObjectSimple } from 'payload'
 
+import { bannerTypes, languages } from './shared.js'
+
 export const postsSlug = 'posts'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const CODE_BLOCK_REG_EXP = /^[ \t]*```(\w{1,10})?\s?$/
-
-export const languages = {
-  ts: 'TypeScript',
-  plaintext: 'Plain Text',
-  tsx: 'TSX',
-}
-
-export const bannerTypes = {
-  success: 'Success',
-  info: 'Info',
-  warning: 'Warning',
-}
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
@@ -206,7 +196,7 @@ export const PostsCollection: CollectionConfig = {
                       label: value,
                       value: key,
                     })),
-                    defaultValue: 'typescript',
+                    defaultValue: 'info',
                   },
                   {
                     name: 'content',
@@ -242,6 +232,11 @@ export const PostsCollection: CollectionConfig = {
                     defaultValue: 'typescript',
                   },
                   {
+                    admin: {
+                      components: {
+                        Field: './collections/Posts/CodeFields.js#Code',
+                      },
+                    },
                     name: 'code',
                     type: 'code',
                   },
