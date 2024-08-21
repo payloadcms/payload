@@ -5,6 +5,15 @@
     position: relative;
   }
 
+  .editor-scroller {
+    overflow: auto;
+    // Necessary for lexical tables not to overflow the editor horizontally.
+    // The contenteditable of the editor itself, as well as this scroller, will
+    // still keep the same un-overflowed, constrained width. This has the benefit
+    // That only the table will go outside it, and other elements like paragraphs
+    // are still being kept constrained to the original width
+  }
+
   .editor-container {
     position: relative;
 

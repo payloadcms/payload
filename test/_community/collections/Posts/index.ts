@@ -9,6 +9,7 @@ import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/m
 import {
   BlocksFeature,
   EXPERIMENTAL_TableFeature,
+  FixedToolbarFeature,
   extractFrontmatter,
   frontmatterToObject,
   getEnabledNodes,
@@ -25,6 +26,18 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const CODE_BLOCK_REG_EXP = /^[ \t]*```(\w{1,10})?\s?$/
+
+export const languages = {
+  ts: 'TypeScript',
+  plaintext: 'Plain Text',
+  tsx: 'TSX',
+}
+
+export const bannerTypes = {
+  success: 'Success',
+  info: 'Info',
+  warning: 'Warning',
+}
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
@@ -164,6 +177,7 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           EXPERIMENTAL_TableFeature(),
+          FixedToolbarFeature(),
           BlocksFeature({
             blocks: [
               {
@@ -186,8 +200,13 @@ export const PostsCollection: CollectionConfig = {
                 },
                 fields: [
                   {
+                    type: 'select',
                     name: 'type',
-                    type: 'text',
+                    options: Object.entries(bannerTypes).map(([key, value]) => ({
+                      label: value,
+                      value: key,
+                    })),
+                    defaultValue: 'typescript',
                   },
                   {
                     name: 'content',
@@ -214,8 +233,13 @@ export const PostsCollection: CollectionConfig = {
                 },
                 fields: [
                   {
+                    type: 'select',
                     name: 'language',
-                    type: 'text',
+                    options: Object.entries(languages).map(([key, value]) => ({
+                      label: value,
+                      value: key,
+                    })),
+                    defaultValue: 'typescript',
                   },
                   {
                     name: 'code',
