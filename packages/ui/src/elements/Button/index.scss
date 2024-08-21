@@ -111,7 +111,7 @@ a.btn {
 
   color: var(--color, inherit);
   background-color: var(--bg-color, transparent);
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--box-shado, none);
 
   .icon {
     @include color-svg(var(--color));
