@@ -71,6 +71,7 @@ export const beforeChange = async <T extends JsonObject>({
   if (errors.length > 0) {
     throw new ValidationError(
       {
+        id,
         collection: collection?.slug,
         errors,
         global: global?.slug,
