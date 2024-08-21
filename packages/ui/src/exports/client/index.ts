@@ -47,6 +47,7 @@ export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export { ListSelection } from '../../elements/ListSelection/index.js'
+export { ListHeader } from '../../elements/ListHeader/index.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
