@@ -41,7 +41,16 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
+  const {
+    Header,
+    beforeActions,
+    collectionSlug,
+    disableBulkDelete,
+    disableBulkEdit,
+    hasCreatePermission,
+    newDocumentURL,
+  } = useListInfo()
+
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
@@ -174,7 +183,9 @@ export const DefaultListView: React.FC = () => {
                 limit={data.limit}
                 nextPage={data.nextPage}
                 numberOfNeighbors={1}
-                onChange={handlePageChange}
+                onChange={(page) => {
+                  void handlePageChange(page)
+                }}
                 page={data.page}
                 prevPage={data.prevPage}
                 totalPages={data.totalPages}
@@ -189,7 +200,9 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
-                    handleChange={handlePerPageChange}
+                    handleChange={(e) => {
+                      void handlePerPageChange(e)
+                    }}
                     limit={
                       isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
                     }
@@ -200,10 +213,15 @@ export const DefaultListView: React.FC = () => {
                     <div className={`${baseClass}__list-selection`}>
                       <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany collection={collectionConfig} fields={fields} />
-                        <PublishMany collection={collectionConfig} />
-                        <UnpublishMany collection={collectionConfig} />
-                        <DeleteMany collection={collectionConfig} />
+                        {beforeActions && beforeActions}
+                        {!disableBulkEdit && (
+                          <Fragment>
+                            <EditMany collection={collectionConfig} fields={fields} />
+                            <PublishMany collection={collectionConfig} />
+                            <UnpublishMany collection={collectionConfig} />
+                          </Fragment>
+                        )}
+                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                       </div>
                     </div>
                   )}

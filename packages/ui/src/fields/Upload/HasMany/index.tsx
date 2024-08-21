@@ -4,6 +4,7 @@ import type { FilterOptionsResult, Where } from 'payload'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
+import type { useSelection } from '../../../providers/Selection/index.js'
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
 import { AddNewRelation } from '../../../elements/AddNewRelation/index.js'
@@ -138,6 +139,17 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
+  const onBulkSelect = useCallback(
+    (selections: ReturnType<typeof useSelection>['selected']) => {
+      const selectedIDs = Object.entries(selections).reduce(
+        (acc, [key, value]) => (value ? [...acc, key] : acc),
+        [] as string[],
+      )
+      setValue([...value, ...selectedIDs])
+    },
+    [setValue, value],
+  )
+
   return (
     <Fragment>
       <div className={[baseClass].join(' ')}>
@@ -241,6 +253,8 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         </div>
       </div>
       <ListDrawer
+        enableRowSelections
+        onBulkSelect={onBulkSelect}
         onSelect={(selection) => {
           setValue([...value, selection.docID])
         }}
