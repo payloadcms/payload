@@ -2,7 +2,7 @@
 
 .section-title {
   position: relative;
-  width: 100%;
+  min-width: base(4);
   max-width: 100%;
   pointer-events: all;
   display: flex;

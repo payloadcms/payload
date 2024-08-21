@@ -4,15 +4,17 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
+  BulkUploadDrawer,
   Button,
   DeleteMany,
   EditMany,
   Gutter,
   ListControls,
+  ListHeader,
   ListSelection,
   Pagination,
   PerPage,
-  Pill,
+  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -22,10 +24,13 @@ import {
   Table,
   UnpublishMany,
   ViewDescription,
+  bulkUploadDrawerSlug,
   useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
+  useModal,
+  useRouteCache,
   useSearchParams,
   useStepNav,
   useTranslation,
@@ -53,6 +58,8 @@ export const DefaultListView: React.FC = () => {
 
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
+  const { openModal } = useModal()
+  const { clearRouteCache } = useRouteCache()
 
   const { getEntityConfig } = useConfig()
 
@@ -76,7 +83,7 @@ export const DefaultListView: React.FC = () => {
     labels,
   } = collectionConfig
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const drawerDepth = useEditDepth()
 
@@ -88,7 +95,9 @@ export const DefaultListView: React.FC = () => {
 
   let docs = data.docs || []
 
-  if (collectionConfig.upload) {
+  const isUploadCollection = Boolean(collectionConfig.upload)
+
+  if (isUploadCollection) {
     docs = docs?.map((doc) => {
       return {
         ...doc,
@@ -113,35 +122,47 @@ export const DefaultListView: React.FC = () => {
       <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
-          <header className={`${baseClass}__header`}>
-            {Header || (
-              <Fragment>
-                <h1>{getTranslation(labels?.plural, i18n)}</h1>
-                {hasCreatePermission && (
-                  <Pill
-                    aria-label={i18n.t('general:createNewLabel', {
-                      label: getTranslation(labels?.singular, i18n),
-                    })}
-                    to={newDocumentURL}
-                  >
-                    {i18n.t('general:createNew')}
-                  </Pill>
-                )}
-                {!smallBreak && (
-                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
-                )}
-                {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderComponent
-                      Component={ViewDescription}
-                      clientProps={{ description }}
-                      mappedComponent={Description}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            )}
-          </header>
+          {Header || (
+            <ListHeader heading={getTranslation(labels?.plural, i18n)}>
+              {hasCreatePermission && (
+                <Button
+                  Link={Link}
+                  SubMenuPopupContent={
+                    isUploadCollection && collectionConfig.upload.bulkUpload ? (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
+                          {t('upload:bulkUpload')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    ) : null
+                  }
+                  aria-label={i18n.t('general:createNewLabel', {
+                    label: getTranslation(labels?.singular, i18n),
+                  })}
+                  buttonStyle="pill"
+                  el="link"
+                  size="small"
+                  to={newDocumentURL}
+                >
+                  {i18n.t('general:createNew')}
+                </Button>
+              )}
+              {!smallBreak && (
+                <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+              )}
+              {(description || Description) && (
+                <div className={`${baseClass}__sub-header`}>
+                  <ViewDescription Description={Description} description={description} />
+                </div>
+              )}
+              {isUploadCollection && collectionConfig.upload.bulkUpload ? (
+                <BulkUploadDrawer
+                  collectionSlug={collectionSlug}
+                  onSuccess={() => clearRouteCache()}
+                />
+              ) : null}
+            </ListHeader>
+          )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
@@ -183,9 +204,7 @@ export const DefaultListView: React.FC = () => {
                 limit={data.limit}
                 nextPage={data.nextPage}
                 numberOfNeighbors={1}
-                onChange={(page) => {
-                  void handlePageChange(page)
-                }}
+                onChange={(page) => void handlePageChange(page)}
                 page={data.page}
                 prevPage={data.prevPage}
                 totalPages={data.totalPages}
@@ -200,9 +219,7 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
-                    handleChange={(e) => {
-                      void handlePerPageChange(e)
-                    }}
+                    handleChange={(limit) => void handlePerPageChange(limit)}
                     limit={
                       isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
                     }

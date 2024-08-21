@@ -245,6 +245,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     moveDown: 'Pomeri dole',
     moveUp: 'Pomeri gore',
     newPassword: 'Nova lozinka',
+    next: 'Sledeći',
     noFiltersSet: 'Nema postavljenih filtera',
     noLabel: '<Nema {{label}}>',
     noOptions: 'Nema opcija',
@@ -262,6 +263,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     password: 'Lozinka',
     payloadSettings: 'Payload postavke',
     perPage: 'Po stranici: {{limit}}',
+    previous: 'Prethodni',
     remove: 'Ukloni',
     reset: 'Ponovo postavi',
     row: 'Red',
@@ -319,6 +321,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Dodaj datoteku',
+    addFiles: 'Dodaj Datoteke',
+    bulkUpload: 'Masovno otpremanje',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',
@@ -327,6 +331,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     editImage: 'Uredi sliku',
     fileName: 'Ime datoteke',
     fileSize: 'Veličina datoteke',
+    fileToUpload: 'Datoteka za otpremanje',
+    filesToUpload: 'Fajlovi za Slanje',
     focalPoint: 'Centralna tačka',
     focalPointDescription:
       'Prevucite središnju tačku direktno na pregled ili prilagodite vrednosti ispod.',
