@@ -1238,7 +1238,13 @@ export type Block = {
    */
   interfaceName?: string
   jsx?: {
+    /**
+     * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere
+     */
     customEndRegex?: RegExp
+    /**
+     * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
+     */
     customStartRegex?: RegExp
     export: (props: {
       fields: BlockFields

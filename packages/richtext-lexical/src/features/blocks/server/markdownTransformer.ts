@@ -49,6 +49,9 @@ export const getBlockMarkdownTransformers = ({
         if (!$isServerBlockNode(node)) {
           return null
         }
+        if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
+          return null
+        }
 
         const nodeFields = node.getFields()
         const lexicalToMarkdown = getLexicalToMarkdown(allNodes, allTransformers)

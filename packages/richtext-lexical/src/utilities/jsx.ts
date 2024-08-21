@@ -88,7 +88,10 @@ export function frontmatterToObject(frontmatter: string): Record<string, any> {
 /**
  * Converts an object to a frontmatter string.
  */
-export function objectToFrontmatter(obj: Record<string, any>): string {
+export function objectToFrontmatter(obj: Record<string, any>): null | string {
+  if (!Object.entries(obj)?.length) {
+    return null
+  }
   let frontmatter = '---\n'
 
   for (const [key, value] of Object.entries(obj)) {

@@ -201,14 +201,14 @@ export const PostsCollection: CollectionConfig = {
                 jsx: {
                   customStartRegex: CODE_BLOCK_REG_EXP,
                   customEndRegex: CODE_BLOCK_REG_EXP,
-                  import: ({ openMatch, children, linesInBetween }) => {
+                  import: ({ openMatch, children }) => {
                     const language = openMatch[1]
                     return {
                       language,
                       code: children,
                     }
                   },
-                  export: ({ fields, lexicalToMarkdown }) => {
+                  export: ({ fields }) => {
                     return '```' + fields.language + '\n' + fields.code + '\n```'
                   },
                 },
