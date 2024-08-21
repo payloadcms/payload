@@ -1,3 +1,5 @@
+import type { FilterOptionsResult } from 'payload'
+
 import { Fragment, useMemo } from 'react'
 
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
@@ -33,21 +35,20 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
     config: { collections },
   } = useConfig()
 
-  const filterOptions = useMemo(() => {
+  const filterOptions: FilterOptionsResult = useMemo(() => {
     if (typeof relationTo === 'string') {
       return {
+        ...filterOptionsFromProps,
         [relationTo]: {
-          where: [
-            {
-              id: {
-                not_in: value,
-              },
-            },
-          ],
+          ...((filterOptionsFromProps?.[relationTo] as any) || {}),
+          id: {
+            ...((filterOptionsFromProps?.[relationTo] as any)?.id || {}),
+            not_in: value,
+          },
         },
       }
     }
-  }, [value, relationTo])
+  }, [value, relationTo, filterOptionsFromProps])
 
   const [ListDrawer, ListDrawerToggler] = useListDrawer({
     collectionSlugs:
