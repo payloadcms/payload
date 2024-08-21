@@ -1,11 +1,12 @@
 'use client'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
+import { FullscreenModal } from '../../FullscreenModal/index.js'
 import { drawerSlug } from '../index.js'
 
 export const discardBulkUploadModalSlug = 'bulk-upload--discard-without-saving'
@@ -26,7 +27,7 @@ export function DiscardWithoutSaving() {
   }, [closeModal])
 
   return (
-    <Modal
+    <FullscreenModal
       className={baseClass}
       slug={discardBulkUploadModalSlug}
       style={{
@@ -47,6 +48,6 @@ export function DiscardWithoutSaving() {
           </Button>
         </div>
       </div>
-    </Modal>
+    </FullscreenModal>
   )
 }

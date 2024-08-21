@@ -1,5 +1,6 @@
 'use client'
 
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
 import React from 'react'
@@ -8,6 +9,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ActionsBar } from '../ActionsBar/index.js'
+import { discardBulkUploadModalSlug } from '../DiscardWithoutSaving/index.js'
 import { EditForm } from '../EditForm/index.js'
 import { FileSidebar } from '../FileSidebar/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -29,6 +31,7 @@ export function AddingFilesView() {
   const activeForm = forms[activeIndex]
   const { config } = useConfig()
   const { i18n } = useTranslation()
+  const { openModal } = useModal()
 
   const collection = config.collections.find((c) => c.slug === collectionSlug)
 
@@ -37,7 +40,10 @@ export function AddingFilesView() {
       <FileSidebar />
 
       <div className={`${baseClass}__editView`}>
-        <DrawerHeader title={getTranslation(collection.labels.singular, i18n)} />
+        <DrawerHeader
+          onClose={() => openModal(discardBulkUploadModalSlug)}
+          title={getTranslation(collection.labels.singular, i18n)}
+        />
         <DocumentInfoProvider
           collectionSlug={collectionSlug}
           docPermissions={docPermissions}

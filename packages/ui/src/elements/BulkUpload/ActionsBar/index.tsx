@@ -67,8 +67,6 @@ export function Actions({ className }: ActionsProps) {
 
   const collectionConfig = config.collections.find((c) => c.slug === collectionSlug)
 
-  console.log({ collectionConfig, hasPublishPermission, hasSavePermission })
-
   return (
     <div className={[`${baseClass}__buttons`, className].filter(Boolean).join(' ')}>
       {collectionConfig?.versions?.drafts && hasSavePermission ? (

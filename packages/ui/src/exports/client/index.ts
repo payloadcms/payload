@@ -45,6 +45,7 @@ export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/i
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 export { EditMany } from '../../elements/EditMany/index.js'
 export { ErrorPill } from '../../elements/ErrorPill/index.js'
+export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'

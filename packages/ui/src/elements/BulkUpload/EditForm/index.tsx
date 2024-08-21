@@ -139,7 +139,7 @@ export function EditForm({ submitted }: EditFormProps) {
         disabled={isInitializing || !hasSavePermission}
         initialState={isInitializing ? undefined : initialState}
         isInitializing={isInitializing}
-        method={'POST'}
+        method="POST"
         onChange={[onChange]}
         onSuccess={onSave}
         submitted={submitted}

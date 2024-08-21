@@ -16,7 +16,9 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { drawerSlug } from '../index.js'
+import { strings } from '../strings.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
 
@@ -31,7 +33,6 @@ type FormsManagerContext = {
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
   readonly isLoadingFiles: boolean
-  readonly isProcessing: boolean
   readonly removeFile: (index: number) => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
   readonly setActiveIndex: (index: number) => void
@@ -56,7 +57,6 @@ const Context = React.createContext<FormsManagerContext>({
   hasSavePermission: false,
   hasSubmitted: false,
   isLoadingFiles: true,
-  isProcessing: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
@@ -86,7 +86,6 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
   const { closeModal } = useModal()
   const { i18n } = useTranslation()
 
-  const [isProcessing, setIsProcessing] = React.useState(false)
   const [isLoadingFiles, setIsLoadingFiles] = React.useState(false)
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
@@ -94,6 +93,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
   const { activeIndex, forms, totalErrorCount } = state
+  const { toggleLoadingOverlay } = useLoadingOverlay()
 
   const initialStateRef = React.useRef<FormState>(null)
   const hasFetchedInitialFormState = React.useRef(false)
@@ -235,7 +235,11 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
       }
       const promises = currentForms.map(async (form, i) => {
         try {
-          setIsProcessing(true)
+          toggleLoadingOverlay({
+            isLoading: true,
+            key: 'saveAllDocs',
+            loadingText: strings.uploadingFiles,
+          })
           const req = await fetch(actionURL, {
             body: createFormData(form.formState, overrides),
             method: 'POST',
@@ -284,7 +288,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
           // swallow error
         } finally {
           setHasSubmitted(true)
-          setIsProcessing(false)
+          toggleLoadingOverlay({ isLoading: false, key: 'saveAllDocs' })
         }
       })
 
@@ -345,7 +349,6 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         hasSavePermission,
         hasSubmitted,
         isLoadingFiles,
-        isProcessing,
         removeFile,
         saveAllDocs,
         setActiveIndex,

@@ -11,18 +11,18 @@ import './index.scss'
 const baseClass = 'drawer-close-button'
 
 type Props = {
+  readonly onClick: () => void
   readonly slug: string
 }
-export function DrawerCloseButton({ slug }: Props) {
+export function DrawerCloseButton({ slug, onClick }: Props) {
   const { t } = useTranslation()
-  const { openModal } = useModal()
 
   return (
     <button
       aria-label={t('general:close')}
       className={baseClass}
       id={`close-drawer__${slug}`}
-      onClick={() => openModal(discardBulkUploadModalSlug)}
+      onClick={onClick}
       type="button"
     >
       <XIcon />

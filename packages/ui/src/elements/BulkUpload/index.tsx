@@ -1,5 +1,6 @@
 'use client'
 
+import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
@@ -12,7 +13,8 @@ import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
 export const drawerSlug = 'bulk-upload-drawer'
 
 function DrawerContent() {
-  const { addFiles, forms, isLoadingFiles } = useFormsManager()
+  const { addFiles, forms } = useFormsManager()
+  const { closeModal } = useModal()
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
@@ -21,12 +23,8 @@ function DrawerContent() {
     [addFiles],
   )
 
-  if (isLoadingFiles) {
-    return <div>Initializing...</div>
-  }
-
   if (!forms.length) {
-    return <AddFilesView onDrop={onDrop} />
+    return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
   } else {
     return <AddingFilesView />
   }
