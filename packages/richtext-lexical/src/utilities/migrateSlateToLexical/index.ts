@@ -64,12 +64,20 @@ async function migrateGlobal({
   })
 
   if (found) {
-    await payload.updateGlobal({
-      slug: global.slug,
-      data: document,
-      depth: 0,
-      locale: locale || undefined,
-    })
+    try {
+      await payload.updateGlobal({
+        slug: global.slug,
+        data: document,
+        depth: 0,
+        locale: locale || undefined,
+      })
+      // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
+    } catch (e) {
+      console.log('Error updating global', e, {
+        id: document.id,
+        slug: global.slug,
+      })
+    }
   }
 }
 
@@ -136,13 +144,21 @@ async function migrateCollection({
       })
 
       if (found) {
-        await payload.update({
-          id: document.id,
-          collection: collection.slug,
-          data: document,
-          depth: 0,
-          locale: locale || undefined,
-        })
+        try {
+          await payload.update({
+            id: document.id,
+            collection: collection.slug,
+            data: document,
+            depth: 0,
+            locale: locale || undefined,
+          })
+          // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
+        } catch (e) {
+          console.log('Error updating collection', e, {
+            id: document.id,
+            slug: collection.slug,
+          })
+        }
       }
     }
     page++
