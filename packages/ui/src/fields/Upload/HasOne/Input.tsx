@@ -148,7 +148,7 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
     [onChange, closeListDrawer],
   )
 
-  if (collection.upload) {
+  if (collection.upload && typeof relationTo === 'string') {
     return (
       <div
         className={[
@@ -178,9 +178,7 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
             <React.Fragment>
               {fileDoc && !missingFile && (
                 <FileDetails
-                  // TODO: remove the type assertion here
-                   
-                  collectionSlug={relationTo as string}
+                  collectionSlug={relationTo}
                   customUploadActions={customUploadActions}
                   doc={fileDoc}
                   handleRemove={
