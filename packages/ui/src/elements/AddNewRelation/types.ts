@@ -1,4 +1,4 @@
-import type { Value } from '../types.js'
+import type { Value } from '../../fields/Relationship/types.js'
 
 export type Props = {
   readonly hasMany: boolean

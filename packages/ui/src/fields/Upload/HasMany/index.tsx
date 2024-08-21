@@ -2,10 +2,10 @@ import { Fragment } from 'react'
 
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
+import { AddNewRelation } from '../../../elements/AddNewRelation/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { FieldLabel } from '../../FieldLabel/index.js'
-import { AddNewRelation } from '../../Relationship/AddNew/index.js'
 import { baseClass } from '../index.js'
 import './index.scss'
 
