@@ -18,7 +18,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
-import { geoCollectionSlug, postsCollectionSlug } from '../../slugs.js'
+import { customViews1CollectionSlug, geoCollectionSlug, postsCollectionSlug } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -42,6 +42,7 @@ describe('admin2', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
+  let customViewsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -56,8 +57,10 @@ describe('admin2', () => {
       dirname,
       prebuild,
     }))
+
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -104,6 +107,26 @@ describe('admin2', () => {
       await createPost({ title: 'post2' })
       await page.reload()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    describe('list view descriptions', () => {
+      test('should render static collection descriptions', async () => {
+        await page.goto(postsUrl.list)
+        await expect(
+          page.locator('.view-description', {
+            hasText: exactText('This is a custom collection description.'),
+          }),
+        ).toBeVisible()
+      })
+
+      test('should render dynamic collection description components', async () => {
+        await page.goto(customViewsUrl.list)
+        await expect(
+          page.locator('.view-description', {
+            hasText: exactText('This is a custom view description component.'),
+          }),
+        ).toBeVisible()
+      })
     })
 
     describe('filtering', () => {
@@ -764,15 +787,8 @@ describe('admin2', () => {
     describe('i18n', () => {
       test('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
-
-        // collection label
         await expect(page.locator('#nav-posts')).toContainText('Posts')
-
-        // global label
         await expect(page.locator('#nav-global-global')).toContainText('Global')
-
-        // view description
-        await expect(page.locator('.view-description')).toContainText('Description')
       })
 
       test('should display translated field titles', async () => {

@@ -114,7 +114,9 @@ a.btn {
   box-shadow: var(--box-shadow, none);
 
   .icon {
-    @include color-svg(var(--color));
+    @include color-svg(var(--color, currentColor));
+    width: 100%;
+    height: 100%;
   }
 
   &__content {
@@ -131,7 +133,6 @@ a.btn {
     justify-content: center;
     border: 1px solid;
     border-radius: 100%;
-    @include color-svg(currentColor);
     padding: base(0.1);
     color: inherit;
 
