@@ -43,7 +43,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
           ...((filterOptionsFromProps?.[relationTo] as any) || {}),
           id: {
             ...((filterOptionsFromProps?.[relationTo] as any)?.id || {}),
-            not_in: value,
+            not_in: (filterOptionsFromProps?.[relationTo] as any)?.id?.not_in || value,
           },
         },
       }
@@ -103,7 +103,11 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
           <div className={`${baseClass}__clear-all`}>Clear all</div>
         </div>
       </div>
-      <ListDrawer />
+      <ListDrawer
+        onSelect={(selection) => {
+          setValue([...value, selection.docID])
+        }}
+      />
     </Fragment>
   )
 }
