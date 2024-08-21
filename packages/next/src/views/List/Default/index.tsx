@@ -13,7 +13,6 @@ import {
   ListSelection,
   Pagination,
   PerPage,
-  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -124,13 +123,9 @@ export const DefaultListView: React.FC = () => {
               {!smallBreak && (
                 <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
               )}
-              {description && (
+              {(description || Description) && (
                 <div className={`${baseClass}__sub-header`}>
-                  <RenderComponent
-                    Component={ViewDescription}
-                    clientProps={{ description }}
-                    mappedComponent={Description}
-                  />
+                  <ViewDescription Description={Description} description={description} />
                 </div>
               )}
             </ListHeader>

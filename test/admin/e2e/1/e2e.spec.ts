@@ -559,7 +559,7 @@ describe('admin1', () => {
       await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
-    test('renders custom description component', async () => {
+    test('renders custom field description text', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('#custom-client-field-description')).toBeVisible()

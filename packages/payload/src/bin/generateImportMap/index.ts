@@ -85,6 +85,7 @@ export async function generateImportMap(
   if (shouldLog) {
     console.log('Generating import map')
   }
+
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 
