@@ -21,7 +21,12 @@
   }
 
   &__clear-all {
+    all: unset;
     flex-shrink: 0;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
   }
 }
 

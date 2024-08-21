@@ -62,7 +62,9 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
     <Fragment>
       <div className={[baseClass].join(' ')}>
         <FieldLabel Label={Label} field={field} label={label} />
-        <div>Draggable / Sortable Rows Go Here</div>
+        <code>
+          <pre>{JSON.stringify({ value }, null, 2)}</pre>
+        </code>
         <div className={[`${baseClass}__controls`].join(' ')}>
           <div className={[`${baseClass}__buttons`].join(' ')}>
             <div className={[`${baseClass}__add-new`].join(' ')}>
@@ -100,7 +102,9 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
               </div>
             </ListDrawerToggler>
           </div>
-          <div className={`${baseClass}__clear-all`}>Clear all</div>
+          <button className={`${baseClass}__clear-all`} onClick={() => setValue([])} type="button">
+            Clear all
+          </button>
         </div>
       </div>
       <ListDrawer
