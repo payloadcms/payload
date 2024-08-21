@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -13,16 +13,7 @@ import './index.scss'
 const baseClass = 'bulk-upload--actions-bar'
 
 export function ActionsBar() {
-  const {
-    activeIndex,
-    forms,
-    hasPublishPermission,
-    hasSavePermission,
-    saveAllDocs,
-    setActiveIndex,
-  } = useFormsManager()
-  const { docConfig } = useDocumentInfo()
-  const { t } = useTranslation()
+  const { activeIndex, forms, setActiveIndex } = useFormsManager()
 
   return (
     <div className={baseClass}>
@@ -61,25 +52,42 @@ export function ActionsBar() {
         </div>
       </div>
 
-      <div className={`${baseClass}__buttons`}>
-        {docConfig?.versions?.drafts && hasSavePermission ? (
-          <Button
-            buttonStyle="secondary"
-            onClick={() => void saveAllDocs({ overrides: { _status: 'draft' } })}
-          >
-            {t('version:saveDraft')}
-          </Button>
-        ) : null}
-        {docConfig?.versions?.drafts && hasPublishPermission ? (
-          <Button onClick={() => void saveAllDocs({ overrides: { _status: 'published' } })}>
-            {t('version:publish')}
-          </Button>
-        ) : null}
+      <Actions className={`${baseClass}__saveButtons`} />
+    </div>
+  )
+}
 
-        {!docConfig?.versions?.drafts && hasSavePermission ? (
-          <Button onClick={() => void saveAllDocs()}>{t('general:save')}</Button>
-        ) : null}
-      </div>
+type ActionsProps = {
+  readonly className?: string
+}
+export function Actions({ className }: ActionsProps) {
+  const { config } = useConfig()
+  const { t } = useTranslation()
+  const { collectionSlug, hasPublishPermission, hasSavePermission, saveAllDocs } = useFormsManager()
+
+  const collectionConfig = config.collections.find((c) => c.slug === collectionSlug)
+
+  console.log({ collectionConfig, hasPublishPermission, hasSavePermission })
+
+  return (
+    <div className={[`${baseClass}__buttons`, className].filter(Boolean).join(' ')}>
+      {collectionConfig?.versions?.drafts && hasSavePermission ? (
+        <Button
+          buttonStyle="secondary"
+          onClick={() => void saveAllDocs({ overrides: { _status: 'draft' } })}
+        >
+          {t('version:saveDraft')}
+        </Button>
+      ) : null}
+      {collectionConfig?.versions?.drafts && hasPublishPermission ? (
+        <Button onClick={() => void saveAllDocs({ overrides: { _status: 'published' } })}>
+          {t('version:publish')}
+        </Button>
+      ) : null}
+
+      {!collectionConfig?.versions?.drafts && hasSavePermission ? (
+        <Button onClick={() => void saveAllDocs()}>{t('general:save')}</Button>
+      ) : null}
     </div>
   )
 }

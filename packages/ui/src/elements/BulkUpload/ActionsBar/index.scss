@@ -1,3 +1,5 @@
+@import '../../../scss/styles.scss';
+
 .bulk-upload--actions-bar {
   display: flex;
   padding-inline: var(--gutter-h);
@@ -7,11 +9,13 @@
   z-index: 1;
   top: 0;
   background-color: var(--theme-bg);
+  height: var(--doc-controls-height);
 
   &__navigation {
     display: flex;
     gap: var(--base);
     align-items: center;
+    width: 100%;
   }
   
   &__locationText {
@@ -42,5 +46,14 @@
     display: flex;
     gap: var(--base);
     margin-left: auto;
+  }
+
+  @include mid-break {
+    &__navigation {
+      justify-content: space-between;
+    }
+    &__saveButtons {
+      display: none;
+    }
   }
 }

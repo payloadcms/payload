@@ -1,3 +1,5 @@
+@import '../../../scss/styles.scss';
+
 .bulk-upload--file-manager {
   display: flex;
   height: 100%;
@@ -9,5 +11,13 @@
     height: 100%;
     max-height: 100%;
     overflow: auto;
+  }
+
+  @include mid-break {
+    flex-direction: column-reverse;
+
+    &__editView {
+      flex-grow: 1;
+    }
   }
 }
