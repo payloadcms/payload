@@ -4,6 +4,7 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
+  BulkUploadDrawer,
   Button,
   DeleteMany,
   EditMany,
@@ -23,10 +24,12 @@ import {
   Table,
   UnpublishMany,
   ViewDescription,
+  bulkUploadDrawerSlug,
   useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
+  useModal,
   useSearchParams,
   useStepNav,
   useTranslation,
@@ -45,6 +48,7 @@ export const DefaultListView: React.FC = () => {
   const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
+  const { openModal } = useModal()
 
   const { getEntityConfig } = useConfig()
 
@@ -80,7 +84,9 @@ export const DefaultListView: React.FC = () => {
 
   let docs = data.docs || []
 
-  if (collectionConfig.upload) {
+  const isUploadCollection = Boolean(collectionConfig.upload)
+
+  if (isUploadCollection) {
     docs = docs?.map((doc) => {
       return {
         ...doc,
@@ -110,6 +116,15 @@ export const DefaultListView: React.FC = () => {
               {hasCreatePermission && (
                 <Button
                   Link={Link}
+                  SubMenuPopupContent={
+                    isUploadCollection ? (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
+                          Bulk Uploads (!)
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    ) : null
+                  }
                   aria-label={i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
@@ -133,6 +148,9 @@ export const DefaultListView: React.FC = () => {
                   />
                 </div>
               )}
+              {isUploadCollection ? (
+                <BulkUploadDrawer collectionSlug={collectionSlug} onSuccess={() => void null} />
+              ) : null}
             </ListHeader>
           )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, DocumentPermissions } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback } from 'react'
@@ -32,13 +32,12 @@ const baseClass = 'collection-edit'
 
 export function EditForm({ submitted }: EditFormProps) {
   const {
-    id,
     AfterDocument,
     AfterFields,
     BeforeDocument,
     BeforeFields,
     action,
-    collectionSlug,
+    collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,
     getVersions,
@@ -65,18 +64,14 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const locale = params.get('locale')
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-
-  const upload = collectionConfig ? collectionConfig.upload : undefined
-
-  const classes = [baseClass, `collection-edit--${collectionSlug}`]
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
+  const collectionSlug = collectionConfig.slug
 
   const [schemaPath] = React.useState(collectionSlug)
 
   const onSave = useCallback(
     (json) => {
       reportUpdate({
-        id,
         entitySlug: collectionSlug,
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
@@ -106,7 +101,6 @@ export function EditForm({ submitted }: EditFormProps) {
       collectionSlug,
       depth,
       getVersions,
-      id,
       isEditing,
       locale,
       onSaveFromContext,
@@ -116,7 +110,7 @@ export function EditForm({ submitted }: EditFormProps) {
     ],
   )
 
-  const onChange: FormProps['onChange'][0] = useCallback(
+  const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
       const newFormState = await getFormState({
@@ -143,9 +137,9 @@ export function EditForm({ submitted }: EditFormProps) {
         action={action}
         className={`${baseClass}__form`}
         disabled={isInitializing || !hasSavePermission}
-        initialState={!isInitializing && initialState}
+        initialState={isInitializing ? undefined : initialState}
         isInitializing={isInitializing}
-        method={id ? 'PATCH' : 'POST'}
+        method={'POST'}
         onChange={[onChange]}
         onSuccess={onSave}
         submitted={submitted}
@@ -163,13 +157,13 @@ export function EditForm({ submitted }: EditFormProps) {
                   <Upload
                     collectionSlug={collectionConfig.slug}
                     initialState={initialState}
-                    uploadConfig={upload}
+                    uploadConfig={collectionConfig.upload}
                   />
                 )}
               </React.Fragment>
             )
           }
-          docPermissions={docPermissions}
+          docPermissions={docPermissions || ({} as DocumentPermissions)}
           fields={collectionConfig.fields}
           readOnly={!hasSavePermission}
           schemaPath={schemaPath}
@@ -206,6 +200,8 @@ function ReportAllErrors() {
     },
     [activeIndex, setFormTotalErrorCount],
   )
+
+  if (!docConfig) return null
 
   return <WatchChildErrors fields={docConfig.fields} path="" setErrorCount={reportFormErrorCount} />
 }
