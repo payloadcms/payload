@@ -29,7 +29,23 @@ The Admin Panel serves as the entire HTTP layer for Payload, providing a full CR
 
 Once you [install Payload](../getting-started/installation), the following files and directories will be created in your app:
 
-<Code />
+```plaintext
+app/
+├─ (payload)/
+├── admin/
+├─── [[...segments]]/
+├──── page.tsx
+├──── not-found.tsx
+├── api/
+├─── [...slug]/
+├──── route.ts
+├── graphql/
+├──── route.ts
+├── graphql-playground/
+├──── route.ts
+├── custom.scss
+├── layout.tsx
+```
 
 <Banner type="info">
   If you are not familiar with Next.js project structure, you can [learn more about it here](https://nextjs.org/docs/getting-started/project-structure).
@@ -37,7 +53,7 @@ Once you [install Payload](../getting-started/installation), the following files
 
 As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper [`lang`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang) and [`dir`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir) attributes, etc.
 
-The `admin` directory contains all the *pages* related to the interface itself, whereas the `api` and `graphql` directories contains all the *routes* related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -48,40 +64,61 @@ Finally, the `custom.scss` file is where you can add or override globally-orient
 
 All auto-generated files will contain the following comments at the top of each file:
 
-<Code />
+```tsx
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */,
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+```
 
 ## Admin Options
 
 All options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:
 
-<Code />
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+})
+```
 
 The following options are available:
 
-|   Option          |   Description                                                                                                                                                             |
-| --- | --- |
-|   **`avatar`**        |   Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                |
-|   **`autoLogin`**     |   Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                              |
-|   **`buildPath`**     |   Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                              |
-|   **`components`**    |   Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                          |
-|   **`custom`**        |   Any custom properties you wish to pass to the Admin Panel.                                                                                                              |
-|   **`dateFormat`**    |   The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                         |
-|   **`disable`**       |   If set to `true`, the entire Admin Panel will be disabled.                                                                                                              |
-|   **`livePreview`**   |   Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                           |
-|   **`meta`**          |   Base metadata to use for the Admin Panel. [More details](./metadata).   |
-|   **`routes`**        |   Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                   |
-|   **`user`**          |   The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                            |
+| Option        | Description                                                                                                                                                           |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`avatar`**      | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
+| **`autoLogin`**   | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
+| **`buildPath`**   | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
+| **`components`**  | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
+| **`custom`**      | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
+| **`dateFormat`**  | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
+| **`disable`**     | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
+| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
+| **`meta`**        | Base metadata to use for the Admin Panel. [More details](./metadata). |
+| **`routes`**      | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
+| **`user`**        | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
 
 <Banner type="success">
   <strong>Reminder:</strong>
-  These are the *root-level* options for the Admin Panel. You can also customize [Collection Admin Options](./collections) and [Global Admin Options](./globals) through their respective `admin` keys.
+  These are the _root-level_ options for the Admin Panel. You can also customize [Collection Admin Options](./collections) and [Global Admin Options](./globals) through their respective `admin` keys.
 </Banner>
 
 ### The Admin User Collection
 
 To specify which Collection to allow to login to the Admin Panel, pass the `admin.user` key equal to the slug of any auth-enabled Collection:
 
-<Code />
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    user: 'admins', // highlight-line
+  },
+})
+```
 
 <Banner type="warning">
   <strong>Important:</strong>
@@ -117,20 +154,29 @@ Root-level routes are those that are not behind the `/admin` path, such as the [
 
 To customize root-level routes, use the `routes` property in your [Payload Config](../configuration/overview):
 
-<Code />
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  routes: {
+    admin: '/custom-admin-route' // highlight-line
+  }
+})
+```
 
 The following options are available:
 
-|   Option                |   Default route           |   Description                                         |
-| --- | --- | --- |
-|   `admin`               |   `/admin`                |   The Admin Panel itself.                             |
-|   `api`                 |   `/api`                  |   The [REST API](../rest-api/overview) base path.     |
-|   `graphQL`             |   `/graphql`              |   The [GraphQL API](../graphql/overview) base path.   |
-|   `graphQLPlayground`   |   `/graphql-playground`   |   The GraphQL Playground.                             |
+| Option              | Default route         | Description                                       |
+|---------------------|-----------------------|---------------------------------------------------|
+| `admin`             | `/admin`              | The Admin Panel itself.                           |
+| `api`               | `/api`                | The [REST API](../rest-api/overview) base path.   |
+| `graphQL`           | `/graphql`            | The [GraphQL API](../graphql/overview) base path. |
+| `graphQLPlayground` | `/graphql-playground` | The GraphQL Playground.                           |
 
 <Banner type="success">
   <strong>Tip:</strong>
-  You can easily add *new* routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
+  You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
 </Banner>
 
 #### Customizing Root-level Routes
@@ -139,11 +185,16 @@ You can change the Root-level Routes as needed, such as to mount the Admin Panel
 
 Changing Root-level Routes also requires a change to [Project Structure](#project-structure) to match the new route. For example, if you set `routes.admin` to `/`, you would need to completely remove the `admin` directory from the project structure:
 
-<Code />
+```plaintext
+app/
+├─ (payload)/
+├── [[...segments]]/
+├──── ...
+```
 
 <Banner type="warning">
   <strong>Note:</strong>
-  If you set Root-level Routes *before* auto-generating the Admin Panel, your [Project Structure](#project-structure) will already be set up correctly.
+  If you set Root-level Routes _before_ auto-generating the Admin Panel, your [Project Structure](#project-structure) will already be set up correctly.
 </Banner>
 
 ### Admin-level Routes
@@ -152,24 +203,35 @@ Admin-level routes are those behind the `/admin` path. These are the routes that
 
 To customize admin-level routes, use the `admin.routes` property in your [Payload Config](../configuration/overview):
 
-<Code />
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    routes: {
+      account: '/my-account' // highlight-line
+    }
+  },
+})
+```
 
 The following options are available:
 
-|   Option              |   Default route             |   Description                                       |
-| --- | --- | --- |
-|   `account`           |   `/account`                |   The user's account page.                          |
-|   `createFirstUser`   |   `/create-first-user`      |   The page to create the first user.                |
-|   `forgot`            |   `/forgot`                 |   The password reset page.                          |
-|   `inactivity`        |   `/logout-inactivity`      |   The page to redirect to after inactivity.         |
-|   `login`             |   `/login`                  |   The login page.                                   |
-|   `logout`            |   `/logout`                 |   The logout page.                                  |
-|   `reset`             |   `/reset`                  |   The password reset page.                          |
-|   `unauthorized`      |   `/unauthorized`           |   The unauthorized page.                            |
+| Option            | Default route           | Description                                     |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| `account`         | `/account`              | The user's account page.                        |
+| `createFirstUser` | `/create-first-user`    | The page to create the first user.              |
+| `forgot`          | `/forgot`               | The password reset page.                        |
+| `inactivity`      | `/logout-inactivity`    | The page to redirect to after inactivity.       |
+| `login`           | `/login`                | The login page.                                 |
+| `logout`          | `/logout`               | The logout page.                                |
+| `reset`           | `/reset`                | The password reset page.                        |
+| `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
 
 <Banner type="success">
   <strong>Note:</strong>
-  You can also swap out entire *views* out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
+  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
 </Banner>
 
 ## I18n
