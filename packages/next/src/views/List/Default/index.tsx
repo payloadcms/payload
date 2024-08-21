@@ -9,10 +9,11 @@ import {
   EditMany,
   Gutter,
   ListControls,
+  ListHeader,
   ListSelection,
   Pagination,
   PerPage,
-  Pill,
+  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -104,35 +105,36 @@ export const DefaultListView: React.FC = () => {
       <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
-          <header className={`${baseClass}__header`}>
-            {Header || (
-              <Fragment>
-                <h1>{getTranslation(labels?.plural, i18n)}</h1>
-                {hasCreatePermission && (
-                  <Pill
-                    aria-label={i18n.t('general:createNewLabel', {
-                      label: getTranslation(labels?.singular, i18n),
-                    })}
-                    to={newDocumentURL}
-                  >
-                    {i18n.t('general:createNew')}
-                  </Pill>
-                )}
-                {!smallBreak && (
-                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
-                )}
-                {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderComponent
-                      Component={ViewDescription}
-                      clientProps={{ description }}
-                      mappedComponent={Description}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            )}
-          </header>
+          {Header || (
+            <ListHeader heading={getTranslation(labels?.plural, i18n)}>
+              {hasCreatePermission && (
+                <Button
+                  Link={Link}
+                  aria-label={i18n.t('general:createNewLabel', {
+                    label: getTranslation(labels?.singular, i18n),
+                  })}
+                  buttonStyle="pill"
+                  el="link"
+                  size="small"
+                  to={newDocumentURL}
+                >
+                  {i18n.t('general:createNew')}
+                </Button>
+              )}
+              {!smallBreak && (
+                <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+              )}
+              {description && (
+                <div className={`${baseClass}__sub-header`}>
+                  <RenderComponent
+                    Component={ViewDescription}
+                    clientProps={{ description }}
+                    mappedComponent={Description}
+                  />
+                </div>
+              )}
+            </ListHeader>
+          )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
@@ -174,7 +176,7 @@ export const DefaultListView: React.FC = () => {
                 limit={data.limit}
                 nextPage={data.nextPage}
                 numberOfNeighbors={1}
-                onChange={handlePageChange}
+                onChange={(page) => void handlePageChange(page)}
                 page={data.page}
                 prevPage={data.prevPage}
                 totalPages={data.totalPages}
@@ -189,7 +191,7 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
-                    handleChange={handlePerPageChange}
+                    handleChange={(limit) => void handlePerPageChange(limit)}
                     limit={
                       isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
                     }

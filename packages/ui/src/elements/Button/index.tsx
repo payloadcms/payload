@@ -9,6 +9,8 @@ import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { ButtonGroup, Button as PopupButton } from '../Popup/PopupButtonList/index.js'
+import { Popup } from '../Popup/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 
@@ -51,6 +53,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     id,
     type = 'button',
     Link,
+    SubMenuPopupContent,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -74,15 +77,13 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const classes = [
     baseClass,
     className && className,
-    buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
     iconStyle && `${baseClass}--icon-style-${iconStyle}`,
     icon && !children && `${baseClass}--icon-only`,
-    disabled && `${baseClass}--disabled`,
-    round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
     icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
+    !SubMenuPopupContent && `${baseClass}--withoutPopup`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -93,12 +94,21 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     if (onClick) onClick(event)
   }
 
+  const styleClasses = [
+    buttonStyle && `${baseClass}--style-${buttonStyle}`,
+    disabled && `${baseClass}--disabled`,
+    round && `${baseClass}--round`,
+    SubMenuPopupContent ? `${baseClass}--withPopup` : `${baseClass}--withoutPopup`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   const buttonProps = {
     id,
     type,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
-    className: classes,
+    className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled,
     onClick: !disabled ? handleClick : undefined,
     onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
@@ -107,6 +117,8 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     target: newTab ? '_blank' : undefined,
   }
 
+  let buttonElement
+
   switch (el) {
     case 'link':
       if (!Link) {
@@ -114,32 +126,61 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         return null
       }
 
-      return (
-        <Link {...buttonProps} href={to || url} to={to || url}>
+      let LinkTag = Link // eslint-disable-line no-case-declarations
+
+      if (disabled) LinkTag = 'div'
+
+      buttonElement = (
+        <LinkTag {...buttonProps} href={to || url} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
-        </Link>
+        </LinkTag>
       )
+      break
 
     case 'anchor':
-      return (
-        <a {...buttonProps} href={url} ref={ref as React.Ref<HTMLAnchorElement>}>
+      buttonElement = (
+        <a
+          {...buttonProps}
+          href={!disabled ? url : undefined}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </a>
       )
+      break
 
     default:
       const Tag = el // eslint-disable-line no-case-declarations
 
-      return (
+      buttonElement = (
         <Tag ref={ref} type="submit" {...buttonProps}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </Tag>
       )
+      break
   }
+  if (SubMenuPopupContent)
+    return (
+      <div className={styleClasses}>
+        {buttonElement}
+        <Popup
+          button={<ChevronIcon />}
+          className={disabled ? `${baseClass}--popup-disabled` : ''}
+          horizontalAlign="right"
+          noBackground
+          size="large"
+          verticalAlign="bottom"
+        >
+          {SubMenuPopupContent}
+        </Popup>
+      </div>
+    )
+
+  return buttonElement
 })
