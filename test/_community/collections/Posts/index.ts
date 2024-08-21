@@ -19,6 +19,9 @@ import path from 'path'
 export const postsSlug = 'posts'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const CODE_BLOCK_REG_EXP = /^[ \t]*```(\w{1,10})?\s?$/
+
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -71,6 +74,33 @@ export const PostsCollection: CollectionConfig = {
                     name: 'content',
                     type: 'richText',
                     editor: lexicalEditor(),
+                  },
+                ],
+              },
+              {
+                slug: 'Code',
+                jsx: {
+                  customStartRegex: CODE_BLOCK_REG_EXP,
+                  customEndRegex: CODE_BLOCK_REG_EXP,
+                  import: ({ openMatch, children, linesInBetween }) => {
+                    const language = openMatch[1]
+                    return {
+                      language,
+                      code: children,
+                    }
+                  },
+                  export: ({ fields, lexicalToMarkdown }) => {
+                    return '```' + fields.language + '\n' + fields.code + '\n```'
+                  },
+                },
+                fields: [
+                  {
+                    name: 'language',
+                    type: 'text',
+                  },
+                  {
+                    name: 'code',
+                    type: 'code',
                   },
                 ],
               },

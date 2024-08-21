@@ -60,6 +60,9 @@ export const getBlockMarkdownTransformers = ({
         if (exportResult === false) {
           return null
         }
+        if (typeof exportResult === 'string') {
+          return exportResult
+        }
 
         if (exportResult?.children?.length) {
           return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}>\n  ${exportResult.children}\n</${nodeFields.blockType}>`
@@ -67,13 +70,13 @@ export const getBlockMarkdownTransformers = ({
 
         return `<${nodeFields.blockType} ${propsToJSXString({ props: exportResult.props })}/>`
       },
-      regExpEnd: regex.regExpEnd,
-      regExpStart: regex.regExpStart,
+      regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
+      regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
       replace: (rootNode, openMatch, closeMatch, linesInBetween) => {
         if (block.jsx.import) {
           const childrenString = linesInBetween.join('\n').trim()
 
-          const propsString: string | null = openMatch[2]?.trim()
+          const propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 
@@ -84,6 +87,9 @@ export const getBlockMarkdownTransformers = ({
                   propsString,
                 })
               : {},
+            openMatch,
+            closeMatch,
+            linesInBetween,
             markdownToLexical: markdownToLexical,
             htmlToLexical: null, // TODO
           })

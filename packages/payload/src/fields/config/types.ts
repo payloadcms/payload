@@ -1238,6 +1238,8 @@ export type Block = {
    */
   interfaceName?: string
   jsx?: {
+    customEndRegex?: RegExp
+    customStartRegex?: RegExp
     export: (props: {
       fields: BlockFields
       lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
@@ -1247,10 +1249,14 @@ export type Block = {
           props?: object
         }
       | false
+      | string
     import: (props: {
       children: string
+      closeMatch?: string[]
       htmlToLexical?: (props: { html: string }) => any
+      linesInBetween?: string[]
       markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+      openMatch?: string[]
       props: Record<string, any>
     }) => BlockFields | false
   }
