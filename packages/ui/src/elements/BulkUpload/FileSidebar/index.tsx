@@ -60,6 +60,7 @@ export function FileSidebar() {
     <div
       className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
     >
+      {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__headerTopRow`}>
           <div className={`${baseClass}__header__text`}>
