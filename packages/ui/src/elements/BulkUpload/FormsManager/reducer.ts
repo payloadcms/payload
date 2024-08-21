@@ -66,7 +66,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         activeIndex: state.forms.length ? state.activeIndex + newForms.length - 1 : 0,
-        forms: [...state.forms, ...newForms],
+        forms: [...newForms, ...state.forms],
       }
     }
     case 'REMOVE_FORM': {
