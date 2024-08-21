@@ -49,6 +49,10 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
   uiSlug,
+  uploads2Slug,
+  uploadsMulti,
+  uploadsMultiPoly,
+  uploadsPoly,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
@@ -121,6 +125,51 @@ export const seed = async (_payload: Payload) => {
     file: jpgFile,
     depth: 0,
     overrideAccess: true,
+  })
+
+  const createdJPGDocSlug2 = await _payload.create({
+    collection: uploads2Slug,
+    data: {
+      ...uploadsDoc,
+      media: createdPNGDoc.id,
+    },
+    file: jpgFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  // Create hasMany upload
+  await _payload.create({
+    collection: uploadsMulti,
+    data: {
+      media: [createdPNGDoc.id, createdJPGDoc.id],
+    },
+  })
+
+  // Create hasMany poly upload
+  await _payload.create({
+    collection: uploadsMultiPoly,
+    data: {
+      media: [
+        { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+        { value: createdJPGDoc.id, relationTo: uploadsSlug },
+      ],
+    },
+  })
+
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+    },
+  })
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+    },
   })
 
   const formattedID =

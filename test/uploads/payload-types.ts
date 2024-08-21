@@ -42,9 +42,6 @@ export interface Config {
     'media-with-relation-preview': MediaWithRelationPreview;
     'media-without-relation-preview': MediaWithoutRelationPreview;
     'relation-preview': RelationPreview;
-    'multi-upload-relation': MultiUploadRelation;
-    'poly-upload-relation': PolyUploadRelation;
-    'multi-poly-upload-relation': MultiPolyUploadRelation;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -1074,63 +1071,6 @@ export interface RelationPreview {
   imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
   imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
   imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "multi-upload-relation".
- */
-export interface MultiUploadRelation {
-  id: string;
-  upload?: (string | Media)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "poly-upload-relation".
- */
-export interface PolyUploadRelation {
-  id: string;
-  upload?:
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'optional-file';
-        value: string | OptionalFile;
-      } | null)
-    | ({
-        relationTo: 'versions';
-        value: string | Version;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "multi-poly-upload-relation".
- */
-export interface MultiPolyUploadRelation {
-  id: string;
-  upload?:
-    | (
-        | {
-            relationTo: 'media';
-            value: string | Media;
-          }
-        | {
-            relationTo: 'optional-file';
-            value: string | OptionalFile;
-          }
-        | {
-            relationTo: 'versions';
-            value: string | Version;
-          }
-      )[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
