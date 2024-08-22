@@ -134,7 +134,7 @@ export default buildConfigWithDefaults({
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 1',
       },
     })
 
@@ -145,7 +145,7 @@ export default buildConfigWithDefaults({
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 2',
       },
     })
 
@@ -156,7 +156,7 @@ export default buildConfigWithDefaults({
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 3',
       },
     })
   },

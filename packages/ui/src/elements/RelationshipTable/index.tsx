@@ -11,9 +11,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useReducer, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
- 
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
+const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
 
 import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
@@ -36,14 +34,13 @@ const baseClass = 'relationship-table'
 type RelationshipTableComponentProps = {
   readonly Label?: React.ReactNode
   readonly field: JoinFieldProps['field']
+  readonly filterOptions?: Where | boolean
   readonly initialData?: PaginatedDocs
   readonly relationTo: string
 }
 
-const filterOptions: Where = {}
-
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { Label, field, initialData, relationTo } = props
+  const { Label, field, filterOptions, initialData, relationTo } = props
 
   const {
     config: {
@@ -126,7 +123,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
-  }, [page, sort, where, search, cacheBust, collectionConfig, setParams, limit])
+  }, [page, sort, where, search, cacheBust, collectionConfig, setParams, limit, filterOptions])
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     collectionSlug: relationTo,
@@ -215,6 +212,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             collectionSlug={relationTo}
             preferenceKey={preferenceKey}
           >
+            {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
             <AnimateHeight
               className={`${baseClass}__columns`}
               height={openColumnSelector ? 'auto' : 0}

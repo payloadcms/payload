@@ -9,6 +9,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 
 const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
   const {
@@ -25,6 +26,8 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
     },
   } = props
 
+  const { id: docID } = useDocumentInfo()
+
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { path, value } = useField<PaginatedDocs>({
@@ -39,6 +42,11 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
         </h4>
       }
       field={field}
+      filterOptions={{
+        [on]: {
+          in: [docID],
+        },
+      }}
       initialData={value}
       relationTo={collection}
     />
