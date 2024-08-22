@@ -248,6 +248,7 @@ export const myTranslations: DefaultTranslationsObject = {
     moveDown: 'Move Down',
     moveUp: 'Move Up',
     newPassword: 'စကားဝှက် အသစ်',
+    next: 'Seterusnya',
     noFiltersSet: 'စစ်ထုတ်မှုများ မသတ်မှတ်ထားပါ။',
     noLabel: '<မရှိ {{label}}>',
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
@@ -265,6 +266,7 @@ export const myTranslations: DefaultTranslationsObject = {
     password: 'စကားဝှက်',
     payloadSettings: 'ရွေးချယ်စရာများ',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
+    previous: 'ယခင်',
     remove: 'ဖယ်ရှားမည်။',
     reset: 'Tetapkan semula',
     row: 'အတန်း',
@@ -323,6 +325,8 @@ export const myTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'ဖိုင်ထည့်ပါ',
+    addFiles: 'Tambah Fail',
+    bulkUpload: 'Muat naik pukal',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -331,6 +335,8 @@ export const myTranslations: DefaultTranslationsObject = {
     editImage: 'ပုံပြင်ပြောင်းရန်',
     fileName: 'ဖိုင် နာမည်',
     fileSize: 'ဖိုင် အရွယ်အစား',
+    fileToUpload: 'ဖိုင်တင်ရန်',
+    filesToUpload: 'Fail untuk Dimuat Naik',
     focalPoint: 'အကန့်အသတ်ချုပ်',
     focalPointDescription:
       'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',

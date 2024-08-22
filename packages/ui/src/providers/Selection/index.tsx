@@ -16,6 +16,8 @@ export enum SelectAllStatus {
 
 type SelectionContext = {
   count: number
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
   getQueryParams: (additionalParams?: Where) => string
   selectAll: SelectAllStatus
   selected: Record<number | string, boolean>
@@ -27,10 +29,11 @@ type SelectionContext = {
 const Context = createContext({} as SelectionContext)
 
 type Props = {
-  children: React.ReactNode
-  docs: any[]
-  totalDocs: number
+  readonly children: React.ReactNode
+  readonly docs: any[]
+  readonly totalDocs: number
 }
+
 export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext)
 

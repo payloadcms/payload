@@ -249,6 +249,7 @@ export const trTranslations: DefaultTranslationsObject = {
     moveDown: 'Aşağı taşı',
     moveUp: 'Yukarı taşı',
     newPassword: 'Yeni parola',
+    next: 'Sonraki',
     noFiltersSet: 'Tanımlı filtre yok',
     noLabel: '<{{label}} yok>',
     noOptions: 'Seçenek yok',
@@ -266,6 +267,7 @@ export const trTranslations: DefaultTranslationsObject = {
     password: 'Parola',
     payloadSettings: 'Ayarlar',
     perPage: 'Sayfa başına: {{limit}}',
+    previous: 'Önceki',
     remove: 'Kaldır',
     reset: 'Sıfırla',
     row: 'Satır',
@@ -324,6 +326,8 @@ export const trTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Dosya ekle',
+    addFiles: 'Dosya Ekle',
+    bulkUpload: 'Toplu Yükleme',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -332,6 +336,8 @@ export const trTranslations: DefaultTranslationsObject = {
     editImage: 'Görüntüyü Düzenle',
     fileName: 'Dosya adı',
     fileSize: 'Dosya boyutu',
+    fileToUpload: 'Yüklenecek Dosya',
+    filesToUpload: 'Yüklemek için Dosyalar',
     focalPoint: 'Odak Noktası',
     focalPointDescription:
       'Önizlemeye odak noktasını doğrudan sürükleyin veya aşağıdaki değerleri ayarlayın.',

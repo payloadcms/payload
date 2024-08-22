@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import util from 'util'
 
+import type { PackageDetails } from './lib/getPackageDetails.js'
+
 import { getPackageDetails } from './lib/getPackageDetails.js'
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
@@ -47,6 +49,7 @@ async function main() {
         'drizzle',
         'db-sqlite',
         'db-postgres',
+        'db-vercel-postgres',
         'richtext-lexical',
         'translations',
         'plugin-cloud',
@@ -58,19 +61,17 @@ async function main() {
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
 
-  //await execa('pnpm', ['install'], execaOpts)
-
   const filtered = packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
 
-  header(`\nOutputting ${filtered.length} packages...
-
-${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
-`)
   if (!noBuild) {
     execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
   }
 
-  header(`\n 📦 Packing all packages to ${dest}...`)
+  header(`\nOutputting ${filtered.length} packages...
+
+${chalk.white.bold(listPackages(filtered))}`)
+
+  header(`\n📦 Packing all packages to ${dest}...`)
 
   await Promise.all(
     filtered.map(async (p) => {
@@ -83,4 +84,8 @@ ${chalk.white.bold(filtered.map((p) => p.name).join('\n'))}
 
 function header(message: string, opts?: { enable?: boolean }) {
   console.log(chalk.bold.green(`${message}\n`))
+}
+
+function listPackages(packages: PackageDetails[]) {
+  return packages.map((p) => `  - ${p.name}`).join('\n')
 }

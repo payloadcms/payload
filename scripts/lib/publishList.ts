@@ -22,6 +22,7 @@ export const packagePublishList = [
   'db-mongodb',
   'db-postgres',
   'db-sqlite',
+  'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',

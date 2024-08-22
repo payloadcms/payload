@@ -28,6 +28,7 @@
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",
+    "@payloadcms/db-vercel-postgres": "workspace:*",
     "@payloadcms/drizzle": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/email-resend": "workspace:*",

@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
+import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -21,7 +22,6 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { AddNewRelation } from './AddNew/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import './index.scss'
@@ -591,15 +591,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             />
             {!readOnly && allowCreate && (
               <AddNewRelation
-                {...{
-                  dispatchOptions,
-                  hasMany,
-                  options,
-                  path,
-                  relationTo,
-                  setValue,
-                  value,
-                }}
+                hasMany={hasMany}
+                path={path}
+                relationTo={relationTo}
+                setValue={setValue}
+                value={value}
               />
             )}
           </div>

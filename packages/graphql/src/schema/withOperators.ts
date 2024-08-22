@@ -230,9 +230,9 @@ const defaults: DefaultsType = {
   },
   upload: {
     operators: [
-      ...operators.equality.map((operator) => ({
+      ...[...operators.equality, ...operators.contains].map((operator) => ({
         name: operator,
-        type: GraphQLString,
+        type: GraphQLJSON,
       })),
     ],
   },

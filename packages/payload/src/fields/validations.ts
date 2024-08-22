@@ -571,18 +571,76 @@ const validateFilterOptions: Validate<
 }
 
 export type UploadFieldValidation = Validate<unknown, unknown, unknown, UploadField>
-export const upload: UploadFieldValidation = (value: string, options) => {
-  if (!value && options.required) {
-    return options?.req?.t('validation:required')
+
+export const upload: UploadFieldValidation = async (value, options) => {
+  const {
+    maxRows,
+    minRows,
+    relationTo,
+    req: { payload, t },
+    required,
+  } = options
+
+  if (
+    ((!value && typeof value !== 'number') || (Array.isArray(value) && value.length === 0)) &&
+    required
+  ) {
+    return t('validation:required')
+  }
+
+  if (Array.isArray(value) && value.length > 0) {
+    if (minRows && value.length < minRows) {
+      return t('validation:lessThanMin', {
+        label: t('general:rows'),
+        min: minRows,
+        value: value.length,
+      })
+    }
+
+    if (maxRows && value.length > maxRows) {
+      return t('validation:greaterThanMax', {
+        label: t('general:rows'),
+        max: maxRows,
+        value: value.length,
+      })
+    }
   }
 
   if (typeof value !== 'undefined' && value !== null) {
-    const idType =
-      options?.req?.payload?.collections[options.relationTo]?.customIDType ||
-      options?.req?.payload?.db?.defaultIDType
+    const values = Array.isArray(value) ? value : [value]
 
-    if (!isValidID(value, idType)) {
-      return options.req?.t('validation:validUploadID')
+    const invalidRelationships = values.filter((val) => {
+      let collectionSlug: string
+      let requestedID
+
+      if (typeof relationTo === 'string') {
+        collectionSlug = relationTo
+
+        // custom id
+        if (val || typeof val === 'number') {
+          requestedID = val
+        }
+      }
+
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
+        collectionSlug = val.relationTo
+        requestedID = val.value
+      }
+
+      if (requestedID === null) return false
+
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+
+      return !isValidID(requestedID, idType)
+    })
+
+    if (invalidRelationships.length > 0) {
+      return `This relationship field has the following invalid relationships: ${invalidRelationships
+        .map((err, invalid) => {
+          return `${err} ${JSON.stringify(invalid)}`
+        })
+        .join(', ')}`
     }
   }
 

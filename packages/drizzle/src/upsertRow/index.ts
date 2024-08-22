@@ -351,6 +351,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     throw error.code === '23505'
       ? new ValidationError(
           {
+            id,
             errors: [
               {
                 field: adapter.fieldConstraints[tableName][error.constraint],
