@@ -131,7 +131,6 @@ export const seed = async (_payload: Payload) => {
     collection: uploads2Slug,
     data: {
       ...uploadsDoc,
-      media: createdPNGDoc.id,
     },
     file: jpgFile,
     depth: 0,
