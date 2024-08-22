@@ -54,6 +54,7 @@ async function migrateGlobal({
   const document = await payload.findGlobal({
     slug: global.slug,
     depth: 0,
+    draft: true,
     locale: locale || undefined,
     overrideAccess: true,
   })
@@ -69,6 +70,7 @@ async function migrateGlobal({
         slug: global.slug,
         data: document,
         depth: 0,
+        draft: document?._status === 'draft',
         locale: locale || undefined,
       })
       // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
@@ -115,6 +117,7 @@ async function migrateCollection({
     const documents = await payload.find({
       collection: collection.slug,
       depth: 0,
+      draft: true,
       locale: locale || undefined,
       overrideAccess: true,
       page,
@@ -150,6 +153,7 @@ async function migrateCollection({
             collection: collection.slug,
             data: document,
             depth: 0,
+            draft: document?._status === 'draft',
             locale: locale || undefined,
           })
           // Catch it, because some errors were caused by the user previously (e.g. invalid relationships) and will throw an error now, even though they are not related to the migration
