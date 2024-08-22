@@ -1,4 +1,3 @@
-import type { Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -33,30 +32,28 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { like } from 'drizzle-orm'
+import {
+  convertPathToJSONTraversal,
+  countDistinct,
+  createJSONQuery,
+  createMigration,
+  defaultDrizzleSnapshot,
+  deleteWhere,
+  dropDatabase,
+  execute,
+  getMigrationTemplate,
+  init,
+  insert,
+  requireDrizzleKit,
+} from '@payloadcms/drizzle/postgres'
+import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter } from 'payload'
 
-import type { Args, SQLiteAdapter } from './types.js'
+import type { Args, VercelPostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
-import { countDistinct } from './countDistinct.js'
-import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
-import { createJSONQuery } from './createJSONQuery/index.js'
-import { createMigration } from './createMigration.js'
-import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
-import { deleteWhere } from './deleteWhere.js'
-import { dropDatabase } from './dropDatabase.js'
-import { execute } from './execute.js'
-import { getMigrationTemplate } from './getMigrationTemplate.js'
-import { init } from './init.js'
-import { insert } from './insert.js'
-import { requireDrizzleKit } from './requireDrizzleKit.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
-export { sql } from 'drizzle-orm'
-
-export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
+export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
@@ -64,25 +61,24 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing
     let rejectInitializing
+    let adapterSchema: VercelPostgresAdapter['pgSchema']
 
     const initializing = new Promise<void>((res, rej) => {
       resolveInitializing = res
       rejectInitializing = rej
     })
 
-    // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
-    const operators = {
-      ...operatorMap,
-      contains: like,
-      like,
-    } as unknown as Operators
+    if (args.schemaName) {
+      adapterSchema = pgSchema(args.schemaName)
+    } else {
+      adapterSchema = { enum: pgEnum, table: pgTable }
+    }
 
-    return createDatabaseAdapter<SQLiteAdapter>({
-      name: 'sqlite',
-      client: undefined,
-      clientConfig: args.client,
+    return createDatabaseAdapter<VercelPostgresAdapter>({
+      name: 'postgres',
       defaultDrizzleSnapshot,
       drizzle: undefined,
+      enums: {},
       features: {
         json: true,
       },
@@ -92,7 +88,10 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      operators,
+      operators: operatorMap,
+      pgSchema: adapterSchema,
+      pool: undefined,
+      poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
@@ -106,7 +105,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions ? beginTransaction : undefined,
+      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
       commitTransaction,
       connect,
       convertPathToJSONTraversal,
@@ -140,7 +139,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       migrateReset,
       migrateStatus,
       migrationDir,
-      packageName: '@payloadcms/db-sqlite',
+      packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
       rejectInitializing,
@@ -159,3 +158,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     init: adapter,
   }
 }
+
+export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { sql } from 'drizzle-orm'

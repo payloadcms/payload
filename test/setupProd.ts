@@ -9,6 +9,7 @@ export const tgzToPkgNameMap = {
   payload: 'payload-*',
   '@payloadcms/db-mongodb': 'payloadcms-db-mongodb-*',
   '@payloadcms/db-postgres': 'payloadcms-db-postgres-*',
+  '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
   '@payloadcms/db-sqlite': 'payloadcms-db-sqlite-*',
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
