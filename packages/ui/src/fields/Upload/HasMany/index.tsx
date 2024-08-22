@@ -110,9 +110,6 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
       }
 
       void fetchFile()
-    } else {
-      setFileDocs([])
-      setMissingFiles(true)
     }
   }, [value, relationTo, api, serverURL, i18n, code])
 
@@ -158,7 +155,8 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         (acc, [key, value]) => (value ? [...acc, key] : acc),
         [] as string[],
       )
-      setValue([...value, ...selectedIDs])
+      if (value?.length) setValue([...value, ...selectedIDs])
+      else setValue(selectedIDs)
     },
     [setValue, value],
   )
@@ -253,7 +251,8 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         enableRowSelections
         onBulkSelect={onBulkSelect}
         onSelect={(selection) => {
-          setValue([...value, selection.docID])
+          if (value?.length) setValue([...value, selection.docID])
+          else setValue([selection.docID])
         }}
       />
     </Fragment>
