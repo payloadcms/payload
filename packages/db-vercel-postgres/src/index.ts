@@ -53,9 +53,7 @@ import type { Args, VercelPostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 
-export { sql } from 'drizzle-orm'
-
-export function vercelPostgresAdapter(args: Args): DatabaseAdapterObj<VercelPostgresAdapter> {
+export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
@@ -92,6 +90,8 @@ export function vercelPostgresAdapter(args: Args): DatabaseAdapterObj<VercelPost
       logger: args.logger,
       operators: operatorMap,
       pgSchema: adapterSchema,
+      pool: undefined,
+      poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
       push: args.push,
       relations: {},
@@ -139,6 +139,7 @@ export function vercelPostgresAdapter(args: Args): DatabaseAdapterObj<VercelPost
       migrateReset,
       migrateStatus,
       migrationDir,
+      packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
       rejectInitializing,
@@ -157,3 +158,6 @@ export function vercelPostgresAdapter(args: Args): DatabaseAdapterObj<VercelPost
     init: adapter,
   }
 }
+
+export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { sql } from 'drizzle-orm'

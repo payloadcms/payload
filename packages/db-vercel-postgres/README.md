@@ -13,6 +13,8 @@ npm install @payloadcms/db-postgres
 
 ## Usage
 
+### Explicit Connection String
+
 ```ts
 import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -23,6 +25,17 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI,
     },
   }),
+  // ...rest of config
+})
+```
+
+### Automatic Connection String Detection
+
+Have Vercel automatically detect from environment variable (typically `process.env.DATABASE_URL`)
+
+```ts
+export default buildConfig({
+  db: postgresAdapter(),
   // ...rest of config
 })
 ```

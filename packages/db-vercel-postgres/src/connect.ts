@@ -2,7 +2,7 @@ import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Connect } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { sql } from '@vercel/postgres'
+import { VercelPool, sql } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 
 import type { VercelPostgresAdapter } from './types.js'
@@ -24,7 +24,12 @@ export const connect: Connect = async function connect(
 
   try {
     const logger = this.logger || false
-    this.drizzle = drizzle(sql, { logger, schema: this.schema })
+    // Passed the poolOptions if provided,
+    // else have vercel/postgres detect the connection string from the environment
+    this.drizzle = drizzle(this.poolOptions ? new VercelPool(this.poolOptions) : sql, {
+      logger,
+      schema: this.schema,
+    })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

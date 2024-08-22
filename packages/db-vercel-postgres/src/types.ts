@@ -6,16 +6,21 @@ import type {
   PostgresDB,
 } from '@payloadcms/drizzle/postgres'
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
-import type { Pool, PoolConfig } from 'pg'
 
 export type Args = {
+  connectionString?: string
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
-  pool: PoolConfig
+  /**
+   * Optional pool configuration for Vercel Postgres
+   * If not provided, vercel/postgres will attempt to use the Vercel environment variables
+   */
+  pool?: VercelPostgresPoolConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string
@@ -32,7 +37,10 @@ export type Args = {
   versionsSuffix?: string
 }
 
-export type VercelPostgresAdapter = BasePostgresAdapter
+export type VercelPostgresAdapter = {
+  pool?: VercelPool
+  poolOptions?: Args['pool']
+} & BasePostgresAdapter
 
 declare module 'payload' {
   export interface DatabaseAdapter
@@ -51,7 +59,7 @@ declare module 'payload' {
     localesSuffix?: string
     logger: DrizzleConfig['logger']
     pgSchema?: { table: PgTableFn } | PgSchema
-    pool: Pool
+    pool: VercelPool
     poolOptions: Args['pool']
     prodMigrations?: {
       down: (args: MigrateDownArgs) => Promise<void>
