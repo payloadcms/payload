@@ -4,6 +4,7 @@ import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
 import { cs } from '../languages/cs.js'
+import { da } from '../languages/da.js'
 import { de } from '../languages/de.js'
 import { en } from '../languages/en.js'
 import { es } from '../languages/es.js'
@@ -38,6 +39,7 @@ export const translations = {
   az,
   bg,
   cs,
+  da,
   de,
   en,
   es,
