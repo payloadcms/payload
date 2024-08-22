@@ -197,7 +197,8 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         {...(props.labelProps || {})}
       />
 
-      {!fieldHookResult.value ? (
+      {!fieldHookResult.value ||
+      (Array.isArray(fieldHookResult.value) && fieldHookResult.value.length === 0) ? (
         <React.Fragment>
           <Dropzone multipleFiles={hasMany} onChange={onFileSelection} />
           <BulkUploadDrawer
