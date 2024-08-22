@@ -8,7 +8,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
-import type { CollectionSlug, JsonObject } from 'payload'
+import type { CollectionSlug, DataFromCollectionSlug, JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -16,12 +16,14 @@ import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-export type UploadData = {
-  fields: JsonObject
-  id: string
-  relationTo: CollectionSlug
-  value: number | string
-}
+export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
+  [TCollectionSlug in CollectionSlug]: {
+    fields: TUploadExtraFieldsData
+    id: string
+    relationTo: TCollectionSlug
+    value: DataFromCollectionSlug<TCollectionSlug> | number | string
+  }
+}[CollectionSlug]
 
 export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
   return (

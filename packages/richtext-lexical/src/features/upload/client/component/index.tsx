@@ -86,6 +86,12 @@ const Component: React.FC<ElementProps> = (props) => {
     depth: editDepth,
   })
 
+  if (typeof value === 'object') {
+    throw new Error(
+      'Upload value should be a string or number. The Lexical Upload component should not receive the populated value object.',
+    )
+  }
+
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value,
     collectionSlug: relatedCollection.slug,
