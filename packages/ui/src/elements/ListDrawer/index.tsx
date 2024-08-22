@@ -87,6 +87,7 @@ export const useListDrawer: UseListDrawer = ({
       setCollectionSlugs(filteredCollectionSlugs.map(({ slug }) => slug))
     }
   }, [collectionSlugs, uploads, collections])
+
   const toggleDrawer = useCallback(() => {
     toggleModal(drawerSlug)
   }, [toggleModal, drawerSlug])

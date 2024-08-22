@@ -247,6 +247,7 @@ export const skTranslations: DefaultTranslationsObject = {
     moveDown: 'Presunúť dolu',
     moveUp: 'Presunúť hore',
     newPassword: 'Nové heslo',
+    next: 'Ďalej',
     noFiltersSet: 'Nie sú nastavené žiadne filtre',
     noLabel: '<Žiadny {{label}}>',
     noOptions: 'Žiadne možnosti',
@@ -264,6 +265,7 @@ export const skTranslations: DefaultTranslationsObject = {
     password: 'Heslo',
     payloadSettings: 'Nastavenia dátového záznamu',
     perPage: 'Na stránku: {{limit}}',
+    previous: 'Predchádzajúci',
     remove: 'Odstrániť',
     reset: 'Resetovať',
     row: 'Riadok',
@@ -321,6 +323,8 @@ export const skTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Pridať súbor',
+    addFiles: 'Pridať súbory',
+    bulkUpload: 'Hromadné nahranie',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
@@ -329,6 +333,8 @@ export const skTranslations: DefaultTranslationsObject = {
     editImage: 'Upraviť obrázok',
     fileName: 'Názov súboru',
     fileSize: 'Veľkosť súboru',
+    fileToUpload: 'Súbor na nahranie',
+    filesToUpload: 'Súbory na nahranie',
     focalPoint: 'Stredobod',
     focalPointDescription:
       'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',

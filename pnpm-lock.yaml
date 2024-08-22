@@ -383,6 +383,52 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/db-vercel-postgres:
+    dependencies:
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../drizzle
+      '@vercel/postgres':
+        specifier: ^0.9.0
+        version: 0.9.0
+      console-table-printer:
+        specifier: 2.11.2
+        version: 2.11.2
+      drizzle-kit:
+        specifier: 0.23.2-df9e596
+        version: 0.23.2-df9e596
+      drizzle-orm:
+        specifier: 0.32.1
+        version: 0.32.1(@libsql/client@0.6.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@neondatabase/serverless@0.9.4)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0-rc-06d0b89e-20240801)(types-react@19.0.0-rc.0)
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      to-snake-case:
+        specifier: 1.0.0
+        version: 1.0.0
+      uuid:
+        specifier: 10.0.0
+        version: 10.0.0
+    devDependencies:
+      '@hyrious/esbuild-plugin-commonjs':
+        specifier: ^0.2.4
+        version: 0.2.4(cjs-module-lexer@1.3.1)(esbuild@0.23.0)
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
+      '@types/to-snake-case':
+        specifier: 1.0.0
+        version: 1.0.0
+      esbuild:
+        specifier: 0.23.0
+        version: 0.23.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/drizzle:
     dependencies:
       console-table-printer:
@@ -1600,6 +1646,9 @@ importers:
       '@payloadcms/db-sqlite':
         specifier: workspace:*
         version: link:../packages/db-sqlite
+      '@payloadcms/db-vercel-postgres':
+        specifier: workspace:*
+        version: link:../packages/db-vercel-postgres
       '@payloadcms/drizzle':
         specifier: workspace:*
         version: link:../packages/drizzle
@@ -12239,7 +12288,6 @@ snapshots:
   '@neondatabase/serverless@0.9.4':
     dependencies:
       '@types/pg': 8.11.6
-    optional: true
 
   '@next/bundle-analyzer@15.0.0-canary.104(bufferutil@4.0.8)':
     dependencies:
@@ -13088,7 +13136,6 @@ snapshots:
       '@types/node': 20.12.5
       pg-protocol: 1.6.1
       pg-types: 4.0.2
-    optional: true
 
   '@types/pluralize@0.0.33': {}
 
@@ -13326,7 +13373,6 @@ snapshots:
       bufferutil: 4.0.8
       utf-8-validate: 6.0.4
       ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
-    optional: true
 
   '@vue/compiler-core@3.4.37':
     dependencies:
@@ -13832,7 +13878,6 @@ snapshots:
   bufferutil@4.0.8:
     dependencies:
       node-gyp-build: 4.8.1
-    optional: true
 
   bundle-name@3.0.0:
     dependencies:
@@ -16940,8 +16985,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-gyp-build@4.8.1:
-    optional: true
+  node-gyp-build@4.8.1: {}
 
   node-int64@0.4.0: {}
 
@@ -18724,7 +18768,6 @@ snapshots:
   utf-8-validate@6.0.4:
     dependencies:
       node-gyp-build: 4.8.1
-    optional: true
 
   utf8-byte-length@1.0.5: {}
 

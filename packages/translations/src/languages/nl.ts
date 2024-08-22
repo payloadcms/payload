@@ -248,6 +248,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',
     newPassword: 'Nieuw wachtwoord',
+    next: 'Volgende',
     noFiltersSet: 'Geen filters ingesteld',
     noLabel: 'Geen "{{label}}"',
     noOptions: 'Geen opties',
@@ -265,6 +266,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     password: 'Wachtwoord',
     payloadSettings: 'Payload Instellingen',
     perPage: 'Per pagina: {{limit}}',
+    previous: 'Vorige',
     remove: 'Verwijderen',
     reset: 'Resetten',
     row: 'Rij',
@@ -322,6 +324,8 @@ export const nlTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Bestand toevoegen',
+    addFiles: 'Bestanden toevoegen',
+    bulkUpload: 'Bulk Upload',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
@@ -330,6 +334,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     editImage: 'Afbeelding bewerken',
     fileName: 'Bestandsnaam',
     fileSize: 'Bestandsgrootte',
+    fileToUpload: 'Bestand om te uploaden',
+    filesToUpload: 'Bestanden om te uploaden',
     focalPoint: 'Focuspunt',
     focalPointDescription:
       'Sleep het focuspunt rechtstreeks op de voorvertoning of pas de waarden hieronder aan.',

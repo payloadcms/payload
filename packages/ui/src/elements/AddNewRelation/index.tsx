@@ -4,29 +4,30 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { DocumentInfoContext } from '../../../providers/DocumentInfo/types.js'
-import type { Value } from '../types.js'
+import type { Value } from '../../fields/Relationship/types.js'
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 import type { Props } from './types.js'
 
-import { Button } from '../../../elements/Button/index.js'
-import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
-import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
-import { Popup } from '../../../elements/Popup/index.js'
-import { Tooltip } from '../../../elements/Tooltip/index.js'
-import { PlusIcon } from '../../../icons/Plus/index.js'
-import { useAuth } from '../../../providers/Auth/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
+import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import * as PopupList from '../Popup/PopupButtonList/index.js'
+import { Popup } from '../Popup/index.js'
+import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
 
 export const AddNewRelation: React.FC<Props> = ({
-  // dispatchOptions,
+  Button: ButtonFromProps,
   hasMany,
   path,
   relationTo,
   setValue,
+  unstyled,
   value,
 }) => {
   const relatedCollections = useRelatedCollections(relationTo)
@@ -129,23 +130,34 @@ export const AddNewRelation: React.FC<Props> = ({
     }
   }, [isDrawerOpen, relatedToMany])
 
+  const label = t('fields:addNewLabel', {
+    label: getTranslation(relatedCollections[0].labels.singular, i18n),
+  })
+
   if (show) {
     return (
       <div className={baseClass} id={`${path}-add-new`}>
         {relatedCollections.length === 1 && (
           <Fragment>
             <DocumentDrawerToggler
-              className={`${baseClass}__add-button`}
+              className={[
+                `${baseClass}__add-button`,
+                !unstyled && `${baseClass}__add-button--styled`,
+              ].join(' ')}
               onClick={() => setShowTooltip(false)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
-              <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                {t('fields:addNewLabel', {
-                  label: getTranslation(relatedCollections[0].labels.singular, i18n),
-                })}
-              </Tooltip>
-              <PlusIcon />
+              {ButtonFromProps ? (
+                ButtonFromProps
+              ) : (
+                <Fragment>
+                  <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+                    {label}
+                  </Tooltip>
+                  <PlusIcon />
+                </Fragment>
+              )}
             </DocumentDrawerToggler>
             <DocumentDrawer onSave={onSave} />
           </Fragment>
@@ -154,13 +166,17 @@ export const AddNewRelation: React.FC<Props> = ({
           <Fragment>
             <Popup
               button={
-                <Button
-                  buttonStyle="none"
-                  className={`${baseClass}__add-button`}
-                  tooltip={popupOpen ? undefined : t('fields:addNew')}
-                >
-                  <PlusIcon />
-                </Button>
+                ButtonFromProps ? (
+                  ButtonFromProps
+                ) : (
+                  <Button
+                    buttonStyle="none"
+                    className={`${baseClass}__add-button`}
+                    tooltip={popupOpen ? undefined : t('fields:addNew')}
+                  >
+                    <PlusIcon />
+                  </Button>
+                )
               }
               buttonType="custom"
               horizontalAlign="center"

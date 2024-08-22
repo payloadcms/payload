@@ -4,7 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-// import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 const filename = fileURLToPath(import.meta.url)
@@ -23,7 +23,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    // MediaCollection
+    MediaCollection,
   ],
   admin: {
     importMap: {

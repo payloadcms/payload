@@ -245,6 +245,7 @@ export const csTranslations: DefaultTranslationsObject = {
     moveDown: 'Posunout dolů',
     moveUp: 'Posunout nahoru',
     newPassword: 'Nové heslo',
+    next: 'Další',
     noFiltersSet: 'Nenastaveny žádné filtry',
     noLabel: '<Žádný {{label}}>',
     noOptions: 'Žádné možnosti',
@@ -262,6 +263,7 @@ export const csTranslations: DefaultTranslationsObject = {
     password: 'Heslo',
     payloadSettings: 'Payload nastavení',
     perPage: 'Na stránku: {{limit}}',
+    previous: 'Předchozí',
     remove: 'Odstranit',
     reset: 'Resetovat',
     row: 'Řádek',
@@ -319,6 +321,8 @@ export const csTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Přidat soubor',
+    addFiles: 'Přidat soubory',
+    bulkUpload: 'Hromadné nahrání',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',
@@ -327,6 +331,8 @@ export const csTranslations: DefaultTranslationsObject = {
     editImage: 'Upravit obrázek',
     fileName: 'Název souboru',
     fileSize: 'Velikost souboru',
+    fileToUpload: 'Soubor k nahrání',
+    filesToUpload: 'Soubory k nahrání',
     focalPoint: 'Středobod',
     focalPointDescription:
       'Přetáhněte bod zaměření přímo na náhled nebo upravte níže uvedené hodnoty.',

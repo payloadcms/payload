@@ -246,6 +246,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     moveDown: 'Pomakni dolje',
     moveUp: 'Pomakni gore',
     newPassword: 'Nova lozinka',
+    next: 'Sljedeće',
     noFiltersSet: 'Nema postavljenih filtera',
     noLabel: '<Nema {{label}}>',
     noOptions: 'Nema opcija',
@@ -263,6 +264,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     password: 'Lozinka',
     payloadSettings: 'Payload postavke',
     perPage: 'Po stranici: {{limit}}',
+    previous: 'Prethodni',
     remove: 'Ukloni',
     reset: 'Ponovno postavi',
     row: 'Red',
@@ -320,6 +322,8 @@ export const hrTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Dodaj datoteku',
+    addFiles: 'Dodaj datoteke',
+    bulkUpload: 'Masovno otpremanje',
     crop: 'Usjev',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
@@ -328,6 +332,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     editImage: 'Uredi sliku',
     fileName: 'Ime datoteke',
     fileSize: 'Veličina datoteke',
+    fileToUpload: 'Datoteka za prijenos',
+    filesToUpload: 'Datoteke za učitavanje',
     focalPoint: 'Središnja točka',
     focalPointDescription:
       'Povucite središnju točku izravno na pregledu ili prilagodite vrijednosti ispod.',

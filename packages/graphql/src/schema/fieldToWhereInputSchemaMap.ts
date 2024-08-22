@@ -130,9 +130,36 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
   textarea: (field: TextareaField) => ({
     type: withOperators(field, parentName),
   }),
-  upload: (field: UploadField) => ({
-    type: withOperators(field, parentName),
-  }),
+  upload: (field: UploadField) => {
+    if (Array.isArray(field.relationTo)) {
+      return {
+        type: new GraphQLInputObjectType({
+          name: `${combineParentName(parentName, field.name)}_Relation`,
+          fields: {
+            relationTo: {
+              type: new GraphQLEnumType({
+                name: `${combineParentName(parentName, field.name)}_Relation_RelationTo`,
+                values: field.relationTo.reduce(
+                  (values, relation) => ({
+                    ...values,
+                    [formatName(relation)]: {
+                      value: relation,
+                    },
+                  }),
+                  {},
+                ),
+              }),
+            },
+            value: { type: GraphQLJSON },
+          },
+        }),
+      }
+    }
+
+    return {
+      type: withOperators(field, parentName),
+    }
+  },
 })
 
 export default fieldToSchemaMap

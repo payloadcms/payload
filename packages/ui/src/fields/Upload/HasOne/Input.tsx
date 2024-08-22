@@ -17,21 +17,20 @@ import type { MarkOptional } from 'ts-essentials'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
-import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
 
-import { Button } from '../../elements/Button/index.js'
-import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-import { FileDetails } from '../../elements/FileDetails/index.js'
-import { useListDrawer } from '../../elements/ListDrawer/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { Button } from '../../../elements/Button/index.js'
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
+import { FileDetails } from '../../../elements/FileDetails/index.js'
+import { useListDrawer } from '../../../elements/ListDrawer/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { FieldDescription } from '../../FieldDescription/index.js'
+import { FieldError } from '../../FieldError/index.js'
+import { FieldLabel } from '../../FieldLabel/index.js'
+import { fieldBaseClass } from '../../shared/index.js'
+import { baseClass } from '../index.js'
 import './index.scss'
-
-const baseClass = 'upload'
 
 export type UploadInputProps = {
   readonly Description?: MappedComponent
@@ -63,7 +62,7 @@ export type UploadInputProps = {
   readonly width?: string
 }
 
-export const UploadInput: React.FC<UploadInputProps> = (props) => {
+export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
   const {
     Description,
     Error,
@@ -149,7 +148,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     [onChange, closeListDrawer],
   )
 
-  if (collection.upload) {
+  if (collection.upload && typeof relationTo === 'string') {
     return (
       <div
         className={[

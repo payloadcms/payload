@@ -324,6 +324,7 @@ export function fieldsToJSONSchema(
             break
           }
 
+          case 'upload':
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
@@ -410,21 +411,6 @@ export function fieldsToJSONSchema(
               }
             }
 
-            break
-          }
-
-          case 'upload': {
-            fieldSchema = {
-              oneOf: [
-                {
-                  type: collectionIDFieldTypes[field.relationTo],
-                },
-                {
-                  $ref: `#/definitions/${field.relationTo}`,
-                },
-              ],
-            }
-            if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
             break
           }
 

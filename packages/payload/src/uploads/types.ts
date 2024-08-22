@@ -96,6 +96,11 @@ export type UploadConfig = {
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Enables bulk upload of files from the list view.
+   * @default true
+   */
+  bulkUpload?: boolean
+  /**
    * Enables cropping of images.
    * @default true
    */
