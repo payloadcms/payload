@@ -81,7 +81,7 @@ export const UploadComponentHasMany: React.FC<
     (index: number) => {
       const updatedArray = [...(value || [])]
       updatedArray.splice(index, 1)
-      onChange(updatedArray)
+      onChange(updatedArray.length === 0 ? null : updatedArray)
     },
     [value, onChange],
   )
@@ -180,7 +180,11 @@ export const UploadComponentHasMany: React.FC<
           </ListDrawerToggler>
         </div>
         {hasMany && (
-          <button className={`${baseClass}__clear-all`} onClick={() => setValue([])} type="button">
+          <button
+            className={`${baseClass}__clear-all`}
+            onClick={() => setValue(null)}
+            type="button"
+          >
             Clear all
           </button>
         )}

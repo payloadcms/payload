@@ -136,11 +136,15 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
 
   const onChange = useCallback(
     (incomingValue) => {
-      const updatedValue = incomingValue?.id || incomingValue
-      setValue(updatedValue)
-      void loadFileDocs(Array.isArray(updatedValue) ? updatedValue : [updatedValue])
+      if (!incomingValue) {
+        setValue(hasMany ? [] : null)
+      } else {
+        const updatedValue = incomingValue?.id || incomingValue
+        setValue(updatedValue)
+        void loadFileDocs(Array.isArray(updatedValue) ? updatedValue : [updatedValue])
+      }
     },
-    [loadFileDocs, setValue],
+    [loadFileDocs, setValue, hasMany],
   )
 
   const onUploadSuccess = useCallback(

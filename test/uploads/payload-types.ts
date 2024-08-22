@@ -865,8 +865,8 @@ export interface ExternallyServedMedia {
  */
 export interface Uploads1 {
   id: string;
-  mediaMedia?: string | Uploads2 | null;
-  mediaSingluar?: string | Uploads2 | null;
+  hasManyUpload?: string | Uploads2 | null;
+  singleUpload?: string | Uploads2 | null;
   richText?: {
     root: {
       type: string;

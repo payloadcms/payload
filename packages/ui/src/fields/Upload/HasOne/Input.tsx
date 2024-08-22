@@ -165,13 +165,6 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        <FieldLabel
-          Label={Label}
-          field={field}
-          label={label}
-          required={required}
-          {...(labelProps || {})}
-        />
         <div className={`${fieldBaseClass}__wrap`}>
           <FieldError CustomError={Error} field={field} {...(errorProps || {})} />
           {collection?.upload && (
