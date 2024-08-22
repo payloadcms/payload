@@ -19,16 +19,26 @@ import { SortColumn } from '../SortColumn/index.js'
 import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
+  beforeRows?: Column[]
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
+  enableRowTypes?: boolean
   fields: ClientField[]
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const buildColumnState = (args: Args): Column[] => {
-  const { cellProps, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
+  const {
+    beforeRows,
+    cellProps,
+    columnPreferences,
+    columns,
+    enableRowSelections,
+    fields,
+    useAsTitle,
+  } = args
 
   let sortedFieldMap = flattenFieldMap(fields)
 
@@ -175,6 +185,10 @@ export const buildColumnState = (args: Args): Column[] => {
         } as ClientField,
       },
     })
+  }
+
+  if (beforeRows) {
+    sorted.unshift(...beforeRows)
   }
 
   return sorted

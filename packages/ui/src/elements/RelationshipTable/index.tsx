@@ -1,19 +1,22 @@
 'use client'
 import type { ClientCollectionConfig, ClientField, PaginatedDocs, Where } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useReducer, useState } from 'react'
 
+import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { useListDrawer } from '../ListDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { MyCell } from './MyCell.js'
 import { MyTableComponent } from './MyTable.js'
+import { DrawerLink } from './cells/DrawerLink.js'
 import './index.scss'
 
 const baseClass = 'table-field-header'
@@ -38,6 +41,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     },
     getEntityConfig,
   } = useConfig()
+
+  const { i18n } = useTranslation()
 
   const [limit, setLimit] = useState<number>(defaultLimit)
   const [sort, setSort] = useState<string | undefined>(undefined)
@@ -141,6 +146,27 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         preferenceKey={preferenceKey}
       >
         <TableColumnsProvider
+          beforeRows={[
+            {
+              Heading: i18n.t('version:type'),
+              accessor: 'collection',
+              active: true,
+              cellProps: {
+                field: {
+                  admin: {
+                    components: {
+                      Cell: {
+                        type: 'client',
+                        RenderedComponent: (
+                          <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+                        ),
+                      },
+                    },
+                  },
+                } as ClientField,
+              },
+            },
+          ]}
           cellProps={[
             {
               field: {
@@ -148,7 +174,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   components: {
                     Cell: {
                       type: 'client',
-                      Component: MyCell,
+                      Component: DrawerLink,
                     },
                   },
                 },
