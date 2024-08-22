@@ -397,6 +397,7 @@ export const koTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '마지막으로 저장한지 {{distance}} 전',
     noFurtherVersionsFound: '더 이상의 버전을 찾을 수 없습니다.',
     noRowsFound: '{{label}}을(를) 찾을 수 없음',
+    noRowsSelected: undefined,
     preview: '미리보기',
     previouslyPublished: '이전에 발표된',
     problemRestoringVersion: '이 버전을 복원하는 중 문제가 발생했습니다.',

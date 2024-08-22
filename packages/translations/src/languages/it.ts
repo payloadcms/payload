@@ -406,6 +406,7 @@ export const itTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
     noRowsFound: 'Nessun {{label}} trovato',
+    noRowsSelected: undefined,
     preview: 'Anteprima',
     previouslyPublished: 'Precedentemente Pubblicato',
     problemRestoringVersion: 'Si è verificato un problema durante il ripristino di questa versione',

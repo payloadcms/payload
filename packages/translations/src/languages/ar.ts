@@ -396,6 +396,7 @@ export const arTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
+    noRowsSelected: undefined,
     preview: 'معاينة',
     previouslyPublished: 'نشر سابقا',
     problemRestoringVersion: 'حدث خطأ في استعادة هذه النّسخة',

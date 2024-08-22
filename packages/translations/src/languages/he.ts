@@ -390,6 +390,7 @@ export const heTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'נשמר לאחרונה לפני {{distance}}',
     noFurtherVersionsFound: 'לא נמצאו עוד גרסאות',
     noRowsFound: 'לא נמצאו {{label}}',
+    noRowsSelected: undefined,
     preview: 'תצוגה מקדימה',
     previouslyPublished: 'פורסם בעבר',
     problemRestoringVersion: 'הייתה בעיה בשחזור הגרסה הזו',

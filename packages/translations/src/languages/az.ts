@@ -403,6 +403,7 @@ export const azTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
+    noRowsSelected: undefined,
     preview: 'Öncədən baxış',
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',

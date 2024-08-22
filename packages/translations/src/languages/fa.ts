@@ -400,6 +400,7 @@ export const faTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
+    noRowsSelected: undefined,
     preview: 'پیش‌نمایش',
     previouslyPublished: 'قبلا منتشر شده',
     problemRestoringVersion: 'مشکلی در بازیابی این نگارش وجود دارد',

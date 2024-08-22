@@ -400,6 +400,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',
     noRowsFound: '{{label}} nije pronađeno',
+    noRowsSelected: undefined,
     preview: 'Pregled',
     previouslyPublished: 'Prethodno objavljeno',
     problemRestoringVersion: 'Nastao je problem pri vraćanju ove verzije',

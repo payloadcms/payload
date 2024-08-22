@@ -407,6 +407,7 @@ export const esTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noRowsFound: 'No encontramos {{label}}',
+    noRowsSelected: undefined,
     preview: 'Previsualizar',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocurrió un problema al restaurar esta versión',

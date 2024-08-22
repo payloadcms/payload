@@ -403,6 +403,7 @@ export const plTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
+    noRowsSelected: undefined,
     preview: 'Podgląd',
     previouslyPublished: 'Wcześniej opublikowane',
     problemRestoringVersion: 'Wystąpił problem podczas przywracania tej wersji',

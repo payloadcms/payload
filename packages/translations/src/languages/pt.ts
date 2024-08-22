@@ -404,6 +404,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Última gravação há {{distance}}',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
+    noRowsSelected: undefined,
     preview: 'Pré-visualização',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocorreu um problema ao restaurar essa versão',

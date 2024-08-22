@@ -407,6 +407,7 @@ export const deTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
     noRowsFound: 'Kein {{label}} gefunden',
+    noRowsSelected: undefined,
     preview: 'Vorschau',
     previouslyPublished: 'Zuvor Veröffentlicht',
     problemRestoringVersion: 'Es gab ein Problem bei der Wiederherstellung dieser Version',

@@ -402,6 +402,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'последно запазено преди {{distance}}',
     noFurtherVersionsFound: 'Не са открити повече версии',
     noRowsFound: 'Не е открит {{label}}',
+    noRowsSelected: undefined,
     preview: 'Предварителен преглед',
     previouslyPublished: 'Предишно публикувано',
     problemRestoringVersion: 'Имаше проблем при възстановяването на тази версия',

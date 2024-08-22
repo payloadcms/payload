@@ -407,6 +407,7 @@ export const huTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
+    noRowsSelected: undefined,
     preview: 'Előnézet',
     previouslyPublished: 'Korábban Közzétéve',
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',

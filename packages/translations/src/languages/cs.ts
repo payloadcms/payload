@@ -401,6 +401,7 @@ export const csTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     noFurtherVersionsFound: 'Nenalezeny další verze',
     noRowsFound: 'Nenalezen {{label}}',
+    noRowsSelected: undefined,
     preview: 'Náhled',
     previouslyPublished: 'Dříve publikováno',
     problemRestoringVersion: 'Při obnovování této verze došlo k problému',

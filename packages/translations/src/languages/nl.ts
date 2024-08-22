@@ -406,6 +406,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
     noRowsFound: 'Geen {{label}} gevonden',
+    noRowsSelected: undefined,
     preview: 'Voorbeeld',
     previouslyPublished: 'Eerder gepubliceerd',
     problemRestoringVersion: 'Er was een probleem bij het herstellen van deze versie',

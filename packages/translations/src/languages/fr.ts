@@ -414,6 +414,7 @@ export const frTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     noFurtherVersionsFound: 'Aucune autre version trouvée',
     noRowsFound: 'Aucun(e) {{label}} trouvé(e)',
+    noRowsSelected: undefined,
     preview: 'Aperçu',
     previouslyPublished: 'Précédemment publié',
     problemRestoringVersion: 'Un problème est survenu lors de la restauration de cette version',

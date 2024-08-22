@@ -399,6 +399,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Zadnji put sačuvano pre {{distance}',
     noFurtherVersionsFound: 'Nisu pronađene naredne verzije',
     noRowsFound: '{{label}} nije pronađeno',
+    noRowsSelected: undefined,
     preview: 'Pregled',
     previouslyPublished: 'Prethodno objavljeno',
     problemRestoringVersion: 'Nastao je problem pri vraćanju ove verzije',

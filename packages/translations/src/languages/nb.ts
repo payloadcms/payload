@@ -403,6 +403,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',
     noRowsFound: 'Ingen {{label}} funnet',
+    noRowsSelected: undefined,
     preview: 'Forhåndsvisning',
     previouslyPublished: 'Tidligere Publisert',
     problemRestoringVersion: 'Det oppstod et problem med gjenoppretting av denne versjonen',
