@@ -122,24 +122,30 @@ export const buildColumnState = (args: Args): Column[] => {
 
     if (field) {
       const column: Column = {
-        Label,
+        Heading,
         accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
+          ...cellProps?.[index],
           field: {
             ...(field || ({} as ClientField)),
             ...(cellProps?.[index]?.field || ({} as ClientField)),
+            admin: {
+              ...(field.admin || {}),
+              ...(cellProps?.[index]?.field?.admin || {}),
+              components: {
+                ...(field.admin?.components || {}),
+                Cell: field.admin?.components?.Cell || {
+                  type: 'client',
+                  Component: DefaultCell,
+                  RenderedComponent: null,
+                },
+                Label,
+                ...(cellProps?.[index]?.field?.admin?.components || {}),
+              },
+            },
           } as ClientField,
-          ...cellProps?.[index],
           link: isFirstActiveColumn,
-        },
-        components: {
-          Cell: field.admin?.components?.Cell || {
-            type: 'client',
-            Component: DefaultCell,
-            RenderedComponent: null,
-          },
-          Heading,
         },
       }
 
@@ -151,16 +157,22 @@ export const buildColumnState = (args: Args): Column[] => {
 
   if (enableRowSelections) {
     sorted.unshift({
-      Label: null,
+      Heading: <SelectAll />,
       accessor: '_select',
       active: true,
-      components: {
-        Cell: {
-          type: 'client',
-          Component: null,
-          RenderedComponent: <SelectRow />,
-        },
-        Heading: <SelectAll />,
+      cellProps: {
+        field: {
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <SelectRow />,
+              },
+              Label: null,
+            },
+          },
+        } as ClientField,
       },
     })
   }

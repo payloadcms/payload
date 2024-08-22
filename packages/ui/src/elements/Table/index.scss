@@ -5,6 +5,10 @@
   overflow: auto;
   max-width: 100%;
 
+  table {
+    min-width: 100%;
+  }
+
   thead {
     color: var(--theme-elevation-400);
 

@@ -9,6 +9,15 @@ export const PostsCollection: CollectionConfig = {
   },
   fields: [
     {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Posts/TableField/index.js#TableField',
+        },
+      },
+    },
+    {
       admin: {
         components: {
           Label: '/collections/Posts/MyComponent.js#MyComponent',
