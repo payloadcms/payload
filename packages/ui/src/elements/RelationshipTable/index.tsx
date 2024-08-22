@@ -3,7 +3,6 @@ import type { ClientCollectionConfig, ClientField, PaginatedDocs, Where } from '
 
 import React, { useEffect, useReducer, useState } from 'react'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
@@ -11,6 +10,7 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { useListDrawer } from '../ListDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
+import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { MyCell } from './MyCell.js'
 import { MyTableComponent } from './MyTable.js'
@@ -19,36 +19,17 @@ import './index.scss'
 const baseClass = 'table-field-header'
 
 type RelationshipTableComponentProps = {
-  readonly field: ClientField
+  readonly Label?: React.ReactNode
+  readonly initialData?: PaginatedDocs
+  readonly relationTo: string
 }
-
-const initialData: PaginatedDocs = {
-  docs: [
-    // {
-    //   id: '123',
-    //   context: {},
-    //   createdAt: '2021-01-01T00:00:00.000Z',
-    //   title: 'Hello',
-    //   updatedAt: '2021-01-01T00:00:00.000Z',
-    // },
-  ],
-  hasNextPage: false,
-  hasPrevPage: false,
-  limit: 0,
-  page: 0,
-  pagingCounter: 0,
-  totalDocs: 0,
-  totalPages: 0,
-}
-
-const relationTo = 'posts'
 
 const filterOptions: Where = {}
 
 const defaultLimit = 5
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { field } = props
+  const { Label, initialData, relationTo } = props
 
   const {
     config: {
@@ -73,8 +54,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
     initialData,
   })
-
-  console.log(data)
 
   useEffect(() => {
     const {
@@ -143,18 +122,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   return (
     <div>
       <div className={baseClass}>
-        <h4>
-          <FieldLabel
-            field={field}
-            label={
-              'label' in field && field.label
-                ? field.label
-                : 'name' in field
-                  ? field.name
-                  : 'Untitled'
-            }
-          />
-        </h4>
+        {Label}
         <div className={`${baseClass}__actions`}>
           <DocumentDrawerToggler>Create new</DocumentDrawerToggler>
           <ListDrawerToggler>Add existing</ListDrawerToggler>
@@ -190,7 +158,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           collectionSlug={relationTo}
           preferenceKey={preferenceKey}
         >
-          <MyTableComponent collectionConfig={collectionConfig} />
+          <RelationshipProvider>
+            <MyTableComponent collectionConfig={collectionConfig} />
+          </RelationshipProvider>
         </TableColumnsProvider>
       </ListQueryProvider>
       <ListDrawer />

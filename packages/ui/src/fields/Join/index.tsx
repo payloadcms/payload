@@ -1,33 +1,45 @@
 'use client'
 
-import type { JoinFieldProps } from 'payload'
+import type { JoinFieldProps, PaginatedDocs } from 'payload'
 
 import React from 'react'
 
+import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
 const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
   const {
-    field: { name, _path: pathFromProps, collection, on },
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        components: { Label },
+      },
+      collection,
+      label,
+      on,
+    },
   } = props
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
-  const { path, value } = useField({
+  const { path, value } = useField<PaginatedDocs>({
     path: pathFromContext ?? pathFromProps ?? name,
   })
 
-  console.log('field props', props)
-
-  // TODO: replace hidden placeholder with the actual edit component
   return (
-    <input
-      id={`field-${path?.replace(/\./g, '__')}`}
-      name={path}
-      type="hidden"
-      value={(value as string) || ''}
+    <RelationshipTable
+      Label={
+        <h4 style={{ margin: 0 }}>
+          <FieldLabel Label={Label} as="span" field={field} label={label} />
+        </h4>
+      }
+      initialData={value}
+      relationTo={collection}
     />
   )
 }

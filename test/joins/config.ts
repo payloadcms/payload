@@ -13,6 +13,7 @@ export default buildConfigWithDefaults({
       slug: 'posts',
       admin: {
         useAsTitle: 'title',
+        defaultColumns: ['id', 'title', 'category'],
       },
       fields: [
         {

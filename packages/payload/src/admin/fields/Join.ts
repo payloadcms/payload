@@ -12,9 +12,7 @@ import type {
 
 type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
-export type JoinFieldProps = {
-  readonly field: MarkOptional<JoinFieldClient, 'type'>
-} & FormFieldBase
+export type JoinFieldProps = FormFieldBase<JoinFieldClientWithoutType>
 
 export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>
 
