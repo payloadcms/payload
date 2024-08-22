@@ -185,6 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
+    clearAll: undefined,
     close: 'Bağla',
     collapse: 'Bağla',
     collections: 'Kolleksiyalar',
@@ -402,6 +403,7 @@ export const azTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
+    noRowsSelected: undefined,
     preview: 'Öncədən baxış',
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',
