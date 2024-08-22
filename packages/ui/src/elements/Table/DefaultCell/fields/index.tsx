@@ -17,6 +17,7 @@ export const cellComponents = {
   checkbox: CheckboxCell,
   code: CodeCell,
   date: DateCell,
+  join: RelationshipCell,
   json: JSONCell,
   radio: SelectCell,
   relationship: RelationshipCell,
