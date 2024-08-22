@@ -178,7 +178,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
               cellProps,
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
-              enableRowSelections: true,
+              enableRowSelections,
               fields,
               useAsTitle,
             }),
@@ -199,6 +199,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     listPreferences,
     initialColumns,
     beforeRows,
+    enableRowSelections,
   ])
 
   return (

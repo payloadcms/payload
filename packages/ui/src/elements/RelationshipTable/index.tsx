@@ -16,13 +16,14 @@ import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { MyTableComponent } from './MyTable.js'
-import { DrawerLink } from './cells/DrawerLink.js'
+import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
 
-const baseClass = 'table-field-header'
+const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
   readonly Label?: React.ReactNode
+  readonly field: ClientField
   readonly initialData?: PaginatedDocs
   readonly relationTo: string
 }
@@ -32,7 +33,7 @@ const filterOptions: Where = {}
 const defaultLimit = 5
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { Label, initialData, relationTo } = props
+  const { Label, field, initialData, relationTo } = props
 
   const {
     config: {
@@ -125,70 +126,73 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   }
 
   return (
-    <div>
-      <div className={baseClass}>
+    <div className={baseClass}>
+      <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          <DocumentDrawerToggler>Create new</DocumentDrawerToggler>
-          <ListDrawerToggler>Add existing</ListDrawerToggler>
+          <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
+          <ListDrawerToggler>{i18n.t('fields:chooseFromExisting')}</ListDrawerToggler>
         </div>
       </div>
-      <ListQueryProvider
-        data={data}
-        defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
-        defaultSort={sort}
-        handlePageChange={setPage}
-        handlePerPageChange={setLimit}
-        handleSearchChange={setSearch}
-        handleSortChange={setSort}
-        handleWhereChange={setWhere}
-        modifySearchParams={false}
-        preferenceKey={preferenceKey}
-      >
-        <TableColumnsProvider
-          beforeRows={[
-            {
-              Heading: i18n.t('version:type'),
-              accessor: 'collection',
-              active: true,
-              cellProps: {
+      <RelationshipProvider>
+        <ListQueryProvider
+          data={data}
+          defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+          defaultSort={sort}
+          handlePageChange={setPage}
+          handlePerPageChange={setLimit}
+          handleSearchChange={setSearch}
+          handleSortChange={setSort}
+          handleWhereChange={setWhere}
+          modifySearchParams={false}
+          preferenceKey={preferenceKey}
+        >
+          <TableColumnsProvider
+            beforeRows={[
+              {
+                Heading: i18n.t('version:type'),
+                accessor: 'collection',
+                active: true,
+                cellProps: {
+                  field: {
+                    admin: {
+                      components: {
+                        Cell: {
+                          type: 'client',
+                          RenderedComponent: (
+                            <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+                          ),
+                        },
+                      },
+                    },
+                  } as ClientField,
+                },
+              },
+            ]}
+            cellProps={[
+              {
                 field: {
                   admin: {
                     components: {
                       Cell: {
                         type: 'client',
-                        RenderedComponent: (
-                          <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
-                        ),
+                        Component: DrawerLink,
+                        clientProps: {
+                          field,
+                        },
                       },
                     },
                   },
                 } as ClientField,
               },
-            },
-          ]}
-          cellProps={[
-            {
-              field: {
-                admin: {
-                  components: {
-                    Cell: {
-                      type: 'client',
-                      Component: DrawerLink,
-                    },
-                  },
-                },
-              } as ClientField,
-            },
-          ]}
-          collectionSlug={relationTo}
-          preferenceKey={preferenceKey}
-        >
-          <RelationshipProvider>
+            ]}
+            collectionSlug={relationTo}
+            preferenceKey={preferenceKey}
+          >
             <MyTableComponent collectionConfig={collectionConfig} />
-          </RelationshipProvider>
-        </TableColumnsProvider>
-      </ListQueryProvider>
+          </TableColumnsProvider>
+        </ListQueryProvider>
+      </RelationshipProvider>
       <ListDrawer />
       <DocumentDrawer />
     </div>

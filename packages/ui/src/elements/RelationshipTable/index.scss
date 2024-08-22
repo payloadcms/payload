@@ -1,10 +1,21 @@
-.table-field-header {
-  display: flex;
-  justify-content: space-between;
+.relationship-table {
+  position: relative;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
 
   &__actions {
     display: flex;
     align-items: center;
     gap: var(--base);
+  }
+
+  .table {
+    th,
+    td:first-child {
+      min-width: 0;
+    }
   }
 }

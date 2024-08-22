@@ -13,7 +13,7 @@ export default buildConfigWithDefaults({
       slug: 'posts',
       admin: {
         useAsTitle: 'title',
-        defaultColumns: ['id', 'title', 'category'],
+        defaultColumns: ['title', 'category'],
       },
       fields: [
         {
@@ -25,17 +25,17 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'categories',
         },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'category',
-              type: 'relationship',
-              relationTo: 'categories',
-            },
-          ],
-        },
+        // {
+        //   name: 'group',
+        //   type: 'group',
+        //   fields: [
+        //     {
+        //       name: 'category',
+        //       type: 'relationship',
+        //       relationTo: 'categories',
+        //     },
+        //   ],
+        // },
       ],
     },
     {
@@ -54,18 +54,18 @@ export default buildConfigWithDefaults({
           collection: 'posts',
           on: 'category',
         },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'posts',
-              type: 'join',
-              collection: 'posts',
-              on: 'group.category',
-            },
-          ],
-        },
+        // {
+        //   name: 'group',
+        //   type: 'group',
+        //   fields: [
+        //     {
+        //       name: 'posts',
+        //       type: 'join',
+        //       collection: 'posts',
+        //       on: 'group.category',
+        //     },
+        //   ],
+        // },
       ],
     },
     {

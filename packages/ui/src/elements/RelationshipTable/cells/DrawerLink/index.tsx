@@ -3,14 +3,18 @@ import type { CellComponentProps } from 'payload'
 
 import React from 'react'
 
-import { EditIcon } from '../../../icons/Edit/index.js'
-import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
-import { useTableCell } from '../../Table/index.js'
+import { EditIcon } from '../../../../icons/Edit/index.js'
+import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
+import { DefaultCell } from '../../../Table/DefaultCell/index.js'
+import { useTableCell } from '../../../Table/index.js'
+import './index.scss'
 
 export const DrawerLink: React.FC<CellComponentProps> = (props) => {
   const context = useTableCell()
+  const { field } = props
 
   const {
+    cellProps,
     customCellContext: { collectionSlug },
     rowData,
   } = context
@@ -21,9 +25,8 @@ export const DrawerLink: React.FC<CellComponentProps> = (props) => {
   })
 
   return (
-    <div>
-      {rowData.id}
-      &nbsp;
+    <div className="drawer-link">
+      <DefaultCell field={field} {...cellProps} className="drawer-link__cell" />
       <DocumentDrawerToggler>
         <EditIcon />
       </DocumentDrawerToggler>
