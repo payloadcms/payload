@@ -185,6 +185,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     backToDashboard: 'ダッシュボードに戻る',
     cancel: 'キャンセル',
     changesNotSaved: '未保存の変更があります。このまま画面を離れると内容が失われます。',
+    clearAll: undefined,
     close: '閉じる',
     collapse: '閉じる',
     collections: 'コレクション',

@@ -187,6 +187,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
+    clearAll: undefined,
     close: 'Dichtbij',
     collapse: 'Samenvouwen',
     collections: 'Collecties',

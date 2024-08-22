@@ -183,6 +183,7 @@ export const arTranslations: DefaultTranslationsObject = {
     backToDashboard: 'العودة للوحة التّحكّم',
     cancel: 'إلغاء',
     changesNotSaved: 'لم يتمّ حفظ التّغييرات. إن غادرت الآن ، ستفقد تغييراتك.',
+    clearAll: undefined,
     close: 'إغلاق',
     collapse: 'طيّ',
     collections: 'المجموعات',

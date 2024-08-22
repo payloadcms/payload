@@ -184,6 +184,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
+    clearAll: undefined,
     close: 'بستن',
     collapse: 'بستن',
     collections: 'مجموعه‌ها',

@@ -189,6 +189,7 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
+    clearAll: undefined,
     close: 'Schließen',
     collapse: 'Einklappen',
     collections: 'Sammlungen',

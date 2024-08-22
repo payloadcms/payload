@@ -185,6 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
+    clearAll: undefined,
     close: 'Bağla',
     collapse: 'Bağla',
     collections: 'Kolleksiyalar',

@@ -181,6 +181,7 @@ export const thTranslations: DefaultTranslationsObject = {
     backToDashboard: 'กลับไปหน้าแดชบอร์ด',
     cancel: 'ยกเลิก',
     changesNotSaved: 'การเปลี่ยนแปลงยังไม่ได้ถูกบันทึก ถ้าคุณออกตอนนี้ สิ่งที่แก้ไขไว้จะหายไป',
+    clearAll: undefined,
     close: 'ปิด',
     collapse: 'ยุบ',
     collections: 'Collections',

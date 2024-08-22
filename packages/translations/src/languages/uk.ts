@@ -185,6 +185,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Повернутись до головної сторінки',
     cancel: 'Скасувати',
     changesNotSaved: 'Ваши зміни не були збережені. Якщо ви вийдете зараз, то втратите свої зміни.',
+    clearAll: undefined,
     close: 'Закрити',
     collapse: 'Згорнути',
     collections: 'Колекції',

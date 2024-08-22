@@ -185,6 +185,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Natrag na nadzornu ploču',
     cancel: 'Otkaži',
     changesNotSaved: 'Vaše promjene nisu spremljene. Ako izađete sada, izgubit ćete promjene.',
+    clearAll: undefined,
     close: 'Zatvori',
     collapse: 'Sažmi',
     collections: 'Kolekcije',

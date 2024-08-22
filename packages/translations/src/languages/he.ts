@@ -180,6 +180,7 @@ export const heTranslations: DefaultTranslationsObject = {
     backToDashboard: 'חזרה ללוח המחוונים',
     cancel: 'ביטול',
     changesNotSaved: 'השינויים שלך לא נשמרו. אם תצא כעת, תאבד את השינויים שלך.',
+    clearAll: undefined,
     close: 'סגור',
     collapse: 'כווץ',
     collections: 'אוספים',

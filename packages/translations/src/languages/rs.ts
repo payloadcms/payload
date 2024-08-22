@@ -184,6 +184,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Назад на контролни панел',
     cancel: 'Откажи',
     changesNotSaved: 'Ваше промене нису сачуване. Ако изађете сада, изгубићете промене.',
+    clearAll: undefined,
     close: 'Затвори',
     collapse: 'Скупи',
     collections: 'Колекције',

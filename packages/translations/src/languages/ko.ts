@@ -184,6 +184,7 @@ export const koTranslations: DefaultTranslationsObject = {
     backToDashboard: '대시보드로 돌아가기',
     cancel: '취소',
     changesNotSaved: '변경 사항이 저장되지 않았습니다. 지금 떠나면 변경 사항을 잃게 됩니다.',
+    clearAll: undefined,
     close: '닫기',
     collapse: '접기',
     collections: '컬렉션',

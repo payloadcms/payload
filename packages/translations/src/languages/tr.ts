@@ -188,6 +188,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
+    clearAll: undefined,
     close: 'Kapat',
     collapse: 'Daralt',
     collections: 'Koleksiyonlar',

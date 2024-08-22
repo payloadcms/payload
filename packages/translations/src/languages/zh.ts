@@ -178,6 +178,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     backToDashboard: '返回到仪表板',
     cancel: '取消',
     changesNotSaved: '您的更改尚未保存。您确定要离开吗？',
+    clearAll: undefined,
     close: '关闭',
     collapse: '折叠',
     collections: '集合',

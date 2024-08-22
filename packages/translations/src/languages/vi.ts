@@ -183,6 +183,7 @@ export const viTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Quay lại bảng điều khiển',
     cancel: 'Hủy',
     changesNotSaved: 'Thay đổi chưa được lưu lại. Bạn sẽ mất bản chỉnh sửa nếu thoát bây giờ.',
+    clearAll: undefined,
     close: 'Gần',
     collapse: 'Thu gọn',
     collections: 'Collections',

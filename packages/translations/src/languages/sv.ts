@@ -185,6 +185,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    clearAll: undefined,
     close: 'Stänga',
     collapse: 'Kollapsa',
     collections: 'Samlingar',

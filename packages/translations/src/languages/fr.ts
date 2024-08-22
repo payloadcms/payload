@@ -192,6 +192,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
+    clearAll: undefined,
     close: 'Fermer',
     collapse: 'Réduire',
     collections: 'Collections',
