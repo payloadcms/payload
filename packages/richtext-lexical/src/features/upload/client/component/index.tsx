@@ -57,6 +57,12 @@ const Component: React.FC<ElementProps> = (props) => {
     nodeKey,
   } = props
 
+  if (typeof value === 'object') {
+    throw new Error(
+      'Upload value should be a string or number. The Lexical Upload component should not receive the populated value object.',
+    )
+  }
+
   const {
     config: {
       collections,
@@ -85,12 +91,6 @@ const Component: React.FC<ElementProps> = (props) => {
     slug: `lexical-upload-drawer-` + uuid + componentID, // There can be multiple upload components, each with their own drawer, in one single editor => separate them by componentID
     depth: editDepth,
   })
-
-  if (typeof value === 'object') {
-    throw new Error(
-      'Upload value should be a string or number. The Lexical Upload component should not receive the populated value object.',
-    )
-  }
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value,
