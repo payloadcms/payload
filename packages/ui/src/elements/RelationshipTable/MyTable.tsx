@@ -2,8 +2,11 @@
 
 import type { ClientCollectionConfig } from 'payload'
 
-import { Pagination, Table, useListQuery } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
+
+import { useListQuery } from '../../providers/ListQuery/index.js'
+import { Pagination } from '../Pagination/index.js'
+import { Table } from '../Table/index.js'
 
 type RelationshipTableComponentProps = {
   readonly collectionConfig: ClientCollectionConfig

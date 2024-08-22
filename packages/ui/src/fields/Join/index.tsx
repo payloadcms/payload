@@ -2,7 +2,7 @@
 
 import type { JoinFieldProps } from 'payload'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -19,7 +19,7 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
     path: pathFromContext ?? pathFromProps ?? name,
   })
 
-  console.log(props)
+  console.log('field props', props)
 
   // TODO: replace hidden placeholder with the actual edit component
   return (

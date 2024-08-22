@@ -1,19 +1,17 @@
 'use client'
 import type { ClientCollectionConfig, ClientField, PaginatedDocs, Where } from 'payload'
 
-import {
-  FieldLabel,
-  ListQueryProvider,
-  LoadingOverlay,
-  TableColumnsProvider,
-  useConfig,
-  useDocumentDrawer,
-  useListDrawer,
-  usePayloadAPI,
-} from '@payloadcms/ui'
 import React, { useEffect, useReducer, useState } from 'react'
 
-import { hoistQueryParamsToAnd } from '../../../../../packages/ui/src/elements/ListDrawer/DrawerContent.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { ListQueryProvider } from '../../providers/ListQuery/index.js'
+import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
+import { useListDrawer } from '../ListDrawer/index.js'
+import { LoadingOverlay } from '../Loading/index.js'
+import { TableColumnsProvider } from '../TableColumns/index.js'
 import { MyCell } from './MyCell.js'
 import { MyTableComponent } from './MyTable.js'
 import './index.scss'
@@ -49,7 +47,7 @@ const filterOptions: Where = {}
 
 const defaultLimit = 5
 
-export const TableField: React.FC<RelationshipTableComponentProps> = (props) => {
+export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const { field } = props
 
   const {
@@ -147,6 +145,7 @@ export const TableField: React.FC<RelationshipTableComponentProps> = (props) => 
       <div className={baseClass}>
         <h4>
           <FieldLabel
+            field={field}
             label={
               'label' in field && field.label
                 ? field.label

@@ -1,8 +1,13 @@
 'use client'
+import type { CellComponentProps } from 'payload'
 
-import { EditIcon, useDocumentDrawer, useTableCell } from '@payloadcms/ui'
+import React from 'react'
 
-export const MyCell = (props) => {
+import { EditIcon } from '../../icons/Edit/index.js'
+import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { useTableCell } from '../Table/index.js'
+
+export const MyCell: React.FC<CellComponentProps> = (props) => {
   const context = useTableCell()
 
   const {
