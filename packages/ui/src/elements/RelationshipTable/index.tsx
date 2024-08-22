@@ -1,5 +1,11 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, PaginatedDocs, Where } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  JoinFieldProps,
+  PaginatedDocs,
+  Where,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useReducer, useState } from 'react'
@@ -23,14 +29,12 @@ const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
   readonly Label?: React.ReactNode
-  readonly field: ClientField
+  readonly field: JoinFieldProps['field']
   readonly initialData?: PaginatedDocs
   readonly relationTo: string
 }
 
 const filterOptions: Where = {}
-
-const defaultLimit = 5
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const { Label, field, initialData, relationTo } = props
@@ -45,7 +49,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { i18n } = useTranslation()
 
-  const [limit, setLimit] = useState<number>(defaultLimit)
+  const [limit, setLimit] = useState<number>()
   const [sort, setSort] = useState<string | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
   const [where, setWhere] = useState<Where | null>(null)
@@ -59,6 +63,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
     initialData,
+    initialParams: {
+      depth: 0,
+    },
   })
 
   useEffect(() => {
@@ -69,13 +76,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
     const params: {
       cacheBust?: number
+      depth?: number
       draft?: string
       limit?: number
       page?: number
       search?: string
       sort?: string
       where?: unknown
-    } = {}
+    } = {
+      depth: 0,
+    }
 
     let copyOfWhere = { ...(where || {}) }
 

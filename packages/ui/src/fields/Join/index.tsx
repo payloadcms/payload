@@ -38,6 +38,7 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
           <FieldLabel Label={Label} as="span" field={field} label={label} />
         </h4>
       }
+      field={field}
       initialData={value}
       relationTo={collection}
     />
