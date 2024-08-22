@@ -95,7 +95,7 @@ export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | Js
 export interface JsonArray extends Array<JsonValue> {}
 
 export interface JsonObject {
-  [key: string]: JsonValue
+  [key: string]: any
 }
 
 export type WhereField = {
