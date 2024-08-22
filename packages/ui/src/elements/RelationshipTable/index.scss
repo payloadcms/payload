@@ -13,6 +13,10 @@
     gap: var(--base);
   }
 
+  &__columns-inner {
+    padding-bottom: var(--base);
+  }
+
   .table {
     th,
     td:first-child {

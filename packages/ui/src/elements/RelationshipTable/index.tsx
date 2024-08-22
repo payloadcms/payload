@@ -9,15 +9,21 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useReducer, useState } from 'react'
+import AnimateHeightImport from 'react-animate-height'
+
+ 
+const AnimateHeight = (AnimateHeightImport.default ||
+  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
-import { useListDrawer } from '../ListDrawer/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
@@ -47,13 +53,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     getEntityConfig,
   } = useConfig()
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const [limit, setLimit] = useState<number>()
   const [sort, setSort] = useState<string | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
   const [where, setWhere] = useState<Where | null>(null)
   const [search, setSearch] = useState<string>('')
+  const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
   const collectionConfig = getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig
 
@@ -125,10 +132,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     collectionSlug: relationTo,
   })
 
-  const [ListDrawer, ListDrawerToggler] = useListDrawer({
-    collectionSlugs: [relationTo],
-  })
-
   const preferenceKey = `${relationTo}-list`
 
   if (isLoadingList) {
@@ -141,7 +144,18 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         {Label}
         <div className={`${baseClass}__actions`}>
           <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>
-          <ListDrawerToggler>{i18n.t('fields:chooseFromExisting')}</ListDrawerToggler>
+          <Pill
+            aria-controls={`${baseClass}-columns`}
+            aria-expanded={openColumnSelector}
+            className={`${baseClass}__toggle-columns ${
+              openColumnSelector ? `${baseClass}__buttons-active` : ''
+            }`}
+            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
+            onClick={() => setOpenColumnSelector(!openColumnSelector)}
+            pillStyle="light"
+          >
+            {t('general:columns')}
+          </Pill>
         </div>
       </div>
       <RelationshipProvider>
@@ -174,6 +188,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                           ),
                         },
                       },
+                      disableListColumn: true,
                     },
                   } as ClientField,
                 },
@@ -200,11 +215,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             collectionSlug={relationTo}
             preferenceKey={preferenceKey}
           >
+            <AnimateHeight
+              className={`${baseClass}__columns`}
+              height={openColumnSelector ? 'auto' : 0}
+              id={`${baseClass}-columns`}
+            >
+              <div className={`${baseClass}__columns-inner`}>
+                <ColumnSelector collectionSlug={collectionConfig.slug} />
+              </div>
+            </AnimateHeight>
             <MyTableComponent collectionConfig={collectionConfig} />
           </TableColumnsProvider>
         </ListQueryProvider>
       </RelationshipProvider>
-      <ListDrawer />
       <DocumentDrawer />
     </div>
   )
