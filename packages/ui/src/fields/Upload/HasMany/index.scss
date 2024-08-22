@@ -34,6 +34,12 @@
     flex-direction: column;
     gap: 0.25rem;
   }
+
+  &__no-data {
+    background: var(--theme-elevation-50);
+    padding: 0.5rem 0.75rem;
+    border-radius: 3px;
+  }
 }
 
 html[data-theme='light'] {

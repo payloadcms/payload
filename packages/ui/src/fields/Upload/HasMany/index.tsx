@@ -110,8 +110,6 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
       }
 
       void fetchFile()
-    } else {
-      setFileDocs([])
     }
   }, [value, relationTo, api, serverURL, i18n, code])
 
@@ -157,7 +155,8 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         (acc, [key, value]) => (value ? [...acc, key] : acc),
         [] as string[],
       )
-      setValue([...value, ...selectedIDs])
+      if (value?.length) setValue([...value, ...selectedIDs])
+      else setValue(selectedIDs)
     },
     [setValue, value],
   )
@@ -167,8 +166,12 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
       <div className={[baseClass].join(' ')}>
         <FieldLabel Label={Label} field={field} label={label} />
 
-        <div className={[baseClass].join(' ')}>
-          <div>
+        <div>
+          {missingFiles || !value?.length ? (
+            <div className={[`${baseClass}__no-data`].join(' ')}>
+              {t('version:noRowsFound', { label: relationTo })}
+            </div>
+          ) : (
             <DraggableSortable
               className={`${baseClass}__draggable-rows`}
               ids={value}
@@ -197,7 +200,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
                   )
                 })}
             </DraggableSortable>
-          </div>
+          )}
         </div>
 
         <div className={[`${baseClass}__controls`].join(' ')}>
@@ -248,7 +251,8 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         enableRowSelections
         onBulkSelect={onBulkSelect}
         onSelect={(selection) => {
-          setValue([...value, selection.docID])
+          if (value?.length) setValue([...value, selection.docID])
+          else setValue([selection.docID])
         }}
       />
     </Fragment>
