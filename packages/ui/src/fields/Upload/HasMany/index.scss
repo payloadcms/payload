@@ -1,0 +1,47 @@
+@import '../../../scss/styles.scss';
+
+.upload--has-many {
+  position: relative;
+  max-width: 100%;
+
+  &__controls {
+    display: flex;
+    gap: base(2);
+    margin-top: base(1);
+  }
+
+  &__buttons {
+    display: flex;
+    gap: base(1);
+  }
+
+  &__add-new {
+    display: flex;
+    gap: base(0.5);
+  }
+
+  &__clear-all {
+    all: unset;
+    flex-shrink: 0;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  &__draggable-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+html[data-theme='light'] {
+  .upload {
+  }
+}
+
+html[data-theme='dark'] {
+  .upload {
+  }
+}

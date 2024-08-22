@@ -594,49 +594,164 @@ export function buildObjectType({
     }),
     upload: (objectTypeConfig: ObjectTypeConfig, field: UploadField) => {
       const { relationTo } = field
+      const isRelatedToManyCollections = Array.isArray(relationTo)
+      const hasManyValues = field.hasMany
+      const relationshipName = combineParentName(parentName, toWords(field.name, true))
 
-      const uploadName = combineParentName(parentName, toWords(field.name, true))
+      let type
+      let relationToType = null
+
+      if (Array.isArray(relationTo)) {
+        relationToType = new GraphQLEnumType({
+          name: `${relationshipName}_RelationTo`,
+          values: relationTo.reduce(
+            (relations, relation) => ({
+              ...relations,
+              [formatName(relation)]: {
+                value: relation,
+              },
+            }),
+            {},
+          ),
+        })
+
+        const types = relationTo.map((relation) => graphqlResult.collections[relation].graphQL.type)
+
+        type = new GraphQLObjectType({
+          name: `${relationshipName}_Relationship`,
+          fields: {
+            relationTo: {
+              type: relationToType,
+            },
+            value: {
+              type: new GraphQLUnionType({
+                name: relationshipName,
+                resolveType(data, { req }) {
+                  return graphqlResult.collections[data.collection].graphQL.type.name
+                },
+                types,
+              }),
+            },
+          },
+        })
+      } else {
+        ;({ type } = graphqlResult.collections[relationTo].graphQL)
+      }
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = withNullableType(
-        field,
-        graphqlResult.collections[relationTo].graphQL.type || newlyCreatedBlockType,
-        forceNullable,
+      type = type || newlyCreatedBlockType
+
+      const relationshipArgs: {
+        draft?: unknown
+        fallbackLocale?: unknown
+        limit?: unknown
+        locale?: unknown
+        page?: unknown
+        where?: unknown
+      } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
       )
 
-      const uploadArgs = {} as LocaleInputType
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (config.localization) {
-        uploadArgs.locale = {
+        relationshipArgs.locale = {
           type: graphqlResult.types.localeInputType,
         }
 
-        uploadArgs.fallbackLocale = {
+        relationshipArgs.fallbackLocale = {
           type: graphqlResult.types.fallbackLocaleInputType,
         }
       }
 
-      const relatedCollectionSlug = field.relationTo
-
-      const upload = {
-        type,
-        args: uploadArgs,
-        extensions: { complexity: 20 },
+      const relationship = {
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
+        args: relationshipArgs,
+        extensions: { complexity: 10 },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
-          const id = value
+          let relatedCollectionSlug = field.relationTo
           const draft = Boolean(args.draft ?? context.req.query?.draft)
+
+          if (hasManyValues) {
+            const results = []
+            const resultPromises = []
+
+            const createPopulationPromise = async (relatedDoc, i) => {
+              let id = relatedDoc
+              let collectionSlug = field.relationTo
+
+              if (isRelatedToManyCollections) {
+                collectionSlug = relatedDoc.relationTo
+                id = relatedDoc.value
+              }
+
+              const result = await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
+
+              if (result) {
+                if (isRelatedToManyCollections) {
+                  results[i] = {
+                    relationTo: collectionSlug,
+                    value: {
+                      ...result,
+                      collection: collectionSlug,
+                    },
+                  }
+                } else {
+                  results[i] = result
+                }
+              }
+            }
+
+            if (value) {
+              value.forEach((relatedDoc, i) => {
+                resultPromises.push(createPopulationPromise(relatedDoc, i))
+              })
+            }
+
+            await Promise.all(resultPromises)
+            return results
+          }
+
+          let id = value
+          if (isRelatedToManyCollections && value) {
+            id = value.value
+            relatedCollectionSlug = value.relationTo
+          }
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
               createDataloaderCacheKey({
-                collectionSlug: relatedCollectionSlug,
+                collectionSlug: relatedCollectionSlug as string,
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
@@ -649,26 +764,30 @@ export function buildObjectType({
               }),
             )
 
-            return relatedDocument || null
+            if (relatedDocument) {
+              if (isRelatedToManyCollections) {
+                return {
+                  relationTo: relatedCollectionSlug,
+                  value: {
+                    ...relatedDocument,
+                    collection: relatedCollectionSlug,
+                  },
+                }
+              }
+
+              return relatedDocument
+            }
+
+            return null
           }
 
           return null
         },
       }
 
-      const whereFields = graphqlResult.collections[relationTo].config.fields
-
-      upload.args.where = {
-        type: buildWhereInputType({
-          name: uploadName,
-          fields: whereFields,
-          parentName: uploadName,
-        }),
-      }
-
       return {
         ...objectTypeConfig,
-        [field.name]: upload,
+        [field.name]: relationship,
       }
     },
   }

@@ -46,7 +46,16 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
+  const {
+    Header,
+    beforeActions,
+    collectionSlug,
+    disableBulkDelete,
+    disableBulkEdit,
+    hasCreatePermission,
+    newDocumentURL,
+  } = useListInfo()
+
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
   const { openModal } = useModal()
@@ -221,10 +230,15 @@ export const DefaultListView: React.FC = () => {
                     <div className={`${baseClass}__list-selection`}>
                       <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany collection={collectionConfig} fields={fields} />
-                        <PublishMany collection={collectionConfig} />
-                        <UnpublishMany collection={collectionConfig} />
-                        <DeleteMany collection={collectionConfig} />
+                        {beforeActions && beforeActions}
+                        {!disableBulkEdit && (
+                          <Fragment>
+                            <EditMany collection={collectionConfig} fields={fields} />
+                            <PublishMany collection={collectionConfig} />
+                            <UnpublishMany collection={collectionConfig} />
+                          </Fragment>
+                        )}
+                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                       </div>
                     </div>
                   )}

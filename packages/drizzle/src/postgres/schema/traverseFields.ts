@@ -726,7 +726,7 @@ export const traverseFields = ({
       case 'upload':
         if (Array.isArray(field.relationTo)) {
           field.relationTo.forEach((relation) => relationships.add(relation))
-        } else if (field.type === 'relationship' && field.hasMany) {
+        } else if (field.hasMany) {
           relationships.add(field.relationTo)
         } else {
           // simple relationships get a column on the targetTable with a foreign key to the relationTo table
