@@ -10,9 +10,8 @@ const modalSlug = 'document-locked'
 
 const baseClass = 'document-locked'
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
+const formatDate = (date) => {
+  if (!date) return ''
   return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     hour: 'numeric',
@@ -24,7 +23,7 @@ const formatDate = (dateString) => {
 }
 
 export const DocumentLocked: React.FC<{
-  editedAt: null | string
+  editedAt: Date | null
   handleGoBack: () => void
   isActive: boolean
   onReadOnly: () => void

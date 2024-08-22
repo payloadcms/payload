@@ -29,6 +29,7 @@ export type BuildFormStateArgs = {
   id?: number | string
   locale?: string
   operation?: 'create' | 'update'
+  returnLockStatus?: boolean
   schemaPath: string
 }
 

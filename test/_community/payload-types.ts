@@ -15,6 +15,7 @@ export interface Config {
     simple: Simple;
     users: User;
     'payload-preferences': PayloadPreference;
+    'payload-locks': PayloadLock;
     'payload-migrations': PayloadMigration;
   };
   db: {
@@ -32,7 +33,6 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
-    password: string;
   };
   login: {
     email: string;
@@ -44,7 +44,6 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
-    password: string;
   };
 }
 /**
@@ -136,6 +135,24 @@ export interface PayloadPreference {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locks".
+ */
+export interface PayloadLock {
+  id: string;
+  docId?: string | null;
+  _lastEdited: {
+    user: {
+      relationTo: 'users';
+      value: string | User;
+    };
+    editedAt?: string | null;
+  };
+  isLocked?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }

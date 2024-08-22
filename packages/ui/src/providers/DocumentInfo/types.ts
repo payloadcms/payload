@@ -1,6 +1,7 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
+  ClientUser,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -38,14 +39,19 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
+  checkLockStatus: () => void
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   initialData: Data
+  initialEditor: ClientUser
   initialState?: FormState
+  isDocumentLocked: boolean
   isInitializing: boolean
   isLoading: boolean
+  lastEditedAt: Date
+  lockDocument: (docId: number | string, user: ClientUser) => Promise<void>
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setDocFieldPreferences: (
@@ -53,9 +59,12 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentTitle: (title: string) => void
+  shouldCheckLockStatus?: boolean
   slug?: string
   title: string
+  unlockDocument: (docId: number | string) => Promise<void>
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  updateDocumentEditor: (docId: number | string, user: ClientUser) => Promise<void>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 } & DocumentInfoProps

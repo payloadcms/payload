@@ -18,6 +18,7 @@ export type Options<TSlug extends CollectionSlug> = {
   disableErrors?: boolean
   draft?: boolean
   fallbackLocale?: TypedLocale
+  includeLockStatus?: boolean
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
@@ -40,6 +41,7 @@ export async function findLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft = false,
+    includeLockStatus,
     limit,
     overrideAccess = true,
     page,
@@ -63,6 +65,7 @@ export async function findLocal<TSlug extends CollectionSlug>(
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
     limit,
     overrideAccess,
     page,

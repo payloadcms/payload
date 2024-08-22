@@ -158,9 +158,7 @@ export async function buildConfigWithDefaults(
     config.admin.autoLogin =
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
         ? false
-        : {
-            email: 'dev@payloadcms.com',
-          }
+        : false
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {

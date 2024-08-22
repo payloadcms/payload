@@ -1,4 +1,11 @@
-import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
+import type {
+  ClientUser,
+  DocumentPreferences,
+  Field,
+  FormState,
+  PayloadRequest,
+  TypeWithID,
+} from 'payload'
 
 import { reduceFieldsToValues } from 'payload/shared'
 
@@ -27,9 +34,14 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   return cached
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
+export const buildFormState = async ({
+  req,
+}: {
+  req: PayloadRequest
+}): Promise<{ lockedState?: { isLocked: boolean; user: ClientUser }; state: FormState }> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
-  const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
+  const { collectionSlug, formState, globalSlug, locale, operation, returnLockStatus, schemaPath } =
+    reqData
 
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
@@ -203,5 +215,25 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
     }
   }
 
-  return result
+  if (returnLockStatus) {
+    const lockStatus = await req.payload.find({
+      collection: 'payload-locks',
+      where: {
+        docId: { equals: id },
+      },
+    })
+
+    if (lockStatus.docs.length > 0) {
+      const lockedState = {
+        isLocked: true,
+        user: lockStatus.docs[0]?._lastEdited?.user.value,
+      }
+
+      console.log('Building form state:', { lockedState, result })
+
+      return { lockedState, state: result }
+    }
+  }
+
+  return { state: result }
 }

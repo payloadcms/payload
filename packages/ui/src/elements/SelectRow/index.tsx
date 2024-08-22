@@ -1,5 +1,4 @@
 'use client'
-import { useDocumentLockStatus } from '@payloadcms/ui'
 import React from 'react'
 
 import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
@@ -13,9 +12,8 @@ const baseClass = 'select-row'
 export const SelectRow: React.FC = () => {
   const { selected, setSelection } = useSelection()
   const { rowData } = useTableCell()
-  const isLocked = useDocumentLockStatus(rowData?.id)
 
-  if (isLocked) {
+  if (rowData?.isLocked) {
     return <LockIcon />
   }
 

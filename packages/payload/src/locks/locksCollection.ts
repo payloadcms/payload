@@ -1,18 +1,8 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
 
-const lockAccess: Access = ({ req }) => ({
-  'user.value': {
-    equals: req?.user?.id,
-  },
-})
-
 export const getLocksCollection = (config: Config): CollectionConfig => ({
   slug: 'payload-locks',
-  // access: {
-  //   delete: lockAccess,
-  //   read: lockAccess,
-  // },
   // admin: {
   //   hidden: true,
   // },
@@ -51,6 +41,11 @@ export const getLocksCollection = (config: Config): CollectionConfig => ({
           type: 'date',
         },
       ],
+    },
+    {
+      name: 'isLocked',
+      type: 'checkbox',
+      defaultValue: false,
     },
   ],
 })

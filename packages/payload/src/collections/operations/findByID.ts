@@ -18,6 +18,7 @@ export type Arguments = {
   disableErrors?: boolean
   draft?: boolean
   id: number | string
+  includeLockStatus?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -53,6 +54,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftEnabled = false,
+      includeLockStatus,
       overrideAccess = false,
       req: { fallbackLocale, locale, t },
       req,
@@ -93,6 +95,27 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       }
 
       return null
+    }
+
+    if (includeLockStatus) {
+      const lockStatus = await req.payload.db.findOne({
+        collection: 'payload-locks',
+        req,
+        where: {
+          docId: {
+            equals: id,
+          },
+        },
+      })
+
+      result.isLocked = lockStatus ? true : false
+      if (lockStatus) {
+        result.lockStatus = {
+          isLocked: true,
+        }
+      } else {
+        result.lockStatus = { isLocked: false }
+      }
     }
 
     // /////////////////////////////////////

@@ -520,6 +520,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  docId?: any
   id: number | string
 }
 

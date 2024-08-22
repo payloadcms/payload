@@ -20,6 +20,7 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
+  includeLockStatus?: boolean
   limit?: number
   overrideAccess?: boolean
   page?: number
@@ -60,6 +61,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       depth,
       disableErrors,
       draft: draftsEnabled,
+      includeLockStatus,
       limit,
       overrideAccess,
       page,
@@ -148,6 +150,27 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         sort,
         where: fullWhere,
       })
+    }
+
+    if (includeLockStatus) {
+      const lockStatuses = await payload.db.find({
+        collection: 'payload-locks',
+        limit: sanitizedLimit,
+        pagination: false,
+        req,
+        where: {
+          docId: {
+            in: result.docs.map((doc) => doc.id),
+          },
+        },
+      })
+
+      const lockedDocIds = new Set(lockStatuses.docs.map((lockDoc) => lockDoc.docId))
+
+      result.docs = result.docs.map((doc) => ({
+        ...doc,
+        isLocked: lockedDocIds.has(doc.id),
+      }))
     }
 
     // /////////////////////////////////////

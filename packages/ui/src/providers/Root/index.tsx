@@ -19,7 +19,6 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
-import { DocumentLockProvider } from '../DocumentLock/index.js'
 import { FieldComponentsProvider } from '../FieldComponents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
@@ -86,25 +85,23 @@ export const RootProvider: React.FC<Props> = ({
                       <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                         <AuthProvider permissions={permissions} user={user}>
                           <PreferencesProvider>
-                            <DocumentLockProvider>
-                              <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <ActionsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              {children}
-                                            </NavProvider>
-                                          </ActionsProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </DocumentLockProvider>
+                            <ThemeProvider cookiePrefix={config.cookiePrefix} theme={theme}>
+                              <ParamsProvider>
+                                <LocaleProvider>
+                                  <StepNavProvider>
+                                    <LoadingOverlayProvider>
+                                      <DocumentEventsProvider>
+                                        <ActionsProvider>
+                                          <NavProvider initialIsOpen={isNavOpen}>
+                                            {children}
+                                          </NavProvider>
+                                        </ActionsProvider>
+                                      </DocumentEventsProvider>
+                                    </LoadingOverlayProvider>
+                                  </StepNavProvider>
+                                </LocaleProvider>
+                              </ParamsProvider>
+                            </ThemeProvider>
                           </PreferencesProvider>
                           <ModalContainer />
                           <StayLoggedInModal />

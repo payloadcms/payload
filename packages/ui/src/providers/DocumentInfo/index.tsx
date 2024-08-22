@@ -1,5 +1,6 @@
 'use client'
 import type {
+  ClientUser,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -18,6 +19,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
@@ -95,6 +97,12 @@ const DocumentInfo: React.FC<
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
     hasPublishPermissionFromProps,
   )
+
+  const [isDocumentLocked, setIsDocumentLocked] = useState<boolean | undefined>(false)
+  const [initialEditor, setInitialEditor] = useState<ClientUser | null>(null)
+  const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null)
+  const lockInProgress = useRef(false)
+
   const isInitializing = initialState === undefined || data === undefined
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -106,6 +114,8 @@ const DocumentInfo: React.FC<
   const hasInitializedDocPermissions = useRef(false)
   // Separate locale cache used for handling permissions
   const prevLocalePermissions = useRef(locale)
+
+  const [shouldCheckLockStatus, setShouldCheckLockStatus] = useState(false)
 
   const versionsConfig = docConfig?.versions
 
@@ -132,6 +142,150 @@ const DocumentInfo: React.FC<
   const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
   const operation = isEditing ? 'update' : 'create'
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
+
+  const lockDocument = useCallback(
+    async (docId: number | string, user: ClientUser) => {
+      if (lockInProgress.current) return
+      lockInProgress.current = true
+
+      try {
+        const request = await requests.get(
+          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+        )
+        const { docs } = await request.json()
+
+        if (docs.length > 0) {
+          // Document is already locked, update the state to reflect this
+          setIsDocumentLocked(true)
+          return
+        }
+
+        await requests.post(`${serverURL}${api}/payload-locks`, {
+          body: JSON.stringify({
+            _lastEdited: {
+              editedAt: new Date(),
+              user: { relationTo: user?.collection, value: user },
+            },
+            docId,
+            isLocked: true,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        setIsDocumentLocked(true)
+      } catch (error) {
+        if (error.response?.status === 409) {
+          setIsDocumentLocked(true)
+        } else {
+          console.error('Failed to lock the document', error)
+        }
+      } finally {
+        lockInProgress.current = false
+      }
+    },
+    [serverURL, api],
+  )
+
+  const unlockDocument = useCallback(
+    async (docId: number | string) => {
+      if (!isDocumentLocked) {
+        return
+      }
+
+      try {
+        const request = await requests.get(
+          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+        )
+
+        const { docs } = await request.json()
+
+        if (docs.length > 0) {
+          const lockId = docs[0].id
+          await requests.delete(`${serverURL}${api}/payload-locks/${lockId}`, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          setIsDocumentLocked(false)
+        }
+      } catch (error) {
+        console.error('Failed to unlock the document', error)
+      }
+    },
+    [serverURL, api, isDocumentLocked],
+  )
+
+  const updateDocumentEditor = useCallback(
+    async (docId: number | string, user: ClientUser) => {
+      if (!isDocumentLocked) {
+        return
+      }
+
+      try {
+        // Check if the document is already locked
+        const request = await requests.get(
+          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+        )
+
+        const { docs } = await request.json()
+
+        if (docs.length > 0) {
+          const lockId = docs[0].id
+
+          // Send a patch request to update the _lastEdited info
+          await requests.patch(`${serverURL}${api}/payload-locks/${lockId}`, {
+            body: JSON.stringify({
+              _lastEdited: {
+                editedAt: new Date(),
+                user: { relationTo: user?.collection, value: user?.id },
+              },
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          setLastEditedAt(new Date())
+        }
+      } catch (error) {
+        console.error('Failed to update the document editor', error)
+      }
+    },
+    [serverURL, api, isDocumentLocked],
+  )
+
+  const checkLockStatus = useCallback(() => {
+    if (isDocumentLocked) {
+      setShouldCheckLockStatus(true)
+    } else {
+      setShouldCheckLockStatus(false)
+    }
+  }, [isDocumentLocked])
+
+  useEffect(() => {
+    const fetchLockState = async () => {
+      if (id) {
+        try {
+          const request = await requests.get(
+            `${serverURL}${api}/payload-locks?where[docId][equals]=${id}`,
+          )
+          const { docs } = await request.json()
+
+          if (docs.length > 0) {
+            setIsDocumentLocked(true)
+            setLastEditedAt(new Date(docs[0]._lastEdited.editedAt))
+            setInitialEditor(docs[0]._lastEdited.user.value)
+          }
+        } catch (error) {
+          console.error('Failed to fetch lock state', error)
+        }
+      }
+    }
+
+    void fetchLockState()
+  }, [id, serverURL, api])
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -377,7 +531,7 @@ const DocumentInfo: React.FC<
 
       const newData = collectionSlug ? json.doc : json.result
 
-      const newState = await getFormState({
+      const { state: newState } = await getFormState({
         apiRoute: api,
         body: {
           id,
@@ -394,6 +548,7 @@ const DocumentInfo: React.FC<
 
       setInitialState(newState)
       setData(newData)
+
       await getDocPermissions(newData)
     },
     [
@@ -426,7 +581,7 @@ const DocumentInfo: React.FC<
         setIsLoading(true)
 
         try {
-          const result = await getFormState({
+          const { state: result } = await getFormState({
             apiRoute: api,
             body: {
               id,
@@ -546,6 +701,7 @@ const DocumentInfo: React.FC<
   const value: DocumentInfoContext = {
     ...props,
     action,
+    checkLockStatus,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -554,16 +710,23 @@ const DocumentInfo: React.FC<
     hasPublishPermission,
     hasSavePermission,
     initialData: data,
+    initialEditor,
     initialState,
+    isDocumentLocked,
     isInitializing,
     isLoading,
+    lastEditedAt,
+    lockDocument,
     onSave,
     preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,
+    shouldCheckLockStatus,
     title: documentTitle,
+    unlockDocument,
     unpublishedVersions,
+    updateDocumentEditor,
     versions,
   }
 
