@@ -18,10 +18,9 @@ import {
   useModal,
   useUploadEdits,
 } from '@payloadcms/ui'
-import { formatAdminURL, getFormState, requests } from '@payloadcms/ui/shared'
+import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
 import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
@@ -45,7 +44,6 @@ export const DefaultEditView: React.FC = () => {
     BeforeFields,
     action,
     apiURL,
-    checkLockStatus,
     collectionSlug,
     disableActions,
     disableLeaveWithoutSaving,
@@ -64,7 +62,6 @@ export const DefaultEditView: React.FC = () => {
     lastEditedAt,
     lockDocument,
     onSave: onSaveFromContext,
-    shouldCheckLockStatus,
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
@@ -84,13 +81,7 @@ export const DefaultEditView: React.FC = () => {
 
   const isDocumentLockedRef = useRef(false)
 
-  const currentDocumentEditorId = documentLockStateRef.current?.user?.id
-
   const [isLockedByAnotherUser, setIsLockedByAnotherUser] = useState(false)
-
-  console.log('Initial editor: ', initialEditor)
-  console.log('User Id: ', user.id)
-  console.log('Is document locked? ', isDocumentLocked)
 
   const {
     config,
@@ -154,14 +145,6 @@ export const DefaultEditView: React.FC = () => {
     setShowLockedModal(false)
   }, [id, updateDocumentEditor, user])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      checkLockStatus()
-    }, 10000) // 10 seconds
-
-    return () => clearInterval(interval)
-  }, [checkLockStatus])
-
   // Handle modal display logic based on lock state
   useEffect(() => {
     if (isDocumentLocked && initialEditor && initialEditor.id !== user.id) {
@@ -196,6 +179,14 @@ export const DefaultEditView: React.FC = () => {
     })
     router.push(redirectRoute)
   }, [adminRoute, collectionSlug, globalSlug, router])
+
+  const handleBackToDashboard = useCallback(() => {
+    const redirectRoute = formatAdminURL({
+      adminRoute,
+      path: '/',
+    })
+    router.push(redirectRoute)
+  }, [adminRoute, router])
 
   const onSave = useCallback(
     (json) => {
@@ -260,7 +251,7 @@ export const DefaultEditView: React.FC = () => {
       }
 
       // Fire the request immediately with returnLockStatus: true if the document is locked
-      const { lockedState, state } = await getFormState({
+      const { state } = await getFormState({
         apiRoute,
         body: {
           id,
@@ -269,19 +260,11 @@ export const DefaultEditView: React.FC = () => {
           formState: prevFormState,
           globalSlug,
           operation,
-          returnLockStatus: shouldCheckLockStatus,
+          returnLockStatus: shouldLockDocument,
           schemaPath,
         },
         serverURL,
       })
-
-      if (
-        lockedState &&
-        (!documentLockStateRef.current ||
-          lockedState.user.id !== documentLockStateRef.current.user.id)
-      ) {
-        documentLockStateRef.current = lockedState
-      }
 
       return state
     },
@@ -295,9 +278,57 @@ export const DefaultEditView: React.FC = () => {
       operation,
       serverURL,
       isLockedByAnotherUser,
-      shouldCheckLockStatus,
+      shouldLockDocument,
     ],
   )
+
+  const intervalRef = useRef(null)
+
+  const checkLockStatus = useCallback(async () => {
+    if (!isDocumentLockedRef.current) return
+
+    const docPreferences = await getDocPreferences()
+
+    const { lockedState } = await getFormState({
+      apiRoute,
+      body: {
+        id,
+        collectionSlug,
+        docPreferences,
+        formState: {},
+        globalSlug,
+        operation,
+        returnLockStatus: true,
+        schemaPath,
+      },
+      serverURL,
+    })
+
+    if (lockedState) {
+      if (
+        !documentLockStateRef.current ||
+        lockedState.user.id !== documentLockStateRef.current.user.id
+      ) {
+        documentLockStateRef.current = lockedState
+
+        if (lockedState.user.id !== user.id) {
+          setIsLockedByAnotherUser(true)
+        } else {
+          setIsLockedByAnotherUser(false)
+        }
+      }
+    }
+  }, [
+    apiRoute,
+    collectionSlug,
+    getDocPreferences,
+    globalSlug,
+    id,
+    operation,
+    schemaPath,
+    serverURL,
+    user.id,
+  ])
 
   useEffect(() => {
     if (id && shouldLockDocument && !isDocumentLockedRef.current) {
@@ -305,7 +336,18 @@ export const DefaultEditView: React.FC = () => {
         try {
           await lockDocument(id, user)
           isDocumentLockedRef.current = true
+
+          // Immediately check the lock status after locking
+          await checkLockStatus()
+
+          // Start the interval to check the lock status every 10 seconds
+          if (!intervalRef.current) {
+            intervalRef.current = setInterval(() => {
+              void checkLockStatus()
+            }, 10000) // 10 seconds
+          }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to lock the document', error)
         } finally {
           setShouldLockDocument(false)
@@ -314,16 +356,26 @@ export const DefaultEditView: React.FC = () => {
 
       void lockDoc()
     }
-  }, [shouldLockDocument, lockDocument, id, user])
+  }, [shouldLockDocument, lockDocument, id, user, checkLockStatus])
 
+  // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (id) {
-        void unlockDocument(id)
+      if (id && isDocumentLockedRef.current) {
+        // Only unlock the document if the current user is the one who locked it
+        if (documentLockStateRef.current?.user?.id === user.id) {
+          void unlockDocument(id)
+        }
+
         isDocumentLockedRef.current = false
+
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
       }
     }
-  }, [id, unlockDocument])
+  }, [id, unlockDocument, user.id])
 
   return (
     <main className={classes.filter(Boolean).join(' ')}>
@@ -352,7 +404,7 @@ export const DefaultEditView: React.FC = () => {
           )}
           {showTakeOverModal && (
             <DocumentTakeOver
-              adminRoute={adminRoute}
+              handleBackToDashboard={handleBackToDashboard}
               isActive={showTakeOverModal}
               onReadOnly={() => setIsReadOnlyForIncomingUser(true)}
             />

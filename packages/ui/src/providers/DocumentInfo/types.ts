@@ -39,7 +39,6 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  checkLockStatus: () => void
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
@@ -59,7 +58,6 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentTitle: (title: string) => void
-  shouldCheckLockStatus?: boolean
   slug?: string
   title: string
   unlockDocument: (docId: number | string) => Promise<void>

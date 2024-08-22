@@ -1,21 +1,18 @@
 'use client'
 import { Button, Modal, useModal, useTranslation } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
 import React, { useEffect } from 'react'
 
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 const modalSlug = 'document-take-over'
 
 const baseClass = 'document-take-over'
 
 export const DocumentTakeOver: React.FC<{
-  adminRoute: string
+  handleBackToDashboard: () => void
   isActive: boolean
   onReadOnly: () => void
-}> = ({ adminRoute, isActive, onReadOnly }) => {
+}> = ({ handleBackToDashboard, isActive, onReadOnly }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
 
@@ -31,7 +28,7 @@ export const DocumentTakeOver: React.FC<{
           <h1>Editing taken over</h1>
         </div>
         <div className={`${baseClass}__controls`}>
-          <Button Link={Link} buttonStyle="primary" el="link" size="large" to={adminRoute}>
+          <Button buttonStyle="primary" onClick={handleBackToDashboard} size="large">
             {t('general:backToDashboard')}
           </Button>
           <Button

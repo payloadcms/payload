@@ -115,8 +115,6 @@ const DocumentInfo: React.FC<
   // Separate locale cache used for handling permissions
   const prevLocalePermissions = useRef(locale)
 
-  const [shouldCheckLockStatus, setShouldCheckLockStatus] = useState(false)
-
   const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
@@ -255,14 +253,6 @@ const DocumentInfo: React.FC<
     },
     [serverURL, api, isDocumentLocked],
   )
-
-  const checkLockStatus = useCallback(() => {
-    if (isDocumentLocked) {
-      setShouldCheckLockStatus(true)
-    } else {
-      setShouldCheckLockStatus(false)
-    }
-  }, [isDocumentLocked])
 
   useEffect(() => {
     const fetchLockState = async () => {
@@ -701,7 +691,6 @@ const DocumentInfo: React.FC<
   const value: DocumentInfoContext = {
     ...props,
     action,
-    checkLockStatus,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -722,7 +711,6 @@ const DocumentInfo: React.FC<
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,
-    shouldCheckLockStatus,
     title: documentTitle,
     unlockDocument,
     unpublishedVersions,
