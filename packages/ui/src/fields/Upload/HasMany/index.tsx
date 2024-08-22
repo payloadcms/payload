@@ -112,6 +112,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
       void fetchFile()
     } else {
       setFileDocs([])
+      setMissingFiles(true)
     }
   }, [value, relationTo, api, serverURL, i18n, code])
 
@@ -167,8 +168,12 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
       <div className={[baseClass].join(' ')}>
         <FieldLabel Label={Label} field={field} label={label} />
 
-        <div className={[baseClass].join(' ')}>
-          <div>
+        <div>
+          {missingFiles || !value?.length ? (
+            <div className={[`${baseClass}__no-data`].join(' ')}>
+              {t('version:noRowsFound', { label: relationTo })}
+            </div>
+          ) : (
             <DraggableSortable
               className={`${baseClass}__draggable-rows`}
               ids={value}
@@ -197,7 +202,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
                   )
                 })}
             </DraggableSortable>
-          </div>
+          )}
         </div>
 
         <div className={[`${baseClass}__controls`].join(' ')}>
