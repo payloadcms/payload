@@ -127,15 +127,15 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  const createdJPGDocSlug2 = await _payload.create({
-    collection: uploads2Slug,
-    data: {
-      ...uploadsDoc,
-    },
-    file: jpgFile,
-    depth: 0,
-    overrideAccess: true,
-  })
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
 
   // Create hasMany upload
   await _payload.create({
@@ -146,15 +146,15 @@ export const seed = async (_payload: Payload) => {
   })
 
   // Create hasMany poly upload
-  await _payload.create({
-    collection: uploadsMultiPoly,
-    data: {
-      media: [
-        { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-        { value: createdJPGDoc.id, relationTo: uploadsSlug },
-      ],
-    },
-  })
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
 
   // Create poly upload
   await _payload.create({
@@ -164,12 +164,12 @@ export const seed = async (_payload: Payload) => {
     },
   })
   // Create poly upload
-  await _payload.create({
-    collection: uploadsPoly,
-    data: {
-      media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-    },
-  })
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
 
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
