@@ -200,7 +200,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
               ids={value}
               onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
             >
-              {Boolean(value.length) &&
+              {Boolean(value?.length) &&
                 value.map((id, index) => {
                   const doc = fileDocs.find((doc) => doc.id === id)
                   const uploadConfig = collection?.upload
@@ -265,7 +265,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
               </div>
             </ListDrawerToggler>
           </div>
-          {Boolean(value.length) && (
+          {Boolean(value?.length) && (
             <button
               className={`${baseClass}__clear-all`}
               onClick={() => setValue([])}
