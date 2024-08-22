@@ -1,8 +1,9 @@
 'use client'
-import type { FilterOptionsResult, Where } from 'payload'
+import type { FilterOptionsResult, PaginatedDocs, Where } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { useSelection } from '../../../providers/Selection/index.js'
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
@@ -13,40 +14,35 @@ import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
 import { FileDetails } from '../../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldLabel } from '../../FieldLabel/index.js'
 
 const baseClass = 'upload upload--has-many'
 
 import './index.scss'
 
-export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string[]>> = (props) => {
+export const UploadComponentHasMany: React.FC<
+  {
+    fileDocs: PaginatedDocs['docs']
+  } & UploadFieldPropsWithContext<string[]>
+> = (props) => {
   const {
     canCreate,
-    field,
     field: {
       _path,
-      admin: {
-        components: { Label },
-        isSortable,
-      },
+      admin: { isSortable },
       hasMany,
-      label,
       relationTo,
     },
     fieldHookResult: { filterOptions: filterOptionsFromProps, setValue, value },
+    fileDocs,
+    onChange,
     readOnly,
   } = props
 
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
   const {
-    config: {
-      collections,
-      routes: { api },
-      serverURL,
-    },
+    config: { collections },
   } = useConfig()
 
   const filterOptions: FilterOptionsResult = useMemo(() => {
@@ -64,55 +60,6 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
     }
   }, [value, relationTo, filterOptionsFromProps])
 
-  const [fileDocs, setFileDocs] = useState([])
-  const [missingFiles, setMissingFiles] = useState(false)
-
-  const { code } = useLocale()
-
-  useEffect(() => {
-    if (value !== null && typeof value !== 'undefined' && value.length !== 0) {
-      const query: {
-        [key: string]: unknown
-        where: Where
-      } = {
-        depth: 0,
-        draft: true,
-        locale: code,
-        where: {
-          and: [
-            {
-              id: {
-                in: value,
-              },
-            },
-          ],
-        },
-      }
-
-      const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}`, {
-          body: qs.stringify(query),
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-HTTP-Method-Override': 'GET',
-          },
-          method: 'POST',
-        })
-        if (response.ok) {
-          const json = await response.json()
-          setFileDocs(json.docs)
-        } else {
-          setMissingFiles(true)
-          setFileDocs([])
-        }
-      }
-
-      void fetchFile()
-    }
-  }, [value, relationTo, api, serverURL, i18n, code])
-
   function moveItemInArray<T>(array: T[], moveFromIndex: number, moveToIndex: number): T[] {
     const newArray = [...array]
     const [item] = newArray.splice(moveFromIndex, 1)
@@ -125,18 +72,18 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
       const updatedArray = moveItemInArray(value, moveFromIndex, moveToIndex)
-      setValue(updatedArray)
+      onChange(updatedArray)
     },
-    [value, setValue],
+    [value, onChange],
   )
 
   const removeItem = useCallback(
     (index: number) => {
-      const updatedArray = [...value]
+      const updatedArray = [...(value || [])]
       updatedArray.splice(index, 1)
-      setValue(updatedArray)
+      onChange(updatedArray)
     },
-    [value, setValue],
+    [value, onChange],
   )
 
   const [ListDrawer, ListDrawerToggler] = useListDrawer({
@@ -149,111 +96,99 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
-  const onBulkSelect = useCallback(
+  const onListSelect = useCallback(
     (selections: ReturnType<typeof useSelection>['selected']) => {
       const selectedIDs = Object.entries(selections).reduce(
         (acc, [key, value]) => (value ? [...acc, key] : acc),
         [] as string[],
       )
-      if (value?.length) setValue([...value, ...selectedIDs])
-      else setValue(selectedIDs)
+      onChange(selectedIDs)
     },
-    [setValue, value],
+    [onChange],
   )
 
   return (
     <Fragment>
       <div className={[baseClass].join(' ')}>
-        <FieldLabel Label={Label} field={field} label={label} />
+        <DraggableSortable
+          className={`${baseClass}__draggable-rows`}
+          ids={value.map((id) => String(id))}
+          onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        >
+          {Boolean(value.length) &&
+            value.map((id, index) => {
+              const doc = fileDocs.find((doc) => doc.id === id)
+              const uploadConfig = collection?.upload
 
-        <div>
-          {missingFiles || !value?.length ? (
-            <div className={[`${baseClass}__no-data`].join(' ')}>
-              {t('version:noRowsFound', { label: relationTo })}
-            </div>
-          ) : (
-            <DraggableSortable
-              className={`${baseClass}__draggable-rows`}
-              ids={value}
-              onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
-            >
-              {Boolean(value.length) &&
-                value.map((id, index) => {
-                  const doc = fileDocs.find((doc) => doc.id === id)
-                  const uploadConfig = collection?.upload
+              if (!doc) {
+                return null
+              }
 
-                  if (!doc) {
-                    return null
-                  }
-
-                  return (
-                    <FileDetails
-                      collectionSlug={relationTo}
-                      doc={doc}
-                      hasMany={true}
-                      isSortable={isSortable}
-                      key={id}
-                      removeItem={removeItem}
-                      rowIndex={index}
-                      uploadConfig={uploadConfig}
-                    />
-                  )
-                })}
-            </DraggableSortable>
-          )}
-        </div>
-
-        <div className={[`${baseClass}__controls`].join(' ')}>
-          <div className={[`${baseClass}__buttons`].join(' ')}>
-            {canCreate && (
-              <div className={[`${baseClass}__add-new`].join(' ')}>
-                <AddNewRelation
-                  Button={
-                    <Button
-                      buttonStyle="icon-label"
-                      el="span"
-                      icon="plus"
-                      iconPosition="left"
-                      iconStyle="with-border"
-                    >
-                      {t('fields:addNew')}
-                    </Button>
-                  }
-                  hasMany={hasMany}
-                  path={_path}
-                  relationTo={relationTo}
-                  setValue={setValue}
-                  unstyled
-                  value={value}
+              return (
+                <FileDetails
+                  collectionSlug={relationTo}
+                  doc={doc}
+                  hasMany={true}
+                  isSortable={isSortable}
+                  key={id}
+                  removeItem={removeItem}
+                  rowIndex={index}
+                  uploadConfig={uploadConfig}
                 />
-              </div>
-            )}
-            <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-              <div>
-                <Button
-                  buttonStyle="icon-label"
-                  el="span"
-                  icon="plus"
-                  iconPosition="left"
-                  iconStyle="with-border"
-                >
-                  {t('fields:chooseFromExisting')}
-                </Button>
-              </div>
-            </ListDrawerToggler>
-          </div>
+              )
+            })}
+        </DraggableSortable>
+      </div>
+
+      <div className={[`${baseClass}__controls`].join(' ')}>
+        <div className={[`${baseClass}__buttons`].join(' ')}>
+          {canCreate && hasMany && (
+            <div className={[`${baseClass}__add-new`].join(' ')}>
+              <AddNewRelation
+                Button={
+                  <Button
+                    buttonStyle="icon-label"
+                    el="span"
+                    icon="plus"
+                    iconPosition="left"
+                    iconStyle="with-border"
+                  >
+                    {t('fields:addNew')}
+                  </Button>
+                }
+                hasMany={hasMany}
+                path={_path}
+                relationTo={relationTo}
+                setValue={setValue}
+                unstyled
+                value={value}
+              />
+            </div>
+          )}
+          <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+            <div>
+              <Button
+                buttonStyle="icon-label"
+                el="span"
+                icon="plus"
+                iconPosition="left"
+                iconStyle="with-border"
+              >
+                {t('fields:chooseFromExisting')}
+              </Button>
+            </div>
+          </ListDrawerToggler>
+        </div>
+        {hasMany && (
           <button className={`${baseClass}__clear-all`} onClick={() => setValue([])} type="button">
             Clear all
           </button>
-        </div>
+        )}
       </div>
       <ListDrawer
-        enableRowSelections
-        onBulkSelect={onBulkSelect}
-        onSelect={(selection) => {
-          if (value?.length) setValue([...value, selection.docID])
-          else setValue([selection.docID])
-        }}
+        enableRowSelections={hasMany}
+        onBulkSelect={onListSelect}
+        onSelect={({ docID }) => onListSelect({ [docID]: true })}
       />
     </Fragment>
   )

@@ -20,7 +20,7 @@ import './index.scss'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-const drawerSlug = 'bulk-upload-drawer--add-more-files'
+const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
 const baseClass = 'file-selections'
 
@@ -41,8 +41,8 @@ export function FileSidebar() {
 
   const handleAddFiles = React.useCallback(
     (filelist: FileList) => {
-      addFiles(filelist)
-      closeModal(drawerSlug)
+      void addFiles(filelist)
+      closeModal(addMoreFilesDrawerSlug)
     },
     [addFiles, closeModal],
   )
@@ -76,7 +76,7 @@ export function FileSidebar() {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            <Pill onClick={() => openModal(drawerSlug)}>{t('upload:addFile')}</Pill>
+            <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
             <Button
               buttonStyle="transparent"
               className={`${baseClass}__toggler`}
@@ -85,8 +85,12 @@ export function FileSidebar() {
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
-            <Drawer Header={null} gutter={false} slug={drawerSlug}>
-              <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={handleAddFiles} />
+            <Drawer Header={null} gutter={false} slug={addMoreFilesDrawerSlug}>
+              <AddFilesView
+                drawerSlug={addMoreFilesDrawerSlug}
+                onCancel={() => closeModal(addMoreFilesDrawerSlug)}
+                onDrop={handleAddFiles}
+              />
             </Drawer>
           </div>
         </div>

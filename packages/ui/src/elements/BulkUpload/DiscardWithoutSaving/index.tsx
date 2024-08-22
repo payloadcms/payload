@@ -7,7 +7,7 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { FullscreenModal } from '../../FullscreenModal/index.js'
-import { drawerSlug } from '../index.js'
+import { useFormsManager } from '../FormsManager/index.js'
 
 export const discardBulkUploadModalSlug = 'bulk-upload--discard-without-saving'
 const baseClass = 'leave-without-saving'
@@ -16,6 +16,7 @@ export function DiscardWithoutSaving() {
   const { t } = useTranslation()
   const editDepth = useEditDepth()
   const { closeModal } = useModal()
+  const { drawerSlug } = useFormsManager()
 
   const onCancel = React.useCallback(() => {
     closeModal(discardBulkUploadModalSlug)
@@ -24,7 +25,7 @@ export function DiscardWithoutSaving() {
   const onConfirm = React.useCallback(() => {
     closeModal(drawerSlug)
     closeModal(discardBulkUploadModalSlug)
-  }, [closeModal])
+  }, [closeModal, drawerSlug])
 
   return (
     <FullscreenModal

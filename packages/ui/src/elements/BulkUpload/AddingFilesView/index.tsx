@@ -9,7 +9,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ActionsBar } from '../ActionsBar/index.js'
-import { discardBulkUploadModalSlug } from '../DiscardWithoutSaving/index.js'
+import { DiscardWithoutSaving, discardBulkUploadModalSlug } from '../DiscardWithoutSaving/index.js'
 import { EditForm } from '../EditForm/index.js'
 import { FileSidebar } from '../FileSidebar/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -23,6 +23,7 @@ export function AddingFilesView() {
     activeIndex,
     collectionSlug,
     docPermissions,
+    drawerSlug,
     forms,
     hasPublishPermission,
     hasSavePermission,
@@ -42,6 +43,7 @@ export function AddingFilesView() {
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
+          slug={drawerSlug}
           title={getTranslation(collection.labels.singular, i18n)}
         />
         <DocumentInfoProvider
@@ -58,6 +60,8 @@ export function AddingFilesView() {
           <EditForm submitted={hasSubmitted} />
         </DocumentInfoProvider>
       </div>
+
+      <DiscardWithoutSaving />
     </div>
   )
 }

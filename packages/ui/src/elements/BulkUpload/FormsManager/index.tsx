@@ -17,15 +17,15 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
-import { drawerSlug } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
 
 type FormsManagerContext = {
   readonly activeIndex: State['activeIndex']
-  readonly addFiles: (filelist: FileList) => void
+  readonly addFiles: (filelist: FileList) => Promise<void>
   readonly collectionSlug: string
   readonly docPermissions?: DocumentPermissions
+  readonly drawerSlug: string
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
   readonly hasPublishPermission: boolean
@@ -47,9 +47,10 @@ type FormsManagerContext = {
 
 const Context = React.createContext<FormsManagerContext>({
   activeIndex: 0,
-  addFiles: () => {},
+  addFiles: () => Promise.resolve(),
   collectionSlug: '',
   docPermissions: undefined,
+  drawerSlug: '',
   forms: [],
   getFormDataRef: { current: () => ({}) },
   hasPublishPermission: false,
@@ -69,13 +70,13 @@ const initialState: State = {
   totalErrorCount: 0,
 }
 
-type Props = {
-  readonly children: React.ReactNode
-  readonly collectionSlug: string
-  readonly onSuccess: BulkUploadProps['onSuccess']
-}
-
-export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Props) {
+export function FormsManagerProvider({
+  children,
+  collectionSlug,
+  drawerSlug,
+  initialFiles,
+  onSuccess,
+}: BulkUploadProps) {
   const { config } = useConfig()
   const {
     routes: { api },
@@ -84,6 +85,8 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
   const { code } = useLocale()
   const { closeModal } = useModal()
   const { i18n, t } = useTranslation()
+
+  console.log({ initialFiles })
 
   const [isLoadingFiles, setIsLoadingFiles] = React.useState(false)
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
@@ -94,6 +97,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
   const { activeIndex, forms, totalErrorCount } = state
   const { toggleLoadingOverlay } = useLoadingOverlay()
 
+  const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
   const hasFetchedInitialFormState = React.useRef(false)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
@@ -203,11 +207,17 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
     [forms, activeIndex],
   )
 
-  const addFiles = React.useCallback((files: FileList) => {
-    setIsLoadingFiles(true)
-    dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
-    setIsLoadingFiles(false)
-  }, [])
+  const addFiles = React.useCallback(
+    async (files: FileList) => {
+      if (!hasFetchedInitialFormState.current) {
+        await initializeSharedFormState()
+      }
+      setIsLoadingFiles(true)
+      dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
+      setIsLoadingFiles(false)
+    },
+    [initializeSharedFormState],
+  )
 
   const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
     dispatch({ type: 'REMOVE_FORM', index })
@@ -232,6 +242,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         errorCount: currentForms[activeIndex].errorCount,
         formState: currentFormsData,
       }
+      const successIDs = []
       const promises = currentForms.map(async (form, i) => {
         try {
           toggleLoadingOverlay({
@@ -245,6 +256,10 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
           })
 
           const json = await req.json()
+
+          if (req.status === 201 && json?.doc) {
+            successIDs.push(json.doc.id)
+          }
 
           // should expose some sort of helper for this
           if (json?.errors?.length) {
@@ -305,7 +320,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         }
 
         if (typeof onSuccess === 'function') {
-          onSuccess()
+          onSuccess(successIDs)
         }
       }
 
@@ -322,7 +337,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         },
       })
     },
-    [actionURL, activeIndex, closeModal, forms, onSuccess],
+    [actionURL, activeIndex, closeModal, forms, onSuccess, t, toggleLoadingOverlay, drawerSlug],
   )
 
   React.useEffect(() => {
@@ -332,8 +347,14 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
     if (!hasFetchedInitialDocPermissions.current) {
       void initilizeSharedDocPermissions()
     }
+
+    if (initialFiles && hasInitializedWithFiles.current === false) {
+      void addFiles(initialFiles)
+      hasInitializedWithFiles.current = true
+    }
+
     return
-  }, [initializeSharedFormState, initilizeSharedDocPermissions])
+  }, [addFiles, initialFiles, initializeSharedFormState, initilizeSharedDocPermissions])
 
   return (
     <Context.Provider
@@ -342,6 +363,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         addFiles,
         collectionSlug,
         docPermissions,
+        drawerSlug,
         forms,
         getFormDataRef,
         hasPublishPermission,

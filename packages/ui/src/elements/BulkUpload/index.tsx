@@ -7,24 +7,27 @@ import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
-import { DiscardWithoutSaving } from './DiscardWithoutSaving/index.js'
 import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
 
-export const drawerSlug = 'bulk-upload-drawer'
-
 function DrawerContent() {
-  const { addFiles, forms } = useFormsManager()
+  const { addFiles, drawerSlug, forms } = useFormsManager()
   const { closeModal } = useModal()
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
-      addFiles(acceptedFiles)
+      void addFiles(acceptedFiles)
     },
     [addFiles],
   )
 
   if (!forms.length) {
-    return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
+    return (
+      <AddFilesView
+        drawerSlug={drawerSlug}
+        onCancel={() => closeModal(drawerSlug)}
+        onDrop={onDrop}
+      />
+    )
   } else {
     return <AddingFilesView />
   }
@@ -33,29 +36,30 @@ function DrawerContent() {
 export type BulkUploadProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: string
-  readonly onSuccess: () => void
+  readonly drawerSlug: string
+  readonly initialFiles?: FileList
+  readonly onSuccess: (ids: (number | string)[]) => void
 }
 
-export function BulkUploadDrawer({ collectionSlug, onSuccess }: Omit<BulkUploadProps, 'children'>) {
+export function BulkUploadDrawer(props: Omit<BulkUploadProps, 'children'>) {
   const currentDepth = useEditDepth()
 
   return (
     <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer Header={null} gutter={false} slug={drawerSlug}>
-        <FormsManagerProvider collectionSlug={collectionSlug} onSuccess={onSuccess}>
+      <Drawer Header={null} gutter={false} slug={props.drawerSlug}>
+        <FormsManagerProvider {...props}>
           <DrawerContent />
-          <DiscardWithoutSaving />
         </FormsManagerProvider>
       </Drawer>
     </EditDepthProvider>
   )
 }
 
-export function BulkUploadToggler({ children, collectionSlug, onSuccess }: BulkUploadProps) {
+export function BulkUploadToggler(props: BulkUploadProps) {
   return (
     <React.Fragment>
-      <DrawerToggler slug={drawerSlug}>{children}</DrawerToggler>
-      <BulkUploadDrawer collectionSlug={collectionSlug} onSuccess={onSuccess} />
+      <DrawerToggler slug={props.drawerSlug}>{props.children}</DrawerToggler>
+      <BulkUploadDrawer {...props} />
     </React.Fragment>
   )
 }

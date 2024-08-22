@@ -33,16 +33,29 @@ export const Dropzone: React.FC<Props> = ({
 
   const { t } = useTranslation()
 
+  const addFiles = React.useCallback(
+    (files: FileList) => {
+      if (!multipleFiles && files.length > 1) {
+        const dataTransfer = new DataTransfer()
+        dataTransfer.items.add(files[0])
+        onChange(dataTransfer.files)
+      } else {
+        onChange(files)
+      }
+    },
+    [multipleFiles, onChange],
+  )
+
   const handlePaste = React.useCallback(
     (e: ClipboardEvent) => {
       e.preventDefault()
       e.stopPropagation()
 
       if (e.clipboardData.files && e.clipboardData.files.length > 0) {
-        onChange(e.clipboardData.files)
+        addFiles(e.clipboardData.files)
       }
     },
-    [onChange],
+    [addFiles],
   )
 
   const handleDragEnter = React.useCallback((e: DragEvent) => {
@@ -64,22 +77,22 @@ export const Dropzone: React.FC<Props> = ({
       setDragging(false)
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        onChange(e.dataTransfer.files)
+        addFiles(e.dataTransfer.files)
         setDragging(false)
 
         e.dataTransfer.clearData()
       }
     },
-    [onChange],
+    [addFiles],
   )
 
   const handleFileSelection = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files.length > 0) {
-        onChange(e.target.files)
+        addFiles(e.target.files)
       }
     },
-    [onChange],
+    [addFiles],
   )
 
   React.useEffect(() => {

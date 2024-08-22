@@ -24,7 +24,6 @@ import {
   Table,
   UnpublishMany,
   ViewDescription,
-  bulkUploadDrawerSlug,
   useConfig,
   useEditDepth,
   useListInfo,
@@ -44,6 +43,7 @@ import './index.scss'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const bulkUploadDrawerSlug = 'bulk-upload-list-view'
 
 export const DefaultListView: React.FC = () => {
   const {
@@ -158,6 +158,7 @@ export const DefaultListView: React.FC = () => {
               {isUploadCollection && collectionConfig.upload.bulkUpload ? (
                 <BulkUploadDrawer
                   collectionSlug={collectionSlug}
+                  drawerSlug={bulkUploadDrawerSlug}
                   onSuccess={() => clearRouteCache()}
                 />
               ) : null}
