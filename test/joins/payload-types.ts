@@ -54,6 +54,9 @@ export interface Post {
   id: string;
   title?: string | null;
   category?: (string | null) | Category;
+  group?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -64,6 +67,7 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
+  group?: {};
   updatedAt: string;
   createdAt: string;
 }

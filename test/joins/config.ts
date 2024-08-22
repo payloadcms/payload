@@ -25,17 +25,17 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'categories',
         },
-        // {
-        //   name: 'group',
-        //   type: 'group',
-        //   fields: [
-        //     {
-        //       name: 'category',
-        //       type: 'relationship',
-        //       relationTo: 'categories',
-        //     },
-        //   ],
-        // },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: 'categories',
+            },
+          ],
+        },
       ],
     },
     {
@@ -54,18 +54,18 @@ export default buildConfigWithDefaults({
           collection: 'posts',
           on: 'category',
         },
-        // {
-        //   name: 'group',
-        //   type: 'group',
-        //   fields: [
-        //     {
-        //       name: 'posts',
-        //       type: 'join',
-        //       collection: 'posts',
-        //       on: 'group.category',
-        //     },
-        //   ],
-        // },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'posts',
+              type: 'join',
+              collection: 'posts',
+              on: 'group.category',
+            },
+          ],
+        },
       ],
     },
     {
@@ -119,7 +119,7 @@ export default buildConfigWithDefaults({
       },
     })
 
-    await payload.create({
+    const category = await payload.create({
       collection: 'categories',
       data: {
         name: 'example',
