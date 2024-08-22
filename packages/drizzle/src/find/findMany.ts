@@ -19,7 +19,6 @@ type Args = {
 export const findMany = async function find({
   adapter,
   fields,
-  joins: joinQuery,
   limit: limitArg,
   locale,
   page = 1,
@@ -68,7 +67,6 @@ export const findMany = async function find({
     adapter,
     depth: 0,
     fields,
-    joinQuery,
     tableName,
   })
 

@@ -289,6 +289,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
       draft,
       fallbackLocale,
       global: null,
+      joins: false,
       locale,
       overrideAccess,
       req,

@@ -1,6 +1,6 @@
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
+import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -35,14 +35,11 @@ export const sanitizeCollection = async (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug) || []
-  const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
-    joins,
     richTextSanitizationPromises,
-    schemaPath: '',
     validRelationships,
   })
 
@@ -180,9 +177,5 @@ export const sanitizeCollection = async (
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
-  const sanitizedConfig = sanitized as SanitizedCollectionConfig
-
-  sanitizedConfig.joins = joins
-
-  return sanitizedConfig
+  return sanitized as SanitizedCollectionConfig
 }

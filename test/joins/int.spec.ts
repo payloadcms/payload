@@ -73,10 +73,10 @@ describe('Joins Field Tests', () => {
       collection: 'categories',
     })
 
-    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
-    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('id')
-    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts.docs[0].title).toStrictEqual('test 9')
+    expect(categoryWithPosts.posts.docs).toHaveLength(10)
+    expect(categoryWithPosts.posts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.posts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.posts.docs[0].title).toStrictEqual('test 9')
   })
 
   it('should populate joins using find', async () => {

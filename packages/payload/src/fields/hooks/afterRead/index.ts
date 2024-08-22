@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JoinQuery, JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -16,6 +16,7 @@ type Args<T extends JsonObject> = {
   findMany?: boolean
   flattenLocales?: boolean
   global: SanitizedGlobalConfig | null
+  joins?: JoinQuery
   locale: string
   overrideAccess: boolean
   req: PayloadRequest
@@ -44,6 +45,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     findMany,
     flattenLocales = true,
     global,
+    joins,
     locale,
     overrideAccess,
     req,
@@ -75,6 +77,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     findMany,
     flattenLocales,
     global,
+    joins,
     locale,
     overrideAccess,
     path: [],

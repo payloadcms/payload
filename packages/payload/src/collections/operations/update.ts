@@ -185,6 +185,8 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           draft: draftArg,
           fallbackLocale,
           global: null,
+          // TODO: joins needs to come from args
+          joins: {},
           locale,
           overrideAccess: true,
           req,
@@ -335,6 +337,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           draft: draftArg,
           fallbackLocale: null,
           global: null,
+          joins: false,
           locale,
           overrideAccess,
           req,
