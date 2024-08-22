@@ -387,6 +387,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '上次保存{{distance}}之前',
     noFurtherVersionsFound: '没有发现其他版本',
     noRowsFound: '没有发现{{label}}',
+    noRowsSelected: undefined,
     preview: '预览',
     previouslyPublished: '先前发布过的',
     problemRestoringVersion: '恢复这个版本时发生了问题',

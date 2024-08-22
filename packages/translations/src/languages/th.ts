@@ -394,6 +394,7 @@ export const thTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
     noRowsFound: 'ไม่พบ {{label}}',
+    noRowsSelected: undefined,
     preview: 'ตัวอย่าง',
     previouslyPublished: 'เผยแพร่ก่อนหน้านี้',
     problemRestoringVersion: 'เกิดปัญหาระหว่างการกู้คืนเวอร์ชันนี้',

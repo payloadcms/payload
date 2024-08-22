@@ -397,6 +397,7 @@ export const viTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
     noFurtherVersionsFound: 'Không tìm thấy phiên bản cũ hơn',
     noRowsFound: 'Không tìm thấy: {{label}}',
+    noRowsSelected: undefined,
     preview: 'Bản xem trước',
     previouslyPublished: 'Đã xuất bản trước đây',
     problemRestoringVersion: 'Đã xảy ra vấn đề khi khôi phục phiên bản này',

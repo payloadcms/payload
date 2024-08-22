@@ -402,6 +402,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
     noFurtherVersionsFound: 'Інших версій не знайдено',
     noRowsFound: 'Не знайдено {{label}}',
+    noRowsSelected: undefined,
     preview: 'Попередній перегляд',
     previouslyPublished: 'Раніше опубліковано',
     problemRestoringVersion: 'Виникла проблема з відновленням цієї версії',
