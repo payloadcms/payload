@@ -36,7 +36,7 @@
   &__h1 {
     font-size: base(1.4);
     font-weight: 700;
-    margin-block: 0.4em 0.5em;
+    margin-block: 0.5em 0.4em;
     line-height: base(1.2);
     letter-spacing: normal;
   }
@@ -44,7 +44,7 @@
   &__h2 {
     font-size: base(1.25);
     font-weight: 700;
-    margin-block: 0.4em 0.45em;
+    margin-block: 0.55em 0.4em;
     line-height: base(1.2);
     letter-spacing: normal;
   }
@@ -52,7 +52,7 @@
   &__h3 {
     font-size: base(1.1);
     font-weight: 700;
-    margin-block: 0.4em 0.4em;
+    margin-block: 0.6em 0.4em;
     line-height: base(1.3);
     letter-spacing: normal;
   }
@@ -60,7 +60,7 @@
   &__h4 {
     font-size: base(1);
     font-weight: 700;
-    margin-block: 0.4em 0.35em;
+    margin-block: 0.65em 0.4em;
     line-height: base(1.4);
     letter-spacing: normal;
   }
@@ -68,7 +68,7 @@
   &__h5 {
     font-size: base(0.9);
     font-weight: 700;
-    margin-block: 0.4em 0.3em;
+    margin-block: 0.7em 0.4em;
     line-height: base(1.5);
     letter-spacing: normal;
   }
@@ -76,7 +76,7 @@
   &__h6 {
     font-size: base(0.8);
     font-weight: 700;
-    margin-block: 0.4em 0.25em;
+    margin-block: 0.75em 0.4em;
     line-height: base(1.5);
     letter-spacing: 0.1em;
   }
@@ -116,7 +116,9 @@
   }
 
   &__textCode {
-    background-color: var(--theme-elevation-100);
+    background-color: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-150);
+    color: var(--theme-error-600);
     padding: base(0.1) base(0.2);
     font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
     font-size: base(0.7);
@@ -135,7 +137,7 @@
   }
 
   &__link {
-    color: var(--theme-success-600);
+    color: var(--theme-success-750);
     text-decoration: none;
     border-bottom: 1px dotted;
   }
@@ -363,7 +365,13 @@
 
   .ContentEditable__root {
     &:first-child {
-      margin-bottom: 05;
+      margin-top: 0;
     }
+  }
+}
+
+html[data-theme='dark'] {
+  .LexicalEditorTheme__textCode {
+    color: var(--theme-warning-600);
   }
 }
