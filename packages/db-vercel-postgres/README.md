@@ -1,6 +1,6 @@
 # Payload Postgres Adapter
 
-Official Postgres adapter for [Payload](https://payloadcms.com).
+[Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) adapter for [Payload](https://payloadcms.com).
 
 - [Main Repository](https://github.com/payloadcms/payload)
 - [Payload Docs](https://payloadcms.com/docs)
@@ -8,7 +8,7 @@ Official Postgres adapter for [Payload](https://payloadcms.com).
 ## Installation
 
 ```bash
-npm install @payloadcms/db-postgres
+npm install @payloadcms/db-vercel-postgres
 ```
 
 ## Usage
@@ -17,10 +17,10 @@ npm install @payloadcms/db-postgres
 
 ```ts
 import { buildConfig } from 'payload'
-import { postgresAdapter } from '@payloadcms/db-postgres'
+import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
 export default buildConfig({
-  db: postgresAdapter({
+  db: vercelPostgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI,
     },
@@ -31,7 +31,7 @@ export default buildConfig({
 
 ### Automatic Connection String Detection
 
-Have Vercel automatically detect from environment variable (typically `process.env.DATABASE_URL`)
+Have Vercel automatically detect from environment variable (typically `process.env.POSTGRES_URL`)
 
 ```ts
 export default buildConfig({
