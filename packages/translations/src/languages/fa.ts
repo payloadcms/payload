@@ -184,6 +184,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
+    clearAll: undefined,
     close: 'بستن',
     collapse: 'بستن',
     collections: 'مجموعه‌ها',
@@ -399,6 +400,7 @@ export const faTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
+    noRowsSelected: undefined,
     preview: 'پیش‌نمایش',
     previouslyPublished: 'قبلا منتشر شده',
     problemRestoringVersion: 'مشکلی در بازیابی این نگارش وجود دارد',

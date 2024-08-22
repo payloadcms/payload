@@ -185,6 +185,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    clearAll: undefined,
     close: 'Lukk',
     collapse: 'Skjul',
     collections: 'Samlinger',
@@ -402,6 +403,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',
     noRowsFound: 'Ingen {{label}} funnet',
+    noRowsSelected: undefined,
     preview: 'Forhåndsvisning',
     previouslyPublished: 'Tidligere Publisert',
     problemRestoringVersion: 'Det oppstod et problem med gjenoppretting av denne versjonen',

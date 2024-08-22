@@ -187,6 +187,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
+    clearAll: undefined,
     close: 'Закрыть',
     collapse: 'Свернуть',
     collections: 'Коллекции',
@@ -404,6 +405,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
+    noRowsSelected: undefined,
     preview: 'Предпросмотр',
     previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',

@@ -186,6 +186,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
+    clearAll: undefined,
     close: 'Fechar',
     collapse: 'Recolher',
     collections: 'Coleções',
@@ -403,6 +404,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Última gravação há {{distance}}',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
+    noRowsSelected: undefined,
     preview: 'Pré-visualização',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocorreu um problema ao restaurar essa versão',

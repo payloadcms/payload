@@ -1,9 +1,7 @@
 'use client'
-import type { FilterOptionsResult, PaginatedDocs, Where } from 'payload'
+import type { FilterOptionsResult, PaginatedDocs } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
-import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 
 import type { useSelection } from '../../../providers/Selection/index.js'
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
@@ -95,6 +93,29 @@ export const UploadComponentHasMany: React.FC<
   })
 
   const collection = collections.find((coll) => coll.slug === relationTo)
+
+  // Get the labels of the collections that the relation is to
+  const labels = useMemo(() => {
+    function joinWithCommaAndOr(items: string[]): string {
+      const or = t('general:or')
+
+      if (items.length === 0) return ''
+      if (items.length === 1) return items[0]
+      if (items.length === 2) return items.join(` ${or} `)
+
+      return items.slice(0, -1).join(', ') + ` ${or} ` + items[items.length - 1]
+    }
+
+    const labels = []
+
+    collections.forEach((collection) => {
+      if (relationTo.includes(collection.slug)) {
+        labels.push(collection.labels?.singular || collection.slug)
+      }
+    })
+
+    return joinWithCommaAndOr(labels)
+  }, [collections, relationTo, t])
 
   const onListSelect = useCallback(
     (selections: ReturnType<typeof useSelection>['selected']) => {

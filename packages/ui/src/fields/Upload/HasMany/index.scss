@@ -6,13 +6,23 @@
 
   &__controls {
     display: flex;
+    flex-wrap: wrap;
     gap: base(2);
     margin-top: base(1);
+
+    @include extra-small-break {
+      gap: base(1);
+    }
   }
 
   &__buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: base(1);
+
+    & .relationship-add-new__add-button {
+      padding: 0;
+    }
   }
 
   &__add-new {
@@ -27,6 +37,12 @@
     font-family: inherit;
     color: inherit;
     cursor: pointer;
+    margin-inline-start: auto;
+    color: var(--theme-elevation-800);
+
+    @include extra-small-break {
+      margin-inline-start: 0;
+    }
   }
 
   &__draggable-rows {
@@ -37,8 +53,10 @@
 
   &__no-data {
     background: var(--theme-elevation-50);
-    padding: 0.5rem 0.75rem;
+    padding: 1rem 0.75rem;
     border-radius: 3px;
+    color: var(--theme-elevation-700);
+    text-align: center;
   }
 }
 
