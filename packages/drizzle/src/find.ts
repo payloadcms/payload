@@ -10,7 +10,6 @@ export const find: Find = async function find(
   this: DrizzleAdapter,
   {
     collection,
-    joins,
     limit,
     locale,
     page = 1,
@@ -28,7 +27,6 @@ export const find: Find = async function find(
   return findMany({
     adapter: this,
     fields: collectionConfig.fields,
-    joins,
     limit,
     locale,
     page,
