@@ -22,13 +22,19 @@ export type Column = {
 }
 
 export type Props = {
+  readonly appearance?: 'compact' | 'default'
   readonly columns?: Column[]
   readonly customCellContext?: Record<string, unknown>
   readonly data: Record<string, unknown>[]
   readonly fields: ClientField[]
 }
 
-export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {
+export const Table: React.FC<Props> = ({
+  appearance,
+  columns: columnsFromProps,
+  customCellContext,
+  data,
+}) => {
   const { columns: columnsFromContext } = useTableColumns()
 
   const columns = columnsFromProps || columnsFromContext
@@ -40,7 +46,11 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
   }
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>

@@ -194,6 +194,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     },
                   },
                 } as ClientField,
+                link: false,
               },
             ]}
             collectionSlug={relationTo}

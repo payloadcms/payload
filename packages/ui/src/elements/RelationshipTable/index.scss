@@ -4,6 +4,7 @@
   &__header {
     display: flex;
     justify-content: space-between;
+    margin-bottom: var(--base);
   }
 
   &__actions {
