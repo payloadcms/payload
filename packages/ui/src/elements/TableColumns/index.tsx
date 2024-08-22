@@ -28,6 +28,7 @@ export type ListPreferences = {
 }
 
 type Props = {
+  readonly beforeRows?: Column[]
   readonly cellProps?: Partial<CellComponentProps>[]
   readonly children: React.ReactNode
   readonly collectionSlug: string
@@ -37,6 +38,7 @@ type Props = {
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
+  beforeRows,
   cellProps,
   children,
   collectionSlug,
@@ -48,9 +50,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     config: { collections },
   } = useConfig()
 
-  const collectionConfig = collections.find(
-    (collectionConfig) => collectionConfig.slug === collectionSlug,
-  )
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
 
   const {
     admin: { defaultColumns, useAsTitle },
@@ -66,6 +66,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({
+      beforeRows,
       cellProps,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
@@ -173,10 +174,11 @@ export const TableColumnsProvider: React.FC<Props> = ({
         if (currentPreferences?.columns) {
           setTableColumns(
             buildColumnState({
+              beforeRows,
               cellProps,
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
-              enableRowSelections: true,
+              enableRowSelections,
               fields,
               useAsTitle,
             }),
@@ -196,6 +198,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
     useAsTitle,
     listPreferences,
     initialColumns,
+    beforeRows,
+    enableRowSelections,
   ])
 
   return (

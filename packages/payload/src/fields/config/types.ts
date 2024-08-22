@@ -1411,7 +1411,12 @@ export type JoinField = {
 } & FieldBase
 
 export type JoinFieldClient = {
-  admin?: AdminClient & Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
+  admin?: {
+    components?: {
+      Label?: MappedComponent
+    } & AdminClient['components']
+  } & AdminClient &
+    Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
   Pick<JoinField, 'collection' | 'index' | 'on' | 'type'>
 

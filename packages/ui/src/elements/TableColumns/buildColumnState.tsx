@@ -19,16 +19,26 @@ import { SortColumn } from '../SortColumn/index.js'
 import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
+  beforeRows?: Column[]
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
+  enableRowTypes?: boolean
   fields: ClientField[]
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const buildColumnState = (args: Args): Column[] => {
-  const { cellProps, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
+  const {
+    beforeRows,
+    cellProps,
+    columnPreferences,
+    columns,
+    enableRowSelections,
+    fields,
+    useAsTitle,
+  } = args
 
   let sortedFieldMap = flattenFieldMap(fields)
 
@@ -122,24 +132,30 @@ export const buildColumnState = (args: Args): Column[] => {
 
     if (field) {
       const column: Column = {
-        Label,
+        Heading,
         accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
+          ...cellProps?.[index],
           field: {
             ...(field || ({} as ClientField)),
             ...(cellProps?.[index]?.field || ({} as ClientField)),
+            admin: {
+              ...(field.admin || {}),
+              ...(cellProps?.[index]?.field?.admin || {}),
+              components: {
+                ...(field.admin?.components || {}),
+                Cell: field.admin?.components?.Cell || {
+                  type: 'client',
+                  Component: DefaultCell,
+                  RenderedComponent: null,
+                },
+                Label,
+                ...(cellProps?.[index]?.field?.admin?.components || {}),
+              },
+            },
           } as ClientField,
-          ...cellProps?.[index],
           link: isFirstActiveColumn,
-        },
-        components: {
-          Cell: field.admin?.components?.Cell || {
-            type: 'client',
-            Component: DefaultCell,
-            RenderedComponent: null,
-          },
-          Heading,
         },
       }
 
@@ -151,18 +167,28 @@ export const buildColumnState = (args: Args): Column[] => {
 
   if (enableRowSelections) {
     sorted.unshift({
-      Label: null,
+      Heading: <SelectAll />,
       accessor: '_select',
       active: true,
-      components: {
-        Cell: {
-          type: 'client',
-          Component: null,
-          RenderedComponent: <SelectRow />,
-        },
-        Heading: <SelectAll />,
+      cellProps: {
+        field: {
+          admin: {
+            components: {
+              Cell: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <SelectRow />,
+              },
+              Label: null,
+            },
+          },
+        } as ClientField,
       },
     })
+  }
+
+  if (beforeRows) {
+    sorted.unshift(...beforeRows)
   }
 
   return sorted

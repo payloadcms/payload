@@ -13,6 +13,7 @@ export default buildConfigWithDefaults({
       slug: 'posts',
       admin: {
         useAsTitle: 'title',
+        defaultColumns: ['title', 'category', 'updatedAt', 'createdAt'],
       },
       fields: [
         {
@@ -126,34 +127,36 @@ export default buildConfigWithDefaults({
       },
     })
 
-    const post1 = await payload.create({
+    await payload.create({
       collection: 'posts',
       data: {
         category: category.id,
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 1',
       },
     })
-    const post2 = await payload.create({
+
+    await payload.create({
       collection: 'posts',
       data: {
         category: category.id,
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 2',
       },
     })
-    const post3 = await payload.create({
+
+    await payload.create({
       collection: 'posts',
       data: {
         category: category.id,
         group: {
           category: category.id,
         },
-        title: 'test',
+        title: 'Test Post 3',
       },
     })
   },
