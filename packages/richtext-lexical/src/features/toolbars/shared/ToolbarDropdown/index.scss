@@ -13,6 +13,7 @@
   cursor: pointer;
   position: relative;
   padding: 0 base(0.4) 0 base(0.3);
+  transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
   &-label {
     color: var(--theme-elevation-600);
