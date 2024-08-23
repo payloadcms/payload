@@ -67,7 +67,34 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
-  group?: {};
+  posts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+    hasPrevPage?: boolean | null;
+    limit?: number | null;
+    nextPage?: number | null;
+    offset?: number | null;
+    page?: number | null;
+    pagingCounter?: number | null;
+    prevPage?: number | null;
+    totalDocs?: number | null;
+    totalPages?: number | null;
+  } | null;
+  group?: {
+    posts?: {
+      docs?: (string | Post)[] | null;
+      hasNextPage?: boolean | null;
+      hasPrevPage?: boolean | null;
+      limit?: number | null;
+      nextPage?: number | null;
+      offset?: number | null;
+      page?: number | null;
+      pagingCounter?: number | null;
+      prevPage?: number | null;
+      totalDocs?: number | null;
+      totalPages?: number | null;
+    } | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -89,6 +116,19 @@ export interface LocalizedPost {
 export interface LocalizedCategory {
   id: string;
   name?: string | null;
+  posts?: {
+    docs?: (string | LocalizedPost)[] | null;
+    hasNextPage?: boolean | null;
+    hasPrevPage?: boolean | null;
+    limit?: number | null;
+    nextPage?: number | null;
+    offset?: number | null;
+    page?: number | null;
+    pagingCounter?: number | null;
+    prevPage?: number | null;
+    totalDocs?: number | null;
+    totalPages?: number | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }

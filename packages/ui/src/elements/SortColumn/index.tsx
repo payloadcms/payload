@@ -1,8 +1,7 @@
 'use client'
 import type { FieldBase } from 'payload'
 
-// TODO: abstract the `next/navigation` dependency out from this component
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -22,7 +21,7 @@ const baseClass = 'sort-column'
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, Label, disable = false, label } = props
   const { searchParams } = useSearchParams()
-  const { refineListData } = useListQuery()
+  const { handleSortChange } = useListQuery()
   const { t } = useTranslation()
 
   const { sort } = searchParams
@@ -36,15 +35,6 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const descClasses = [`${baseClass}__desc`]
   if (sort === desc) descClasses.push(`${baseClass}--active`)
 
-  const setSort = useCallback(
-    async (newSort: string) => {
-      await refineListData({
-        sort: newSort,
-      })
-    },
-    [refineListData],
-  )
-
   return (
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{Label}</span>
@@ -56,7 +46,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void setSort(asc)}
+            onClick={() => void handleSortChange(asc)}
             type="button"
           >
             <ChevronIcon direction="up" />
@@ -67,7 +57,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void setSort(desc)}
+            onClick={() => void handleSortChange(desc)}
             type="button"
           >
             <ChevronIcon />
