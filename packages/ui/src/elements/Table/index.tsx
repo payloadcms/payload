@@ -35,7 +35,7 @@ export const Table: React.FC<Props> = ({
   customCellContext,
   data,
 }) => {
-  const { columns: columnsFromContext } = useTableColumns()
+  const { cellProps, columns: columnsFromContext } = useTableColumns()
 
   const columns = columnsFromProps || columnsFromContext
 
@@ -76,8 +76,26 @@ export const Table: React.FC<Props> = ({
                         rowData={row}
                       >
                         <RenderComponent
-                          clientProps={{ ...col?.cellProps }}
-                          mappedComponent={col.cellProps?.field?.admin?.components?.Cell}
+                          clientProps={{
+                            ...(cellProps[colIndex] || {}),
+                            ...col?.cellProps,
+                            field: {
+                              ...(cellProps[colIndex]?.field || {}),
+                              ...col?.cellProps?.field,
+                              admin: {
+                                ...(cellProps[colIndex]?.field?.admin || {}),
+                                ...col?.cellProps?.field?.admin,
+                                components: {
+                                  ...(cellProps[colIndex]?.field?.admin?.components || {}),
+                                  ...col?.cellProps?.field?.admin?.components,
+                                },
+                              },
+                            },
+                          }}
+                          mappedComponent={
+                            cellProps[colIndex]?.field?.admin?.components?.Cell ||
+                            col.cellProps?.field?.admin?.components?.Cell
+                          }
                         />
                       </TableCellProvider>
                     </td>

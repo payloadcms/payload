@@ -1,10 +1,5 @@
 'use client'
-import type {
-  CellComponentProps,
-  ClientField,
-  SanitizedCollectionConfig,
-  StaticLabel,
-} from 'payload'
+import type { ClientField, SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import React from 'react'
 
@@ -20,7 +15,6 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
   beforeRows?: Column[]
-  cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   enableRowSelections: boolean
@@ -30,15 +24,7 @@ type Args = {
 }
 
 export const buildColumnState = (args: Args): Column[] => {
-  const {
-    beforeRows,
-    cellProps,
-    columnPreferences,
-    columns,
-    enableRowSelections,
-    fields,
-    useAsTitle,
-  } = args
+  const { beforeRows, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
 
   let sortedFieldMap = flattenFieldMap(fields)
 
@@ -136,13 +122,10 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
-          ...cellProps?.[index],
           field: {
             ...(field || ({} as ClientField)),
-            ...(cellProps?.[index]?.field || ({} as ClientField)),
             admin: {
               ...(field.admin || {}),
-              ...(cellProps?.[index]?.field?.admin || {}),
               components: {
                 ...(field.admin?.components || {}),
                 Cell: field.admin?.components?.Cell || {
@@ -151,7 +134,6 @@ export const buildColumnState = (args: Args): Column[] => {
                   RenderedComponent: null,
                 },
                 Label,
-                ...(cellProps?.[index]?.field?.admin?.components || {}),
               },
             },
           } as ClientField,

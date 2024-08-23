@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps, ClientField, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
@@ -13,6 +13,7 @@ import { filterFields } from './filterFields.js'
 import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
+  cellProps?: Partial<CellComponentProps>[]
   columns: Column[]
   moveColumn: (args: { fromIndex: number; toIndex: number }) => void
   setActiveColumns: (columns: string[]) => void
@@ -67,7 +68,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const [tableColumns, setTableColumns] = React.useState(() =>
     buildColumnState({
       beforeRows,
-      cellProps,
       columnPreferences: listPreferences?.columns,
       columns: initialColumns,
       enableRowSelections,
@@ -88,23 +88,28 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [preferenceKey, setPreference],
   )
 
-  const reassignLinkColumn = (columns: Column[]): Column[] => {
+  const reassignLinkColumn = useCallback((columns: Column[]): Column[] => {
     let foundFirstActive = false
+    let linkColumn = false
+
     const newColumns = columns.map((col) => {
-      const linkColumn = col.active && !foundFirstActive && col.accessor !== '_select'
+      if (col.active) {
+        linkColumn = !foundFirstActive && col.accessor !== '_select'
+      }
+
       if (linkColumn) foundFirstActive = true
 
       return {
         ...col,
         cellProps: {
-          ...col.cellProps,
           link: linkColumn,
+          ...col.cellProps,
         },
       }
     })
 
     return newColumns
-  }
+  }, [])
 
   const moveColumn = useCallback(
     (args: { fromIndex: number; toIndex: number }) => {
@@ -118,7 +123,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       setTableColumns(newColumns)
       updateColumnPreferences(newColumns)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, updateColumnPreferences, reassignLinkColumn],
   )
 
   const toggleColumn = useCallback(
@@ -139,7 +144,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       setTableColumns(newColumns)
       updateColumnPreferences(newColumns)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, updateColumnPreferences, reassignLinkColumn],
   )
 
   const setActiveColumns = React.useCallback(
@@ -154,7 +159,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       const newColumns = reassignLinkColumn(activeColumns)
       updateColumnPreferences(newColumns)
     },
-    [tableColumns, updateColumnPreferences],
+    [tableColumns, updateColumnPreferences, reassignLinkColumn],
   )
 
   // //////////////////////////////////////////////
@@ -175,7 +180,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
           setTableColumns(
             buildColumnState({
               beforeRows,
-              cellProps,
               columnPreferences: currentPreferences?.columns,
               columns: initialColumns,
               enableRowSelections,
@@ -193,7 +197,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     getPreference,
     collectionSlug,
     fields,
-    cellProps,
     defaultColumns,
     useAsTitle,
     listPreferences,
@@ -205,6 +208,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   return (
     <TableColumnContext.Provider
       value={{
+        cellProps,
         columns: tableColumns,
         moveColumn,
         setActiveColumns,

@@ -58,9 +58,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             field: {
               admin: {
                 // @ts-expect-error // TODO: `Label` does not exist on the UI field
-                components: { Label },
-              },
-            },
+                components: { Label } = {},
+              } = {},
+            } = {},
           },
         } = col
 

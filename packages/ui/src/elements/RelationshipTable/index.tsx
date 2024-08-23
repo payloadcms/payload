@@ -8,11 +8,12 @@ import type {
   Where,
 } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
+
+import { getTranslation } from '@payloadcms/translations'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -24,7 +25,6 @@ import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { UseDocumentDrawer } from '../DocumentDrawer/types.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
@@ -213,6 +213,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               },
             ]}
             cellProps={[
+              {},
               {
                 field: {
                   admin: {
