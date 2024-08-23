@@ -125,7 +125,7 @@ describe('Joins Field Tests', () => {
         collection: 'localized-posts',
         locale: 'en',
         data: {
-          title: 'english post',
+          title: 'english post 1',
           category: localizedCategory.id,
         },
       })
@@ -142,7 +142,7 @@ describe('Joins Field Tests', () => {
         collection: 'localized-posts',
         locale: 'en',
         data: {
-          title: 'spanish post',
+          title: 'english post 2',
           category: localizedCategory.id,
         },
       })

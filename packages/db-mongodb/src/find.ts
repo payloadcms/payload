@@ -105,6 +105,8 @@ export const find: Find = async function find(
 
   const joinPromises = []
 
+  // TODO:
+  // we need to convert to aggregation here for performance
   result.docs.forEach((doc) => {
     joinPromises.push(
       setJoins({

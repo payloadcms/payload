@@ -57,7 +57,13 @@ export const setJoins = async ({
             let current = doc
             for (let i = 0; i <= path.length - 1; i++) {
               if (i === path.length - 1) {
-                current[path[i]] = data
+                if (join.field.localized) {
+                  current[path[i]] = {
+                    [locale]: data,
+                  }
+                } else {
+                  current[path[i]] = data
+                }
               } else {
                 if (!current[path[i]]) {
                   current[path[i]] = {}

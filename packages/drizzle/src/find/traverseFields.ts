@@ -1,6 +1,6 @@
-import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field, JoinQuery } from 'payload'
 
+import { type DBQueryConfig, sql } from 'drizzle-orm'
 import { APIError } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -232,17 +232,20 @@ export const traverseFields = ({
             })
             const withJoin: DBQueryConfig<'many', true, any, any> = {
               columns: {
-                id: true,
                 ...selectFields,
               },
-              // TODO: join a custom query to handle count
-              // extras: {},
               limit,
               orderBy: () => [orderBy.order(orderBy.column)],
             }
+
             if (field.localized) {
               withJoin.columns._locale = true
+              // Masquerade the parent_id as id, for population to work appropriately
+              withJoin.extras = { id: sql`_parent_id`.as('id') }
+            } else {
+              withJoin.columns.id = true
             }
+
             currentArgs.with[toSnakeCase(`${path}${field.name}`)] = withJoin
           }
           break
