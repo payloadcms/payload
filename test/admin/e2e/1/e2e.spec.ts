@@ -336,6 +336,20 @@ describe('admin1', () => {
   })
 
   describe('routing', () => {
+    test('should 404 not found root pages', async () => {
+      await page.goto(`${serverURL}/admin/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should 404 not found documents', async () => {
+      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
     test('should use custom logout route', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
 
