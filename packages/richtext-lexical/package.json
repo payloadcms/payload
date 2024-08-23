@@ -83,7 +83,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "babel-plugin-react-compiler": "0.0.0-experimental-1cd8995-20240814",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.23.0",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
     "eslint-plugin-react-compiler": "0.0.0-experimental-d0e920e-20240815",
     "payload": "workspace:*",
