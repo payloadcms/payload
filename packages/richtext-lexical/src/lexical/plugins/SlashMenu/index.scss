@@ -1,9 +1,9 @@
 @import '../../../scss/styles.scss';
 
 .slash-menu-popup {
-  background: var(--color-base-0);
+  background: var(--theme-elevation-0);
   width: 200px;
-  color: var(--color-base-800);
+  color: var(--theme-elevation-800);
   border-radius: $style-radius-m;
   list-style: none;
   font-family: var(--font-body);
@@ -22,7 +22,7 @@
 
   &__group-title {
     padding-left: 10px;
-    color: var(--color-base-600);
+    color: var(--theme-elevation-600);
     font-size: 10px;
   }
 
@@ -33,7 +33,7 @@
     box-sizing: border-box;
     background: none;
     border: none;
-    color: var(--color-base-900);
+    color: var(--theme-elevation-900);
     display: flex;
     align-items: center;
     height: 30px;
@@ -41,7 +41,7 @@
     cursor: pointer;
 
     &--selected {
-      background: var(--color-base-100);
+      background: var(--theme-elevation-100);
     }
 
     &-text {
@@ -52,7 +52,7 @@
     }
 
     .icon {
-      color: var(--color-base-500);
+      color: var(--theme-elevation-500);
       min-width: fit-content;
     }
   }
