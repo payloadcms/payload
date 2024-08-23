@@ -1,10 +1,10 @@
 'use client'
 
-import type { UploadFieldProps, Where } from 'payload'
+import type { JsonObject, UploadFieldProps, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { FieldType } from '../../forms/useField/index.js'
 import type { UploadInputProps } from './HasOne/Input.js'
@@ -51,10 +51,10 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const { code } = useLocale()
   const { i18n } = useTranslation()
   const { config } = useConfig()
-  const { openModal } = useModal()
+  const { closeModal, openModal } = useModal()
 
   const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null)
-  const [fileDocs, setFileDocs] = React.useState([])
+  const fileDocs = React.useRef<JsonObject | JsonObject[]>([])
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -85,7 +85,10 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const setValue = useMemo(() => fieldHookResult.setValue, [fieldHookResult])
+  const { setValue, value } = useMemo(
+    () => ({ setValue: fieldHookResult.setValue, value: fieldHookResult.value }),
+    [fieldHookResult],
+  )
 
   const disabled =
     readOnlyFromProps ||
@@ -125,26 +128,35 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
       })
       if (response.ok) {
         const json = await response.json()
-        setFileDocs(hasMany ? json.docs : json.docs[0])
+        fileDocs.current = hasMany ? json.docs : json.docs[0]
+        //setFileDocs(hasMany ? json.docs : json.docs[0])
       } else {
         // setMissingFiles(true)
-        setFileDocs([])
+        //setFileDocs([])
       }
     },
     [code, config.routes.api, config.serverURL, hasMany, i18n.language, relationTo],
   )
+
+  useEffect(() => {
+    if (hasMany) {
+      void loadFileDocs(Array.isArray(value) ? value : [value])
+    }
+  }, [hasMany, loadFileDocs, value])
 
   const onChange = useCallback(
     (incomingValue) => {
       if (!incomingValue) {
         setValue(hasMany ? [] : null)
       } else {
-        const updatedValue = incomingValue?.id || incomingValue
-        setValue(updatedValue)
-        void loadFileDocs(Array.isArray(updatedValue) ? updatedValue : [updatedValue])
+        if (Array.isArray(incomingValue)) {
+          setValue([...value, ...incomingValue])
+        } else {
+          setValue(incomingValue)
+        }
       }
     },
-    [loadFileDocs, setValue, hasMany],
+    [setValue, hasMany, value],
   )
 
   const onUploadSuccess = useCallback(
@@ -196,10 +208,16 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         required={required}
         {...(props.labelProps || {})}
       />
+      {/* <BulkUploadDrawer
+        collectionSlug={relationTo}
+        drawerSlug={drawerSlug}
+        //initialFiles={selectedFiles}
+        onSuccess={onUploadSuccess}
+      /> */}
 
       {!fieldHookResult.value ||
       (Array.isArray(fieldHookResult.value) && fieldHookResult.value.length === 0) ? (
-        <React.Fragment>
+        <>
           <Dropzone multipleFiles={hasMany} onChange={onFileSelection} />
           <BulkUploadDrawer
             collectionSlug={relationTo}
@@ -207,15 +225,19 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
             initialFiles={selectedFiles}
             onSuccess={onUploadSuccess}
           />
-        </React.Fragment>
+        </>
       ) : hasMany ? (
         <UploadComponentHasMany
           {...props}
           canCreate={canCreate}
           disabled={disabled}
+          drawerSlug={drawerSlug}
           fieldHookResult={fieldHookResult as FieldType<string[]>}
-          fileDocs={fileDocs}
+          fileDocs={Array.isArray(fileDocs.current) ? fileDocs.current : []}
           onChange={onChange}
+          onUploadSuccess={onUploadSuccess}
+          selectedFiles={selectedFiles}
+          //onFileSelection={onFileSelection}
         />
       ) : (
         <UploadComponentHasOne

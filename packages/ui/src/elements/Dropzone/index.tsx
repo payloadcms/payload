@@ -13,6 +13,7 @@ const handleDragOver = (e: DragEvent) => {
 const baseClass = 'dropzone'
 
 export type Props = {
+  readonly children?: React.ReactNode
   readonly className?: string
   readonly mimeTypes?: string[]
   readonly multipleFiles?: boolean
@@ -21,6 +22,7 @@ export type Props = {
 }
 
 export const Dropzone: React.FC<Props> = ({
+  children,
   className,
   mimeTypes,
   multipleFiles,
@@ -150,6 +152,8 @@ export const Dropzone: React.FC<Props> = ({
         ref={inputRef}
         type="file"
       />
+
+      {children}
 
       <p className={`${baseClass}__label`}>
         {t('general:or')} {t('upload:dragAndDrop')}
