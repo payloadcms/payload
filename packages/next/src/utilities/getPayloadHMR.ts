@@ -62,7 +62,9 @@ export const reload = async (
   }
 }
 
-export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
+export const getPayloadHMR = async (
+  options: Pick<InitOptions, 'config' | 'importMap'>,
+): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayloadHMR to work.')
   }
