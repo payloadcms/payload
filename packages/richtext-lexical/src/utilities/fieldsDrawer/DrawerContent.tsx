@@ -46,7 +46,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -65,7 +65,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return await getFormState({
+      const { state } = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
@@ -75,6 +75,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         },
         serverURL: config.serverURL,
       })
+
+      return state
     },
 
     [config.routes.api, config.serverURL, schemaFieldsPath, id],

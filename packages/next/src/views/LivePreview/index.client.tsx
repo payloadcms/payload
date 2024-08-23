@@ -117,7 +117,7 @@ const PreviewView: React.FC<Props> = ({
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
 
-      return getFormState({
+      const { state } = await getFormState({
         apiRoute,
         body: {
           id,
@@ -128,6 +128,8 @@ const PreviewView: React.FC<Props> = ({
         },
         serverURL,
       })
+
+      return state
     },
     [serverURL, apiRoute, id, operation, schemaPath, getDocPreferences],
   )

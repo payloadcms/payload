@@ -73,37 +73,39 @@ export const LinkButton: React.FC = () => {
 
   const fields = richTextComponentMap.get(linkFieldsSchemaPath)
 
+  const handleClick = async () => {
+    if (isElementActive(editor, 'link')) {
+      unwrapLink(editor)
+    } else {
+      openModal(drawerSlug)
+      const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
+
+      if (!isCollapsed) {
+        const data = {
+          text: editor.selection ? Editor.string(editor, editor.selection) : '',
+        }
+
+        const { state } = await getFormState({
+          apiRoute: config.routes.api,
+          body: {
+            data,
+            operation: 'update',
+            schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
+          },
+          serverURL: config.serverURL,
+        })
+
+        setInitialState(state)
+      }
+    }
+  }
+
   return (
     <Fragment>
       <ElementButton
         className="link"
         format="link"
-        onClick={async () => {
-          if (isElementActive(editor, 'link')) {
-            unwrapLink(editor)
-          } else {
-            openModal(drawerSlug)
-            const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
-
-            if (!isCollapsed) {
-              const data = {
-                text: editor.selection ? Editor.string(editor, editor.selection) : '',
-              }
-
-              const state = await getFormState({
-                apiRoute: config.routes.api,
-                body: {
-                  data,
-                  operation: 'update',
-                  schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
-                },
-                serverURL: config.serverURL,
-              })
-
-              setInitialState(state)
-            }
-          }
-        }}
+        onClick={void handleClick}
         tooltip={t('fields:addLink')}
       >
         <LinkIcon />

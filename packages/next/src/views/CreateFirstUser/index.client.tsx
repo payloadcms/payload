@@ -34,8 +34,8 @@ export const CreateFirstUserClient: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const { state } = await getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
@@ -44,7 +44,9 @@ export const CreateFirstUserClient: React.FC<{
           schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      }),
+      })
+      return state
+    },
     [apiRoute, userSlug, serverURL],
   )
 
