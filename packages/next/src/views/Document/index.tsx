@@ -75,6 +75,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
+  if (!data) {
+    notFound()
+  }
+
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
     id,
     collectionConfig,
