@@ -19,4 +19,5 @@ export async function removePreferences(
   })
 
   if (shouldLog) logger.info(`All user preferences removed.`)
+  process.exit(1)
 }
