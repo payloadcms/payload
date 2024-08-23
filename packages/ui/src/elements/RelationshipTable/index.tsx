@@ -2,16 +2,19 @@
 import type {
   ClientCollectionConfig,
   ClientField,
+  JoinFieldClient,
   JoinFieldProps,
   PaginatedDocs,
   Where,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
+
+import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
 import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
@@ -21,6 +24,7 @@ import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { UseDocumentDrawer } from '../DocumentDrawer/types.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
@@ -40,7 +44,7 @@ type RelationshipTableComponentProps = {
 }
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { Label, field, filterOptions, initialData, relationTo } = props
+  const { Label, field, filterOptions, initialData: initialDataFromProps, relationTo } = props
 
   const {
     config: {
@@ -49,6 +53,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     },
     getEntityConfig,
   } = useConfig()
+
+  const [initialData, setInitialData] = useState<PaginatedDocs>(initialDataFromProps)
 
   const { i18n, t } = useTranslation()
 
@@ -129,6 +135,21 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     collectionSlug: relationTo,
   })
 
+  const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
+      if (foundDocIndex !== -1) {
+        const newDocs = [...data.docs]
+        newDocs[foundDocIndex] = args.doc
+        setInitialData({
+          ...data,
+          docs: newDocs,
+        })
+      }
+    },
+    [data],
+  )
+
   const preferenceKey = `${relationTo}-list`
 
   if (isLoadingList) {
@@ -198,10 +219,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     components: {
                       Cell: {
                         type: 'client',
-                        Component: DrawerLink,
-                        clientProps: {
-                          field,
-                        },
+                        RenderedComponent: (
+                          <DrawerLink
+                            field={field as JoinFieldClient}
+                            onDrawerSave={onDrawerSave}
+                          />
+                        ),
                       },
                     },
                   },

@@ -1,7 +1,9 @@
 'use client'
-import type { CellComponentProps } from 'payload'
+import type { CellComponentProps, JoinFieldClient } from 'payload'
 
 import React from 'react'
+
+import type { DocumentDrawerProps } from '../../../DocumentDrawer/types.js'
 
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
@@ -9,9 +11,13 @@ import { DefaultCell } from '../../../Table/DefaultCell/index.js'
 import { useTableCell } from '../../../Table/index.js'
 import './index.scss'
 
-export const DrawerLink: React.FC<CellComponentProps> = (props) => {
+export const DrawerLink: React.FC<
+  {
+    readonly onDrawerSave?: DocumentDrawerProps['onSave']
+  } & CellComponentProps<JoinFieldClient>
+> = (props) => {
   const context = useTableCell()
-  const { field } = props
+  const { field, onDrawerSave } = props
 
   const {
     cellProps,
@@ -30,7 +36,7 @@ export const DrawerLink: React.FC<CellComponentProps> = (props) => {
       <DocumentDrawerToggler>
         <EditIcon />
       </DocumentDrawerToggler>
-      <DocumentDrawer />
+      <DocumentDrawer onSave={onDrawerSave} />
     </div>
   )
 }

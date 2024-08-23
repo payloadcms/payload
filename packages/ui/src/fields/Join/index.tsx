@@ -2,7 +2,7 @@
 
 import type { JoinFieldProps, PaginatedDocs } from 'payload'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
