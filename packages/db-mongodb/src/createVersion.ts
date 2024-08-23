@@ -1,7 +1,13 @@
-import type { CreateVersion, Document, PayloadRequest } from 'payload'
+import {
+  type CreateVersion,
+  type Document,
+  type PayloadRequest,
+  buildVersionCollectionFields,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 
 export const createVersion: CreateVersion = async function createVersion(
@@ -19,20 +25,20 @@ export const createVersion: CreateVersion = async function createVersion(
   const VersionModel = this.versions[collectionSlug]
   const options = await withSession(this, req)
 
-  const [doc] = await VersionModel.create(
-    [
-      {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
-      },
-    ],
-    options,
-    req,
-  )
+  const data = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: {
+      autosave,
+      createdAt,
+      latest: true,
+      parent,
+      updatedAt,
+      version: versionData,
+    },
+    fields: buildVersionCollectionFields(this.payload.collections[collectionSlug].config),
+  })
+
+  const [doc] = await VersionModel.create([data], options, req)
 
   await VersionModel.updateMany(
     {
