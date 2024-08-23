@@ -4,6 +4,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { JoinQuery, JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { combineQueries } from '../../../database/combineQueries.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
@@ -191,7 +192,8 @@ export const promise = async ({
         break
       }
       const joinQuery = joins?.[fieldSchemaPath.join('.')] || {}
-      const { limit, page, pagination = true, sort } = joinQuery
+      const { limit, page, pagination = true, sort, where } = joinQuery
+
       populationPromises.push(
         req.payload
           .find({
@@ -204,9 +206,9 @@ export const promise = async ({
             pagination,
             req,
             sort,
-            where: {
+            where: combineQueries(where, {
               [field.on]: { equals: doc.id },
-            },
+            }),
           })
           .then((result) => {
             siblingDoc[field.name] = result

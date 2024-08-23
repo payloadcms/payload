@@ -119,6 +119,7 @@ export type JoinQuery =
         page?: number
         pagination?: boolean
         sort?: string
+        where?: Where
       }
     }
   | false

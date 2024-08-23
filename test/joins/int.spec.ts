@@ -79,6 +79,25 @@ describe('Joins Field Tests', () => {
     expect(categoryWithPosts.posts.docs[0].title).toStrictEqual('test 9')
   })
 
+  it('should filter joins using where query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        posts: {
+          sort: '-title',
+          where: {
+            title: {
+              equals: 'test 9',
+            },
+          },
+        },
+      },
+      collection: 'categories',
+    })
+
+    expect(categoryWithPosts.posts.docs).toHaveLength(1)
+  })
+
   it('should populate joins using find', async () => {
     const result = await payload.find({
       collection: 'categories',

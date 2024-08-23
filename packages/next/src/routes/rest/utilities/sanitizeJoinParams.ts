@@ -14,6 +14,7 @@ export const sanitizeJoinParams = (
           page?: unknown
           pagination?: unknown
           sort?: string
+          where?: unknown
         }
       }
     | false = {},
@@ -30,6 +31,7 @@ export const sanitizeJoinParams = (
           ? true
           : undefined,
       sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
+      where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
     }
   })
 
