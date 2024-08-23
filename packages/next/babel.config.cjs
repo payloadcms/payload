@@ -12,7 +12,6 @@ const ReactCompilerConfig = {
     // accidentally compile React Server Components
     const file = fs.readFileSync(filename, 'utf8')
     if (file.includes("'use client'")) {
-      console.log('React compiler - compiling file: ' + filename)
       return true
     }
     console.log('React compiler - skipping file: ' + filename)
