@@ -34,7 +34,7 @@ type MenuButtonProps = {
   className?: string
   href?: LinkProps['href']
   id?: string
-  onClick?: () => void
+  onClick?: (e?: React.MouseEvent) => void
 }
 
 export const Button: React.FC<MenuButtonProps> = ({
@@ -55,9 +55,9 @@ export const Button: React.FC<MenuButtonProps> = ({
         className={classes}
         href={href}
         id={id}
-        onClick={() => {
+        onClick={(e) => {
           if (onClick) {
-            onClick()
+            onClick(e)
           }
         }}
       >
@@ -71,9 +71,9 @@ export const Button: React.FC<MenuButtonProps> = ({
       <button
         className={classes}
         id={id}
-        onClick={() => {
+        onClick={(e) => {
           if (onClick) {
-            onClick()
+            onClick(e)
           }
         }}
         type="button"

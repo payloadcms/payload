@@ -9,8 +9,9 @@ export const indent = (text: string) =>
 export const getMigrationTemplate = ({
   downSQL,
   imports,
+  packageName,
   upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '${packageName}'
 ${imports ? `${imports}\n` : ''}
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${indent(upSQL)}

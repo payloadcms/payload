@@ -9,6 +9,7 @@ export type SlateToLexicalFeatureProps = {
   converters?:
     | (({ defaultConverters }: { defaultConverters: SlateNodeConverter[] }) => SlateNodeConverter[])
     | SlateNodeConverter[]
+  disableHooks?: boolean
 }
 
 export const SlateToLexicalFeature = createServerFeature<
@@ -35,22 +36,24 @@ export const SlateToLexicalFeature = createServerFeature<
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#SlateToLexicalFeatureClient',
-      hooks: {
-        afterRead: [
-          ({ value }) => {
-            if (!value || !Array.isArray(value) || 'root' in value) {
-              // incomingEditorState null or not from Slate
-              return value
-            }
+      hooks: props.disableHooks
+        ? undefined
+        : {
+            afterRead: [
+              ({ value }) => {
+                if (!value || !Array.isArray(value) || 'root' in value) {
+                  // incomingEditorState null or not from Slate
+                  return value
+                }
 
-            // Slate => convert to lexical
-            return convertSlateToLexical({
-              converters: props.converters as SlateNodeConverter[],
-              slateData: value,
-            })
+                // Slate => convert to lexical
+                return convertSlateToLexical({
+                  converters: props.converters as SlateNodeConverter[],
+                  slateData: value,
+                })
+              },
+            ],
           },
-        ],
-      },
       nodes: [
         {
           node: UnknownConvertedNode,

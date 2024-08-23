@@ -24,7 +24,6 @@ export type ClientCollectionConfig = {
       beforeList: MappedComponent[]
       beforeListTable: MappedComponent[]
       edit: {
-        Description: MappedComponent
         PreviewButton: MappedComponent
         PublishButton: MappedComponent
         SaveButton: MappedComponent

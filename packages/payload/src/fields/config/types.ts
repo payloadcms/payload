@@ -824,35 +824,106 @@ export type UIFieldClient = {
 } & Omit<DeepUndefinable<FieldBaseClient>, '_isPresentational' | 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
-export type UploadField = {
-  admin?: {
-    components?: {
-      Error?: CustomComponent<UploadFieldErrorClientComponent | UploadFieldErrorServerComponent>
-      Label?: CustomComponent<UploadFieldLabelClientComponent | UploadFieldLabelServerComponent>
-    } & Admin['components']
-  }
+type SharedUploadProperties = {
+  /**
+   * Toggle the preview in the admin interface.
+   */
   displayPreview?: boolean
   filterOptions?: FilterOptions
+  hasMany?: boolean
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
    *
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-  relationTo: CollectionSlug
   type: 'upload'
-  validate?: Validate<unknown, unknown, unknown, UploadField>
-} & FieldBase
+  validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
+} & (
+  | {
+      hasMany: true
+      /**
+       * @deprecated Use 'maxRows' instead
+       */
+      max?: number
+      maxRows?: number
+      /**
+       * @deprecated Use 'minRows' instead
+       */
+      min?: number
+      minRows?: number
+    }
+  | {
+      hasMany?: false | undefined
+      /**
+       * @deprecated Use 'maxRows' instead
+       */
+      max?: undefined
+      maxRows?: undefined
+      /**
+       * @deprecated Use 'minRows' instead
+       */
+      min?: undefined
+      minRows?: undefined
+    }
+) &
+  FieldBase
 
-export type UploadFieldClient = {
+type SharedUploadPropertiesClient = FieldBaseClient &
+  Pick<
+    SharedUploadProperties,
+    'hasMany' | 'max' | 'maxDepth' | 'maxRows' | 'min' | 'minRows' | 'type'
+  >
+
+type UploadAdmin = {
+  allowCreate?: boolean
+  components?: {
+    Error?: CustomComponent<
+      RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
+    >
+    Label?: CustomComponent<
+      RelationshipFieldLabelClientComponent | RelationshipFieldLabelServerComponent
+    >
+  } & Admin['components']
+  isSortable?: boolean
+} & Admin
+type UploadAdminClient = {
+  components?: {
+    Error?: MappedComponent
+    Label?: MappedComponent
+  } & AdminClient['components']
+} & AdminClient &
+  Pick<UploadAdmin, 'allowCreate' | 'isSortable'>
+
+export type PolymorphicUploadField = {
   admin?: {
-    components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  }
-} & FieldBaseClient &
-  Pick<UploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'>
+    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+  } & UploadAdmin
+  relationTo: CollectionSlug[]
+} & SharedUploadProperties
+
+export type PolymorphicUploadFieldClient = {
+  admin?: {
+    sortOptions?: Pick<PolymorphicUploadField['admin'], 'sortOptions'>
+  } & UploadAdminClient
+} & Pick<PolymorphicUploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'> &
+  SharedUploadPropertiesClient
+
+export type SingleUploadField = {
+  admin?: {
+    sortOptions?: string
+  } & UploadAdmin
+  relationTo: CollectionSlug
+} & SharedUploadProperties
+
+export type SingleUploadFieldClient = {
+  admin?: Pick<SingleUploadField['admin'], 'sortOptions'> & UploadAdminClient
+} & Pick<SingleUploadField, 'displayPreview' | 'maxDepth' | 'relationTo' | 'type'> &
+  SharedUploadPropertiesClient
+
+export type UploadField = /* PolymorphicUploadField | */ SingleUploadField
+
+export type UploadFieldClient = /* PolymorphicUploadFieldClient | */ SingleUploadFieldClient
 
 export type CodeField = {
   admin?: {

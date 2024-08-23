@@ -189,6 +189,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
+    clearAll: undefined,
     close: 'Închide',
     collapse: 'Colaps',
     collections: 'Colecții',
@@ -252,6 +253,7 @@ export const roTranslations: DefaultTranslationsObject = {
     moveDown: 'Mutați în jos',
     moveUp: 'Mutați în sus',
     newPassword: 'Parolă nouă',
+    next: 'Următorul',
     noFiltersSet: 'Nici un filtru setat',
     noLabel: '<Nici un {{label}}>',
     noOptions: 'Fără opțiuni',
@@ -269,6 +271,7 @@ export const roTranslations: DefaultTranslationsObject = {
     password: 'Parola',
     payloadSettings: 'Setări de Payload',
     perPage: 'Pe pagină: {{limit}}',
+    previous: 'Anterior',
     remove: 'Eliminați',
     reset: 'Resetare',
     row: 'Rând',
@@ -328,6 +331,8 @@ export const roTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Adaugă fișier',
+    addFiles: 'Adăugați fișiere',
+    bulkUpload: 'Încărcare în masă',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',
@@ -336,6 +341,8 @@ export const roTranslations: DefaultTranslationsObject = {
     editImage: 'Editează imaginea',
     fileName: 'Numele fișierului',
     fileSize: 'Dimensiunea fișierului',
+    fileToUpload: 'Fișier de încărcat',
+    filesToUpload: 'Fișiere de încărcat',
     focalPoint: 'Punct central',
     focalPointDescription:
       'Trageți punctul focal direct pe previzualizare sau ajustați valorile de mai jos.',
@@ -408,6 +415,7 @@ export const roTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
+    noRowsSelected: undefined,
     preview: 'Previzualizare',
     previouslyPublished: 'Publicat anterior',
     problemRestoringVersion: 'A existat o problemă la restaurarea acestei versiuni',

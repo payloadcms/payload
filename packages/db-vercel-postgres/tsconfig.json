@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+  },
+  "exclude": [
+    "dist",
+    "build",
+    "tests",
+    "test",
+    "node_modules",
+    "eslint.config.js",
+    "src/**/*.spec.js",
+    "src/**/*.spec.jsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
+  ],
+  "include": [
+    "src",
+    "src/**/*.ts",
+  ],
+  "references": [
+    {
+      "path": "../payload"
+    },
+    {
+      "path": "../translations"
+    },
+    {
+      "path": "../drizzle"
+    }
+  ]
+}

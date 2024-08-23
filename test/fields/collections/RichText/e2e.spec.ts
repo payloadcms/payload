@@ -268,7 +268,8 @@ describe('Rich Text', () => {
       await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
 
       const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
-      await expect(menu).not.toContainText('Uploads')
+      const regex = /\bUploads\b/
+      await expect(menu).not.toContainText(regex)
     })
 
     // TODO: Flaky test in CI. Flake: https://github.com/payloadcms/payload/actions/runs/8914532814/job/24482407114

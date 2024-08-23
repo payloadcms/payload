@@ -184,6 +184,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
+    clearAll: undefined,
     close: 'بستن',
     collapse: 'بستن',
     collections: 'مجموعه‌ها',
@@ -247,6 +248,7 @@ export const faTranslations: DefaultTranslationsObject = {
     moveDown: 'حرکت به پایین',
     moveUp: 'حرکت به بالا',
     newPassword: 'گذرواژه تازه',
+    next: 'بعدی',
     noFiltersSet: 'هیچ علامت‌گذاری تنظیم نشده',
     noLabel: '<No {{label}}>',
     noOptions: 'بدون گزینه',
@@ -264,6 +266,7 @@ export const faTranslations: DefaultTranslationsObject = {
     password: 'گذرواژه',
     payloadSettings: 'تنظیمات پی‌لود',
     perPage: 'هر برگه: {{limit}}',
+    previous: 'قبلی',
     remove: 'برداشتن',
     reset: 'بازنشانی',
     row: 'ردیف',
@@ -323,6 +326,8 @@ export const faTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'اضافه کردن فایل',
+    addFiles: 'اضافه کردن فایل‌ها',
+    bulkUpload: 'بارگذاری انبوه',
     crop: 'محصول',
     cropToolDescription:
       'گوشه‌های منطقه انتخاب شده را بکشید، یک منطقه جدید رسم کنید یا مقادیر زیر را تنظیم کنید.',
@@ -331,6 +336,8 @@ export const faTranslations: DefaultTranslationsObject = {
     editImage: 'ویرایش تصویر',
     fileName: 'نام رسانه',
     fileSize: 'حجم رسانه',
+    fileToUpload: 'فایل برای بارگذاری',
+    filesToUpload: 'فایل ها برای بارگذاری',
     focalPoint: 'نقطه متمرکز',
     focalPointDescription:
       'نقطه کانونی را مستقیماً روی پیش نمایش بکشید یا مقادیر زیر را تنظیم کنید.',
@@ -397,6 +404,7 @@ export const faTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
+    noRowsSelected: undefined,
     preview: 'پیش‌نمایش',
     previouslyPublished: 'قبلا منتشر شده',
     problemRestoringVersion: 'مشکلی در بازیابی این نگارش وجود دارد',

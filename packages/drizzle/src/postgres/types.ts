@@ -111,8 +111,6 @@ export type BasePostgresAdapter = {
   logger: DrizzleConfig['logger']
   operators: Operators
   pgSchema?: Schema
-  // pool: Pool
-  // poolOptions: Args['pool']
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string

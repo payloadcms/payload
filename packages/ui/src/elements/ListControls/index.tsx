@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, ClientField, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
@@ -49,7 +49,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { collectionConfig, enableColumns = true, enableSort = false, fields } = props
 
   const { handleSearchChange } = useListQuery()
-  const { collectionSlug } = useListInfo()
+  const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
   const { searchParams } = useSearchParams()
   const titleField = useUseTitleField(collectionConfig, fields)
   const { i18n, t } = useTranslation()
@@ -144,10 +144,15 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} fields={fields} />
-                <PublishMany collection={collectionConfig} />
-                <UnpublishMany collection={collectionConfig} />
-                <DeleteMany collection={collectionConfig} />
+                {beforeActions && beforeActions}
+                {!disableBulkEdit && (
+                  <Fragment>
+                    <EditMany collection={collectionConfig} fields={fields} />
+                    <PublishMany collection={collectionConfig} />
+                    <UnpublishMany collection={collectionConfig} />
+                  </Fragment>
+                )}
+                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
               </React.Fragment>
             )}
             {enableColumns && (

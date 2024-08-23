@@ -187,6 +187,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
+    clearAll: undefined,
     close: 'Закрыть',
     collapse: 'Свернуть',
     collections: 'Коллекции',
@@ -250,6 +251,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     moveDown: 'Сдвинуть вниз',
     moveUp: 'Сдвинуть вверх',
     newPassword: 'Новый пароль',
+    next: 'Следующий',
     noFiltersSet: 'Фильтры не установлены',
     noLabel: 'Без метки',
     noOptions: 'Нет вариантов',
@@ -267,6 +269,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     password: 'Пароль',
     payloadSettings: 'Настройки Payload',
     perPage: 'На странице: {{limit}}',
+    previous: 'Предыдущий',
     remove: 'Удалить',
     reset: 'Сброс',
     row: 'Строка',
@@ -327,6 +330,8 @@ export const ruTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Добавить файл',
+    addFiles: 'Добавить файлы',
+    bulkUpload: 'Массовая загрузка',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
@@ -335,6 +340,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     editImage: 'Редактировать изображение',
     fileName: 'Имя файла',
     fileSize: 'Размер файла',
+    fileToUpload: 'Файл для загрузки',
+    filesToUpload: 'Файлы для загрузки',
     focalPoint: 'Центральная точка',
     focalPointDescription:
       'Перетащите фокусное расстояние прямо на предварительный просмотр или отрегулируйте значения ниже.',
@@ -402,6 +409,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
+    noRowsSelected: undefined,
     preview: 'Предпросмотр',
     previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',

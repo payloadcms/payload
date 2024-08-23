@@ -224,20 +224,18 @@ export const createClientCollectionConfig = ({
 
   clientCollection.admin.description = description
 
-  if (collection.admin.components.edit?.Description) {
-    clientCollection.admin.components.edit.Description = createMappedComponent(
-      collection.admin.components.edit.Description,
+  if (collection.admin.components?.Description) {
+    clientCollection.admin.components.Description = createMappedComponent(
+      collection.admin.components.Description,
       {
         clientProps: {
           description,
         },
       },
       undefined,
-      'collection.admin.components.edit.Description',
+      'collection.admin.components.Description',
     )
   }
-
-  clientCollection.admin.description = description
 
   clientCollection.admin.components.views = (
     collection?.admin?.components?.views

@@ -187,6 +187,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
+    clearAll: undefined,
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collections: 'စုစည်းမှူများ',
@@ -250,6 +251,7 @@ export const myTranslations: DefaultTranslationsObject = {
     moveDown: 'Move Down',
     moveUp: 'Move Up',
     newPassword: 'စကားဝှက် အသစ်',
+    next: 'Seterusnya',
     noFiltersSet: 'စစ်ထုတ်မှုများ မသတ်မှတ်ထားပါ။',
     noLabel: '<မရှိ {{label}}>',
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
@@ -267,6 +269,7 @@ export const myTranslations: DefaultTranslationsObject = {
     password: 'စကားဝှက်',
     payloadSettings: 'ရွေးချယ်စရာများ',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
+    previous: 'ယခင်',
     remove: 'ဖယ်ရှားမည်။',
     reset: 'Tetapkan semula',
     row: 'အတန်း',
@@ -327,6 +330,8 @@ export const myTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'ဖိုင်ထည့်ပါ',
+    addFiles: 'Tambah Fail',
+    bulkUpload: 'Muat naik pukal',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -335,6 +340,8 @@ export const myTranslations: DefaultTranslationsObject = {
     editImage: 'ပုံပြင်ပြောင်းရန်',
     fileName: 'ဖိုင် နာမည်',
     fileSize: 'ဖိုင် အရွယ်အစား',
+    fileToUpload: 'ဖိုင်တင်ရန်',
+    filesToUpload: 'Fail untuk Dimuat Naik',
     focalPoint: 'အကန့်အသတ်ချုပ်',
     focalPointDescription:
       'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',
@@ -406,6 +413,7 @@ export const myTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
+    noRowsSelected: undefined,
     preview: 'နမူနာပြရန်',
     previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',

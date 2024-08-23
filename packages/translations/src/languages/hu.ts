@@ -187,6 +187,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
+    clearAll: undefined,
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collections: 'Gyűjtemények',
@@ -250,6 +251,7 @@ export const huTranslations: DefaultTranslationsObject = {
     moveDown: 'Mozgatás lefelé',
     moveUp: 'Mozgatás felfelé',
     newPassword: 'Új jelszó',
+    next: 'Következő',
     noFiltersSet: 'Nincs beállítva szűrő',
     noLabel: '<No {{label}}>',
     noOptions: 'Nincs lehetőség',
@@ -267,6 +269,7 @@ export const huTranslations: DefaultTranslationsObject = {
     password: 'Jelszó',
     payloadSettings: 'Payload beállítások',
     perPage: 'Oldalanként: {{limit}}',
+    previous: 'Előző',
     remove: 'Törlés',
     reset: 'Visszaállítás',
     row: 'Sor',
@@ -326,6 +329,8 @@ export const huTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Fájl hozzáadása',
+    addFiles: 'Fájlok hozzáadása',
+    bulkUpload: 'Tömeges feltöltés',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
@@ -334,6 +339,8 @@ export const huTranslations: DefaultTranslationsObject = {
     editImage: 'Kép szerkesztése',
     fileName: 'Fájlnév',
     fileSize: 'Fájl mérete',
+    fileToUpload: 'Feltöltendő fájl',
+    filesToUpload: 'Feltöltendő fájlok',
     focalPoint: 'Fókuszpont',
     focalPointDescription:
       'Húzza az érdekes pontot közvetlenül az előnézetre, vagy állítsa be az alábbi értékeket.',
@@ -404,6 +411,7 @@ export const huTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
+    noRowsSelected: undefined,
     preview: 'Előnézet',
     previouslyPublished: 'Korábban Közzétéve',
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',

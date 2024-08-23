@@ -64,12 +64,11 @@ export const generateSearchCollection = (pluginConfig: SearchPluginConfig): Coll
       typeof pluginConfig?.searchOverrides?.fields === 'function'
         ? pluginConfig?.searchOverrides.fields({ defaultFields })
         : defaultFields,
-    hooks: {
-      ...(pluginConfig?.searchOverrides?.hooks || {}),
-    },
     labels: {
-      plural: 'Search Results',
-      singular: 'Search Result',
+      ...(pluginConfig?.searchOverrides?.labels || {
+        plural: 'Search Results',
+        singular: 'Search Result',
+      }),
     },
   }
 
