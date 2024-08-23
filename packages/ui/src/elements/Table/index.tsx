@@ -5,8 +5,8 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
+import { RenderCell } from './RenderCell.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
 
@@ -65,42 +65,16 @@ export const Table: React.FC<Props> = ({
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {activeColumns.map((col, colIndex) => {
-                  return (
-                    <td className={`cell-${col.accessor}`} key={colIndex}>
-                      <TableCellProvider
-                        cellData={row[col.accessor]}
-                        cellProps={col?.cellProps}
-                        columnIndex={colIndex}
-                        customCellContext={customCellContext}
-                        rowData={row}
-                      >
-                        <RenderComponent
-                          clientProps={{
-                            ...(cellProps[colIndex] || {}),
-                            ...col?.cellProps,
-                            field: {
-                              ...(cellProps[colIndex]?.field || {}),
-                              ...col?.cellProps?.field,
-                              admin: {
-                                ...(cellProps[colIndex]?.field?.admin || {}),
-                                ...col?.cellProps?.field?.admin,
-                                components: {
-                                  ...(cellProps[colIndex]?.field?.admin?.components || {}),
-                                  ...col?.cellProps?.field?.admin?.components,
-                                },
-                              },
-                            },
-                          }}
-                          mappedComponent={
-                            cellProps[colIndex]?.field?.admin?.components?.Cell ||
-                            col.cellProps?.field?.admin?.components?.Cell
-                          }
-                        />
-                      </TableCellProvider>
-                    </td>
-                  )
-                })}
+                {activeColumns.map((col, colIndex) => (
+                  <RenderCell
+                    cellPropOverrides={cellProps?.[colIndex]}
+                    col={col}
+                    colIndex={colIndex}
+                    customCellContext={customCellContext}
+                    key={colIndex}
+                    row={row}
+                  />
+                ))}
               </tr>
             ))}
         </tbody>
