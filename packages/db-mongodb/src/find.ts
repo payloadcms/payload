@@ -1,4 +1,4 @@
-import type { Aggregate, PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -7,14 +7,13 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
-import { setJoins } from './utilities/setJoins.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
   {
     collection,
-    joins,
+    joins = {},
     limit,
     locale,
     page,
@@ -103,29 +102,103 @@ export const find: Find = async function find(
 
   let result
 
-  if (Object.keys(collectionConfig.joins).length > 0) {
-    const aggregate = [] as unknown as Aggregate<unknown[]>
+  if (Object.keys(collectionConfig.joins).length > 0 && joins !== false) {
+    const joinConfig = this.payload.collections[collection].config.joins
+    const aggregate: PipelineStage[] = [{ $match: query }]
     // Do some aggregation here
-    result = await Model.aggregatePaginate(aggregate, paginationOptions)
+
+    Object.keys(joinConfig).forEach((slug) => {
+      joinConfig[slug].forEach((join) => {
+        // get the query options for the join off of req
+        // if (joins[join.schemaPath] === false || req.query[join.schemaPath] === 'false') {
+        //   continue
+        // }
+
+        const { limit, page, pagination = true, sort } = joins[join.schemaPath] || {}
+
+        // skip if joins doesn't have the schemaPath !== false
+
+        // add lookup to join the doc ids and localize the key as needed
+        // if locale all, do every locale
+
+        // $lookup
+        // from: collection
+        // localField: _id
+        // foreignField: on (localized)
+        // as collection
+
+        if (this.payload.config.localization && locale === 'all') {
+          this.payload.config.localization.localeCodes.forEach((code) => {
+            aggregate.push({
+              $lookup: {
+                as: `${join.schemaPath}.${code}`,
+                foreignField: `${join.field.on}.${code}`,
+                from: slug,
+                localField: '_id',
+              },
+              // $count to count the docs
+            })
+          })
+          // $count to count the docs
+          // $slice to limit the docs
+        } else {
+          const localeSuffix =
+            join.field.localized && this.payload.config.localization && locale ? `.${locale}` : ''
+          const as = `${join.schemaPath}${localeSuffix}`
+          const asAlias = `${join.schemaPath}${localeSuffix}`.replaceAll('.', '_')
+          aggregate.push({
+            $lookup: {
+              as,
+              foreignField: `${join.field.on}${localeSuffix}`,
+              from: slug,
+              localField: '_id',
+            },
+          })
+          aggregate.push({
+            $addFields: {
+              [asAlias]: as,
+            },
+          })
+          aggregate.push({
+            $unwind: `$${asAlias}`,
+          })
+          aggregate.push({
+            $group: {
+              _id: '$_id',
+              [asAlias]: { $push: `$${as}._id` },
+            },
+          })
+          aggregate.push({
+            $addFields: {
+              [as]: asAlias,
+            },
+          })
+          // $count to count the docs
+          // $slice to limit the docs
+        }
+      })
+    })
+
+    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
   } else {
     result = await Model.paginate(query, paginationOptions)
   }
 
-  const joinPromises = []
+  // const joinPromises = []
 
-  result.docs.forEach((doc) => {
-    joinPromises.push(
-      setJoins({
-        collection,
-        doc,
-        joins,
-        payload: this.payload,
-        req,
-      }),
-    )
-  })
+  // result.docs.forEach((doc) => {
+  //   joinPromises.push(
+  //     setJoins({
+  //       collection,
+  //       doc,
+  //       joins,
+  //       payload: this.payload,
+  //       req,
+  //     }),
+  //   )
+  // })
 
-  await Promise.all(joinPromises)
+  // await Promise.all(joinPromises)
 
   const docs = JSON.parse(JSON.stringify(result.docs))
 
