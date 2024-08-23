@@ -43,7 +43,6 @@
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
-    "@payloadcms/plugin-relationship-object-ids": "workspace:*",
     "@payloadcms/plugin-search": "workspace:*",
     "@payloadcms/plugin-sentry": "workspace:*",
     "@payloadcms/plugin-seo": "workspace:*",
