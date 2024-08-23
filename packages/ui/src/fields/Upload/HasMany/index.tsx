@@ -149,6 +149,29 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
+  // Get the labels of the collections that the relation is to
+  const labels = useMemo(() => {
+    function joinWithCommaAndOr(items: string[]): string {
+      const or = t('general:or')
+
+      if (items.length === 0) return ''
+      if (items.length === 1) return items[0]
+      if (items.length === 2) return items.join(` ${or} `)
+
+      return items.slice(0, -1).join(', ') + ` ${or} ` + items[items.length - 1]
+    }
+
+    const labels = []
+
+    collections.forEach((collection) => {
+      if (relationTo.includes(collection.slug)) {
+        labels.push(collection.labels?.singular || collection.slug)
+      }
+    })
+
+    return joinWithCommaAndOr(labels)
+  }, [collections, relationTo, t])
+
   const onBulkSelect = useCallback(
     (selections: ReturnType<typeof useSelection>['selected']) => {
       const selectedIDs = Object.entries(selections).reduce(
@@ -169,7 +192,7 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
         <div>
           {missingFiles || !value?.length ? (
             <div className={[`${baseClass}__no-data`].join(' ')}>
-              {t('version:noRowsFound', { label: relationTo })}
+              {t('version:noRowsSelected', { label: labels })}
             </div>
           ) : (
             <DraggableSortable
@@ -242,9 +265,15 @@ export const UploadComponentHasMany: React.FC<UploadFieldPropsWithContext<string
               </div>
             </ListDrawerToggler>
           </div>
-          <button className={`${baseClass}__clear-all`} onClick={() => setValue([])} type="button">
-            Clear all
-          </button>
+          {Boolean(value.length) && (
+            <button
+              className={`${baseClass}__clear-all`}
+              onClick={() => setValue([])}
+              type="button"
+            >
+              {t('general:clearAll')}
+            </button>
+          )}
         </div>
       </div>
       <ListDrawer

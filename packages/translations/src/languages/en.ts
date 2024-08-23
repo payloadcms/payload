@@ -187,6 +187,7 @@ export const enTranslations = {
     cancel: 'Cancel',
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
+    clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
     collections: 'Collections',
@@ -404,6 +405,7 @@ export const enTranslations = {
     lastSavedAgo: 'Last saved {{distance}} ago',
     noFurtherVersionsFound: 'No further versions found',
     noRowsFound: 'No {{label}} found',
+    noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',
     previouslyPublished: 'Previously Published',
     problemRestoringVersion: 'There was a problem restoring this version',
