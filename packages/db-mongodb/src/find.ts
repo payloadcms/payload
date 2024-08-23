@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { Aggregate, PaginateOptions } from 'mongoose'
 import type { Find, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -101,12 +101,18 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result
+
+  if (Object.keys(collectionConfig.joins).length > 0) {
+    const aggregate = [] as unknown as Aggregate<unknown[]>
+    // Do some aggregation here
+    result = await Model.aggregatePaginate(aggregate, paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
 
   const joinPromises = []
 
-  // TODO:
-  // we need to convert to aggregation here for performance
   result.docs.forEach((doc) => {
     joinPromises.push(
       setJoins({
