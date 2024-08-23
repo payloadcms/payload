@@ -142,8 +142,10 @@ export const AddNewRelation: React.FC<Props> = ({
             <DocumentDrawerToggler
               className={[
                 `${baseClass}__add-button`,
-                !unstyled && `${baseClass}__add-button--styled`,
-              ].join(' ')}
+                unstyled && `${baseClass}__add-button--unstyled`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onClick={() => setShowTooltip(false)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}

@@ -189,6 +189,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
+    clearAll: undefined,
     close: 'Închide',
     collapse: 'Colaps',
     collections: 'Colecții',
@@ -410,6 +411,7 @@ export const roTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
+    noRowsSelected: undefined,
     preview: 'Previzualizare',
     previouslyPublished: 'Publicat anterior',
     problemRestoringVersion: 'A existat o problemă la restaurarea acestei versiuni',

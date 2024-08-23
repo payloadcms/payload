@@ -159,13 +159,14 @@
     "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
     "tsx": "4.17.0",
-    "turbo": "^1.13.3",
+    "turbo": "^2.0.14",
     "typescript": "5.5.4"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
     "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
+  "packageManager": "pnpm@9.7.1",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9.7.0"
