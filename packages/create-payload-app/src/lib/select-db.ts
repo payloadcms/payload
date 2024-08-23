@@ -27,6 +27,11 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
     title: 'SQLite (beta)',
     value: 'sqlite',
   },
+  vercelPostgres: {
+    dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
+    title: 'Vercel Postgres (beta)',
+    value: 'vercelPostgres',
+  },
 }
 
 export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
