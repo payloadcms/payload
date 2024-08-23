@@ -1,17 +1,18 @@
-import type { MongooseQueryOptions } from 'mongoose'
-import type { Document, FindOne, PayloadRequest } from 'payload'
+import type { QueryOptions } from 'mongoose'
+import type { FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { setJoins } from './utilities/setJoins.js'
 import { withSession } from './withSession.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, joins, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options: MongooseQueryOptions = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
   }
@@ -28,7 +29,16 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  let result = await setJoins({
+    collection,
+    doc,
+    joins,
+    locale,
+    payload: this.payload,
+    req,
+  })
+
+  result = JSON.parse(JSON.stringify(result))
 
   // custom id type reset
   result.id = result._id

@@ -1,10 +1,9 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JoinQuery, JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
-import { combineQueries } from '../../../database/combineQueries.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
@@ -28,7 +27,6 @@ type Args = {
   findMany: boolean
   flattenLocales: boolean
   global: SanitizedGlobalConfig | null
-  joins: JoinQuery
   locale: null | string
   overrideAccess: boolean
   /**
@@ -51,7 +49,6 @@ type Args = {
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
 // - Sanitize outgoing data (point field, etc.)
-// - Populate joins
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
@@ -69,7 +66,6 @@ export const promise = async ({
   findMany,
   flattenLocales,
   global,
-  joins,
   locale,
   overrideAccess,
   parentPath,
@@ -186,37 +182,6 @@ export const promise = async ({
       break
     }
 
-    // Populate joins
-    case 'join': {
-      if (joins === false) {
-        break
-      }
-      const joinQuery = joins?.[fieldSchemaPath.join('.')] || {}
-      const { limit, page, pagination = true, sort, where } = joinQuery
-
-      populationPromises.push(
-        req.payload
-          .find({
-            collection: field.collection,
-            // only join the first level of joins
-            depth: 0,
-            joins: false,
-            limit,
-            page,
-            pagination,
-            req,
-            sort,
-            where: combineQueries(where, {
-              [field.on]: { equals: doc.id },
-            }),
-          })
-          .then((result) => {
-            siblingDoc[field.name] = result
-          }),
-      )
-      break
-    }
-
     default: {
       break
     }
@@ -323,7 +288,7 @@ export const promise = async ({
       })
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
+    if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
       populationPromises.push(
         relationshipPopulationPromise({
           currentDepth,
@@ -359,7 +324,6 @@ export const promise = async ({
         findMany,
         flattenLocales,
         global,
-        joins,
         locale,
         overrideAccess,
         path: fieldPath,
