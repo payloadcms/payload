@@ -27,7 +27,7 @@
     "build:live-preview": "turbo build --filter live-preview",
     "build:live-preview-react": "turbo build --filter live-preview-react",
     "build:live-preview-vue": "turbo build --filter live-preview-vue",
-    "build:next": "turbo build --filter next",
+    "build:next": "turbo build --filter \"@payloadcms/next\"",
     "build:payload": "turbo build --filter payload",
     "build:plugin-cloud": "turbo build --filter plugin-cloud",
     "build:plugin-cloud-storage": "turbo build --filter plugin-cloud-storage",
