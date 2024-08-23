@@ -9,6 +9,7 @@ import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { loadEnv } from './loadEnv.js'
 import { migrate } from './migrate.js'
+import { removePreferences } from './removePreferences.js'
 
 export const bin = async () => {
   loadEnv()
@@ -73,6 +74,10 @@ export const bin = async () => {
 
   if (script === 'generate:importmap') {
     return generateImportMap(config)
+  }
+
+  if (script === 'remove:preferences') {
+    return removePreferences(config)
   }
 
   console.error(`Unknown script: "${script}".`)
