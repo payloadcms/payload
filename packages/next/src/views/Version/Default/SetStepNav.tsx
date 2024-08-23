@@ -31,7 +31,7 @@ export const SetStepNav: React.FC<{
       routes: { admin: adminRoute },
     } = config
 
-    if (collectionSlug) {
+    if (collectionSlug && collectionConfig) {
       let docLabel = ''
 
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
@@ -83,7 +83,7 @@ export const SetStepNav: React.FC<{
       ]
     }
 
-    if (globalSlug) {
+    if (globalSlug && globalConfig) {
       nav = [
         {
           label: globalConfig.label,
