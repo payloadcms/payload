@@ -51,7 +51,6 @@ export const createClientCollectionConfig = ({
     'access',
     'endpoints',
     'custom',
-    'joins',
     // `upload`
     // `admin`
     // are all handled separately
