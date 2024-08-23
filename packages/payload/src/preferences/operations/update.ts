@@ -39,15 +39,20 @@ async function update(args: PreferenceUpdateRequest) {
     await executeAccess({ req }, defaultAccess)
   }
 
-  try {
-    // try/catch because we attempt to update without first reading to check if it exists first to save on db calls
+  const existingPreference = await payload.db.count({
+    collection,
+    req,
+    where: filter,
+  })
+
+  if (existingPreference.totalDocs > 0) {
     await payload.db.updateOne({
       collection,
       data: preference,
       req,
       where: filter,
     })
-  } catch (err: unknown) {
+  } else {
     await payload.db.create({
       collection,
       data: preference,
