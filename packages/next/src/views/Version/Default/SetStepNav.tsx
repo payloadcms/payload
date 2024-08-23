@@ -1,3 +1,4 @@
+'use client'
 import type { StepNavItem } from '@payloadcms/ui'
 import type { ClientCollectionConfig, ClientField, ClientGlobalConfig } from 'payload'
 import type React from 'react'
