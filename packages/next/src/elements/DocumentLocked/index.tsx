@@ -27,7 +27,7 @@ export const DocumentLocked: React.FC<{
   handleGoBack: () => void
   isActive: boolean
   onReadOnly: () => void
-  onTakeOver: () => Promise<void>
+  onTakeOver: () => void
   user?: ClientUser
 }> = ({ editedAt, handleGoBack, isActive, onReadOnly, onTakeOver, user }) => {
   const { closeModal, openModal } = useModal()

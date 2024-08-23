@@ -137,13 +137,20 @@ export const DefaultEditView: React.FC = () => {
     return false
   })
 
-  const handleTakeOver = useCallback(async () => {
-    // Update the document for the incoming user
-    await updateDocumentEditor(id, user)
-
-    // Close the current modal for the incoming user
+  const handleTakeOver = useCallback(() => {
+    // Close the modal and mark that the user intends to edit
     setShowLockedModal(false)
-  }, [id, updateDocumentEditor, user])
+    setIsLockedByAnotherUser(false)
+    documentLockStateRef.current = { isLocked: true, user }
+  }, [user])
+
+  useEffect(() => {
+    if (documentLockStateRef.current && documentLockStateRef.current.user.id !== user.id) {
+      setIsLockedByAnotherUser(true)
+    } else {
+      setIsLockedByAnotherUser(false)
+    }
+  }, [user.id])
 
   // Handle modal display logic based on lock state
   useEffect(() => {
@@ -156,21 +163,21 @@ export const DefaultEditView: React.FC = () => {
   }, [isDocumentLocked, initialEditor, user.id])
 
   useEffect(() => {
-    if (documentLockStateRef.current && documentLockStateRef.current.user.id !== user.id) {
-      setIsLockedByAnotherUser(true)
-    } else {
-      setIsLockedByAnotherUser(false)
-    }
-  }, [user.id])
+    let timeoutId
 
-  useEffect(() => {
-    if (isLockedByAnotherUser && isDocumentLocked) {
-      // The current user was the lock owner but is no longer
-      setShowTakeOverModal(true)
+    if (isLockedByAnotherUser && documentLockStateRef.current?.user?.id !== user.id) {
+      timeoutId = setTimeout(() => {
+        setShowTakeOverModal(true)
+      }, 200)
     } else {
+      clearTimeout(timeoutId)
       setShowTakeOverModal(false)
     }
-  }, [isLockedByAnotherUser, isDocumentLocked])
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [isLockedByAnotherUser, user.id])
 
   const handleGoBack = useCallback(() => {
     const redirectRoute = formatAdminURL({
@@ -245,9 +252,16 @@ export const DefaultEditView: React.FC = () => {
     async ({ formState: prevFormState }) => {
       const docPreferences = await getDocPreferences()
 
-      // Lock the document if it's not locked by another user
+      // Lock the document if it's not locked by another user and hasn't been locked by this user yet
       if (id && !isLockedByAnotherUser && !isDocumentLockedRef.current) {
         setShouldLockDocument(true)
+      }
+
+      if (id && isLockedByAnotherUser && documentLockStateRef.current?.user?.id !== user.id) {
+        documentLockStateRef.current = { isLocked: true, user }
+        setIsLockedByAnotherUser(false)
+
+        await updateDocumentEditor(id, user)
       }
 
       // Fire the request immediately with returnLockStatus: true if the document is locked
@@ -279,6 +293,8 @@ export const DefaultEditView: React.FC = () => {
       serverURL,
       isLockedByAnotherUser,
       shouldLockDocument,
+      updateDocumentEditor,
+      user,
     ],
   )
 

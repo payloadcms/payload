@@ -246,6 +246,7 @@ const DocumentInfo: React.FC<
           })
 
           setLastEditedAt(new Date())
+          setIsDocumentLocked(true)
         }
       } catch (error) {
         console.error('Failed to update the document editor', error)
