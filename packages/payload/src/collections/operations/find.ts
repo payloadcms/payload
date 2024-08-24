@@ -1,7 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
-import type { PaginatedDocs } from '../../database/types.js'
+import type { FindArgs, PaginatedDocs, QueryDraftsArgs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../../types/index.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -15,6 +15,7 @@ import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
+  cache?: boolean
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -54,6 +55,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
     }, Promise.resolve())
 
     const {
+      cache,
       collection: { config: collectionConfig },
       collection,
       currentDepth,
@@ -120,7 +122,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         where: fullWhere,
       })
 
-      result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
+      const args: QueryDraftsArgs = {
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -129,7 +131,10 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         req,
         sort: getQueryDraftsSort(sort),
         where: fullWhere,
-      })
+      }
+
+      if (cache) result = await payload.cache.find({ ...args, draft: true })
+      else result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>(args)
     } else {
       await validateQueryPaths({
         collectionConfig,
@@ -138,7 +143,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         where,
       })
 
-      result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
+      const args: FindArgs = {
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -147,7 +152,20 @@ export const findOperation = async <TSlug extends CollectionSlug>(
         req,
         sort,
         where: fullWhere,
-      })
+      }
+
+      if (cache) result = await payload.cache.find(args)
+      else
+        result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig.slug,
+          limit: sanitizedLimit,
+          locale,
+          page: sanitizedPage,
+          pagination,
+          req,
+          sort,
+          where: fullWhere,
+        })
     }
 
     // /////////////////////////////////////
@@ -187,6 +205,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
       docs: await Promise.all(
         result.docs.map(async (doc) =>
           afterRead<DataFromCollectionSlug<TSlug>>({
+            cache,
             collection: collectionConfig,
             context: req.context,
             currentDepth,

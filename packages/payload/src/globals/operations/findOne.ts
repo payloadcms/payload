@@ -1,4 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
+import type { FindGlobalArgs } from '../../database/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -8,6 +9,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
+  cache?: boolean
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
@@ -22,6 +24,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 ): Promise<T> => {
   const {
     slug,
+    cache = false,
     depth,
     draft: draftEnabled = false,
     globalConfig,
@@ -42,16 +45,22 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
 
-    // /////////////////////////////////////
-    // Perform database operation
-    // /////////////////////////////////////
-
-    let doc = await req.payload.db.findGlobal({
+    const args: FindGlobalArgs = {
       slug,
       locale,
       req,
       where: overrideAccess ? undefined : (accessResult as Where),
-    })
+    }
+
+    // /////////////////////////////////////
+    // Perform database operation
+    // /////////////////////////////////////
+
+    let doc
+
+    if (cache) doc = await req.payload.cache.findGlobal(args)
+    else doc = await req.payload.db.findGlobal(args)
+
     if (!doc) {
       doc = {}
     }

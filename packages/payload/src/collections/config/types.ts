@@ -476,6 +476,7 @@ export interface SanitizedCollectionConfig
     'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
   > {
   auth: Auth
+  cacheIndexes: string[]
   endpoints: Endpoint[] | false
   fields: Field[]
   upload: SanitizedUploadConfig

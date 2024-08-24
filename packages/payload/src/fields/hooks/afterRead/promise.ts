@@ -12,6 +12,7 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  cache?: boolean
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth: number
@@ -54,6 +55,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  cache,
   collection,
   context,
   currentDepth,
@@ -291,6 +293,7 @@ export const promise = async ({
     if (field.type === 'relationship' || field.type === 'upload') {
       populationPromises.push(
         relationshipPopulationPromise({
+          cache,
           currentDepth,
           depth,
           draft,

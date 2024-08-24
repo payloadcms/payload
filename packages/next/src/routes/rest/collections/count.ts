@@ -6,11 +6,13 @@ import { countOperation } from 'payload'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const count: CollectionRouteHandler = async ({ collection, req }) => {
-  const { where } = req.query as {
+  const { cache, where } = req.query as {
+    cache?: string
     where?: Where
   }
 
   const result = await countOperation({
+    cache: cache === 'true',
     collection,
     req,
     where,

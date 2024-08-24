@@ -14,6 +14,7 @@ export const findByID: CollectionRouteHandlerWithID = async ({
 }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
+  const cache = searchParams.get('cache')
 
   const id = sanitizeCollectionID({
     id: incomingID,
@@ -23,6 +24,7 @@ export const findByID: CollectionRouteHandlerWithID = async ({
 
   const result = await findByIDOperation({
     id,
+    cache: cache === 'true',
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',

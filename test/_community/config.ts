@@ -1,6 +1,8 @@
+import { nextDatabaseCache } from '@payloadcms/next/cache'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { inMemoryDatabaseCache } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -12,6 +14,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
+  cache: inMemoryDatabaseCache({ logging: true }),
   collections: [
     PostsCollection,
     {

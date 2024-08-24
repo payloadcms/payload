@@ -354,6 +354,7 @@ export interface FieldBase {
     update?: FieldAccess
   }
   admin?: Admin
+  cacheIndex?: boolean
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   defaultValue?: any
@@ -386,6 +387,7 @@ export interface FieldBase {
    */
   typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
+
   validate?: Validate
 }
 

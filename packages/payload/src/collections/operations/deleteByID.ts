@@ -1,4 +1,4 @@
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, DeleteOneArgs } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -126,14 +126,22 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       })
     }
 
+    const deleteArgs: DeleteOneArgs = {
+      collection: collectionConfig.slug,
+      req,
+      where: { id: { equals: id } },
+    }
+
     // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
-    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
-      collection: collectionConfig.slug,
-      req,
-      where: { id: { equals: id } },
+    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne(deleteArgs)
+
+    await payload.cache.invalidateCache(req, {
+      args: deleteArgs,
+      draft: 'all',
+      operation: 'deleteOne',
     })
 
     // /////////////////////////////////////

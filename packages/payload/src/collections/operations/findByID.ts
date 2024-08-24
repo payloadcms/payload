@@ -12,6 +12,7 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
+  cache?: boolean
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -48,6 +49,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     const {
       id,
+      cache,
       collection: { config: collectionConfig },
       currentDepth,
       depth,
@@ -74,6 +76,8 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       collection: collectionConfig.slug,
       locale,
       req: {
+        locale: req.locale,
+        payload: req.payload,
         transactionID: req.transactionID,
       } as PayloadRequest,
       where: combineQueries({ id: { equals: id } }, accessResult),
@@ -85,7 +89,10 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
+    let result: DataFromCollectionSlug<TSlug>
+
+    if (cache) result = await req.payload.cache.findOne(findOneArgs)
+    else result = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {

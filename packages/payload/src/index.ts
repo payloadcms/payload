@@ -18,6 +18,7 @@ import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
 import type { ImportMap } from './bin/generateImportMap/index.js'
+import type { DatabaseCache } from './cache/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -146,6 +147,8 @@ export class BasePayload {
   }
 
   authStrategies: AuthStrategy[]
+
+  cache: DatabaseCache
 
   collections: {
     [slug: string]: Collection
@@ -603,6 +606,8 @@ export class BasePayload {
       })
     }
 
+    this.cache = this.config.cache
+
     if (!options.disableOnInit) {
       if (typeof options.onInit === 'function') await options.onInit(this)
       if (typeof this.config.onInit === 'function') await this.config.onInit(this)
@@ -709,6 +714,10 @@ export { generateImportMap } from './bin/generateImportMap/index.js'
 
 export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
+export { createDatabaseCache } from './cache/createDatabaseCache.js'
+export { inMemoryDatabaseCache } from './cache/in-memory-database-cache/index.js'
+export type { DatabaseCache, DatabaseCacheOptions, DatabaseCacheStorage } from './cache/types.js'
+
 export type { ClientCollectionConfig } from './collections/config/client.js'
 export type {
   ServerOnlyCollectionAdminProperties,
@@ -1058,10 +1067,10 @@ export { isValidID } from './utilities/isValidID.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { getDependencies }
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
-export { getDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'

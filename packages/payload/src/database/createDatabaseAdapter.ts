@@ -7,6 +7,7 @@ import type {
   RollbackTransaction,
 } from './types.js'
 
+import { createDatabaseCache } from './cache/createDatabaseCache.js'
 import { createMigration } from './migrations/createMigration.js'
 import { migrate } from './migrations/migrate.js'
 import { migrateDown } from './migrations/migrateDown.js'
@@ -43,7 +44,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     migrateReset,
     migrateStatus,
     rollbackTransaction,
-
     ...args,
 
     // Ensure migrationDir is set

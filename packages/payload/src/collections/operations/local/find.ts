@@ -8,6 +8,7 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
 export type Options<TSlug extends CollectionSlug> = {
+  cache?: boolean
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
@@ -35,6 +36,7 @@ export async function findLocal<TSlug extends CollectionSlug>(
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<DataFromCollectionSlug<TSlug>>> {
   const {
+    cache = false,
     collection: collectionSlug,
     currentDepth,
     depth,
@@ -58,6 +60,7 @@ export async function findLocal<TSlug extends CollectionSlug>(
   }
 
   return findOperation<TSlug>({
+    cache,
     collection,
     currentDepth,
     depth,

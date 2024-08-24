@@ -9,7 +9,8 @@ import type { CollectionRouteHandler } from '../types.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, limit, page, sort, where } = req.query as {
+  const { cache, depth, draft, limit, page, sort, where } = req.query as {
+    cache?: string
     depth?: string
     draft?: string
     limit?: string
@@ -19,6 +20,7 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
   }
 
   const result = await findOperation({
+    cache: cache === 'true',
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',

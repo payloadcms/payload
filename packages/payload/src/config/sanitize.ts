@@ -11,6 +11,7 @@ import type {
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
+import { inMemoryDatabaseCache } from '../cache/in-memory-database-cache/InMemoryDatabaseCacheStorage.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
@@ -199,6 +200,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
   await Promise.all(promises)
+
+  config.cache = incomingConfig.cache ?? inMemoryDatabaseCache({})
 
   return config as SanitizedConfig
 }
