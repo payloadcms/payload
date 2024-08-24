@@ -126,5 +126,5 @@ export const useBulkUpload = () => React.useContext(Context)
 export function useBulkUploadDrawerSlug() {
   const depth = useEditDepth()
 
-  return `${drawerSlug}-${depth || 0}`
+  return `${drawerSlug}-${depth || 1}`
 }
