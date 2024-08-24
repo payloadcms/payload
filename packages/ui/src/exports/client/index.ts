@@ -26,7 +26,12 @@ export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
 export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
-export { BulkUploadDrawer, BulkUploadToggler } from '../../elements/BulkUpload/index.js'
+export {
+  BulkUploadDrawer,
+  BulkUploadProvider,
+  useBulkUpload,
+  useBulkUploadDrawerSlug,
+} from '../../elements/BulkUpload/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'

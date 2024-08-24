@@ -10,16 +10,15 @@ import './index.scss'
 const baseClass = 'bulk-upload--add-files'
 
 type Props = {
-  readonly drawerSlug: string
   readonly onCancel: () => void
   readonly onDrop: (acceptedFiles: FileList) => void
 }
-export function AddFilesView({ drawerSlug, onCancel, onDrop }: Props) {
+export function AddFilesView({ onCancel, onDrop }: Props) {
   const { t } = useTranslation()
 
   return (
     <div className={baseClass}>
-      <DrawerHeader onClose={onCancel} slug={drawerSlug} title={t('upload:addFiles')} />
+      <DrawerHeader onClose={onCancel} title={t('upload:addFiles')} />
       <div className={`${baseClass}__dropArea`}>
         <Dropzone multipleFiles onChange={onDrop} />
       </div>

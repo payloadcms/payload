@@ -23,7 +23,6 @@ export function AddingFilesView() {
     activeIndex,
     collectionSlug,
     docPermissions,
-    drawerSlug,
     forms,
     hasPublishPermission,
     hasSavePermission,
@@ -43,7 +42,6 @@ export function AddingFilesView() {
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
-          slug={drawerSlug}
           title={getTranslation(collection.labels.singular, i18n)}
         />
         <DocumentInfoProvider

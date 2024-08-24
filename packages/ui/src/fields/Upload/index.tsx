@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import type { FieldType } from '../../forms/useField/index.js'
 import type { UploadInputProps } from './HasOne/Input.js'
 
-import { BulkUploadDrawer } from '../../elements/BulkUpload/index.js'
+import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -31,7 +31,6 @@ export const baseClass = 'upload'
 const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   const {
     field: {
-      name,
       _path: pathFromProps,
       admin: { className, components, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
@@ -43,18 +42,17 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     validate,
   } = props
 
-  const drawerSlug = `bulk-upload-drawer--field-${name}`
-
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n } = useTranslation()
   const { config } = useConfig()
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
+  const { drawerSlug, setCollectionSlug, setInitialFiles, setOnSuccess } = useBulkUpload()
 
-  const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null)
-  const fileDocs = React.useRef<JsonObject | JsonObject[]>([])
+  const fileDocs = React.useRef<JsonObject[]>([])
+  const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -96,7 +94,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     fieldHookResult.formProcessing ||
     fieldHookResult.formInitializing
 
-  const loadFileDocs = React.useCallback(
+  const populateDocs = React.useCallback(
     async (ids: (number | string)[]) => {
       const query: {
         [key: string]: unknown
@@ -138,12 +136,6 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     [code, config.routes.api, config.serverURL, hasMany, i18n.language, relationTo],
   )
 
-  useEffect(() => {
-    if (hasMany) {
-      void loadFileDocs(Array.isArray(value) ? value : [value])
-    }
-  }, [hasMany, loadFileDocs, value])
-
   const onChange = useCallback(
     (incomingValue) => {
       if (!incomingValue) {
@@ -160,30 +152,47 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
   )
 
   const onUploadSuccess = useCallback(
-    (ids: string[]) => {
+    (newDocs: JsonObject[]) => {
       if (hasMany) {
         const mergedValue = [
           ...(Array.isArray(fieldHookResult.value) ? fieldHookResult.value : []),
-          ...ids,
+          ...newDocs.map((doc) => doc.id),
         ]
         setValue(mergedValue)
-        void loadFileDocs(mergedValue)
+        fileDocs.current.push(...newDocs)
       } else {
-        const firstDoc = ids[0]
-        setValue(firstDoc)
-        void loadFileDocs([firstDoc])
+        const firstDoc = newDocs[0]
+        setValue(firstDoc.id)
+        fileDocs.current = [firstDoc]
       }
     },
-    [fieldHookResult.value, hasMany, loadFileDocs, setValue],
+    [fieldHookResult.value, hasMany, setValue],
   )
 
   const onFileSelection = useCallback(
     (files: FileList) => {
+      setCollectionSlug(relationTo)
+      setInitialFiles(files)
+      setOnSuccess(onUploadSuccess)
       openModal(drawerSlug)
-      setSelectedFiles(files)
     },
-    [openModal, drawerSlug],
+    [
+      openModal,
+      drawerSlug,
+      relationTo,
+      setCollectionSlug,
+      setInitialFiles,
+      setOnSuccess,
+      onUploadSuccess,
+    ],
   )
+
+  useEffect(() => {
+    if (value && !loadedValueDocsRef.current) {
+      void populateDocs(Array.isArray(value) ? value : [value])
+      loadedValueDocsRef.current = true
+    }
+  }, [hasMany, populateDocs, value])
 
   return (
     <div
@@ -208,36 +217,18 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
         required={required}
         {...(props.labelProps || {})}
       />
-      {/* <BulkUploadDrawer
-        collectionSlug={relationTo}
-        drawerSlug={drawerSlug}
-        //initialFiles={selectedFiles}
-        onSuccess={onUploadSuccess}
-      /> */}
 
       {!fieldHookResult.value ||
       (Array.isArray(fieldHookResult.value) && fieldHookResult.value.length === 0) ? (
-        <>
-          <Dropzone multipleFiles={hasMany} onChange={onFileSelection} />
-          <BulkUploadDrawer
-            collectionSlug={relationTo}
-            drawerSlug={drawerSlug}
-            initialFiles={selectedFiles}
-            onSuccess={onUploadSuccess}
-          />
-        </>
+        <Dropzone multipleFiles={hasMany} onChange={onFileSelection} />
       ) : hasMany ? (
         <UploadComponentHasMany
           {...props}
           canCreate={canCreate}
           disabled={disabled}
-          drawerSlug={drawerSlug}
           fieldHookResult={fieldHookResult as FieldType<string[]>}
           fileDocs={Array.isArray(fileDocs.current) ? fileDocs.current : []}
           onChange={onChange}
-          onUploadSuccess={onUploadSuccess}
-          selectedFiles={selectedFiles}
-          //onFileSelection={onFileSelection}
         />
       ) : (
         <UploadComponentHasOne
@@ -245,6 +236,7 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
           canCreate={canCreate}
           disabled={disabled}
           fieldHookResult={fieldHookResult as FieldType<string>}
+          fileDoc={fileDocs?.current?.[0]}
           onChange={onChange}
         />
       )}

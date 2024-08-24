@@ -22,6 +22,7 @@ import { getFormState } from '../../../utilities/getFormState.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
+import { BulkUploadProvider } from '../index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -132,46 +133,48 @@ export function EditForm({ submitted }: EditFormProps) {
 
   return (
     <OperationProvider operation="create">
-      {BeforeDocument}
-      <Form
-        action={action}
-        className={`${baseClass}__form`}
-        disabled={isInitializing || !hasSavePermission}
-        initialState={isInitializing ? undefined : initialState}
-        isInitializing={isInitializing}
-        method="POST"
-        onChange={[onChange]}
-        onSuccess={onSave}
-        submitted={submitted}
-      >
-        <DocumentFields
-          AfterFields={AfterFields}
-          BeforeFields={
-            BeforeFields || (
-              <React.Fragment>
-                {collectionConfig?.admin?.components?.edit?.Upload ? (
-                  <RenderComponent
-                    mappedComponent={collectionConfig.admin.components.edit.Upload}
-                  />
-                ) : (
-                  <Upload
-                    collectionSlug={collectionConfig.slug}
-                    initialState={initialState}
-                    uploadConfig={collectionConfig.upload}
-                  />
-                )}
-              </React.Fragment>
-            )
-          }
-          docPermissions={docPermissions || ({} as DocumentPermissions)}
-          fields={collectionConfig.fields}
-          readOnly={!hasSavePermission}
-          schemaPath={schemaPath}
-        />
-        <ReportAllErrors />
-        <GetFieldProxy />
-      </Form>
-      {AfterDocument}
+      <BulkUploadProvider>
+        {BeforeDocument}
+        <Form
+          action={action}
+          className={`${baseClass}__form`}
+          disabled={isInitializing || !hasSavePermission}
+          initialState={isInitializing ? undefined : initialState}
+          isInitializing={isInitializing}
+          method="POST"
+          onChange={[onChange]}
+          onSuccess={onSave}
+          submitted={submitted}
+        >
+          <DocumentFields
+            AfterFields={AfterFields}
+            BeforeFields={
+              BeforeFields || (
+                <React.Fragment>
+                  {collectionConfig?.admin?.components?.edit?.Upload ? (
+                    <RenderComponent
+                      mappedComponent={collectionConfig.admin.components.edit.Upload}
+                    />
+                  ) : (
+                    <Upload
+                      collectionSlug={collectionConfig.slug}
+                      initialState={initialState}
+                      uploadConfig={collectionConfig.upload}
+                    />
+                  )}
+                </React.Fragment>
+              )
+            }
+            docPermissions={docPermissions || ({} as DocumentPermissions)}
+            fields={collectionConfig.fields}
+            readOnly={!hasSavePermission}
+            schemaPath={schemaPath}
+          />
+          <ReportAllErrors />
+          <GetFieldProxy />
+        </Form>
+        {AfterDocument}
+      </BulkUploadProvider>
     </OperationProvider>
   )
 }

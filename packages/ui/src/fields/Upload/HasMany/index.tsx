@@ -6,11 +6,9 @@ import React, { Fragment, useCallback, useMemo } from 'react'
 import type { useSelection } from '../../../providers/Selection/index.js'
 import type { UploadFieldPropsWithContext } from '../HasOne/index.js'
 
-import { AddNewRelation } from '../../../elements/AddNewRelation/index.js'
-import { BulkUploadDrawer } from '../../../elements/BulkUpload/index.js'
+import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
 import { Button } from '../../../elements/Button/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
-import { Dropzone } from '../../../elements/Dropzone/index.js'
 import { FileDetails } from '../../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -25,13 +23,11 @@ import './index.scss'
 export const UploadComponentHasMany: React.FC<
   {
     fileDocs: PaginatedDocs['docs']
-    onFileSelection?: (files: FileList) => void
     setValue?: (value: string[]) => void
   } & UploadFieldPropsWithContext<string[]>
 > = (props) => {
   const {
     canCreate,
-    drawerSlug,
     field: {
       _path,
       admin: { isSortable },
@@ -41,14 +37,12 @@ export const UploadComponentHasMany: React.FC<
     fieldHookResult: { filterOptions: filterOptionsFromProps, setValue, value },
     fileDocs,
     onChange,
-    onFileSelection,
-    onUploadSuccess,
     readOnly,
-    selectedFiles,
   } = props
 
   const { openModal } = useModal()
   const { t } = useTranslation()
+  const { drawerSlug } = useBulkUpload()
 
   const {
     config: { collections },
@@ -142,8 +136,6 @@ export const UploadComponentHasMany: React.FC<
   return (
     <Fragment>
       <div className={[baseClass].join(' ')}>
-        {/* <Dropzone multipleFiles={true} onChange={onFileSelection}>
-        </Dropzone> */}
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
           ids={value.map((id) => String(id))}
@@ -174,12 +166,12 @@ export const UploadComponentHasMany: React.FC<
         </DraggableSortable>
       </div>
 
-      <BulkUploadDrawer
+      {/* <BulkUploadDrawer
         collectionSlug={relationTo}
         drawerSlug={drawerSlug}
         initialFiles={selectedFiles}
         onSuccess={onUploadSuccess}
-      />
+      /> */}
 
       <div className={[`${baseClass}__controls`].join(' ')}>
         <div className={[`${baseClass}__buttons`].join(' ')}>

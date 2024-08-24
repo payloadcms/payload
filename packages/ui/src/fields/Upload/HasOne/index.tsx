@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadFieldProps } from 'payload'
+import type { Data, UploadFieldProps } from 'payload'
 
 import React from 'react'
 
@@ -14,6 +14,7 @@ export type UploadFieldPropsWithContext<TValue extends string | string[] = strin
   readonly canCreate: boolean
   readonly disabled: boolean
   readonly fieldHookResult: ReturnType<typeof useField<TValue>>
+  readonly fileDoc?: Data
   readonly onChange: (value: unknown) => void
 } & UploadFieldProps
 
@@ -26,6 +27,7 @@ export const UploadComponentHasOne: React.FC<UploadFieldPropsWithContext> = (pro
     field,
     field: { admin: { className, style, width } = {}, label, relationTo, required },
     fieldHookResult,
+    fileDoc,
     labelProps,
     onChange,
   } = props
@@ -53,6 +55,7 @@ export const UploadComponentHasOne: React.FC<UploadFieldPropsWithContext> = (pro
           collection={collection}
           descriptionProps={descriptionProps}
           errorProps={errorProps}
+          fileDoc={fileDoc}
           filterOptions={fieldHookResult.filterOptions}
           label={label}
           labelProps={labelProps}

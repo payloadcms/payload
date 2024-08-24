@@ -87,7 +87,6 @@ export function FileSidebar() {
 
             <Drawer Header={null} gutter={false} slug={addMoreFilesDrawerSlug}>
               <AddFilesView
-                drawerSlug={addMoreFilesDrawerSlug}
                 onCancel={() => closeModal(addMoreFilesDrawerSlug)}
                 onDrop={handleAddFiles}
               />

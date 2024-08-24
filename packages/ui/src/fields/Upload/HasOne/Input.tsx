@@ -2,6 +2,7 @@
 
 import type {
   ClientCollectionConfig,
+  Data,
   FieldDescriptionClientProps,
   FieldErrorClientProps,
   FieldLabelClientProps,
@@ -15,7 +16,7 @@ import type {
 import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
@@ -48,6 +49,7 @@ export type UploadInputProps = {
   readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly field?: MarkOptional<UploadFieldClient, 'type'>
+  readonly fileDoc?: Data
   readonly filterOptions?: FilterOptionsResult
   readonly label: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
@@ -75,6 +77,7 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
     descriptionProps,
     errorProps,
     field,
+    fileDoc,
     filterOptions,
     label,
     labelProps,
@@ -91,7 +94,6 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
 
-  const [fileDoc, setFileDoc] = useState(undefined)
   const [missingFile, setMissingFile] = useState(false)
   const [collectionSlugs] = useState([collection?.slug])
 
@@ -103,30 +105,6 @@ export const UploadInputHasOne: React.FC<UploadInputProps> = (props) => {
     collectionSlugs,
     filterOptions,
   })
-
-  useEffect(() => {
-    if (value !== null && typeof value !== 'undefined' && value !== '') {
-      const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        })
-        if (response.ok) {
-          const json = await response.json()
-          setFileDoc(json)
-        } else {
-          setMissingFile(true)
-          setFileDoc(undefined)
-        }
-      }
-
-      void fetchFile()
-    } else {
-      setFileDoc(undefined)
-    }
-  }, [value, relationTo, api, serverURL, i18n])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
