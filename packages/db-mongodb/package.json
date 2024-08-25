@@ -34,9 +34,9 @@
   },
   "dependencies": {
     "bson-objectid": "2.0.4",
-    "http-status": "1.6.2",
+    "http-status": "1.7.4",
     "mongoose": "6.12.3",
-    "mongoose-paginate-v2": "1.7.22",
+    "mongoose-paginate-v2": "1.8.3",
     "prompts": "2.4.2",
     "uuid": "10.0.0"
   },

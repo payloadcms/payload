@@ -46,10 +46,10 @@
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
-    "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.23.2-df9e596",
-    "drizzle-orm": "0.32.1",
-    "pg": "8.11.3",
+    "console-table-printer": "2.12.1",
+    "drizzle-kit": "0.24.1",
+    "drizzle-orm": "0.33.0",
+    "pg": "8.12.0",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "10.0.0"
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
+    "@types/pg": "8.11.6",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.23.1",
     "payload": "workspace:*"

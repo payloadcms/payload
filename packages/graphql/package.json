@@ -41,10 +41,10 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "graphql-scalars": "1.22.2",
+    "graphql-scalars": "1.23.0",
     "pluralize": "8.0.0",
     "ts-essentials": "7.0.3",
-    "tsx": "4.17.0"
+    "tsx": "4.18.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
