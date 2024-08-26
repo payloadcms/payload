@@ -200,15 +200,11 @@ export function UploadInput(props: UploadInputProps) {
         },
       }
 
-      const response = await fetch(`${serverURL}${api}/${relatedCollectionSlug}`, {
-        body: qs.stringify(query),
+      const response = await fetch(`${serverURL}${api}/${relatedCollectionSlug}?${qs.stringify(query)}`, {
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
         },
-        method: 'POST',
       })
       if (response.ok) {
         const json = await response.json()
