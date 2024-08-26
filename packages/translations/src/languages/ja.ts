@@ -227,6 +227,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     editingLabel_many: '{{count}}つの{{label}}を編集しています',
     editingLabel_one: '{{count}}つの{{label}}を編集しています',
     editingLabel_other: '{{count}}つの{{label}}を編集しています',
+    editingTakenOver: '編集が引き継がれました',
     email: 'メールアドレス',
     emailAddress: 'メールアドレス',
     enterAValue: '値を入力',

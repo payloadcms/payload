@@ -225,6 +225,7 @@ export const viTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Đang chỉnh sửa {{count}} {{label}}',
     editingLabel_one: 'Đang chỉnh sửa {{count}} {{label}}',
     editingLabel_other: 'Đang chỉnh sửa {{count}} {{label}}',
+    editingTakenOver: 'Chỉnh sửa đã được tiếp quản',
     email: 'Email',
     emailAddress: 'Địa chỉ Email',
     enterAValue: 'Nhập một giá trị',

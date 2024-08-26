@@ -226,6 +226,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Уређивање {{count}} {{label}}',
     editingLabel_one: 'Уређивање {{count}} {{label}}',
     editingLabel_other: 'Уређивање {{count}} {{label}}',
+    editingTakenOver: 'Уређивање преузето',
     email: 'Е-пошта',
     emailAddress: 'Адреса е-поште',
     enterAValue: 'Унеси вредност',

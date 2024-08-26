@@ -226,6 +226,7 @@ export const faTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'در حال نگارش {{count}} از {{label}}',
     editingLabel_one: 'در حال نگارش {{count}} از {{label}}',
     editingLabel_other: 'در حال نگارش {{count}} از {{label}}',
+    editingTakenOver: 'ویرایش به دست گرفته شد',
     email: 'رایانامه',
     emailAddress: 'نشانی رایانامه',
     enterAValue: 'یک مقدار وارد کنید',

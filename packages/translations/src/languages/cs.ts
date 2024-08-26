@@ -226,6 +226,7 @@ export const csTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Úprava {{count}} {{label}}',
     editingLabel_one: 'Úprava {{count}} {{label}}',
     editingLabel_other: 'Úprava {{count}} {{label}}',
+    editingTakenOver: 'Úpravy byly převzaty',
     email: 'E-mail',
     emailAddress: 'E-mailová adresa',
     enterAValue: 'Zadejte hodnotu',

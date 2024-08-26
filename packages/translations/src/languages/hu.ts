@@ -229,6 +229,7 @@ export const huTranslations: DefaultTranslationsObject = {
     editingLabel_many: '{{count}} {{label}} szerkesztése',
     editingLabel_one: '{{count}} {{label}} szerkesztése',
     editingLabel_other: '{{count}} {{label}} szerkesztése',
+    editingTakenOver: 'A szerkesztést átvették',
     email: 'E-mail',
     emailAddress: 'E-mail cím',
     enterAValue: 'Adjon meg egy értéket',

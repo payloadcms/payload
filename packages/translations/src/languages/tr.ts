@@ -230,6 +230,7 @@ export const trTranslations: DefaultTranslationsObject = {
     editingLabel_many: '{{count}} {{label}} düzenleniyor',
     editingLabel_one: '{{count}} {{label}} düzenleniyor',
     editingLabel_other: '{{count}} {{label}} düzenleniyor',
+    editingTakenOver: 'Düzenleme devralındı',
     email: 'E-posta',
     emailAddress: 'E-posta adresi',
     enterAValue: 'Değer girin',

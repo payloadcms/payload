@@ -227,6 +227,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Uređivanje {{count}} {{label}}',
     editingLabel_one: 'Uređivanje {{count}} {{label}}',
     editingLabel_other: 'Uređivanje {{count}} {{label}}',
+    editingTakenOver: 'Uređivanje preuzeto',
     email: 'Email',
     emailAddress: 'Email adresa',
     enterAValue: 'Unesi vrijednost',

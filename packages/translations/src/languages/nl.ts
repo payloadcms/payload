@@ -229,6 +229,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Bewerken {{count}} {{label}}',
     editingLabel_one: 'Bewerken {{count}} {{label}}',
     editingLabel_other: 'Bewerken {{count}} {{label}}',
+    editingTakenOver: 'Bewerking overgenomen',
     email: 'E-mail',
     emailAddress: 'E-maildres',
     enterAValue: 'Waarde invoeren',

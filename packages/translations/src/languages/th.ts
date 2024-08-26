@@ -223,6 +223,7 @@ export const thTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'กำลังแก้ไข {{count}} {{label}}',
     editingLabel_one: 'กำลังแก้ไข {{count}} {{label}}',
     editingLabel_other: 'กำลังแก้ไข {{count}} {{label}}',
+    editingTakenOver: 'การแก้ไขถูกครอบครอง',
     email: 'อีเมล',
     emailAddress: 'อีเมล',
     enterAValue: 'ระบุค่า',

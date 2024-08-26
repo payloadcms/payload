@@ -227,6 +227,7 @@ export const plTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Edytowanie {{count}} {{label}}',
     editingLabel_one: 'Edytowanie {{count}} {{label}}',
     editingLabel_other: 'Edytowanie {{count}} {{label}}',
+    editingTakenOver: 'Edycja przejęta',
     email: 'Email',
     emailAddress: 'Adres email',
     enterAValue: 'Wpisz wartość',

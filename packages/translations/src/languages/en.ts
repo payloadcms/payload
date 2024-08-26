@@ -229,6 +229,7 @@ export const enTranslations = {
     editingLabel_many: 'Editing {{count}} {{label}}',
     editingLabel_one: 'Editing {{count}} {{label}}',
     editingLabel_other: 'Editing {{count}} {{label}}',
+    editingTakenOver: 'Editing taken over',
     email: 'Email',
     emailAddress: 'Email Address',
     enterAValue: 'Enter a value',

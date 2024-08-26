@@ -222,6 +222,7 @@ export const heTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'עריכת {{count}} {{label}}',
     editingLabel_one: 'עריכת {{label}} אחד',
     editingLabel_other: 'עריכת {{count}} {{label}}',
+    editingTakenOver: 'העריכה נלקחה על ידי',
     email: 'דוא"ל',
     emailAddress: 'כתובת דוא"ל',
     enterAValue: 'הזן ערך',

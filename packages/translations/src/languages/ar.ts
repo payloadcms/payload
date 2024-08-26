@@ -225,6 +225,7 @@ export const arTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'تعديل {{count}} {{label}}',
     editingLabel_one: 'تعديل {{count}} {{label}}',
     editingLabel_other: 'تعديل {{count}} {{label}}',
+    editingTakenOver: 'تم الاستيلاء على التحرير',
     email: 'البريد الإلكتروني',
     emailAddress: 'عنوان البريد الإلكتروني',
     enterAValue: 'أدخل قيمة',

@@ -227,6 +227,7 @@ export const svTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Redigerar {{count}} {{label}}',
     editingLabel_one: 'Redigerar {{count}} {{label}}',
     editingLabel_other: 'Redigerar {{count}} {{label}}',
+    editingTakenOver: 'Redigering övertagen',
     email: 'E-post',
     emailAddress: 'E-postadress',
     enterAValue: 'Ange ett värde',

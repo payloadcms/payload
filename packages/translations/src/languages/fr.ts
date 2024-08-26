@@ -234,6 +234,7 @@ export const frTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Modification des {{count}} {{label}}',
     editingLabel_one: 'Modification de {{count}} {{label}}',
     editingLabel_other: 'Modification des {{count}} {{label}}',
+    editingTakenOver: 'Modification prise en charge',
     email: 'E-mail',
     emailAddress: 'Adresse e-mail',
     enterAValue: 'Entrez une valeur',

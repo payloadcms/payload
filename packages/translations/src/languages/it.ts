@@ -229,6 +229,7 @@ export const itTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Modificare {{count}} {{label}}',
     editingLabel_one: 'Modifica {{count}} {{label}}',
     editingLabel_other: 'Modificare {{count}} {{label}}',
+    editingTakenOver: 'Modifica presa in carico',
     email: 'Email',
     emailAddress: 'Indirizzo Email',
     enterAValue: 'Inserisci un valore',

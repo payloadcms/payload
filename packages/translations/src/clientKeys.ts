@@ -169,6 +169,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:edit',
   'general:editing',
   'general:editingLabel',
+  'general:editingTakenOver',
   'general:editLabel',
   'general:editedSince',
   'general:email',

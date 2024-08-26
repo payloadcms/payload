@@ -231,6 +231,7 @@ export const roTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Editare {{count}} {{label}}',
     editingLabel_one: 'Editare {{count}} {{label}}',
     editingLabel_other: 'Editare {{count}} {{label}}',
+    editingTakenOver: 'Editarea preluată',
     email: 'Email',
     emailAddress: 'Adresa de email',
     enterAValue: 'Introduceți o valoare',

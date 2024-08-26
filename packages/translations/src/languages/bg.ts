@@ -226,6 +226,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Редактиране на {{count}} {{label}}',
     editingLabel_one: 'Редактиране на {{count}} {{label}}',
     editingLabel_other: 'Редактиране на {{count}} {{label}}',
+    editingTakenOver: 'Редактирането е поето',
     email: 'Имейл',
     emailAddress: 'Имейл адрес',
     enterAValue: 'Въведи стойност',

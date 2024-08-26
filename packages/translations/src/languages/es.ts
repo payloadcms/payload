@@ -231,6 +231,7 @@ export const esTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Edición de {{count}} {{label}}',
     editingLabel_one: 'Editando {{count}} {{label}}',
     editingLabel_other: 'Edición de {{count}} {{label}}',
+    editingTakenOver: 'Edición tomada',
     email: 'Correo electrónico',
     emailAddress: 'Dirección de Correo Electrónico',
     enterAValue: 'Introduce un valor',

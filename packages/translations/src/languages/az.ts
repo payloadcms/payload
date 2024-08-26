@@ -227,6 +227,7 @@ export const azTranslations: DefaultTranslationsObject = {
     editingLabel_many: '{{count}} {{label}} redaktə olunur',
     editingLabel_one: '{{count}} {{label}} redaktə olunur',
     editingLabel_other: '{{count}} {{label}} redaktə olunur',
+    editingTakenOver: 'Redaktə ələ keçirildi',
     email: 'Elektron poçt',
     emailAddress: 'Elektron poçt ünvanı',
     enterAValue: 'Bir dəyər daxil edin',

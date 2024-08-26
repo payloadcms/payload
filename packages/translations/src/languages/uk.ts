@@ -227,6 +227,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Редагування {{count}} {{label}}',
     editingLabel_one: 'Редагування {{count}} {{label}}',
     editingLabel_other: 'Редагування {{count}} {{label}}',
+    editingTakenOver: 'Редагування взято на себе',
     email: 'Електронна пошта',
     emailAddress: 'Адреса електронної пошти',
     enterAValue: 'Введіть значення',

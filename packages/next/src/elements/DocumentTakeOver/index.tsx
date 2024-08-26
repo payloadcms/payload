@@ -25,7 +25,7 @@ export const DocumentTakeOver: React.FC<{
     <Modal className={baseClass} slug={modalSlug}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <h1>Editing taken over</h1>
+          <h1>{t('general:editingTakenOver')}</h1>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button buttonStyle="primary" onClick={handleBackToDashboard} size="large">

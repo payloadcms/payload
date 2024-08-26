@@ -220,6 +220,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     editingLabel_many: '编辑 {{count}} {{label}}',
     editingLabel_one: '编辑 {{count}} {{label}}',
     editingLabel_other: '编辑 {{count}} {{label}}',
+    editingTakenOver: '编辑已被接管',
     email: '电子邮件',
     emailAddress: '电子邮件地址',
     enterAValue: '输入一个值',

@@ -228,6 +228,7 @@ export const skTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Úprava {{count}} {{label}}',
     editingLabel_one: 'Úprava {{count}} {{label}}',
     editingLabel_other: 'Úprava {{count}} {{label}}',
+    editingTakenOver: 'Úpravy prevzaté',
     email: 'E-mail',
     emailAddress: 'E-mailová adresa',
     enterAValue: 'Zadajte hodnotu',

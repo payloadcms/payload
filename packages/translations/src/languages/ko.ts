@@ -226,6 +226,7 @@ export const koTranslations: DefaultTranslationsObject = {
     editingLabel_many: '{{count}}개의 {{label}} 수정 중',
     editingLabel_one: '{{count}}개의 {{label}} 수정 중',
     editingLabel_other: '{{count}}개의 {{label}} 수정 중',
+    editingTakenOver: '편집이 인수되었습니다',
     email: '이메일',
     emailAddress: '이메일 주소',
     enterAValue: '값을 입력하세요',

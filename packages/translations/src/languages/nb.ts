@@ -227,6 +227,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Redigerer {{count}} {{label}}',
     editingLabel_one: 'Redigerer {{count}} {{label}}',
     editingLabel_other: 'Redigerer {{count}} {{label}}',
+    editingTakenOver: 'Redigering overtatt',
     email: 'E-post',
     emailAddress: 'E-postadresse',
     enterAValue: 'Skriv inn en verdi',

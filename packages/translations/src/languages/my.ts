@@ -229,6 +229,7 @@ export const myTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'တည်းဖြတ်ခြင်း {{count}} {{label}}',
     editingLabel_one: 'တည်းဖြတ်ခြင်း {{count}} {{label}}',
     editingLabel_other: 'တည်းဖြတ်ခြင်း {{count}} {{label}}',
+    editingTakenOver: 'တည်းဖြတ်ခြင်းကိုရယူခဲ့သည်',
     email: 'အီးမေးလ်',
     emailAddress: 'အီးမေးလ် လိပ်စာ',
     enterAValue: 'တန်ဖိုးတစ်ခုထည့်ပါ။',

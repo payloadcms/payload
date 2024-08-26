@@ -226,6 +226,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Uređivanje {{count}} {{label}}',
     editingLabel_one: 'Uređivanje {{count}} {{label}}',
     editingLabel_other: 'Uređivanje {{count}} {{label}}',
+    editingTakenOver: 'Uređivanje preuzeto',
     email: 'E-pošta',
     emailAddress: 'Аdresa e-pošte',
     enterAValue: 'Unesi vrednost',

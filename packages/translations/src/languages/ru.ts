@@ -229,6 +229,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     editingLabel_many: 'Редактирование {{count}} {{label}}',
     editingLabel_one: 'Редактирование {{count}} {{label}}',
     editingLabel_other: 'Редактирование {{count}} {{label}}',
+    editingTakenOver: 'Редактирование взято под контроль',
     email: 'Email',
     emailAddress: 'Email',
     enterAValue: 'Введите значение',
