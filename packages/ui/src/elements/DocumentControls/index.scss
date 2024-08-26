@@ -53,6 +53,14 @@
     }
   }
 
+  &__locked-controls.locked {
+    position: unset;
+
+    .tooltip {
+      top: calc(var(--base) * -0.5);
+    }
+  }
+
   &__list-item {
     display: flex;
     align-items: center;

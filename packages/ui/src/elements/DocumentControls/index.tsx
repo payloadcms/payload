@@ -2,6 +2,7 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
+  ClientUser,
   CollectionPermission,
   GlobalPermission,
   SanitizedCollectionConfig,
@@ -15,9 +16,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
+import { Button } from '../Button/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
@@ -37,8 +40,11 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  onTakeOver: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly readOnlyForIncomingUser?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
+  readonly user?: ClientUser
 }> = (props) => {
   const {
     id,
@@ -48,10 +54,13 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    onTakeOver,
     permissions,
+    readOnlyForIncomingUser,
+    user,
   } = props
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -105,6 +114,9 @@ export const DocumentControls: React.FC<{
                   })}
                 </p>
               </li>
+            )}
+            {user && readOnlyForIncomingUser && (
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
@@ -199,6 +211,16 @@ export const DocumentControls: React.FC<{
                   />
                 )}
               </React.Fragment>
+            )}
+            {user && readOnlyForIncomingUser && (
+              <Button
+                buttonStyle="secondary"
+                onClick={() => void onTakeOver()}
+                size="medium"
+                type="button"
+              >
+                {t('general:takeOver')}
+              </Button>
             )}
           </div>
           {showDotMenu && (

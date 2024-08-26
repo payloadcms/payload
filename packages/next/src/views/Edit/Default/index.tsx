@@ -67,7 +67,6 @@ export const DefaultEditView: React.FC = () => {
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const { openModal } = useModal()
   const [showLockedModal, setShowLockedModal] = useState(false)
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -447,8 +446,11 @@ export const DefaultEditView: React.FC = () => {
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onTakeOver={handleTakeOver}
             permissions={docPermissions}
+            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             slug={collectionConfig?.slug || globalConfig?.slug}
+            user={initialEditor}
           />
           <DocumentFields
             AfterFields={AfterFields}
