@@ -430,43 +430,48 @@ export class BasePayload {
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
     ) {
+      const dependencies = [
+        '@payloadcms/ui/shared',
+        'payload',
+        '@payloadcms/next/utilities',
+        '@payloadcms/richtext-lexical',
+        '@payloadcms/richtext-slate',
+        '@payloadcms/graphql',
+        '@payloadcms/plugin-cloud',
+        '@payloadcms/db-mongodb',
+        '@payloadcms/db-postgres',
+        '@payloadcms/plugin-form-builder',
+        '@payloadcms/plugin-nested-docs',
+        '@payloadcms/plugin-seo',
+        '@payloadcms/plugin-search',
+        '@payloadcms/plugin-cloud-storage',
+        '@payloadcms/plugin-stripe',
+        '@payloadcms/plugin-zapier',
+        '@payloadcms/plugin-redirects',
+        '@payloadcms/bundler-webpack',
+        '@payloadcms/bundler-vite',
+        '@payloadcms/live-preview',
+        '@payloadcms/live-preview-react',
+        '@payloadcms/translations',
+        '@payloadcms/email-nodemailer',
+        '@payloadcms/email-resend',
+        '@payloadcms/storage-azure',
+        '@payloadcms/storage-s3',
+        '@payloadcms/storage-gcs',
+        '@payloadcms/storage-vercel-blob',
+        '@payloadcms/storage-uploadthing',
+      ]
+
+      if (process.env.PAYLOAD_CI_DEPENDENCY_CHECKER !== 'true') {
+        dependencies.push('@payloadcms/plugin-sentry')
+      }
+
       // First load. First check if there are mismatching dependency versions of payload packages
       await checkDependencies({
         dependencyGroups: [
           {
             name: 'payload',
-            dependencies: [
-              '@payloadcms/ui/shared',
-              'payload',
-              '@payloadcms/next/utilities',
-              '@payloadcms/richtext-lexical',
-              '@payloadcms/richtext-slate',
-              '@payloadcms/graphql',
-              '@payloadcms/plugin-cloud',
-              '@payloadcms/db-mongodb',
-              '@payloadcms/db-postgres',
-              '@payloadcms/plugin-form-builder',
-              '@payloadcms/plugin-nested-docs',
-              '@payloadcms/plugin-seo',
-              '@payloadcms/plugin-search',
-              '@payloadcms/plugin-cloud-storage',
-              '@payloadcms/plugin-stripe',
-              '@payloadcms/plugin-zapier',
-              '@payloadcms/plugin-redirects',
-              '@payloadcms/plugin-sentry',
-              '@payloadcms/bundler-webpack',
-              '@payloadcms/bundler-vite',
-              '@payloadcms/live-preview',
-              '@payloadcms/live-preview-react',
-              '@payloadcms/translations',
-              '@payloadcms/email-nodemailer',
-              '@payloadcms/email-resend',
-              '@payloadcms/storage-azure',
-              '@payloadcms/storage-s3',
-              '@payloadcms/storage-gcs',
-              '@payloadcms/storage-vercel-blob',
-              '@payloadcms/storage-uploadthing',
-            ],
+            dependencies,
             targetVersionDependency: 'payload',
           },
           {

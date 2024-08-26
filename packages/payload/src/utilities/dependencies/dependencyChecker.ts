@@ -58,14 +58,14 @@ export async function checkDependencies({
             .map(([version, pkg]) => `${pkg}@${version} (Please change this to ${targetVersion})`)
             .join(', ')
           throw new Error(
-            `Mismatching ${dependencyGroup.name} dependency versions found: ${formattedVersionsWithPackageNameString}. All ${dependencyGroup.name} packages must have the same version. This is an error with your set-up, not a bug in Payload. Please go to your package.json and ensure all ${dependencyGroup.name} packages have the same version.`,
+            `Mismatching "${dependencyGroup.name}" dependency versions found: ${formattedVersionsWithPackageNameString}. All "${dependencyGroup.name}" packages must have the same version. This is an error with your set-up, not a bug in Payload. Please go to your package.json and ensure all "${dependencyGroup.name}" packages have the same version.`,
           )
         } else {
           const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
             .map(([version, pkg]) => `${pkg}@${version}`)
             .join(', ')
           throw new Error(
-            `Mismatching ${dependencyGroup.name} dependency versions found: ${formattedVersionsWithPackageNameString}. All ${dependencyGroup.name} packages must have the same version. This is an error with your set-up, not a bug in Payload. Please go to your package.json and ensure all ${dependencyGroup.name} packages have the same version.`,
+            `Mismatching "${dependencyGroup.name}" dependency versions found: ${formattedVersionsWithPackageNameString}. All "${dependencyGroup.name}" packages must have the same version. This is an error with your set-up, not a bug in Payload. Please go to your package.json and ensure all "${dependencyGroup.name}" packages have the same version.`,
           )
         }
       }
