@@ -154,6 +154,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+dist_optimized
 
 # Gatsby files
 .cache/

@@ -1,11 +1,6 @@
+'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  ClientField,
-  OptionObject,
-  SelectField,
-  SelectFieldClient,
-  SelectFieldProps,
-} from 'payload'
+import type { OptionObject, SelectField, SelectFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'

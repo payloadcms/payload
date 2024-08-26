@@ -11,7 +11,7 @@
   border: 1px solid var(--theme-elevation-100);
   position: relative;
   font-family: var(--font-body);
-  margin: 0 0 1.5em;
+  margin-block: base(0.5);
 
   .btn {
     margin: 0;

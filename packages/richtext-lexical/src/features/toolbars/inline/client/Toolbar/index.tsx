@@ -236,7 +236,7 @@ function InlineToolbar({
           horizontalPosition: 'center',
           specialHandlingForCaret: true,
           targetRect: rangeRect,
-          verticalGap: 10,
+          verticalGap: 8,
         })
       }
     } else {

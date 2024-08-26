@@ -4,13 +4,14 @@ html[data-theme='dark'] {
   .fixed-toolbar {
     &__dropdown-items {
       background: var(--theme-elevation-0);
+      transition: background 0.2s cubic-bezier(0, 0.2, 0.2, 1);
 
       .toolbar-popup__dropdown-item {
         color: var(--theme-elevation-900);
 
         &:hover:not([disabled]),
         &.active {
-          background-color: var(--theme-elevation-100);
+          background: var(--theme-elevation-100);
         }
 
         .icon {
@@ -23,13 +24,15 @@ html[data-theme='dark'] {
       &__button {
         &.active,
         &:hover:not([disabled]) {
-          background-color: var(--theme-elevation-100);
+          background: var(--theme-elevation-100);
         }
       }
 
       &__dropdown {
+        transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+
         &:hover:not([disabled]) {
-          background-color: var(--theme-elevation-100);
+          background: var(--theme-elevation-100);
         }
 
         &-caret:after {
@@ -70,7 +73,7 @@ html[data-theme='dark'] {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 2px;
+    gap: 0;
     z-index: 1;
 
     .icon {
@@ -84,13 +87,6 @@ html[data-theme='dark'] {
       height: 15px;
       background-color: var(--theme-elevation-100);
       margin: 0 6.25px;
-    }
-  }
-
-  .toolbar-popup {
-    &__dropdown,
-    &__button {
-      border-radius: 0;
     }
   }
 

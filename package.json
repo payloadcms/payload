@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.90",
+  "version": "3.0.0-beta.91",
   "private": true,
   "type": "module",
   "scripts": {
@@ -27,7 +27,7 @@
     "build:live-preview": "turbo build --filter live-preview",
     "build:live-preview-react": "turbo build --filter live-preview-react",
     "build:live-preview-vue": "turbo build --filter live-preview-vue",
-    "build:next": "turbo build --filter next",
+    "build:next": "turbo build --filter \"@payloadcms/next\"",
     "build:payload": "turbo build --filter payload",
     "build:plugin-cloud": "turbo build --filter plugin-cloud",
     "build:plugin-cloud-storage": "turbo build --filter plugin-cloud-storage",
@@ -54,7 +54,7 @@
     "clean:all": "node ./scripts/delete-recursively.js '@node_modules' 'media/*' '**/dist/' '**/.cache/*' '**/.next/*' '**/.turbo/*' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:build": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:cache": "node ./scripts/delete-recursively.js node_modules/.cache! packages/payload/node_modules/.cache! .next/*",
-    "dev": "tsx ./test/dev.ts",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts",
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
@@ -73,7 +73,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release:alpha": "pnpm runts ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "pnpm runts ./scripts/release.ts --bump prerelease --tag beta",
-    "runts": "node --no-deprecation --import @swc-node/register/esm-register",
+    "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:gen-templates": "pnpm runts ./scripts/generate-template-variations.ts",
     "script:list-published": "pnpm runts scripts/lib/getPackageRegistryVersions.ts",
     "script:pack": "pnpm runts scripts/pack-all-to-dest.ts",
@@ -159,13 +159,14 @@
     "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
     "tsx": "4.17.0",
-    "turbo": "^1.13.3",
+    "turbo": "^2.0.14",
     "typescript": "5.5.4"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
     "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
+  "packageManager": "pnpm@9.7.1",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9.7.0"

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.90",
+  "version": "3.0.0-beta.91",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -124,7 +124,7 @@
     "@types/uuid": "10.0.0",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.23.0",
+    "esbuild": "0.23.1",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
