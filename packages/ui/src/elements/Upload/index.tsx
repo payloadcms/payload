@@ -294,7 +294,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
                   type="text"
-                  value={filename}
+                  value={filename || value.name}
                 />
                 <UploadActions
                   customActions={customActions}
