@@ -19,6 +19,30 @@ import { deepCopyObjectSimple } from 'payload'
 
 import { createClientFields } from './fields.js'
 
+const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
+  'hooks',
+  'access',
+  'endpoints',
+  'custom',
+  // `upload`
+  // `admin`
+  // are all handled separately
+]
+
+const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+  'adminThumbnail',
+  'externalFileHeaderFilter',
+  'handlers',
+  'modifyResponseHeaders',
+  'withMetadata',
+]
+
+const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
+  'hidden',
+  'preview',
+  // `livePreview` is handled separately
+]
+
 export const createClientCollectionConfig = ({
   DefaultEditView,
   DefaultListView,
@@ -46,24 +70,6 @@ export const createClientCollectionConfig = ({
     importMap,
     payload,
   })
-
-  const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
-    'hooks',
-    'access',
-    'endpoints',
-    'custom',
-    // `upload`
-    // `admin`
-    // are all handled separately
-  ]
-
-  const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
-    'adminThumbnail',
-    'externalFileHeaderFilter',
-    'handlers',
-    'modifyResponseHeaders',
-    'withMetadata',
-  ]
 
   serverOnlyCollectionProperties.forEach((key) => {
     if (key in clientCollection) {
@@ -100,12 +106,6 @@ export const createClientCollectionConfig = ({
       }
     })
   }
-
-  const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-    'hidden',
-    'preview',
-    // `livePreview` is handled separately
-  ]
 
   serverOnlyCollectionAdminProperties.forEach((key) => {
     if (key in clientCollection.admin) {
