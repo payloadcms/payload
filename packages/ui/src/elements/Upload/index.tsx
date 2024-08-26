@@ -88,22 +88,22 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
-  const [replacingFile, setReplacingFile] = useState(false)
-  const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
 
+  const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
+  const [fileSrc, setFileSrc] = useState<null | string>(null)
+  const [replacingFile, setReplacingFile] = useState(false)
+  const [filename, setFilename] = useState<string>(value?.name || '')
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
 
-  const cursorPositionRef = useRef(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = useCallback(
@@ -122,27 +122,26 @@ export const Upload: React.FC<UploadProps> = (props) => {
     [onChange, setValue],
   )
 
-  const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedFileName = e.target.value
-    const cursorPosition = e.target.selectionStart
-
-    cursorPositionRef.current = cursorPosition
-
-    if (value) {
-      const fileValue = value
-      // Creating a new File object with updated properties
-      const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
-      handleFileChange(newFile)
-    }
+  const renameFile = (fileToChange: File, newName: string): File => {
+    // Creating a new File object with updated properties
+    const newFile = new File([fileToChange], newName, {
+      type: fileToChange.type,
+      lastModified: fileToChange.lastModified,
+    })
+    return newFile
   }
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const inputElement = document.querySelector(`.${baseClass}__filename`) as HTMLInputElement
-    if (inputElement && cursorPositionRef.current !== null) {
-      inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
-    }
-  }, [value])
+  const handleFileNameChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const updatedFileName = e.target.value
+
+      if (value) {
+        handleFileChange(renameFile(value, updatedFileName))
+        setFilename(updatedFileName)
+      }
+    },
+    [handleFileChange, value],
+  )
 
   const handleFileSelection = useCallback(
     (files: FileList) => {
@@ -202,7 +201,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   useEffect(() => {
     if (showUrlInput && urlInputRef.current) {
-      urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
+      // urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
     }
   }, [showUrlInput])
 
@@ -295,7 +294,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
                   type="text"
-                  value={value.name}
+                  value={filename}
                 />
                 <UploadActions
                   customActions={customActions}
