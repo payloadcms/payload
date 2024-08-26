@@ -13,6 +13,10 @@
 .select {
   all: unset;
   padding-right: 14px;
+  option {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+  }
 }
 
 .selectIcon {
