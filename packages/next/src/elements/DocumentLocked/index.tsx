@@ -43,10 +43,11 @@ export const DocumentLocked: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:documentLocked')}</h1>
-          <p>{`${user?.email ?? user?.id} is currently editing this document. If you take over, they will be blocked from continuing to eit, and may also lose unsaved changes.`}</p>
           <p>
-            {`Edited since `}
-            <strong>{formatDate(editedAt)}</strong>
+            <strong>{user?.email ?? user?.id}</strong> {t('general:currentlyEditing')}
+          </p>
+          <p>
+            {t('general:editedSince')} <strong>{formatDate(editedAt)}</strong>
           </p>
         </div>
         <div className={`${baseClass}__controls`}>
