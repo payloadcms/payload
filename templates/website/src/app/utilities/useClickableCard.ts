@@ -6,10 +6,10 @@ import { useCallback, useEffect, useRef } from 'react'
 
 type UseClickableCardType<T extends HTMLElement> = {
   card: {
-    ref: RefObject<T>
+    ref: RefObject<T | null>
   }
   link: {
-    ref: RefObject<HTMLAnchorElement>
+    ref: RefObject<HTMLAnchorElement | null>
   }
 }
 

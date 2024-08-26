@@ -50,16 +50,22 @@ export default async function Post({ params: { slug = '' } }) {
           />
         </div>
 
-        <RelatedPosts
-          className="mt-12"
-          docs={post.relatedPosts.filter((post) => typeof post === 'object')}
-        />
+        {post.relatedPosts && post.relatedPosts.length > 0 && (
+          <RelatedPosts
+            className="mt-12"
+            docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+          />
+        )}
       </div>
     </article>
   )
 }
 
-export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
+export async function generateMetadata({
+  params: { slug },
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
   const post = await queryPostBySlug({ slug })
 
   return generateMeta({ doc: post })
