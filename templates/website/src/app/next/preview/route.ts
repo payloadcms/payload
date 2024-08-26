@@ -28,7 +28,13 @@ export async function GET(
     new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  const user = jwt.verify(token, payload.config.secret)
+  let user
+
+  try {
+    user = jwt.verify(token, payload.secret)
+  } catch (error) {
+    payload.logger.error('Error verifying token for live preview:', error)
+  }
 
   // You can add additional checks here to see if the user is allowed to preview this page
   if (!user) {

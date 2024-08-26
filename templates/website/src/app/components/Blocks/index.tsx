@@ -29,7 +29,7 @@ export const Blocks: React.FC<{
     return (
       <Fragment>
         {blocks.map((block, index) => {
-          const { blockName, blockType } = block
+          const { blockType } = block
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
@@ -38,7 +38,7 @@ export const Blocks: React.FC<{
               return (
                 <div className="my-16" key={index}>
                   {/* @ts-expect-error */}
-                  <Block id={toKebabCase(blockName)} {...block} />
+                  <Block {...block} />
                 </div>
               )
             }
