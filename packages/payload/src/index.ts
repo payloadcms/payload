@@ -837,6 +837,7 @@ export type {
   QueryDrafts,
   QueryDraftsArgs,
   RollbackTransaction,
+  SimplePaginatedDocs,
   Transaction,
   UpdateGlobal,
   UpdateGlobalArgs,
