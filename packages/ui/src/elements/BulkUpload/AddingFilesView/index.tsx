@@ -44,19 +44,21 @@ export function AddingFilesView() {
           onClose={() => openModal(discardBulkUploadModalSlug)}
           title={getTranslation(collection.labels.singular, i18n)}
         />
-        <DocumentInfoProvider
-          collectionSlug={collectionSlug}
-          docPermissions={docPermissions}
-          hasPublishPermission={hasPublishPermission}
-          hasSavePermission={hasSavePermission}
-          id={null}
-          initialData={reduceFieldsToValues(activeForm.formState, true)}
-          initialState={activeForm.formState}
-          key={`${activeIndex}-${forms.length}`}
-        >
-          <ActionsBar />
-          <EditForm submitted={hasSubmitted} />
-        </DocumentInfoProvider>
+        {activeForm ? (
+          <DocumentInfoProvider
+            collectionSlug={collectionSlug}
+            docPermissions={docPermissions}
+            hasPublishPermission={hasPublishPermission}
+            hasSavePermission={hasSavePermission}
+            id={null}
+            initialData={reduceFieldsToValues(activeForm.formState, true)}
+            initialState={activeForm.formState}
+            key={`${activeIndex}-${forms.length}`}
+          >
+            <ActionsBar />
+            <EditForm submitted={hasSubmitted} />
+          </DocumentInfoProvider>
+        ) : null}
       </div>
 
       <DiscardWithoutSaving />

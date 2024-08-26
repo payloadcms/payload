@@ -12,9 +12,11 @@ import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { Pill } from '../../Pill/index.js'
+import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
+import { useBulkUpload } from '../index.js'
 import './index.scss'
 
 const AnimateHeight = (AnimateHeightImport.default ||
@@ -25,8 +27,16 @@ const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 const baseClass = 'file-selections'
 
 export function FileSidebar() {
-  const { activeIndex, addFiles, forms, removeFile, setActiveIndex, totalErrorCount } =
-    useFormsManager()
+  const {
+    activeIndex,
+    addFiles,
+    forms,
+    isInitializing,
+    removeFile,
+    setActiveIndex,
+    totalErrorCount,
+  } = useFormsManager()
+  const { initialFiles } = useBulkUpload()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const [showFiles, setShowFiles] = React.useState(false)
@@ -56,6 +66,8 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
+  const totalFileCount = isInitializing ? initialFiles.length : forms.length
+
   return (
     <div
       className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
@@ -67,10 +79,10 @@ export function FileSidebar() {
             <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
             <p>
               <strong
-                title={`${forms.length} ${t(forms.length > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+                title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
               >
-                {forms.length}{' '}
-                {t(forms.length > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
+                {totalFileCount}{' '}
+                {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
               </strong>
             </p>
           </div>
@@ -102,6 +114,15 @@ export function FileSidebar() {
       <div className={`${baseClass}__animateWrapper`}>
         <AnimateHeight duration={200} height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
+            {isInitializing && forms.length === 0 && initialFiles.length > 0
+              ? Array.from(initialFiles).map((file, index) => (
+                  <ShimmerEffect
+                    animationDelay={`calc(${index} * ${60}ms)`}
+                    height="35px"
+                    key={index}
+                  />
+                ))
+              : null}
             {forms.map(({ errorCount, formState }, index) => {
               const currentFile = formState.file.value as File
 

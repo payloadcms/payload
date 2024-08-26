@@ -171,8 +171,8 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
 
   const onFileSelection = useCallback(
     (files: FileList) => {
-      setCollectionSlug(relationTo)
       setInitialFiles(files)
+      setCollectionSlug(relationTo)
       setOnSuccess(onUploadSuccess)
       openModal(drawerSlug)
     },

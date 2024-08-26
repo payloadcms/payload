@@ -30,7 +30,7 @@ type FormsManagerContext = {
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
-  readonly isLoadingFiles: boolean
+  readonly isInitializing: boolean
   readonly removeFile: (index: number) => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
   readonly setActiveIndex: (index: number) => void
@@ -54,7 +54,7 @@ const Context = React.createContext<FormsManagerContext>({
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
-  isLoadingFiles: true,
+  isInitializing: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
@@ -80,19 +80,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const [isLoadingFiles, setIsLoadingFiles] = React.useState(false)
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
   const [hasSavePermission, setHasSavePermission] = React.useState(false)
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
+  const [hasInitializedState, setHasInitializedState] = React.useState(false)
+  const [hasInitializedDocPermissions, setHasInitializedDocPermissions] = React.useState(false)
+  const [isInitializing, setIsInitializing] = React.useState(false)
   const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
   const { activeIndex, forms, totalErrorCount } = state
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
-  const [hasInitializedState, setHasInitializedState] = React.useState(false)
-  const [hasInitializedDocPermissions, setHasInitializedDocPermissions] = React.useState(false)
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
@@ -197,14 +197,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const addFiles = React.useCallback(
     async (files: FileList) => {
+      toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
       if (!hasInitializedState) {
         await initializeSharedFormState()
       }
-      setIsLoadingFiles(true)
       dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
-      setIsLoadingFiles(false)
+      toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
-    [initializeSharedFormState, hasInitializedState],
+    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay],
   )
 
   const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
@@ -336,6 +336,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       void initilizeSharedDocPermissions()
     }
 
+    if (initialFiles) {
+      if (!hasInitializedState || !hasInitializedDocPermissions) {
+        setIsInitializing(true)
+      } else {
+        setIsInitializing(false)
+      }
+    }
+
     if (hasInitializedState && initialFiles && !hasInitializedWithFiles.current) {
       void addFiles(initialFiles)
       hasInitializedWithFiles.current = true
@@ -363,7 +371,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,
-        isLoadingFiles,
+        isInitializing,
         removeFile,
         saveAllDocs,
         setActiveIndex,

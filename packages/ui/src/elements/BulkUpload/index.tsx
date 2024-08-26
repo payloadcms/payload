@@ -14,7 +14,7 @@ import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
 const drawerSlug = 'bulk-upload-drawer-slug'
 
 function DrawerContent() {
-  const { addFiles, forms } = useFormsManager()
+  const { addFiles, forms, isInitializing } = useFormsManager()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
 
@@ -27,7 +27,7 @@ function DrawerContent() {
 
   if (!collectionSlug) return null
 
-  if (!forms.length) {
+  if (!forms.length && !isInitializing) {
     return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
   } else {
     return <AddingFilesView />
