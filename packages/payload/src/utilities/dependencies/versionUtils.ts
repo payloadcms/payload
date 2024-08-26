@@ -1,3 +1,5 @@
+import type { CustomVersionParser } from './dependencyChecker.js'
+
 export function parseVersion(version: string): { parts: number[]; preReleases: string[] } {
   const [mainVersion, ...preReleases] = version.split('-')
   const parts = mainVersion.split('.').map(Number)
@@ -40,7 +42,7 @@ function comparePreRelease(v1: string, v2: string): number {
 export function compareVersions(
   compare: string,
   to: string,
-  customVersionParser?: (version: string) => { parts: number[]; preReleases: string[] },
+  customVersionParser?: CustomVersionParser,
 ): 'equal' | 'greater' | 'lower' {
   const { parts: parts1, preReleases: preReleases1 } = customVersionParser
     ? customVersionParser(compare)

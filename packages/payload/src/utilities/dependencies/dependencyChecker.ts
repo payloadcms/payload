@@ -7,6 +7,8 @@ import { compareVersions } from './versionUtils.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+export type CustomVersionParser = (version: string) => { parts: number[]; preReleases: string[] }
+
 export type DependencyCheckerArgs = {
   /**
    * Define dependency groups to ensure that all dependencies within that group are on the same version, and that no dependencies in that group with different versions are found
@@ -24,7 +26,7 @@ export type DependencyCheckerArgs = {
    */
   dependencyVersions?: {
     [dependency: string]: {
-      customVersionParser?: (version: string) => { parts: number[]; preReleases: string[] }
+      customVersionParser?: CustomVersionParser
       required?: boolean
       version?: string
     }
