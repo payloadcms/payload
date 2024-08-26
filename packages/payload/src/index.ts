@@ -476,10 +476,38 @@ export class BasePayload {
             version: '>=15.0.0-canary.104',
           },
           react: {
+            customVersionParser: (version) => {
+              const [mainVersion, ...preReleases] = version.split('-')
+
+              if (preReleases?.length === 3) {
+                // Needs different handling, as it's in a format like 19.0.0-rc-06d0b89e-20240801 format
+                const date = preReleases[2]
+
+                const parts = mainVersion.split('.').map(Number)
+                return { parts, preReleases: [date] }
+              }
+
+              const parts = mainVersion.split('.').map(Number)
+              return { parts, preReleases }
+            },
             required: false,
             version: '>=19.0.0-rc-06d0b89e-20240801',
           },
           'react-dom': {
+            customVersionParser: (version) => {
+              const [mainVersion, ...preReleases] = version.split('-')
+
+              if (preReleases?.length === 3) {
+                // Needs different handling, as it's in a format like 19.0.0-rc-06d0b89e-20240801 format
+                const date = preReleases[2]
+
+                const parts = mainVersion.split('.').map(Number)
+                return { parts, preReleases: [date] }
+              }
+
+              const parts = mainVersion.split('.').map(Number)
+              return { parts, preReleases }
+            },
             required: false,
             version: '>=19.0.0-rc-06d0b89e-20240801',
           },

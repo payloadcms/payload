@@ -1,4 +1,4 @@
-function parseVersion(version: string): { parts: number[]; preReleases: string[] } {
+export function parseVersion(version: string): { parts: number[]; preReleases: string[] } {
   const [mainVersion, ...preReleases] = version.split('-')
   const parts = mainVersion.split('.').map(Number)
   return { parts, preReleases }
