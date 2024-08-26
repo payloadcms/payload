@@ -41,8 +41,8 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
       width: fullWidth,
     } = resource
 
-    width = fullWidth
-    height = fullHeight
+    width = fullWidth!
+    height = fullHeight!
     alt = altFromResource
 
     src = `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
