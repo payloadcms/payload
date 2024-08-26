@@ -1,3 +1,16 @@
+## [2.27.0](https://github.com/payloadcms/payload/compare/v2.26.0...v2.27.0) (2024-08-26)
+
+
+### Features
+
+* add support for custom image size file names ([#7637](https://github.com/payloadcms/payload/issues/7637)) ([f976270](https://github.com/payloadcms/payload/commit/f97627092cabe4eabbebefa75afc53579188386b))
+* upgrade react-toastify dependency, and upgrade to pnpm v9 in our monorepo ([#7667](https://github.com/payloadcms/payload/issues/7667)) ([94d18e8](https://github.com/payloadcms/payload/commit/94d18e8d747588efce225cde0b621db9b513e7c1))
+
+
+### Bug Fixes
+
+* update state of field if either `valid` status or `errorMessage` changes ([#7632](https://github.com/payloadcms/payload/issues/7632)) ([c624eea](https://github.com/payloadcms/payload/commit/c624eea0d868938f4603860fa25be3df580ba7fe)), closes [#6413](https://github.com/payloadcms/payload/issues/6413)
+
 ## [2.26.0](https://github.com/payloadcms/payload/compare/v2.25.0...v2.26.0) (2024-08-09)
 
 
