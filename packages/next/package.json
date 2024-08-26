@@ -90,7 +90,7 @@
     "@babel/preset-typescript": "^7.24.1",
     "@next/eslint-plugin-next": "15.0.0-canary.104",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/busboy": "^1.5.3",
+    "@types/busboy": "1.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/uuid": "10.0.0",
