@@ -75,7 +75,7 @@ export const getBlockMarkdownTransformers = ({
       },
       regExpEnd: block.jsx?.customEndRegex ?? regex.regExpEnd,
       regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
-      replace: (rootNode, openMatch, closeMatch, linesInBetween) => {
+      replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
         if (block.jsx.import) {
           const childrenString = linesInBetween.join('\n').trim()
 
