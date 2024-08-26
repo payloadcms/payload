@@ -7,7 +7,7 @@ import type {
   User,
 } from 'payload'
 
-import { validateUrl } from '../../../lexical/utils/url.js'
+import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 
 export const getBaseFields = (
   config: SanitizedConfig,
@@ -64,10 +64,20 @@ export const getBaseFields = (
     {
       name: 'url',
       type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ value }) => {
+            if (!validateUrl(value)) {
+              return encodeURIComponent(value)
+            }
+            return value
+          },
+        ],
+      },
       label: ({ t }) => t('fields:enterURL'),
       required: true,
       validate: (value: string) => {
-        if (!validateUrl(value)) {
+        if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
         }
       },
