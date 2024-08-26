@@ -134,13 +134,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     setParams(params)
   }, [page, sort, where, search, cacheBust, collectionConfig, setParams, limit, filterOptions])
 
-  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
   })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
+
+      closeDrawer()
 
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
@@ -156,7 +158,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         })
       }
     },
-    [data],
+    [data, closeDrawer],
   )
 
   const preferenceKey = `${relationTo}-list`
