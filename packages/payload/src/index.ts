@@ -663,6 +663,7 @@ export type { ClientCollectionConfig } from './collections/config/client.js'
 export type {
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
+  ServerOnlyUploadProperties,
 } from './collections/config/client.js'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
