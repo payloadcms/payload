@@ -25,7 +25,7 @@ export async function GET(
     new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  const user = jwt.decode(token, process.env.PAYLOAD_SECRET)
+  const user = jwt.verify(token, process.env.PAYLOAD_SECRET)
 
   if (!user) {
     draftMode().disable()
