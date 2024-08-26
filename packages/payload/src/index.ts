@@ -61,7 +61,7 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
-import { getDependencies } from './utilities/dependencies/getDependencies.js'
+import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -431,57 +431,60 @@ export class BasePayload {
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
     ) {
       // First load. First check if there are mismatching dependency versions of payload packages
-      const resolvedDependencies = await getDependencies(dirname, [
-        '@payloadcms/ui/shared',
-        'payload',
-        '@payloadcms/next/utilities',
-        '@payloadcms/richtext-lexical',
-        '@payloadcms/richtext-slate',
-        '@payloadcms/graphql',
-        '@payloadcms/plugin-cloud',
-        '@payloadcms/db-mongodb',
-        '@payloadcms/db-postgres',
-        '@payloadcms/plugin-form-builder',
-        '@payloadcms/plugin-nested-docs',
-        '@payloadcms/plugin-seo',
-        '@payloadcms/plugin-search',
-        '@payloadcms/plugin-cloud-storage',
-        '@payloadcms/plugin-stripe',
-        '@payloadcms/plugin-zapier',
-        '@payloadcms/plugin-redirects',
-        '@payloadcms/plugin-sentry',
-        '@payloadcms/bundler-webpack',
-        '@payloadcms/bundler-vite',
-        '@payloadcms/live-preview',
-        '@payloadcms/live-preview-react',
-        '@payloadcms/translations',
-        '@payloadcms/email-nodemailer',
-        '@payloadcms/email-resend',
-        '@payloadcms/storage-azure',
-        '@payloadcms/storage-s3',
-        '@payloadcms/storage-gcs',
-        '@payloadcms/storage-vercel-blob',
-        '@payloadcms/storage-uploadthing',
-      ])
-
-      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
-      const foundVersions: {
-        [version: string]: string
-      } = {}
-      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
-        if (!Object.keys(foundVersions).includes(version)) {
-          foundVersions[version] = _pkg
-        }
-      }
-      if (Object.keys(foundVersions).length > 1) {
-        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
-          .map(([version, pkg]) => `${pkg}@${version}`)
-          .join(', ')
-
-        throw new Error(
-          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all payload and @payloadcms/* packages have the same version.`,
-        )
-      }
+      await checkDependencies({
+        dependencyGroups: [
+          {
+            name: 'payload',
+            dependencies: [
+              '@payloadcms/ui/shared',
+              'payload',
+              '@payloadcms/next/utilities',
+              '@payloadcms/richtext-lexical',
+              '@payloadcms/richtext-slate',
+              '@payloadcms/graphql',
+              '@payloadcms/plugin-cloud',
+              '@payloadcms/db-mongodb',
+              '@payloadcms/db-postgres',
+              '@payloadcms/plugin-form-builder',
+              '@payloadcms/plugin-nested-docs',
+              '@payloadcms/plugin-seo',
+              '@payloadcms/plugin-search',
+              '@payloadcms/plugin-cloud-storage',
+              '@payloadcms/plugin-stripe',
+              '@payloadcms/plugin-zapier',
+              '@payloadcms/plugin-redirects',
+              '@payloadcms/plugin-sentry',
+              '@payloadcms/bundler-webpack',
+              '@payloadcms/bundler-vite',
+              '@payloadcms/live-preview',
+              '@payloadcms/live-preview-react',
+              '@payloadcms/translations',
+              '@payloadcms/email-nodemailer',
+              '@payloadcms/email-resend',
+              '@payloadcms/storage-azure',
+              '@payloadcms/storage-s3',
+              '@payloadcms/storage-gcs',
+              '@payloadcms/storage-vercel-blob',
+              '@payloadcms/storage-uploadthing',
+            ],
+            targetVersionDependency: 'payload',
+          },
+        ],
+        dependencyVersions: {
+          next: {
+            required: false,
+            version: '>=15.0.0-canary.104',
+          },
+          react: {
+            required: false,
+            version: '>=19.0.0-rc-06d0b89e-20240801',
+          },
+          'react-dom': {
+            required: false,
+            version: '>=19.0.0-rc-06d0b89e-20240801',
+          },
+        },
+      })
     }
 
     this.importMap = options.importMap
@@ -1047,6 +1050,7 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
+export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
@@ -1061,7 +1065,7 @@ export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
-export { getDependencies }
+export { checkDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
