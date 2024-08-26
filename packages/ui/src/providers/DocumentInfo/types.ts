@@ -16,25 +16,25 @@ import type {
 import type React from 'react'
 
 export type DocumentInfoProps = {
-  AfterDocument?: React.ReactNode
-  AfterFields?: React.ReactNode
-  BeforeDocument?: React.ReactNode
-  BeforeFields?: React.ReactNode
-  action?: string
-  apiURL?: string
-  collectionSlug?: SanitizedCollectionConfig['slug']
-  disableActions?: boolean
-  disableLeaveWithoutSaving?: boolean
-  docPermissions?: DocumentPermissions
-  globalSlug?: SanitizedGlobalConfig['slug']
-  hasPublishPermission?: boolean
-  hasSavePermission?: boolean
-  id: null | number | string
-  initialData?: Data
-  initialState?: FormState
-  isEditing?: boolean
-  onLoadError?: (data?: any) => Promise<void> | void
-  onSave?: (data: Data) => Promise<void> | void
+  readonly AfterDocument?: React.ReactNode
+  readonly AfterFields?: React.ReactNode
+  readonly BeforeDocument?: React.ReactNode
+  readonly BeforeFields?: React.ReactNode
+  readonly action?: string
+  readonly apiURL?: string
+  readonly collectionSlug?: SanitizedCollectionConfig['slug']
+  readonly disableActions?: boolean
+  readonly disableLeaveWithoutSaving?: boolean
+  readonly docPermissions?: DocumentPermissions
+  readonly globalSlug?: SanitizedGlobalConfig['slug']
+  readonly hasPublishPermission?: boolean
+  readonly hasSavePermission?: boolean
+  readonly id: null | number | string
+  readonly initialData?: Data
+  readonly initialState?: FormState
+  readonly isEditing?: boolean
+  readonly onLoadError?: (data?: any) => Promise<void> | void
+  readonly onSave?: (data: Data) => Promise<void> | void
 }
 
 export type DocumentInfoContext = {

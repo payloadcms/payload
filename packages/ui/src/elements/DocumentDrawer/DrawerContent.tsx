@@ -23,6 +23,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   Header,
   collectionSlug,
   drawerSlug,
+  initialData,
+  initialState,
   onSave: onSaveFromProps,
 }) => {
   const { config } = useConfig()
@@ -101,6 +103,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       disableActions
       disableLeaveWithoutSaving
       id={docID}
+      initialData={initialData}
+      initialState={initialState}
       isEditing={isEditing}
       onLoadError={onLoadError}
       onSave={onSave}

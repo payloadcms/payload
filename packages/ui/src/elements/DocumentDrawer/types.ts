@@ -1,3 +1,4 @@
+import type { Data, FormState } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -8,6 +9,8 @@ export type DocumentDrawerProps = {
   readonly collectionSlug: string
   readonly drawerSlug?: string
   readonly id?: null | number | string
+  readonly initialData?: Data
+  readonly initialState?: FormState
   readonly onSave?: DocumentInfoContext['onSave']
 } & Pick<DrawerProps, 'Header'>
 

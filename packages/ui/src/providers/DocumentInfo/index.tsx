@@ -37,7 +37,7 @@ export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 const DocumentInfo: React.FC<
   {
-    children: React.ReactNode
+    readonly children: React.ReactNode
   } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
@@ -419,6 +419,12 @@ const DocumentInfo: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
+      console.log(
+        'DocumentInfo useEffect',
+        initialStateFromProps,
+        initialDataFromProps,
+        localeChanged,
+      )
       if (localeChanged) prevLocale.current = locale
 
       const getInitialState = async () => {

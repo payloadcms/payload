@@ -21,6 +21,7 @@ import { Pill } from '../../elements/Pill/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
@@ -53,6 +54,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     },
     getEntityConfig,
   } = useConfig()
+
+  const { id: docID } = useDocumentInfo()
 
   const [initialData, setInitialData] = useState<PaginatedDocs>(initialDataFromProps)
 
@@ -138,12 +141,18 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
+
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
         newDocs[foundDocIndex] = args.doc
         setInitialData({
           ...data,
           docs: newDocs,
+        })
+      } else {
+        setInitialData({
+          ...data,
+          docs: [args.doc, ...data.docs],
         })
       }
     },
@@ -250,7 +259,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           </TableColumnsProvider>
         </ListQueryProvider>
       </RelationshipProvider>
-      <DocumentDrawer />
+      <DocumentDrawer
+        initialData={{
+          category: docID,
+        }}
+        initialState={{
+          category: {
+            initialValue: docID,
+            valid: true,
+            value: docID,
+          },
+        }}
+        onSave={onDrawerSave}
+      />
     </div>
   )
 }
