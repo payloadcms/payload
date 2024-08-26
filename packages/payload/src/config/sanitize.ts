@@ -15,7 +15,7 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
-import { getLocksCollection } from '../locks/locksCollection.js'
+import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
@@ -148,7 +148,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   config.i18n = i18nConfig
 
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
-  configWithDefaults.collections.push(getLocksCollection(config as unknown as Config))
+  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []

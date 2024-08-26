@@ -217,7 +217,7 @@ export const buildFormState = async ({
 
   if (returnLockStatus) {
     const lockStatus = await req.payload.find({
-      collection: 'payload-locks',
+      collection: 'payload-locked-documents',
       where: {
         docId: { equals: id },
       },
@@ -228,8 +228,6 @@ export const buildFormState = async ({
         isLocked: true,
         user: lockStatus.docs[0]?._lastEdited?.user.value,
       }
-
-      console.log('Building form state:', { lockedState, result })
 
       return { lockedState, state: result }
     }

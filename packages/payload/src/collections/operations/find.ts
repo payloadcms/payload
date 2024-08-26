@@ -153,8 +153,9 @@ export const findOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (includeLockStatus) {
-      const lockStatuses = await payload.db.find({
-        collection: 'payload-locks',
+      const lockStatuses = await payload.find({
+        collection: 'payload-locked-documents',
+        depth: 2,
         limit: sanitizedLimit,
         pagination: false,
         req,
@@ -167,10 +168,14 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       const lockedDocIds = new Set(lockStatuses.docs.map((lockDoc) => lockDoc.docId))
 
-      result.docs = result.docs.map((doc) => ({
-        ...doc,
-        isLocked: lockedDocIds.has(doc.id),
-      }))
+      result.docs = result.docs.map((doc) => {
+        const lockDoc = lockStatuses.docs.find((lock) => lock.docId === doc.id)
+        return {
+          ...doc,
+          isLocked: lockedDocIds.has(doc.id),
+          userEditing: lockDoc ? (lockDoc as any)?._lastEdited?.user?.value || null : null,
+        }
+      })
     }
 
     // /////////////////////////////////////

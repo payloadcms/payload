@@ -98,24 +98,14 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (includeLockStatus) {
-      const lockStatus = await req.payload.db.findOne({
-        collection: 'payload-locks',
+      const lockStatus = await req.payload.findByID({
+        id,
+        collection: 'payload-locked-documents',
         req,
-        where: {
-          docId: {
-            equals: id,
-          },
-        },
       })
 
       result.isLocked = lockStatus ? true : false
-      if (lockStatus) {
-        result.lockStatus = {
-          isLocked: true,
-        }
-      } else {
-        result.lockStatus = { isLocked: false }
-      }
+      result.userEditing = lockStatus ? (lockStatus as any)?._lastEdited?.user?.value || null : null
     }
 
     // /////////////////////////////////////

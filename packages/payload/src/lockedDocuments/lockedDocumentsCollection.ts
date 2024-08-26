@@ -1,11 +1,11 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Access, Config } from '../config/types.js'
+import type { Config } from '../config/types.js'
 
-export const getLocksCollection = (config: Config): CollectionConfig => ({
-  slug: 'payload-locks',
-  // admin: {
-  //   hidden: true,
-  // },
+export const getLockedDocumentsCollection = (config: Config): CollectionConfig => ({
+  slug: 'payload-locked-documents',
+  admin: {
+    hidden: true,
+  },
   fields: [
     {
       name: 'docId',

@@ -148,7 +148,7 @@ const DocumentInfo: React.FC<
 
       try {
         const request = await requests.get(
-          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
         )
         const { docs } = await request.json()
 
@@ -158,7 +158,7 @@ const DocumentInfo: React.FC<
           return
         }
 
-        await requests.post(`${serverURL}${api}/payload-locks`, {
+        await requests.post(`${serverURL}${api}/payload-locked-documents`, {
           body: JSON.stringify({
             _lastEdited: {
               editedAt: new Date(),
@@ -194,14 +194,14 @@ const DocumentInfo: React.FC<
 
       try {
         const request = await requests.get(
-          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
         )
 
         const { docs } = await request.json()
 
         if (docs.length > 0) {
           const lockId = docs[0].id
-          await requests.delete(`${serverURL}${api}/payload-locks/${lockId}`, {
+          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -224,7 +224,7 @@ const DocumentInfo: React.FC<
       try {
         // Check if the document is already locked
         const request = await requests.get(
-          `${serverURL}${api}/payload-locks?where[docId][equals]=${docId}`,
+          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
         )
 
         const { docs } = await request.json()
@@ -233,7 +233,7 @@ const DocumentInfo: React.FC<
           const lockId = docs[0].id
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${serverURL}${api}/payload-locks/${lockId}`, {
+          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
             body: JSON.stringify({
               _lastEdited: {
                 editedAt: new Date(),
@@ -260,7 +260,7 @@ const DocumentInfo: React.FC<
       if (id) {
         try {
           const request = await requests.get(
-            `${serverURL}${api}/payload-locks?where[docId][equals]=${id}`,
+            `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${id}`,
           )
           const { docs } = await request.json()
 
