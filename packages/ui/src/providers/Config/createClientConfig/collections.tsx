@@ -11,6 +11,7 @@ import type {
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
+  ServerOnlyUploadProperties,
 } from 'payload'
 import type React from 'react'
 
@@ -56,6 +57,14 @@ export const createClientCollectionConfig = ({
     // are all handled separately
   ]
 
+  const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+    'adminThumbnail',
+    'externalFileHeaderFilter',
+    'handlers',
+    'modifyResponseHeaders',
+    'withMetadata',
+  ]
+
   serverOnlyCollectionProperties.forEach((key) => {
     if (key in clientCollection) {
       delete clientCollection[key]
@@ -63,10 +72,11 @@ export const createClientCollectionConfig = ({
   })
 
   if ('upload' in clientCollection && typeof clientCollection.upload === 'object') {
-    delete clientCollection.upload.handlers
-    delete clientCollection.upload.adminThumbnail
-    delete clientCollection.upload.externalFileHeaderFilter
-    delete clientCollection.upload.withMetadata
+    serverOnlyUploadProperties.forEach((key) => {
+      if (key in clientCollection.upload) {
+        delete clientCollection.upload[key]
+      }
+    })
 
     if ('imageSizes' in clientCollection.upload && clientCollection.upload.imageSizes.length) {
       clientCollection.upload.imageSizes = clientCollection.upload.imageSizes.map((size) => {
