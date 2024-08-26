@@ -469,6 +469,11 @@ export class BasePayload {
             ],
             targetVersionDependency: 'payload',
           },
+          {
+            name: 'react',
+            dependencies: ['react', 'react-dom'],
+            targetVersionDependency: 'react',
+          },
         ],
         dependencyVersions: {
           next: {
