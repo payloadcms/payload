@@ -84,17 +84,18 @@ export const buildJoinAggregation = async ({
       } else if (limitJoin > 0) {
         $limit = limitJoin
       }
-      const pipeline = [
-        // {
-        //   $match,
-        // },
+      const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
+        { $match },
         {
           $sort: { [sortProperty]: sortDirection },
         },
-        {
-          $limit,
-        },
       ]
+
+      if ($limit) {
+        pipeline.push({
+          $limit,
+        })
+      }
 
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
@@ -110,9 +111,6 @@ export const buildJoinAggregation = async ({
                 pipeline,
               },
             },
-            // {
-            //   $sort: { [sortProperty]: sortDirection },
-            // },
             {
               $addFields: {
                 [`${as}.docs`]: {
@@ -122,17 +120,21 @@ export const buildJoinAggregation = async ({
                     input: `$${as}.docs`,
                   },
                 }, // Slicing the docs to match the limit
-                [`${as}.hasNextPage`]: { $gt: [{ $size: `$${as}.docs` }, limitJoin] }, // Boolean indicating if more docs than limit
+                [`${as}.hasNextPage`]: {
+                  $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
+                }, // Boolean indicating if more docs than limit
               },
             },
-            {
+          )
+          if (limitJoin > 0) {
+            aggregate.push({
               $addFields: {
                 [`${as}.docs`]: {
                   $slice: [`$${as}.docs`, limitJoin],
                 },
               },
-            },
-          )
+            })
+          }
         })
       } else {
         const localeSuffix =
@@ -158,17 +160,21 @@ export const buildJoinAggregation = async ({
                   input: `$${as}.docs`,
                 },
               }, // Slicing the docs to match the limit
-              [`${as}.hasNextPage`]: { $gt: [{ $size: `$${as}.docs` }, limitJoin] }, // Boolean indicating if more docs than limit
+              [`${as}.hasNextPage`]: {
+                $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
+              }, // Boolean indicating if more docs than limit
             },
           },
-          {
+        )
+        if (limitJoin > 0) {
+          aggregate.push({
             $addFields: {
               [`${as}.docs`]: {
                 $slice: [`$${as}.docs`, limitJoin],
               },
             },
-          },
-        )
+          })
+        }
       }
     }
   }
