@@ -14,7 +14,6 @@ import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner'
 import { Code } from '../../blocks/Code'
 import { MediaBlock } from '../../blocks/MediaBlock'
-import { slugField } from '../../fields/slug'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
@@ -26,6 +25,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
+import { slugField } from '@/payload/fields/slug'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -193,7 +193,7 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
-    slugField(),
+    ...slugField(),
   ],
   hooks: {
     afterChange: [revalidatePost],
