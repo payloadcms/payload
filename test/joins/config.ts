@@ -2,76 +2,20 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { Categories } from './collections/Categories.js'
+import { Posts } from './collections/Posts.js'
+import { seed } from './seed.js'
+import { localizedCategoriesSlug, localizedPostsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   collections: [
+    Posts,
+    Categories,
     {
-      slug: 'posts',
-      admin: {
-        useAsTitle: 'title',
-        defaultColumns: ['title', 'category', 'updatedAt', 'createdAt'],
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'category',
-          type: 'relationship',
-          relationTo: 'categories',
-        },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'category',
-              type: 'relationship',
-              relationTo: 'categories',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: 'categories',
-      admin: {
-        useAsTitle: 'name',
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'posts',
-          label: 'Related Posts',
-          type: 'join',
-          collection: 'posts',
-          on: 'category',
-        },
-        // {
-        //   name: 'group',
-        //   type: 'group',
-        //   fields: [
-        //     {
-        //       name: 'posts',
-        //       label: 'Related Posts (Group)',
-        //       type: 'join',
-        //       collection: 'posts',
-        //       on: 'group.category',
-        //     },
-        //   ],
-        // },
-      ],
-    },
-    {
-      slug: 'localized-posts',
+      slug: localizedPostsSlug,
       admin: {
         useAsTitle: 'title',
       },
@@ -85,12 +29,12 @@ export default buildConfigWithDefaults({
           name: 'category',
           type: 'relationship',
           localized: true,
-          relationTo: 'localized-categories',
+          relationTo: localizedCategoriesSlug,
         },
       ],
     },
     {
-      slug: 'localized-categories',
+      slug: localizedCategoriesSlug,
       admin: {
         useAsTitle: 'name',
       },
@@ -100,9 +44,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: 'posts',
+          name: postsSlug,
           type: 'join',
-          collection: 'localized-posts',
+          collection: localizedPostsSlug,
           on: 'category',
           localized: true,
         },
@@ -114,54 +58,9 @@ export default buildConfigWithDefaults({
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    const category = await payload.create({
-      collection: 'categories',
-      data: {
-        name: 'example',
-        // group: {},
-      },
-    })
-
-    await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        // group: {
-        //   category: category.id,
-        // },
-        title: 'Test Post 1',
-      },
-    })
-
-    await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        // group: {
-        //   category: category.id,
-        // },
-        title: 'Test Post 2',
-      },
-    })
-
-    await payload.create({
-      collection: 'posts',
-      data: {
-        category: category.id,
-        // group: {
-        //   category: category.id,
-        // },
-        title: 'Test Post 3',
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

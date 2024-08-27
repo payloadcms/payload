@@ -2,7 +2,7 @@
 
 import type { JoinFieldProps, PaginatedDocs } from 'payload'
 
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -10,6 +10,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { fieldBaseClass } from '../index.js'
 
 const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
   const {
@@ -35,21 +36,23 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
   })
 
   return (
-    <RelationshipTable
-      Label={
-        <h4 style={{ margin: 0 }}>
-          <FieldLabel Label={Label} as="span" field={field} label={label} />
-        </h4>
-      }
-      field={field}
-      filterOptions={{
-        [on]: {
-          in: [docID],
-        },
-      }}
-      initialData={value}
-      relationTo={collection}
-    />
+    <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
+      <RelationshipTable
+        Label={
+          <h4 style={{ margin: 0 }}>
+            <FieldLabel Label={Label} as="span" field={field} label={label} />
+          </h4>
+        }
+        field={field}
+        filterOptions={{
+          [on]: {
+            in: [docID],
+          },
+        }}
+        initialData={value}
+        relationTo={collection}
+      />
+    </div>
   )
 }
 

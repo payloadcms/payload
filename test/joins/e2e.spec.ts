@@ -6,21 +6,25 @@ import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { categoriesSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 test.describe('Admin Panel', () => {
   let page: Page
-  let url: AdminUrlUtil
+  let categoriesURL: AdminUrlUtil
+  let postsURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
-    url = new AdminUrlUtil(serverURL, 'posts')
+    postsURL = new AdminUrlUtil(serverURL, postsSlug)
+    categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -28,10 +32,11 @@ test.describe('Admin Panel', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('example test', async () => {
-    await page.goto(url.list)
-
-    const textCell = page.locator('.row-1 .cell-text')
-    await expect(textCell).toHaveText('example post')
+  test('renders join field with initial rows', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const columns = await joinField.locator('.relationship-table tbody tr').count()
+    expect(columns).toBe(3)
   })
 })
