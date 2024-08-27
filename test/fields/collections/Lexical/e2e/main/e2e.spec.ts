@@ -519,6 +519,63 @@ describe('lexicalMain', () => {
     )
   })
 
+  async function navigateToLexicalFields(
+    navigateToListView: boolean = true,
+    localized: boolean = false,
+  ) {
+    if (navigateToListView) {
+      const url: AdminUrlUtil = new AdminUrlUtil(
+        serverURL,
+        localized ? 'lexical-localized-fields' : 'lexical-fields',
+      )
+      await page.goto(url.list)
+    }
+
+    const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    const linkDocHref = await linkToDoc.getAttribute('href')
+
+    await linkToDoc.click()
+
+    await page.waitForURL(`**${linkDocHref}`)
+  }
+
+  // https://github.com/payloadcms/payload/issues/7379
+  test('enabledCollections and disabledCollections should work with RelationshipFeature', async ({
+    page,
+  }) => {
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-relationship-fields')
+    await page.goto(url.list)
+    const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    const linkDocHref = await linkToDoc.getAttribute('href')
+    await linkToDoc.click()
+    await page.waitForURL(`**${linkDocHref}`)
+    const richTextField = page.locator('.rich-text-lexical').nth(0)
+    // await richTextField.scrollIntoViewIfNeeded()
+    // await expect(richTextField).toBeVisible()
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    // Create relationship node with slash menu
+    await lastParagraph.click()
+    await page.keyboard.press('/')
+    await page.keyboard.type('Relationship')
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const relationshipSelectButton = slashMenuPopover.locator('button').nth(2)
+    await expect(relationshipSelectButton).toBeVisible()
+    await expect(relationshipSelectButton).toContainText('Relationship')
+    await relationshipSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    const relationshipListDrawer = page.locator('.list-drawer__header-text')
+    await expect(relationshipListDrawer).toHaveText('Array Fields')
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)

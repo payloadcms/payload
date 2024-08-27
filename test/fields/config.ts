@@ -20,6 +20,7 @@ import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
@@ -74,6 +75,7 @@ export const collectionSlugs: CollectionConfig[] = [
   NumberFields,
   PointFields,
   RelationshipFields,
+  LexicalRelationshipsFields,
   RichTextFields,
   SelectFields,
   TabsFields2,
