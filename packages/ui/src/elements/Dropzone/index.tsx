@@ -8,7 +8,7 @@ const handleDragOver = (e: DragEvent) => {
   e.stopPropagation()
 }
 
-const baseClass = 'dropzone-shell'
+const baseClass = 'dropzone'
 
 export type Props = {
   readonly children?: React.ReactNode
