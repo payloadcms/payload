@@ -10,16 +10,17 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 export type SortColumnProps = {
-  Label: React.ReactNode
-  disable?: boolean
-  label?: FieldBase['label']
-  name: string
+  readonly Label: React.ReactNode
+  readonly appearance?: 'condensed' | 'default'
+  readonly disable?: boolean
+  readonly label?: FieldBase['label']
+  readonly name: string
 }
 
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, Label, disable = false, label } = props
+  const { name, Label, appearance, disable = false, label } = props
   const { searchParams } = useSearchParams()
   const { handleSortChange } = useListQuery()
   const { t } = useTranslation()
@@ -36,7 +37,11 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   if (sort === desc) descClasses.push(`${baseClass}--active`)
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <span className={`${baseClass}__label`}>{Label}</span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>

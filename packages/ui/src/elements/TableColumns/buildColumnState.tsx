@@ -4,6 +4,7 @@ import type { ClientField, SanitizedCollectionConfig, StaticLabel } from 'payloa
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -20,11 +21,20 @@ type Args = {
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fields: ClientField[]
+  sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export const buildColumnState = (args: Args): Column[] => {
-  const { beforeRows, columnPreferences, columns, enableRowSelections, fields, useAsTitle } = args
+  const {
+    beforeRows,
+    columnPreferences,
+    columns,
+    enableRowSelections,
+    fields,
+    sortColumnProps,
+    useAsTitle,
+  } = args
 
   let sortedFieldMap = flattenFieldMap(fields)
 
@@ -113,6 +123,7 @@ export const buildColumnState = (args: Args): Column[] => {
         disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
+        {...(sortColumnProps || {})}
       />
     )
 

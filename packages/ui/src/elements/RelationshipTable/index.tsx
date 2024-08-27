@@ -8,7 +8,7 @@ import type {
   Where,
 } from 'payload'
 
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
@@ -29,7 +29,7 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { MyTableComponent } from './MyTable.js'
+import { RelationshipTableWrapper } from './TableWrapper.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
 
@@ -71,9 +71,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const apiURL = `${serverURL}${api}/${collectionConfig.slug}`
 
-  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
-
-  const [{ data, isError }, { setParams }] = usePayloadAPI(apiURL, {
+  const [{ data }, { setParams }] = usePayloadAPI(apiURL, {
     initialData,
     initialParams: {
       depth: 0,
@@ -126,12 +124,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     if (limit) params.limit = limit
     if (page) params.page = page
     if (sort) params.sort = sort
-    if (cacheBust) params.cacheBust = cacheBust
     if (copyOfWhere) params.where = copyOfWhere
     if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
-  }, [page, sort, where, search, cacheBust, collectionConfig, setParams, limit, filterOptions])
+  }, [page, sort, where, search, collectionConfig, setParams, limit, filterOptions])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
@@ -247,6 +244,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             ]}
             collectionSlug={relationTo}
             preferenceKey={preferenceKey}
+            sortColumnProps={{
+              appearance: 'condensed',
+            }}
           >
             {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
             <AnimateHeight
@@ -258,7 +258,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 <ColumnSelector collectionSlug={collectionConfig.slug} />
               </div>
             </AnimateHeight>
-            <MyTableComponent collectionConfig={collectionConfig} />
+            <RelationshipTableWrapper collectionConfig={collectionConfig} />
           </TableColumnsProvider>
         </ListQueryProvider>
       </RelationshipProvider>

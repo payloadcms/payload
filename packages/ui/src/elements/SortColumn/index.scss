@@ -2,7 +2,7 @@
 
 .sort-column {
   display: flex;
-  gap: calc(var(--base) / 4);
+  gap: calc(var(--base) / 2);
   align-items: center;
 
   &__label {
@@ -24,6 +24,7 @@
   &__buttons {
     display: flex;
     align-items: center;
+    gap: calc(var(--base) / 4);
   }
 
   &__button {
@@ -52,6 +53,14 @@
     .btn {
       opacity: 0.4;
       visibility: visible;
+    }
+  }
+
+  &--appearance-condensed {
+    gap: calc(var(--base) / 4);
+
+    .sort-column__buttons {
+      gap: 0;
     }
   }
 }

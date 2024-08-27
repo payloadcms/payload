@@ -6,8 +6,7 @@
   white-space: nowrap;
   display: flex;
   padding-inline-start: base(0.4);
-  padding-inline-end: base(0.1);
-  gap: 0;
+  padding-inline-end: base(0.4);
   background-color: var(--theme-elevation-100);
   border-radius: var(--style-radius-s);
 
@@ -16,10 +15,15 @@
   }
 
   &__chevron {
-    padding: base(0.1);
     .stroke {
       stroke: currentColor;
     }
+  }
+
+  &__current {
+    display: flex;
+    align-items: center;
+    gap: base(0.3);
   }
 
   button {

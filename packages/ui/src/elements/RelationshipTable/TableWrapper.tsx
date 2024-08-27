@@ -12,9 +12,9 @@ type RelationshipTableComponentProps = {
   readonly collectionConfig: ClientCollectionConfig
 }
 
-export const MyTableComponent: React.FC<RelationshipTableComponentProps> = ({
-  collectionConfig,
-}) => {
+export const RelationshipTableWrapper: React.FC<RelationshipTableComponentProps> = (props) => {
+  const { collectionConfig } = props
+
   const { data, handlePageChange } = useListQuery()
 
   return (

@@ -1,6 +1,9 @@
 @import '../../scss/styles';
 
 .icon--chevron {
+  height: calc(var(--base) / 2);
+  width: calc(var(--base) / 2);
+
   .stroke {
     fill: none;
     stroke: currentColor;
@@ -8,8 +11,13 @@
     vector-effect: non-scaling-stroke;
   }
 
-  &--size-large {
+  &.icon--size-large {
     height: var(--base);
     width: var(--base);
+  }
+
+  &.icon--size-small {
+    height: 8px;
+    width: 8px;
   }
 }

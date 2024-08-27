@@ -4,6 +4,7 @@ import type { CellComponentProps, ClientField, SanitizedCollectionConfig } from 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -36,6 +37,7 @@ type Props = {
   readonly enableRowSelections?: boolean
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
+  readonly sortColumnProps?: Partial<SortColumnProps>
 }
 
 export const TableColumnsProvider: React.FC<Props> = ({
@@ -46,6 +48,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   enableRowSelections = false,
   listPreferences,
   preferenceKey,
+  sortColumnProps,
 }) => {
   const {
     config: { collections },
@@ -72,6 +75,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
       columns: initialColumns,
       enableRowSelections,
       fields,
+      sortColumnProps,
       useAsTitle,
     }),
   )
@@ -182,6 +186,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
               columns: initialColumns,
               enableRowSelections,
               fields,
+              sortColumnProps,
               useAsTitle,
             }),
           )
@@ -201,6 +206,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     initialColumns,
     beforeRows,
     enableRowSelections,
+    sortColumnProps,
   ])
 
   return (
