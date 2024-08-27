@@ -15,7 +15,6 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
-  useModal,
   useUploadEdits,
 } from '@payloadcms/ui'
 import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
@@ -116,7 +115,7 @@ export const DefaultEditView: React.FC = () => {
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
 
-  const classes = [baseClass, id && `${baseClass}--is-editing`]
+  const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
 
   if (globalSlug) classes.push(`global-edit--${globalSlug}`)
   if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
@@ -181,10 +180,10 @@ export const DefaultEditView: React.FC = () => {
   const handleGoBack = useCallback(() => {
     const redirectRoute = formatAdminURL({
       adminRoute,
-      path: collectionSlug ? `/collections/${collectionSlug}` : `/globals/${globalSlug}`,
+      path: collectionSlug ? `/collections/${collectionSlug}` : `/`,
     })
     router.push(redirectRoute)
-  }, [adminRoute, collectionSlug, globalSlug, router])
+  }, [adminRoute, collectionSlug, router])
 
   const handleBackToDashboard = useCallback(() => {
     const redirectRoute = formatAdminURL({
@@ -252,15 +251,19 @@ export const DefaultEditView: React.FC = () => {
       const docPreferences = await getDocPreferences()
 
       // Lock the document if it's not locked by another user and hasn't been locked by this user yet
-      if (id && !isLockedByAnotherUser && !isDocumentLockedRef.current) {
+      if ((id || globalSlug) && !isLockedByAnotherUser && !isDocumentLockedRef.current) {
         setShouldLockDocument(true)
       }
 
-      if (id && isLockedByAnotherUser && documentLockStateRef.current?.user?.id !== user.id) {
+      if (
+        (id || globalSlug) &&
+        isLockedByAnotherUser &&
+        documentLockStateRef.current?.user?.id !== user.id
+      ) {
         documentLockStateRef.current = { isLocked: true, user }
         setIsLockedByAnotherUser(false)
 
-        await updateDocumentEditor(id, user)
+        await updateDocumentEditor(id, collectionSlug ?? globalSlug, user)
       }
 
       // Fire the request immediately with returnLockStatus: true if the document is locked
@@ -346,10 +349,11 @@ export const DefaultEditView: React.FC = () => {
   ])
 
   useEffect(() => {
-    if (id && shouldLockDocument && !isDocumentLockedRef.current) {
+    if ((id || globalSlug) && shouldLockDocument && !isDocumentLockedRef.current) {
       const lockDoc = async () => {
         try {
-          await lockDocument(id, user)
+          console.log('hit')
+          await lockDocument(id, collectionSlug ?? globalSlug, user)
           isDocumentLockedRef.current = true
 
           // Immediately check the lock status after locking
@@ -371,15 +375,15 @@ export const DefaultEditView: React.FC = () => {
 
       void lockDoc()
     }
-  }, [shouldLockDocument, lockDocument, id, user, checkLockStatus])
+  }, [shouldLockDocument, lockDocument, id, user, checkLockStatus, globalSlug])
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (id && isDocumentLockedRef.current) {
+      if ((id || globalSlug) && isDocumentLockedRef.current) {
         // Only unlock the document if the current user is the one who locked it
         if (documentLockStateRef.current?.user?.id === user.id) {
-          void unlockDocument(id)
+          void unlockDocument(id, collectionSlug ?? globalSlug)
         }
 
         isDocumentLockedRef.current = false
@@ -390,7 +394,7 @@ export const DefaultEditView: React.FC = () => {
         }
       }
     }
-  }, [id, unlockDocument, user.id])
+  }, [id, unlockDocument, user.id, globalSlug])
 
   return (
     <main className={classes.filter(Boolean).join(' ')}>

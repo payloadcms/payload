@@ -142,14 +142,20 @@ const DocumentInfo: React.FC<
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const lockDocument = useCallback(
-    async (docId: number | string, user: ClientUser) => {
+    async (docId: number | string, slug: string, user: ClientUser) => {
       if (lockInProgress.current) return
       lockInProgress.current = true
 
       try {
-        const request = await requests.get(
-          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
-        )
+        // Check if it's a collection or global document
+        const isGlobal = slug === globalSlug
+
+        const query = isGlobal
+          ? `where[globalSlug][equals]=${slug}`
+          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+
         const { docs } = await request.json()
 
         if (docs.length > 0) {
@@ -164,7 +170,8 @@ const DocumentInfo: React.FC<
               editedAt: new Date(),
               user: { relationTo: user?.collection, value: user },
             },
-            docId,
+            document: !isGlobal ? { relationTo: slug, value: docId } : undefined,
+            globalSlug: isGlobal ? slug : undefined,
             isLocked: true,
           }),
           headers: {
@@ -187,15 +194,19 @@ const DocumentInfo: React.FC<
   )
 
   const unlockDocument = useCallback(
-    async (docId: number | string) => {
+    async (docId: number | string, slug: string) => {
       if (!isDocumentLocked) {
         return
       }
 
       try {
-        const request = await requests.get(
-          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
-        )
+        const isGlobal = slug === globalSlug
+
+        const query = isGlobal
+          ? `where[globalSlug][equals]=${slug}`
+          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
 
         const { docs } = await request.json()
 
@@ -216,16 +227,20 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docId: number | string, user: ClientUser) => {
+    async (docId: number | string, slug: string, user: ClientUser) => {
       if (!isDocumentLocked) {
         return
       }
 
       try {
+        const isGlobal = slug === globalSlug
+
+        const query = isGlobal
+          ? `where[globalSlug][equals]=${slug}`
+          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+
         // Check if the document is already locked
-        const request = await requests.get(
-          `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${docId}`,
-        )
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
 
         const { docs } = await request.json()
 
@@ -257,11 +272,17 @@ const DocumentInfo: React.FC<
 
   useEffect(() => {
     const fetchLockState = async () => {
-      if (id) {
+      if (id || globalSlug) {
         try {
-          const request = await requests.get(
-            `${serverURL}${api}/payload-locked-documents?where[docId][equals]=${id}`,
-          )
+          const slug = collectionSlug ?? globalSlug
+          const isGlobal = slug === globalSlug
+
+          const query = isGlobal
+            ? `where[globalSlug][equals]=${slug}`
+            : `where[document.value][equals]=${id}&where[document.relationTo][equals]=${slug}`
+
+          const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+
           const { docs } = await request.json()
 
           if (docs.length > 0) {

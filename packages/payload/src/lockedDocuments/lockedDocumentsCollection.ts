@@ -8,7 +8,14 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
   },
   fields: [
     {
-      name: 'docId',
+      name: 'document',
+      type: 'relationship',
+      index: true,
+      maxDepth: 0,
+      relationTo: [...config.collections.map((collectionConfig) => collectionConfig.slug)],
+    },
+    {
+      name: 'globalSlug',
       type: 'text',
     },
     {

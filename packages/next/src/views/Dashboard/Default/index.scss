@@ -35,6 +35,11 @@
     }
   }
 
+  &__locked.locked {
+    align-items: unset;
+    justify-content: unset;
+  }
+
   @include large-break {
     --cols: 4;
   }

@@ -153,29 +153,40 @@ export const findOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (includeLockStatus) {
-      const lockStatuses = await payload.find({
-        collection: 'payload-locked-documents',
-        depth: 2,
-        limit: sanitizedLimit,
-        pagination: false,
-        req,
-        where: {
-          docId: {
-            in: result.docs.map((doc) => doc.id),
+      try {
+        const lockStatuses = await payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: sanitizedLimit,
+          pagination: false,
+          req,
+          where: {
+            'document.relationTo': {
+              equals: collectionConfig.slug,
+            },
+            'document.value': {
+              in: result.docs.map((doc) => doc.id),
+            },
           },
-        },
-      })
+        })
 
-      const lockedDocIds = new Set(lockStatuses.docs.map((lockDoc) => lockDoc.docId))
+        const lockedDocs = Array.isArray(lockStatuses?.docs) ? lockStatuses.docs : []
 
-      result.docs = result.docs.map((doc) => {
-        const lockDoc = lockStatuses.docs.find((lock) => lock.docId === doc.id)
-        return {
+        result.docs = result.docs.map((doc) => {
+          const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)
+          return {
+            ...doc,
+            isLocked: !!lockedDoc,
+            userEditing: lockedDoc ? lockedDoc._lastEdited?.user?.value || null : null,
+          }
+        })
+      } catch (error) {
+        result.docs = result.docs.map((doc) => ({
           ...doc,
-          isLocked: lockedDocIds.has(doc.id),
-          userEditing: lockDoc ? (lockDoc as any)?._lastEdited?.user?.value || null : null,
-        }
-      })
+          isLocked: false,
+          userEditing: null,
+        }))
+      }
     }
 
     // /////////////////////////////////////

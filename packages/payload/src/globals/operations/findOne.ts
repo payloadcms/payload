@@ -11,6 +11,7 @@ type Args = {
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
+  includeLockStatus?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
@@ -25,6 +26,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     depth,
     draft: draftEnabled = false,
     globalConfig,
+    includeLockStatus,
     overrideAccess = false,
     req: { fallbackLocale, locale },
     req,
@@ -54,6 +56,37 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     })
     if (!doc) {
       doc = {}
+    }
+
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
+
+    if (includeLockStatus) {
+      let lockStatus = null
+
+      try {
+        const lockStatusResult = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          req,
+          where: {
+            globalSlug: {
+              equals: slug,
+            },
+          },
+        })
+
+        if (lockStatusResult.docs.length > 0) {
+          lockStatus = lockStatusResult.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      doc.isLocked = !!lockStatus
+      doc.userEditing = lockStatus?._lastEdited?.user?.value ?? null
     }
 
     // /////////////////////////////////////

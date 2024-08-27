@@ -50,7 +50,7 @@ export type DocumentInfoContext = {
   isInitializing: boolean
   isLoading: boolean
   lastEditedAt: Date
-  lockDocument: (docId: number | string, user: ClientUser) => Promise<void>
+  lockDocument: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setDocFieldPreferences: (
@@ -60,9 +60,9 @@ export type DocumentInfoContext = {
   setDocumentTitle: (title: string) => void
   slug?: string
   title: string
-  unlockDocument: (docId: number | string) => Promise<void>
+  unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
-  updateDocumentEditor: (docId: number | string, user: ClientUser) => Promise<void>
+  updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 } & DocumentInfoProps

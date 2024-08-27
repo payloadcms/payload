@@ -97,15 +97,39 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       return null
     }
 
-    if (includeLockStatus) {
-      const lockStatus = await req.payload.findByID({
-        id,
-        collection: 'payload-locked-documents',
-        req,
-      })
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
 
-      result.isLocked = lockStatus ? true : false
-      result.userEditing = lockStatus ? (lockStatus as any)?._lastEdited?.user?.value || null : null
+    if (includeLockStatus) {
+      let lockStatus = null
+
+      try {
+        const lockStatusResult = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            'document.relationTo': {
+              equals: collectionConfig.slug,
+            },
+            'document.value': {
+              equals: id,
+            },
+          },
+        })
+
+        if (lockStatusResult.docs.length > 0) {
+          lockStatus = lockStatusResult.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      result.isLocked = !!lockStatus
+      result.userEditing = lockStatus?._lastEdited?.user?.value ?? null
     }
 
     // /////////////////////////////////////
