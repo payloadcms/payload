@@ -7,6 +7,7 @@ import type { BinScript } from '../config/types.js'
 import { findConfig } from '../config/find.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
+import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
 import { migrate } from './migrate.js'
 
@@ -15,6 +16,11 @@ export const bin = async () => {
 
   const args = minimist(process.argv.slice(2))
   const script = (typeof args._[0] === 'string' ? args._[0] : '').toLowerCase()
+
+  if (script === 'info') {
+    await info()
+    return
+  }
 
   if (script === 'run') {
     const scriptPath = args._[1]

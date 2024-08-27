@@ -1,6 +1,7 @@
 import type { CustomVersionParser } from './utilities/dependencies/dependencyChecker.js'
 
 import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
+import { PAYLOAD_PACKAGE_LIST } from './versions/payloadPackageList.js'
 
 const customReactVersionParser: CustomVersionParser = (version) => {
   const [mainVersion, ...preReleases] = version.split('-')
@@ -18,37 +19,7 @@ const customReactVersionParser: CustomVersionParser = (version) => {
 }
 
 export async function checkPayloadDependencies() {
-  const dependencies = [
-    '@payloadcms/ui/shared',
-    'payload',
-    '@payloadcms/next/utilities',
-    '@payloadcms/richtext-lexical',
-    '@payloadcms/richtext-slate',
-    '@payloadcms/graphql',
-    '@payloadcms/plugin-cloud',
-    '@payloadcms/db-mongodb',
-    '@payloadcms/db-postgres',
-    '@payloadcms/plugin-form-builder',
-    '@payloadcms/plugin-nested-docs',
-    '@payloadcms/plugin-seo',
-    '@payloadcms/plugin-search',
-    '@payloadcms/plugin-cloud-storage',
-    '@payloadcms/plugin-stripe',
-    '@payloadcms/plugin-zapier',
-    '@payloadcms/plugin-redirects',
-    '@payloadcms/bundler-webpack',
-    '@payloadcms/bundler-vite',
-    '@payloadcms/live-preview',
-    '@payloadcms/live-preview-react',
-    '@payloadcms/translations',
-    '@payloadcms/email-nodemailer',
-    '@payloadcms/email-resend',
-    '@payloadcms/storage-azure',
-    '@payloadcms/storage-s3',
-    '@payloadcms/storage-gcs',
-    '@payloadcms/storage-vercel-blob',
-    '@payloadcms/storage-uploadthing',
-  ]
+  const dependencies = [...PAYLOAD_PACKAGE_LIST]
 
   if (process.env.PAYLOAD_CI_DEPENDENCY_CHECKER !== 'true') {
     dependencies.push('@payloadcms/plugin-sentry')
