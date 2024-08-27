@@ -38,13 +38,13 @@ const {
   tag = 'latest',
 } = args
 
-const LOG_PREFIX = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
+const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
 
 const cmdRunner =
   (dryRun: boolean, gitTag: boolean) => (cmd: string, execOpts: ExecSyncOptions) => {
     const isGitCommand = cmd.startsWith('git')
     if (dryRun || (isGitCommand && !gitTag)) {
-      console.log(LOG_PREFIX, cmd)
+      console.log(logPrefix, cmd)
     } else {
       execSync(cmd, execOpts)
     }
@@ -53,7 +53,7 @@ const cmdRunner =
 const cmdRunnerAsync =
   (dryRun: boolean) => async (cmd: string, args: string[], options?: execa.Options) => {
     if (dryRun) {
-      console.log(LOG_PREFIX, cmd, args.join(' '))
+      console.log(logPrefix, cmd, args.join(' '))
       return { exitCode: 0 }
     } else {
       return await execa(cmd, args, options ?? { stdio: 'inherit' })
@@ -123,7 +123,7 @@ async function main() {
   }
 
   // Preview/Update changelog
-  header(`${LOG_PREFIX}📝 Updating changelog...`)
+  header(`${logPrefix}📝 Updating changelog...`)
   const {
     changelog: changelogContent,
     releaseNotes,
@@ -170,7 +170,7 @@ async function main() {
   }
 
   // Increment all package versions
-  header(`${LOG_PREFIX}📦 Updating package.json versions...`)
+  header(`${logPrefix}📦 Updating package.json versions...`)
   await Promise.all(
     packageDetails.map(async (pkg) => {
       const packageJson = await fse.readJSON(`${pkg.packagePath}/package.json`)
@@ -182,7 +182,7 @@ async function main() {
   )
 
   // Set version in root package.json
-  header(`${LOG_PREFIX}📦 Updating root package.json...`)
+  header(`${logPrefix}📦 Updating root package.json...`)
   const rootPackageJsonPath = path.resolve(dirname, '../package.json')
   const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
   rootPackageJson.version = nextReleaseVersion
@@ -209,19 +209,11 @@ async function main() {
 
   // Publish only payload to get 5 min auth token
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
-  runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, {
-    stdio: ['ignore', 'ignore', 'pipe'],
-  })
+  runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
   const results: PublishResult[] = []
-  const totalPackageCount = packageDetails.length
-  let packageIndex = 1 // payload already published
   for (const pkg of packageDetails) {
-    packageIndex += 1
-    const res = await publishSinglePackage(pkg, {
-      dryRun,
-      logPrefix: `${packageIndex}/${totalPackageCount}`,
-    })
+    const res = await publishSinglePackage(pkg, { dryRun })
     results.push(res)
   }
 
@@ -255,16 +247,9 @@ main().catch((error) => {
   process.exit(1)
 })
 
-async function publishSinglePackage(
-  pkg: PackageDetails,
-  opts: { dryRun?: boolean; logPrefix: string },
-) {
-  const { dryRun = false, logPrefix = '' } = opts
-  console.log(
-    chalk.bold(
-      `${LOG_PREFIX}${logPrefix ? ` ${logPrefix} ` : logPrefix}🚀 ${pkg.name} publishing...`,
-    ),
-  )
+async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
+  const { dryRun = false } = opts ?? {}
+  console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
 
   try {
     const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
@@ -302,7 +287,7 @@ async function publishSinglePackage(
       }
     }
 
-    console.log(`${LOG_PREFIX} ${chalk.green(`✅ ${pkg.name} published`)}`)
+    console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
     return { name: pkg.name, success: true }
   } catch (err: unknown) {
     console.error(err)
