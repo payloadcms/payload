@@ -142,6 +142,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        joins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,
@@ -198,7 +199,6 @@ export const findOperation = async <TSlug extends CollectionSlug>(
             fallbackLocale,
             findMany: true,
             global: null,
-            joins,
             locale,
             overrideAccess,
             req,

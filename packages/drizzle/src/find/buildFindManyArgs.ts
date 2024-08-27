@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field } from 'payload'
+import type { Field, JoinQuery } from 'payload'
 
 import type { DrizzleAdapter } from '../types.js'
 
@@ -9,6 +9,7 @@ type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   depth: number
   fields: Field[]
+  joinQuery?: JoinQuery
   locale?: string
   tableName: string
 }
@@ -25,6 +26,7 @@ export const buildFindManyArgs = ({
   adapter,
   depth,
   fields,
+  joinQuery,
   locale,
   tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
@@ -81,6 +83,7 @@ export const buildFindManyArgs = ({
     currentTableName: tableName,
     depth,
     fields,
+    joinQuery,
     locale,
     path: '',
     topLevelArgs: result,

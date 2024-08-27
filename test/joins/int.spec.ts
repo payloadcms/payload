@@ -45,7 +45,7 @@ describe('Joins Field Tests', () => {
       },
     })
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
       await createPost({
         title: `test ${i}`,
         category: category.id,
@@ -66,17 +66,37 @@ describe('Joins Field Tests', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
-        posts: {
+        'group.posts': {
           sort: '-title',
         },
       },
       collection: 'categories',
     })
 
-    expect(categoryWithPosts.posts.docs).toHaveLength(10)
-    expect(categoryWithPosts.posts.docs[0]).toHaveProperty('id')
-    expect(categoryWithPosts.posts.docs[0]).toHaveProperty('title')
-    expect(categoryWithPosts.posts.docs[0].title).toStrictEqual('test 9')
+    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.posts.docs[0].title).toStrictEqual('test 9')
+  })
+
+  it('should filter joins using where query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        posts: {
+          sort: '-title',
+          where: {
+            title: {
+              equals: 'test 9',
+            },
+          },
+        },
+      },
+      collection: 'categories',
+    })
+
+    expect(categoryWithPosts.posts.docs).toHaveLength(1)
+    expect(categoryWithPosts.posts.hasNextPage).toStrictEqual(false)
   })
 
   it('should populate joins using find', async () => {
@@ -88,7 +108,7 @@ describe('Joins Field Tests', () => {
 
     expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts.docs[0].title).toBe('test 9')
+    expect(categoryWithPosts.group.posts.docs[0].title).toBe('test 14')
   })
 
   describe('Joins with localization', () => {
@@ -106,7 +126,7 @@ describe('Joins Field Tests', () => {
         collection: 'localized-posts',
         locale: 'en',
         data: {
-          title: 'english post',
+          title: 'english post 1',
           category: localizedCategory.id,
         },
       })
@@ -123,7 +143,7 @@ describe('Joins Field Tests', () => {
         collection: 'localized-posts',
         locale: 'en',
         data: {
-          title: 'spanish post',
+          title: 'english post 2',
           category: localizedCategory.id,
         },
       })
@@ -146,8 +166,7 @@ describe('Joins Field Tests', () => {
   })
 
   describe('REST', () => {
-    it('should paginate joins', async () => {
-      let page = 1
+    it('should have simple paginate for joins', async () => {
       const query = {
         depth: 1,
         where: {
@@ -155,56 +174,23 @@ describe('Joins Field Tests', () => {
         },
         joins: {
           posts: {
-            limit: 4,
             sort: 'createdAt',
-            get page() {
-              return page
-            },
+            limit: 4,
           },
         },
       }
+      const pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
 
-      const page1 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
-      page = 2
-      const page2 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
-      page = 3
-      const page3 = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+      query.joins.posts.limit = 0
+      const unlimited = await restClient.GET(`/categories`, { query }).then((res) => res.json())
 
-      expect(page1.docs[0].posts.docs).toHaveLength(4)
-      expect(page1.docs[0].posts.docs[0].title).toStrictEqual('test 0')
-      expect(page1.docs[0].posts.hasNextPage).toStrictEqual(true)
-      expect(page1.docs[0].posts.hasPrevPage).toStrictEqual(false)
-      expect(page1.docs[0].posts.limit).toStrictEqual(4)
-      expect(page1.docs[0].posts.nextPage).toStrictEqual(2)
-      expect(page1.docs[0].posts.page).toStrictEqual(1)
-      expect(page1.docs[0].posts.pagingCounter).toStrictEqual(1)
-      expect(page1.docs[0].posts.prevPage).toStrictEqual(null)
-      expect(page1.docs[0].posts.totalDocs).toStrictEqual(10)
-      expect(page1.docs[0].posts.totalPages).toStrictEqual(3)
+      expect(pageWithLimit.docs[0].posts.docs).toHaveLength(4)
+      expect(pageWithLimit.docs[0].posts.docs[0].title).toStrictEqual('test 0')
+      expect(pageWithLimit.docs[0].posts.hasNextPage).toStrictEqual(true)
 
-      expect(page2.docs[0].posts.docs).toHaveLength(4)
-      expect(page2.docs[0].posts.docs[0].title).toStrictEqual('test 4')
-      expect(page2.docs[0].posts.hasNextPage).toStrictEqual(true)
-      expect(page2.docs[0].posts.hasPrevPage).toStrictEqual(true)
-      expect(page2.docs[0].posts.limit).toStrictEqual(4)
-      expect(page2.docs[0].posts.nextPage).toStrictEqual(3)
-      expect(page2.docs[0].posts.page).toStrictEqual(2)
-      expect(page2.docs[0].posts.pagingCounter).toStrictEqual(5)
-      expect(page2.docs[0].posts.prevPage).toStrictEqual(1)
-      expect(page2.docs[0].posts.totalDocs).toStrictEqual(10)
-      expect(page2.docs[0].posts.totalPages).toStrictEqual(3)
-
-      expect(page3.docs[0].posts.docs).toHaveLength(2)
-      expect(page3.docs[0].posts.docs[0].title).toStrictEqual('test 8')
-      expect(page3.docs[0].posts.hasNextPage).toStrictEqual(false)
-      expect(page3.docs[0].posts.hasPrevPage).toStrictEqual(true)
-      expect(page3.docs[0].posts.limit).toStrictEqual(4)
-      expect(page3.docs[0].posts.nextPage).toStrictEqual(null)
-      expect(page3.docs[0].posts.page).toStrictEqual(3)
-      expect(page3.docs[0].posts.pagingCounter).toStrictEqual(9)
-      expect(page3.docs[0].posts.prevPage).toStrictEqual(2)
-      expect(page3.docs[0].posts.totalDocs).toStrictEqual(10)
-      expect(page3.docs[0].posts.totalPages).toStrictEqual(3)
+      expect(unlimited.docs[0].posts.docs).toHaveLength(15)
+      expect(unlimited.docs[0].posts.docs[0].title).toStrictEqual('test 0')
+      expect(unlimited.docs[0].posts.hasNextPage).toStrictEqual(false)
     })
     it('should sort joins', async () => {
       const response = await restClient

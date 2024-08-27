@@ -116,9 +116,9 @@ export type JoinQuery =
   | {
       [schemaPath: string]: {
         limit?: number
-        page?: number
         pagination?: boolean
         sort?: string
+        where?: Where
       }
     }
   | false

@@ -74,6 +74,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      joins,
       locale,
       req: {
         transactionID: req.transactionID,
@@ -142,7 +143,6 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       draft: draftEnabled,
       fallbackLocale,
       global: null,
-      joins,
       locale,
       overrideAccess,
       req,

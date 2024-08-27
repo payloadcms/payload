@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JoinQuery, JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -21,7 +21,6 @@ type Args = {
   findMany: boolean
   flattenLocales: boolean
   global: SanitizedGlobalConfig | null
-  joins?: JoinQuery
   locale: null | string
   overrideAccess: boolean
   path: (number | string)[]
@@ -47,7 +46,6 @@ export const traverseFields = ({
   findMany,
   flattenLocales,
   global,
-  joins,
   locale,
   overrideAccess,
   path,
@@ -74,7 +72,6 @@ export const traverseFields = ({
         findMany,
         flattenLocales,
         global,
-        joins,
         locale,
         overrideAccess,
         parentPath: path,

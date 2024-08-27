@@ -79,6 +79,7 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+          localized: true,
         },
         {
           name: 'category',
