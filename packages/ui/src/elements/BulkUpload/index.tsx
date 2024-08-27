@@ -57,10 +57,12 @@ type BulkUploadContext = {
   collectionSlug: string
   drawerSlug: string
   initialFiles: FileList
+  maxFiles: number
   onCancel: () => void
   onSuccess: (newDocs: JsonObject[], errorCount: number) => void
   setCollectionSlug: (slug: string) => void
   setInitialFiles: (files: FileList) => void
+  setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
   setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
 }
@@ -69,10 +71,12 @@ const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
   drawerSlug: '',
   initialFiles: undefined,
+  maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
   setCollectionSlug: () => null,
   setInitialFiles: () => null,
+  setMaxFiles: () => null,
   setOnCancel: () => null,
   setOnSuccess: () => null,
 })
@@ -81,6 +85,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
   const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
+  const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
   const drawerSlug = useBulkUploadDrawerSlug()
 
   const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
@@ -97,6 +102,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
         collectionSlug: collection,
         drawerSlug,
         initialFiles,
+        maxFiles,
         onCancel: () => {
           if (typeof onCancelFunction === 'function') {
             onCancelFunction()
@@ -109,6 +115,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
         },
         setCollectionSlug,
         setInitialFiles,
+        setMaxFiles,
         setOnCancel: setOnCancelFunction,
         setOnSuccess,
       }}

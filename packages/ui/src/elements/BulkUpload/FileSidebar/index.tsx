@@ -36,7 +36,7 @@ export function FileSidebar() {
     setActiveIndex,
     totalErrorCount,
   } = useFormsManager()
-  const { initialFiles } = useBulkUpload()
+  const { initialFiles, maxFiles } = useBulkUpload()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const [showFiles, setShowFiles] = React.useState(false)
@@ -88,7 +88,9 @@ export function FileSidebar() {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+            {typeof maxFiles === 'number' && totalFileCount < maxFiles ? (
+              <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+            ) : null}
             <Button
               buttonStyle="transparent"
               className={`${baseClass}__toggler`}

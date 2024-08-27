@@ -1,0 +1,24 @@
+.upload {
+  &__dropzoneAndUpload {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 4);
+  }
+
+  &__dropzoneContent {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__dropzoneContent__buttons {
+    display: flex;
+    gap: var(--base);
+  }
+
+  &__dragAndDropText {
+    margin: 0;
+    text-transform: lowercase;
+    align-self: center;
+  }
+}
