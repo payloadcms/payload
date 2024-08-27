@@ -1,5 +1,5 @@
 import type { PipelineStage } from 'mongoose'
-import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig } from 'payload'
+import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -10,7 +10,11 @@ type BuildJoinAggregationArgs = {
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   joins: JoinQuery
+  // the limit on number of docs at the top collection level
+  limit?: number
   locale: string
+  // the where clause for the top collection
+  query?: Where
 }
 
 export const buildJoinAggregation = async ({
@@ -18,7 +22,9 @@ export const buildJoinAggregation = async ({
   collection,
   collectionConfig,
   joins,
+  limit,
   locale,
+  query,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (Object.keys(collectionConfig.joins).length === 0 || joins === false) {
     return
@@ -32,6 +38,18 @@ export const buildJoinAggregation = async ({
     },
   ]
 
+  if (query) {
+    aggregate.push({
+      $match: query,
+    })
+  }
+
+  if (limit) {
+    aggregate.push({
+      $limit: limit,
+    })
+  }
+
   for (const slug of Object.keys(joinConfig)) {
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
@@ -41,7 +59,7 @@ export const buildJoinAggregation = async ({
         pagination = false,
         sort: sortJoin,
         where: whereJoin,
-      } = joins[join.schemaPath] || {}
+      } = joins?.[join.schemaPath] || {}
 
       const useSimplePagination = pagination === false && limitJoin > 0
       const sort = buildSortParam({
@@ -67,53 +85,51 @@ export const buildJoinAggregation = async ({
         $limit = limitJoin
       }
       const pipeline = [
+        // {
+        //   $match,
+        // },
+        {
+          $sort: { [sortProperty]: sortDirection },
+        },
         {
           $limit,
-        },
-        {
-          $match,
-        },
-        {
-          $project: {
-            _id: 1,
-          },
         },
       ]
 
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
-          const as = `${join.schemaPath}.${code}`
-          const asAlias = `${join.schemaPath}.${code}`.replaceAll('.', '_')
+          const as = `${join.schemaPath}${code}`
 
           aggregate.push(
             {
               $lookup: {
-                as,
-                foreignField: `${join.field.on}.${code}`,
+                as: `${as}.docs`,
+                foreignField: `${join.field.on}${code}`,
                 from: slug,
                 localField: '_id',
                 pipeline,
               },
             },
+            // {
+            //   $sort: { [sortProperty]: sortDirection },
+            // },
             {
-              $sort: { [sortProperty]: sortDirection },
+              $addFields: {
+                [`${as}.docs`]: {
+                  $map: {
+                    as: 'doc',
+                    in: '$$doc._id',
+                    input: `$${as}.docs`,
+                  },
+                }, // Slicing the docs to match the limit
+                [`${as}.hasNextPage`]: { $gt: [{ $size: `$${as}.docs` }, limitJoin] }, // Boolean indicating if more docs than limit
+              },
             },
             {
               $addFields: {
-                [asAlias]: as,
-              },
-            },
-            {
-              $unwind: {
-                path: `$${asAlias}`,
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-            {
-              $group: {
-                _id: '$_id',
-                [asAlias]: { $push: `$${as}._id` },
-                originalDocument: { $first: '$$ROOT' },
+                [`${as}.docs`]: {
+                  $slice: [`$${as}.docs`, limitJoin],
+                },
               },
             },
           )
@@ -122,12 +138,11 @@ export const buildJoinAggregation = async ({
         const localeSuffix =
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
         const as = `${join.schemaPath}${localeSuffix}`
-        const asAlias = `${join.schemaPath}${localeSuffix}`.replaceAll('.', '_')
 
         aggregate.push(
           {
             $lookup: {
-              as,
+              as: `${as}.docs`,
               foreignField: `${join.field.on}${localeSuffix}`,
               from: slug,
               localField: '_id',
@@ -135,30 +150,21 @@ export const buildJoinAggregation = async ({
             },
           },
           {
-            $sort: { [sortProperty]: sortDirection },
+            $addFields: {
+              [`${as}.docs`]: {
+                $map: {
+                  as: 'doc',
+                  in: '$$doc._id',
+                  input: `$${as}.docs`,
+                },
+              }, // Slicing the docs to match the limit
+              [`${as}.hasNextPage`]: { $gt: [{ $size: `$${as}.docs` }, limitJoin] }, // Boolean indicating if more docs than limit
+            },
           },
           {
             $addFields: {
-              [asAlias]: as,
-            },
-          },
-          {
-            $unwind: {
-              path: `$${asAlias}`,
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-          {
-            $group: {
-              _id: '$_id',
-              [asAlias]: { $push: `$${as}._id` },
-              originalDocument: { $first: '$$ROOT' },
-            },
-          },
-          {
-            $replaceRoot: {
-              newRoot: {
-                $mergeObjects: ['$originalDocument', { [asAlias]: `$${asAlias}` }],
+              [`${as}.docs`]: {
+                $slice: [`$${as}.docs`, limitJoin],
               },
             },
           },

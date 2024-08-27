@@ -32,6 +32,8 @@ export const sanitizeQueryValue = ({
 
       if (!isValid) {
         return { operator: formattedOperator, val: undefined }
+      } else {
+        formattedValue = new mongoose.Types.ObjectId(val)
       }
     }
 

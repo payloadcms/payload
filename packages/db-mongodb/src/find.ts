@@ -116,23 +116,6 @@ export const find: Find = async function find(
   } else {
     result = await Model.paginate(query, paginationOptions)
   }
-  // result = await Model.paginate(query, paginationOptions)
-
-  // const joinPromises = []
-
-  // result.docs.forEach((doc) => {
-  //   joinPromises.push(
-  //     setJoins({
-  //       collection,
-  //       doc,
-  //       joins,
-  //       payload: this.payload,
-  //       req,
-  //     }),
-  //   )
-  // })
-
-  // await Promise.all(joinPromises)
 
   const docs = JSON.parse(JSON.stringify(result.docs))
 
