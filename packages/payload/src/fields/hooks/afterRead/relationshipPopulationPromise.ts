@@ -81,18 +81,18 @@ const populate = async ({
     }
 
     if (typeof index === 'number' && typeof key === 'string') {
-      if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+      if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
       } else {
         dataToUpdate[field.name][key][index] = relationshipValue
       }
     } else if (typeof index === 'number' || typeof key === 'string') {
-      if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+      if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][index ?? key].value = relationshipValue
       } else {
         dataToUpdate[field.name].docs[index ?? key] = relationshipValue
       }
-    } else if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+    } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
     } else {
       dataToUpdate[field.name] = relationshipValue
