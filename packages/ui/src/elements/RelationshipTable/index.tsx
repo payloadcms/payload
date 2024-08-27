@@ -27,7 +27,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
-import { LoadingOverlay } from '../Loading/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { MyTableComponent } from './MyTable.js'
@@ -74,7 +73,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
 
-  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
+  const [{ data, isError }, { setParams }] = usePayloadAPI(apiURL, {
     initialData,
     initialParams: {
       depth: 0,
@@ -168,10 +167,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   )
 
   const preferenceKey = `${relationTo}-list`
-
-  if (isLoadingList) {
-    return <LoadingOverlay />
-  }
 
   return (
     <div className={baseClass}>
