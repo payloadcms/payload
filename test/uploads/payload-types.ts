@@ -79,8 +79,8 @@ export interface UserAuthOperations {
  */
 export interface Relation {
   id: string;
-  image?: string | Media | null;
-  versionedImage?: string | Version | null;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
   updatedAt: string;
   createdAt: string;
 }
@@ -250,7 +250,7 @@ export interface Version {
  */
 export interface Audio {
   id: string;
-  audio?: string | Media | null;
+  audio?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -865,8 +865,8 @@ export interface ExternallyServedMedia {
  */
 export interface Uploads1 {
   id: string;
-  hasManyUpload?: string | Uploads2 | null;
-  singleUpload?: string | Uploads2 | null;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
   richText?: {
     root: {
       type: string;
@@ -1066,12 +1066,12 @@ export interface MediaWithoutRelationPreview {
  */
 export interface RelationPreview {
   id: string;
-  imageWithPreview1?: string | MediaWithRelationPreview | null;
-  imageWithPreview2?: string | MediaWithRelationPreview | null;
-  imageWithoutPreview1?: string | MediaWithRelationPreview | null;
-  imageWithoutPreview2?: string | MediaWithoutRelationPreview | null;
-  imageWithPreview3?: string | MediaWithoutRelationPreview | null;
-  imageWithoutPreview3?: string | MediaWithoutRelationPreview | null;
+  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
