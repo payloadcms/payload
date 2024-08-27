@@ -45,7 +45,7 @@ const populate = async ({
   const relatedCollection = req.payload.collections[relation]
 
   if (relatedCollection) {
-    let id = field.type === 'relationship' && Array.isArray(field.relationTo) ? data.value : data
+    let id = field.type !== 'join' && Array.isArray(field.relationTo) ? data.value : data
     let relationshipValue
     const shouldPopulate = depth && currentDepth <= depth
 
