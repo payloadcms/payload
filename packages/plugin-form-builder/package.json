@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.0.0-beta.92",
+  "version": "3.0.0-beta.93",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
