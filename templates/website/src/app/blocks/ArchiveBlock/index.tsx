@@ -14,14 +14,16 @@ export const ArchiveBlock: React.FC<
     id?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit = 3, populateBy, selectedDocs } = props
+  const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
+
+  const limit = limitFromProps || 3
 
   let posts: Post[] = []
 
   if (populateBy === 'collection') {
     const payload = await getPayloadHMR({ config: configPromise })
 
-    const flattenedCategories = categories.map((category) => {
+    const flattenedCategories = categories?.map((category) => {
       if (typeof category === 'object') return category.id
       else return category
     })
@@ -43,9 +45,13 @@ export const ArchiveBlock: React.FC<
 
     posts = fetchedPosts.docs
   } else {
-    posts = selectedDocs.map((post) => {
-      if (typeof post.value === 'object') return post.value
-    })
+    if (selectedDocs?.length) {
+      const filteredSelectedPosts = selectedDocs.map((post) => {
+        if (typeof post.value === 'object') return post.value
+      }) as Post[]
+
+      posts = filteredSelectedPosts
+    }
   }
 
   return (

@@ -37,6 +37,8 @@ export const DeviceContainer: React.FC<{
     x = '-50%'
 
     if (
+      desiredSize &&
+      measuredDeviceSize &&
       typeof zoom === 'number' &&
       typeof desiredSize.width === 'number' &&
       typeof desiredSize.height === 'number' &&

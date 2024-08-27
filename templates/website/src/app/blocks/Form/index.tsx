@@ -3,7 +3,7 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import RichText from 'src/app/components/RichText'
 import { Button } from 'src/app/components/ui/button'
 
@@ -48,10 +48,8 @@ export const FormBlock: React.FC<
   const {
     control,
     formState: { errors },
-    getValues,
     handleSubmit,
     register,
-    setValue,
   } = formMethods
 
   const [isLoading, setIsLoading] = useState(false)
@@ -128,44 +126,46 @@ export const FormBlock: React.FC<
 
   return (
     <div className="container max-w-[48rem] pb-20">
-      {enableIntro && introContent && !hasSubmitted && (
-        <RichText className="mb-8" content={introContent} enableGutter={false} />
-      )}
-      {!isLoading && hasSubmitted && confirmationType === 'message' && (
-        <RichText content={confirmationMessage} />
-      )}
-      {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-      {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
-      {!hasSubmitted && (
-        <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-4 last:mb-0">
-            {formFromProps &&
-              formFromProps.fields &&
-              formFromProps.fields?.map((field, index) => {
-                const Field: React.FC<any> = fields?.[field.blockType]
-                if (Field) {
-                  return (
-                    <div className="mb-6 last:mb-0" key={index}>
-                      <Field
-                        form={formFromProps}
-                        {...field}
-                        {...formMethods}
-                        control={control}
-                        errors={errors}
-                        register={register}
-                      />
-                    </div>
-                  )
-                }
-                return null
-              })}
-          </div>
+      <FormProvider {...formMethods}>
+        {enableIntro && introContent && !hasSubmitted && (
+          <RichText className="mb-8" content={introContent} enableGutter={false} />
+        )}
+        {!isLoading && hasSubmitted && confirmationType === 'message' && (
+          <RichText content={confirmationMessage} />
+        )}
+        {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
+        {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
+        {!hasSubmitted && (
+          <form id={formID} onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-4 last:mb-0">
+              {formFromProps &&
+                formFromProps.fields &&
+                formFromProps.fields?.map((field, index) => {
+                  const Field: React.FC<any> = fields?.[field.blockType]
+                  if (Field) {
+                    return (
+                      <div className="mb-6 last:mb-0" key={index}>
+                        <Field
+                          form={formFromProps}
+                          {...field}
+                          {...formMethods}
+                          control={control}
+                          errors={errors}
+                          register={register}
+                        />
+                      </div>
+                    )
+                  }
+                  return null
+                })}
+            </div>
 
-          <Button form={formID} type="submit" variant="default">
-            {submitButtonLabel}
-          </Button>
-        </form>
-      )}
+            <Button form={formID} type="submit" variant="default">
+              {submitButtonLabel}
+            </Button>
+          </form>
+        )}
+      </FormProvider>
     </div>
   )
 }
