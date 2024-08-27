@@ -211,11 +211,7 @@ export const traverseFields = ({
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery !== false) {
-            const { limit = 10, page = 1, sort } = joinQuery[`${path}${field.name}`] || {}
-            if (page !== 1) {
-              // we need a second query in read step to complete the join because drizzle doesn't support offset
-              throw new APIError('Pagination is not supported for joins')
-            }
+            const { limit = 10, sort } = joinQuery[`${path}${field.name}`] || {}
             const fields = adapter.payload.collections[field.collection].config.fields
             const joinTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${
               field.localized && adapter.payload.config.localization ? adapter.localesSuffix : ''

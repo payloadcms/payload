@@ -310,15 +310,6 @@ export function fieldsToJSONSchema(
                   },
                 },
                 hasNextPage: { type: withNullableJSONSchemaType('boolean', false) },
-                hasPrevPage: { type: withNullableJSONSchemaType('boolean', false) },
-                limit: { type: withNullableJSONSchemaType('integer', false) },
-                nextPage: { type: withNullableJSONSchemaType('integer', false) },
-                offset: { type: withNullableJSONSchemaType('integer', false) },
-                page: { type: withNullableJSONSchemaType('integer', false) },
-                pagingCounter: { type: withNullableJSONSchemaType('integer', false) },
-                prevPage: { type: withNullableJSONSchemaType('integer', false) },
-                totalDocs: { type: withNullableJSONSchemaType('integer', false) },
-                totalPages: { type: withNullableJSONSchemaType('integer', false) },
               },
             }
             break

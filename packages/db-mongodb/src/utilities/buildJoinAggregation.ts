@@ -10,7 +10,7 @@ type BuildJoinAggregationArgs = {
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   joins: JoinQuery
-  // the limit on number of docs at the top collection level
+  // the number of docs to get at the top collection level
   limit?: number
   locale: string
   // the where clause for the top collection
@@ -30,7 +30,6 @@ export const buildJoinAggregation = async ({
     return
   }
 
-  const promises = []
   const joinConfig = adapter.payload.collections[collection].config.joins
   const aggregate: PipelineStage[] = [
     {
@@ -178,8 +177,6 @@ export const buildJoinAggregation = async ({
       }
     }
   }
-
-  await Promise.all(promises)
 
   return aggregate
 }

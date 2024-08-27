@@ -49,7 +49,7 @@ export interface BaseDatabaseAdapter {
    */
   destroy?: Destroy
 
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  find: Find
 
   findGlobal: FindGlobal
 
