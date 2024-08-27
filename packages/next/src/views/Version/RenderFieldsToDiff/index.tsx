@@ -100,7 +100,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs' && 'fields' in field) {
+          if (field.type === 'tabs' && 'tabs' in field) {
             const Tabs = diffComponents.tabs
 
             return (

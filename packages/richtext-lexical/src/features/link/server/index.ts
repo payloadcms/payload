@@ -116,6 +116,8 @@ export const LinkFeature = createServerFeature<
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -125,6 +127,8 @@ export const LinkFeature = createServerFeature<
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -161,6 +165,8 @@ export const LinkFeature = createServerFeature<
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -170,6 +176,8 @@ export const LinkFeature = createServerFeature<
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,

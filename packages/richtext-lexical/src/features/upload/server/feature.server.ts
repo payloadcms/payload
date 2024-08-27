@@ -97,7 +97,15 @@ export const UploadFeature = createServerFeature<
         createNode({
           converters: {
             html: {
-              converter: async ({ draft, node, overrideAccess, req, showHiddenFields }) => {
+              converter: async ({
+                currentDepth,
+                depth,
+                draft,
+                node,
+                overrideAccess,
+                req,
+                showHiddenFields,
+              }) => {
                 // @ts-expect-error
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
@@ -110,9 +118,9 @@ export const UploadFeature = createServerFeature<
                     await populate({
                       id,
                       collectionSlug: node.relationTo,
-                      currentDepth: 0,
+                      currentDepth,
                       data: uploadDocument,
-                      depth: 1,
+                      depth,
                       draft,
                       key: 'value',
                       overrideAccess,

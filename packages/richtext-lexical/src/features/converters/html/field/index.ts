@@ -162,6 +162,8 @@ export const lexicalHTML: (
       afterRead: [
         async ({
           collection,
+          currentDepth,
+          depth,
           draft,
           field,
           global,
@@ -217,7 +219,9 @@ export const lexicalHTML: (
 
           return await convertLexicalToHTML({
             converters: finalConverters,
+            currentDepth,
             data: lexicalFieldData,
+            depth,
             draft,
             overrideAccess,
             req,

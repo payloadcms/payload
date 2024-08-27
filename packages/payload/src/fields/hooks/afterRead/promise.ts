@@ -204,7 +204,9 @@ export const promise = async ({
               const hookedValue = await currentHook({
                 collection,
                 context,
+                currentDepth,
                 data: doc,
+                depth,
                 draft,
                 field,
                 findMany,
@@ -231,7 +233,9 @@ export const promise = async ({
           const hookedValue = await currentHook({
             collection,
             context,
+            currentDepth,
             data: doc,
+            depth,
             draft,
             field,
             findMany,
