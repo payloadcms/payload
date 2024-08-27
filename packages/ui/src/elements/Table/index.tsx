@@ -65,16 +65,25 @@ export const Table: React.FC<Props> = ({
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {activeColumns.map((col, colIndex) => (
-                  <RenderCell
-                    cellPropOverrides={cellProps?.[colIndex]}
-                    col={col}
-                    colIndex={colIndex}
-                    customCellContext={customCellContext}
-                    key={colIndex}
-                    row={row}
-                  />
-                ))}
+                {activeColumns.map((col, colIndex) => {
+                  const isLink =
+                    (colIndex === 0 && col.accessor !== '_select') ||
+                    (colIndex === 1 && activeColumns[0]?.accessor === '_select')
+
+                  return (
+                    <RenderCell
+                      cellPropOverrides={{
+                        link: isLink,
+                        ...cellProps?.[colIndex],
+                      }}
+                      col={col}
+                      colIndex={colIndex}
+                      customCellContext={customCellContext}
+                      key={colIndex}
+                      row={row}
+                    />
+                  )
+                })}
               </tr>
             ))}
         </tbody>

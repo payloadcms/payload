@@ -80,21 +80,6 @@ export interface Category {
     totalDocs?: number | null;
     totalPages?: number | null;
   } | null;
-  group?: {
-    posts?: {
-      docs?: (string | Post)[] | null;
-      hasNextPage?: boolean | null;
-      hasPrevPage?: boolean | null;
-      limit?: number | null;
-      nextPage?: number | null;
-      offset?: number | null;
-      page?: number | null;
-      pagingCounter?: number | null;
-      prevPage?: number | null;
-      totalDocs?: number | null;
-      totalPages?: number | null;
-    } | null;
-  };
   updatedAt: string;
   createdAt: string;
 }

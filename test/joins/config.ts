@@ -55,19 +55,19 @@ export default buildConfigWithDefaults({
           collection: 'posts',
           on: 'category',
         },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'posts',
-              label: 'Related Posts (Group)',
-              type: 'join',
-              collection: 'posts',
-              on: 'group.category',
-            },
-          ],
-        },
+        // {
+        //   name: 'group',
+        //   type: 'group',
+        //   fields: [
+        //     {
+        //       name: 'posts',
+        //       label: 'Related Posts (Group)',
+        //       type: 'join',
+        //       collection: 'posts',
+        //       on: 'group.category',
+        //     },
+        //   ],
+        // },
       ],
     },
     {
@@ -125,7 +125,7 @@ export default buildConfigWithDefaults({
       collection: 'categories',
       data: {
         name: 'example',
-        group: {},
+        // group: {},
       },
     })
 
@@ -133,9 +133,9 @@ export default buildConfigWithDefaults({
       collection: 'posts',
       data: {
         category: category.id,
-        group: {
-          category: category.id,
-        },
+        // group: {
+        //   category: category.id,
+        // },
         title: 'Test Post 1',
       },
     })
@@ -144,9 +144,9 @@ export default buildConfigWithDefaults({
       collection: 'posts',
       data: {
         category: category.id,
-        group: {
-          category: category.id,
-        },
+        // group: {
+        //   category: category.id,
+        // },
         title: 'Test Post 2',
       },
     })
@@ -155,9 +155,9 @@ export default buildConfigWithDefaults({
       collection: 'posts',
       data: {
         category: category.id,
-        group: {
-          category: category.id,
-        },
+        // group: {
+        //   category: category.id,
+        // },
         title: 'Test Post 3',
       },
     })

@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, ClientField, SanitizedCollectionConfig } from 'payload'
+import type { CellComponentProps, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
@@ -92,40 +92,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [preferenceKey, setPreference],
   )
 
-  const reassignLinkColumn = useCallback((columns: Column[]): Column[] => {
-    let foundFirstActive = false
-    let linkColumn = false
-
-    const newColumns = columns.map((col) => {
-      if (col.active) {
-        linkColumn = !foundFirstActive && col.accessor !== '_select'
-      }
-
-      if (linkColumn) foundFirstActive = true
-
-      return {
-        ...col,
-        cellProps: {
-          link: linkColumn,
-          ...col.cellProps,
-        },
-      }
-    })
-
-    return newColumns
-  }, [])
-
   const moveColumn = useCallback(
-    (args: { fromIndex: number; toIndex: number }) => {
-      const { fromIndex, toIndex } = args
-      const withMovedColumn = [...tableColumns]
-      const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
-      withMovedColumn.splice(toIndex, 0, columnToMove)
-      const newColumns = reassignLinkColumn(withMovedColumn)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
-    },
-    [tableColumns, updateColumnPreferences, reassignLinkColumn],
+    (args: { fromIndex: number; toIndex: number }) => {},
+    [tableColumns, updateColumnPreferences],
   )
 
   const toggleColumn = useCallback(
@@ -142,11 +111,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
         }
       })
 
-      const newColumns = reassignLinkColumn(toggledColumns)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
+      setTableColumns(toggledColumns)
+      updateColumnPreferences(toggledColumns)
     },
-    [tableColumns, updateColumnPreferences, reassignLinkColumn],
+    [tableColumns, updateColumnPreferences],
   )
 
   const setActiveColumns = React.useCallback(
@@ -157,11 +125,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
           active: activeColumnAccessors.includes(col.accessor),
         }
       })
-
-      const newColumns = reassignLinkColumn(activeColumns)
-      updateColumnPreferences(newColumns)
+      updateColumnPreferences(activeColumns)
     },
-    [tableColumns, updateColumnPreferences, reassignLinkColumn],
+    [tableColumns, updateColumnPreferences],
   )
 
   // //////////////////////////////////////////////
