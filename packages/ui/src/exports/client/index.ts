@@ -130,7 +130,7 @@ export type { TextAreaInputProps } from '../../fields/Textarea/index.js'
 
 export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
-export type { UploadFieldProps, UploadInputProps } from '../../fields/Upload/index.js'
+export type { UploadInputProps } from '../../fields/Upload/index.js'
 
 export { fieldBaseClass } from '../../fields/shared/index.js'
 

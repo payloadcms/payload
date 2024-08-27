@@ -6,9 +6,8 @@ import React from 'react'
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
 import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
-import { RowCard } from '../RowCard/index.js'
+import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
@@ -23,17 +22,15 @@ type Props = {
   readonly isSortable?: boolean
   readonly onRemove?: (value) => void
   readonly onReorder?: (value) => void
+  readonly readonly?: boolean
+  readonly serverURL: string
 }
 export function UploadComponentHasMany(props: Props) {
-  const { className, fileDocs, isSortable, onRemove, onReorder } = props
-
-  const {
-    config: { serverURL },
-  } = useConfig()
+  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, serverURL } = props
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      // if (moveFromIndex === moveToIndex) return
+      if (moveFromIndex === moveToIndex) return
 
       const updatedArray = [...fileDocs]
       const [item] = updatedArray.splice(moveFromIndex, 1)
@@ -61,56 +58,57 @@ export function UploadComponentHasMany(props: Props) {
         ids={fileDocs?.map(({ value }) => String(value.id))}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
       >
-        {Boolean(fileDocs.length) &&
-          fileDocs.map(({ relationTo, value }, index) => {
-            const id = String(value.id)
-            return (
-              <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
-                {(draggableSortableItemProps) => (
-                  <div
-                    className={[
-                      `${baseClass}__dragItem`,
-                      draggableSortableItemProps && isSortable && `${baseClass}--has-drag-handle`,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    ref={draggableSortableItemProps.setNodeRef}
-                    style={{
-                      transform: draggableSortableItemProps.transform,
-                      transition: draggableSortableItemProps.transition,
-                      zIndex: draggableSortableItemProps.isDragging ? 1 : undefined,
-                    }}
-                  >
-                    <RowCard size="small">
-                      {isSortable && draggableSortableItemProps && (
-                        <div
-                          className={`${baseClass}__drag`}
-                          {...draggableSortableItemProps.attributes}
-                          {...draggableSortableItemProps.listeners}
-                        >
-                          <DragHandleIcon />
-                        </div>
-                      )}
+        {fileDocs.map(({ relationTo, value }, index) => {
+          const id = String(value.id)
+          return (
+            <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
+              {(draggableSortableItemProps) => (
+                <div
+                  className={[
+                    `${baseClass}__dragItem`,
+                    draggableSortableItemProps && isSortable && `${baseClass}--has-drag-handle`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  ref={draggableSortableItemProps.setNodeRef}
+                  style={{
+                    transform: draggableSortableItemProps.transform,
+                    transition: draggableSortableItemProps.transition,
+                    zIndex: draggableSortableItemProps.isDragging ? 1 : undefined,
+                  }}
+                >
+                  <UploadCard size="small">
+                    {isSortable && draggableSortableItemProps && (
+                      <div
+                        className={`${baseClass}__drag`}
+                        {...draggableSortableItemProps.attributes}
+                        {...draggableSortableItemProps.listeners}
+                      >
+                        <DragHandleIcon />
+                      </div>
+                    )}
 
-                      <RelationshipContent
-                        alt={(value?.alt || value?.filename) as string}
-                        byteSize={value.filesize as number}
-                        collectionSlug={relationTo}
-                        filename={value.filename as string}
-                        id={id}
-                        mimeType={value?.mimeType as string}
-                        onRemove={() => removeItem(index)}
-                        src={`${serverURL}${value.url}`}
-                        withMeta={false}
-                        x={value?.width as number}
-                        y={value?.height as number}
-                      />
-                    </RowCard>
-                  </div>
-                )}
-              </DraggableSortableItem>
-            )
-          })}
+                    <RelationshipContent
+                      allowEdit={!readonly}
+                      allowRemove={!readonly}
+                      alt={(value?.alt || value?.filename) as string}
+                      byteSize={value.filesize as number}
+                      collectionSlug={relationTo}
+                      filename={value.filename as string}
+                      id={id}
+                      mimeType={value?.mimeType as string}
+                      onRemove={() => removeItem(index)}
+                      src={`${serverURL}${value.url}`}
+                      withMeta={false}
+                      x={value?.width as number}
+                      y={value?.height as number}
+                    />
+                  </UploadCard>
+                </div>
+              )}
+            </DraggableSortableItem>
+          )
+        })}
       </DraggableSortable>
     </div>
   )

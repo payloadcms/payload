@@ -105,6 +105,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const [fileUrl, setFileUrl] = useState<string>('')
 
   const urlInputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -168,10 +169,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
     },
     [setModified, updateUploadEdits],
   )
-
-  const handlePasteUrlClick = () => {
-    setShowUrlInput((prev) => !prev)
-  }
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
@@ -237,12 +234,46 @@ export const Upload: React.FC<UploadProps> = (props) => {
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
-            <Dropzone
-              className={`${baseClass}__dropzone`}
-              mimeTypes={uploadConfig?.mimeTypes}
-              onChange={handleFileSelection}
-              onPasteUrlClick={handlePasteUrlClick}
-            />
+            <Dropzone onChange={handleFileSelection}>
+              <div className={`${baseClass}__dropzoneButtons`}>
+                <Button
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconPosition="left"
+                  onClick={() => {
+                    if (inputRef.current) {
+                      inputRef.current.click()
+                    }
+                  }}
+                  size="small"
+                >
+                  {t('upload:selectFile')}
+                </Button>
+                <input
+                  aria-hidden="true"
+                  className={`${baseClass}__hidden-input`}
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleFileSelection(e.target.files)
+                    }
+                  }}
+                  ref={inputRef}
+                  type="file"
+                />
+                <Button
+                  buttonStyle="icon-label"
+                  icon="link"
+                  iconPosition="left"
+                  onClick={() => {
+                    setShowUrlInput(true)
+                  }}
+                  size="small"
+                >
+                  {t('upload:pasteURL')}
+                </Button>
+              </div>
+            </Dropzone>
           )}
           {showUrlInput && (
             <React.Fragment>
@@ -274,7 +305,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 className={`${baseClass}__remove`}
                 icon="x"
                 iconStyle="with-border"
-                onClick={handleFileRemoval}
+                onClick={() => {
+                  setShowUrlInput(false)
+                }}
                 round
                 tooltip={t('general:cancel')}
               />

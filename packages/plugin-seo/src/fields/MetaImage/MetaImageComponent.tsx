@@ -156,6 +156,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
               setValue(null)
             }
           }}
+          path={field.path}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

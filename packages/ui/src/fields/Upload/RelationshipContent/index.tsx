@@ -11,6 +11,8 @@ import './index.scss'
 const baseClass = 'uploadDocRelationshipContent'
 
 type Props = {
+  readonly allowEdit?: boolean
+  readonly allowRemove?: boolean
   readonly alt: string
   readonly byteSize: number
   readonly className?: string
@@ -27,6 +29,8 @@ type Props = {
 export function RelationshipContent(props: Props) {
   const {
     id,
+    allowEdit,
+    allowRemove,
     alt,
     byteSize,
     className,
@@ -80,18 +84,23 @@ export function RelationshipContent(props: Props) {
         </div>
       </div>
 
-      <div className={`${baseClass}__actions`}>
-        <Button buttonStyle="icon-label" icon="edit" iconStyle="none" onClick={openDrawer} round />
-        <Button
-          buttonStyle="icon-label"
-          className={`${baseClass}__button`}
-          icon="x"
-          iconStyle="none"
-          onClick={() => onRemove()}
-          round
-        />
-        <DocumentDrawer />
-      </div>
+      {allowEdit !== false || allowRemove !== false ? (
+        <div className={`${baseClass}__actions`}>
+          {allowEdit !== false ? (
+            <Button buttonStyle="icon-label" icon="edit" iconStyle="none" onClick={openDrawer} />
+          ) : null}
+          {allowRemove !== false ? (
+            <Button
+              buttonStyle="icon-label"
+              className={`${baseClass}__button`}
+              icon="x"
+              iconStyle="none"
+              onClick={() => onRemove()}
+            />
+          ) : null}
+          <DocumentDrawer />
+        </div>
+      ) : null}
     </div>
   )
 }

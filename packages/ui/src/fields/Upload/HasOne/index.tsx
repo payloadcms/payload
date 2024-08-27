@@ -4,9 +4,8 @@ import type { JsonObject } from 'payload'
 
 import React from 'react'
 
-import { useConfig } from '../../../providers/Config/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
-import { RowCard } from '../RowCard/index.js'
+import { UploadCard } from '../UploadCard/index.js'
 import './index.scss'
 
 const baseClass = 'upload upload--has-one'
@@ -18,18 +17,20 @@ type Props = {
     value: JsonObject
   }
   readonly onRemove?: () => void
+  readonly readonly?: boolean
+  readonly serverURL: string
 }
 
-export function UploadComponentHasOne2(props: Props) {
-  const { className, fileDoc, onRemove } = props
+export function UploadComponentHasOne(props: Props) {
+  const { className, fileDoc, onRemove, readonly, serverURL } = props
   const { relationTo, value } = fileDoc
   const id = String(value.id)
 
-  const { config } = useConfig()
-
   return (
-    <RowCard className={[baseClass, className].filter(Boolean).join(' ')}>
+    <UploadCard className={[baseClass, className].filter(Boolean).join(' ')}>
       <RelationshipContent
+        allowEdit={!readonly}
+        allowRemove={!readonly}
         alt={(value?.alt || value?.filename) as string}
         byteSize={value.filesize as number}
         collectionSlug={relationTo}
@@ -37,10 +38,10 @@ export function UploadComponentHasOne2(props: Props) {
         id={id}
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
-        src={`${config.serverURL}${value.url}`}
+        src={`${serverURL}${value.url}`}
         x={value?.width as number}
         y={value?.height as number}
       />
-    </RowCard>
+    </UploadCard>
   )
 }

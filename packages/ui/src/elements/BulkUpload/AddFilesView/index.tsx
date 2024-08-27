@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { DrawerHeader } from '../Header/index.js'
 import './index.scss'
@@ -16,11 +17,43 @@ type Props = {
 export function AddFilesView({ onCancel, onDrop }: Props) {
   const { t } = useTranslation()
 
+  const inputRef = React.useRef(null)
+
   return (
     <div className={baseClass}>
       <DrawerHeader onClose={onCancel} title={t('upload:addFiles')} />
       <div className={`${baseClass}__dropArea`}>
-        <Dropzone multipleFiles onChange={onDrop} />
+        <Dropzone multipleFiles onChange={onDrop}>
+          <Button
+            buttonStyle="pill"
+            iconPosition="left"
+            onClick={() => {
+              if (inputRef.current) {
+                inputRef.current.click()
+              }
+            }}
+            size="small"
+          >
+            {t('upload:selectFile')}
+          </Button>
+          <input
+            aria-hidden="true"
+            className={`${baseClass}__hidden-input`}
+            hidden
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                onDrop(e.target.files)
+              }
+            }}
+            ref={inputRef}
+            type="file"
+          />
+
+          <p className={`${baseClass}__dragAndDropText`}>
+            {t('general:or')} {t('upload:dragAndDrop')}
+          </p>
+        </Dropzone>
+        {/* <Dropzone multipleFiles onChange={onDrop} /> */}
       </div>
     </div>
   )
