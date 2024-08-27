@@ -1,7 +1,7 @@
 'use client'
 import type { CellComponentProps, JoinFieldClient } from 'payload'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import type { DocumentDrawerProps } from '../../../DocumentDrawer/types.js'
 
@@ -17,7 +17,7 @@ export const DrawerLink: React.FC<
   } & CellComponentProps<JoinFieldClient>
 > = (props) => {
   const context = useTableCell()
-  const { field, onDrawerSave } = props
+  const { field, onDrawerSave: onDrawerSaveFromProps } = props
 
   const {
     cellProps,
@@ -25,10 +25,21 @@ export const DrawerLink: React.FC<
     rowData,
   } = context
 
-  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: rowData.id,
     collectionSlug,
   })
+
+  const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      closeDrawer()
+
+      if (typeof onDrawerSaveFromProps === 'function') {
+        void onDrawerSaveFromProps(args)
+      }
+    },
+    [closeDrawer, onDrawerSaveFromProps],
+  )
 
   return (
     <div className="drawer-link">

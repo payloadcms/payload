@@ -142,8 +142,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
 
-      closeDrawer()
-
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
         newDocs[foundDocIndex] = args.doc
@@ -158,7 +156,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         })
       }
     },
-    [data, closeDrawer],
+    [data],
+  )
+
+  const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      closeDrawer()
+      void onDrawerSave(args)
+    },
+    [closeDrawer, onDrawerSave],
   )
 
   const preferenceKey = `${relationTo}-list`
@@ -272,7 +278,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             value: docID,
           },
         }}
-        onSave={onDrawerSave}
+        onSave={onDrawerCreate}
       />
     </div>
   )
