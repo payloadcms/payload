@@ -1,27 +1,25 @@
 import type { FieldHook } from 'payload'
 
-const format = (val: string): string =>
+export const formatSlug = (val: string): string =>
   val
     .replace(/ /g, '-')
     .replace(/[^\w-]+/g, '')
     .toLowerCase()
 
-const formatSlug =
+export const formatSlugHook =
   (fallback: string): FieldHook =>
   ({ data, operation, originalDoc, value }) => {
     if (typeof value === 'string') {
-      return format(value)
+      return formatSlug(value)
     }
 
     if (operation === 'create' || !data?.slug) {
       const fallbackData = data?.[fallback] || data?.[fallback]
 
       if (fallbackData && typeof fallbackData === 'string') {
-        return format(fallbackData)
+        return formatSlug(fallbackData)
       }
     }
 
     return value
   }
-
-export default formatSlug
