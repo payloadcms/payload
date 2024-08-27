@@ -1,4 +1,4 @@
-import type { FormState } from 'payload'
+import type { FormState } from '../admin/types.js'
 
 import { unflatten } from './unflatten.js'
 
