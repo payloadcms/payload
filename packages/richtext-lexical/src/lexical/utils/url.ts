@@ -30,6 +30,8 @@ const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
  * @param url
  */
 export function validateUrlMinimal(url: string): boolean {
+  if (!url) return false
+
   return !url.includes(' ')
 }
 

@@ -46,6 +46,8 @@ export const HeadingFeature = createServerFeature<
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -55,6 +57,8 @@ export const HeadingFeature = createServerFeature<
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,

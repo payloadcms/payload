@@ -7,7 +7,9 @@ import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
 export type ConvertLexicalToHTMLArgs = {
   converters: HTMLConverter[]
+  currentDepth?: number
   data: SerializedEditorState
+  depth?: number
   draft?: boolean // default false
   overrideAccess?: boolean // default false
   showHiddenFields?: boolean // default false
@@ -42,7 +44,9 @@ export type ConvertLexicalToHTMLArgs = {
 
 export async function convertLexicalToHTML({
   converters,
+  currentDepth,
   data,
+  depth,
   draft,
   overrideAccess,
   payload,
@@ -54,8 +58,18 @@ export async function convertLexicalToHTML({
       req = await createLocalReq({}, payload)
     }
 
+    if (!currentDepth) {
+      currentDepth = 0
+    }
+
+    if (!depth) {
+      depth = req?.payload?.config?.defaultDepth
+    }
+
     return await convertLexicalNodesToHTML({
       converters,
+      currentDepth,
+      depth,
       draft: draft === undefined ? false : draft,
       lexicalNodes: data?.root?.children,
       overrideAccess: overrideAccess === undefined ? false : overrideAccess,
@@ -69,6 +83,8 @@ export async function convertLexicalToHTML({
 
 export async function convertLexicalNodesToHTML({
   converters,
+  currentDepth,
+  depth,
   draft,
   lexicalNodes,
   overrideAccess,
@@ -77,6 +93,8 @@ export async function convertLexicalNodesToHTML({
   showHiddenFields,
 }: {
   converters: HTMLConverter[]
+  currentDepth: number
+  depth: number
   draft: boolean
   lexicalNodes: SerializedLexicalNode[]
   overrideAccess: boolean
@@ -100,6 +118,8 @@ export async function convertLexicalNodesToHTML({
             return await unknownConverter.converter({
               childIndex: i,
               converters,
+              currentDepth,
+              depth,
               draft,
               node,
               overrideAccess,
@@ -113,6 +133,8 @@ export async function convertLexicalNodesToHTML({
         return await converterForNode.converter({
           childIndex: i,
           converters,
+          currentDepth,
+          depth,
           draft,
           node,
           overrideAccess,
