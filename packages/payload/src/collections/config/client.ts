@@ -14,6 +14,15 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
   'hidden' | 'preview'
 >
 
+export type ServerOnlyUploadProperties = keyof Pick<
+  SanitizedCollectionConfig['upload'],
+  | 'adminThumbnail'
+  | 'externalFileHeaderFilter'
+  | 'handlers'
+  | 'modifyResponseHeaders'
+  | 'withMetadata'
+>
+
 export type ClientCollectionConfig = {
   _isPreviewEnabled?: true
   admin: {

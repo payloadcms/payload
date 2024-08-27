@@ -16,6 +16,7 @@ type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }> & {
   id?: string
   imgClassName?: string
   staticImage?: StaticImageData
+  disableInnerContainer?: boolean
 }
 
 export const MediaBlock: React.FC<Props> = (props) => {
@@ -27,6 +28,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
     media,
     position = 'default',
     staticImage,
+    disableInnerContainer,
   } = props
 
   let caption
@@ -55,7 +57,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
           className={cn(
             'mt-6',
             {
-              container: position === 'fullscreen',
+              container: position === 'fullscreen' && !disableInnerContainer,
             },
             captionClassName,
           )}

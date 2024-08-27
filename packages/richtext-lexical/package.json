@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.90",
+  "version": "3.0.0-beta.91",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -43,7 +43,7 @@
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build_without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
@@ -81,11 +81,11 @@
     "@types/node": "20.12.5",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-1cd8995-20240814",
+    "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.23.0",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-d0e920e-20240815",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },

@@ -25,6 +25,14 @@ const absoluteRegExp =
  *  */
 const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
 
+/**
+ * Prevents unreasonable URLs from being inserted into the editor.
+ * @param url
+ */
+export function validateUrlMinimal(url: string): boolean {
+  return !url.includes(' ')
+}
+
 // Do not keep validateUrl function too loose. This is run when pasting in text, to determine if links are in that text and if it should create AutoLinkNodes.
 // This is why we do not allow stuff like anchors here, as we don't want copied anchors to be turned into AutoLinkNodes.
 export function validateUrl(url: string): boolean {

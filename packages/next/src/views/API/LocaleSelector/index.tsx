@@ -1,3 +1,4 @@
+'use client'
 import { SelectField, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 

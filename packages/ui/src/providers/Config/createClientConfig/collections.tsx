@@ -11,12 +11,37 @@ import type {
   SanitizedCollectionConfig,
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
+  ServerOnlyUploadProperties,
 } from 'payload'
 import type React from 'react'
 
 import { deepCopyObjectSimple } from 'payload'
 
 import { createClientFields } from './fields.js'
+
+const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
+  'hooks',
+  'access',
+  'endpoints',
+  'custom',
+  // `upload`
+  // `admin`
+  // are all handled separately
+]
+
+const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+  'adminThumbnail',
+  'externalFileHeaderFilter',
+  'handlers',
+  'modifyResponseHeaders',
+  'withMetadata',
+]
+
+const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
+  'hidden',
+  'preview',
+  // `livePreview` is handled separately
+]
 
 export const createClientCollectionConfig = ({
   DefaultEditView,
@@ -46,16 +71,6 @@ export const createClientCollectionConfig = ({
     payload,
   })
 
-  const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
-    'hooks',
-    'access',
-    'endpoints',
-    'custom',
-    // `upload`
-    // `admin`
-    // are all handled separately
-  ]
-
   serverOnlyCollectionProperties.forEach((key) => {
     if (key in clientCollection) {
       delete clientCollection[key]
@@ -63,10 +78,11 @@ export const createClientCollectionConfig = ({
   })
 
   if ('upload' in clientCollection && typeof clientCollection.upload === 'object') {
-    delete clientCollection.upload.handlers
-    delete clientCollection.upload.adminThumbnail
-    delete clientCollection.upload.externalFileHeaderFilter
-    delete clientCollection.upload.withMetadata
+    serverOnlyUploadProperties.forEach((key) => {
+      if (key in clientCollection.upload) {
+        delete clientCollection.upload[key]
+      }
+    })
 
     if ('imageSizes' in clientCollection.upload && clientCollection.upload.imageSizes.length) {
       clientCollection.upload.imageSizes = clientCollection.upload.imageSizes.map((size) => {
@@ -90,12 +106,6 @@ export const createClientCollectionConfig = ({
       }
     })
   }
-
-  const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-    'hidden',
-    'preview',
-    // `livePreview` is handled separately
-  ]
 
   serverOnlyCollectionAdminProperties.forEach((key) => {
     if (key in clientCollection.admin) {

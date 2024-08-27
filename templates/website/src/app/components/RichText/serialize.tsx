@@ -118,6 +118,7 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
                   {...block}
                   captionClassName="mx-auto max-w-[48rem]"
                   enableGutter={false}
+                  disableInnerContainer={true}
                 />
               )
             case 'banner':

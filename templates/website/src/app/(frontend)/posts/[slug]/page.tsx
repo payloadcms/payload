@@ -41,8 +41,8 @@ export default async function Post({ params: { slug = '' } }) {
 
       <PostHero post={post} />
 
-      <div className="flex flex-col gap-4 pt-8">
-        <div className="container lg:grid lg:grid-cols-[1fr_48rem_1fr] grid-rows-[1fr]">
+      <div className="flex flex-col items-center gap-4 pt-8">
+        <div className="container lg:mx-0 lg:grid lg:grid-cols-[1fr_48rem_1fr] grid-rows-[1fr]">
           <RichText
             className="lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[1fr]"
             content={post.content}
@@ -50,16 +50,22 @@ export default async function Post({ params: { slug = '' } }) {
           />
         </div>
 
-        <RelatedPosts
-          className="mt-12"
-          docs={post.relatedPosts.filter((post) => typeof post === 'object')}
-        />
+        {post.relatedPosts && post.relatedPosts.length > 0 && (
+          <RelatedPosts
+            className="mt-12"
+            docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+          />
+        )}
       </div>
     </article>
   )
 }
 
-export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
+export async function generateMetadata({
+  params: { slug },
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
   const post = await queryPostBySlug({ slug })
 
   return generateMeta({ doc: post })

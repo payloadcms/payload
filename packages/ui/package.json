@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.90",
+  "version": "3.0.0-beta.91",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -64,7 +64,7 @@
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build_without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -109,10 +109,10 @@
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-1cd8995-20240814",
-    "esbuild": "0.23.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-d0e920e-20240815",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
     "payload": "workspace:*"
   },
   "peerDependencies": {

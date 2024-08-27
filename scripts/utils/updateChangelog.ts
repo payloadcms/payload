@@ -87,13 +87,13 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
   // Might need to swap out HEAD for the new proposed version
   let changelog = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
   if (sections.feat.length) {
-    changelog += `### Features\n\n${sections.feat.join('\n')}\n\n`
+    changelog += `### 🚀 Features\n\n${sections.feat.join('\n')}\n\n`
   }
   if (sections.fix.length) {
-    changelog += `### Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
+    changelog += `### 🐛 Bug Fixes\n\n${sections.fix.join('\n')}\n\n`
   }
   if (sections.breaking.length) {
-    changelog += `### BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
+    changelog += `### ⚠️ BREAKING CHANGES\n\n${sections.breaking.join('\n')}\n\n`
   }
 
   if (writeChangelog) {
