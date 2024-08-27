@@ -50,6 +50,7 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'posts',
+          label: 'Related Posts',
           type: 'join',
           collection: 'posts',
           on: 'category',
@@ -60,6 +61,7 @@ export default buildConfigWithDefaults({
           fields: [
             {
               name: 'posts',
+              label: 'Related Posts (Group)',
               type: 'join',
               collection: 'posts',
               on: 'group.category',

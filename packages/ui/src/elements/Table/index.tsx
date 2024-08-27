@@ -22,7 +22,7 @@ export type Column = {
 }
 
 export type Props = {
-  readonly appearance?: 'compact' | 'default'
+  readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
   readonly customCellContext?: Record<string, unknown>
   readonly data: Record<string, unknown>[]

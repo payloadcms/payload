@@ -49,7 +49,7 @@
     outline-offset: var(--accessibility-outline-offset);
   }
 
-  &--appearance-compact {
+  &--appearance-condensed {
     thead {
       th:first-child {
         border-top-left-radius: $style-radius-s;
@@ -85,13 +85,12 @@
     }
 
     th {
-      padding: base(0.2) base(0.3);
+      padding: base(0.3);
     }
 
     tr td,
     th {
-      border: 1px solid var(--theme-elevation-100);
-      border-collapse: collapse;
+      border: 0.5px solid var(--theme-elevation-100);
     }
   }
 

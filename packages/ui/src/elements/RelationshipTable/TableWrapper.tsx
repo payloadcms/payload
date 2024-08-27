@@ -20,7 +20,7 @@ export const RelationshipTableWrapper: React.FC<RelationshipTableComponentProps>
   return (
     <Fragment>
       <Table
-        appearance="compact"
+        appearance="condensed"
         customCellContext={{
           collectionSlug: collectionConfig.slug,
           uploadConfig: collectionConfig.upload,
