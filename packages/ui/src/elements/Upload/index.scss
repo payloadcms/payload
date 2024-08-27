@@ -83,6 +83,15 @@
     }
   }
 
+  .dropzone {
+    background-color: transparent;
+  }
+
+  &__dropzoneButtons {
+    display: flex;
+    gap: var(--base);
+  }
+
   @include small-break {
     &__upload {
       flex-wrap: wrap;

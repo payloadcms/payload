@@ -44,7 +44,6 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
         <Thumbnail
           // size="small"
           className={`${baseClass}__thumbnail`}
-          collectionSlug={collectionSlug}
           doc={doc}
           fileSrc={thumbnailURL || url}
           imageCacheTag={imageCacheTag}

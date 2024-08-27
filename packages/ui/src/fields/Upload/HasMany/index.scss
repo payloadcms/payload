@@ -4,68 +4,24 @@
   position: relative;
   max-width: 100%;
 
-  &__controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: base(2);
-    margin-top: base(1);
-
-    @include extra-small-break {
-      gap: base(1);
-    }
-  }
-
-  &__buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: base(1);
-
-    & .relationship-add-new__add-button {
-      padding: 0;
-    }
-  }
-
-  &__add-new {
-    display: flex;
-    gap: base(0.5);
-  }
-
-  &__clear-all {
-    all: unset;
-    flex-shrink: 0;
-    font-size: inherit;
-    font-family: inherit;
-    color: inherit;
-    cursor: pointer;
-    margin-inline-start: auto;
-    color: var(--theme-elevation-800);
-
-    @include extra-small-break {
-      margin-inline-start: 0;
-    }
-  }
-
   &__draggable-rows {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: calc(var(--base) / 4);
   }
 
-  &__no-data {
-    background: var(--theme-elevation-50);
-    padding: 1rem 0.75rem;
-    border-radius: 3px;
-    color: var(--theme-elevation-700);
-    text-align: center;
-  }
-}
+  &__dragItem {
+    .icon--drag-handle {
+      color: var(--theme-elevation-400);
+    }
 
-html[data-theme='light'] {
-  .upload {
-  }
-}
+    .thumbnail {
+      width: 26px;
+      height: 26px;
+    }
 
-html[data-theme='dark'] {
-  .upload {
+    .uploadDocRelationshipContent__details {
+      line-height: 1.2;
+    }
   }
 }

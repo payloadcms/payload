@@ -28,9 +28,11 @@ export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
 export {
   BulkUploadDrawer,
-  BulkUploadToggler,
-  drawerSlug as bulkUploadDrawerSlug,
+  BulkUploadProvider,
+  useBulkUpload,
+  useBulkUploadDrawerSlug,
 } from '../../elements/BulkUpload/index.js'
+export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'
@@ -128,7 +130,7 @@ export type { TextAreaInputProps } from '../../fields/Textarea/index.js'
 
 export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
-export type { UploadFieldProps, UploadInputProps } from '../../fields/Upload/index.js'
+export type { UploadInputProps } from '../../fields/Upload/index.js'
 
 export { fieldBaseClass } from '../../fields/shared/index.js'
 
