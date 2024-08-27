@@ -64,7 +64,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
           },
         } = col
 
-        if (col.accessor === '_select') return null
+        if (col.accessor === '_select' || Label === null) return null
 
         return (
           <Pill

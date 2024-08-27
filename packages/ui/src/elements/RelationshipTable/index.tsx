@@ -201,30 +201,28 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           preferenceKey={preferenceKey}
         >
           <TableColumnsProvider
-            beforeRows={
-              [
-                // {
-                //   Heading: i18n.t('version:type'),
-                //   accessor: 'collection',
-                //   active: false,
-                //   cellProps: {
-                //     field: {
-                //       admin: {
-                //         components: {
-                //           Cell: {
-                //             type: 'client',
-                //             RenderedComponent: (
-                //               <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
-                //             ),
-                //           },
-                //         },
-                //         disableListColumn: true,
-                //       },
-                //     } as ClientField,
-                //   },
-                // },
-              ]
-            }
+            beforeRows={[
+              {
+                Heading: i18n.t('version:type'),
+                accessor: 'collection',
+                active: true,
+                cellProps: {
+                  field: {
+                    admin: {
+                      components: {
+                        Cell: {
+                          type: 'client',
+                          RenderedComponent: (
+                            <Pill>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+                          ),
+                        },
+                        Label: null,
+                      },
+                    },
+                  } as ClientField,
+                },
+              },
+            ]}
             cellProps={[
               {},
               {
