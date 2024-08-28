@@ -143,7 +143,7 @@ importers:
         version: 9.4.1(@aws-sdk/credential-providers@3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0)))
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -196,8 +196,8 @@ importers:
         specifier: 4.17.0
         version: 4.17.0
       turbo:
-        specifier: ^2.0.14
-        version: 2.0.14
+        specifier: ^2.1.0
+        version: 2.1.0
       typescript:
         specifier: 5.5.4
         version: 5.5.4
@@ -963,7 +963,7 @@ importers:
         version: link:../payload
       ts-jest:
         specifier: ^29.1.0
-        version: 29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
+        version: 29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(esbuild@0.19.12)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
 
   packages/plugin-cloud-storage:
     dependencies:
@@ -1160,7 +1160,7 @@ importers:
         version: link:../payload
       ts-jest:
         specifier: ^29.1.0
-        version: 29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
+        version: 29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(esbuild@0.19.12)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4)
 
   packages/plugin-seo:
     dependencies:
@@ -1467,7 +1467,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1798,7 +1798,7 @@ importers:
         version: 0.17.0
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../packages/payload
@@ -1828,7 +1828,7 @@ importers:
         version: 5.5.4
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -7244,6 +7244,7 @@ packages:
 
   libsql@0.3.19:
     resolution: {integrity: sha512-Aj5cQ5uk/6fHdmeW0TiXK42FqUlwx7ytmMLPSaUQPin5HKKKuUPD62MAbN4OEweGBBI7q1BekoEN4gPUEL6MZA==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lie@3.1.1:
@@ -9160,38 +9161,38 @@ packages:
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
 
-  turbo-darwin-64@2.0.14:
-    resolution: {integrity: sha512-kwfDmjNwlNfvtrvT29+ZBg5n1Wvxl891bFHchMJyzMoR0HOE9N1NSNdSZb9wG3e7sYNIu4uDkNk+VBEqJW0HzQ==}
+  turbo-darwin-64@2.1.0:
+    resolution: {integrity: sha512-gHwpDk2gyB7qZ57gUUwDIS/IkglqEjjVtPZCTxmCRg28Tiwjui0azsLVKrnHP9UZHllozwbi28x8HXLXLEFF1w==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.0.14:
-    resolution: {integrity: sha512-m3LXYEshCx3wc4ZClM6gb01KYpFmtjQ9IBF3A7ofjb6ahux3xlYZJZ3uFCLAGHuvGLuJ3htfiPbwlDPTdknqqw==}
+  turbo-darwin-arm64@2.1.0:
+    resolution: {integrity: sha512-GLaqGetNC6eS4eqXgsheLOHic/OcnGCGDi5boVf+TFZTXYH6YE15L4ugZha4xHXCr1KouCLILHh+f8EHEmWylg==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.0.14:
-    resolution: {integrity: sha512-7vBzCPdoTtR92SNn2JMgj1FlMmyonGmpMaQdgAB1OVYtuQ6NVGoh7/lODfaILqXjpvmFSVbpBIDrKOT6EvcprQ==}
+  turbo-linux-64@2.1.0:
+    resolution: {integrity: sha512-VzBOsj7JyGoZtiNZZ6brjnY7UehRnClluw7pwznuLPzClkqOOPMd2jOcgkWxnP/xW4NBmOoFANXXrtvKBD4f2w==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.0.14:
-    resolution: {integrity: sha512-jwH+c0bfjpBf26K/tdEFatmnYyXwGROjbr6bZmNcL8R+IkGAc/cglL+OToqJnQZTgZvH7uDGbeSyUo7IsHyjuA==}
+  turbo-linux-arm64@2.1.0:
+    resolution: {integrity: sha512-St7svJnOO5g4F6R7Z32e10I/0M3e6qpNjEYybXwPNul9NSfnUXeky4WoKaALwqNhyJ7nYemoFpZ1d+i8hFQTHg==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.0.14:
-    resolution: {integrity: sha512-w9/XwkHSzvLjmioo6cl3S1yRfI6swxsV1j1eJwtl66JM4/pn0H2rBa855R0n7hZnmI6H5ywLt/nLt6Ae8RTDmw==}
+  turbo-windows-64@2.1.0:
+    resolution: {integrity: sha512-iSobNud2MrJ1SZ1upVPlErT8xexsr0MQtKapdfq6z0M0rBnrDGEq5bUCSScWyGu+O4+glB4br9xkTAkGFqaxqQ==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.0.14:
-    resolution: {integrity: sha512-XaQlyYk+Rf4xS5XWCo8XCMIpssgGGy8blzLfolN6YBp4baElIWMlkLZHDbGyiFmCbNf9I9gJI64XGRG+LVyyjA==}
+  turbo-windows-arm64@2.1.0:
+    resolution: {integrity: sha512-d61jN4rjE5PnUfF66GKrKoj8S8Ql4FGXzFFzZz4kjsHpZZzCTtqlzPZBmd1byzGYhDPTorTqG3G1USohbdyohA==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.0.14:
-    resolution: {integrity: sha512-00JjdCMD/cpsjP0Izkjcm8Oaor5yUCfDwODtaLb+WyblyadkaDEisGhy3Dbd5az9n+5iLSPiUgf+WjPbns6MRg==}
+  turbo@2.1.0:
+    resolution: {integrity: sha512-A969/LO/sPHKlapIarY2VVzqQ5JnnW2/1kksZlnMEpsRD6gwOELvVL+ozfMiO7av9RILt3UeN02L17efr6HUCA==}
     hasBin: true
 
   type-check@0.4.0:
@@ -16936,36 +16937,6 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4):
-    dependencies:
-      '@next/env': 15.0.0-canary.104
-      '@swc/counter': 0.1.3
-      '@swc/helpers': 0.5.12
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001651
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 19.0.0-rc-06d0b89e-20240801
-      react-dom: 19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801)
-      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-06d0b89e-20240801)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 15.0.0-canary.104
-      '@next/swc-darwin-x64': 15.0.0-canary.104
-      '@next/swc-linux-arm64-gnu': 15.0.0-canary.104
-      '@next/swc-linux-arm64-musl': 15.0.0-canary.104
-      '@next/swc-linux-x64-gnu': 15.0.0-canary.104
-      '@next/swc-linux-x64-musl': 15.0.0-canary.104
-      '@next/swc-win32-arm64-msvc': 15.0.0-canary.104
-      '@next/swc-win32-ia32-msvc': 15.0.0-canary.104
-      '@next/swc-win32-x64-msvc': 15.0.0-canary.104
-      '@playwright/test': 1.46.0
-      babel-plugin-react-compiler: 0.0.0-experimental-48eb8f4-20240822
-      sass: 1.77.4
-      sharp: 0.33.4
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
   nice-napi@1.0.2:
     dependencies:
       node-addon-api: 3.2.1
@@ -18558,7 +18529,7 @@ snapshots:
     dependencies:
       typescript: 5.5.4
 
-  ts-jest@29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4):
+  ts-jest@29.2.4(@babel/core@7.25.2)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.2))(esbuild@0.19.12)(jest@29.7.0(@types/node@20.12.5)(babel-plugin-macros@3.1.0))(typescript@5.5.4):
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10
@@ -18576,6 +18547,7 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.25.2)
+      esbuild: 0.19.12
 
   tslib@1.14.1: {}
 
@@ -18592,32 +18564,32 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  turbo-darwin-64@2.0.14:
+  turbo-darwin-64@2.1.0:
     optional: true
 
-  turbo-darwin-arm64@2.0.14:
+  turbo-darwin-arm64@2.1.0:
     optional: true
 
-  turbo-linux-64@2.0.14:
+  turbo-linux-64@2.1.0:
     optional: true
 
-  turbo-linux-arm64@2.0.14:
+  turbo-linux-arm64@2.1.0:
     optional: true
 
-  turbo-windows-64@2.0.14:
+  turbo-windows-64@2.1.0:
     optional: true
 
-  turbo-windows-arm64@2.0.14:
+  turbo-windows-arm64@2.1.0:
     optional: true
 
-  turbo@2.0.14:
+  turbo@2.1.0:
     optionalDependencies:
-      turbo-darwin-64: 2.0.14
-      turbo-darwin-arm64: 2.0.14
-      turbo-linux-64: 2.0.14
-      turbo-linux-arm64: 2.0.14
-      turbo-windows-64: 2.0.14
-      turbo-windows-arm64: 2.0.14
+      turbo-darwin-64: 2.1.0
+      turbo-darwin-arm64: 2.1.0
+      turbo-linux-64: 2.1.0
+      turbo-linux-arm64: 2.1.0
+      turbo-windows-64: 2.1.0
+      turbo-windows-arm64: 2.1.0
 
   type-check@0.4.0:
     dependencies:
@@ -18743,7 +18715,7 @@ snapshots:
       escalade: 3.1.2
       picocolors: 1.0.1
 
-  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)):
+  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)):
     dependencies:
       '@effect/schema': 0.68.12(effect@3.4.5)
       '@uploadthing/mime-types': 0.2.10
@@ -18753,7 +18725,7 @@ snapshots:
       std-env: 3.7.0
     optionalDependencies:
       express: 4.19.2
-      next: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+      next: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
