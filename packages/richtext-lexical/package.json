@@ -62,6 +62,7 @@
     "@types/uuid": "10.0.0",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
+    "escape-html": "1.0.3",
     "lexical": "0.17.0",
     "react-error-boundary": "4.0.13",
     "uuid": "10.0.0"
@@ -77,6 +78,7 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "20.12.5",
     "@types/react": "npm:types-react@19.0.0-rc.0",
