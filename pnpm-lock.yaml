@@ -1164,6 +1164,12 @@ importers:
 
   packages/plugin-seo:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       react:
         specifier: 19.0.0-rc-06d0b89e-20240801
         version: 19.0.0-rc-06d0b89e-20240801
@@ -1177,12 +1183,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@types/react':
         specifier: npm:types-react@19.0.0-rc.0
         version: types-react@19.0.0-rc.0
@@ -1195,6 +1195,9 @@ importers:
 
   packages/plugin-stripe:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1214,9 +1217,6 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
       '@types/express':
         specifier: ^4.17.9
         version: 4.17.21
@@ -1274,6 +1274,15 @@ importers:
       '@lexical/utils':
         specifier: 0.17.0
         version: 0.17.0
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -1323,15 +1332,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/next':
-        specifier: workspace:*
-        version: link:../next
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@types/escape-html':
         specifier: 1.0.4
         version: 1.0.4
@@ -1374,6 +1374,9 @@ importers:
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       is-hotkey:
         specifier: 0.2.0
         version: 0.2.0
@@ -1396,9 +1399,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@types/is-hotkey':
         specifier: ^0.1.10
         version: 0.1.10
