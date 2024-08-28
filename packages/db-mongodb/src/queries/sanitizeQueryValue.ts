@@ -29,23 +29,39 @@ export const sanitizeQueryValue = ({
   let formattedOperator = operator
 
   // Disregard invalid _ids
-  if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
-    if (!hasCustomID) {
-      const isValid = mongoose.Types.ObjectId.isValid(val)
+  if (path === '_id') {
+    if (typeof val === 'string' && val.split(',').length === 1) {
+      if (!hasCustomID) {
+        const isValid = mongoose.Types.ObjectId.isValid(val)
 
-      if (!isValid) {
-        return { operator: formattedOperator, val: undefined }
-      } else {
-        formattedValue = ObjectId(val)
+        if (!isValid) {
+          return { operator: formattedOperator, val: undefined }
+        } else {
+          formattedValue = ObjectId(val)
+        }
       }
-    }
 
-    if (field.type === 'number') {
-      const parsedNumber = parseFloat(val)
+      if (field.type === 'number') {
+        const parsedNumber = parseFloat(val)
 
-      if (Number.isNaN(parsedNumber)) {
-        return { operator: formattedOperator, val: undefined }
+        if (Number.isNaN(parsedNumber)) {
+          return { operator: formattedOperator, val: undefined }
+        }
       }
+    } else if (Array.isArray(val)) {
+      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
+        const newValues = [inVal]
+        if (!hasCustomID) {
+          if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(ObjectId(inVal))
+        }
+
+        if (field.type === 'number') {
+          const parsedNumber = parseFloat(inVal)
+          if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber)
+        }
+
+        return [...formattedValues, ...newValues]
+      }, [])
     }
   }
 
@@ -97,11 +113,10 @@ export const sanitizeQueryValue = ({
       }
     }
 
-    if (operator === 'in' && Array.isArray(formattedValue)) {
+    if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
-        if (mongoose.Types.ObjectId.isValid(inVal))
-          newValues.push(new mongoose.Types.ObjectId(inVal))
+        if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(ObjectId(inVal))
 
         const parsedNumber = parseFloat(inVal)
         if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber)
