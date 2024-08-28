@@ -386,6 +386,7 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
