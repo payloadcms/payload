@@ -88,9 +88,27 @@
     background-color: transparent;
   }
 
+  &__dropzoneContent {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
   &__dropzoneButtons {
     display: flex;
-    gap: var(--base);
+    gap: calc(var(--base) * .5);
+  }
+
+  &__orText {
+    color: var(--theme-elevation-500);
+    text-transform: lowercase;
+  }
+
+  &__dragAndDropText {
+    margin: 0;
+    text-transform: lowercase;
+    align-self: center;
+    color: var(--theme-elevation-500);
   }
 
   @include small-break {
@@ -121,6 +139,12 @@
     }
 
     &__edit {
+      display: none;
+    }
+  }
+
+  @include small-break {
+    &__dropzoneContent {
       display: none;
     }
   }

@@ -29,6 +29,7 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -474,10 +475,8 @@ export function UploadInput(props: UploadInputProps) {
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
                 <Button
-                  buttonStyle="icon-label"
+                  buttonStyle="pill"
                   disabled={readOnly || !canCreate}
-                  icon="plus"
-                  iconPosition="left"
                   onClick={() => {
                     if (!readOnly) {
                       if (hasMany) {
@@ -491,12 +490,14 @@ export function UploadInput(props: UploadInputProps) {
                 >
                   {t('general:createNew')}
                 </Button>
-                <CreateDocDrawer onSave={onDocCreate} />
+                <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
                 <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                  <Button buttonStyle="icon-label" el="span" icon="plus" iconPosition="left">
+                  <Button buttonStyle="pill" el="span" size="small">
                     {t('fields:chooseFromExisting')}
                   </Button>
                 </ListDrawerToggler>
+
+                <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
