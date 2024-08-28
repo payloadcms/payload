@@ -1,8 +1,8 @@
+import type { FetchAPIFileUploadOptions } from 'payload'
+
 import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
-
-import type { FetchAPIFileUploadOptions } from './index.js'
 
 import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities.js'
 

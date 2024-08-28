@@ -41,6 +41,7 @@ import {
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
@@ -354,6 +355,15 @@ export const seed = async (_payload: Payload) => {
       ) as any,
     },
     locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: lexicalRelationshipFieldsSlug,
+    data: {
+      richText: textToLexicalJSON({ text: 'English text' }) as any,
+    },
     depth: 0,
     overrideAccess: true,
   })

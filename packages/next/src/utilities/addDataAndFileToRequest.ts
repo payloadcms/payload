@@ -2,8 +2,6 @@ import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
-import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
-
 import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
@@ -30,7 +28,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
     } else if (bodyByteSize && contentType.includes('multipart/')) {
       const { error, fields, files } = await fetchAPIFileUpload({
-        options: payload.config.upload as FetchAPIFileUploadOptions,
+        options: payload.config.upload,
         request: req as Request,
       })
 
