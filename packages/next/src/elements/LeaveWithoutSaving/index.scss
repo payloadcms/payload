@@ -12,14 +12,14 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--base);
+    gap: base(0.8);
     padding: base(2);
   }
 
   &__content {
     display: flex;
     flex-direction: column;
-    gap: var(--base);
+    gap: base(0.4);
 
     > * {
       margin: 0;
@@ -28,7 +28,7 @@
 
   &__controls {
     display: flex;
-    gap: var(--base);
+    gap: base(0.4);
 
     .btn {
       margin: 0;
