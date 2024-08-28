@@ -79,6 +79,17 @@ describe('Joins Field Tests', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
+  it('should populate relationships in joins', async () => {
+    const { docs } = await payload.find({
+      limit: 1,
+      collection: 'posts',
+    })
+
+    expect(docs[0].category.id).toBeDefined()
+    expect(docs[0].category.name).toBeDefined()
+    expect(docs[0].category.relatedPosts.docs).toHaveLength(10)
+  })
+
   it('should filter joins using where query', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
@@ -192,11 +203,19 @@ describe('Joins Field Tests', () => {
       expect(unlimited.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
+
     it('should sort joins', async () => {
       const response = await restClient
         .GET(`/categories/${category.id}?joins[relatedPosts][sort]=-title`)
         .then((res) => res.json())
       expect(response.relatedPosts.docs[0].title).toStrictEqual('test 9')
+    })
+
+    it('should query in on collections with joins', async () => {
+      const response = await restClient
+        .GET(`/categories?where[id][in]=${category.id}`)
+        .then((res) => res.json())
+      expect(response.docs[0].name).toStrictEqual(category.name)
     })
   })
 })

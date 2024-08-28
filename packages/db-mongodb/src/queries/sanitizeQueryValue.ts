@@ -37,7 +37,13 @@ export const sanitizeQueryValue = ({
         if (!isValid) {
           return { operator: formattedOperator, val: undefined }
         } else {
-          formattedValue = ObjectId(val)
+          if (['in', 'not_in'].includes(operator)) {
+            formattedValue = createArrayFromCommaDelineated(formattedValue).map((id) =>
+              ObjectId(id),
+            )
+          } else {
+            formattedValue = ObjectId(val)
+          }
         }
       }
 
