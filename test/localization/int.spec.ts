@@ -1611,6 +1611,112 @@ describe('Localization', () => {
       expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
     })
   })
+
+  describe('nested fields', () => {
+    it('should allow for fields which could contain new tables within localized arrays to be stored', async () => {
+      const randomDoc = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[0]
+      const randomDoc2 = (
+        await payload.find({
+          collection: 'localized-posts',
+          depth: 0,
+        })
+      ).docs[1]
+
+      const newDoc = await payload.create({
+        collection: 'nested-fields',
+        data: {
+          array: [
+            {
+              relation: {
+                value: randomDoc.id,
+                relationTo: 'localized-posts',
+              },
+              hasManyRelation: [randomDoc.id, randomDoc2.id],
+              hasManyPolyRelation: [
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
+              ],
+              number: [1, 2],
+              text: ['hello', 'goodbye'],
+              select: ['one'],
+            },
+          ],
+        },
+      })
+
+      await payload.update({
+        collection: 'nested-fields',
+        id: newDoc.id,
+        locale: 'es',
+        data: {
+          array: [
+            {
+              relation: {
+                value: randomDoc2.id,
+                relationTo: 'localized-posts',
+              },
+              hasManyRelation: [randomDoc2.id, randomDoc.id],
+              hasManyPolyRelation: [
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
+                {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
+              ],
+              select: ['two', 'three'],
+              text: ['hola', 'adios'],
+              number: [3, 4],
+            },
+          ],
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: 'nested-fields',
+        id: newDoc.id,
+        depth: 0,
+        locale: 'all',
+      })
+
+      expect(retrieved.array.en[0].relation.value).toStrictEqual(randomDoc.id)
+      expect(retrieved.array.es[0].relation.value).toStrictEqual(randomDoc2.id)
+
+      expect(retrieved.array.en[0].hasManyRelation).toEqual([randomDoc.id, randomDoc2.id])
+      expect(retrieved.array.es[0].hasManyRelation).toEqual([randomDoc2.id, randomDoc.id])
+
+      expect(retrieved.array.en[0].hasManyPolyRelation).toEqual([
+        { value: randomDoc.id, relationTo: 'localized-posts' },
+        { value: randomDoc2.id, relationTo: 'localized-posts' },
+      ])
+      expect(retrieved.array.es[0].hasManyPolyRelation).toEqual([
+        { value: randomDoc2.id, relationTo: 'localized-posts' },
+        { value: randomDoc.id, relationTo: 'localized-posts' },
+      ])
+
+      expect(retrieved.array.en[0].number).toEqual([1, 2])
+      expect(retrieved.array.es[0].number).toEqual([3, 4])
+
+      expect(retrieved.array.en[0].select).toEqual(['one'])
+      expect(retrieved.array.es[0].select).toEqual(['two', 'three'])
+
+      expect(retrieved.array.en[0].text).toEqual(['hello', 'goodbye'])
+      expect(retrieved.array.es[0].text).toEqual(['hola', 'adios'])
+    })
+  })
 })
 
 async function createLocalizedPost(data: {

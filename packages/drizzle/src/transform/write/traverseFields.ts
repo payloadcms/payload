@@ -227,7 +227,7 @@ export const traverseFields = ({
               row,
               selects,
               texts,
-              withinArrayOrBlockLocale,
+              withinArrayOrBlockLocale: localeKey,
             })
           })
         } else {
@@ -286,7 +286,7 @@ export const traverseFields = ({
                   row,
                   selects,
                   texts,
-                  withinArrayOrBlockLocale,
+                  withinArrayOrBlockLocale: localeKey,
                 })
               })
             } else {
@@ -403,6 +403,7 @@ export const traverseFields = ({
 
         transformRelationship({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: relationshipPath,
           },
           data: fieldData,
@@ -456,6 +457,7 @@ export const traverseFields = ({
       } else if (Array.isArray(fieldData)) {
         transformTexts({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: textPath,
           },
           data: fieldData,
@@ -487,6 +489,7 @@ export const traverseFields = ({
       } else if (Array.isArray(fieldData)) {
         transformNumbers({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: numberPath,
           },
           data: fieldData,
@@ -519,6 +522,7 @@ export const traverseFields = ({
         const newRows = transformSelects({
           id: data._uuid || data.id,
           data: data[field.name],
+          locale: withinArrayOrBlockLocale,
         })
 
         selects[selectTableName] = selects[selectTableName].concat(newRows)

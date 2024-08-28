@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
+    'nested-fields': NestedField;
     users: User;
     'localized-posts': LocalizedPost;
     'array-fields': ArrayField;
@@ -123,6 +124,34 @@ export interface LocalizedPost {
   group?: {
     children?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-fields".
+ */
+export interface NestedField {
+  id: number;
+  array?:
+    | {
+        relation?: {
+          relationTo: 'localized-posts';
+          value: number | LocalizedPost;
+        } | null;
+        hasManyRelation?: (number | LocalizedPost)[] | null;
+        hasManyPolyRelation?:
+          | {
+              relationTo: 'localized-posts';
+              value: number | LocalizedPost;
+            }[]
+          | null;
+        select?: ('one' | 'two' | 'three')[] | null;
+        number?: number[] | null;
+        text?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

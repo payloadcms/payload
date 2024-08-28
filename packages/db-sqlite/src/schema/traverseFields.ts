@@ -156,7 +156,11 @@ export const traverseFields = ({
     switch (field.type) {
       case 'text': {
         if (field.hasMany) {
-          if (field.localized) {
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock
+
+          if (isLocalized) {
             hasLocalizedManyTextField = true
           }
 
@@ -185,7 +189,11 @@ export const traverseFields = ({
 
       case 'number': {
         if (field.hasMany) {
-          if (field.localized) {
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock
+
+          if (isLocalized) {
             hasLocalizedManyNumberField = true
           }
 
@@ -261,7 +269,11 @@ export const traverseFields = ({
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
-          if (field.localized) {
+          const isLocalized =
+            Boolean(field.localized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock
+
+          if (isLocalized) {
             baseColumns.locale = text('locale', { enum: locales }).notNull()
             baseExtraConfig.localeIdx = (cols) =>
               index(`${selectTableName}_locale_idx`).on(cols.locale)
@@ -354,6 +366,9 @@ export const traverseFields = ({
         }
 
         const {
+          hasLocalizedManyNumberField: subHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: subHasLocalizedManyTextField,
+          hasLocalizedRelationshipField: subHasLocalizedRelationshipField,
           hasManyNumberField: subHasManyNumberField,
           hasManyTextField: subHasManyTextField,
           relationsToBuild: subRelationsToBuild,
@@ -372,6 +387,18 @@ export const traverseFields = ({
           versions,
           withinLocalizedArrayOrBlock: isLocalized,
         })
+
+        if (subHasLocalizedManyNumberField) {
+          hasLocalizedManyNumberField = subHasLocalizedManyNumberField
+        }
+
+        if (subHasLocalizedRelationshipField) {
+          hasLocalizedRelationshipField = subHasLocalizedRelationshipField
+        }
+
+        if (subHasLocalizedManyTextField) {
+          hasLocalizedManyTextField = subHasLocalizedManyTextField
+        }
 
         if (subHasManyTextField) {
           if (!hasManyTextField || subHasManyTextField === 'index')
@@ -475,6 +502,9 @@ export const traverseFields = ({
             }
 
             const {
+              hasLocalizedManyNumberField: subHasLocalizedManyNumberField,
+              hasLocalizedManyTextField: subHasLocalizedManyTextField,
+              hasLocalizedRelationshipField: subHasLocalizedRelationshipField,
               hasManyNumberField: subHasManyNumberField,
               hasManyTextField: subHasManyTextField,
               relationsToBuild: subRelationsToBuild,
@@ -493,6 +523,18 @@ export const traverseFields = ({
               versions,
               withinLocalizedArrayOrBlock: isLocalized,
             })
+
+            if (subHasLocalizedManyNumberField) {
+              hasLocalizedManyNumberField = subHasLocalizedManyNumberField
+            }
+
+            if (subHasLocalizedRelationshipField) {
+              hasLocalizedRelationshipField = subHasLocalizedRelationshipField
+            }
+
+            if (subHasLocalizedManyTextField) {
+              hasLocalizedManyTextField = subHasLocalizedManyTextField
+            }
 
             if (subHasManyTextField) {
               if (!hasManyTextField || subHasManyTextField === 'index')
@@ -773,7 +815,10 @@ export const traverseFields = ({
           }
           break
         }
-        if (adapter.payload.config.localization && field.localized) {
+        if (
+          Boolean(field.localized && adapter.payload.config.localization) ||
+          withinLocalizedArrayOrBlock
+        ) {
           hasLocalizedRelationshipField = true
         }
 

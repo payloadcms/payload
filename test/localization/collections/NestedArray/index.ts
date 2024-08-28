@@ -6,6 +6,7 @@ export const NestedArray: CollectionConfig = {
     {
       name: 'arrayWithBlocks',
       type: 'array',
+      localized: true,
       fields: [
         {
           name: 'blocksWithinArray',
@@ -24,8 +25,6 @@ export const NestedArray: CollectionConfig = {
           ],
         },
       ],
-
-      localized: true,
     },
     {
       name: 'arrayWithLocalizedRelation',

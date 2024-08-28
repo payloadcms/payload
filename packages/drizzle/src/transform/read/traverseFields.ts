@@ -360,6 +360,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               field,
               ref: result,
               relations: relationPathMatch,
+              withinArrayOrBlockLocale,
             })
           }
           return result
@@ -394,6 +395,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             ref: result,
             textRows: textPathMatch,
+            withinArrayOrBlockLocale,
           })
         }
 
@@ -428,6 +430,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             numberRows: numberPathMatch,
             ref: result,
+            withinArrayOrBlockLocale,
           })
         }
 

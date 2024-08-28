@@ -66,6 +66,9 @@ type Args = {
 }
 
 type Result = {
+  hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
+  hasLocalizedRelationshipField: boolean
   hasManyNumberField: 'index' | boolean
   hasManyTextField: 'index' | boolean
   relationsToBuild: RelationMap
@@ -485,5 +488,12 @@ export const buildTable = ({
     return result
   })
 
-  return { hasManyNumberField, hasManyTextField, relationsToBuild }
+  return {
+    hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+    hasManyTextField,
+    relationsToBuild,
+  }
 }
