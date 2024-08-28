@@ -8,10 +8,13 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
   // if value is unchanged, skip validation
   if (originalDoc.username === value) return value
 
-  const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
-  const currentTenantID =
-    typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
-  const tenantIDToMatch = incomingTenantID || currentTenantID
+  const typedData = data as User | undefined
+  const typedOriginalDoc = originalDoc as User | undefined
+
+  const incomingTenantIDs = typedData?.tenants?.map((t) => t.tenant).filter(Boolean)
+  const currentTenantIDs = typedOriginalDoc?.tenants?.map((t) => t.id).filter(Boolean)
+
+  const tenantIDsToMatch = incomingTenantIDs ?? currentTenantIDs
 
   const findDuplicateUsers = await req.payload.find({
     collection: 'users',
@@ -19,7 +22,7 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
       and: [
         {
           'tenants.tenant': {
-            equals: tenantIDToMatch,
+            in: tenantIDsToMatch,
           },
         },
         {

@@ -5,14 +5,14 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev --turbo",
+    "_dev": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next dev",
+    "build": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next build",
+    "dev": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" && pnpm seed && next dev --turbo",
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "payload": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" payload",
     "seed": "npm run payload migrate:fresh",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+    "start": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next start"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "3.0.0-beta.58",

@@ -39,22 +39,10 @@ const Users: CollectionConfig = {
           type: 'relationship',
           filterOptions: ({ user }) => {
             if (!user) {
-              // Would like to query where exists true on id
-              // but that is not working
-              return {
-                id: {
-                  like: '',
-                },
-              }
+              return true
             }
             if (user?.roles?.includes('super-admin')) {
-              // Would like to query where exists true on id
-              // but that is not working
-              return {
-                id: {
-                  like: '',
-                },
-              }
+              return true
             }
             const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(user as User)
             return {
