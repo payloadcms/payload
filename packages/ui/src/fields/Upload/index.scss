@@ -1,0 +1,57 @@
+@import '../../scss/styles.scss';
+
+.upload {
+  .dropzone {
+    padding-right: var(--base);
+  }
+
+  &__dropzoneAndUpload {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 4);
+  }
+
+  &__dropzoneContent {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__dropzoneContent__buttons {
+    display: flex;
+    gap: var(--base);
+    position: relative;
+    left: -2px;
+
+    .btn .btn__content {
+      gap: calc(var(--base) / 5);
+    }
+    
+    .btn__label {
+      font-weight: 100;
+    }
+  }
+
+  &__dragAndDropText {
+    margin: 0;
+    text-transform: lowercase;
+    align-self: center;
+  }
+
+  &__loadingRows {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 4);
+  }
+
+  .shimmer-effect {
+    border-radius: var(--style-radius-s);
+    border: 1px solid var(--theme-border-color);
+  }
+
+  @include small-break {
+    &__dragAndDropText {
+      display: none;
+    }
+  }
+}

@@ -33,21 +33,10 @@ export type DraggableFileDetailsProps = {
 }
 
 export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props) => {
-  const {
-    collectionSlug,
-    customUploadActions,
-    doc,
-    enableAdjustments,
-    hasImageSizes,
-    hasMany,
-    imageCacheTag,
-    isSortable,
-    removeItem,
-    rowIndex,
-    uploadConfig,
-  } = props
+  const { collectionSlug, doc, imageCacheTag, isSortable, removeItem, rowIndex, uploadConfig } =
+    props
 
-  const { id, filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
+  const { id, filename, thumbnailURL, url } = doc
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,

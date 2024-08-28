@@ -13,7 +13,18 @@ export const Uploads1: CollectionConfig = {
   fields: [
     {
       type: 'upload',
-      name: 'media',
+      name: 'hasManyUpload',
+      relationTo: 'uploads-2',
+      filterOptions: {
+        mimeType: {
+          equals: 'image/png',
+        },
+      },
+      hasMany: true,
+    },
+    {
+      type: 'upload',
+      name: 'singleUpload',
       relationTo: 'uploads-2',
       filterOptions: {
         mimeType: {
