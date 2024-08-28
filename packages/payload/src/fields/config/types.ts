@@ -115,11 +115,18 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
   collection: SanitizedCollectionConfig | null
   context: RequestContext
+  /**
+   * Only available in `afterRead` hooks
+   */
+  currentDepth?: number /**
+   * Only available in `afterRead` hooks
+   */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
   /**
    * Only available in the `afterRead` hook.
    */
+  depth?: number
   draft?: boolean
   /** The field which the hook is running against. */
   field: FieldAffectingData
@@ -1600,7 +1607,7 @@ export function optionIsValue(option: Option): option is string {
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
-  return field.type === 'select' || field.type === 'relationship'
+  return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(

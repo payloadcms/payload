@@ -72,15 +72,6 @@ export const Collapsible: React.FC<Props> = ({
           onMouseEnter={() => setHoveringToggle(true)}
           onMouseLeave={() => setHoveringToggle(false)}
         >
-          {dragHandleProps && (
-            <div
-              className={`${baseClass}__drag`}
-              {...dragHandleProps.attributes}
-              {...dragHandleProps.listeners}
-            >
-              <DragHandleIcon />
-            </div>
-          )}
           <button
             className={[
               `${baseClass}__toggle`,
@@ -93,7 +84,16 @@ export const Collapsible: React.FC<Props> = ({
           >
             <span>{t('fields:toggleBlock')}</span>
           </button>
-          {header && (
+          {dragHandleProps && (
+            <div
+              className={`${baseClass}__drag`}
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
+            >
+              <DragHandleIcon />
+            </div>
+          )}
+          {header ? (
             <div
               className={[
                 `${baseClass}__header-wrap`,
@@ -102,11 +102,11 @@ export const Collapsible: React.FC<Props> = ({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {header && header}
+              {header}
             </div>
-          )}
+          ) : null}
           <div className={`${baseClass}__actions-wrap`}>
-            {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
+            {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             <div className={`${baseClass}__indicator`}>
               <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
             </div>

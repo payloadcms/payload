@@ -85,33 +85,33 @@ describe('Upload', () => {
     await uploadImage()
   })
 
-  // test('should upload files from remote URL', async () => {
-  //   await uploadImage()
+  test('should upload files from remote URL', async () => {
+    await uploadImage()
 
-  //   await page.goto(url.create)
+    await page.goto(url.create)
 
-  //   const pasteURLButton = page.locator('.file-field__upload .dropzone__file-button', {
-  //     hasText: 'Paste URL',
-  //   })
-  //   await pasteURLButton.click()
+    const pasteURLButton = page.locator('.file-field__upload .dropzone__file-button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
 
-  //   const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
 
-  //   const inputField = page.locator('.file-field__upload .file-field__remote-file')
-  //   await inputField.fill(remoteImage)
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
 
-  //   const addFileButton = page.locator('.file-field__add-file')
-  //   await addFileButton.click()
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
 
-  //   await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
+    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
 
-  //   await saveDocAndAssert(page)
+    await saveDocAndAssert(page)
 
-  //   await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
-  //     'src',
-  //     /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
-  //   )
-  // })
+    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
+      'src',
+      /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
+    )
+  })
 
   // test that the image renders
   test('should render uploaded image', async () => {

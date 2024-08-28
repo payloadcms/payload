@@ -48,16 +48,15 @@
 
 .draggable-block-target-line {
   pointer-events: none;
-  background: var(--theme-elevation-200);
-  //border: 1px solid var(--theme-elevation-650);
-  border-radius: $style-radius-m;
-  height: 50px;
+  background: var(--theme-success-400);
+  border-radius: 1px;
+  height: base(0.2);
   position: absolute;
   left: 0;
   top: 0;
   opacity: 0;
   will-change: transform;
-  transition: transform 0.04s;
+  transition: transform 0.1s;
 }
 
 /* This targets Firefox 57+. The transition looks ugly on firefox, thus we disable it here */

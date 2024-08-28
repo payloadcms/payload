@@ -1,6 +1,8 @@
+'use client'
 import type { LivePreviewConfig } from 'payload'
 import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
+import type React from 'react'
 
 import { createContext, useContext } from 'react'
 

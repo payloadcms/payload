@@ -1,3 +1,4 @@
+'use client'
 // Credit: @Taiki92777
 //    - Source: https://github.com/vercel/next.js/discussions/32231#discussioncomment-7284386
 // Credit: `react-use` maintainers
