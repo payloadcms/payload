@@ -1,8 +1,8 @@
 'use client'
 
-import type { JoinFieldProps, PaginatedDocs } from 'payload'
+import type { JoinFieldProps, PaginatedDocs, Where } from 'payload'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -35,6 +35,15 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
     path: pathFromContext ?? pathFromProps ?? name,
   })
 
+  const filterOptions: Where = useMemo(
+    () => ({
+      [on]: {
+        in: [docID || null],
+      },
+    }),
+    [docID, on],
+  )
+
   return (
     <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
       <RelationshipTable
@@ -44,12 +53,8 @@ const JoinFieldComponent: React.FC<JoinFieldProps> = (props) => {
           </h4>
         }
         field={field}
-        filterOptions={{
-          [on]: {
-            in: [docID],
-          },
-        }}
-        initialData={value}
+        filterOptions={filterOptions}
+        initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         relationTo={collection}
       />
     </div>

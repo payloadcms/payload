@@ -19,8 +19,12 @@ export const reorderColumns = async (
     togglerSelector?: string
   },
 ) => {
-  await page.locator(togglerSelector).first().click()
   const columnContainer = page.locator(columnContainerSelector).first()
+  const isAlreadyOpen = await columnContainer.isVisible()
+
+  if (!isAlreadyOpen) {
+    await page.locator(togglerSelector).first().click()
+  }
 
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
 

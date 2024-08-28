@@ -130,7 +130,13 @@ test.describe('Admin Panel', () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
-    const addButton = joinField.locator('button.doc-drawer__toggler')
+
+    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
+      hasText: exactText('Add new'),
+    })
+
+    await expect(addButton).toBeVisible()
+
     await addButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
@@ -145,7 +151,7 @@ test.describe('Admin Panel', () => {
     await expect(joinField.locator('tbody tr:last-child td:nth-child(2)')).toHaveText('Test Post 4')
   })
 
-  test.skip('should update relationship table when document is updated', async () => {
+  test('should update relationship table when document is updated', async () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
@@ -161,5 +167,12 @@ test.describe('Admin Panel', () => {
     await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
       'Test Post 1 Updated',
     )
+  })
+
+  test('ensures relationship table empty when creating new document', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table tbody tr')).toBeHidden()
   })
 })

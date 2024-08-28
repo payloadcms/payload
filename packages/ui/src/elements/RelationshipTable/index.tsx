@@ -8,7 +8,7 @@ import type {
   Where,
 } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
@@ -66,6 +66,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [where, setWhere] = useState<Where | null>(null)
   const [search, setSearch] = useState<string>('')
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
+  const hasInitialized = useRef(false)
 
   const collectionConfig = getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig
 
@@ -79,6 +80,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   })
 
   useEffect(() => {
+    if (initialData !== undefined && !hasInitialized.current) {
+      hasInitialized.current = true
+      return
+    }
+
     const {
       admin: { listSearchableFields, useAsTitle } = {} as ClientCollectionConfig['admin'],
       versions,
@@ -128,7 +134,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
-  }, [page, sort, where, search, collectionConfig, setParams, limit, filterOptions])
+  }, [page, sort, where, search, collectionConfig, setParams, limit, filterOptions, initialData])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
