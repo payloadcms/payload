@@ -83,12 +83,54 @@ test.describe('Admin Panel', () => {
     await expect(toggler).toBeVisible()
     const link = actionColumn.locator('a')
     await expect(link).toBeHidden()
-    // change column order and ensure this behavior remains on the second column
+
+    await reorderColumns(page, {
+      togglerSelector: '.relationship-table__toggle-columns',
+      columnContainerSelector: '.relationship-table__columns',
+      fromColumn: 'Category',
+      toColumn: 'Title',
+    })
+
+    const newActionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
+    const newToggler = newActionColumn.locator('button.doc-drawer__toggler')
+    await expect(newToggler).toBeVisible()
+    const newLink = newActionColumn.locator('a')
+    await expect(newLink).toBeHidden()
+
+    // put columns back in original order for the next test
     await reorderColumns(page, {
       togglerSelector: '.relationship-table__toggle-columns',
       columnContainerSelector: '.relationship-table__columns',
       fromColumn: 'Title',
       toColumn: 'Category',
     })
+  })
+
+  test('should sort relationship table by clicking on column headers', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const titleColumn = joinField.locator('thead tr th#heading-title')
+    const titleAscButton = titleColumn.locator('button.sort-column__asc')
+    await expect(titleAscButton).toBeVisible()
+    await titleAscButton.click()
+    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
+      'Test Post 1',
+    )
+
+    const titleDescButton = titleColumn.locator('button.sort-column__desc')
+    await expect(titleDescButton).toBeVisible()
+    await titleDescButton.click()
+    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
+      'Test Post 3',
+    )
+  })
+
+  test.skip('should update relationship table when new document is created', async () => {
+    // TODO: Implement this test
+  })
+
+  test.skip('should update relationship table when document is updated', async () => {
+    // TODO: Implement this test
   })
 })
