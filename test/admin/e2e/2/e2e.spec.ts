@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
-import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
@@ -32,6 +31,7 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
+import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
