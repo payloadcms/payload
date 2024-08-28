@@ -74,7 +74,7 @@ export interface Page {
   meta: {
     title: string;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
     ogTitle?: string | null;
   };
   updatedAt: string;
@@ -87,7 +87,7 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  media?: string | Media | null;
+  media?: (string | null) | Media;
   richText?: {
     root: {
       type: string;
@@ -130,7 +130,7 @@ export interface PagesWithImportedField {
       description?: string | null;
     };
     innerMedia?: {
-      image?: string | Media | null;
+      image?: (string | null) | Media;
     };
   };
   updatedAt: string;
