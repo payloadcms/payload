@@ -98,7 +98,7 @@
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "image-size": "^1.1.1",
-    "json-schema-to-typescript": "11.0.3",
+    "json-schema-to-typescript": "15.0.1",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
     "monaco-editor": "0.38.0",
