@@ -56,18 +56,18 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
+  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
     "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
