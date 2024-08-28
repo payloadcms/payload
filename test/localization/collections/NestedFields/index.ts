@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 export const NestedFields: CollectionConfig = {
-  slug: 'nested-fields',
+  slug: 'nested-field-tables',
   fields: [
     {
       name: 'array',

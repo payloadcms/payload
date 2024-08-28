@@ -1628,7 +1628,7 @@ describe('Localization', () => {
       ).docs[1]
 
       const newDoc = await payload.create({
-        collection: 'nested-fields',
+        collection: 'nested-field-tables',
         data: {
           array: [
             {
@@ -1656,7 +1656,7 @@ describe('Localization', () => {
       })
 
       await payload.update({
-        collection: 'nested-fields',
+        collection: 'nested-field-tables',
         id: newDoc.id,
         locale: 'es',
         data: {
@@ -1686,7 +1686,7 @@ describe('Localization', () => {
       })
 
       const retrieved = await payload.findByID({
-        collection: 'nested-fields',
+        collection: 'nested-field-tables',
         id: newDoc.id,
         depth: 0,
         locale: 'all',
