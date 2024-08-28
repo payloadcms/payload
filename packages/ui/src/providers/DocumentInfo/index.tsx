@@ -99,7 +99,7 @@ const DocumentInfo: React.FC<
   )
 
   const [isDocumentLocked, setIsDocumentLocked] = useState<boolean | undefined>(false)
-  const [initialEditor, setInitialEditor] = useState<ClientUser | null>(null)
+  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(null)
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null)
   const lockInProgress = useRef(false)
 
@@ -288,7 +288,7 @@ const DocumentInfo: React.FC<
           if (docs.length > 0) {
             setIsDocumentLocked(true)
             setLastEditedAt(new Date(docs[0]._lastEdited.editedAt))
-            setInitialEditor(docs[0]._lastEdited.user.value)
+            setCurrentEditor(docs[0]._lastEdited.user.value)
           }
         } catch (error) {
           console.error('Failed to fetch lock state', error)
@@ -713,6 +713,7 @@ const DocumentInfo: React.FC<
   const value: DocumentInfoContext = {
     ...props,
     action,
+    currentEditor,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -721,7 +722,6 @@ const DocumentInfo: React.FC<
     hasPublishPermission,
     hasSavePermission,
     initialData: data,
-    initialEditor,
     initialState,
     isDocumentLocked,
     isInitializing,
@@ -731,6 +731,7 @@ const DocumentInfo: React.FC<
     onSave,
     preferencesKey,
     publishedDoc,
+    setCurrentEditor,
     setDocFieldPreferences,
     setDocumentTitle,
     title: documentTitle,
