@@ -86,9 +86,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true })
           .where as Where
-        where = params || {
-          id: { not_equals: '' },
-        }
+        where = params
       } else {
         where = {
           id: {
