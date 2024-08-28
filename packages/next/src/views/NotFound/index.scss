@@ -13,6 +13,24 @@
     }
   }
 
+  &__wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: base(0.8);
+    max-width: base(36);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: base(0.4);
+
+    > * {
+      margin: 0;
+    }
+  }
+
   &__button {
     margin: 0;
   }

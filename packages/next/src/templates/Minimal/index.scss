@@ -14,14 +14,14 @@
 
   &--width-normal {
     .template-minimal__wrap {
-      max-width: 500px;
+      max-width: base(24);
       width: 100%;
     }
   }
 
   &--width-wide {
     .template-minimal__wrap {
-      max-width: 1024px;
+      max-width: base(48);
       width: 100%;
     }
   }
