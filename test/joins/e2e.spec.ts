@@ -126,11 +126,40 @@ test.describe('Admin Panel', () => {
     )
   })
 
-  test.skip('should update relationship table when new document is created', async () => {
-    // TODO: Implement this test
+  test('should update relationship table when new document is created', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const addButton = joinField.locator('button.doc-drawer__toggler')
+    await addButton.click()
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+    const categoryField = drawer.locator('#field-category')
+    await expect(categoryField).toBeVisible()
+    await expect(categoryField).toHaveText('Category')
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill('Test Post 4')
+    await drawer.locator('button[id="action-save"]').click()
+    await expect(drawer).toBeHidden()
+    await expect(joinField.locator('tbody tr:last-child td:nth-child(2)')).toHaveText('Test Post 4')
   })
 
   test.skip('should update relationship table when document is updated', async () => {
-    // TODO: Implement this test
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const editButton = joinField.locator('tbody tr:first-child td:nth-child(3) button')
+    await editButton.click()
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill('Test Post 1 Updated')
+    await drawer.locator('button[id="action-save"]').click()
+    await expect(drawer).toBeHidden()
+    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
+      'Test Post 1 Updated',
+    )
   })
 })
