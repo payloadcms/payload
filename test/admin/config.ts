@@ -104,6 +104,15 @@ export default buildConfigWithDefaults({
       titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
+    dependencies: {
+      myTestComponent: {
+        path: '/components/TestComponent.js#TestComponent',
+        type: 'component',
+        clientProps: {
+          test: 'hello',
+        },
+      },
+    },
   },
   collections: [
     UploadCollection,
