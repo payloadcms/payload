@@ -1,7 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, Translation } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { Button } from '@payloadcms/ui'
+import { Translation, formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
