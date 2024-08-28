@@ -20,6 +20,7 @@ import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
+  AfterFields,
   Header,
   collectionSlug,
   drawerSlug,
@@ -75,6 +76,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   return (
     <DocumentInfoProvider
+      AfterFields={AfterFields}
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>

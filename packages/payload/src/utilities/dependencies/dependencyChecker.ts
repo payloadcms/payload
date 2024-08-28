@@ -19,7 +19,8 @@ export type DependencyCheckerArgs = {
      * Name of the dependency group to be displayed in the error message
      */
     name: string
-    targetVersionDependency: string
+    targetVersion?: string
+    targetVersionDependency?: string
   }[]
   /**
    * Dependency package names keyed to their required versions. Supports >= (greater or equal than version) as a prefix, or no prefix for the exact version
@@ -51,9 +52,9 @@ export async function checkDependencies({
         }
       }
       if (Object.keys(foundVersions).length > 1) {
-        const targetVersion = resolvedDependencies.resolved.get(
-          dependencyGroup.targetVersionDependency,
-        )?.version
+        const targetVersion =
+          dependencyGroup.targetVersion ??
+          resolvedDependencies.resolved.get(dependencyGroup.targetVersionDependency)?.version
         if (targetVersion) {
           const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
             .filter(([version]) => version !== targetVersion)

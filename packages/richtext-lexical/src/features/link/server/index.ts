@@ -1,5 +1,6 @@
 import type { CollectionSlug, Config, Field, FieldAffectingData, SanitizedConfig } from 'payload'
 
+import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
 import { deepCopyObject } from 'payload/shared'
 
@@ -116,6 +117,8 @@ export const LinkFeature = createServerFeature<
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -125,6 +128,8 @@ export const LinkFeature = createServerFeature<
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -161,6 +166,8 @@ export const LinkFeature = createServerFeature<
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -170,6 +177,8 @@ export const LinkFeature = createServerFeature<
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -186,7 +195,7 @@ export const LinkFeature = createServerFeature<
 
                 const href: string =
                   node.fields.linkType === 'custom'
-                    ? node.fields.url
+                    ? escapeHTML(node.fields.url)
                     : (node.fields.doc?.value as string)
 
                 return `<a href="${href}"${target}${rel}>${childrenText}</a>`

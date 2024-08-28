@@ -280,6 +280,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialData={data}
       initialState={formState}
       isEditing={isEditing}
+      key={locale?.code}
     >
       {!RootViewOverride && (
         <DocumentHeader

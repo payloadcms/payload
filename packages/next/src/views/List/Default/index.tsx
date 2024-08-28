@@ -4,7 +4,6 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
-  BulkUploadDrawer,
   Button,
   DeleteMany,
   EditMany,
@@ -14,7 +13,6 @@ import {
   ListSelection,
   Pagination,
   PerPage,
-  PopupList,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -24,7 +22,7 @@ import {
   Table,
   UnpublishMany,
   ViewDescription,
-  bulkUploadDrawerSlug,
+  useBulkUpload,
   useConfig,
   useEditDepth,
   useListInfo,
@@ -60,6 +58,8 @@ export const DefaultListView: React.FC = () => {
   const { searchParams } = useSearchParams()
   const { openModal } = useModal()
   const { clearRouteCache } = useRouteCache()
+  const { setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { drawerSlug } = useBulkUpload()
 
   const { getEntityConfig } = useConfig()
 
@@ -106,6 +106,12 @@ export const DefaultListView: React.FC = () => {
     })
   }
 
+  const openBulkUpload = React.useCallback(() => {
+    setCollectionSlug(collectionSlug)
+    openModal(drawerSlug)
+    setOnSuccess(clearRouteCache)
+  }, [clearRouteCache, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
+
   useEffect(() => {
     if (drawerDepth <= 1) {
       setStepNav([
@@ -115,6 +121,8 @@ export const DefaultListView: React.FC = () => {
       ])
     }
   }, [setStepNav, labels, drawerDepth])
+
+  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
@@ -126,23 +134,15 @@ export const DefaultListView: React.FC = () => {
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
               {hasCreatePermission && (
                 <Button
-                  Link={Link}
-                  SubMenuPopupContent={
-                    isUploadCollection && collectionConfig.upload.bulkUpload ? (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button onClick={() => openModal(bulkUploadDrawerSlug)}>
-                          {t('upload:bulkUpload')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    ) : null
-                  }
+                  Link={!isBulkUploadEnabled ? Link : undefined}
                   aria-label={i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
                   buttonStyle="pill"
-                  el="link"
+                  el={!isBulkUploadEnabled ? 'link' : 'button'}
+                  onClick={isBulkUploadEnabled ? openBulkUpload : undefined}
                   size="small"
-                  to={newDocumentURL}
+                  to={!isBulkUploadEnabled ? newDocumentURL : undefined}
                 >
                   {i18n.t('general:createNew')}
                 </Button>
@@ -155,12 +155,6 @@ export const DefaultListView: React.FC = () => {
                   <ViewDescription Description={Description} description={description} />
                 </div>
               )}
-              {isUploadCollection && collectionConfig.upload.bulkUpload ? (
-                <BulkUploadDrawer
-                  collectionSlug={collectionSlug}
-                  onSuccess={() => clearRouteCache()}
-                />
-              ) : null}
             </ListHeader>
           )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />
