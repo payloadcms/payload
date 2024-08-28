@@ -73,6 +73,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -82,6 +84,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -104,6 +108,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -113,6 +119,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -144,6 +152,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -153,6 +163,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,

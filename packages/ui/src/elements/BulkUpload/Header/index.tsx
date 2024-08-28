@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { DrawerCloseButton } from '../DrawerCloseButton/index.js'
-import { drawerSlug } from '../index.js'
 import './index.scss'
 
 const baseClass = 'bulk-upload--drawer-header'
@@ -14,7 +13,7 @@ export function DrawerHeader({ onClose, title }: Props) {
   return (
     <div className={baseClass}>
       <h2 title={title}>{title}</h2>
-      <DrawerCloseButton onClick={onClose} slug={drawerSlug} />
+      <DrawerCloseButton onClick={onClose} />
     </div>
   )
 }

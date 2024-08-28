@@ -7,7 +7,6 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
-import type { BulkUploadProps } from '../index.js'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
@@ -17,13 +16,13 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFormState } from '../../../utilities/getFormState.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
-import { drawerSlug } from '../index.js'
+import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
 
 type FormsManagerContext = {
   readonly activeIndex: State['activeIndex']
-  readonly addFiles: (filelist: FileList) => void
+  readonly addFiles: (filelist: FileList) => Promise<void>
   readonly collectionSlug: string
   readonly docPermissions?: DocumentPermissions
   readonly forms: State['forms']
@@ -31,7 +30,7 @@ type FormsManagerContext = {
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
-  readonly isLoadingFiles: boolean
+  readonly isInitializing: boolean
   readonly removeFile: (index: number) => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
   readonly setActiveIndex: (index: number) => void
@@ -47,7 +46,7 @@ type FormsManagerContext = {
 
 const Context = React.createContext<FormsManagerContext>({
   activeIndex: 0,
-  addFiles: () => {},
+  addFiles: () => Promise.resolve(),
   collectionSlug: '',
   docPermissions: undefined,
   forms: [],
@@ -55,7 +54,7 @@ const Context = React.createContext<FormsManagerContext>({
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
-  isLoadingFiles: true,
+  isInitializing: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
@@ -69,47 +68,39 @@ const initialState: State = {
   totalErrorCount: 0,
 }
 
-type Props = {
+type FormsManagerProps = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
-  readonly onSuccess: BulkUploadProps['onSuccess']
 }
-
-export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Props) {
+export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { config } = useConfig()
   const {
     routes: { api },
     serverURL,
   } = config
   const { code } = useLocale()
-  const { closeModal } = useModal()
   const { i18n, t } = useTranslation()
 
-  const [isLoadingFiles, setIsLoadingFiles] = React.useState(false)
   const [hasSubmitted, setHasSubmitted] = React.useState(false)
   const [docPermissions, setDocPermissions] = React.useState<DocumentPermissions>()
   const [hasSavePermission, setHasSavePermission] = React.useState(false)
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
+  const [hasInitializedState, setHasInitializedState] = React.useState(false)
+  const [hasInitializedDocPermissions, setHasInitializedDocPermissions] = React.useState(false)
+  const [isInitializing, setIsInitializing] = React.useState(false)
   const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
   const { activeIndex, forms, totalErrorCount } = state
-  const { toggleLoadingOverlay } = useLoadingOverlay()
 
+  const { toggleLoadingOverlay } = useLoadingOverlay()
+  const { closeModal } = useModal()
+  const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+
+  const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
-  const hasFetchedInitialFormState = React.useRef(false)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
-  const initialFormStateAbortControllerRef = React.useRef<AbortController>(null)
-  const hasFetchedInitialDocPermissions = React.useRef(false)
-  const initialDocPermissionsAbortControllerRef = React.useRef<AbortController>(null)
 
   const actionURL = `${api}/${collectionSlug}`
 
   const initilizeSharedDocPermissions = React.useCallback(async () => {
-    if (initialDocPermissionsAbortControllerRef.current)
-      initialDocPermissionsAbortControllerRef.current.abort(
-        'aborting previous fetch for initial doc permissions',
-      )
-    initialDocPermissionsAbortControllerRef.current = new AbortController()
-
     const params = {
       locale: code || undefined,
     }
@@ -122,7 +113,6 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         'Content-Type': 'application/json',
       },
       method: 'post',
-      signal: initialDocPermissionsAbortControllerRef.current.signal,
     })
 
     const json: DocumentPermissions = await res.json()
@@ -152,34 +142,36 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
     )
 
     setHasPublishPermission(publishedAccessJSON?.update?.permission)
+    setHasInitializedDocPermissions(true)
   }, [api, code, collectionSlug, i18n.language, serverURL])
 
-  const initializeSharedFormState = React.useCallback(async () => {
-    if (initialFormStateAbortControllerRef.current)
-      initialFormStateAbortControllerRef.current.abort(
-        'aborting previous fetch for initial form state without files',
-      )
-    initialFormStateAbortControllerRef.current = new AbortController()
+  const initializeSharedFormState = React.useCallback(
+    async (abortController?: AbortController) => {
+      if (abortController?.signal) {
+        abortController.abort('aborting previous fetch for initial form state without files')
+      }
 
-    try {
-      const formStateWithoutFiles = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          collectionSlug,
-          locale: code,
-          operation: 'create',
-          schemaPath: collectionSlug,
-        },
-        // onError: onLoadError,
-        serverURL: config.serverURL,
-        signal: initialFormStateAbortControllerRef.current.signal,
-      })
-      initialStateRef.current = formStateWithoutFiles
-      hasFetchedInitialFormState.current = true
-    } catch (error) {
-      // swallow error
-    }
-  }, [code, collectionSlug, config.routes.api, config.serverURL])
+      try {
+        const formStateWithoutFiles = await getFormState({
+          apiRoute: config.routes.api,
+          body: {
+            collectionSlug,
+            locale: code,
+            operation: 'create',
+            schemaPath: collectionSlug,
+          },
+          // onError: onLoadError,
+          serverURL: config.serverURL,
+          signal: abortController?.signal,
+        })
+        initialStateRef.current = formStateWithoutFiles
+        setHasInitializedState(true)
+      } catch (error) {
+        // swallow error
+      }
+    },
+    [code, collectionSlug, config.routes.api, config.serverURL],
+  )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {
@@ -203,11 +195,17 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
     [forms, activeIndex],
   )
 
-  const addFiles = React.useCallback((files: FileList) => {
-    setIsLoadingFiles(true)
-    dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
-    setIsLoadingFiles(false)
-  }, [])
+  const addFiles = React.useCallback(
+    async (files: FileList) => {
+      toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
+      if (!hasInitializedState) {
+        await initializeSharedFormState()
+      }
+      dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
+      toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+    },
+    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay],
+  )
 
   const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
     dispatch({ type: 'REMOVE_FORM', index })
@@ -232,6 +230,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         errorCount: currentForms[activeIndex].errorCount,
         formState: currentFormsData,
       }
+      const newDocs = []
       const promises = currentForms.map(async (form, i) => {
         try {
           toggleLoadingOverlay({
@@ -245,6 +244,10 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
           })
 
           const json = await req.json()
+
+          if (req.status === 201 && json?.doc) {
+            newDocs.push(json.doc)
+          }
 
           // should expose some sort of helper for this
           if (json?.errors?.length) {
@@ -300,17 +303,15 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
       if (successCount) {
         toast.success(`Successfully saved ${successCount} files`)
 
-        if (errorCount === 0) {
-          closeModal(drawerSlug)
-        }
-
         if (typeof onSuccess === 'function') {
-          onSuccess()
+          onSuccess(newDocs, errorCount)
         }
       }
 
       if (errorCount) {
         toast.error(`Failed to save ${errorCount} files`)
+      } else {
+        closeModal(drawerSlug)
       }
 
       dispatch({
@@ -322,18 +323,41 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         },
       })
     },
-    [actionURL, activeIndex, closeModal, forms, onSuccess],
+    [actionURL, activeIndex, forms, onSuccess, t, toggleLoadingOverlay, closeModal, drawerSlug],
   )
 
   React.useEffect(() => {
-    if (!hasFetchedInitialFormState.current) {
+    if (!collectionSlug) return
+    if (!hasInitializedState) {
       void initializeSharedFormState()
     }
-    if (!hasFetchedInitialDocPermissions.current) {
+
+    if (!hasInitializedDocPermissions) {
       void initilizeSharedDocPermissions()
     }
+
+    if (initialFiles) {
+      if (!hasInitializedState || !hasInitializedDocPermissions) {
+        setIsInitializing(true)
+      } else {
+        setIsInitializing(false)
+      }
+    }
+
+    if (hasInitializedState && initialFiles && !hasInitializedWithFiles.current) {
+      void addFiles(initialFiles)
+      hasInitializedWithFiles.current = true
+    }
     return
-  }, [initializeSharedFormState, initilizeSharedDocPermissions])
+  }, [
+    addFiles,
+    initialFiles,
+    initializeSharedFormState,
+    initilizeSharedDocPermissions,
+    collectionSlug,
+    hasInitializedState,
+    hasInitializedDocPermissions,
+  ])
 
   return (
     <Context.Provider
@@ -347,7 +371,7 @@ export function FormsManagerProvider({ children, collectionSlug, onSuccess }: Pr
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,
-        isLoadingFiles,
+        isInitializing,
         removeFile,
         saveAllDocs,
         setActiveIndex,

@@ -2,41 +2,39 @@
 
 import type { UploadFieldProps } from 'payload'
 
-import React, { useCallback, useMemo } from 'react'
+import React from 'react'
 
-import type { UploadInputProps } from './HasOne/Input.js'
-
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
-import { UploadComponentHasMany } from './HasMany/index.js'
-import { UploadInputHasOne } from './HasOne/Input.js'
-import { UploadComponentHasOne } from './HasOne/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { UploadInput } from './Input.js'
+import './index.scss'
 
-export { UploadFieldProps, UploadInputHasOne as UploadInput }
-export type { UploadInputProps }
+export { UploadInput } from './Input.js'
+export type { UploadInputProps } from './Input.js'
 
 export const baseClass = 'upload'
 
-const UploadComponent: React.FC<UploadFieldProps> = (props) => {
+export function UploadComponent(props: UploadFieldProps) {
   const {
     field: {
-      _path: pathFromProps,
-      admin: { readOnly: readOnlyFromAdmin } = {},
+      _path,
+      admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
+      label,
+      maxRows,
       relationTo,
       required,
     },
+    field,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
-
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { permissions } = useAuth()
+  const { config } = useConfig()
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate = React.useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -44,66 +42,44 @@ const UploadComponent: React.FC<UploadFieldProps> = (props) => {
     },
     [validate, required],
   )
-
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  // Checks if the user has permissions to create a new document in the related collection
-  const canCreate = useMemo(() => {
-    if (typeof relationTo === 'string') {
-      if (permissions?.collections && permissions.collections?.[relationTo]?.create) {
-        if (permissions.collections[relationTo].create?.permission === true) {
-          return true
-        }
-      }
-    }
-
-    return false
-  }, [relationTo, permissions])
-
-  const fieldHookResult = useField<string | string[]>({
-    path: pathFromContext ?? pathFromProps,
+  const {
+    filterOptions,
+    formInitializing,
+    formProcessing,
+    readOnly: readOnlyFromField,
+    setValue,
+    showError,
+    value,
+  } = useField<string | string[]>({
+    path: _path,
     validate: memoizedValidate,
   })
 
-  const setValue = useMemo(() => fieldHookResult.setValue, [fieldHookResult])
-
-  const disabled =
-    readOnlyFromProps ||
-    readOnlyFromContext ||
-    fieldHookResult.formProcessing ||
-    fieldHookResult.formInitializing
-
-  const onChange = useCallback(
-    (incomingValue) => {
-      const incomingID = incomingValue?.id || incomingValue
-      setValue(incomingID)
-    },
-    [setValue],
-  )
-
-  if (hasMany) {
-    return (
-      <UploadComponentHasMany
-        {...props}
-        canCreate={canCreate}
-        disabled={disabled}
-        // Note: the below TS error is thrown bc the field hook return result varies based on `hasMany`
-        // @ts-expect-error
-        fieldHookResult={fieldHookResult}
-        onChange={onChange}
-      />
-    )
-  }
+  const disabled = readOnlyFromProps || readOnlyFromField || formProcessing || formInitializing
 
   return (
-    <UploadComponentHasOne
-      {...props}
-      canCreate={canCreate}
-      disabled={disabled}
-      // Note: the below TS error is thrown bc the field hook return result varies based on `hasMany`
-      // @ts-expect-error
-      fieldHookResult={fieldHookResult}
-      onChange={onChange}
+    <UploadInput
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      api={config.routes.api}
+      className={className}
+      field={field}
+      filterOptions={filterOptions}
+      hasMany={hasMany}
+      isSortable={isSortable}
+      label={label}
+      maxRows={maxRows}
+      onChange={setValue}
+      path={_path}
+      readOnly={disabled}
+      relationTo={relationTo}
+      required={required}
+      serverURL={config.serverURL}
+      showError={showError}
+      style={style}
+      value={value}
+      width={width}
     />
   )
 }

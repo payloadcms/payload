@@ -5,6 +5,8 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
   converter: (args: {
     childIndex: number
     converters: HTMLConverter<any>[]
+    currentDepth: number
+    depth: number
     draft: boolean
     node: T
     overrideAccess: boolean

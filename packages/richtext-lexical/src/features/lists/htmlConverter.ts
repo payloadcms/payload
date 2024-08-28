@@ -7,9 +7,21 @@ import type { SerializedListItemNode, SerializedListNode } from './plugin/index.
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
-  converter: async ({ converters, draft, node, overrideAccess, parent, req, showHiddenFields }) => {
+  converter: async ({
+    converters,
+    currentDepth,
+    depth,
+    draft,
+    node,
+    overrideAccess,
+    parent,
+    req,
+    showHiddenFields,
+  }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
+      currentDepth,
+      depth,
       draft,
       lexicalNodes: node.children,
       overrideAccess,
@@ -27,11 +39,23 @@ export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
 }
 
 export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
-  converter: async ({ converters, draft, node, overrideAccess, parent, req, showHiddenFields }) => {
+  converter: async ({
+    converters,
+    currentDepth,
+    depth,
+    draft,
+    node,
+    overrideAccess,
+    parent,
+    req,
+    showHiddenFields,
+  }) => {
     const hasSubLists = node.children.some((child) => child.type === 'list')
 
     const childrenText = await convertLexicalNodesToHTML({
       converters,
+      currentDepth,
+      depth,
       draft,
       lexicalNodes: node.children,
       overrideAccess,

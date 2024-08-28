@@ -9,19 +9,12 @@ const baseClass = 'drawer-close-button'
 
 type Props = {
   readonly onClick: () => void
-  readonly slug: string
 }
-export function DrawerCloseButton({ slug, onClick }: Props) {
+export function DrawerCloseButton({ onClick }: Props) {
   const { t } = useTranslation()
 
   return (
-    <button
-      aria-label={t('general:close')}
-      className={baseClass}
-      id={`close-drawer__${slug}`}
-      onClick={onClick}
-      type="button"
-    >
+    <button aria-label={t('general:close')} className={baseClass} onClick={onClick} type="button">
       <XIcon />
     </button>
   )
