@@ -36,7 +36,9 @@ export const traverseFields = (
     if (field.type === 'tabs' && 'tabs' in field) {
       field.tabs.forEach((tab) => {
         if ('name' in tab && tab.name) {
-          ref[tab.name] = {}
+          if (typeof ref[tab.name] === 'undefined') {
+            ref[tab.name] = {}
+          }
           ref = ref[tab.name]
         }
         traverseFields(tab.fields, callback, ref, parentRef)
