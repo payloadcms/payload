@@ -93,7 +93,14 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const moveColumn = useCallback(
-    (args: { fromIndex: number; toIndex: number }) => {},
+    (args: { fromIndex: number; toIndex: number }) => {
+      const { fromIndex, toIndex } = args
+      const withMovedColumn = [...tableColumns]
+      const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
+      withMovedColumn.splice(toIndex, 0, columnToMove)
+      setTableColumns(withMovedColumn)
+      updateColumnPreferences(withMovedColumn)
+    },
     [tableColumns, updateColumnPreferences],
   )
 
