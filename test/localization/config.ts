@@ -1,12 +1,15 @@
 import type { LocalizedPost } from './payload-types'
 
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { englishLocale } from '../globals/config'
 import { ArrayCollection } from './collections/Array'
-import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
+import { BlocksCollection } from './collections/Blocks'
 import { Group } from './collections/Group'
+import { NestedArray } from './collections/NestedArray'
+import { NestedFields } from './collections/NestedFields'
+import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
+import { RestrictedByLocaleCollection } from './collections/RestrictedByLocale'
 import { Tab } from './collections/Tab'
 import {
   blocksWithLocalizedSameName,
@@ -43,6 +46,9 @@ const openAccess = {
 
 export default buildConfigWithDefaults({
   collections: [
+    BlocksCollection,
+    NestedArray,
+    NestedFields,
     {
       auth: true,
       fields: [

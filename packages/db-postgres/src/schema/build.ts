@@ -7,7 +7,7 @@ import type {
   PgTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core'
-import { Field, fieldAffectsData } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -20,6 +20,7 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
+import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
@@ -51,9 +52,17 @@ type Args = {
   tableName: string
   timestamps?: boolean
   versions: boolean
+  /**
+   * Tracks whether or not this table is built
+   * from the result of a localized array or block field at some point
+   */
+  withinLocalizedArrayOrBlock?: boolean
 }
 
 type Result = {
+  hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
+  hasLocalizedRelationshipField: boolean
   hasManyNumberField: 'index' | boolean
   hasManyTextField: 'index' | boolean
   relationsToBuild: Map<string, string>
@@ -76,6 +85,7 @@ export const buildTable = ({
   tableName,
   timestamps,
   versions,
+  withinLocalizedArrayOrBlock,
 }: Args): Result => {
   const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
@@ -124,6 +134,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
+    withinLocalizedArrayOrBlock,
   })
 
   if (timestamps) {
@@ -431,5 +442,12 @@ export const buildTable = ({
 
   adapter.relations[`relations_${tableName}`] = tableRelations
 
-  return { hasManyNumberField, hasManyTextField, relationsToBuild }
+  return {
+    hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+    hasManyTextField,
+    relationsToBuild,
+  }
 }
