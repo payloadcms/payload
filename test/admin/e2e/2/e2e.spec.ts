@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
-import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
@@ -32,6 +31,7 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
+import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
@@ -483,49 +483,10 @@ describe('admin2', () => {
     })
 
     describe('table columns', () => {
-      const reorderColumns = async () => {
-        // open the column controls
-        await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
-        const numberBoundingBox = await page
-          .locator(`.column-selector .column-selector__column`, {
-            hasText: exactText('Number'),
-          })
-
-          .boundingBox()
-
-        const idBoundingBox = await page
-          .locator(`.column-selector .column-selector__column`, {
-            hasText: exactText('ID'),
-          })
-          .boundingBox()
-
-        if (!numberBoundingBox || !idBoundingBox) return
-
-        // drag the "number" column to the left of the "ID" column
-        await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 })
-        await page.mouse.down()
-        await wait(300)
-
-        await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 })
-        await page.mouse.up()
-
-        // ensure the "number" column is now first
-        await expect(
-          page.locator('.list-controls .column-selector .column-selector__column').first(),
-        ).toHaveText('Number')
-        await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
-
-        // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
-        await wait(1000)
-      }
-
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost()
 
-        await reorderColumns()
+        await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
         // reload to ensure the preferred order was stored in the database
         await page.reload()
@@ -538,7 +499,7 @@ describe('admin2', () => {
       test('should render drawer columns in order', async () => {
         // Re-order columns like done in the previous test
         await createPost()
-        await reorderColumns()
+        await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
         await page.reload()
 
