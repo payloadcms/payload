@@ -13,7 +13,7 @@ export const Categories: CollectionConfig = {
       type: 'text',
     },
     {
-      name: postsSlug,
+      name: 'relatedPosts',
       label: 'Related Posts',
       type: 'join',
       collection: postsSlug,
@@ -24,7 +24,7 @@ export const Categories: CollectionConfig = {
       type: 'group',
       fields: [
         {
-          name: postsSlug,
+          name: 'relatedPosts',
           label: 'Related Posts (Group)',
           type: 'join',
           collection: postsSlug,

@@ -24,6 +24,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'access',
   'endpoints',
   'custom',
+  'joins',
   // `upload`
   // `admin`
   // are all handled separately

@@ -5,7 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { Posts } from './collections/Posts.js'
 import { seed } from './seed.js'
-import { localizedCategoriesSlug, localizedPostsSlug, postsSlug } from './shared.js'
+import { localizedCategoriesSlug, localizedPostsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,7 +44,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: postsSlug,
+          name: 'relatedPosts',
           type: 'join',
           collection: localizedPostsSlug,
           on: 'category',
