@@ -90,7 +90,7 @@ describe('Upload', () => {
 
     await page.goto(url.create)
 
-    const pasteURLButton = page.locator('.file-field__upload .dropzone__file-button', {
+    const pasteURLButton = page.locator('.file-field__upload button', {
       hasText: 'Paste URL',
     })
     await pasteURLButton.click()
@@ -127,7 +127,7 @@ describe('Upload', () => {
     await wait(1000)
     // Open the media drawer and create a png upload
 
-    await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
     await page
       .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
@@ -156,7 +156,7 @@ describe('Upload', () => {
     await wait(1000)
     // Open the media drawer and create a png upload
 
-    await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
     await page
       .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
@@ -194,7 +194,7 @@ describe('Upload', () => {
     await uploadImage()
     await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
 
-    await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
     await wait(1000)
 
