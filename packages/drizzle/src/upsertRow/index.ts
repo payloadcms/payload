@@ -358,9 +358,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           const replacement = `${tableName}_`
 
           if (error.constraint.includes(replacement)) {
-            const replacedConstraint = error.constraint.replace(`${tableName}_`, '')
+            const replacedConstraint = error.constraint.replace(replacement, '')
 
-            if (replacedConstraint && adapter.fieldConstraints?.[tableName]?.[replacedConstraint])
+            if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint])
               fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
           }
         }
