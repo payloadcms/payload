@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -32,11 +33,52 @@ test.describe('Admin Panel', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('renders join field with initial rows', async () => {
+  test('populates joined relationships in table cells of list view', async () => {
+    await page.goto(categoriesURL.list)
+    const cell = page.locator('tbody tr:first-child td.cell-relatedPosts')
+    const text = await cell.textContent()
+    expect(text).toContain('Test Post 1')
+    expect(text).toContain('Test Post 2')
+    expect(text).toContain('Test Post 3')
+  })
+
+  test('should render initial rows within relationship table', async () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
     const columns = await joinField.locator('.relationship-table tbody tr').count()
     expect(columns).toBe(3)
+  })
+
+  test('should render collection type in first column of relationship table', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const collectionTypeColumn = joinField.locator('thead tr th#heading-collection:first-child')
+    const text = collectionTypeColumn
+    await expect(text).toHaveText('Type')
+    const cells = joinField.locator('.relationship-table tbody tr td:first-child .pill__label')
+    for (const cell of cells) {
+      const text = cell
+      await expect(text).toHaveText('Post')
+    }
+  })
+
+  test('should render drawer toggler without document link in second column of relationship table', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('.field-type.join').first()
+    await expect(joinField).toBeVisible()
+    const actionColumn = joinField.locator('tbody tr td:nth-child(2)')
+    const toggler = actionColumn.locator('button.doc-drawer__toggler')
+    await expect(toggler).toBeVisible()
+    const link = actionColumn.locator('a')
+    await expect(link).toBeHidden()
+    // change column order and ensure this behavior remains on the second column
+    await reorderColumns(page, {
+      togglerSelector: '.relationship-table__toggle-columns',
+      columnContainerSelector: '.relationship-table__columns',
+      fromColumn: 'Title',
+      toColumn: 'Category',
+    })
   })
 })
