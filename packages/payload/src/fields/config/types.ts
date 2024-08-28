@@ -1607,7 +1607,7 @@ export function optionIsValue(option: Option): option is string {
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
-  return field.type === 'select' || field.type === 'relationship'
+  return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(
