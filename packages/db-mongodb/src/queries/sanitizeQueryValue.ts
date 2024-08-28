@@ -1,5 +1,6 @@
 import type { Field, TabAsField } from 'payload'
 
+import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
 
@@ -11,6 +12,8 @@ type SanitizeQueryValueArgs = {
   val: any
 }
 
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
@@ -33,7 +36,7 @@ export const sanitizeQueryValue = ({
       if (!isValid) {
         return { operator: formattedOperator, val: undefined }
       } else {
-        formattedValue = new mongoose.Types.ObjectId(val)
+        formattedValue = ObjectId(val)
       }
     }
 
