@@ -86,6 +86,7 @@
 
   .dropzone {
     background-color: transparent;
+    padding-block: calc(var(--base) * 2.25);
   }
 
   &__dropzoneContent {
