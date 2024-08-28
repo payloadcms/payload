@@ -519,27 +519,6 @@ describe('lexicalMain', () => {
     )
   })
 
-  async function navigateToLexicalFields(
-    navigateToListView: boolean = true,
-    localized: boolean = false,
-  ) {
-    if (navigateToListView) {
-      const url: AdminUrlUtil = new AdminUrlUtil(
-        serverURL,
-        localized ? 'lexical-localized-fields' : 'lexical-fields',
-      )
-      await page.goto(url.list)
-    }
-
-    const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const linkDocHref = await linkToDoc.getAttribute('href')
-
-    await linkToDoc.click()
-
-    await page.waitForURL(`**${linkDocHref}`)
-  }
-
   // https://github.com/payloadcms/payload/issues/7379
   test('enabledCollections and disabledCollections should work with RelationshipFeature', async () => {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-relationship-fields')
