@@ -1,12 +1,14 @@
 import type { SerializedTextNode } from 'lexical'
 
+import escapeHTML from 'escape-html'
+
 import type { HTMLConverter } from '../types.js'
 
 import { NodeFormat } from '../../../../../lexical/utils/nodeFormat.js'
 
 export const TextHTMLConverter: HTMLConverter<SerializedTextNode> = {
   converter({ node }) {
-    let text = node.text
+    let text = escapeHTML(node.text)
 
     if (node.format & NodeFormat.IS_BOLD) {
       text = `<strong>${text}</strong>`
