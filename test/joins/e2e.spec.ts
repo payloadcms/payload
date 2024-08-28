@@ -33,7 +33,7 @@ test.describe('Admin Panel', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('populates joined relationships in table cells of list view', async () => {
+  test('should populate joined relationships in table cells of list view', async () => {
     await page.goto(categoriesURL.list)
     await expect
       .poll(
@@ -142,20 +142,28 @@ test.describe('Admin Panel', () => {
     await expect(drawer).toBeVisible()
     const categoryField = drawer.locator('#field-category')
     await expect(categoryField).toBeVisible()
-    await expect(categoryField).toHaveText('Category')
+    const categoryValue = categoryField.locator('.relationship--single-value__text')
+    await expect(categoryValue).toHaveText('example')
     const titleField = drawer.locator('#field-title')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Post 4')
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
-    await expect(joinField.locator('tbody tr:last-child td:nth-child(2)')).toHaveText('Test Post 4')
+    await expect(
+      joinField.locator('tbody tr td:nth-child(2)', {
+        hasText: exactText('Test Post 4'),
+      }),
+    ).toBeVisible()
   })
 
   test('should update relationship table when document is updated', async () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
-    const editButton = joinField.locator('tbody tr:first-child td:nth-child(3) button')
+    const editButton = joinField.locator(
+      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+    )
+    await expect(editButton).toBeVisible()
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
@@ -169,8 +177,8 @@ test.describe('Admin Panel', () => {
     )
   })
 
-  test('ensures relationship table empty when creating new document', async () => {
-    await navigateToDoc(page, categoriesURL)
+  test('should render empty relationship table when creating new document', async () => {
+    await page.goto(categoriesURL.create)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table tbody tr')).toBeHidden()
