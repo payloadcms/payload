@@ -1,10 +1,6 @@
 @import '../../scss/styles.scss';
 
 .upload {
-  .dropzone {
-    padding-right: var(--base);
-  }
-
   &__dropzoneAndUpload {
     display: flex;
     flex-direction: column;
@@ -19,7 +15,7 @@
 
   &__dropzoneContent__buttons {
     display: flex;
-    gap: var(--base);
+    gap: calc(var(--base) / 2);
     position: relative;
     left: -2px;
 
@@ -31,11 +27,17 @@
       font-weight: 100;
     }
   }
+  
+  &__dropzoneContent__orText {
+    color: var(--theme-elevation-500);
+    text-transform: lowercase;
+  }
 
   &__dragAndDropText {
     margin: 0;
     text-transform: lowercase;
     align-self: center;
+    color: var(--theme-elevation-500);
   }
 
   &__loadingRows {
