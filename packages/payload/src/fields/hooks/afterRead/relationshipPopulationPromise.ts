@@ -80,7 +80,7 @@ const populate = async ({
       relationshipValue = id
     }
     if (typeof index === 'number' && typeof key === 'string') {
-      if (Array.isArray(field.relationTo)) {
+      if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
       } else {
         dataToUpdate[field.name][key][index] = relationshipValue
