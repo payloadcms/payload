@@ -66,24 +66,24 @@ describe('Joins Field Tests', () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
-        'group.posts': {
+        'group.relatedPosts': {
           sort: '-title',
         },
       },
       collection: 'categories',
     })
 
-    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
-    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('id')
-    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts.docs[0].title).toStrictEqual('test 9')
+    expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
   it('should filter joins using where query', async () => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
-        posts: {
+        relatedPosts: {
           sort: '-title',
           where: {
             title: {
@@ -95,8 +95,8 @@ describe('Joins Field Tests', () => {
       collection: 'categories',
     })
 
-    expect(categoryWithPosts.posts.docs).toHaveLength(1)
-    expect(categoryWithPosts.posts.hasNextPage).toStrictEqual(false)
+    expect(categoryWithPosts.relatedPosts.docs).toHaveLength(1)
+    expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
   it('should populate joins using find', async () => {
@@ -106,9 +106,9 @@ describe('Joins Field Tests', () => {
 
     const [categoryWithPosts] = result.docs
 
-    expect(categoryWithPosts.group.posts.docs).toHaveLength(10)
-    expect(categoryWithPosts.group.posts.docs[0]).toHaveProperty('title')
-    expect(categoryWithPosts.group.posts.docs[0].title).toBe('test 14')
+    expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
+    expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
+    expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
   })
 
   describe('Joins with localization', () => {
@@ -160,8 +160,8 @@ describe('Joins Field Tests', () => {
         collection: 'localized-categories',
         locale: 'es',
       })
-      expect(enCategory.posts.docs).toHaveLength(2)
-      expect(esCategory.posts.docs).toHaveLength(1)
+      expect(enCategory.relatedPosts.docs).toHaveLength(2)
+      expect(esCategory.relatedPosts.docs).toHaveLength(1)
     })
   })
 
@@ -173,7 +173,7 @@ describe('Joins Field Tests', () => {
           name: { equals: 'paginate example' },
         },
         joins: {
-          posts: {
+          relatedPosts: {
             sort: 'createdAt',
             limit: 4,
           },
@@ -181,22 +181,22 @@ describe('Joins Field Tests', () => {
       }
       const pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
 
-      query.joins.posts.limit = 0
+      query.joins.relatedPosts.limit = 0
       const unlimited = await restClient.GET(`/categories`, { query }).then((res) => res.json())
 
-      expect(pageWithLimit.docs[0].posts.docs).toHaveLength(4)
-      expect(pageWithLimit.docs[0].posts.docs[0].title).toStrictEqual('test 0')
-      expect(pageWithLimit.docs[0].posts.hasNextPage).toStrictEqual(true)
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
+      expect(pageWithLimit.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
 
-      expect(unlimited.docs[0].posts.docs).toHaveLength(15)
-      expect(unlimited.docs[0].posts.docs[0].title).toStrictEqual('test 0')
-      expect(unlimited.docs[0].posts.hasNextPage).toStrictEqual(false)
+      expect(unlimited.docs[0].relatedPosts.docs).toHaveLength(15)
+      expect(unlimited.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
+      expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
     it('should sort joins', async () => {
       const response = await restClient
-        .GET(`/categories/${category.id}?joins[posts][sort]=-title`)
+        .GET(`/categories/${category.id}?joins[relatedPosts][sort]=-title`)
         .then((res) => res.json())
-      expect(response.posts.docs[0].title).toStrictEqual('test 9')
+      expect(response.relatedPosts.docs[0].title).toStrictEqual('test 9')
     })
   })
 })
