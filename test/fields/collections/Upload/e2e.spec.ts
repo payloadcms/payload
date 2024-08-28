@@ -212,7 +212,7 @@ describe('Upload', () => {
   test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
     await uploadImage()
 
-    await openDocDrawer(page, '.field-type.upload .upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '.field-type.upload .upload__listToggler')
 
     const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
     await expect
