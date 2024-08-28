@@ -1,0 +1,43 @@
+import type { CollectionConfig } from 'payload'
+
+export const NestedArray: CollectionConfig = {
+  slug: 'nested-arrays',
+  fields: [
+    {
+      name: 'arrayWithBlocks',
+      type: 'array',
+      fields: [
+        {
+          name: 'blocksWithinArray',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'someBlock',
+              fields: [
+                {
+                  name: 'relationWithinBlock',
+                  type: 'relationship',
+                  relationTo: 'localized-posts',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+
+      localized: true,
+    },
+    {
+      name: 'arrayWithLocalizedRelation',
+      type: 'array',
+      fields: [
+        {
+          name: 'localizedRelation',
+          type: 'relationship',
+          localized: true,
+          relationTo: 'localized-posts',
+        },
+      ],
+    },
+  ],
+}

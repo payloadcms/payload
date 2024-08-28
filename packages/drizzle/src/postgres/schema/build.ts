@@ -54,6 +54,11 @@ type Args = {
   tableName: string
   timestamps?: boolean
   versions: boolean
+  /**
+   * Tracks whether or not this table is built
+   * from the result of a localized array or block field at some point
+   */
+  withinLocalizedArrayOrBlock?: boolean
 }
 
 type Result = {
@@ -76,6 +81,7 @@ export const buildTable = ({
   tableName,
   timestamps,
   versions,
+  withinLocalizedArrayOrBlock,
 }: Args): Result => {
   const isRoot = !incomingRootTableName
   const rootTableName = incomingRootTableName || tableName
@@ -122,6 +128,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
+    withinLocalizedArrayOrBlock,
   })
 
   // split the relationsToBuild by localized and non-localized

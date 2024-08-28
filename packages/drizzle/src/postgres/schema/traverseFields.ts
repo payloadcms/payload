@@ -58,6 +58,11 @@ type Args = {
   rootTableIDColType: string
   rootTableName: string
   versions: boolean
+  /**
+   * Tracks whether or not this table is built
+   * from the result of a localized array or block field at some point
+   */
+  withinLocalizedArrayOrBlock?: boolean
 }
 
 type Result = {
@@ -89,6 +94,7 @@ export const traverseFields = ({
   rootTableIDColType,
   rootTableName,
   versions,
+  withinLocalizedArrayOrBlock,
 }: Args): Result => {
   const throwValidationError = true
   let hasLocalizedField = false
@@ -354,7 +360,11 @@ export const traverseFields = ({
           _parentIDIdx: (cols) => index(`${arrayTableName}_parent_id_idx`).on(cols._parentID),
         }
 
-        if (field.localized && adapter.payload.config.localization) {
+        const isLocalized =
+          Boolean(field.localized && adapter.payload.config.localization) ||
+          withinLocalizedArrayOrBlock
+
+        if (isLocalized) {
           baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
           baseExtraConfig._localeIdx = (cols) =>
             index(`${arrayTableName}_locale_idx`).on(cols._locale)
@@ -377,6 +387,7 @@ export const traverseFields = ({
           rootTableName,
           tableName: arrayTableName,
           versions,
+          withinLocalizedArrayOrBlock: isLocalized,
         })
 
         if (subHasManyTextField) {
@@ -466,7 +477,11 @@ export const traverseFields = ({
               _pathIdx: (cols) => index(`${blockTableName}_path_idx`).on(cols._path),
             }
 
-            if (field.localized && adapter.payload.config.localization) {
+            const isLocalized =
+              Boolean(field.localized && adapter.payload.config.localization) ||
+              withinLocalizedArrayOrBlock
+
+            if (isLocalized) {
               baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
               baseExtraConfig._localeIdx = (cols) =>
                 index(`${blockTableName}_locale_idx`).on(cols._locale)
@@ -489,6 +504,7 @@ export const traverseFields = ({
               rootTableName,
               tableName: blockTableName,
               versions,
+              withinLocalizedArrayOrBlock: isLocalized,
             })
 
             if (subHasManyTextField) {
@@ -589,6 +605,7 @@ export const traverseFields = ({
             rootTableIDColType,
             rootTableName,
             versions,
+            withinLocalizedArrayOrBlock,
           })
 
           if (groupHasLocalizedField) hasLocalizedField = true
@@ -629,6 +646,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           versions,
+          withinLocalizedArrayOrBlock,
         })
 
         if (groupHasLocalizedField) hasLocalizedField = true
@@ -670,6 +688,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           versions,
+          withinLocalizedArrayOrBlock,
         })
 
         if (tabHasLocalizedField) hasLocalizedField = true
@@ -711,6 +730,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           versions,
+          withinLocalizedArrayOrBlock,
         })
 
         if (rowHasLocalizedField) hasLocalizedField = true
