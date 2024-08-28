@@ -86,6 +86,7 @@
   "dependencies": {
     "@next/env": "^15.0.0-canary.104",
     "@payloadcms/translations": "workspace:*",
+    "@types/busboy": "1.5.4",
     "ajv": "8.14.0",
     "bson-objectid": "2.0.4",
     "ci-info": "^4.0.0",
@@ -114,7 +115,6 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/express-fileupload": "1.4.1",
     "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",
     "@types/minimist": "1.2.2",
