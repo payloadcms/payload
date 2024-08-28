@@ -5,7 +5,7 @@ import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -35,11 +35,16 @@ test.describe('Admin Panel', () => {
 
   test('populates joined relationships in table cells of list view', async () => {
     await page.goto(categoriesURL.list)
-    const cell = page.locator('tbody tr:first-child td.cell-relatedPosts')
-    const text = await cell.textContent()
-    expect(text).toContain('Test Post 1')
-    expect(text).toContain('Test Post 2')
-    expect(text).toContain('Test Post 3')
+    await expect
+      .poll(
+        async () =>
+          await page
+            .locator('tbody tr:first-child td.cell-relatedPosts', {
+              hasText: exactText('Test Post 3, Test Post 2, Test Post 1'),
+            })
+            .isVisible(),
+      )
+      .toBeTruthy()
   })
 
   test('should render initial rows within relationship table', async () => {
@@ -58,9 +63,14 @@ test.describe('Admin Panel', () => {
     const text = collectionTypeColumn
     await expect(text).toHaveText('Type')
     const cells = joinField.locator('.relationship-table tbody tr td:first-child .pill__label')
-    for (const cell of cells) {
-      const text = cell
-      await expect(text).toHaveText('Post')
+
+    const count = await cells.count()
+
+    for (let i = 0; i < count; i++) {
+      const element = cells.nth(i)
+      // Perform actions on each element
+      await expect(element).toBeVisible()
+      await expect(element).toHaveText('Post')
     }
   })
 
@@ -68,7 +78,7 @@ test.describe('Admin Panel', () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
-    const actionColumn = joinField.locator('tbody tr td:nth-child(2)')
+    const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
     const toggler = actionColumn.locator('button.doc-drawer__toggler')
     await expect(toggler).toBeVisible()
     const link = actionColumn.locator('a')
