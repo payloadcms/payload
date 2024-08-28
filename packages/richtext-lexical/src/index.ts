@@ -108,6 +108,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = await loadFeatures({
         config,
         isRoot,
+        parentIsLocalized,
         unSanitizedEditorConfig: {
           features,
           lexical,

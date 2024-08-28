@@ -271,6 +271,7 @@ export type RichTextAdapterProvider<
 > = ({
   config,
   isRoot,
+  parentIsLocalized,
 }: {
   config: SanitizedConfig
   /**
@@ -279,6 +280,7 @@ export type RichTextAdapterProvider<
    * @default false
    */
   isRoot?: boolean
+  parentIsLocalized: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

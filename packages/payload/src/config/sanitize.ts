@@ -188,6 +188,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.editor = await incomingConfig.editor({
       config: config as SanitizedConfig,
       isRoot: true,
+      parentIsLocalized: false,
     })
     if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
       config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
