@@ -534,7 +534,7 @@ describe('lexicalBlocks', () => {
       // Upload something
       await expect(async () => {
         const chooseExistingUploadButton = newSubLexicalAndUploadBlock
-          .locator('.upload____listToggler')
+          .locator('.upload__listToggler')
           .first()
         await wait(300)
         await expect(chooseExistingUploadButton).toBeVisible()
