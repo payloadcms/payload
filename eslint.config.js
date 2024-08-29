@@ -25,13 +25,13 @@ export const defaultESLintIgnores = [
 let FlatConfig
 
 export const rootParserOptions = {
-  EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
-  EXPERIMENTAL_useProjectService: {
-    allowDefaultProjectForFiles: ['./src/*.ts', './src/*.tsx'],
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100,
-  },
   sourceType: 'module',
   ecmaVersion: 'latest',
+  projectService: {
+    allowDefaultProject: ['./src/*.ts', './src/*.tsx'],
+    defaultProject: './tsconfig.json',
+    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
+  },
 }
 
 /** @type {FlatConfig[]} */
