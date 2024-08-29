@@ -52,7 +52,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = null,
   } = props
 
-  if (!totalPages || totalPages <= 1) {
+  if (!hasNextPage && !hasPrevPage) {
     return null
   }
 
@@ -82,6 +82,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   if (currentPage - numberOfNeighbors - 1 >= 2) {
     nodes.unshift({ type: 'Separator' })
   }
+
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
     nodes.unshift({
@@ -98,6 +99,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   if (currentPage + numberOfNeighbors + 1 < totalPages) {
     nodes.push({ type: 'Separator' })
   }
+
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
     nodes.push({

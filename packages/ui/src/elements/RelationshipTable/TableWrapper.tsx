@@ -32,10 +32,12 @@ export const RelationshipTableWrapper: React.FC<RelationshipTableComponentProps>
         hasNextPage={data.hasNextPage}
         hasPrevPage={data.hasPrevPage}
         limit={data.limit}
-        nextPage={data.nextPage || undefined}
+        nextPage={data.nextPage || 2}
         numberOfNeighbors={1}
-        onChange={() => handlePageChange}
-        page={data.page}
+        onChange={(e) => {
+          void handlePageChange(e)
+        }}
+        page={data.page || 1}
         prevPage={data.prevPage || undefined}
         totalPages={data.totalPages}
       />

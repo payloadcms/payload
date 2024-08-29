@@ -68,7 +68,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
   const hasInitialized = useRef(false)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig
+  const [collectionConfig] = useState(
+    () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
+  )
 
   const apiURL = `${serverURL}${api}/${collectionConfig.slug}`
 
@@ -127,14 +129,24 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
     }
 
-    if (limit) params.limit = limit
-    if (page) params.page = page
-    if (sort) params.sort = sort
-    if (copyOfWhere) params.where = copyOfWhere
-    if (versions?.drafts) params.draft = 'true'
+    if (limit) {
+      params.limit = limit
+    }
+    if (page) {
+      params.page = page
+    }
+    if (sort) {
+      params.sort = sort
+    }
+    if (copyOfWhere) {
+      params.where = copyOfWhere
+    }
+    if (versions?.drafts) {
+      params.draft = 'true'
+    }
 
     setParams(params)
-  }, [page, sort, where, search, collectionConfig, setParams, limit, filterOptions, initialData])
+  }, [page, sort, where, search, collectionConfig, filterOptions, initialData, limit, setParams])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
