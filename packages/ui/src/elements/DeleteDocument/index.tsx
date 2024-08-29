@@ -148,12 +148,16 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               <Button
                 buttonStyle="secondary"
                 id="confirm-cancel"
-                onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+                onClick={() => void (deleting ? undefined : () => toggleModal(modalSlug))}
+                size="large"
                 type="button"
               >
                 {t('general:cancel')}
               </Button>
-              <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
+              <Button
+                id="confirm-delete"
+                onClick={() => void (deleting ? undefined : handleDelete)}
+              >
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>

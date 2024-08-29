@@ -161,12 +161,14 @@ export const Status: React.FC = () => {
                     <Button
                       buttonStyle="secondary"
                       onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
+                      size="large"
                       type="button"
                     >
                       {t('general:cancel')}
                     </Button>
                     <Button
                       onClick={processing ? undefined : () => void performAction('unpublish')}
+                      size="large"
                     >
                       {t(processing ? 'version:unpublishing' : 'general:confirm')}
                     </Button>
@@ -196,15 +198,17 @@ export const Status: React.FC = () => {
                     <Button
                       buttonStyle="secondary"
                       onClick={() =>
-                        processing ? undefined : () => void toggleModal(revertModalSlug)
+                        void (processing ? undefined : () => toggleModal(revertModalSlug))
                       }
+                      size="large"
                       type="button"
                     >
                       {t('general:cancel')}
                     </Button>
                     <Button
                       id="action-revert-to-published-confirm"
-                      onClick={() => (processing ? undefined : () => void performAction('revert'))}
+                      onClick={() => void (processing ? undefined : () => performAction('revert'))}
+                      size="large"
                     >
                       {t(processing ? 'version:reverting' : 'general:confirm')}
                     </Button>

@@ -18,7 +18,6 @@ import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
-import { MinimalTemplate } from '../../../templates/Minimal/index.js'
 import './index.scss'
 
 const baseClass = 'restore-version'
@@ -128,6 +127,7 @@ const Restore: React.FC<Props> = ({
             <Button
               buttonStyle="secondary"
               onClick={processing ? undefined : () => toggleModal(modalSlug)}
+              size="large"
               type="button"
             >
               {t('general:cancel')}

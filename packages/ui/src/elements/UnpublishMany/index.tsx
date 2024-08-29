@@ -135,11 +135,16 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
               buttonStyle="secondary"
               id="confirm-cancel"
               onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+              size="large"
               type="button"
             >
               {t('general:cancel')}
             </Button>
-            <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
+            <Button
+              id="confirm-unpublish"
+              onClick={submitted ? undefined : handleUnpublish}
+              size="large"
+            >
               {submitted ? t('version:unpublishing') : t('general:confirm')}
             </Button>
           </div>

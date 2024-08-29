@@ -128,11 +128,12 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
                 buttonStyle="secondary"
                 id="confirm-cancel"
                 onClick={() => toggleModal(modalSlug)}
+                size="large"
                 type="button"
               >
                 {t('general:cancel')}
               </Button>
-              <Button id="confirm-duplicate" onClick={() => void confirm()}>
+              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
                 {t('general:duplicateWithoutSaving')}
               </Button>
             </div>

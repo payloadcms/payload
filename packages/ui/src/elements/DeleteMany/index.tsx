@@ -135,6 +135,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
               buttonStyle="secondary"
               id="confirm-cancel"
               onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+              size="large"
               type="button"
             >
               {t('general:cancel')}

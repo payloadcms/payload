@@ -63,6 +63,7 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
               onClick={() => {
                 toggleModal(modalSlug)
               }}
+              size="large"
               type="button"
             >
               {t('general:cancel')}
