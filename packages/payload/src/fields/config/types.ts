@@ -1241,7 +1241,16 @@ export type Block = {
     /**
      * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere
      */
-    customEndRegex?: RegExp
+    customEndRegex?:
+      | {
+          /**
+           * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
+           * The entire text from regexpStart to the end of the document will then be matched.
+           */
+          optional?: true
+          regExp: RegExp
+        }
+      | RegExp
     /**
      * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
      */
@@ -1277,7 +1286,7 @@ export type ClientBlock = {
   } & Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlockField = {
   admin?: {

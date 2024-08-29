@@ -98,6 +98,7 @@ export interface Media {
  */
 export interface Post {
   id: string;
+  docPath: string;
   frontMatter?:
     | {
         key?: string | null;

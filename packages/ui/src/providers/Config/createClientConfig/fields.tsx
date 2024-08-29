@@ -160,6 +160,7 @@ export const createClientField = ({
             fields: field.blocks[i].fields,
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
+            jsx: block.jsx,
           }
 
           if (block.labels) {

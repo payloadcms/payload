@@ -4,16 +4,20 @@ import {
   type MultilineElementTransformer,
   $convertToMarkdownString,
 } from '@lexical/markdown'
-import type { Block } from 'payload'
-import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
+import type { ClientBlock } from 'payload'
 import type { Transformer } from '@lexical/markdown'
 
 import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
-import { NodeWithHooks } from '../../typesServer.js'
-import { SerializedEditorState } from 'lexical'
+
+import {
+  type Klass,
+  type LexicalNode,
+  type LexicalNodeReplacement,
+  SerializedEditorState,
+} from 'lexical'
+import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -25,9 +29,9 @@ function createTagRegexes(tagName: string) {
 export const getBlockMarkdownTransformers = ({
   blocks,
 }: {
-  blocks: Block[]
+  blocks: ClientBlock[]
 }): ((props: {
-  allNodes: Array<NodeWithHooks>
+  allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   allTransformers: Transformer[]
 }) => MultilineElementTransformer)[] => {
   if (!blocks?.length) {
@@ -35,19 +39,22 @@ export const getBlockMarkdownTransformers = ({
   }
 
   const transformers: ((props: {
-    allNodes: Array<NodeWithHooks>
+    allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
     allTransformers: Transformer[]
   }) => MultilineElementTransformer)[] = []
 
   for (const block of blocks) {
+    console.log('before reg block', block)
+
     if (!block.jsx) {
       continue
     }
+    console.log('Registering block!', block)
     const regex = createTagRegexes(block.slug)
     transformers.push(({ allTransformers, allNodes }) => ({
-      dependencies: [ServerBlockNode],
+      dependencies: [BlockNode],
       export: (node) => {
-        if (!$isServerBlockNode(node)) {
+        if (!$isBlockNode(node)) {
           return null
         }
         if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
@@ -101,7 +108,7 @@ export const getBlockMarkdownTransformers = ({
             return false
           }
 
-          const node = $createServerBlockNode({
+          const node = $createBlockNode({
             blockType: block.slug,
             ...blockFields,
           } as any)
@@ -121,14 +128,12 @@ export const getBlockMarkdownTransformers = ({
 }
 
 export function getMarkdownToLexical(
-  allNodes: Array<NodeWithHooks>,
+  allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>,
   allTransformers: Transformer[],
 ): (args: { markdown: string }) => SerializedEditorState {
   const markdownToLexical = ({ markdown }: { markdown: string }): SerializedEditorState => {
     const headlessEditor = createHeadlessEditor({
-      nodes: getEnabledNodesFromServerNodes({
-        nodes: allNodes,
-      }),
+      nodes: allNodes,
     })
 
     headlessEditor.update(
@@ -146,14 +151,12 @@ export function getMarkdownToLexical(
 }
 
 export function getLexicalToMarkdown(
-  allNodes: Array<NodeWithHooks>,
+  allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>,
   allTransformers: Transformer[],
 ): (args: { editorState: Record<string, any> }) => string {
   const lexicalToMarkdown = ({ editorState }: { editorState: Record<string, any> }): string => {
     const headlessEditor = createHeadlessEditor({
-      nodes: getEnabledNodesFromServerNodes({
-        nodes: allNodes,
-      }),
+      nodes: allNodes,
     })
 
     try {
