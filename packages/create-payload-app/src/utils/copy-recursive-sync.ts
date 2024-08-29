@@ -6,7 +6,7 @@ import path from 'path'
  *
  * @internal
  */
-export function copyRecursiveSync(src: string, dest: string, debug?: boolean) {
+export function copyRecursiveSync(src: string, dest: string) {
   const exists = fs.existsSync(src)
   const stats = exists && fs.statSync(src)
   const isDirectory = exists && stats !== false && stats.isDirectory()
