@@ -4,7 +4,7 @@ import type {
   I18nOptions,
   TFunction,
 } from '@payloadcms/translations'
-import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
+import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, LoggerOptions } from 'pino'
@@ -536,6 +536,104 @@ export interface AdminDependencies {
   [key: string]: AdminComponent | AdminFunction
 }
 
+export type FetchAPIFileUploadOptions = {
+  /**
+   * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
+   * Otherwise, it will add a `truncated = true` to the resulting file structure.
+   * @default false
+   */
+  abortOnLimit?: boolean | undefined
+  /**
+   * Automatically creates the directory path specified in `.mv(filePathName)`
+   * @default false
+   */
+  createParentPath?: boolean | undefined
+  /**
+   * Turn on/off upload process logging. Can be useful for troubleshooting.
+   * @default false
+   */
+  debug?: boolean | undefined
+  /**
+   * User defined limit handler which will be invoked if the file is bigger than configured limits.
+   * @default false
+   */
+  limitHandler?: ((args: { request: Request; size: number }) => void) | boolean | undefined
+  /**
+   * By default, `req.body` and `req.files` are flattened like this:
+   * `{'name': 'John', 'hobbies[0]': 'Cinema', 'hobbies[1]': 'Bike'}
+   *
+   * When this option is enabled they are parsed in order to be nested like this:
+   * `{'name': 'John', 'hobbies': ['Cinema', 'Bike']}`
+   * @default false
+   */
+  parseNested?: boolean | undefined
+  /**
+   * Preserves filename extension when using `safeFileNames` option.
+   * If set to `true`, will default to an extension length of `3`.
+   * If set to `number`, this will be the max allowable extension length.
+   * If an extension is smaller than the extension length, it remains untouched. If the extension is longer,
+   * it is shifted.
+   * @default false
+   *
+   * @example
+   * // true
+   * app.use(fileUpload({ safeFileNames: true, preserveExtension: true }));
+   * // myFileName.ext --> myFileName.ext
+   *
+   * @example
+   * // max extension length 2, extension shifted
+   * app.use(fileUpload({ safeFileNames: true, preserveExtension: 2 }));
+   * // myFileName.ext --> myFileNamee.xt
+   */
+  preserveExtension?: boolean | number | undefined
+  /**
+   * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
+   * @default 'File size limit has been reached'
+   */
+  responseOnLimit?: string | undefined
+  /**
+   * Strips characters from the upload's filename.
+   * You can use custom regex to determine what to strip.
+   * If set to `true`, non-alphanumeric characters _except_ dashes and underscores will be stripped.
+   * This option is off by default.
+   * @default false
+   *
+   * @example
+   * // strip slashes from file names
+   * app.use(fileUpload({ safeFileNames: /\\/g }))
+   *
+   * @example
+   * app.use(fileUpload({ safeFileNames: true }))
+   */
+  safeFileNames?: RegExp | boolean | undefined
+  /**
+   * Path to store temporary files.
+   * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
+   * in the current working directory.
+   * You can use trailing slash, but it is not necessary.
+   * @default './tmp'
+   */
+  tempFileDir?: string | undefined
+  /**
+   * This defines how long to wait for data before aborting. Set to `0` if you want to turn off timeout checks.
+   * @default 60_000
+   */
+  uploadTimeout?: number | undefined
+  /**
+   * Applies uri decoding to file names if set `true`.
+   * @default false
+   */
+  uriDecodeFileNames?: boolean | undefined
+  /**
+   * By default this module uploads files into RAM.
+   * Setting this option to `true` turns on using temporary files instead of utilising RAM.
+   * This avoids memory overflow issues when uploading large files or in case of uploading
+   * lots of files at same time.
+   * @default false
+   */
+  useTempFiles?: boolean | undefined
+} & Partial<BusboyConfig>
+
 /**
  * This is the central configuration
  *
@@ -714,6 +812,19 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
+   * Compatibility flags for prior Payload versions
+   */
+  compatibility?: {
+    /**
+     * By default, Payload will remove the `localized: true` property
+     * from fields if a parent field is localized. Set this property
+     * to `true` only if you have an existing Payload database from pre-3.0
+     * that you would like to maintain without migrating. This is only
+     * relevant for MongoDB databases.
+     */
+    allowLocalizedWithinLocalized: true
+  }
+  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
@@ -885,7 +996,7 @@ export type Config = {
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
-  upload?: ExpressFileUploadOptions
+  upload?: FetchAPIFileUploadOptions
 }
 
 export type SanitizedConfig = {
@@ -906,7 +1017,7 @@ export type SanitizedConfig = {
      * Deduped list of adapters used in the project
      */
     adapters: string[]
-  } & ExpressFileUploadOptions
+  } & FetchAPIFileUploadOptions
 } & Omit<
   // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,

@@ -54,9 +54,17 @@ type Args = {
   tableName: string
   timestamps?: boolean
   versions: boolean
+  /**
+   * Tracks whether or not this table is built
+   * from the result of a localized array or block field at some point
+   */
+  withinLocalizedArrayOrBlock?: boolean
 }
 
 type Result = {
+  hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
+  hasLocalizedRelationshipField: boolean
   hasManyNumberField: 'index' | boolean
   hasManyTextField: 'index' | boolean
   relationsToBuild: RelationMap
@@ -76,6 +84,7 @@ export const buildTable = ({
   tableName,
   timestamps,
   versions,
+  withinLocalizedArrayOrBlock,
 }: Args): Result => {
   const isRoot = !incomingRootTableName
   const rootTableName = incomingRootTableName || tableName
@@ -122,6 +131,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
+    withinLocalizedArrayOrBlock,
   })
 
   // split the relationsToBuild by localized and non-localized
@@ -464,5 +474,12 @@ export const buildTable = ({
     return result
   })
 
-  return { hasManyNumberField, hasManyTextField, relationsToBuild }
+  return {
+    hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+    hasManyTextField,
+    relationsToBuild,
+  }
 }

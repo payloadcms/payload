@@ -133,19 +133,31 @@ export const DefaultListView: React.FC = () => {
           {Header || (
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
               {hasCreatePermission && (
-                <Button
-                  Link={!isBulkUploadEnabled ? Link : undefined}
-                  aria-label={i18n.t('general:createNewLabel', {
-                    label: getTranslation(labels?.singular, i18n),
-                  })}
-                  buttonStyle="pill"
-                  el={!isBulkUploadEnabled ? 'link' : 'button'}
-                  onClick={isBulkUploadEnabled ? openBulkUpload : undefined}
-                  size="small"
-                  to={!isBulkUploadEnabled ? newDocumentURL : undefined}
-                >
-                  {i18n.t('general:createNew')}
-                </Button>
+                <>
+                  <Button
+                    Link={Link}
+                    aria-label={i18n.t('general:createNewLabel', {
+                      label: getTranslation(labels?.singular, i18n),
+                    })}
+                    buttonStyle="pill"
+                    el={'link'}
+                    size="small"
+                    to={newDocumentURL}
+                  >
+                    {i18n.t('general:createNew')}
+                  </Button>
+
+                  {isBulkUploadEnabled && (
+                    <Button
+                      aria-label={t('upload:bulkUpload')}
+                      buttonStyle="pill"
+                      onClick={openBulkUpload}
+                      size="small"
+                    >
+                      {t('upload:bulkUpload')}
+                    </Button>
+                  )}
+                </>
               )}
               {!smallBreak && (
                 <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />

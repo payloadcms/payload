@@ -1,8 +1,8 @@
+import type { FetchAPIFileUploadOptions } from 'payload'
+
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
-
-import type { FetchAPIFileUploadOptions } from './index.js'
 
 // Parameters for safe file name parsing.
 const SAFE_FILE_NAME_REGEX = /[^\w-]/g

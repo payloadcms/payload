@@ -1,8 +1,9 @@
-import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
 import { head } from '@vercel/blob'
 import path from 'path'
+
+import type { StaticHandler } from '../../types.js'
 
 import { getFilePrefix } from '../../utilities/getFilePrefix.js'
 

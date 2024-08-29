@@ -235,43 +235,46 @@ export const Upload: React.FC<UploadProps> = (props) => {
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone onChange={handleFileSelection}>
-              <div className={`${baseClass}__dropzoneButtons`}>
-                <Button
-                  buttonStyle="icon-label"
-                  icon="plus"
-                  iconPosition="left"
-                  onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.click()
-                    }
-                  }}
-                  size="small"
-                >
-                  {t('upload:selectFile')}
-                </Button>
-                <input
-                  aria-hidden="true"
-                  className={`${baseClass}__hidden-input`}
-                  hidden
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handleFileSelection(e.target.files)
-                    }
-                  }}
-                  ref={inputRef}
-                  type="file"
-                />
-                <Button
-                  buttonStyle="icon-label"
-                  icon="link"
-                  iconPosition="left"
-                  onClick={() => {
-                    setShowUrlInput(true)
-                  }}
-                  size="small"
-                >
-                  {t('upload:pasteURL')}
-                </Button>
+              <div className={`${baseClass}__dropzoneContent`}>
+                <div className={`${baseClass}__dropzoneButtons`}>
+                  <Button
+                    buttonStyle="pill"
+                    onClick={() => {
+                      if (inputRef.current) {
+                        inputRef.current.click()
+                      }
+                    }}
+                    size="small"
+                  >
+                    {t('upload:selectFile')}
+                  </Button>
+                  <input
+                    aria-hidden="true"
+                    className={`${baseClass}__hidden-input`}
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleFileSelection(e.target.files)
+                      }
+                    }}
+                    ref={inputRef}
+                    type="file"
+                  />
+                  <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                  <Button
+                    buttonStyle="pill"
+                    onClick={() => {
+                      setShowUrlInput(true)
+                    }}
+                    size="small"
+                  >
+                    {t('upload:pasteURL')}
+                  </Button>
+                </div>
+
+                <p className={`${baseClass}__dragAndDropText`}>
+                  {t('general:or')} {t('upload:dragAndDrop')}
+                </p>
               </div>
             </Dropzone>
           )}
