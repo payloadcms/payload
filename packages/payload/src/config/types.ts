@@ -7,7 +7,7 @@ import type {
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { DestinationStream, LoggerOptions } from 'pino'
+import type { DestinationStream, LoggerOptions, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -283,19 +283,6 @@ export type InitOptions = {
 
   importMap?: ImportMap
 
-  /**
-   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
-   * This allows you to bring your own logger instance and let payload use it
-   */
-  logger?: PayloadLogger
-
-  loggerDestination?: DestinationStream
-  /**
-   * Specify options for the built-in Pino logger that Payload uses for internal logging.
-   *
-   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
-   */
-  loggerOptions?: LoggerOptions
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -916,6 +903,9 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
+
+  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
