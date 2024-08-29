@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-shadow */
+
 import { useModal } from '@faceless-ui/modal'
 import { setsAreEqual } from 'payload/shared'
 import { useCallback, useEffect } from 'react'
@@ -93,7 +93,9 @@ export const useHotkey = (
         }
       })
 
-      if (e.code) pushToKeys(e.code)
+      if (e.code) {
+        pushToKeys(e.code)
+      }
 
       // Check for Mac and iPad
       const hasCmd = window.navigator.userAgent.includes('Mac OS X')
@@ -122,7 +124,9 @@ export const useHotkey = (
   )
 
   const keyup = useCallback((e: KeyboardEvent) => {
-    if (e.code) removeFromKeys(e.code)
+    if (e.code) {
+      removeFromKeys(e.code)
+    }
   }, [])
 
   useEffect(() => {

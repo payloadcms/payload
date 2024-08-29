@@ -6,7 +6,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
@@ -64,12 +64,20 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    offset: skip,
+    limit,
     options,
     page,
     pagination,
     sort,
     useEstimatedCount,
+  }
+
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
   }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
@@ -104,7 +112,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

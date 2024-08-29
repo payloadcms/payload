@@ -1,7 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import type { Option } from 'payload'
+import type { RadioFieldProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback } from 'react'
@@ -16,53 +14,45 @@ import './index.scss'
 
 const baseClass = 'radio-group'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-export type RadioFieldProps = FormFieldBase & {
-  layout?: 'horizontal' | 'vertical'
-  name?: string
-  onChange?: OnChange
-  options?: Option[]
-  path?: string
-  value?: string
-  width?: string
-}
-
-export type OnChange<T = string> = (value: T) => void
-
-const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
+const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        layout = 'horizontal',
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as RadioFieldProps['field']['admin'],
+      label,
+      options = [],
+      required,
+    } = {} as RadioFieldProps['field'],
     labelProps,
-    layout = 'horizontal',
     onChange: onChangeFromProps,
-    options = [],
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
     value: valueFromProps,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, options, required })
+      }
     },
     [validate, options, required],
   )
@@ -102,15 +92,21 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        field={field}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
@@ -148,14 +144,15 @@ const _RadioGroupField: React.FC<RadioFieldProps> = (props) => {
             )
           })}
         </ul>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          field={field}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )
 }
 
-export const RadioGroupField = withCondition(_RadioGroupField)
+export const RadioGroupField = withCondition(RadioGroupFieldComponent)

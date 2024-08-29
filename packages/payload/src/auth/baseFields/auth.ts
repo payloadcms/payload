@@ -1,6 +1,6 @@
 import type { Field } from '../../fields/config/types.js'
 
-const baseAuthFields: Field[] = [
+export const baseAuthFields: Field[] = [
   {
     name: 'resetPasswordToken',
     type: 'text',
@@ -22,5 +22,3 @@ const baseAuthFields: Field[] = [
     hidden: true,
   },
 ]
-
-export default baseAuthFields

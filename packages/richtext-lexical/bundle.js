@@ -18,35 +18,40 @@ const removeCSSImports = {
   },
 }
 
-// Bundle only the .scss files into a single css file
-await esbuild
-  .build({
+async function build() {
+  // Bundle only the .scss files into a single css file
+  await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
     minify: true,
-    outdir: 'dist/field',
+    outdir: 'dist/bundled_scss',
     loader: { '.svg': 'dataurl' },
     packages: 'external',
     //external: ['*.svg'],
     plugins: [sassPlugin({ css: 'external' })],
   })
-  .then(() => {
-    fs.rename('dist/field/index.css', 'dist/exports/client/bundled.css', (err) => {
-      if (err) console.error(`Error while renaming index.css: ${err}`)
-    })
 
-    console.log('dist/field/bundled.css bundled successfully')
-  })
-  .catch(() => process.exit(1))
+  //create empty dist/exports/client_optimized dir
+  fs.mkdirSync('dist/exports/client_optimized')
 
-// Bundle `client.ts`
-const resultClient = await esbuild
-  .build({
-    entryPoints: ['src/exports/client/index.ts'],
+  try {
+    fs.renameSync('dist/bundled_scss/index.css', 'dist/field/bundled.css')
+    fs.copyFileSync('dist/field/bundled.css', 'dist/exports/client_optimized/bundled.css')
+    fs.rmSync('dist/bundled_scss', { recursive: true })
+  } catch (err) {
+    console.error(`Error while renaming index.css: ${err}`)
+    throw err
+  }
+
+  console.log('dist/field/bundled.css bundled successfully')
+
+  // Bundle `client.ts`
+  const resultClient = await esbuild.build({
+    entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports/client',
+    outdir: 'dist/exports/client_optimized',
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
@@ -90,15 +95,14 @@ const resultClient = await esbuild
     plugins: [
       removeCSSImports,
       /*commonjs({
-        ignore: ['date-fns', '@floating-ui/react'],
-      }),*/
+          ignore: ['date-fns', '@floating-ui/react'],
+        }),*/
     ],
     sourcemap: true,
   })
-  .then((res, err) => {
-    console.log('client/index.ts bundled successfully')
-    return res
-  })
-  .catch(() => process.exit(1))
+  console.log('client/index.ts bundled successfully')
 
-fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+  fs.writeFileSync('meta_client.json', JSON.stringify(resultClient.metafile))
+}
+
+await build()

@@ -7,6 +7,11 @@ import { devUser } from '../credentials.js'
 import { arraySlug } from './shared.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: arraySlug,
@@ -19,26 +24,26 @@ export default buildConfigWithDefaults({
           },
           fields: [
             {
-              type: 'text',
               name: 'required',
+              type: 'text',
               required: true,
             },
             {
-              type: 'text',
               name: 'optional',
+              type: 'text',
             },
             {
               name: 'innerArrayOfFields',
               type: 'array',
               fields: [
                 {
-                  type: 'text',
                   name: 'required',
+                  type: 'text',
                   required: true,
                 },
                 {
-                  type: 'text',
                   name: 'optional',
+                  type: 'text',
                 },
               ],
             },

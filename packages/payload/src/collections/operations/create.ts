@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, JsonObject } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
@@ -11,6 +11,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
@@ -48,6 +49,14 @@ export const createOperation = async <TSlug extends CollectionSlug>(
 
   try {
     const shouldCommit = await initTransaction(args.req)
+
+    ensureUsernameOrEmail<TSlug>({
+      authOptions: args.collection.config.auth,
+      collectionSlug: args.collection.config.slug,
+      data: args.data,
+      operation: 'create',
+      req: args.req,
+    })
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -184,7 +193,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    const resultWithLocales = await beforeChange<Record<string, unknown>>({
+    const resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -214,10 +223,6 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     let doc
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      if (data.email) {
-        resultWithLocales.email = (data.email as string).toLowerCase()
-      }
-
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
         resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
@@ -260,7 +265,7 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // Send verification email if applicable
     // /////////////////////////////////////
 
-    if (collectionConfig.auth && collectionConfig.auth.verify) {
+    if (collectionConfig.auth && collectionConfig.auth.verify && result.email) {
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
@@ -359,7 +364,9 @@ export const createOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

@@ -18,6 +18,11 @@ export default buildConfigWithDefaults({
     fallback: true,
     locales: ['en', 'es', 'de'],
   },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -31,24 +36,33 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     searchPlugin({
-      beforeSync: ({ originalDoc, searchDoc }) => ({
-        ...searchDoc,
-        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
-      }),
+      beforeSync: ({ originalDoc, searchDoc }) => {
+        return {
+          ...searchDoc,
+          excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
+          slug: originalDoc.slug,
+        }
+      },
       collections: ['pages', 'posts'],
       defaultPriorities: {
         pages: 10,
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
       },
       searchOverrides: {
-        fields: [
+        fields: ({ defaultFields }) => [
+          ...defaultFields,
           {
             name: 'excerpt',
-            type: 'text',
+            type: 'textarea',
             admin: {
-              readOnly: true,
+              position: 'sidebar',
             },
-            label: 'Excerpt',
+          },
+          {
+            name: 'slug',
+            required: false,
+            type: 'text',
+            localized: true,
           },
         ],
       },

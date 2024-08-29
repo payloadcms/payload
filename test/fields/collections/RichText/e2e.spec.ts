@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../helpers.js'
@@ -43,7 +43,7 @@ describe('Rich Text', () => {
       snapshotKey: 'fieldsRichTextTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -58,7 +58,7 @@ describe('Rich Text', () => {
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   async function navigateToRichTextFields() {
@@ -268,7 +268,8 @@ describe('Rich Text', () => {
       await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
 
       const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
-      await expect(menu).not.toContainText('Uploads')
+      const regex = /\bUploads\b/
+      await expect(menu).not.toContainText(regex)
     })
 
     // TODO: Flaky test in CI. Flake: https://github.com/payloadcms/payload/actions/runs/8914532814/job/24482407114

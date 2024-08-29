@@ -7,7 +7,7 @@ import type {
   Collection,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
@@ -30,9 +30,20 @@ export type Result = string
 export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
-  const loginWithUsername = incomingArgs.collection?.config?.auth?.loginWithUsername
+  const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
+  const { data } = incomingArgs
 
-  if (!incomingArgs.data.email && !incomingArgs.data.username) {
+  const canLoginWithUsername = Boolean(loginWithUsername)
+  const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+
+  const sanitizedEmail =
+    (canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()) || null
+  const sanitizedUsername =
+    'username' in data && typeof data?.username === 'string'
+      ? data.username.toLowerCase().trim()
+      : null
+
+  if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${loginWithUsername ? 'username' : 'email'}.`,
       httpStatus.BAD_REQUEST,
@@ -85,26 +96,41 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       resetPasswordToken?: string
     }
 
-    if (!data.email && !data.username) {
+    if (!sanitizedEmail && !sanitizedUsername) {
       throw new APIError(
         `Missing ${loginWithUsername ? 'username' : 'email'}.`,
         httpStatus.BAD_REQUEST,
       )
     }
 
+    let whereConstraint: Where = {}
+
+    if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = {
+        email: {
+          equals: sanitizedEmail,
+        },
+      }
+    } else if (canLoginWithUsername && sanitizedUsername) {
+      whereConstraint = {
+        username: {
+          equals: sanitizedUsername,
+        },
+      }
+    }
+
     let user = await payload.db.findOne<UserDoc>({
       collection: collectionConfig.slug,
       req,
-      where:
-        loginWithUsername && data?.username
-          ? { username: { equals: data.username } }
-          : { email: { equals: data.email.toLowerCase() } },
+      where: whereConstraint,
     })
 
     // We don't want to indicate specifically that an email was not found,
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
-    if (!user) return null
+    if (!user) {
+      return null
+    }
 
     user.resetPasswordToken = token
     user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
@@ -116,7 +142,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (!disableEmail) {
+    if (!disableEmail && user.email) {
       const protocol = new URL(req.url).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
@@ -149,7 +175,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
         html,
         subject,
-        to: loginWithUsername ? user.email : data.email,
+        to: user.email,
       })
     }
 
@@ -173,7 +199,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       result: token,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return token
   } catch (error: unknown) {

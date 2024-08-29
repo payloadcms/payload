@@ -118,6 +118,19 @@ export type AuthStrategy = {
   name: string
 }
 
+export type LoginWithUsernameOptions =
+  | {
+      allowEmailLogin?: false
+      requireEmail?: boolean
+      // If `allowEmailLogin` is false, `requireUsername` must be true (default: true)
+      requireUsername?: true
+    }
+  | {
+      allowEmailLogin?: true
+      requireEmail?: boolean
+      requireUsername?: boolean
+    }
+
 export interface IncomingAuthType {
   cookies?: {
     domain?: string
@@ -131,7 +144,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
   lockTime?: number
-  loginWithUsername?: boolean
+  loginWithUsername?: LoginWithUsernameOptions | boolean
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: AuthStrategy[]
@@ -150,11 +163,13 @@ export type VerifyConfig = {
   generateEmailSubject?: GenerateVerifyEmailSubject
 }
 
-export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'verify'> {
+export interface Auth
+  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  loginWithUsername: LoginWithUsernameOptions | false
   verify?: VerifyConfig | boolean
 }
 

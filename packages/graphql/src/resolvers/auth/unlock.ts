@@ -4,11 +4,11 @@ import { isolateObjectProperty, unlockOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
-function unlockResolver(collection: Collection) {
+export function unlock(collection: Collection) {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
-      data: { email: args.email },
+      data: { email: args.email, username: args.username },
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
@@ -18,5 +18,3 @@ function unlockResolver(collection: Collection) {
 
   return resolver
 }
-
-export default unlockResolver

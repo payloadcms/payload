@@ -9,14 +9,20 @@ export const packagePublishList = [
   'ui',
   'next',
   'graphql',
-  'db-mongodb',
-  'db-postgres',
   'live-preview',
   'live-preview-react',
+  'live-preview-vue',
   'richtext-slate',
   'richtext-lexical',
 
   'create-payload-app',
+
+  // DB Adapters
+  'drizzle',
+  'db-mongodb',
+  'db-postgres',
+  'db-sqlite',
+  'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',

@@ -1,4 +1,6 @@
 'use client'
+import type React from 'react'
+
 import * as qs from 'qs-esm'
 import { useEffect, useRef, useState } from 'react'
 
@@ -89,7 +91,11 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     }
 
     return () => {
-      abortController.abort()
+      try {
+        abortController.abort()
+      } catch (error) {
+        // swallow error
+      }
     }
   }, [url, locale, search, i18n.language, initialData])
 

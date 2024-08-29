@@ -2,7 +2,6 @@
 
 .rich-text-link {
   position: relative;
-  text-decoration: underline;
 
   .popup {
     position: absolute;
@@ -35,11 +34,6 @@
       font-weight: 600;
       cursor: pointer;
       margin: 0;
-
-      &:hover,
-      &:focus-visible {
-        text-decoration: underline;
-      }
     }
   }
 
@@ -78,7 +72,9 @@
   border: 0;
   background-color: transparent;
   padding: 0;
-  text-decoration: underline;
+  color: var(--theme-success-600);
+  text-decoration: none;
+  border-bottom: 1px dotted;
   cursor: text;
 
   &:focus,

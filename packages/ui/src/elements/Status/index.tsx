@@ -26,8 +26,10 @@ export const Status: React.FC = () => {
   } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const [processing, setProcessing] = useState(false)
   const { reset: resetForm } = useForm()

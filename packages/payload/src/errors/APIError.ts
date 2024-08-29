@@ -1,5 +1,7 @@
-/* eslint-disable max-classes-per-file */
 import httpStatus from 'http-status'
+
+// This gets dynamically reassigned during compilation
+export let APIErrorName = 'APIError'
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
   data: TData
@@ -15,6 +17,7 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
       // show data in cause
       cause: data,
     })
+    APIErrorName = this.constructor.name
     this.name = this.constructor.name
     this.message = message
     this.status = status

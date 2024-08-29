@@ -1,12 +1,11 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Connect, Payload } from 'payload'
 
-import { sql } from 'drizzle-orm'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
-
-import { pushDevSchema } from './utilities/pushDevSchema.js'
 
 const connectWithReconnect = async function ({
   adapter,
@@ -54,6 +53,7 @@ export const connect: Connect = async function connect(
   const { hotReload } = options
 
   this.schema = {
+    pgSchema: this.pgSchema,
     ...this.tables,
     ...this.relations,
     ...this.enums,
@@ -71,12 +71,7 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
-        await this.drizzle.execute(
-          sql.raw(`
-          drop schema if exists ${this.schemaName || 'public'} cascade;
-          create schema ${this.schemaName || 'public'};
-        `),
-        )
+        await this.dropDatabase({ adapter: this })
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
@@ -92,8 +87,12 @@ export const connect: Connect = async function connect(
     process.env.PAYLOAD_MIGRATING !== 'true' &&
     this.push !== false
   ) {
-    await pushDevSchema(this)
+    await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
   if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+
+  if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
+    await this.migrate({ migrations: this.prodMigrations })
+  }
 }

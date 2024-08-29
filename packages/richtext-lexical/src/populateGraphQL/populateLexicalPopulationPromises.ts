@@ -6,11 +6,9 @@ import type { AdapterProps } from '../types.js'
 
 import { recurseNodes } from '../utilities/forEachNodeRecursively.js'
 
-export type Args = Parameters<
-  RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']
->[0] & {
+export type Args = {
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
-}
+} & Parameters<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>[0]
 
 /**
  * Appends all new populationPromises to the populationPromises prop
@@ -61,6 +59,7 @@ export const populateLexicalPopulationPromises = ({
         }
       }
     },
+
     nodes: (siblingDoc[field?.name] as SerializedEditorState)?.root?.children ?? [],
   })
 }

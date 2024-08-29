@@ -27,6 +27,7 @@ import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -34,10 +35,10 @@ export type * from './types.js'
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<
-  DocumentInfoProps & {
+const DocumentInfo: React.FC<
+  {
     children: React.ReactNode
-  }
+  } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
     id,
@@ -53,11 +54,13 @@ export const DocumentInfoProvider: React.FC<
   } = props
 
   const {
-    admin: { dateFormat },
-    collections,
-    globals,
-    routes: { api },
-    serverURL,
+    config: {
+      admin: { dateFormat },
+      collections,
+      globals,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
@@ -66,8 +69,12 @@ export const DocumentInfoProvider: React.FC<
 
   const { i18n } = useTranslation()
 
+  const { uploadEdits } = useUploadEdits()
+
   const [documentTitle, setDocumentTitle] = useState(() => {
-    if (!initialDataFromProps) return ''
+    if (!initialDataFromProps) {
+      return ''
+    }
 
     return formatDocTitle({
       collectionConfig,
@@ -91,7 +98,6 @@ export const DocumentInfoProvider: React.FC<
     hasPublishPermissionFromProps,
   )
   const isInitializing = initialState === undefined || data === undefined
-  const hasInitializedDocPermissions = useRef(false)
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
@@ -99,20 +105,26 @@ export const DocumentInfoProvider: React.FC<
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
+  const hasInitializedDocPermissions = useRef(false)
+  // Separate locale cache used for handling permissions
+  const prevLocalePermissions = useRef(locale)
 
   const versionsConfig = docConfig?.versions
 
   const baseURL = `${serverURL}${api}`
   let slug: string
+  let pluralType: 'collections' | 'globals'
   let preferencesKey: string
 
   if (globalSlug) {
     slug = globalSlug
+    pluralType = 'globals'
     preferencesKey = `global-${slug}`
   }
 
   if (collectionSlug) {
     slug = collectionSlug
+    pluralType = 'collections'
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`
@@ -256,21 +268,25 @@ export const DocumentInfoProvider: React.FC<
         locale: locale || undefined,
       }
 
-      const newIsEditing = getIsEditing({ id: data?.id, collectionSlug, globalSlug })
+      const idToUse = data?.id || id
+      const newIsEditing = getIsEditing({ id: idToUse, collectionSlug, globalSlug })
 
       if (newIsEditing) {
         const docAccessURL = collectionSlug
-          ? `/${collectionSlug}/access/${data.id}`
+          ? `/${collectionSlug}/access/${idToUse}`
           : globalSlug
             ? `/globals/${globalSlug}/access`
             : null
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            body: JSON.stringify(data),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
             },
+            method: 'post',
           })
 
           const json: DocumentPermissions = await res.json()
@@ -278,14 +294,13 @@ export const DocumentInfoProvider: React.FC<
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
             {
               body: JSON.stringify({
-                data: {
-                  ...(data || {}),
-                  _status: 'published',
-                },
+                ...(data || {}),
+                _status: 'published',
               }),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
               },
               method: 'POST',
             },
@@ -323,7 +338,7 @@ export const DocumentInfoProvider: React.FC<
         )
       }
     },
-    [serverURL, api, permissions, i18n.language, locale, collectionSlug, globalSlug],
+    [serverURL, api, id, permissions, i18n.language, locale, collectionSlug, globalSlug],
   )
 
   const getDocPreferences = useCallback(() => {
@@ -406,7 +421,9 @@ export const DocumentInfoProvider: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
-      if (localeChanged) prevLocale.current = locale
+      if (localeChanged) {
+        prevLocale.current = locale
+      }
 
       const getInitialState = async () => {
         setIsError(false)
@@ -427,8 +444,13 @@ export const DocumentInfoProvider: React.FC<
             serverURL,
             signal: abortController.signal,
           })
+          const data = reduceFieldsToValues(result, true)
+          setData(data)
 
-          setData(reduceFieldsToValues(result, true))
+          if (localeChanged) {
+            void getDocPermissions(data)
+          }
+
           setInitialState(result)
         } catch (err) {
           if (!abortController.signal.aborted) {
@@ -446,7 +468,11 @@ export const DocumentInfoProvider: React.FC<
     }
 
     return () => {
-      abortController.abort()
+      try {
+        abortController.abort()
+      } catch (error) {
+        // swallow error
+      }
     }
   }, [
     api,
@@ -459,6 +485,7 @@ export const DocumentInfoProvider: React.FC<
     onLoadError,
     initialDataFromProps,
     initialStateFromProps,
+    getDocPermissions,
   ])
 
   useEffect(() => {
@@ -479,25 +506,18 @@ export const DocumentInfoProvider: React.FC<
   }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const loadDocPermissions = async () => {
-      const docPermissions: DocumentPermissions = docPermissionsFromProps
-      const hasSavePermission: boolean = hasSavePermissionFromProps
-      const hasPublishPermission: boolean = hasPublishPermissionFromProps
-
+    if (data && (collectionSlug || globalSlug)) {
       if (
-        !docPermissions ||
-        hasSavePermission === undefined ||
-        hasSavePermission === null ||
-        hasPublishPermission === undefined ||
-        hasPublishPermission === null
+        hasInitializedDocPermissions.current === false &&
+        (!docPermissions ||
+          hasSavePermission === undefined ||
+          hasSavePermission === null ||
+          hasPublishPermission === undefined ||
+          hasPublishPermission === null)
       ) {
-        await getDocPermissions(data)
+        hasInitializedDocPermissions.current = true
+        void getDocPermissions(data)
       }
-    }
-
-    if (!hasInitializedDocPermissions.current && data && (collectionSlug || globalSlug)) {
-      hasInitializedDocPermissions.current = true
-      void loadDocPermissions()
     }
   }, [
     getDocPermissions,
@@ -508,12 +528,32 @@ export const DocumentInfoProvider: React.FC<
     collectionSlug,
     globalSlug,
     data,
+    docPermissions,
+    hasSavePermission,
+    hasPublishPermission,
   ])
 
-  if (isError) notFound()
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${qs.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
+
+  if (isError) {
+    notFound()
+  }
 
   const value: DocumentInfoContext = {
     ...props,
+    action,
     docConfig,
     docPermissions,
     getDocPermissions,
@@ -526,6 +566,7 @@ export const DocumentInfoProvider: React.FC<
     isInitializing,
     isLoading,
     onSave,
+    preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,
@@ -535,4 +576,16 @@ export const DocumentInfoProvider: React.FC<
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<
+  {
+    children: React.ReactNode
+  } & DocumentInfoProps
+> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

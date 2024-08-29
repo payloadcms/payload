@@ -7,11 +7,12 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
+import { SelectMany } from '../../elements/SelectMany/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
@@ -45,7 +46,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   collectionSlugs,
   customHeader,
   drawerSlug,
+  enableRowSelections,
   filterOptions,
+  onBulkSelect,
   onSelect,
   selectedCollection,
 }) => {
@@ -59,12 +62,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [where, setWhere] = useState<Where>(null)
   const [search, setSearch] = useState<string>('')
 
-  const { componentMap } = useComponentMap()
-
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const enabledCollectionConfigs = collections.filter(({ slug }) => {
@@ -80,7 +83,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     },
   )
 
-  const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
+  const List = selectedCollectionConfig?.admin?.components.views.list.Component
 
   const [selectedOption, setSelectedOption] = useState<Option | Option[]>(() =>
     selectedCollectionConfig
@@ -131,7 +134,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const isOpen = isModalOpen(drawerSlug)
   const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0) // used to force a re-fetch even when apiURL is unchanged
-  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {})
+  const [{ data, isError, isLoading: isLoadingList }, { setParams }] = usePayloadAPI(apiURL, {
+    initialParams: {
+      depth: 0,
+    },
+  })
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
@@ -142,13 +149,16 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     } = selectedCollectionConfig
     const params: {
       cacheBust?: number
+      depth?: number
       draft?: string
       limit?: number
       page?: number
       search?: string
       sort?: string
       where?: unknown
-    } = {}
+    } = {
+      depth: 0,
+    }
 
     let copyOfWhere = { ...(where || {}) }
     const filterOption = filterOptions?.[slug]
@@ -175,11 +185,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       }
     }
 
-    if (page) params.page = page
-    if (sort) params.sort = sort
-    if (cacheBust) params.cacheBust = cacheBust
-    if (copyOfWhere) params.where = copyOfWhere
-    if (versions?.drafts) params.draft = 'true'
+    if (page) {
+      params.page = page
+    }
+    if (sort) {
+      params.sort = sort
+    }
+    if (cacheBust) {
+      params.cacheBust = cacheBust
+    }
+    if (copyOfWhere) {
+      params.where = copyOfWhere
+    }
+    if (versions?.drafts) {
+      params.draft = 'true'
+    }
 
     setParams(params)
   }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])
@@ -244,14 +264,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               <XIcon />
             </button>
           </div>
-          {selectedCollectionConfig?.admin?.description && (
+          {(selectedCollectionConfig?.admin?.description ||
+            selectedCollectionConfig?.admin?.components?.Description) && (
             <div className={`${baseClass}__sub-header`}>
-              <ViewDescription description={selectedCollectionConfig.admin.description} />
+              <ViewDescription
+                Description={selectedCollectionConfig.admin?.components?.Description}
+                description={selectedCollectionConfig.admin?.description}
+              />
             </div>
           )}
           {moreThanOneAvailableCollection && (
             <div className={`${baseClass}__select-collection-wrap`}>
-              <FieldLabel label={t('upload:selectCollectionToBrowse')} />
+              <FieldLabel field={null} label={t('upload:selectCollectionToBrowse')} />
               <ReactSelect
                 className={`${baseClass}__select-collection`}
                 onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
@@ -265,8 +289,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
         </header>
       }
+      beforeActions={
+        enableRowSelections ? [<SelectMany key="select-many" onClick={onBulkSelect} />] : undefined
+      }
       collectionConfig={selectedCollectionConfig}
       collectionSlug={selectedCollectionConfig.slug}
+      disableBulkDelete
+      disableBulkEdit
       hasCreatePermission={hasCreatePermission}
       newDocumentURL={null}
     >
@@ -298,9 +327,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             },
           ]}
           collectionSlug={selectedCollectionConfig.slug}
+          enableRowSelections={enableRowSelections}
           preferenceKey={preferenceKey}
         >
-          {List}
+          <RenderComponent mappedComponent={List} />
           <DocumentDrawer onSave={onCreateNew} />
         </TableColumnsProvider>
       </ListQueryProvider>

@@ -5,10 +5,13 @@ export type Props = {
   collectionSlug: SanitizedCollectionConfig['slug']
   disableLocalStrategy?: boolean
   email: string
-  loginWithUsername: boolean
+  loginWithUsername: SanitizedCollectionConfig['auth']['loginWithUsername']
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean
+  setSchemaPath: (path: string) => void
+  setValidateBeforeSubmit: (validate: boolean) => void
   useAPIKey?: boolean
+  username: string
   verify?: VerifyConfig | boolean
 }

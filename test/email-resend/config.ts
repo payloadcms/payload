@@ -8,15 +8,19 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  // ...extend config here
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [],
 
   // NOTE: The from address and api key should be properly set
   // See email-resend README for more information
   email: resendAdapter({
+    apiKey: process.env.RESEND_API_KEY || '',
     defaultFromAddress: 'dev@payloadcms.com',
     defaultFromName: 'Payload CMS',
-    apiKey: process.env.RESEND_API_KEY || '',
   }),
   onInit: async (payload) => {
     await payload.create({
@@ -28,12 +32,12 @@ export default buildConfigWithDefaults({
     })
 
     const email = await payload.sendEmail({
-      to: 'dev@payloadcms.com',
       subject: 'This was sent on init',
       text: 'This is my message body',
+      to: 'dev@payloadcms.com',
     })
 
-    payload.logger.info({ msg: 'Email sent', email })
+    payload.logger.info({ email, msg: 'Email sent' })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

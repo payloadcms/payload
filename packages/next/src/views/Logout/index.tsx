@@ -10,15 +10,15 @@ const baseClass = 'logout'
 export { generateLogoutMetadata } from './meta.js'
 
 export const LogoutView: React.FC<
-  AdminViewProps & {
+  {
     inactivity?: boolean
-  }
+  } & AdminViewProps
 > = ({ inactivity, initPageResult, searchParams }) => {
   const {
     req: {
       payload: {
         config: {
-          routes: { admin },
+          routes: { admin: adminRoute },
         },
       },
     },
@@ -27,7 +27,7 @@ export const LogoutView: React.FC<
   return (
     <div className={`${baseClass}__wrap`}>
       <LogoutClient
-        adminRoute={admin}
+        adminRoute={adminRoute}
         inactivity={inactivity}
         redirect={searchParams.redirect as string}
       />

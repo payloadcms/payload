@@ -1,7 +1,7 @@
-import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
-
 import { del } from '@vercel/blob'
 import path from 'path'
+
+import type { HandleDelete } from '../../types.js'
 
 type HandleDeleteArgs = {
   baseUrl: string

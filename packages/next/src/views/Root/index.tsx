@@ -1,8 +1,8 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/shared'
+import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -15,21 +15,23 @@ export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
-  i18n: I18n
+  i18n: I18nClient
   isEditing?: boolean
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
 
 export const RootPage = async ({
   config: configPromise,
+  importMap,
   params,
   searchParams,
 }: {
-  config: Promise<SanitizedConfig>
-  params: {
+  readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
+  readonly params: {
     segments: string[]
   }
-  searchParams: {
+  readonly searchParams: {
     [key: string]: string | string[]
   }
 }) => {
@@ -37,13 +39,16 @@ export const RootPage = async ({
 
   const {
     admin: {
-      routes: { createFirstUser: createFirstUserRoute },
+      routes: { createFirstUser: _createFirstUserRoute },
       user: userSlug,
     },
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = `${adminRoute}${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`
+  const currentRoute = formatAdminURL({
+    adminRoute,
+    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+  })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -51,13 +56,14 @@ export const RootPage = async ({
     adminRoute,
     config,
     currentRoute,
+    importMap,
     searchParams,
     segments,
   })
 
   let dbHasUser = false
 
-  if (!DefaultView) {
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     notFound()
   }
 
@@ -71,36 +77,44 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc)
 
-    const routeWithAdmin = `${adminRoute}${createFirstUserRoute}`
+    const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
 
     const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
     const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
 
-    if (disableLocalStrategy && currentRoute === routeWithAdmin) {
+    if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
 
-    if (!dbHasUser && currentRoute !== routeWithAdmin && !disableLocalStrategy) {
-      redirect(routeWithAdmin)
+    if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+      redirect(createFirstUserRoute)
     }
 
-    if (dbHasUser && currentRoute === routeWithAdmin) {
+    if (dbHasUser && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
   }
 
-  const RenderedView = (
-    <WithServerSideProps
-      Component={DefaultView}
-      serverOnlyProps={
-        {
-          initPageResult,
-          params,
-          searchParams,
-        } as any
-      }
-    />
+  const createMappedView = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      i18n: initPageResult?.req.i18n,
+      importMap,
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    },
+  })
+
+  const MappedView: MappedComponent = createMappedView(
+    DefaultView.payloadComponent,
+    undefined,
+    DefaultView.Component,
+    'createMappedView',
   )
+
+  const RenderedView = <RenderComponent mappedComponent={MappedView} />
 
   return (
     <Fragment>

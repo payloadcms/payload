@@ -1,4 +1,4 @@
-import type { EditViewComponent, PaginatedDocs } from 'payload'
+import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
 import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -7,12 +7,13 @@ import React from 'react'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
+import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'
 import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: EditViewComponent = async (props) => {
+export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {
@@ -39,6 +40,8 @@ export const VersionsView: EditViewComponent = async (props) => {
 
   let versionsData: PaginatedDocs
   let limitToUse = isNumber(limit) ? Number(limit) : undefined
+  let latestPublishedVersion = null
+  let latestDraftVersion = null
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
@@ -58,6 +61,20 @@ export const VersionsView: EditViewComponent = async (props) => {
           },
         },
       })
+      if (collectionConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: collectionSlug,
+          type: 'collection',
+          payload,
+          status: 'published',
+        })
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }
@@ -76,12 +93,41 @@ export const VersionsView: EditViewComponent = async (props) => {
         sort: sort as string,
         user,
       })
+
+      if (globalConfig?.versions?.drafts) {
+        latestDraftVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'draft',
+        })
+        latestPublishedVersion = await getLatestVersion({
+          slug: globalSlug,
+          type: 'global',
+          payload,
+          status: 'published',
+        })
+      }
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
     }
 
     if (!versionsData) {
       return notFound()
+    }
+  }
+  const fetchURL = collectionSlug
+    ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
+    : globalSlug
+      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
+      : ''
+
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+
+  if (publishedNewerThanDraft) {
+    latestDraftVersion = {
+      id: '',
+      updatedAt: '',
     }
   }
 
@@ -91,13 +137,9 @@ export const VersionsView: EditViewComponent = async (props) => {
     docID: id,
     globalConfig,
     i18n,
+    latestDraftVersion: latestDraftVersion?.id,
+    latestPublishedVersion: latestPublishedVersion?.id,
   })
-
-  const fetchURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
-      : ''
 
   return (
     <React.Fragment>

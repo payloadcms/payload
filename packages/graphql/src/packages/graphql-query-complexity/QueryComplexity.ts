@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-use-before-define */
+
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /**
  * Created by Ivo Meißner on 28.07.17.
@@ -122,7 +122,7 @@ export function getComplexity(options: {
   return visitor.complexity
 }
 
-export default class QueryComplexity {
+export class QueryComplexity {
   OperationDefinition: Record<string, any>
   complexity: number
   context: ValidationContext

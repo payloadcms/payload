@@ -1,6 +1,6 @@
 'use client'
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
-import type { JSX, MutableRefObject, ReactPortal } from 'react'
+import type { JSX, ReactPortal, RefObject } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
@@ -28,7 +28,7 @@ export type MenuResolution = {
 const baseClass = 'slash-menu-popup'
 
 export type MenuRenderFn = (
-  anchorElementRef: MutableRefObject<HTMLElement | null>,
+  anchorElementRef: RefObject<HTMLElement | null>,
   itemProps: {
     groups: Array<SlashMenuGroupInternal>
     selectItemAndCleanUp: (selectedItem: SlashMenuItem) => void
@@ -40,7 +40,9 @@ export type MenuRenderFn = (
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
   const typeaheadContainerNode = document.getElementById('slash-menu')
-  if (!typeaheadContainerNode) return
+  if (!typeaheadContainerNode) {
+    return
+  }
 
   const typeaheadRect = typeaheadContainerNode.getBoundingClientRect()
 
@@ -92,9 +94,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | null {
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
-  // eslint-disable-next-line react/destructuring-assignment
   const characterOffset = match.replaceableString.length
-  // eslint-disable-next-line react/destructuring-assignment
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
@@ -208,7 +208,7 @@ export function LexicalMenu({
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
-  anchorElementRef: MutableRefObject<HTMLElement>
+  anchorElementRef: RefObject<HTMLElement>
   close: () => void
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
@@ -436,7 +436,7 @@ export function useMenuAnchorRef(
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-): MutableRefObject<HTMLElement> {
+): RefObject<HTMLElement> {
   const [editor] = useLexicalComposerContext()
   const anchorElementRef = useRef<HTMLElement>(document.createElement('div'))
   const positionMenu = useCallback(() => {

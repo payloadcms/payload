@@ -17,11 +17,12 @@ const baseVersionFields: Field[] = [
     type: 'select',
     admin: {
       components: {
-        Field: () => null,
+        Field: false,
       },
       disableBulkEdit: true,
     },
     defaultValue: 'draft',
+    index: true,
     label: ({ t }) => t('version:status'),
     options: statuses,
   },

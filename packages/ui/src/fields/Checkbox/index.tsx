@@ -1,10 +1,9 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { CheckboxFieldProps, CheckboxFieldValidation } from 'payload'
 
 import React, { useCallback } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
-import type { CheckboxFieldProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
@@ -22,37 +21,40 @@ const baseClass = 'checkbox'
 
 export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
 
-const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
     checked: checkedFromProps,
-    className,
     descriptionProps,
     disableFormData,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as CheckboxFieldProps['field']['admin'],
+      label,
+      required,
+    } = {} as CheckboxFieldProps['field'],
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
   const editDepth = useEditDepth()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: CheckboxFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -74,7 +76,9 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   const onToggle = useCallback(() => {
     if (!disabled) {
       setValue(!value)
-      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(!value)
+      }
     }
   }, [onChangeFromProps, disabled, setValue, value])
 
@@ -99,11 +103,17 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        field={field}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <CheckboxInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
+        afterInput={field?.admin?.components?.afterInput}
+        beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
@@ -115,13 +125,14 @@ const _CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         readOnly={disabled}
         required={required}
       />
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        field={field}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }
 
-export const CheckboxField = withCondition(_CheckboxField)
+export const CheckboxField = withCondition(CheckboxFieldComponent)

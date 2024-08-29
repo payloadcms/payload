@@ -1,12 +1,11 @@
-import type { Config } from 'payload'
-import type { Payload } from 'payload'
-import { jest } from '@jest/globals'
+import type { Config, Payload } from 'payload'
 
+import { jest } from '@jest/globals'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
 import { payloadCloudPlugin } from './plugin.js'
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 const mockedPayload: Payload = jest.fn() as unknown as Payload
 
@@ -18,22 +17,15 @@ describe('plugin', () => {
   beforeEach(() => {
     createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
-        verify: jest.fn(),
         transporter: {
           name: 'Nodemailer - SMTP',
         },
+        verify: jest.fn(),
       } as unknown as ReturnType<typeof nodemailer.createTransport>
     })
-
-    const createTestAccountSpy = jest.spyOn(nodemailer, 'createTestAccount').mockResolvedValueOnce({
-      pass: 'password',
-      user: 'user',
-      web: 'ethereal.email',
-    } as unknown as nodemailer.TestAccount)
   })
 
   describe('not in Payload Cloud', () => {
-    // eslint-disable-next-line jest/expect-expect
     it('should return unmodified config', async () => {
       const plugin = payloadCloudPlugin()
       const config = await plugin(createConfig())
@@ -69,10 +61,9 @@ describe('plugin', () => {
     })
 
     describe('email', () => {
-      // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud email', async () => {
         const plugin = payloadCloudPlugin()
-        const config = await plugin(createConfig())
+        await plugin(createConfig())
 
         expect(createTransportSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -81,7 +72,6 @@ describe('plugin', () => {
         )
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', async () => {
         const plugin = payloadCloudPlugin({ email: false })
         const config = await plugin(createConfig())
@@ -89,7 +79,6 @@ describe('plugin', () => {
         expect(config.email).toBeUndefined()
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('should allow PAYLOAD_CLOUD_EMAIL_* env vars to be unset', async () => {
         delete process.env.PAYLOAD_CLOUD_EMAIL_API_KEY
         delete process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
@@ -105,8 +94,9 @@ describe('plugin', () => {
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
-          // eslint-disable-next-line @typescript-eslint/require-await
+          // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
           send: async (mail) => {
+            // eslint-disable-next-line no-console
             console.log('mock send', mail)
           },
           version: '0.0.1',
@@ -116,13 +106,13 @@ describe('plugin', () => {
           email: await nodemailerAdapter({
             defaultFromAddress: 'test@test.com',
             defaultFromName: 'Test',
-            transport: existingTransport,
             skipVerify,
+            transport: existingTransport,
           }),
         })
 
         const plugin = payloadCloudPlugin()
-        const config = await plugin(configWithTransport)
+        await plugin(configWithTransport)
 
         expect(logSpy).toHaveBeenCalledWith(
           expect.stringContaining('Payload Cloud Email is enabled but'),
@@ -148,8 +138,8 @@ describe('plugin', () => {
 
         const initializedEmail = emailConfig({ payload: mockedPayload })
 
-        expect(initializedEmail.defaultFromName).toEqual(defaultFromName)
-        expect(initializedEmail.defaultFromAddress).toEqual(defaultFromAddress)
+        expect(initializedEmail.defaultFromName).toStrictEqual(defaultFromName)
+        expect(initializedEmail.defaultFromAddress).toStrictEqual(defaultFromAddress)
 
         expect(createTransportSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -162,15 +152,11 @@ describe('plugin', () => {
 })
 
 function assertCloudStorage(config: Config) {
-  expect(config.upload?.useTempFiles).toEqual(true)
+  expect(config.upload?.useTempFiles).toStrictEqual(true)
 }
 
 function assertNoCloudStorage(config: Config) {
   expect(config.upload?.useTempFiles).toBeFalsy()
-}
-
-async function assertCloudEmail(config: Config) {
-  expect(config.email && 'name' in config.email).toStrictEqual('Nodemailer - SMTP')
 }
 
 function createConfig(overrides?: Partial<Config>): Config {

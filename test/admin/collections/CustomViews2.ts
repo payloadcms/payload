@@ -1,61 +1,78 @@
 import type { CollectionConfig } from 'payload'
 
-import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
-import { CustomTabComponentView } from '../components/views/CustomTabComponent/index.js'
-import { CustomTabLabelView } from '../components/views/CustomTabLabel/index.js'
-import { CustomNestedTabView } from '../components/views/CustomTabNested/index.js'
-import { CustomTabWithParamView } from '../components/views/CustomTabWithParam/index.js'
-import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import {
+  customCollectionMetaTitle,
   customCollectionParamViewPath,
   customCollectionParamViewPathBase,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
+    meta: {
+      title: customCollectionMetaTitle,
+    },
     components: {
       views: {
-        Edit: {
+        edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-          Default: {
-            Tab: {
+          customViewWithParam: {
+            Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
+            tab: {
+              href: `${customCollectionParamViewPathBase}/123`,
+              label: 'Custom Param View',
+            },
+            path: customCollectionParamViewPath,
+          },
+          default: {
+            tab: {
               label: customEditLabel,
             },
+            meta: {
+              title: customDefaultTabMetaTitle,
+            },
           },
-          MyCustomView: {
-            Component: CustomTabLabelView,
-            Tab: {
+          myCustomView: {
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            tab: {
               href: '/custom-tab-view',
               label: customTabLabel,
             },
             path: '/custom-tab-view',
-          },
-          MyCustomViewWithCustomTab: {
-            Component: CustomTabComponentView,
-            Tab: CustomTabComponent,
-            path: customTabViewPath,
-          },
-          MyCustomViewWithNestedPath: {
-            Component: CustomNestedTabView,
-            path: customNestedTabViewPath,
-            Tab: {
-              label: 'Custom Nested Tab View',
-              href: customNestedTabViewPath,
+            meta: {
+              title: customViewMetaTitle,
             },
           },
-          Versions: CustomVersionsView,
-          CustomViewWithParam: {
-            Component: CustomTabWithParamView,
-            path: customCollectionParamViewPath,
-            Tab: {
-              label: 'Custom Param View',
-              href: `${customCollectionParamViewPathBase}/123`,
+          myCustomViewWithCustomTab: {
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
+            path: customTabViewPath,
+          },
+          myCustomViewWithNestedPath: {
+            Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
+            tab: {
+              href: customNestedTabViewPath,
+              label: 'Custom Nested Tab View',
+            },
+            path: customNestedTabViewPath,
+            meta: {
+              title: 'Custom Nested Meta Title',
+            },
+          },
+          versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+            meta: {
+              title: customVersionsTabMetaTitle,
             },
           },
         },

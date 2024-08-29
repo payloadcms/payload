@@ -1,6 +1,8 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes } from 'crypto'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
@@ -14,7 +16,6 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -31,11 +32,14 @@ import {
 let restClient: NextRESTClient
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     await restClient.login({ slug: usersSlug })
   })
@@ -446,7 +450,6 @@ describe('Relationships', () => {
         it('should validate the format of text id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
@@ -456,7 +459,6 @@ describe('Relationships', () => {
         it('should validate the format of number id relationships', async () => {
           await expect(async () =>
             createPost({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),

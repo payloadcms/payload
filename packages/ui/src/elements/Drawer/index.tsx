@@ -31,7 +31,9 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   const handleClick = useCallback(
     (e) => {
       openModal(slug)
-      if (typeof onClick === 'function') onClick(e)
+      if (typeof onClick === 'function') {
+        onClick(e)
+      }
     },
     [openModal, slug, onClick],
   )
@@ -55,6 +57,7 @@ export const Drawer: React.FC<Props> = ({
   const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
+
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
 
@@ -91,7 +94,12 @@ export const Drawer: React.FC<Props> = ({
           onClick={() => closeModal(slug)}
           type="button"
         />
-        <div className={`${baseClass}__content`}>
+        <div
+          className={`${baseClass}__content`}
+          style={{
+            width: `calc(100% - (${drawerDepth} * var(--gutter-h))`,
+          }}
+        >
           <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
             <EditDepthContext.Provider value={drawerDepth + 1}>

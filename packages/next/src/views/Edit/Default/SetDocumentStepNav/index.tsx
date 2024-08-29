@@ -11,6 +11,7 @@ import {
   useStepNav,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useEffect } from 'react'
 
 export const SetDocumentStepNav: React.FC<{
@@ -35,7 +36,9 @@ export const SetDocumentStepNav: React.FC<{
   const { i18n, t } = useTranslation()
 
   const {
-    routes: { admin },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const drawerDepth = useEditDepth()
@@ -47,13 +50,23 @@ export const SetDocumentStepNav: React.FC<{
       if (collectionSlug) {
         nav.push({
           label: getTranslation(pluralLabel, i18n),
-          url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
+          url: isVisible
+            ? formatAdminURL({
+                adminRoute,
+                path: `/collections/${collectionSlug}`,
+              })
+            : undefined,
         })
 
         if (isEditing) {
           nav.push({
             label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
-            url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
+            url: isVisible
+              ? formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}/${id}`,
+                })
+              : undefined,
           })
         } else {
           nav.push({
@@ -63,7 +76,12 @@ export const SetDocumentStepNav: React.FC<{
       } else if (globalSlug) {
         nav.push({
           label: title,
-          url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
+          url: isVisible
+            ? formatAdminURL({
+                adminRoute,
+                path: `/globals/${globalSlug}`,
+              })
+            : undefined,
         })
       }
 
@@ -73,7 +91,9 @@ export const SetDocumentStepNav: React.FC<{
         })
       }
 
-      if (drawerDepth <= 1) setStepNav(nav)
+      if (drawerDepth <= 1) {
+        setStepNav(nav)
+      }
     }
   }, [
     setStepNav,
@@ -82,7 +102,7 @@ export const SetDocumentStepNav: React.FC<{
     pluralLabel,
     id,
     useAsTitle,
-    admin,
+    adminRoute,
     t,
     i18n,
     title,

@@ -1,4 +1,4 @@
-import glob from 'glob'
+import globby from 'globby'
 import minimist from 'minimist'
 import path from 'path'
 import shelljs from 'shelljs'
@@ -10,6 +10,13 @@ const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
+const prod = process.argv.includes('--prod')
+process.argv = process.argv.filter((arg) => arg !== '--prod')
+if (prod) {
+  process.env.PAYLOAD_TEST_PROD = 'true'
+  shelljs.env.PAYLOAD_TEST_PROD = 'true'
+}
+
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
@@ -18,7 +25,7 @@ const suiteName = args[0]
 
 // Run all
 if (!suiteName) {
-  let files = glob.sync(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
 
   const totalFiles = files.length
 
@@ -74,9 +81,9 @@ function executePlaywright(suitePath: string, bail = false) {
 
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
   console.log('\n', cmd)
-  const { stdout, code } = shelljs.exec(cmd)
+  const { code, stdout } = shelljs.exec(cmd)
   const suite = path.basename(path.dirname(suitePath))
-  const results = { suiteName: suite, code }
+  const results = { code, suiteName: suite }
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)

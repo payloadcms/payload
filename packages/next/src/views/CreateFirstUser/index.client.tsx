@@ -1,49 +1,50 @@
 'use client'
-import type { FormState } from 'payload'
+import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
 
 import {
   ConfirmPasswordField,
-  EmailField,
   Form,
   type FormProps,
   FormSubmit,
   PasswordField,
   RenderFields,
-  useComponentMap,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import { getFormState } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
+
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
+  loginWithUsername?: LoginWithUsernameOptions | false
   userSlug: string
-}> = ({ initialState, userSlug }) => {
-  const { getFieldMap } = useComponentMap()
-
+}> = ({ initialState, loginWithUsername, userSlug }) => {
   const {
-    routes: { admin, api: apiRoute },
-    serverURL,
+    config: {
+      routes: { admin, api: apiRoute },
+      serverURL,
+    },
+    getEntityConfig,
   } = useConfig()
 
   const { t } = useTranslation()
 
-  const fieldMap = getFieldMap({ collectionSlug: userSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
-      return getFormState({
+    async ({ formState: prevFormState }) =>
+      getFormState({
         apiRoute,
         body: {
           collectionSlug: userSlug,
           formState: prevFormState,
           operation: 'create',
-          schemaPath: userSlug,
+          schemaPath: `_${userSlug}.auth`,
         },
         serverURL,
-      })
-    },
+      }),
     [apiRoute, userSlug, serverURL],
   )
 
@@ -56,22 +57,30 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <EmailField autoComplete="email" label={t('general:email')} name="email" required />
+      <RenderEmailAndUsernameFields
+        className="emailAndUsername"
+        loginWithUsername={loginWithUsername}
+        operation="create"
+        readOnly={false}
+      />
       <PasswordField
-        autoComplete="off"
-        label={t('authentication:newPassword')}
-        name="password"
-        required
+        autoComplete={'off'}
+        field={{
+          name: 'password',
+          label: t('authentication:newPassword'),
+          required: true,
+        }}
       />
       <ConfirmPasswordField />
       <RenderFields
-        fieldMap={fieldMap}
+        fields={collectionConfig.fields}
+        forceRender
         operation="create"
         path=""
         readOnly={false}
         schemaPath={userSlug}
       />
-      <FormSubmit>{t('general:create')}</FormSubmit>
+      <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>
   )
 }

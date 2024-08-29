@@ -43,7 +43,7 @@ For example, a use case for "versions enabled, drafts disabled" could be on a co
 
 ### Versions and drafts enabled
 
-If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [access control](/docs/access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
+If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [Access Control](../access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
 
 ### Versions, drafts, and autosave enabled
 
@@ -245,10 +245,10 @@ const result = await payload.restoreGlobalVersion({
 
 ## Access Control
 
-Versions expose a new access control function on both Collections and Globals that allow for you to control who can see versions of documents, and who can't.
-
-**New version access control:**
+Versions expose a new [Access Control](../access-control/overview) function on both [Collections](../configuration/collections) and [Globals](../configuration/globals) that allow for you to control who can see versions of documents, and who can't.
 
 | Function           | Allows/Denies Access                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | **`readVersions`** | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. |
+
+For full details on how to use Access Control with Versions, see the [Access Control](../access-control/overview) documentation.

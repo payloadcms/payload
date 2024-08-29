@@ -111,7 +111,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     )
   }
   const handleKeyDown: KeyboardEventHandler = (event) => {
-    // eslint-disable-next-line no-restricted-globals
     if (numberOnly === true) {
       const acceptableKeys = [
         'Tab',
@@ -130,7 +129,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         return
       }
     }
-    if (!value || !inputValue || inputValue.trim() === '') return
+    if (!value || !inputValue || inputValue.trim() === '') {
+      return
+    }
     if (filterOption && !filterOption(null, inputValue)) {
       return
     }

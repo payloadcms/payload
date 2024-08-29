@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { CollectionConfig } from 'payload'
 
 const validateFieldTransformAction = (hook: string, value) => {

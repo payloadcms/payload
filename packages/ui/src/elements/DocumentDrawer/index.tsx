@@ -5,9 +5,9 @@ import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
 
-import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
 import './index.scss'

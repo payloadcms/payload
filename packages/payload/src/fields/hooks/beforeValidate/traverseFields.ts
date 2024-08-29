@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -21,11 +21,11 @@ type Args<T> = {
   path: (number | string)[]
   req: PayloadRequest
   schemaPath: string[]
-  siblingData: Record<string, unknown>
+  siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
    */
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
 }
 
 export const traverseFields = async <T>({

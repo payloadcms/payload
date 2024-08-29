@@ -8,8 +8,7 @@
   .rs__control {
     @include formInput;
     height: auto;
-    padding-top: base(0.25);
-    padding-bottom: base(0.25);
+    padding: base(0.4) base(0.6);
     flex-wrap: nowrap;
   }
 
@@ -59,13 +58,20 @@
     }
   }
 
-  &--error {
+  &--error,
+  &--error:hover,
+  &--error:focus-within {
     div.rs__control {
-      background-color: var(--theme-error-100);
+      background-color: var(--theme-error-50);
+      border: 1px solid var(--theme-error-500);
+
+      & > div.rs__indicator > button.dropdown-indicator[type='button'] {
+        border: none;
+      }
     }
   }
 
   &.rs--is-disabled .rs__control {
-    background: var(--theme-elevation-200);
+    @include readOnly;
   }
 }

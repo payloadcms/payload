@@ -1,15 +1,18 @@
-import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+'use client'
+import type { ClientField } from 'payload'
+
+import { fieldAffectsData } from 'payload/shared'
 
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],
-  fieldMap: FieldMap,
-): MappedField[] => {
+  fields: ClientField[],
+): ClientField[] => {
   if (listSearchableFields) {
-    const flattenedFields = flattenFieldMap(fieldMap)
+    const flattenedFields = flattenFieldMap(fields)
     return flattenedFields.filter(
-      (field) => field.isFieldAffectingData && listSearchableFields.includes(field.name),
+      (field) => fieldAffectsData(field) && listSearchableFields.includes(field.name),
     )
   }
 

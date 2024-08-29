@@ -13,10 +13,14 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [PostsCollection, MediaCollection],
-  globals: [MenuGlobal],
   email: nodemailerAdapter(),
+  globals: [MenuGlobal],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -34,8 +38,8 @@ export default buildConfigWithDefaults({
     })
 
     const email = await payload.sendEmail({
-      to: 'test@example.com',
       subject: 'This was sent on init',
+      to: 'test@example.com',
     })
 
     // Create image

@@ -2,28 +2,26 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { TextField } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
+const defaultValueField: TextField = {
+  name: 'defaultValue',
+  type: 'text',
+  defaultValue: 'default value from database',
+}
+
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
-      hooks: {
-        beforeOperation: [
-          ({ req, operation, args }) => {
-            if (operation === 'update') {
-              const defaultIDType = req.payload.db.defaultIDType
-
-              if (defaultIDType === 'number' && typeof args.id === 'string') {
-                throw new Error('ID was not sanitized to a number properly')
-              }
-            }
-
-            return args
-          },
-        ],
-      },
       fields: [
         {
           name: 'title',
@@ -45,6 +43,55 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      hooks: {
+        beforeOperation: [
+          ({ args, operation, req }) => {
+            if (operation === 'update') {
+              const defaultIDType = req.payload.db.defaultIDType
+
+              if (defaultIDType === 'number' && typeof args.id === 'string') {
+                throw new Error('ID was not sanitized to a number properly')
+              }
+            }
+
+            return args
+          },
+        ],
+      },
+    },
+    {
+      slug: 'default-values',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        defaultValueField,
+        {
+          name: 'array',
+          type: 'array',
+          // default array with one object to test subfield defaultValue properties for Mongoose
+          defaultValue: [{}],
+          fields: [defaultValueField],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          // we need to have to use as default in order to have subfield defaultValue properties directly for Mongoose
+          defaultValue: {},
+          fields: [defaultValueField],
+        },
+        {
+          name: 'select',
+          type: 'select',
+          defaultValue: 'default',
+          options: [
+            { value: 'option0', label: 'Option 0' },
+            { value: 'option1', label: 'Option 1' },
+            { value: 'default', label: 'Default' },
+          ],
+        },
+      ],
     },
     {
       slug: 'relation-a',
@@ -52,11 +99,6 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-        },
-        {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
         },
         {
           name: 'richText',
@@ -92,7 +134,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'pg-migrations',
-      versions: true,
       fields: [
         {
           name: 'relation1',
@@ -115,8 +156,8 @@ export default buildConfigWithDefaults({
                 {
                   name: 'relation3',
                   type: 'relationship',
-                  relationTo: 'relation-b',
                   localized: true,
+                  relationTo: 'relation-b',
                 },
               ],
             },
@@ -129,8 +170,8 @@ export default buildConfigWithDefaults({
             {
               name: 'relation4',
               type: 'relationship',
-              relationTo: 'relation-b',
               localized: true,
+              relationTo: 'relation-b',
             },
           ],
         },
@@ -149,14 +190,15 @@ export default buildConfigWithDefaults({
                 {
                   name: 'relation6',
                   type: 'relationship',
-                  relationTo: 'relation-b',
                   localized: true,
+                  relationTo: 'relation-b',
                 },
               ],
             },
           ],
         },
       ],
+      versions: true,
     },
     {
       slug: 'custom-schema',

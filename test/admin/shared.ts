@@ -1,3 +1,5 @@
+import type { Config } from 'payload'
+
 export const slugSingularLabel = 'Post'
 
 export const slugPluralLabel = 'Posts'
@@ -21,6 +23,7 @@ export const customEditLabel = 'Custom Edit Label'
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'
+
 export const customTabViewTitle = 'Custom View With Tab Component'
 
 export const customTabLabelViewTitle = 'Custom Tab Label View'
@@ -29,13 +32,23 @@ export const customTabViewComponentTitle = 'Custom View With Tab Component'
 
 export const customNestedTabViewPath = `${customTabViewPath}/nested-view`
 
+export const customCollectionMetaTitle = 'Custom Meta Title'
+
+export const customRootViewMetaTitle = 'Custom Root View Meta Title'
+
+export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
+
+export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'
+
+export const customViewMetaTitle = 'Custom Tab Meta Title'
+
 export const customNestedTabViewTitle = 'Custom Nested Tab View'
 
 export const customCollectionParamViewPathBase = '/custom-param'
 
 export const customCollectionParamViewPath = `${customCollectionParamViewPathBase}/:slug`
 
-export const customAdminRoutes = {
-  logout: '/custom-logout',
+export const customAdminRoutes: Config['admin']['routes'] = {
   inactivity: '/custom-inactivity',
+  logout: '/custom-logout',
 }

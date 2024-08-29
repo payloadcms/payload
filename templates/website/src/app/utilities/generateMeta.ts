@@ -4,7 +4,6 @@ import type { Page, Post } from '../../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const generateMeta = async (args: { doc: Page | Post }): Promise<Metadata> => {
   const { doc } = args || {}
 
@@ -14,12 +13,14 @@ export const generateMeta = async (args: { doc: Page | Post }): Promise<Metadata
     'url' in doc.meta.image &&
     `${process.env.NEXT_PUBLIC_SERVER_URL}${doc.meta.image.url}`
 
-  const title = doc?.meta?.title ? doc?.meta?.title + ' | Payload Template' : 'Payload Template'
+  const title = doc?.meta?.title
+    ? doc?.meta?.title + ' | Payload Website Template'
+    : 'Payload Website Template'
 
   return {
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
-      description: doc?.meta?.description,
+      description: doc?.meta?.description || '',
       images: ogImage
         ? [
             {

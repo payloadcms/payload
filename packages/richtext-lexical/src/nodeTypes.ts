@@ -1,30 +1,41 @@
 import type {
+  SerializedLineBreakNode as _SerializedLineBreakNode,
+  SerializedTextNode as _SerializedTextNode,
   SerializedEditorState,
   SerializedElementNode,
   SerializedLexicalNode,
   Spread,
-  TextModeType,
 } from 'lexical'
 
-import type { SerializedQuoteNode } from './features/blockquote/feature.server.js'
-import type { SerializedBlockNode } from './features/blocks/nodes/BlocksNode.js'
-import type { SerializedHeadingNode } from './features/heading/feature.server.js'
-import type { SerializedHorizontalRuleNode } from './features/horizontalRule/nodes/HorizontalRuleNode.js'
+import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
+import type { SerializedInlineBlockNode } from './features/blocks/client/nodes/InlineBlocksNode.js'
+import type { SerializedBlockNode } from './features/blocks/server/nodes/BlocksNode.js'
+import type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from './features/experimental_table/server/index.js'
+import type { SerializedHeadingNode } from './features/heading/server/index.js'
+import type { SerializedHorizontalRuleNode } from './features/horizontalRule/server/nodes/HorizontalRuleNode.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from './features/link/nodes/types.js'
 import type { SerializedListItemNode, SerializedListNode } from './features/lists/plugin/index.js'
-import type { SerializedRelationshipNode } from './features/relationship/nodes/RelationshipNode.js'
-import type { SerializedUploadNode } from './features/upload/nodes/UploadNode.js'
+import type { SerializedRelationshipNode } from './features/relationship/server/nodes/RelationshipNode.js'
+import type { SerializedUploadNode } from './features/upload/server/nodes/UploadNode.js'
 
-export {
+export type {
   SerializedAutoLinkNode,
   SerializedBlockNode,
   SerializedHeadingNode,
   SerializedHorizontalRuleNode,
+  SerializedInlineBlockNode,
   SerializedLinkNode,
   SerializedListItemNode,
   SerializedListNode,
   SerializedQuoteNode,
   SerializedRelationshipNode,
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
   SerializedUploadNode,
 }
 
@@ -39,14 +50,17 @@ export type SerializedParagraphNode<T extends SerializedLexicalNode = Serialized
 export type SerializedTextNode = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    detail: number
-    format: number
-    mode: TextModeType
-    style: string
-    text: string
     type: 'text'
   },
-  SerializedLexicalNode
+  _SerializedTextNode
+>
+
+export type SerializedLineBreakNode = Spread<
+  {
+    children?: never // required so that our typed editor state doesn't automatically add children
+    type: 'linebreak'
+  },
+  _SerializedLineBreakNode
 >
 
 type RecursiveNodes<T extends SerializedLexicalNode, Depth extends number = 4> = Depth extends 0
@@ -60,9 +74,10 @@ export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexical
 
 export type DefaultNodeTypes =
   | SerializedAutoLinkNode
-  | SerializedBlockNode
+  //| SerializedBlockNode // Not included by default
   | SerializedHeadingNode
   | SerializedHorizontalRuleNode
+  | SerializedLineBreakNode
   | SerializedLinkNode
   | SerializedListItemNode
   | SerializedListNode

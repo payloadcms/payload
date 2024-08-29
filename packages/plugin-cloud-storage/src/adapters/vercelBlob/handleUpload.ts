@@ -1,15 +1,14 @@
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-
 import { put } from '@vercel/blob'
 import path from 'path'
 
+import type { HandleUpload } from '../../types.js'
 import type { VercelBlobAdapterUploadOptions } from './index.js'
 
-type HandleUploadArgs = VercelBlobAdapterUploadOptions & {
+type HandleUploadArgs = {
   baseUrl: string
   prefix?: string
   token: string
-}
+} & VercelBlobAdapterUploadOptions
 
 export const getHandleUpload = ({
   access = 'public',

@@ -12,8 +12,9 @@ import {
   useNav,
   useTranslation,
 } from '@payloadcms/ui'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType, formatAdminURL, groupNavItems } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
+import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
@@ -21,11 +22,14 @@ const baseClass = 'nav'
 export const DefaultNavClient: React.FC = () => {
   const { permissions } = useAuth()
   const { isEntityVisible } = useEntityVisibility()
+  const pathname = usePathname()
 
   const {
-    collections,
-    globals,
-    routes: { admin },
+    config: {
+      collections,
+      globals,
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   const { i18n } = useTranslation()
@@ -69,13 +73,13 @@ export const DefaultNavClient: React.FC = () => {
               let id: string
 
               if (type === EntityType.collection) {
-                href = `${admin}/collections/${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
                 entityLabel = getTranslation(entity.labels.plural, i18n)
                 id = `nav-${entity.slug}`
               }
 
               if (type === EntityType.global) {
-                href = `${admin}/globals/${entity.slug}`
+                href = formatAdminURL({ adminRoute, path: `/globals/${entity.slug}` })
                 entityLabel = getTranslation(entity.label, i18n)
                 id = `nav-global-${entity.slug}`
               }
@@ -84,18 +88,20 @@ export const DefaultNavClient: React.FC = () => {
                 LinkWithDefault) as typeof LinkWithDefault.default
 
               const LinkElement = Link || 'a'
+              const activeCollection =
+                pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
               return (
                 <LinkElement
-                  className={`${baseClass}__link`}
+                  className={[`${baseClass}__link`, activeCollection && `active`]
+                    .filter(Boolean)
+                    .join(' ')}
                   href={href}
                   id={id}
                   key={i}
                   tabIndex={!navOpen ? -1 : undefined}
                 >
-                  <span className={`${baseClass}__link-icon`}>
-                    <ChevronIcon direction="right" />
-                  </span>
+                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
                   <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                 </LinkElement>
               )

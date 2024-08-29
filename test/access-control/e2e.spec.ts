@@ -16,9 +16,9 @@ import type {
 
 import {
   closeNav,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   login,
   openDocControls,
@@ -92,14 +92,14 @@ describe('access control', () => {
     initPageConsoleErrorCatch(page)
 
     await login({ page, serverURL })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
 
     const {
       admin: {
         routes: { logout: logoutRoute },
       },
       routes: { admin: adminRoute },
-    } = getAdminRoutes({})
+    } = getRoutes({})
 
     logoutURL = `${serverURL}${adminRoute}${logoutRoute}`
   })
@@ -172,8 +172,16 @@ describe('access control', () => {
     })
 
     test('should not have list url', async () => {
+      const errors = []
+
+      page.on('console', (exception) => {
+        errors.push(exception)
+      })
+
       await page.goto(restrictedUrl.list)
-      await expect(page.locator('.not-found')).toBeVisible()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(errors).not.toHaveLength(0)
     })
 
     test('should not have create url', async () => {

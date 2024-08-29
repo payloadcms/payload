@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "3.0.0-beta.59",
-  "description": "The official live preview React SDK for Payload",
+  "version": "3.0.0-beta.96",
+  "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -29,6 +29,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
@@ -36,13 +38,13 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-f994737d14-20240522"
+    "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801"
   },
   "publishConfig": {
     "exports": {
@@ -57,7 +59,7 @@
     "types": "./dist/index.d.ts"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2"
+    "@types/react": "npm:types-react@19.0.0-rc.0",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
   }
 }

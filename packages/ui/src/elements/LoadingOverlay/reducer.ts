@@ -1,3 +1,4 @@
+'use client'
 import type { Action, State } from './types.js'
 
 export const defaultLoadingOverlayState = {

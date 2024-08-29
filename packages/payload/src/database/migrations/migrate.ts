@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
@@ -8,9 +7,12 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'
 
-export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
+export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
+  this: BaseDatabaseAdapter,
+  args,
+): Promise<void> {
   const { payload } = this
-  const migrationFiles = await readMigrationFiles({ payload })
+  const migrationFiles = args?.migrations || (await readMigrationFiles({ payload }))
   const { existingMigrations, latestBatch } = await getMigrations({ payload })
 
   const newBatch = latestBatch + 1
@@ -23,7 +25,7 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
 
     // Run migration if not found in database
     if (existingMigration) {
-      continue // eslint-disable-line no-continue
+      continue
     }
 
     const start = Date.now()

@@ -3,9 +3,10 @@ import type React from 'react'
 
 export type Props = {
   Link?: React.ElementType
+  SubMenuPopupContent?: React.ReactNode
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?: 'error' | 'icon-label' | 'none' | 'primary' | 'secondary' | 'transparent'
+  buttonStyle?: 'error' | 'icon-label' | 'none' | 'pill' | 'primary' | 'secondary' | 'transparent'
   children?: React.ReactNode
   className?: string
   disabled?: boolean
@@ -17,7 +18,7 @@ export type Props = {
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   round?: boolean
-  size?: 'medium' | 'small'
+  size?: 'large' | 'medium' | 'small'
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'

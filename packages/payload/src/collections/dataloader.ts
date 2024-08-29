@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { JsonValue, PayloadRequest } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -75,7 +75,9 @@ const batchAndLoadDocs =
 
       let sanitizedID: number | string = id
 
-      if (idType === 'number') sanitizedID = parseFloat(id)
+      if (idType === 'number') {
+        sanitizedID = parseFloat(id)
+      }
 
       if (isValidID(sanitizedID, idType)) {
         return {

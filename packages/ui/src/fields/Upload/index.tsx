@@ -1,48 +1,40 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import type { UploadFieldProps } from 'payload'
 
-import type { UploadInputProps } from './Input.js'
-import type { UploadFieldProps } from './types.js'
+import React from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
 
-export { UploadFieldProps, UploadInput }
-export type { UploadInputProps }
+export { UploadInput } from './Input.js'
+export type { UploadInputProps } from './Input.js'
 
-const _Upload: React.FC<UploadFieldProps> = (props) => {
+export const baseClass = 'upload'
+
+export function UploadComponent(props: UploadFieldProps) {
   const {
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    relationTo,
-    required,
-    style,
+    field: {
+      _path,
+      admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
+      hasMany,
+      label,
+      maxRows,
+      relationTo,
+      required,
+    },
+    field,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const {
-    collections,
-    routes: { api },
-    serverURL,
-  } = useConfig()
+  const { config } = useConfig()
 
-  const collection = collections.find((coll) => coll.slug === relationTo)
-
-  const memoizedValidate = useCallback(
+  const memoizedValidate = React.useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -50,54 +42,47 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
     },
     [validate, required],
   )
+  const {
+    filterOptions,
+    formInitializing,
+    formProcessing,
+    path,
+    readOnly: readOnlyFromField,
+    setValue,
+    showError,
+    value,
+  } = useField<string | string[]>({
+    path: _path,
+    validate: memoizedValidate,
+  })
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const disabled = readOnlyFromProps || readOnlyFromField || formProcessing || formInitializing
 
-  const { filterOptions, formInitializing, formProcessing, path, setValue, showError, value } =
-    useField<string>({
-      path: pathFromContext ?? pathFromProps,
-      validate: memoizedValidate,
-    })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
-  const onChange = useCallback(
-    (incomingValue) => {
-      const incomingID = incomingValue?.id || incomingValue
-      setValue(incomingID)
-    },
-    [setValue],
+  return (
+    <UploadInput
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      api={config.routes.api}
+      className={className}
+      field={field}
+      filterOptions={filterOptions}
+      hasMany={hasMany}
+      isSortable={isSortable}
+      label={label}
+      maxRows={maxRows}
+      onChange={setValue}
+      path={path}
+      readOnly={disabled}
+      relationTo={relationTo}
+      required={required}
+      serverURL={config.serverURL}
+      showError={showError}
+      style={style}
+      value={value}
+      width={width}
+    />
   )
-
-  if (collection.upload) {
-    return (
-      <UploadInput
-        CustomDescription={CustomDescription}
-        CustomError={CustomError}
-        CustomLabel={CustomLabel}
-        api={api}
-        className={className}
-        collection={collection}
-        descriptionProps={descriptionProps}
-        errorProps={errorProps}
-        filterOptions={filterOptions}
-        label={label}
-        labelProps={labelProps}
-        onChange={onChange}
-        path={path}
-        readOnly={disabled}
-        relationTo={relationTo}
-        required={required}
-        serverURL={serverURL}
-        showError={showError}
-        style={style}
-        value={value}
-        width={width}
-      />
-    )
-  }
-
-  return null
 }
 
-export const UploadField = withCondition(_Upload)
+export const UploadField = withCondition(UploadComponent)

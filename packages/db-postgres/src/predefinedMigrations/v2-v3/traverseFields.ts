@@ -1,16 +1,17 @@
+import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { Field, Payload } from 'payload'
 
 import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleTransaction, PostgresAdapter } from '../../types.js'
+import type { PostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
 type Args = {
   adapter: PostgresAdapter
   collectionSlug?: string
   columnPrefix: string
-  db: DrizzleTransaction
+  db: TransactionPg
   disableNotNull: boolean
   fields: Field[]
   globalSlug?: string

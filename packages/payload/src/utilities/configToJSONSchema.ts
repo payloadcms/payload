@@ -3,6 +3,7 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
+import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
@@ -16,10 +17,14 @@ import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
-  if (isConditional) return false
+  if (isConditional) {
+    return false
+  }
 
   const isMarkedRequired = 'required' in field && field.required === true
-  if (fieldAffectsData(field) && isMarkedRequired) return true
+  if (fieldAffectsData(field) && isMarkedRequired) {
+    return true
+  }
 
   // if any subfields are required, this field is required
   if ('fields' in field && field.type !== 'array') {
@@ -112,6 +117,25 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
 }
 
 /**
+ * Generates the JSON Schema for database configuration
+ *
+ * @example { db: idType: string }
+ */
+function generateDbEntitySchema(config: SanitizedConfig): JSONSchema4 {
+  const defaultIDType: JSONSchema4 =
+    config.db?.defaultIDType === 'number' ? { type: 'number' } : { type: 'string' }
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      defaultIDType,
+    },
+    required: ['defaultIDType'],
+  }
+}
+
+/**
  * Returns a JSON Schema Type with 'null' added if the field is not required.
  */
 export function withNullableJSONSchemaType(
@@ -119,7 +143,9 @@ export function withNullableJSONSchemaType(
   isRequired: boolean,
 ): JSONSchema4TypeName | JSONSchema4TypeName[] {
   const fieldTypes = [fieldType]
-  if (isRequired) return fieldType
+  if (isRequired) {
+    return fieldType
+  }
   fieldTypes.push('null')
   return fieldTypes
 }
@@ -149,7 +175,9 @@ export function fieldsToJSONSchema(
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-        if (isRequired) requiredFieldNames.add(field.name)
+        if (isRequired) {
+          requiredFieldNames.add(field.name)
+        }
 
         let fieldSchema: JSONSchema4
 
@@ -271,6 +299,7 @@ export function fieldsToJSONSchema(
             break
           }
 
+          case 'upload':
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
@@ -360,56 +389,48 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'upload': {
-            fieldSchema = {
-              oneOf: [
-                {
-                  type: collectionIDFieldTypes[field.relationTo],
-                },
-                {
-                  $ref: `#/definitions/${field.relationTo}`,
-                },
-              ],
-            }
-            if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
-            break
-          }
-
           case 'blocks': {
+            // Check for a case where no blocks are provided.
+            // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
+            // so the best we can get is `unknown[]`
+            const hasBlocks = Boolean(field.blocks.length)
+
             fieldSchema = {
               type: withNullableJSONSchemaType('array', isRequired),
-              items: {
-                oneOf: field.blocks.map((block) => {
-                  const blockFieldSchemas = fieldsToJSONSchema(
-                    collectionIDFieldTypes,
-                    block.fields,
-                    interfaceNameDefinitions,
-                    config,
-                  )
+              items: hasBlocks
+                ? {
+                    oneOf: field.blocks.map((block) => {
+                      const blockFieldSchemas = fieldsToJSONSchema(
+                        collectionIDFieldTypes,
+                        block.fields,
+                        interfaceNameDefinitions,
+                        config,
+                      )
 
-                  const blockSchema: JSONSchema4 = {
-                    type: 'object',
-                    additionalProperties: false,
-                    properties: {
-                      ...blockFieldSchemas.properties,
-                      blockType: {
-                        const: block.slug,
-                      },
-                    },
-                    required: ['blockType', ...blockFieldSchemas.required],
+                      const blockSchema: JSONSchema4 = {
+                        type: 'object',
+                        additionalProperties: false,
+                        properties: {
+                          ...blockFieldSchemas.properties,
+                          blockType: {
+                            const: block.slug,
+                          },
+                        },
+                        required: ['blockType', ...blockFieldSchemas.required],
+                      }
+
+                      if (block.interfaceName) {
+                        interfaceNameDefinitions.set(block.interfaceName, blockSchema)
+
+                        return {
+                          $ref: `#/definitions/${block.interfaceName}`,
+                        }
+                      }
+
+                      return blockSchema
+                    }),
                   }
-
-                  if (block.interfaceName) {
-                    interfaceNameDefinitions.set(block.interfaceName, blockSchema)
-
-                    return {
-                      $ref: `#/definitions/${block.interfaceName}`,
-                    }
-                  }
-
-                  return blockSchema
-                }),
-              },
+                : {},
             }
             break
           }
@@ -588,60 +609,135 @@ export function entityToJSONSchema(
   }
 }
 
-function generateOperationJSONSchema(
-  config: SanitizedCollectionConfig,
-  operation: 'forgotPassword' | 'login' | 'registerFirstUser',
-): JSONSchema4 {
-  const usernameLogin = config.auth?.loginWithUsername
-  const fieldType: JSONSchema4 = {
-    type: 'string',
+const fieldType: JSONSchema4 = {
+  type: 'string',
+  required: false,
+}
+const generateAuthFieldTypes = ({
+  type,
+  loginWithUsername,
+}: {
+  loginWithUsername: Auth['loginWithUsername']
+  type: 'forgotOrUnlock' | 'login' | 'register'
+}): JSONSchema4 => {
+  if (loginWithUsername) {
+    switch (type) {
+      case 'login': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow username or email and require password for login
+          return {
+            additionalProperties: false,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: { email: fieldType, password: fieldType },
+                required: ['email', 'password'],
+              },
+              {
+                additionalProperties: false,
+                properties: { password: fieldType, username: fieldType },
+                required: ['username', 'password'],
+              },
+            ],
+          }
+        } else {
+          // allow only username and password for login
+          return {
+            additionalProperties: false,
+            properties: {
+              password: fieldType,
+              username: fieldType,
+            },
+            required: ['username', 'password'],
+          }
+        }
+      }
+
+      case 'register': {
+        const requiredFields: ('email' | 'password' | 'username')[] = ['password']
+        const properties: {
+          email?: JSONSchema4['properties']
+          password?: JSONSchema4['properties']
+          username?: JSONSchema4['properties']
+        } = {
+          password: fieldType,
+          username: fieldType,
+        }
+
+        if (loginWithUsername.requireEmail) {
+          requiredFields.push('email')
+        }
+        if (loginWithUsername.requireUsername) {
+          requiredFields.push('username')
+        }
+        if (loginWithUsername.requireEmail || loginWithUsername.allowEmailLogin) {
+          properties.email = fieldType
+        }
+
+        return {
+          additionalProperties: false,
+          properties,
+          required: requiredFields,
+        }
+      }
+
+      case 'forgotOrUnlock': {
+        if (loginWithUsername.allowEmailLogin) {
+          // allow email or username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: { email: fieldType },
+                required: ['email'],
+              },
+              {
+                additionalProperties: false,
+                properties: { username: fieldType },
+                required: ['username'],
+              },
+            ],
+          }
+        } else {
+          // allow only username for unlock/forgot-password
+          return {
+            additionalProperties: false,
+            properties: { username: fieldType },
+            required: ['username'],
+          }
+        }
+      }
+    }
   }
 
-  let properties: JSONSchema4['properties'] = {}
-  switch (operation) {
-    case 'login': {
-      properties = {
-        password: fieldType,
-        [usernameLogin ? 'username' : 'email']: fieldType,
-      }
-      break
-    }
-    case 'forgotPassword': {
-      properties = {
-        [usernameLogin ? 'username' : 'email']: fieldType,
-      }
-      break
-    }
-    case 'registerFirstUser': {
-      properties = {
-        email: fieldType,
-        password: fieldType,
-      }
-      if (usernameLogin) properties.username = fieldType
-      break
-    }
-  }
-
+  // default email (and password for login/register)
   return {
     additionalProperties: false,
-    properties,
-    required: Object.keys(properties),
+    properties: { email: fieldType, password: fieldType },
+    required: ['email', 'password'],
   }
 }
 
 export function authCollectionToOperationsJSONSchema(
   config: SanitizedCollectionConfig,
 ): JSONSchema4 {
-  const properties = {
-    forgotPassword: {
-      ...generateOperationJSONSchema(config, 'forgotPassword'),
-    },
-    login: {
-      ...generateOperationJSONSchema(config, 'login'),
-    },
-    registerFirstUser: {
-      ...generateOperationJSONSchema(config, 'registerFirstUser'),
-    },
+  const loginWithUsername = config.auth?.loginWithUsername
+  const loginUserFields: JSONSchema4 = generateAuthFieldTypes({ type: 'login', loginWithUsername })
+  const forgotOrUnlockUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'forgotOrUnlock',
+    loginWithUsername,
+  })
+  const registerUserFields: JSONSchema4 = generateAuthFieldTypes({
+    type: 'register',
+    loginWithUsername,
+  })
+
+  const properties: JSONSchema4['properties'] = {
+    forgotPassword: forgotOrUnlockUserFields,
+    login: loginUserFields,
+    registerFirstUser: registerUserFields,
+    unlock: forgotOrUnlockUserFields,
   }
 
   return {
@@ -713,11 +809,12 @@ export function configToJSONSchema(
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
       collections: generateEntitySchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
       globals: generateEntitySchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'locale', 'collections', 'globals', 'auth'],
+    required: ['user', 'locale', 'collections', 'globals', 'auth', 'db'],
     title: 'Config',
   }
 

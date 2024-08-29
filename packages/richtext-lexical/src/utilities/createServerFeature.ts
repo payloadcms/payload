@@ -9,16 +9,14 @@ import type {
 } from '../features/typesServer.js'
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 
-export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProps> = Pick<
-  FeatureProviderServer<UnSanitizedProps, ClientProps>,
-  'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
-> & {
+export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProps> = {
   feature:
     | ((props: {
         config: SanitizedConfig
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ServerFeatureProviderMap
         isRoot?: boolean
+        parentIsLocalized: boolean
         props: UnSanitizedProps
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedServerFeatureMap
@@ -28,7 +26,10 @@ export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProp
         | Promise<ServerFeature<SanitizedProps, ClientProps>>
         | ServerFeature<SanitizedProps, ClientProps>)
     | Omit<ServerFeature<SanitizedProps, ClientProps>, 'sanitizedServerFeatureProps'>
-}
+} & Pick<
+  FeatureProviderServer<UnSanitizedProps, ClientProps>,
+  'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
+>
 
 export const createServerFeature: <
   UnSanitizedProps = undefined,
@@ -57,6 +58,7 @@ export const createServerFeature: <
         config,
         featureProviderMap,
         isRoot,
+        parentIsLocalized,
         resolvedFeatures,
         unSanitizedEditorConfig,
       }) => {
@@ -64,6 +66,7 @@ export const createServerFeature: <
           config,
           featureProviderMap,
           isRoot,
+          parentIsLocalized,
           props,
           resolvedFeatures,
           unSanitizedEditorConfig,
@@ -75,8 +78,11 @@ export const createServerFeature: <
         return toReturn
       }
     } else {
-      ;(feature as ServerFeature<any, any>).sanitizedServerFeatureProps = props
-      featureProviderServer.feature = feature as ServerFeature<any, any>
+      // For explanation why we have to spread feature, see createClientFeature.ts
+      const newFeature: ServerFeature<any, any> = { ...feature }
+
+      newFeature.sanitizedServerFeatureProps = props
+      featureProviderServer.feature = newFeature
     }
     return featureProviderServer as FeatureProviderServer<any, any, any>
   }

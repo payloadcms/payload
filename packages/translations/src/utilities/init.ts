@@ -8,7 +8,7 @@ import type {
 } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
-import { deepMerge } from './deepMerge.js'
+import { deepMergeSimple } from './deepMergeSimple.js'
 import { getTranslationsByContext } from './getTranslationsByContext.js'
 
 /**
@@ -34,7 +34,9 @@ export const getTranslationString = <
   let keySuffix = ''
 
   const translation: string = keys.reduce((acc: any, key, index) => {
-    if (typeof acc === 'string') return acc
+    if (typeof acc === 'string') {
+      return acc
+    }
 
     if (typeof count === 'number') {
       if (count === 0 && `${key}_zero` in acc) {
@@ -143,7 +145,9 @@ export function t<
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMerge(translations, config?.translations?.[language] ?? {})
+  const mergedTranslations = config?.translations?.[language]
+    ? deepMergeSimple<DefaultTranslationsObject>(translations, config?.translations?.[language])
+    : translations
 
   return {
     t: (key, vars) => {
@@ -161,9 +165,9 @@ function memoize(
   fn: (args: Parameters<InitI18n>[0]) => Promise<I18n>,
   keys: string[],
 ): (
-  args: Parameters<InitI18n>[0] & {
+  args: {
     context: 'api' | 'client'
-  },
+  } & Parameters<InitI18n>[0],
 ) => Promise<I18n> {
   const cacheMap = new Map()
 

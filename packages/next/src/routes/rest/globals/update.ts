@@ -24,8 +24,12 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) message = req.t('version:draftSavedSuccessfully')
-  if (autosave) message = req.t('version:autosavedSuccessfully')
+  if (draft) {
+    message = req.t('version:draftSavedSuccessfully')
+  }
+  if (autosave) {
+    message = req.t('version:autosavedSuccessfully')
+  }
 
   return Response.json(
     {

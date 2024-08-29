@@ -9,7 +9,7 @@ const { beforeAll, beforeEach, describe } = test
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -22,7 +22,7 @@ describe('i18n', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -39,7 +39,7 @@ describe('i18n', () => {
       serverURL,
       snapshotKey: 'i18nTests',
     })
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -47,7 +47,7 @@ describe('i18n', () => {
       snapshotKey: 'i18nTests',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('ensure i18n labels and useTranslation hooks display correct translation', async () => {

@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { InitPageResult, Locale, PayloadRequest, VisibleEntities } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -16,12 +16,13 @@ import { handleAuthRedirect } from './handleAuthRedirect.js'
 
 export const initPage = async ({
   config: configPromise,
+  importMap,
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise, importMap })
 
   const {
     collections,
@@ -35,7 +36,7 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
-  const i18n: I18nClient = await initI18n({
+  const i18n: I18n = await initI18n({
     config: i18nConfig,
     context: 'client',
     language,
@@ -116,7 +117,9 @@ export const initPage = async ({
 
     locale = findLocaleFromCode(localization, localeCode)
 
-    if (!locale) locale = findLocaleFromCode(localization, defaultLocaleCode)
+    if (!locale) {
+      locale = findLocaleFromCode(localization, defaultLocaleCode)
+    }
     req.locale = locale.code
   }
 

@@ -1,13 +1,13 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { type MappedField, useConfig } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
@@ -22,32 +22,40 @@ type RelationshipValue = Record<string, any>
 
 const generateLabelFromValue = (
   collections: ClientCollectionConfig[],
-  field: MappedField,
+  field: ClientField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
 ): string => {
-  let relation: string
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => generateLabelFromValue(collections, field, locale, v))
+      .filter(Boolean) // Filters out any undefined or empty values
+      .join(', ')
+  }
+
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
 
-  const relationTo =
-    'relationTo' in field.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
+  const relationTo = 'relationTo' in field ? field.relationTo : undefined
 
   if (value === null || typeof value === 'undefined') {
     return String(value)
   }
 
-  if (Array.isArray(relationTo)) {
-    if (typeof value === 'object') {
-      relation = value.relationTo
-      relatedDoc = value.value
-    }
+  if (typeof value === 'object' && 'relationTo' in value) {
+    relatedDoc = value.value
   } else {
-    relation = relationTo
+    // Non-polymorphic relationship
     relatedDoc = value
   }
 
-  const relatedCollection = collections.find((c) => c.slug === relation)
+  const relatedCollection = relationTo
+    ? collections.find(
+        (c) =>
+          c.slug ===
+          (typeof value === 'object' && 'relationTo' in value ? value.relationTo : relationTo),
+      )
+    : null
 
   if (relatedCollection) {
     const useAsTitle = relatedCollection?.admin?.useAsTitle
@@ -56,52 +64,78 @@ const generateLabelFromValue = (
     )
     let titleFieldIsLocalized = false
 
-    if (useAsTitleField && fieldAffectsData(useAsTitleField))
+    if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
       titleFieldIsLocalized = useAsTitleField.localized
+    }
 
     if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
       valueToReturn = relatedDoc[useAsTitle]
     } else if (typeof relatedDoc?.id !== 'undefined') {
       valueToReturn = relatedDoc.id
+    } else {
+      valueToReturn = relatedDoc
     }
 
     if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
       valueToReturn = valueToReturn[locale]
     }
+  } else if (relatedDoc) {
+    // Handle non-polymorphic `hasMany` relationships or fallback
+    if (typeof relatedDoc?.id !== 'undefined') {
+      valueToReturn = relatedDoc.id
+    } else {
+      valueToReturn = relatedDoc
+    }
+  }
+
+  if (typeof valueToReturn === 'object' && valueToReturn !== null) {
+    valueToReturn = JSON.stringify(valueToReturn)
   }
 
   return valueToReturn
 }
 
-const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
-  let placeholder = ''
+const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
+  comparison,
+  field,
+  i18n,
+  locale,
+  version,
+}) => {
+  const placeholder = `[${i18n.t('general:noValue')}]`
 
-  const { collections } = useConfig()
+  const {
+    config: { collections },
+  } = useConfig()
 
-  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
+  let versionToRender: string | undefined = placeholder
+  let comparisonToRender: string | undefined = placeholder
 
-  let versionToRender = version
-  let comparisonToRender = comparison
+  if (version) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
+      versionToRender =
+        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
+        placeholder
+    } else {
+      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
+    }
+  }
 
-  if ('hasMany' in field && field.hasMany) {
-    if (Array.isArray(version))
-      versionToRender = version
-        .map((val) => generateLabelFromValue(collections, field, locale, val))
-        .join(', ')
-    if (Array.isArray(comparison))
-      comparisonToRender = comparison
-        .map((val) => generateLabelFromValue(collections, field, locale, val))
-        .join(', ')
-  } else {
-    versionToRender = generateLabelFromValue(collections, field, locale, version)
-    comparisonToRender = generateLabelFromValue(collections, field, locale, comparison)
+  if (comparison) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
+      comparisonToRender =
+        comparison
+          .map((val) => generateLabelFromValue(collections, field, locale, val))
+          .join(', ') || placeholder
+    } else {
+      comparisonToRender =
+        generateLabelFromValue(collections, field, locale, comparison) || placeholder
+    }
   }
 
   const label =
-    'label' in field.fieldComponentProps &&
-    typeof field.fieldComponentProps.label !== 'boolean' &&
-    typeof field.fieldComponentProps.label !== 'function'
-      ? field.fieldComponentProps.label
+    'label' in field && typeof field.label !== 'boolean' && typeof field.label !== 'function'
+      ? field.label
       : ''
 
   return (
@@ -112,10 +146,8 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
       </Label>
       <ReactDiffViewer
         hideLineNumbers
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        oldValue={
-          typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder
-        }
+        newValue={versionToRender}
+        oldValue={comparisonToRender}
         showDiffOnly={false}
         splitView
         styles={diffStyles}

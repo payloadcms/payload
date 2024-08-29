@@ -5,7 +5,7 @@ import Select from './Select/index.js'
 import Tabs from './Tabs/index.js'
 import Text from './Text/index.js'
 
-export default {
+export const diffComponents = {
   array: Iterable,
   blocks: Iterable,
   checkbox: Text,
@@ -18,12 +18,12 @@ export default {
   number: Text,
   point: Text,
   radio: Select,
-  relationship: null,
+  relationship: Relationship,
   richText: Text,
   row: Nested,
   select: Select,
   tabs: Tabs,
   text: Text,
   textarea: Text,
-  upload: null,
+  upload: Relationship,
 }

@@ -1,7 +1,7 @@
 'use client'
-import React from 'react'
+import type { RowFieldProps } from 'payload'
 
-import type { RowFieldProps } from './types.js'
+import React from 'react'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -14,8 +14,11 @@ export { RowProvider, useRow }
 
 const baseClass = 'row'
 
-export const _RowField: React.FC<RowFieldProps> = (props) => {
-  const { className, fieldMap, forceRender = false } = props
+const RowFieldComponent: React.FC<RowFieldProps> = (props) => {
+  const {
+    field: { admin: { className } = {}, fields },
+    forceRender = false,
+  } = props
 
   const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
@@ -23,17 +26,19 @@ export const _RowField: React.FC<RowFieldProps> = (props) => {
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
         <RenderFields
-          {...{ fieldMap, forceRender, path, readOnly, schemaPath }}
           className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
+          fields={fields}
           forceRender={forceRender}
           indexPath={indexPath}
           margins={false}
+          path={path}
           permissions={siblingPermissions}
+          readOnly={readOnly}
+          schemaPath={schemaPath}
         />
       </div>
     </RowProvider>
   )
 }
 
-export const RowField = withCondition(_RowField)
+export const RowField = withCondition(RowFieldComponent)

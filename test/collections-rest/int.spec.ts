@@ -1,14 +1,15 @@
 import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
-import { mapAsync } from 'payload'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import config, {
+import {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -17,12 +18,15 @@ import config, {
   slug,
 } from './config.js'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 let restClient: NextRESTClient
 let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -127,9 +131,9 @@ describe('collections-rest', () => {
 
     describe('Bulk operations', () => {
       it('should bulk update', async () => {
-        await mapAsync([...Array(11)], async (_, i) => {
+        for (let i = 0; i < 11; i++) {
           await createPost({ description: `desc ${i}` })
-        })
+        }
 
         const description = 'updated'
         const response = await restClient.PATCH(`/${slug}`, {
@@ -148,9 +152,9 @@ describe('collections-rest', () => {
       })
 
       it('should not bulk update with a bad query', async () => {
-        await mapAsync([...Array(2)], async (_, i) => {
+        for (let i = 0; i < 2; i++) {
           await createPost({ description: `desc ${i}` })
-        })
+        }
 
         const description = 'updated'
 
@@ -175,9 +179,9 @@ describe('collections-rest', () => {
       })
 
       it('should not bulk update with a bad relationship query', async () => {
-        await mapAsync([...Array(2)], async (_, i) => {
+        for (let i = 0; i < 2; i++) {
           await createPost({ description: `desc ${i}` })
-        })
+        }
 
         const description = 'updated'
         const relationFieldResponse = await restClient.PATCH(`/${slug}`, {
@@ -271,9 +275,9 @@ describe('collections-rest', () => {
 
       it('should bulk delete', async () => {
         const count = 11
-        await mapAsync([...Array(count)], async (_, i) => {
+        for (let i = 0; i < count; i++) {
           await createPost({ description: `desc ${i}` })
-        })
+        }
 
         const response = await restClient.DELETE(`/${slug}`, {
           query: { where: { title: { equals: 'title' } } },
@@ -1088,19 +1092,22 @@ describe('collections-rest', () => {
 
           it('should sort find results by nearest distance', async () => {
             // creating twice as many records as we are querying to get a random sample
-            // eslint-disable-next-line @typescript-eslint/require-await
-            await mapAsync([...Array(10)], async () => {
+            const promises = []
+            for (let i = 0; i < 11; i++) {
               // setTimeout used to randomize the creation timestamp
-              setTimeout(async () => {
-                await payload.create({
-                  collection: pointSlug,
-                  data: {
-                    // only randomize longitude to make distance comparison easy
-                    point: [Math.random(), 0],
-                  },
-                })
+              setTimeout(() => {
+                promises.push(
+                  payload.create({
+                    collection: pointSlug,
+                    data: {
+                      // only randomize longitude to make distance comparison easy
+                      point: [Math.random(), 0],
+                    },
+                  }),
+                )
               }, Math.random())
-            })
+            }
+            await Promise.all(promises)
 
             const { docs } = await restClient
               .GET(`/${pointSlug}`, {
@@ -1327,13 +1334,13 @@ describe('collections-rest', () => {
               name: 'test',
             },
           })
-          await mapAsync([...Array(10)], async (_, i) => {
+          for (let i = 0; i < 10; i++) {
             await createPost({
               number: i,
               relationField: relatedDoc.id as string,
               title: 'paginate-test',
             })
-          })
+          }
         })
 
         it('should paginate with where query', async () => {
@@ -1436,9 +1443,9 @@ describe('collections-rest', () => {
 
         describe('limit', () => {
           beforeEach(async () => {
-            await mapAsync([...Array(50)], async (_, i) =>
-              createPost({ number: i, title: 'limit-test' }),
-            )
+            for (let i = 0; i < 50; i++) {
+              await createPost({ number: i, title: 'limit-test' })
+            }
           })
 
           it('should query a limited set of docs', async () => {
@@ -1522,9 +1529,9 @@ async function createPost(overrides?: Partial<Post>) {
 }
 
 async function createPosts(count: number) {
-  await mapAsync([...Array(count)], async () => {
+  for (let i = 0; i < count; i++) {
     await createPost()
-  })
+  }
 }
 
 async function clearDocs(): Promise<void> {

@@ -24,11 +24,19 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
+  MetaConfig,
   OpenGraphConfig,
+  PayloadComponent,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { CollectionSlug, TypedAuthOperations, TypedCollection } from '../../index.js'
+import type {
+  CollectionSlug,
+  JsonObject,
+  TypedAuthOperations,
+  TypedCollection,
+} from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -41,7 +49,7 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
-export type RequiredDataFromCollection<TData extends Record<string, any>> = MarkOptional<
+export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
   'createdAt' | 'id' | 'sizes' | 'updatedAt'
 >
@@ -242,6 +250,7 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
+    Description?: EntityDescriptionComponent
     afterList?: CustomComponent[]
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
@@ -250,8 +259,6 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
-      Description?: EntityDescriptionComponent
-
       /**
        * Replaces the "Preview" button
        */
@@ -280,16 +287,14 @@ export type CollectionAdminOptions = {
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?: EditConfig
-      List?:
-        | {
-            Component?: React.ComponentType<any>
-            actions?: CustomComponent[]
-          }
-        | React.ComponentType<any>
+      edit?: EditConfig
+      list?: {
+        Component?: PayloadComponent
+        actions?: CustomComponent[]
+      }
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
@@ -324,10 +329,7 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   pagination?: {
     defaultLimit?: number
     limits?: number[]
@@ -337,7 +339,7 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
-   * Field to use as title in Edit view and first column in List view
+   * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string
 }
@@ -433,8 +435,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Label configuration
    */
   labels?: {
-    plural?: LabelFunction | Record<string, string> | string
-    singular?: LabelFunction | Record<string, string> | string
+    plural?: LabelFunction | StaticLabel
+    singular?: LabelFunction | StaticLabel
   }
   slug: string
   /**

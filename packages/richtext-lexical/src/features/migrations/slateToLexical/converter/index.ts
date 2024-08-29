@@ -47,7 +47,7 @@ export function convertSlateNodesToLexical({
   parentNodeType: string
   slateNodes: SlateNode[]
 }): SerializedLexicalNode[] {
-  if (!converters?.length) {
+  if (!converters?.length || !slateNodes?.length) {
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
@@ -99,6 +99,7 @@ export function convertParagraphNode(
     format: '',
     indent: 0,
     textFormat: 0,
+    textStyle: '',
     version: 1,
   }
 }

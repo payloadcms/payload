@@ -47,7 +47,9 @@ async function buildEmail(emailConfig?: NodemailerAdapterArgs): Promise<{
 }> {
   if (!emailConfig) {
     const transport = await createMockAccount(emailConfig)
-    if (!transport) throw new InvalidConfiguration('Unable to create Nodemailer test account.')
+    if (!transport) {
+      throw new InvalidConfiguration('Unable to create Nodemailer test account.')
+    }
 
     return {
       defaultFromAddress: 'info@payloadcms.com',
@@ -66,7 +68,7 @@ async function buildEmail(emailConfig?: NodemailerAdapterArgs): Promise<{
     transport = await createMockAccount(emailConfig)
   }
 
-  if (emailConfig.skipVerify !== false) {
+  if (!emailConfig.skipVerify) {
     await verifyTransport(transport)
   }
 

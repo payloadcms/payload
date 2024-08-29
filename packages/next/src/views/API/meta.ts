@@ -16,18 +16,25 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       ? getTranslation(globalConfig.label, i18n)
       : ''
 
-  const metaTitle = `API - ${entityLabel}`
-  const description = `API - ${entityLabel}`
-
   return Promise.resolve(
     meta({
       ...(config.admin.meta || {}),
-      description,
+      description: `API - ${entityLabel}`,
       keywords: 'API',
       serverURL: config.serverURL,
-      title: metaTitle,
-      ...(collectionConfig?.admin.meta || {}),
-      ...(globalConfig?.admin.meta || {}),
+      title: `API - ${entityLabel}`,
+      ...(collectionConfig
+        ? {
+            ...(collectionConfig?.admin.meta || {}),
+            ...(collectionConfig?.admin?.components?.views?.edit?.api?.meta || {}),
+          }
+        : {}),
+      ...(globalConfig
+        ? {
+            ...(globalConfig?.admin.meta || {}),
+            ...(globalConfig?.admin?.components?.views?.edit?.api?.meta || {}),
+          }
+        : {}),
     }),
   )
 }

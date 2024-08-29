@@ -1,7 +1,7 @@
 import { promises as fs, existsSync } from 'fs'
-import path, { join } from 'path'
-import glob from 'glob'
-import process from 'process'
+import { join } from 'path'
+import globby from 'globby'
+import process from 'node:process'
 import chalk from 'chalk'
 
 // Helper function to format size appropriately in KB or MB
@@ -73,35 +73,18 @@ async function cleanDirectories(patterns) {
     if (pattern === '@node_modules') {
       pattern = '**/node_modules'
       fulleDelete = true
-      files = await new Promise((resolve, reject) => {
-        glob(pattern, { nodir: false }, (err, files) => {
-          if (err) {
-            reject(err)
-          } else {
-            // Filter out node_modules within other node_modules
-            const topNodeModules = files.filter((file) => {
-              const parentDir = path.dirname(file)
-              return !parentDir.includes('node_modules')
-            })
-            resolve(topNodeModules)
-          }
-        })
+      files = await globby(pattern, {
+        onlyDirectories: true,
+        ignore: ['**/node_modules/**/node_modules'],
       })
     } else {
       const options = {
         ignore: ignoreNodeModules ? '**/node_modules/**' : '',
-        nodir: false,
+        onlyDirectories: pattern.endsWith('/') ? true : false,
       }
+      fulleDelete = options.onlyDirectories
 
-      files = await new Promise((resolve, reject) => {
-        glob(pattern, options, (err, files) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(files)
-          }
-        })
-      })
+      files = await globby(pattern, options)
     }
 
     let count = 0
@@ -127,7 +110,7 @@ async function cleanDirectories(patterns) {
   )
 
   // Print details for each pattern with colors, formatted for alignment
-  console.log(chalk.blue('Summary of deleted items:'))
+  console.log(chalk.blue('\nSummary of deleted items:'))
   Object.keys(deletedCounts).forEach((pattern) => {
     const itemCount =
       `${deletedCounts[pattern].count} item${deletedCounts[pattern].count !== 1 ? 's' : ''} deleted`.padEnd(
@@ -144,7 +127,7 @@ async function cleanDirectories(patterns) {
       `Total deleted items: ${Object.values(deletedCounts).reduce((acc, { count }) => acc + count, 0)}`,
     ),
   )
-  console.log(chalk.cyan(`Total size of deleted items: ${formatSize(totalSize)}`))
+  console.log(chalk.cyan(`Total size of deleted items: ${formatSize(totalSize)}\n`))
 }
 
 // Get patterns from command-line arguments

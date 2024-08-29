@@ -3,19 +3,24 @@ import type { Permissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
-import { EntityType, WithServerSideProps } from '@payloadcms/ui/shared'
+import {
+  EntityType,
+  RenderComponent,
+  formatAdminURL,
+  getCreateMappedComponent,
+} from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import './index.scss'
 
 const baseClass = 'dashboard'
 
-export type DashboardProps = ServerProps & {
+export type DashboardProps = {
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
   visibleEntities: VisibleEntities
-}
+} & ServerProps
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {
@@ -39,48 +44,39 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     user,
   } = props
 
-  const BeforeDashboards = Array.isArray(beforeDashboard)
-    ? beforeDashboard.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
 
-  const AfterDashboards = Array.isArray(afterDashboard)
-    ? afterDashboard.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const mappedBeforeDashboards = createMappedComponent(
+    beforeDashboard,
+    undefined,
+    undefined,
+    'beforeDashboard',
+  )
+
+  const mappedAfterDashboards = createMappedComponent(
+    afterDashboard,
+    undefined,
+    undefined,
+    'afterDashboard',
+  )
 
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />
       <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
-        {Array.isArray(BeforeDashboards) && BeforeDashboards.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedBeforeDashboards} />
         <Fragment>
           <SetViewActions actions={[]} />
           {!navGroups || navGroups?.length === 0 ? (
@@ -100,19 +96,31 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
 
                       if (type === EntityType.collection) {
                         title = getTranslation(entity.labels.plural, i18n)
+
                         buttonAriaLabel = t('general:showAllLabel', { label: title })
-                        href = `${adminRoute}/collections/${entity.slug}`
-                        createHREF = `${adminRoute}/collections/${entity.slug}/create`
+
+                        href = formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` })
+
+                        createHREF = formatAdminURL({
+                          adminRoute,
+                          path: `/collections/${entity.slug}/create`,
+                        })
+
                         hasCreatePermission =
                           permissions?.collections?.[entity.slug]?.create?.permission
                       }
 
                       if (type === EntityType.global) {
                         title = getTranslation(entity.label, i18n)
+
                         buttonAriaLabel = t('general:editLabel', {
                           label: getTranslation(entity.label, i18n),
                         })
-                        href = `${adminRoute}/globals/${entity.slug}`
+
+                        href = formatAdminURL({
+                          adminRoute,
+                          path: `/globals/${entity.slug}`,
+                        })
                       }
 
                       return (
@@ -150,7 +158,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        {Array.isArray(AfterDashboards) && AfterDashboards.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedAfterDashboards} />
       </Gutter>
     </div>
   )

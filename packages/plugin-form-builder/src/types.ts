@@ -1,4 +1,10 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type {
+  Block,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  Field,
+  TypeWithID,
+} from 'payload'
 
 export interface BlockConfig {
   block: Block
@@ -17,9 +23,9 @@ export interface FieldValues {
   [key: string]: boolean | null | number | string | undefined
 }
 
-export type PaymentFieldConfig = Partial<Field> & {
+export type PaymentFieldConfig = {
   paymentProcessor: Partial<SelectField>
-}
+} & Partial<Field>
 
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
@@ -37,15 +43,19 @@ export interface FieldsConfig {
   textarea?: FieldConfig | boolean
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
+type BeforeChangeParams<T extends TypeWithID = any> = Parameters<CollectionBeforeChangeHook<T>>[0]
+export type BeforeEmail<T extends TypeWithID = any> = (
+  emails: FormattedEmail[],
+  beforeChangeParams: BeforeChangeParams<T>,
+) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
   fields?: FieldsConfig
-  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
-  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
+  formOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

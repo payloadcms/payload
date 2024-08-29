@@ -18,16 +18,20 @@ export const withPayload = (nextConfig = {}) => {
     env: {
       ...(nextConfig?.env || {}),
     },
+    outputFileTracingExcludes: {
+      ...(nextConfig?.outputFileTracingExcludes || {}),
+      '**/*': [
+        ...(nextConfig?.outputFileTracingExcludes?.['**/*'] || []),
+        'drizzle-kit',
+        'drizzle-kit/api',
+      ],
+    },
+    outputFileTracingIncludes: {
+      ...(nextConfig?.outputFileTracingIncludes || {}),
+      '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
+    },
     experimental: {
       ...(nextConfig?.experimental || {}),
-      outputFileTracingExcludes: {
-        '**/*': [
-          ...(nextConfig.experimental?.outputFileTracingExcludes?.['**/*'] || []),
-          'drizzle-kit',
-          'drizzle-kit/payload',
-          'libsql',
-        ],
-      },
       turbo: {
         ...(nextConfig?.experimental?.turbo || {}),
         resolveAlias: {
@@ -63,9 +67,9 @@ export const withPayload = (nextConfig = {}) => {
     serverExternalPackages: [
       ...(nextConfig?.serverExternalPackages || []),
       'drizzle-kit',
-      'drizzle-kit/payload',
-      'libsql',
+      'drizzle-kit/api',
       'pino',
+      'libsql',
       'pino-pretty',
       'graphql',
     ],
@@ -80,7 +84,7 @@ export const withPayload = (nextConfig = {}) => {
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           'drizzle-kit',
-          'drizzle-kit/payload',
+          'drizzle-kit/api',
           'sharp',
           'libsql',
         ],

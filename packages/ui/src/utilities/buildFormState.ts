@@ -1,20 +1,16 @@
 import type { DocumentPreferences, Field, FormState, PayloadRequest, TypeWithID } from 'payload'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
 import { reduceFieldsToValues } from 'payload/shared'
 
 import type { BuildFormStateArgs } from '../forms/buildStateFromSchema/index.js'
 import type { FieldSchemaMap } from './buildFieldSchemaMap/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import {} from '../exports/client/index.js'
 import { buildStateFromSchema } from '../forms/buildStateFromSchema/index.js'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
 let cached = global._payload_fieldSchemaMap
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_fieldSchemaMap = null
 }
 
@@ -32,7 +28,7 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<FormState> => {
-  const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
+  const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
 
   const incomingUserSlug = req.user?.collection
@@ -69,7 +65,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   const fieldSchemaMap = getFieldSchemaMap(req)
 
   const id = collectionSlug ? reqData.id : undefined
-  const schemaPathSegments = schemaPath.split('.')
+  const schemaPathSegments = schemaPath && schemaPath.split('.')
 
   let fieldSchema: Field[]
 
@@ -84,7 +80,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   }
 
   if (!fieldSchema) {
-    throw new Error('Could not find field schema for given path')
+    throw new Error(`Could not find field schema for given path "${schemaPath}"`)
   }
 
   let docPreferences = reqData.docPreferences
@@ -98,7 +94,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   // If the request does not include doc preferences,
   // we should fetch them. This is useful for DocumentInfoProvider
   // as it reduces the amount of client-side fetches necessary
-  // when we fetch data for the Edit view
+  // when we fetch data for the Edit View
   if (!docPreferences) {
     let preferencesKey
 
@@ -117,13 +113,29 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
           depth: 0,
           limit: 1,
           where: {
-            key: {
-              equals: preferencesKey,
-            },
+            and: [
+              {
+                key: {
+                  equals: preferencesKey,
+                },
+              },
+              {
+                'user.relationTo': {
+                  equals: req.user.collection,
+                },
+              },
+              {
+                'user.value': {
+                  equals: req.user.id,
+                },
+              },
+            ],
           },
         })) as unknown as { docs: { value: DocumentPreferences }[] }
 
-        if (preferencesResult?.docs?.[0]?.value) docPreferences = preferencesResult.docs[0].value
+        if (preferencesResult?.docs?.[0]?.value) {
+          docPreferences = preferencesResult.docs[0].value
+        }
       }
 
       promises.preferences = fetchPreferences()
@@ -132,7 +144,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   // If there is a form state,
   // then we can deduce data from that form state
-  if (formState) data = reduceFieldsToValues(formState, true)
+  if (formState) {
+    data = reduceFieldsToValues(formState, true)
+  }
 
   // If we do not have data at this point,
   // we can fetch it. This is useful for DocumentInfoProvider
@@ -178,6 +192,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   const result = await buildStateFromSchema({
     id,
+    collectionSlug,
     data,
     fieldSchema,
     operation,
@@ -189,15 +204,6 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
   if (collectionSlug && formState) {
     if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
       result.file = formState.file
-    }
-
-    if (
-      req.payload.collections[collectionSlug]?.config?.auth &&
-      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
-    ) {
-      if (formState.password) result.password = formState.password
-      if (formState['confirm-password']) result['confirm-password'] = formState['confirm-password']
-      if (formState.email) result.email = formState.email
     }
   }
 

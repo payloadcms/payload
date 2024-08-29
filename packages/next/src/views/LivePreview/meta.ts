@@ -17,4 +17,5 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     globalConfig,
     i18n,
     isEditing,
+    view: 'livePreview',
   })

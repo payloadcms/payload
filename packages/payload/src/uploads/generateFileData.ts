@@ -19,6 +19,7 @@ import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { resizeAndTransformImageSizes } from './imageResizer.js'
 import { isImage } from './isImage.js'
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type Args<T> = {
   collection: Collection
@@ -71,6 +72,7 @@ export const generateFileData = async <T>({
     resizeOptions,
     staticDir,
     trimOptions,
+    withMetadata,
   } = collectionConfig.upload
 
   const staticPath = staticDir
@@ -98,7 +100,9 @@ export const generateFileData = async <T>({
   }
 
   if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t)
+    if (throwOnMissingFile) {
+      throw new MissingFile(req.t)
+    }
 
     return {
       data,
@@ -131,7 +135,9 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimatedType) sharpOptions.animated = true
+    if (fileIsAnimatedType) {
+      sharpOptions.animated = true
+    }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
@@ -161,6 +167,11 @@ export const generateFileData = async <T>({
 
     if (sharpFile) {
       const metadata = await sharpFile.metadata()
+      sharpFile = await optionallyAppendMetadata({
+        req,
+        sharpFile,
+        withMetadata,
+      })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
       ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
@@ -177,14 +188,16 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()
+        ext = file.name.split('.').pop().split('?')[0]
       } else {
         ext = ''
       }
     }
 
-    // Adust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
+    // Adjust SVG mime type. fromBuffer modifies it.
+    if (mime === 'application/xml' && ext === 'svg') {
+      mime = 'image/svg+xml'
+    }
     fileData.mimeType = mime
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
@@ -203,7 +216,16 @@ export const generateFileData = async <T>({
     let fileForResize = file
 
     if (cropData && sharp) {
-      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
+      const { data: croppedImage, info } = await cropImage({
+        cropData,
+        dimensions,
+        file,
+        heightInPixels: uploadEdits.heightInPixels,
+        req,
+        sharp,
+        widthInPixels: uploadEdits.widthInPixels,
+        withMetadata,
+      })
 
       filesToSave.push({
         buffer: croppedImage,
@@ -267,6 +289,7 @@ export const generateFileData = async <T>({
         sharp,
         staticPath,
         uploadEdits,
+        withMetadata,
       })
 
       fileData.sizes = sizeData
@@ -302,13 +325,14 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const { data, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
-  const {
-    uploadEdits = {},
-  }: {
-    uploadEdits?: UploadEdits
-  } = req.query || {}
+  const uploadEdits =
+    req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
+      ? (req.query.uploadEdits as UploadEdits)
+      : {}
 
-  if (uploadEdits.focalPoint) return uploadEdits
+  if (uploadEdits.focalPoint) {
+    return uploadEdits
+  }
 
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData

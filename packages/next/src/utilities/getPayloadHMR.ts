@@ -1,20 +1,24 @@
 import type { InitOptions, Payload, SanitizedConfig } from 'payload'
 
-import { BasePayload } from 'payload'
+import { BasePayload, generateImportMap } from 'payload'
 import WebSocket from 'ws'
 
 let cached: {
   payload: Payload | null
   promise: Promise<Payload> | null
   reload: Promise<void> | boolean
+  ws: WebSocket | null
 } = global._payload
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
-  cached = global._payload = { payload: null, promise: null, reload: false }
+  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
-export const reload = async (config: SanitizedConfig, payload: Payload): Promise<void> => {
+export const reload = async (
+  config: SanitizedConfig,
+  payload: Payload,
+  skipImportMapGeneration?: boolean,
+): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     await payload.db.destroy()
   }
@@ -45,13 +49,22 @@ export const reload = async (config: SanitizedConfig, payload: Payload): Promise
     })
   }
 
+  // Generate component map
+  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    await generateImportMap(config, {
+      log: true,
+    })
+  }
+
   await payload.db.init()
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
 }
 
-export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
+export const getPayloadHMR = async (
+  options: Pick<InitOptions, 'config' | 'importMap'>,
+): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayloadHMR to work.')
   }
@@ -74,9 +87,13 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
       await cached.reload
     }
 
+    if (options?.importMap) {
+      cached.payload.importMap = options.importMap
+    }
     return cached.payload
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
@@ -86,17 +103,18 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     cached.payload = await cached.promise
 
     if (
+      !cached.ws &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
         const port = process.env.PORT || '3000'
-        const ws = new WebSocket(
+        cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )
 
-        ws.onmessage = (event) => {
+        cached.ws.onmessage = (event) => {
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
@@ -112,6 +130,10 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   } catch (e) {
     cached.promise = null
     throw e
+  }
+
+  if (options?.importMap) {
+    cached.payload.importMap = options.importMap
   }
 
   return cached.payload

@@ -28,21 +28,29 @@ export const rootParserOptions = {
   EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
   sourceType: 'module',
   ecmaVersion: 'latest',
+  projectService: {
+    allowDefaultProject: ['./src/*.ts', './src/*.tsx'],
+    defaultProject: './tsconfig.json',
+    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
+  },
 }
 
 /** @type {FlatConfig[]} */
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
-    ignores: [...defaultESLintIgnores, 'test/live-preview/next-app', 'packages/**/*.spec.ts'],
+    ignores: [
+      ...defaultESLintIgnores,
+      'packages/eslint-*/**',
+      'test/live-preview/next-app',
+      'packages/**/*.spec.ts',
+      'templates/**',
+    ],
   },
   {
     languageOptions: {
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ['./src/*.ts', './src/*.tsx'],
-          defaultProject: './tsconfig.json',
-        },
+        project: './tsconfig.json',
         tsconfigDirName: import.meta.dirname,
         ...rootParserOptions,
       },
@@ -56,6 +64,7 @@ export const rootEslintConfig = [
       'payload/no-jsx-import-statements': 'warn',
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
+      'payload/no-imports-from-self': 'error',
     },
   },
   {

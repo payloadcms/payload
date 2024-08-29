@@ -10,6 +10,7 @@ import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
 
 type Args = {
+  collectionSlug?: string
   data?: Data
   fieldSchema: FieldSchema[] | undefined
   id?: number | string
@@ -32,7 +33,7 @@ export type BuildFormStateArgs = {
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const { id, data: fullData = {}, fieldSchema, operation, preferences, req } = args
+  const { id, collectionSlug, data: fullData = {}, fieldSchema, operation, preferences, req } = args
 
   if (fieldSchema) {
     const state: FormState = {}
@@ -49,6 +50,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
     await iterateFields({
       id,
       addErrorPathToParent: null,
+      collectionSlug,
       data: dataWithDefaultValues,
       fields: fieldSchema,
       fullData,

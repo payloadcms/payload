@@ -14,11 +14,11 @@ const {
   title: { maxLength: maxTitle, minLength: minTitle },
 } = defaults
 
-type OverviewProps = UIField & {
+type OverviewProps = {
   descriptionPath?: string
   imagePath?: string
   titlePath?: string
-}
+} & UIField
 
 export const OverviewComponent: React.FC<OverviewProps> = ({
   descriptionPath: descriptionPathFromContext,
@@ -58,10 +58,12 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   }, [getFields])
 
   useEffect(() => {
-    if (typeof metaTitle === 'string')
+    if (typeof metaTitle === 'string') {
       setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle)
-    if (typeof metaDesc === 'string')
+    }
+    if (typeof metaDesc === 'string') {
       setDescIsValid(metaDesc.length >= minDesc && metaDesc.length <= maxDesc)
+    }
     setImageIsValid(Boolean(metaImage))
   }, [metaTitle, metaDesc, metaImage])
 

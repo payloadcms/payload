@@ -1,12 +1,9 @@
 import type { AccessResult } from '../../config/types.js'
-import type { GeneratedTypes } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
@@ -35,8 +32,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Retrieve and execute access
     // /////////////////////////////////////
@@ -125,12 +120,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           req,
         })) || doc
     }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     // /////////////////////////////////////
     // Return results

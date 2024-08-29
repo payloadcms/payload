@@ -1,6 +1,6 @@
 import type { Data, FormState } from 'payload'
 
-import { unflatten as flatleyUnflatten } from '../../../payload/src/utilities/unflatten.js'
+import { unflatten as flatleyUnflatten } from 'payload/shared'
 
 type ReturnType = {
   data: Data
@@ -24,12 +24,16 @@ export const reduceFieldsToValuesWithValidation = (
     valid: true,
   }
 
-  if (!fields) return state
+  if (!fields) {
+    return state
+  }
 
   Object.keys(fields).forEach((key) => {
     if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {
       state.data[key] = fields[key]?.value
-      if (!fields[key].valid) state.valid = false
+      if (!fields[key].valid) {
+        state.valid = false
+      }
     }
   })
 

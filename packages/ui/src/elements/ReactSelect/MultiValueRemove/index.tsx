@@ -13,9 +13,9 @@ import './index.scss'
 const baseClass = 'multi-value-remove'
 
 export const MultiValueRemove: React.FC<
-  MultiValueRemoveProps<OptionType> & {
+  {
     innerProps: JSX.IntrinsicElements['button']
-  }
+  } & MultiValueRemoveProps<OptionType>
 > = (props) => {
   const {
     innerProps: { className, onClick, onTouchEnd },

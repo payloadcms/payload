@@ -44,7 +44,6 @@ export interface BaseDatabaseAdapter {
   deleteOne: DeleteOne
 
   deleteVersions: DeleteVersions
-
   /**
    * Terminate the connection with the database
    */
@@ -68,7 +67,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>
+  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
@@ -79,15 +78,16 @@ export interface BaseDatabaseAdapter {
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
-
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -100,6 +100,13 @@ export interface BaseDatabaseAdapter {
    * The name of the database adapter
    */
   name: string
+  /**
+   * Full package name of the database adapter
+   *
+   * @example @payloadcms/db-postgres
+   */
+  packageName: string
+
   /**
    * reference to the instance of payload
    */
@@ -148,7 +155,7 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
-}) => Promise<void>
+}) => Promise<void> | void
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -222,17 +229,17 @@ type BaseVersionArgs = {
   where?: Where
 }
 
-export type FindVersionsArgs = BaseVersionArgs & {
+export type FindVersionsArgs = {
   collection: string
-}
+} & BaseVersionArgs
 
 export type FindVersions = <T = TypeWithID>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
-export type FindGlobalVersionsArgs = BaseVersionArgs & {
+export type FindGlobalVersionsArgs = {
   global: string
-}
+} & BaseVersionArgs
 
 export type FindGlobalArgs = {
   locale?: string
@@ -395,10 +402,10 @@ export type DeleteManyArgs = {
 
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
-export type Migration = MigrationData & {
-  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
-  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
-}
+export type Migration = {
+  down: (args: unknown) => Promise<void>
+  up: (args: unknown) => Promise<void>
+} & MigrationData
 
 export type MigrationData = {
   batch?: number
@@ -434,5 +441,6 @@ export type DBIdentifierName =
 export type MigrationTemplateArgs = {
   downSQL?: string
   imports?: string
+  packageName?: string
   upSQL?: string
 }

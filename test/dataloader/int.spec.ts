@@ -1,18 +1,24 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise, { postDoc } from './config.js'
+import { postDoc } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
 let token: string
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('dataloader', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -65,8 +71,8 @@ describe('dataloader', () => {
         const normalizedResponse = JSON.parse(JSON.stringify(data))
 
         expect(normalizedResponse).toStrictEqual({
-          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
           Items: { docs: [{ name: 'item1', itemTags: [{ name: 'tag1' }] }] },
+          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
         })
       }
     })

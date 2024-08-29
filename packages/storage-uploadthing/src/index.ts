@@ -31,12 +31,12 @@ export type UploadthingStorageOptions = {
   /**
    * Uploadthing Options
    */
-  options: UTApiOptions & {
+  options: {
     /**
      * @default 'public-read'
      */
     acl?: ACL
-  }
+  } & UTApiOptions
 }
 
 type UploadthingPlugin = (uploadthingStorageOptions: UploadthingStorageOptions) => Plugin

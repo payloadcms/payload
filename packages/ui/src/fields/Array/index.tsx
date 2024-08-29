@@ -1,11 +1,8 @@
 'use client'
-import type { ArrayField as ArrayFieldType } from 'payload'
+import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
-
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -14,6 +11,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
+import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -31,41 +29,35 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export type ArrayFieldProps = FormFieldBase & {
-  CustomRowLabel?: React.ReactNode
-  fieldMap: FieldMap
-  forceRender?: boolean
-  isSortable?: boolean
-  labels?: ArrayFieldType['labels']
-  maxRows?: ArrayFieldType['maxRows']
-  minRows?: ArrayFieldType['minRows']
-  name?: string
-  width?: string
-}
-
-export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    CustomRowLabel,
-    className,
     descriptionProps,
     errorProps,
-    fieldMap,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { RowLabel },
+        description,
+        isSortable = true,
+        readOnly: readOnlyFromAdmin,
+      } = {},
+      fields,
+      label,
+      localized,
+      maxRows,
+      minRows: minRowsProp,
+      required,
+    },
     forceRender = false,
-    isSortable = true,
-    label,
     labelProps,
-    localized,
-    maxRows,
-    minRows: minRowsProp,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const {
     indexPath,
@@ -73,6 +65,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     permissions,
     readOnly: readOnlyFromContext,
   } = useFieldProps()
+
   const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -80,7 +73,10 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
-  const { localization } = useConfig()
+
+  const {
+    config: { localization },
+  } = useConfig()
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
@@ -92,9 +88,13 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps): ArrayFieldType['labels'] => {
-    if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p && p?.label) return { plural: undefined, singular: p?.label }
+  const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
+    if ('labels' in p && p?.labels) {
+      return p.labels
+    }
+    if ('label' in p.field && p.field.label) {
+      return { plural: undefined, singular: p.field.label }
+    }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -132,7 +132,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
+    async (rowIndex: number): Promise<void> => {
       await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
@@ -173,16 +173,27 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = toggleAllRows({
+        collapsed,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
+      const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
+        collapsed,
+        rowID,
+        rows,
+      })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
+      setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -205,14 +216,22 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />}
+      {showError && (
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          field={field}
+          path={path}
+          {...(errorProps || {})}
+        />
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                CustomLabel={CustomLabel}
+                Label={field?.admin?.components?.Label}
                 as="span"
+                field={field}
                 label={label}
                 required={required}
                 unstyled
@@ -246,7 +265,12 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          field={field}
+          {...(descriptionProps || {})}
+        />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -264,11 +288,11 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
-                    CustomRowLabel={CustomRowLabel}
+                    RowLabel={RowLabel}
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
-                    fieldMap={fieldMap}
+                    fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     indexPath={indexPath}
@@ -317,7 +341,9 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value || 0)}
+          onClick={() => {
+            void addRow(value || 0)
+          }}
         >
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
@@ -326,4 +352,4 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   )
 }
 
-export const ArrayField = withCondition(_ArrayField)
+export const ArrayField = withCondition(ArrayFieldComponent)

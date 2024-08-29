@@ -1,3 +1,4 @@
+'use client'
 import type { Field, FormState } from 'payload'
 
 // import { buildPathSegments } from './buildPathSegments'

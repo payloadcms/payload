@@ -2,10 +2,13 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
 import type { Block } from 'payload'
 
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
 import { slateEditor } from '@payloadcms/richtext-slate'
+
+import type { FormSubmission } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -27,7 +30,16 @@ const colorField: Block = {
   },
 }
 
+const beforeEmail: BeforeEmail<FormSubmission> = (emails, { req: { payload }, originalDoc }) => {
+  return emails
+}
+
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [Pages, Users],
   editor: slateEditor({}),
   localization: {
@@ -49,7 +61,6 @@ export default buildConfigWithDefaults({
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
-      // beforeEmail: prepareFormEmails,
       fields: {
         colorField,
         payment: true,
@@ -72,6 +83,7 @@ export default buildConfigWithDefaults({
         //     },
         // },
       },
+      beforeEmail,
       formOverrides: {
         // labels: {
         //   singular: 'Contact Form',

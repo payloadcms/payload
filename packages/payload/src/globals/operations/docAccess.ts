@@ -29,7 +29,9 @@ export const docAccessOperation = async (args: Arguments): Promise<GlobalPermiss
       operations: globalOperations,
       req,
     })
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
     return result
   } catch (e: unknown) {
     await killTransaction(req)

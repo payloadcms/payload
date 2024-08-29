@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
@@ -111,7 +111,6 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
 
     const errors = []
 
-    /* eslint-disable no-param-reassign */
     const promises = docs.map(async (doc) => {
       let result
 
@@ -262,7 +261,9 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       result,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

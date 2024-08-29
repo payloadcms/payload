@@ -24,6 +24,9 @@ export type BlockColumns =
   | null;
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -36,6 +39,7 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
     'date-fields': DateField;
+    'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
     'row-fields': RowField;
@@ -44,6 +48,7 @@ export interface Config {
     'number-fields': NumberField;
     'point-fields': PointField;
     'relationship-fields': RelationshipField;
+    'lexical-relationship-fields': LexicalRelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
     'tabs-fields-2': TabsFields2;
@@ -52,9 +57,15 @@ export interface Config {
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
+    'uploads-multi': UploadsMulti;
+    'uploads-poly': UploadsPoly;
+    'uploads-multi-poly': UploadsMultiPoly;
     'ui-fields': UiField;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  db: {
+    defaultIDType: string;
   };
   globals: {
     tabsWithRichText: TabsWithRichText;
@@ -62,6 +73,24 @@ export interface Config {
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -571,6 +600,19 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
+  blocksWithLocalizedArray?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedArray';
+      }[]
+    | null;
   blocksWithSimilarConfigs?:
     | (
         | {
@@ -679,9 +721,6 @@ export interface TextField {
   overrideLength?: string | null;
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
-  customLabel?: string | null;
-  customError?: string | null;
-  beforeAndAfterInput?: string | null;
   hasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -785,6 +824,28 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-fields".
+ */
+export interface EmailField {
+  id: string;
+  email: string;
+  localizedEmail?: string | null;
+  emailWithAutocomplete?: string | null;
+  i18nEmail?: string | null;
+  defaultEmail?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  customLabel?: string | null;
+  customError?: string | null;
+  beforeAndAfterInput?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -908,15 +969,11 @@ export interface IndexedField {
  */
 export interface JsonField {
   id: string;
-  json?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  json?: {
+    foo?: 'bar' | 'foobar';
+    number?: 10 | 5;
+    [k: string]: unknown;
+  };
   group?: {
     jsonWithinGroup?:
       | {
@@ -1028,6 +1085,45 @@ export interface RelationshipField {
         value: string | TextField;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-relationship-fields".
+ */
+export interface LexicalRelationshipField {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richText2?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1258,7 +1354,7 @@ export interface TabsField {
 export interface Upload {
   id: string;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: (string | null) | Upload;
   richText?: {
     root: {
       type: string;
@@ -1293,7 +1389,7 @@ export interface Upload {
 export interface Uploads2 {
   id: string;
   text?: string | null;
-  media?: string | Uploads2 | null;
+  media?: (string | null) | Uploads2;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1312,7 +1408,7 @@ export interface Uploads2 {
  */
 export interface Uploads3 {
   id: string;
-  media?: string | Uploads3 | null;
+  media?: (string | null) | Uploads3;
   richText?: {
     root: {
       type: string;
@@ -1339,6 +1435,58 @@ export interface Uploads3 {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi".
+ */
+export interface UploadsMulti {
+  id: string;
+  text?: string | null;
+  media?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-poly".
+ */
+export interface UploadsPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi-poly".
+ */
+export interface UploadsMultiPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | (
+        | {
+            relationTo: 'uploads';
+            value: string | Upload;
+          }
+        | {
+            relationTo: 'uploads2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1436,6 +1584,13 @@ export interface LexicalBlocksRadioButtonsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'radioButtons';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

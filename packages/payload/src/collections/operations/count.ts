@@ -6,8 +6,6 @@ import type { Collection } from '../config/types.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -25,8 +23,6 @@ export const countOperation = async <TSlug extends CollectionSlug>(
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
-
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -101,8 +97,6 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

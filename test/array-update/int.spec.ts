@@ -1,14 +1,19 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { arraySlug } from './shared.js'
 
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('array-update', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -25,12 +30,12 @@ describe('array-update', () => {
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: originalText,
+            required: 'a required field here',
           },
           {
-            required: 'another required field here',
             optional: 'this is cool',
+            required: 'another required field here',
           },
         ],
       },
@@ -54,8 +59,8 @@ describe('array-update', () => {
     })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
-      required: updatedText,
       optional: originalText,
+      required: updatedText,
     })
   })
 
@@ -63,8 +68,8 @@ describe('array-update', () => {
     const updatedText = 'here is some new text'
 
     const secondArrayItem = {
-      required: 'test',
       optional: 'optional test',
+      required: 'test',
     }
 
     const doc = await payload.create({
@@ -72,8 +77,8 @@ describe('array-update', () => {
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: 'some optional text',
+            required: 'a required field here',
           },
           secondArrayItem,
         ],

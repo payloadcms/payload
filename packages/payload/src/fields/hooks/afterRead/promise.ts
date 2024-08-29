@@ -1,13 +1,12 @@
-/* eslint-disable no-param-reassign */
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import getValueWithDefault from '../../getDefaultValue.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
@@ -17,7 +16,7 @@ type Args = {
   context: RequestContext
   currentDepth: number
   depth: number
-  doc: Record<string, unknown>
+  doc: JsonObject
   draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
@@ -41,7 +40,7 @@ type Args = {
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }
@@ -205,7 +204,10 @@ export const promise = async ({
               const hookedValue = await currentHook({
                 collection,
                 context,
+                currentDepth,
                 data: doc,
+                depth,
+                draft,
                 field,
                 findMany,
                 global,
@@ -215,6 +217,7 @@ export const promise = async ({
                 path: fieldPath,
                 req,
                 schemaPath: fieldSchemaPath,
+                showHiddenFields,
                 siblingData: siblingDoc,
                 value,
               })
@@ -230,7 +233,10 @@ export const promise = async ({
           const hookedValue = await currentHook({
             collection,
             context,
+            currentDepth,
             data: doc,
+            depth,
+            draft,
             field,
             findMany,
             global,
@@ -240,6 +246,7 @@ export const promise = async ({
             path: fieldPath,
             req,
             schemaPath: fieldSchemaPath,
+            showHiddenFields,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
           })
@@ -277,7 +284,7 @@ export const promise = async ({
       typeof siblingDoc[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {
-      siblingDoc[field.name] = await getValueWithDefault({
+      siblingDoc[field.name] = await getDefaultValue({
         defaultValue: field.defaultValue,
         locale,
         user: req.user,
@@ -305,8 +312,10 @@ export const promise = async ({
 
   switch (field.type) {
     case 'group': {
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
+      let groupDoc = siblingDoc[field.name] as JsonObject
+      if (typeof siblingDoc[field.name] !== 'object') {
+        groupDoc = {}
+      }
 
       traverseFields({
         collection,
@@ -337,7 +346,7 @@ export const promise = async ({
     }
 
     case 'array': {
-      const rows = siblingDoc[field.name]
+      const rows = siblingDoc[field.name] as JsonObject
 
       if (Array.isArray(rows)) {
         rows.forEach((row, i) => {
@@ -390,7 +399,7 @@ export const promise = async ({
                 req,
                 schemaPath: fieldSchemaPath,
                 showHiddenFields,
-                siblingDoc: row || {},
+                siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
                 triggerHooks,
               })
@@ -408,7 +417,9 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+          const block = field.blocks.find(
+            (blockType) => blockType.slug === (row as JsonObject).blockType,
+          )
 
           if (block) {
             traverseFields({
@@ -431,7 +442,7 @@ export const promise = async ({
               req,
               schemaPath: fieldSchemaPath,
               showHiddenFields,
-              siblingDoc: row || {},
+              siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
               triggerHooks,
             })
@@ -441,7 +452,9 @@ export const promise = async ({
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row, i) => {
-              const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+              const block = field.blocks.find(
+                (blockType) => blockType.slug === (row as JsonObject).blockType,
+              )
 
               if (block) {
                 traverseFields({
@@ -464,7 +477,7 @@ export const promise = async ({
                   req,
                   schemaPath: fieldSchemaPath,
                   showHiddenFields,
-                  siblingDoc: row || {},
+                  siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
                   triggerHooks,
                 })
@@ -512,8 +525,10 @@ export const promise = async ({
     case 'tab': {
       let tabDoc = siblingDoc
       if (tabHasName(field)) {
-        tabDoc = siblingDoc[field.name] as Record<string, unknown>
-        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
+        tabDoc = siblingDoc[field.name] as JsonObject
+        if (typeof siblingDoc[field.name] !== 'object') {
+          tabDoc = {}
+        }
       }
 
       traverseFields({

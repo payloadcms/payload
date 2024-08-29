@@ -7,11 +7,18 @@ import type { LocalizedPost } from './payload-types.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
+import { BlocksCollection } from './collections/Blocks/index.js'
+import { Group } from './collections/Group/index.js'
+import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
+import { NestedArray } from './collections/NestedArray/index.js'
+import { NestedFields } from './collections/NestedFields/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -26,12 +33,12 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 
-export type LocalizedPostAllLocale = LocalizedPost & {
+export type LocalizedPostAllLocale = {
   title: {
     en?: string
     es?: string
   }
-}
+} & LocalizedPost
 
 const openAccess = {
   create: () => true,
@@ -41,7 +48,15 @@ const openAccess = {
 }
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
+    BlocksCollection,
+    NestedArray,
+    NestedFields,
     {
       auth: true,
       fields: [
@@ -68,6 +83,11 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'localizedDescription',
+          localized: true,
           type: 'text',
         },
         {
@@ -219,6 +239,8 @@ export default buildConfigWithDefaults({
       slug: 'dummy',
     },
     NestedToArrayAndBlock,
+    Group,
+    Tab,
     {
       slug: localizedSortSlug,
       access: openAccess,
@@ -267,6 +289,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    LocalizedWithinLocalized,
   ],
   globals: [
     {
@@ -309,6 +332,11 @@ export default buildConfigWithDefaults({
         code: 'ar',
         label: 'Arabic',
         rtl: true,
+      },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
       },
     ],
   },

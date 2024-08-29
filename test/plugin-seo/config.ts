@@ -44,6 +44,11 @@ export default buildConfigWithDefaults({
       },
     },
   },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,

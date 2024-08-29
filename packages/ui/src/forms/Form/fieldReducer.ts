@@ -1,8 +1,9 @@
+'use client'
 import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObject } from 'payload/shared'
+import { deepCopyObject, deepCopyObjectSimple } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
@@ -43,7 +44,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
     case 'REMOVE': {
       const newState = { ...state }
-      if (newState[action.path]) delete newState[action.path]
+      if (newState[action.path]) {
+        delete newState[action.path]
+      }
       return newState
     }
 
@@ -249,11 +252,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { remainingFields, rows } = separateRows(path, state)
       const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
+      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
+      if (duplicateRowMetadata.id) {
+        duplicateRowMetadata.id = new ObjectId().toHexString()
+      }
 
       const duplicateRowState = deepCopyObject(rows[rowIndex])
-      if (duplicateRowState.id) duplicateRowState.id = new ObjectId().toHexString()
+      if (duplicateRowState.id) {
+        duplicateRowState.id.value = new ObjectId().toHexString()
+        duplicateRowState.id.initialValue = new ObjectId().toHexString()
+      }
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
@@ -306,35 +314,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'SET_ROW_COLLAPSED': {
-      const { collapsed, path, rowID, setDocFieldPreferences } = action
-
-      const arrayState = state[path]
-
-      const { collapsedRowIDs, matchedIndex } = state[path].rows.reduce(
-        (acc, row, index) => {
-          const isMatchingRow = row.id === rowID
-          if (isMatchingRow) acc.matchedIndex = index
-
-          if (!isMatchingRow && row.collapsed) acc.collapsedRowIDs.push(row.id)
-          else if (isMatchingRow && collapsed) acc.collapsedRowIDs.push(row.id)
-
-          return acc
-        },
-        {
-          collapsedRowIDs: [],
-          matchedIndex: undefined,
-        },
-      )
-
-      if (matchedIndex > -1) {
-        arrayState.rows[matchedIndex].collapsed = collapsed
-        setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
-      }
+      const { path, updatedRows } = action
 
       const newState = {
         ...state,
         [path]: {
-          ...arrayState,
+          ...state[path],
+          rows: updatedRows,
         },
       }
 
@@ -342,32 +328,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'SET_ALL_ROWS_COLLAPSED': {
-      const { collapsed, path, setDocFieldPreferences } = action
-
-      const { collapsedRowIDs, rows } = state[path].rows.reduce(
-        (acc, row) => {
-          if (collapsed) acc.collapsedRowIDs.push(row.id)
-
-          acc.rows.push({
-            ...row,
-            collapsed,
-          })
-
-          return acc
-        },
-        {
-          collapsedRowIDs: [],
-          rows: [],
-        },
-      )
-
-      setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
+      const { path, updatedRows } = action
 
       return {
         ...state,
         [path]: {
           ...state[path],
-          rows,
+          rows: updatedRows,
         },
       }
     }

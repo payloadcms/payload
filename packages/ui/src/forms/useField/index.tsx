@@ -1,4 +1,6 @@
 'use client'
+import type { PayloadRequest } from 'payload'
+
 import { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
@@ -39,7 +41,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { user } = useAuth()
-  const { id } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
   const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
@@ -48,7 +50,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   }))
 
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const modified = useFormModified()
@@ -154,19 +156,25 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valueToValidate = getDataByPath(path)
         }
 
-        let errorMessage: string | undefined
+        let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
         const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
-                config,
+                collectionSlug,
                 data: getData(),
                 operation,
+                preferences: {} as any,
+                req: {
+                  payload: {
+                    config,
+                  },
+                  t,
+                  user,
+                } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
-                t,
-                user,
               })
             : true
 
@@ -190,7 +198,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
             path,
             rows: field?.rows,
             valid,
-            // validate,
+            validate,
             value,
           }
 
@@ -220,6 +228,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       user,
       validate,
       field?.rows,
+      collectionSlug,
     ],
   )
 

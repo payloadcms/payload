@@ -109,11 +109,13 @@ export async function getLocalizedPaths({
             if (typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid =
                 ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
-                pathSegments.length === 1
+                pathSegments.length === 1 ||
+                (pathSegments.length === 2 && pathSegments[0] === 'version')
+
+              lastIncompletePath.path = pathSegments.join('.')
 
               if (lastSegmentIsValid) {
                 lastIncompletePath.complete = true
-                lastIncompletePath.path = pathSegments.join('.')
               } else {
                 lastIncompletePath.invalid = true
                 return paths
@@ -129,7 +131,6 @@ export async function getLocalizedPaths({
               if (nestedPathToQuery) {
                 const relatedCollection = payload.collections[matchedField.relationTo].config
 
-                // eslint-disable-next-line no-await-in-loop
                 const remainingPaths = await getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
                   fields: relatedCollection.fields,
@@ -153,7 +154,9 @@ export async function getLocalizedPaths({
               lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false)
             }
 
-            if (i + 1 === pathSegments.length) lastIncompletePath.complete = true
+            if (i + 1 === pathSegments.length) {
+              lastIncompletePath.complete = true
+            }
             lastIncompletePath.path = currentPath
           }
         }

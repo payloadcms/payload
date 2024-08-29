@@ -1,18 +1,18 @@
 ---
 title: Stripe Plugin
 label: Stripe
-order: 20
+order: 40
 desc: Easily accept payments with Stripe
 keywords: plugins, stripe, payments, ecommerce
 ---
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
 
-With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's access control. Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
+With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's [Access Control](../access-control). Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
 
 For example, you might be building an e-commerce or SaaS application, where you have a `products` or a `plans` collection that requires either a one-time payment or a subscription. You can to tie each of these products to Stripe, then easily subscribe to billing-related events to perform your application's business logic, such as active purchases or subscription cancellations.
 
-To build a checkout flow on your front-end you can either use [Stripe Checkout](https://stripe.com/payments/checkout), or you can also build a completely custom checkout experience from scratch using [Stripe Web Elements](https://stripe.com/docs/payments/elements). Then to build fully custom, secure customer dashboards, you can leverage Payload's access control to restrict access to your Stripe resources so your users never have to leave your site to manage their accounts.
+To build a checkout flow on your front-end you can either use [Stripe Checkout](https://stripe.com/payments/checkout), or you can also build a completely custom checkout experience from scratch using [Stripe Web Elements](https://stripe.com/docs/payments/elements). Then to build fully custom, secure customer dashboards, you can leverage Payload's Access Control to restrict access to your Stripe resources so your users never have to leave your site to manage their accounts.
 
 The beauty of this plugin is the entirety of your application's content and business logic can be handled in Payload while Stripe handles solely the billing and payment processing. You can build a completely proprietary application that is endlessly customizable and extendable, on APIs and databases that you own. Hosted services like Shopify or BigCommerce might fracture your application's content then charge you for access.
 
@@ -39,16 +39,16 @@ The beauty of this plugin is the entirety of your application's content and busi
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  yarn add @payloadcms/plugin-stripe
+  pnpm add @payloadcms/plugin-stripe
 ```
 
 ## Basic Usage
 
-In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```ts
-import { buildConfig } from 'payload/config'
-import stripePlugin from '@payloadcms/plugin-stripe'
+import { buildConfig } from 'payload'
+import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
   plugins: [
@@ -128,7 +128,7 @@ If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 Development:
 
 1. Login using Stripe cli `stripe login`
-1. Forward events to localhost `stripe listen --forward-to localhost:3000/stripe/webhooks`
+1. Forward events to localhost `stripe listen --forward-to localhost:3000/api/stripe/webhooks`
 1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 
 Production:
@@ -140,7 +140,7 @@ Production:
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
@@ -239,7 +239,7 @@ This option will setup a basic sync between Payload collections and Stripe resou
 </Banner>
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
@@ -254,7 +254,7 @@ const config = buildConfig({
           stripeResourceTypeSingular: 'customer',
           fields: [
             {
-              fieldPath: 'name', // this is a field on your own Payload config
+              fieldPath: 'name', // this is a field on your own Payload Config
               stripeProperty: 'name', // use dot notation, if applicable
             },
           ],

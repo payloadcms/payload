@@ -1,23 +1,19 @@
-import merge from 'deepmerge'
-
+import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
-import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
-import baseAPIKeyFields from '../../auth/baseFields/apiKey.js'
-import baseAuthFields from '../../auth/baseFields/auth.js'
-import baseLoginField from '../../auth/baseFields/loginField.js'
-import baseVerificationFields from '../../auth/baseFields/verification.js'
+import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
+import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { authDefaults, defaults } from './defaults.js'
+import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
+import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 
 export const sanitizeCollection = async (
   config: Config,
@@ -32,8 +28,20 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = merge(defaults, collection, {
-    isMergeableObject: isPlainObject,
+  const sanitized: CollectionConfig = deepMergeWithReactComponents(defaults, collection)
+
+  // /////////////////////////////////
+  // Sanitize fields
+  // /////////////////////////////////
+
+  const validRelationships = config.collections.map((c) => c.slug) || []
+  sanitized.fields = await sanitizeFields({
+    collectionConfig: sanitized,
+    config,
+    fields: sanitized.fields,
+    parentIsLocalized: false,
+    richTextSanitizationPromises,
+    validRelationships,
   })
 
   if (sanitized.timestamps !== false) {
@@ -42,8 +50,12 @@ export const sanitizeCollection = async (
     let hasCreatedAt = null
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
-        if (field.name === 'updatedAt') hasUpdatedAt = true
-        if (field.name === 'createdAt') hasCreatedAt = true
+        if (field.name === 'updatedAt') {
+          hasUpdatedAt = true
+        }
+        if (field.name === 'createdAt') {
+          hasCreatedAt = true
+        }
       }
       return hasCreatedAt && hasUpdatedAt
     })
@@ -76,7 +88,9 @@ export const sanitizeCollection = async (
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) sanitized.versions = { drafts: false }
+    if (sanitized.versions === true) {
+      sanitized.versions = { drafts: false }
+    }
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
@@ -105,11 +119,17 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.upload) {
-    if (sanitized.upload === true) sanitized.upload = {}
+    if (sanitized.upload === true) {
+      sanitized.upload = {}
+    }
+
+    // sanitize fields for reserved names
+    sanitizeUploadFields(sanitized.fields, sanitized)
 
     // disable duplicate for uploads by default
     sanitized.disableDuplicate = sanitized.disableDuplicate || true
 
+    sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
       sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
@@ -125,31 +145,16 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.auth) {
-    sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {}, {
-      isMergeableObject: isPlainObject,
-    })
+    // sanitize fields for reserved names
+    sanitizeAuthFields(sanitized.fields, sanitized)
 
-    let authFields = []
+    sanitized.auth = deepMergeWithReactComponents(
+      authDefaults,
+      typeof sanitized.auth === 'object' ? sanitized.auth : {},
+    )
 
-    if (sanitized.auth.useAPIKey) {
-      authFields = authFields.concat(baseAPIKeyFields)
-    }
-
-    if (!sanitized.auth.disableLocalStrategy) {
-      const loginField = sanitized.auth.loginWithUsername ? 'username' : 'email'
-
-      authFields = authFields.concat(baseLoginField(loginField))
-
-      authFields = authFields.concat(baseAuthFields)
-
-      if (sanitized.auth.verify) {
-        if (sanitized.auth.verify === true) sanitized.auth.verify = {}
-        authFields = authFields.concat(baseVerificationFields)
-      }
-
-      if (sanitized.auth.maxLoginAttempts > 0) {
-        authFields = authFields.concat(baseAccountLockFields)
-      }
+    if (!sanitized.auth.disableLocalStrategy && sanitized.auth.verify === true) {
+      sanitized.auth.verify = {}
     }
 
     // disable duplicate for auth enabled collections by default
@@ -159,20 +164,27 @@ export const sanitizeCollection = async (
       sanitized.auth.strategies = []
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, authFields)
+    if (sanitized.auth.loginWithUsername) {
+      if (sanitized.auth.loginWithUsername === true) {
+        sanitized.auth.loginWithUsername = loginWithUsernameDefaults
+      } else {
+        const loginWithUsernameWithDefaults = {
+          ...loginWithUsernameDefaults,
+          ...sanitized.auth.loginWithUsername,
+        } as LoginWithUsernameOptions
+
+        // if allowEmailLogin is false, requireUsername must be true
+        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
+          loginWithUsernameWithDefaults.requireUsername = true
+        }
+        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
+      }
+    } else {
+      sanitized.auth.loginWithUsername = false
+    }
+
+    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
-
-  // /////////////////////////////////
-  // Sanitize fields
-  // /////////////////////////////////
-
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  sanitized.fields = await sanitizeFields({
-    config,
-    fields: sanitized.fields,
-    richTextSanitizationPromises,
-    validRelationships,
-  })
 
   return sanitized as SanitizedCollectionConfig
 }

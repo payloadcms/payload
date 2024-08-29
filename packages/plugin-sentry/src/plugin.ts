@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import type { Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
@@ -24,7 +23,9 @@ export const sentryPlugin =
     }
 
     config.onInit = async (payload) => {
-      if (incomingConfig.onInit) await incomingConfig.onInit(payload)
+      if (incomingConfig.onInit) {
+        await incomingConfig.onInit(payload)
+      }
       startSentry(pluginOptions, payload)
     }
 

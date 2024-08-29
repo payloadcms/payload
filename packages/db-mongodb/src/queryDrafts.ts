@@ -6,7 +6,7 @@ import { combineQueries, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -57,6 +57,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
   if (
     !useEstimatedCount &&
     Object.keys(versionQuery).length === 0 &&
@@ -87,7 +95,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc = {
         _id: doc.parent,
         id: doc.parent,

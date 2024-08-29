@@ -9,7 +9,8 @@
     position: relative;
 
     font-family: var(--font-serif);
-    font-size: calc(var(--base) * 0.625);
+    font-size: base(0.8);
+    letter-spacing: 0.02em;
 
     h1,
     h2,
@@ -19,23 +20,36 @@
     h6 {
       font-family: var(--font-body);
       line-height: 1.125;
+      letter-spacing: 0;
     }
   }
 
   &--show-gutter {
-    > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+    > .rich-text-lexical__wrap
+      > .editor-container
+      > .editor-scroller
+      > .editor
+      > div
+      > .editor-placeholder {
       left: 3rem;
     }
   }
 
-  &:not(&--show-gutter) > .rich-text-lexical__wrap > .editor-container > .editor-placeholder {
+  &:not(&--show-gutter)
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor
+    > div
+    > .editor-placeholder {
     left: 0;
   }
 
   .editor-placeholder {
     position: absolute;
     top: 8px;
-    font-size: 15px;
+    font-size: base(0.8);
+    line-height: 1.5;
     color: var(--theme-elevation-500);
     /* Prevent text selection */
     user-select: none;

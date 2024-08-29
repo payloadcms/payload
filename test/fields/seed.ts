@@ -12,6 +12,7 @@ import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
+import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -34,11 +35,13 @@ import {
   collectionSlugs,
   conditionalLogicSlug,
   dateFieldsSlug,
+  emailFieldsSlug,
   groupFieldsSlug,
   jsonFieldsSlug,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
@@ -47,9 +50,14 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
   uiSlug,
+  uploads2Slug,
+  uploadsMulti,
+  uploadsMultiPoly,
+  uploadsPoly,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -120,6 +128,50 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
+
+  // Create hasMany upload
+  await _payload.create({
+    collection: uploadsMulti,
+    data: {
+      media: [createdPNGDoc.id, createdJPGDoc.id],
+    },
+  })
+
+  // Create hasMany poly upload
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
+
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+    },
+  })
+  // Create poly upload
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
+
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
 
@@ -154,6 +206,20 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: richTextFieldsSlug,
     data: richTextBulletsDocWithRelId,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: emailFieldsSlug,
+    data: emailDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: emailFieldsSlug,
+    data: anotherEmailDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -289,6 +355,15 @@ export const seed = async (_payload: Payload) => {
       ) as any,
     },
     locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: lexicalRelationshipFieldsSlug,
+    data: {
+      richText: textToLexicalJSON({ text: 'English text' }) as any,
+    },
     depth: 0,
     overrideAccess: true,
   })

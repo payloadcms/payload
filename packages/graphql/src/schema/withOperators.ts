@@ -14,9 +14,9 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { optionIsObject } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
-import operators from './operators.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
+import { operators } from './operators.js'
 
 type staticTypes =
   | 'checkbox'
@@ -45,17 +45,17 @@ const GeoJSONObject = new GraphQLInputObjectType({
 })
 
 type DefaultsType = {
-  [key in staticTypes]: {
-    operators: {
-      name: string
-      type: ((field: FieldAffectingData, parentName: string) => GraphQLType) | GraphQLType
-    }[]
-  }
-} & {
   [key in dynamicTypes]: {
     operators: {
       name: string
       type: (field: FieldAffectingData, parentName: string) => GraphQLType
+    }[]
+  }
+} & {
+  [key in staticTypes]: {
+    operators: {
+      name: string
+      type: ((field: FieldAffectingData, parentName: string) => GraphQLType) | GraphQLType
     }[]
   }
 }
@@ -230,9 +230,9 @@ const defaults: DefaultsType = {
   },
   upload: {
     operators: [
-      ...operators.equality.map((operator) => ({
+      ...[...operators.equality, ...operators.contains].map((operator) => ({
         name: operator,
-        type: GraphQLString,
+        type: GraphQLJSON,
       })),
     ],
   },
@@ -263,7 +263,9 @@ export const withOperators = (
   field: FieldAffectingData,
   parentName: string,
 ): GraphQLInputObjectType => {
-  if (!defaults?.[field.type]) throw new Error(`Error: ${field.type} has no defaults configured.`)
+  if (!defaults?.[field.type]) {
+    throw new Error(`Error: ${field.type} has no defaults configured.`)
+  }
 
   const name = `${combineParentName(parentName, field.name)}_operator`
 

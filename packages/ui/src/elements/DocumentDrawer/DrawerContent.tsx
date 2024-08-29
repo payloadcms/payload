@@ -1,20 +1,18 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -22,12 +20,13 @@ import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
+  AfterFields,
   Header,
   collectionSlug,
   drawerSlug,
   onSave: onSaveFromProps,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: { api: apiRoute },
@@ -40,19 +39,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [docID, setDocID] = useState(existingDocID)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const { formQueryParams } = useFormQueryParams()
-  const formattedQueryParams = qs.stringify(formQueryParams)
 
-  const { componentMap } = useComponentMap()
+  const Edit = collectionConfig.admin.components.views.edit.default.Component
 
-  const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
     ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
     : null
-  const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${docID}` : ''
-  }?${formattedQueryParams}`
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -83,6 +76,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   return (
     <DocumentInfoProvider
+      AfterFields={AfterFields}
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
@@ -104,7 +98,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      action={action}
       apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
       disableActions
@@ -114,7 +107,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onLoadError={onLoadError}
       onSave={onSave}
     >
-      {Edit}
+      <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>
   )
 }

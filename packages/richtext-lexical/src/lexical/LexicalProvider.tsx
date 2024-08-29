@@ -1,12 +1,12 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
-import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
 import * as React from 'react'
 import { useMemo } from 'react'
 
+import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
@@ -18,11 +18,7 @@ import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig
-  fieldProps: FormFieldBase & {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-  }
+  field: LexicalRichTextFieldProps['field']
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean
@@ -45,7 +41,7 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, path, readOnly, value } = props
+  const { editorConfig, field, onChange, path, readOnly, value } = props
 
   const parentContext = useEditorConfigContext()
 
@@ -72,13 +68,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
     if (processedValue && Array.isArray(processedValue) && !('root' in processedValue)) {
       throw new Error(
-        'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
+        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/beta/lexical/migration#migration-via-migration-script-recommended',
       )
     }
 
     if (processedValue && 'jsonContent' in processedValue) {
       throw new Error(
-        'You have tried to pass in data from payload-plugin-lexical. This is not supported. The data structure has changed in this editor, compared to the plugin, and there is no automatic conversion available yet (coming soon). Please remove the data from the field and start again.',
+        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/beta/lexical/migration#migrating-from-payload-plugin-lexical',
       )
     }
 
@@ -103,7 +99,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
-        fieldProps={fieldProps}
+        field={field}
         parentContext={parentContext}
       >
         <NestProviders providers={editorConfig.features.providers}>

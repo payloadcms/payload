@@ -2,10 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { CustomCell } from '../components/CustomCell/index.js'
-import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
-import { DemoUIField } from '../components/DemoUIField/Field.js'
-import { FieldDescriptionComponent } from '../components/FieldDescription/index.js'
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug } from '../slugs.js'
 
@@ -13,18 +9,18 @@ export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
   admin: {
     defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
-    description: 'Description',
+    description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
-    preview: () => 'https://payloadcms.com',
-    useAsTitle: 'title',
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {
-        title: 'This is a custom OG title for posts',
         description: 'This is a custom OG description for posts',
+        title: 'This is a custom OG title for posts',
       },
     },
+    preview: () => 'https://payloadcms.com',
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -58,8 +54,8 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Cell: DemoUIFieldCell,
-                  Field: DemoUIField,
+                  Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
+                  Field: '/components/DemoUIField/Field.js#DemoUIField',
                 },
               },
               label: 'Demo UI Field',
@@ -92,7 +88,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Cell: CustomCell,
+          Cell: '/components/CustomCell/index.js#CustomCell',
         },
       },
     },
@@ -106,29 +102,6 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
-      },
-    },
-    {
-      name: 'descriptionAsString',
-      type: 'text',
-      admin: {
-        description: 'Static field description.',
-      },
-    },
-    {
-      name: 'descriptionAsFunction',
-      type: 'text',
-      admin: {
-        description: () => 'Function description',
-      },
-    },
-    {
-      name: 'descriptionAsComponent',
-      type: 'text',
-      admin: {
-        components: {
-          Description: FieldDescriptionComponent,
-        },
       },
     },
   ],

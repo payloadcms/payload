@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
 import type {
   ArrayField,
@@ -55,9 +52,19 @@ type FieldSchemaGenerator = (
   buildSchemaOptions: BuildSchemaOptions,
 ) => void
 
+/**
+ * get a field's defaultValue only if defined and not dynamic so that it can be set on the field schema
+ * @param field
+ */
+const formatDefaultValue = (field: FieldAffectingData) =>
+  typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
+    ? field.defaultValue
+    : undefined
+
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions
   const schema: SchemaTypeOptions<unknown> = {
+    default: formatDefaultValue(field),
     index: field.index || (!disableUnique && field.unique) || indexSortableFields || false,
     required: false,
     unique: (!disableUnique && field.unique) || false,
@@ -104,7 +111,7 @@ const localizeSchema = (
   return schema
 }
 
-const buildSchema = (
+export const buildSchema = (
   config: SanitizedConfig,
   configFields: Field[],
   buildSchemaOptions: BuildSchemaOptions = {},
@@ -162,7 +169,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           },
         }),
       ],
-      default: undefined,
     }
 
     schema.add({
@@ -177,7 +183,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   ): void => {
     const fieldSchema = {
       type: [new mongoose.Schema({}, { _id: false, discriminatorKey: 'blockType' })],
-      default: undefined,
     }
 
     schema.add({
@@ -196,12 +201,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
       if (field.localized && config.localization) {
         config.localization.localeCodes.forEach((localeCode) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error Possible incorrect typing in mongoose types, this works
           schema.path(`${field.name}.${localeCode}`).discriminator(blockItem.slug, blockSchema)
         })
       } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error Possible incorrect typing in mongoose types, this works
         schema.path(field.name).discriminator(blockItem.slug, blockSchema)
       }
@@ -344,7 +347,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       },
       coordinates: {
         type: [Number],
-        default: field.defaultValue || undefined,
+        default: formatDefaultValue(field),
         required: false,
       },
     }
@@ -425,7 +428,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
+            [locale]: field.hasMany
+              ? { type: [localeSchema], default: formatDefaultValue(field) }
+              : localeSchema,
           }
         }, {}),
         localized: true,
@@ -445,7 +450,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       if (field.hasMany) {
         schemaToReturn = {
           type: [schemaToReturn],
-          default: undefined,
+          default: formatDefaultValue(field),
         }
       }
     } else {
@@ -458,7 +463,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       if (field.hasMany) {
         schemaToReturn = {
           type: [schemaToReturn],
-          default: undefined,
+          default: formatDefaultValue(field),
         }
       }
     }
@@ -590,16 +595,77 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const baseSchema = {
-      ...formatBaseSchema(field, buildSchemaOptions),
-      type: mongoose.Schema.Types.Mixed,
-      ref: field.relationTo,
+    const hasManyRelations = Array.isArray(field.relationTo)
+    let schemaToReturn: { [key: string]: any } = {}
+
+    if (field.localized && config.localization) {
+      schemaToReturn = {
+        type: config.localization.localeCodes.reduce((locales, locale) => {
+          let localeSchema: { [key: string]: any } = {}
+
+          if (hasManyRelations) {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
+              _id: false,
+              type: mongoose.Schema.Types.Mixed,
+              relationTo: { type: String, enum: field.relationTo },
+              value: {
+                type: mongoose.Schema.Types.Mixed,
+                refPath: `${field.name}.${locale}.relationTo`,
+              },
+            }
+          } else {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
+              type: mongoose.Schema.Types.Mixed,
+              ref: field.relationTo,
+            }
+          }
+
+          return {
+            ...locales,
+            [locale]: field.hasMany
+              ? { type: [localeSchema], default: formatDefaultValue(field) }
+              : localeSchema,
+          }
+        }, {}),
+        localized: true,
+      }
+    } else if (hasManyRelations) {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
+        _id: false,
+        type: mongoose.Schema.Types.Mixed,
+        relationTo: { type: String, enum: field.relationTo },
+        value: {
+          type: mongoose.Schema.Types.Mixed,
+          refPath: `${field.name}.relationTo`,
+        },
+      }
+
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: formatDefaultValue(field),
+        }
+      }
+    } else {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
+        type: mongoose.Schema.Types.Mixed,
+        ref: field.relationTo,
+      }
+
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: formatDefaultValue(field),
+        }
+      }
     }
 
     schema.add({
-      [field.name]: localizeSchema(field, baseSchema, config.localization),
+      [field.name]: schemaToReturn,
     })
   },
 }
-
-export default buildSchema

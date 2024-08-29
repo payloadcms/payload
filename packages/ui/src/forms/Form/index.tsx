@@ -1,7 +1,6 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState, PayloadRequest } from 'payload'
 
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
@@ -11,7 +10,6 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -27,7 +25,6 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -81,9 +78,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { formQueryParams } = useFormQueryParams()
 
-  const config = useConfig()
+  const { config } = useConfig()
   const {
     routes: { api: apiRoute },
     serverURL,
@@ -130,13 +126,20 @@ export const Form: React.FC<FormProps> = (props) => {
             }
 
             validationResult = await field.validate(valueToValidate, {
+              ...field,
               id,
-              config,
+              collectionSlug,
               data,
               operation,
+              preferences: {} as any,
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+                user,
+              } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
-              t,
-              user,
             })
 
             if (typeof validationResult === 'string') {
@@ -164,12 +167,12 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
       const {
-        action: actionArg,
+        action: actionArg = action,
         method: methodToUse = method,
         overrides = {},
         skipValidation,
@@ -217,7 +220,9 @@ export const Form: React.FC<FormProps> = (props) => {
       setProcessing(true)
       setDisabled(true)
 
-      if (waitForAutocomplete) await wait(100)
+      if (waitForAutocomplete) {
+        await wait(100)
+      }
 
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
@@ -278,14 +283,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       try {
         let res
-        const actionEndpoint =
-          actionArg ||
-          (typeof action === 'string'
-            ? `${action}${qs.stringify(formQueryParams, { addQueryPrefix: true })}`
-            : null)
 
-        if (actionEndpoint) {
-          res = await requests[methodToUse.toLowerCase()](actionEndpoint, {
+        if (typeof actionArg === 'string') {
+          res = await requests[methodToUse.toLowerCase()](actionArg, {
             body: formData,
             headers: {
               'Accept-Language': i18n.language,
@@ -309,9 +309,13 @@ export const Form: React.FC<FormProps> = (props) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
-        if (isJSON) json = await res.json()
+        if (isJSON) {
+          json = await res.json()
+        }
         if (res.status < 400) {
-          if (typeof onSuccess === 'function') await onSuccess(json)
+          if (typeof onSuccess === 'function') {
+            await onSuccess(json)
+          }
           setSubmitted(false)
           setProcessing(false)
 
@@ -401,7 +405,6 @@ export const Form: React.FC<FormProps> = (props) => {
       t,
       i18n,
       waitForAutocomplete,
-      formQueryParams,
     ],
   )
 
@@ -565,11 +568,15 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [])
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') setDisabled(disabledFromProps)
+    if (typeof disabledFromProps === 'boolean') {
+      setDisabled(disabledFromProps)
+    }
   }, [disabledFromProps])
 
   useEffect(() => {
-    if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
+    if (typeof submittedFromProps === 'boolean') {
+      setSubmitted(submittedFromProps)
+    }
   }, [submittedFromProps])
 
   useEffect(() => {
@@ -621,7 +628,9 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      if (modified) void executeOnChange()
+      if (modified) {
+        void executeOnChange()
+      }
     },
     150,
     // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
@@ -629,18 +638,13 @@ export const Form: React.FC<FormProps> = (props) => {
     [contextRef.current.fields, dispatchFields, onChange, modified],
   )
 
-  const actionString =
-    typeof action === 'string'
-      ? `${action}${qs.stringify(formQueryParams, { addQueryPrefix: true })}`
-      : ''
-
   return (
     <form
-      action={method ? actionString : (action as string)}
+      action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
       noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
+      onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

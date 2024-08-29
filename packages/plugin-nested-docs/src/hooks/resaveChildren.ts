@@ -1,4 +1,9 @@
-import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionConfig,
+  JsonObject,
+  PayloadRequest,
+} from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -6,7 +11,7 @@ import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
 type ResaveArgs = {
   collection: CollectionConfig
-  doc: Record<string, unknown>
+  doc: JsonObject
   draft: boolean
   pluginConfig: NestedDocsPluginConfig
   req: PayloadRequest
@@ -40,7 +45,9 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         collection.versions.drafts &&
         child._status === 'published'
 
-      if (!parentDocIsPublished && childIsPublished) return
+      if (!parentDocIsPublished && childIsPublished) {
+        return
+      }
 
       await req.payload.update({
         id: child.id,

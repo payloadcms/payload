@@ -15,13 +15,18 @@ import {
 } from './shared.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: collectionSlug,
       access: {
-        read: () => true,
         create: () => true,
         delete: () => true,
+        read: () => true,
         update: () => true,
       },
       endpoints: collectionEndpoints,
@@ -34,7 +39,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsCollectionSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -42,8 +46,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
+  endpoints,
   globals: [
     {
       slug: globalSlug,
@@ -52,7 +58,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsGlobalSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -60,9 +65,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
-  endpoints,
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

@@ -15,17 +15,10 @@
   font-weight: 500;
 }
 
-%jumbo {
-  font-size: base(2.5);
-  line-height: 1;
-  margin: 0 0 base(2);
-}
-
 %h1 {
-  margin: 0 0 base(1);
-  font-size: base(2);
-  line-height: 1.15;
-  letter-spacing: -1px;
+  margin: 0;
+  font-size: base(1.6);
+  line-height: base(1.8);
 
   @include small-break {
     letter-spacing: -0.5px;
@@ -34,10 +27,9 @@
 }
 
 %h2 {
-  margin: 0 0 base(1);
-  font-size: base(1.25);
-  line-height: 1.15;
-  letter-spacing: -0.5px;
+  margin: 0;
+  font-size: base(1.3);
+  line-height: base(1.6);
 
   @include small-break {
     font-size: base(0.85);
@@ -45,10 +37,9 @@
 }
 
 %h3 {
-  margin: 0 0 base(1);
-  font-size: base(0.925);
-  line-height: 1.25;
-  letter-spacing: -0.5px;
+  margin: 0;
+  font-size: base(1);
+  line-height: base(1.2);
 
   @include small-break {
     font-size: base(0.65);
@@ -57,28 +48,28 @@
 }
 
 %h4 {
-  margin: 0 0 $baseline;
-  font-size: base(0.75);
-  line-height: 1.5;
+  margin: 0;
+  font-size: base(0.8);
+  line-height: base(1);
   letter-spacing: -0.375px;
 }
 
 %h5 {
   margin: 0;
-  font-size: base(0.5625);
-  line-height: 1.5;
+  font-size: base(0.65);
+  line-height: base(0.8);
 }
 
 %h6 {
   margin: 0;
-  font-size: base(0.5);
-  line-height: 1.5;
+  font-size: base(0.6);
+  line-height: base(0.8);
 }
 
 %small {
   margin: 0;
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 20px;
 }
 
 /////////////////////////////
@@ -105,6 +96,7 @@
   font-size: $baseline-body-size;
   line-height: $baseline-px;
   font-weight: normal;
+  font-family: var(--font-body);
 }
 
 %code {

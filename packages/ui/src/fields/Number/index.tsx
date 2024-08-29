@@ -1,18 +1,17 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { NumberField as NumberFieldType } from 'payload'
+import type { NumberFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -20,46 +19,36 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-export type NumberFieldProps = FormFieldBase & {
-  hasMany?: boolean
-  max?: number
-  maxRows?: number
-  min?: number
-  name?: string
-  onChange?: (e: number) => void
-  path?: string
-  placeholder?: NumberFieldType['admin']['placeholder']
-  step?: number
-  width?: string
-}
-
-const _NumberField: React.FC<NumberFieldProps> = (props) => {
+const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     errorProps,
-    hasMany = false,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        step = 1,
+        style,
+        width,
+      } = {} as NumberFieldProps['field']['admin'],
+      hasMany = false,
+      label,
+      max = Infinity,
+      maxRows = Infinity,
+      min = -Infinity,
+      required,
+    },
     labelProps,
-    max = Infinity,
-    maxRows = Infinity,
-    min = -Infinity,
     onChange: onChangeFromProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    step = 1,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -159,19 +148,24 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        Label={field?.admin?.components?.Label}
+        field={field}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError
+          CustomError={field?.admin?.components?.Error}
+          field={field}
+          path={path}
+          {...(errorProps || {})}
+        />
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
             disabled={disabled}
             filterOption={(_, rawInput) => {
-              // eslint-disable-next-line no-restricted-globals
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
             }}
@@ -195,7 +189,7 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
+            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
             <input
               disabled={disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -204,7 +198,6 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
               name={path}
               onChange={handleChange}
               onWheel={(e) => {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
                 e.target.blur()
               }}
@@ -213,17 +206,18 @@ const _NumberField: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            {AfterInput}
+            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
           </div>
         )}
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          field={field}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )
 }
 
-export const NumberField = withCondition(_NumberField)
+export const NumberField = withCondition(NumberFieldComponent)

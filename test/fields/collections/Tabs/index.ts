@@ -1,9 +1,7 @@
-/* eslint-disable no-param-reassign */
 import type { CollectionConfig } from 'payload'
 
 import { tabsFieldsSlug } from '../../slugs.js'
 import { getBlocksField } from '../Blocks/index.js'
-import { UIField } from './UIField.js'
 import { namedTabDefaultValue } from './constants.js'
 
 const TabsFields: CollectionConfig = {
@@ -36,7 +34,7 @@ const TabsFields: CollectionConfig = {
               label: 'Demo UI Field',
               admin: {
                 components: {
-                  Field: UIField,
+                  Field: '/collections/Tabs/UIField.js#UIField',
                 },
               },
             },

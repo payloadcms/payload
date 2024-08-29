@@ -22,7 +22,7 @@ import {
   createCommand,
 } from 'lexical'
 
-import type { LinkPayload } from '../plugins/floatingLinkEditor/types.js'
+import type { LinkPayload } from '../client/plugins/floatingLinkEditor/types.js'
 import type { LinkFields, SerializedLinkNode } from './types.js'
 
 const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', 'tel:'])
@@ -184,7 +184,7 @@ export class LinkNode extends ElementNode {
   sanitizeUrl(url: string): string {
     try {
       const parsedUrl = new URL(url)
-      // eslint-disable-next-line no-script-url
+
       if (!SUPPORTED_URL_PROTOCOLS.has(parsedUrl.protocol)) {
         return 'about:blank'
       }
@@ -386,7 +386,7 @@ function $getAncestor(
   predicate: (ancestor: LexicalNode) => boolean,
 ): LexicalNode | null {
   let parent: LexicalNode | null = node
-  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent));
+  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {}
   return parent
 }
 

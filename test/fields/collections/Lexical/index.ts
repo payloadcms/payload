@@ -44,14 +44,14 @@ const editorConfig: ServerEditorConfig = {
         ...defaultFields,
         {
           name: 'rel',
-          label: 'Rel Attribute',
           type: 'select',
-          hasMany: true,
-          options: ['noopener', 'noreferrer', 'nofollow'],
           admin: {
             description:
               'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
           },
+          hasMany: true,
+          label: 'Rel Attribute',
+          options: ['noopener', 'noreferrer', 'nofollow'],
         },
       ],
     }),
@@ -81,6 +81,26 @@ const editorConfig: ServerEditorConfig = {
         ConditionalLayoutBlock,
         TabBlock,
       ],
+      inlineBlocks: [
+        {
+          slug: 'myInlineBlock',
+          admin: {
+            components: {
+              Label: '/collections/Lexical/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+      ],
     }),
     EXPERIMENTAL_TableFeature(),
   ],
@@ -88,12 +108,12 @@ const editorConfig: ServerEditorConfig = {
 
 export const LexicalFields: CollectionConfig = {
   slug: lexicalFieldsSlug,
-  admin: {
-    useAsTitle: 'title',
-    listSearchableFields: ['title', 'richTextLexicalCustomFields'],
-  },
   access: {
     read: () => true,
+  },
+  admin: {
+    listSearchableFields: ['title', 'richTextLexicalCustomFields'],
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -128,13 +148,13 @@ export const LexicalFields: CollectionConfig = {
     {
       name: 'lexicalWithBlocks',
       type: 'richText',
-      required: true,
       editor: lexicalEditor({
         admin: {
           hideGutter: false,
         },
         features: editorConfig.features,
       }),
+      required: true,
     },
     {
       name: 'lexicalWithBlocks_markdown',

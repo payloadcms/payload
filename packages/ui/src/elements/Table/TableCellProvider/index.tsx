@@ -14,12 +14,12 @@ export type ITableCellContext = {
 const TableCellContext = React.createContext<ITableCellContext>({} as ITableCellContext)
 
 export const TableCellProvider: React.FC<{
-  cellData?: DefaultCellComponentProps['cellData']
-  cellProps?: Partial<CellComponentProps>
-  children: React.ReactNode
-  columnIndex?: number
-  customCellContext?: DefaultCellComponentProps['customCellContext']
-  rowData?: DefaultCellComponentProps['rowData']
+  readonly cellData?: DefaultCellComponentProps['cellData']
+  readonly cellProps?: Partial<CellComponentProps>
+  readonly children: React.ReactNode
+  readonly columnIndex?: number
+  readonly customCellContext?: DefaultCellComponentProps['customCellContext']
+  readonly rowData?: DefaultCellComponentProps['rowData']
 }> = (props) => {
   const { cellData, cellProps, children, columnIndex, customCellContext, rowData } = props
 

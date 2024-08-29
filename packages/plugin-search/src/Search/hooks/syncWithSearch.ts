@@ -23,8 +23,17 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
   }
 
   if (typeof beforeSync === 'function') {
+    let docToSyncWith = doc
+    if (payload.config?.localization) {
+      docToSyncWith = await payload.findByID({
+        id,
+        collection,
+        locale: 'all',
+        req,
+      })
+    }
     dataToSave = await beforeSync({
-      originalDoc: doc,
+      originalDoc: docToSyncWith,
       payload,
       req,
       searchDoc: dataToSave,
@@ -73,6 +82,9 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
           depth: 0,
           req,
           where: {
+            'doc.relationTo': {
+              equals: collection,
+            },
             'doc.value': {
               equals: id,
             },
@@ -129,7 +141,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error(`Error deleting search document: ${err}`)
+              payload.logger.error({ err, msg: `Error deleting search document.` })
             }
           }
         } else if (doSync) {
@@ -143,17 +155,18 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
               req,
             })
           } catch (err: unknown) {
-            payload.logger.error(`Error creating search document: ${err}`)
+            payload.logger.error({ err, msg: `Error creating search document.` })
           }
         }
       } catch (err: unknown) {
-        payload.logger.error(`Error finding search document: ${err}`)
+        payload.logger.error({ err, msg: `Error finding search document.` })
       }
     }
   } catch (err: unknown) {
-    payload.logger.error(
-      `Error syncing search document related to ${collection} with id: '${id}': ${err}`,
-    )
+    payload.logger.error({
+      err,
+      msg: `Error syncing search document related to ${collection} with id: '${id}'.`,
+    })
   }
 
   return doc

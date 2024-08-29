@@ -59,17 +59,20 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: new Date() },
+        resetPasswordExpiration: { greater_than: new Date().toISOString() },
         resetPasswordToken: { equals: data.token },
       },
     })
 
-    if (!user) throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
+    if (!user) {
+      throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
+    }
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({
       collection: collectionConfig,
       password: data.password,
+      req,
     })
 
     user.salt = salt
@@ -107,7 +110,9 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       overrideAccess,
       req,
     })
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     const result = {
       token,
@@ -120,5 +125,3 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     throw error
   }
 }
-
-export default resetPasswordOperation

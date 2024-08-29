@@ -8,9 +8,9 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   exactText,
-  getAdminRoutes,
+  getRoutes,
   initPageConsoleErrorCatch,
   openDocControls,
   openNav,
@@ -21,20 +21,26 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
   customAdminRoutes,
+  customCollectionMetaTitle,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
+  customRootViewMetaTitle,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
   customViewPath,
   customViewTitle,
   slugPluralLabel,
 } from '../../shared.js'
 import {
   customFieldsSlug,
+  customGlobalViews2GlobalSlug,
   customIdCollectionId,
   customViews2CollectionSlug,
   disableDuplicateSlug,
@@ -54,6 +60,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -74,11 +81,11 @@ describe('admin1', () => {
   let customFieldsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getAdminRoutes>
+  let adminRoutes: ReturnType<typeof getRoutes>
   let loginURL: string
 
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -102,9 +109,9 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
-    adminRoutes = getAdminRoutes({ customAdminRoutes })
+    adminRoutes = getRoutes({ customAdminRoutes })
 
     loginURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.login}`
   })
@@ -114,112 +121,158 @@ describe('admin1', () => {
       snapshotKey: 'adminTests1',
     })
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL, customAdminRoutes })
+    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
   describe('metadata', () => {
-    test('should render custom page title suffix', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
+    describe('root title and description', () => {
+      test('should render custom page title suffix', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description/,
+        )
+      })
+
+      test('should render custom meta description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description for posts/,
+        )
+      })
+
+      test('should fallback to root meta for custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-default-view`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta title from custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-minimal-view`)
+        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
 
-    test('should render payload favicons', async () => {
-      await page.goto(postsUrl.admin)
-      const favicons = page.locator('link[rel="icon"]')
-      await expect(favicons).toHaveCount(4)
-      await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
-      await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')
-      await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute(
-        'href',
-        /\/payload-favicon-light\.[a-z\d]+\.png/,
-      )
+    describe('favicons', () => {
+      test('should render custom favicons', async () => {
+        await page.goto(postsUrl.admin)
+        const favicons = page.locator('link[rel="icon"]')
+
+        await expect(favicons).toHaveCount(2)
+        await expect(favicons.nth(0)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
+        )
+        await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
+        await expect(favicons.nth(1)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
+        )
+      })
     })
 
-    test('should render custom meta description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description/,
-      )
+    describe('og meta', () => {
+      test('should render custom og:title from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title/,
+        )
+      })
+
+      test('should render custom og:description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description/,
+        )
+      })
+
+      test('should render custom og:title from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title for posts/,
+        )
+      })
+
+      test('should render custom og:description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description for posts/,
+        )
+      })
+
+      test('should render og:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
+
+      test('should render twitter:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
     })
 
-    test('should render custom meta description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
+    describe('document meta', () => {
+      test('should render custom meta title from collection config', async () => {
+        await page.goto(customViewsURL.list)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description for posts/,
-      )
-    })
+      test('should render custom meta title from default edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        const pattern = new RegExp(`^${customDefaultTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom favicons', async () => {
-      await page.goto(postsUrl.admin)
-      const favicons = page.locator('link[rel="icon"]')
-      await expect(favicons).toHaveCount(4)
-      await expect(favicons.nth(2)).toHaveAttribute('href', /\/custom-favicon-dark\.[a-z\d]+\.png/)
-      await expect(favicons.nth(3)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(3)).toHaveAttribute('href', /\/custom-favicon-light\.[a-z\d]+\.png/)
-    })
+      test('should render custom meta title from nested edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/versions`)
+        const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:title from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title/,
-      )
-    })
+      test('should render custom meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/custom-tab-view`)
+        const pattern = new RegExp(`^${customViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description/,
-      )
-    })
-
-    test('should render custom og:title from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title for posts/,
-      )
-    })
-
-    test('should render custom og:description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description for posts/,
-      )
-    })
-
-    test('should render og:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
-    })
-
-    test('should render twitter:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
+      test('should render fallback meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}${customTabViewPath}`)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
   })
 
@@ -283,6 +336,20 @@ describe('admin1', () => {
   })
 
   describe('routing', () => {
+    test('should 404 not found root pages', async () => {
+      await page.goto(`${serverURL}/admin/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should 404 not found documents', async () => {
+      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
     test('should use custom logout route', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
 
@@ -293,14 +360,6 @@ describe('admin1', () => {
       await expect(() => expect(page.url()).not.toContain(loginURL)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
-
-      // Ensure auto-login logged the user back in
-
-      await expect(() => expect(page.url()).toBe(`${serverURL}${adminRoutes.routes.admin}`)).toPass(
-        {
-          timeout: POLL_TOPASS_TIMEOUT,
-        },
-      )
     })
   })
 
@@ -482,12 +541,139 @@ describe('admin1', () => {
 
       await expect(customTab).toBeVisible()
     })
+
+    test('global — should render custom tab label', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
+
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+
+      await expect(docTab).toBeVisible()
+      await expect(title).toContainText('Custom Tab Label View')
+    })
+
+    test('global — should render custom tab component', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.custom-doc-tab').first()
+
+      await expect(docTab).toBeVisible()
+      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(title).toContainText('Custom View With Tab Component')
+    })
   })
 
   describe('custom fields', () => {
+    test('renders custom label component', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#custom-client-field-label')).toBeVisible()
+      await expect(page.locator('#custom-server-field-label')).toBeVisible()
+    })
+
+    test('renders custom field description text', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#custom-client-field-description')).toBeVisible()
+      await expect(page.locator('#custom-server-field-description')).toBeVisible()
+    })
+
+    test('custom server components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-server-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#custom-server-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('custom client components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-client-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('#custom-client-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
+
+    describe('field descriptions', () => {
+      test('should render static field description', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
+        await expect(page.locator('.field-description-descriptionAsString')).toContainText(
+          'Static field description.',
+        )
+      })
+
+      test('should render functional field description', async () => {
+        await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
+        await page.locator('#field-descriptionAsFunction').fill('functional')
+        await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
+          'Function description',
+        )
+      })
+    })
+
+    test('should render component field description', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await page.locator('#field-descriptionAsComponent').fill('component')
+      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
+        'Component description: descriptionAsComponent - component',
+      )
+    })
+
+    test('should render custom error component', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      const input = page.locator('input[id="field-customTextClientField"]')
+      await input.fill('ab')
+      await expect(input).toHaveValue('ab')
+      const error = page.locator('.custom-error:near(input[id="field-customTextClientField"])')
+      const submit = page.locator('button[type="button"][id="action-save"]')
+      await submit.click()
+      await expect(error).toHaveText('#custom-error')
+    })
+
+    test('should render beforeInput and afterInput', async () => {
+      await page.goto(customFieldsURL.create)
+      const input = page.locator('input[id="field-customTextClientField"]')
+
+      const prevSibling = await input.evaluateHandle((el) => {
+        return el.previousElementSibling
+      })
+
+      const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
+      expect(prevSiblingText).toEqual('#before-input')
+
+      const nextSibling = await input.evaluateHandle((el) => {
+        return el.nextElementSibling
+      })
+
+      const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
+      expect(nextSiblingText).toEqual('#after-input')
+    })
+
     describe('select field', () => {
       test('should render custom select options', async () => {
         await page.goto(customFieldsURL.create)
+        await page.waitForURL(customFieldsURL.create)
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
@@ -717,6 +903,99 @@ describe('admin1', () => {
     })
   })
 
+  describe('i18n', () => {
+    test('should allow changing language', async () => {
+      await page.goto(postsUrl.account)
+
+      const field = page.locator('.payload-settings__language .react-select')
+
+      await field.click()
+      const options = page.locator('.rs__option')
+      await options.locator('text=Español').click()
+
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Tablero',
+      )
+
+      await field.click()
+      await options.locator('text=English').click()
+      await field.click()
+      await expect(page.locator('.form-submit .btn')).toContainText('Save')
+    })
+
+    test('should allow custom translation', async () => {
+      await page.goto(postsUrl.account)
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Home',
+      )
+    })
+
+    test('should allow custom translation of locale labels', async () => {
+      const selectOptionClass = '.localizer .popup-button-list__button'
+      const localizerButton = page.locator('.localizer .popup-button')
+      const localeListItem1 = page.locator(selectOptionClass).nth(0)
+
+      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
+        await localizerButton.click()
+        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
+        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
+      }
+
+      await checkLocaleLabels('Spanish (es)', 'English (en)')
+
+      // Change locale to Spanish
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
+      await localeListItem1.click()
+
+      // Go to account page
+      await page.goto(postsUrl.account)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+      const options = page.locator('.rs__option')
+
+      // Change language to Spanish
+      await languageField.click()
+      await options.locator('text=Español').click()
+
+      await checkLocaleLabels('Español (es)', 'Inglés (en)')
+
+      // Change locale and language back to English
+      await languageField.click()
+      await options.locator('text=English').click()
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
+    })
+  })
+
+  describe('drawers', () => {
+    test('document drawers are visually stacking', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+      const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
+      await drawer1Content
+        .locator(
+          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        )
+        .click()
+      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
+      await expect(drawer2Content).toBeVisible()
+      const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
+      expect(drawer2Left > drawerLeft).toBe(true)
+    })
+  })
+
   describe('CRUD', () => {
     test('should create', async () => {
       await page.goto(postsUrl.create)
@@ -839,6 +1118,30 @@ describe('admin1', () => {
       await page.locator('.doc-controls__popup >> .popup-button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
+
+    test('should properly close leave-without-saving modal after clicking leave-anyway button', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const title = 'title'
+      await page.locator('#field-title').fill(title)
+      await saveDocHotkeyAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+
+      const newTitle = 'new title'
+      await page.locator('#field-title').fill(newTitle)
+
+      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
+      await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
+    })
   })
 
   describe('custom IDs', () => {
@@ -856,73 +1159,6 @@ describe('admin1', () => {
       const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
-    })
-  })
-
-  describe('i18n', () => {
-    test('should allow changing language', async () => {
-      await page.goto(postsUrl.account)
-
-      const field = page.locator('.payload-settings__language .react-select')
-
-      await field.click()
-      const options = page.locator('.rs__option')
-      await options.locator('text=Español').click()
-
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Tablero',
-      )
-
-      await field.click()
-      await options.locator('text=English').click()
-      await field.click()
-      await expect(page.locator('.form-submit .btn')).toContainText('Save')
-    })
-
-    test('should allow custom translation', async () => {
-      await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Home',
-      )
-    })
-
-    test('should allow custom translation of locale labels', async () => {
-      const selectOptionClass = '.localizer .popup-button-list__button'
-      const localizerButton = page.locator('.localizer .popup-button')
-      const localeListItem1 = page.locator(selectOptionClass).nth(0)
-
-      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
-        await localizerButton.click()
-        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
-        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
-      }
-
-      await checkLocaleLabels('Spanish (es)', 'English (en)')
-
-      // Change locale to Spanish
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
-      await localeListItem1.click()
-
-      // Go to account page
-      await page.goto(postsUrl.account)
-
-      const languageField = page.locator('.payload-settings__language .react-select')
-      const options = page.locator('.rs__option')
-
-      // Change language to Spanish
-      await languageField.click()
-      await options.locator('text=Español').click()
-
-      await checkLocaleLabels('Español (es)', 'Inglés (en)')
-
-      // Change locale and language back to English
-      await languageField.click()
-      await options.locator('text=English').click()
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
 })

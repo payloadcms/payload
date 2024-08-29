@@ -10,7 +10,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import configPromise from './config.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   enlargeSlug,
@@ -32,7 +31,7 @@ let payload: Payload
 
 describe('Collections - Uploads', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     await restClient.login({ slug: usersSlug })
   })
@@ -726,7 +725,6 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Required Files', () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
       const successfulCreate = await payload.create({
         collection: 'optional-file',

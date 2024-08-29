@@ -1,9 +1,9 @@
 @import '../../scss/styles.scss';
 
 .render-title {
+  display: inline-block;
   &__id {
     vertical-align: middle;
     position: relative;
-    top: -3px;
   }
 }

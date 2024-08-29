@@ -1,10 +1,10 @@
 'use client'
-import type { ClientValidate } from 'payload'
+import type { TextFieldProps } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { TextFieldProps, TextInputProps } from './types.js'
+import type { TextInputProps } from './types.js'
 
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -15,46 +15,49 @@ import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
 import './index.scss'
 
-export { TextFieldProps, TextInput, TextInputProps }
+export { TextInput, TextInputProps }
 
-const _TextField: React.FC<TextFieldProps> = (props) => {
+const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        rtl,
+        style,
+        width,
+      } = {},
+      hasMany,
+      label,
+      localized,
+      maxLength,
+      maxRows,
+      minLength,
+      minRows,
+      required,
+    },
     inputRef,
-    label,
-    labelProps,
-    localized,
-    maxLength,
-    maxRows,
-    minLength,
-    minRows,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    rtl,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
-  const { localization: localizationConfig } = useConfig()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, minLength, maxLength, required],
   )
@@ -118,18 +121,17 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      Description={field?.admin?.components?.Description}
+      Error={field?.admin?.components?.Error}
+      Label={field?.admin?.components?.Label}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      description={description}
+      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
       label={label}
-      labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
       onChange={
@@ -153,4 +155,4 @@ const _TextField: React.FC<TextFieldProps> = (props) => {
   )
 }
 
-export const TextField = withCondition(_TextField)
+export const TextField = withCondition(TextFieldComponent)

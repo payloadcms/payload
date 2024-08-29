@@ -1,3 +1,4 @@
+'use client'
 const replacedElements = [
   'IMG',
   'INPUT',
@@ -19,7 +20,9 @@ const replacedElements = [
  * @param htmlElem
  */
 export function doesLineHeightAffectElement(htmlElem: HTMLElement) {
-  if (!htmlElem) return false
+  if (!htmlElem) {
+    return false
+  }
 
   // Check for replaced elements, elements that typically don't support line-height adjustments,
   // and elements without visible content

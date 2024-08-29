@@ -8,29 +8,35 @@ import type { Column } from '../../elements/Table/index.js'
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 export type ListInfoProps = {
-  Header?: React.ReactNode
-  collectionConfig: ClientConfig['collections'][0]
-  collectionSlug: SanitizedCollectionConfig['slug']
-  hasCreatePermission: boolean
-  newDocumentURL: string
-  titleField?: FieldAffectingData
+  readonly Header?: React.ReactNode
+  readonly beforeActions?: React.ReactNode[]
+  readonly collectionConfig: ClientConfig['collections'][0]
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
+  readonly hasCreatePermission: boolean
+  readonly newDocumentURL: string
+  readonly titleField?: FieldAffectingData
 }
 
 export type ListInfoContext = {
-  Header?: React.ReactNode
-  collectionSlug: string
-  hasCreatePermission: boolean
-  newDocumentURL: string
-}
+  readonly Header?: React.ReactNode
+  readonly beforeActions?: React.ReactNode[]
+  readonly collectionSlug: string
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
+  readonly hasCreatePermission: boolean
+  readonly newDocumentURL: string
+} & ListInfoProps
 
 const Context = createContext({} as ListInfoContext)
 
 export const useListInfo = (): ListInfoContext => useContext(Context)
 
 export const ListInfoProvider: React.FC<
-  ListInfoProps & {
-    children: React.ReactNode
-  }
+  {
+    readonly children: React.ReactNode
+  } & ListInfoProps
 > = ({ children, ...props }) => {
   return <Context.Provider value={props}>{children}</Context.Provider>
 }

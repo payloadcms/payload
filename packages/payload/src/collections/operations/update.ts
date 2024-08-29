@@ -12,6 +12,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from '../config/types.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
@@ -199,6 +200,17 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           req,
         })
 
+        if (args.collection.config.auth) {
+          ensureUsernameOrEmail<TSlug>({
+            authOptions: args.collection.config.auth,
+            collectionSlug: args.collection.config.slug,
+            data: args.data,
+            operation: 'update',
+            originalDoc,
+            req: args.req,
+          })
+        }
+
         // /////////////////////////////////////
         // beforeValidate - Fields
         // /////////////////////////////////////
@@ -263,7 +275,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // beforeChange - Fields
         // /////////////////////////////////////
 
-        let result = await beforeChange<DataFromCollectionSlug<TSlug>>({
+        let result = await beforeChange({
           id,
           collection: collectionConfig,
           context: req.context,
@@ -349,7 +361,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // afterChange - Fields
         // /////////////////////////////////////
 
-        result = await afterChange<DataFromCollectionSlug<TSlug>>({
+        result = await afterChange({
           collection: collectionConfig,
           context: req.context,
           data,
@@ -416,7 +428,9 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
       result,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

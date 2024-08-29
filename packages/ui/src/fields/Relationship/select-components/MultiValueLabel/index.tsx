@@ -41,13 +41,14 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   })
 
   useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen)
+    if (typeof setDrawerIsOpen === 'function') {
+      setDrawerIsOpen(isDrawerOpen)
+    }
   }, [isDrawerOpen, setDrawerIsOpen])
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__content`}>
-        {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
         <components.MultiValueLabel
           {...props}
           innerProps={{

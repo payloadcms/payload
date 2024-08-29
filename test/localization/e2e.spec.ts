@@ -10,7 +10,7 @@ import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
-  ensureAutoLoginAndCompilationIsDone,
+  ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
   saveDocAndAssert,
@@ -63,7 +63,7 @@ describe('Localization', () => {
 
     initPageConsoleErrorCatch(page)
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('localized text', () => {
@@ -232,6 +232,23 @@ describe('Localization', () => {
       await page.goto(url.admin)
       await page.goto(url.list)
       await expect(page.locator('.row-1 .cell-title')).toContainText(spanishTitle)
+    })
+  })
+
+  describe('localized relationships', () => {
+    test('ensure relationship field fetches are localised as well', async () => {
+      await page.goto(url.list)
+      await changeLocale(page, spanishLocale)
+
+      const localisedPost = page.locator('.cell-title a').first()
+      const localisedPostUrl = await localisedPost.getAttribute('href')
+      await page.goto(serverURL + localisedPostUrl)
+      await page.waitForURL(serverURL + localisedPostUrl)
+
+      const selectField = page.locator('#field-children .rs__control')
+      await selectField.click()
+
+      await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
     })
   })
 })

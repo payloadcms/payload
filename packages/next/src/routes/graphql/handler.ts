@@ -50,7 +50,6 @@ const handleError = async (
 let cached = global._payload_graphql
 
 if (!cached) {
-  // eslint-disable-next-line no-multi-assign
   cached = global._payload_graphql = { graphql: null, promise: null }
 }
 
@@ -135,12 +134,8 @@ export const POST =
       resHeaders.append(key, headers[key])
     }
 
-    if (req.responseHeaders) {
-      mergeHeaders(req.responseHeaders, resHeaders)
-    }
-
     return new Response(apiResponse.body, {
-      headers: resHeaders,
+      headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, resHeaders) : resHeaders,
       status: apiResponse.status,
     })
   }

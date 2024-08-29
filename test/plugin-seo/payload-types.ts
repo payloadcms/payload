@@ -7,6 +7,9 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
     users: User;
     pages: Page;
@@ -15,10 +18,31 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {};
   locale: 'en' | 'es' | 'de';
   user: User & {
     collection: 'users';
+  };
+}
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
   };
 }
 /**
@@ -50,7 +74,7 @@ export interface Page {
   meta: {
     title: string;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
     ogTitle?: string | null;
   };
   updatedAt: string;
@@ -63,7 +87,7 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  media?: string | Media | null;
+  media?: (string | null) | Media;
   richText?: {
     root: {
       type: string;
@@ -106,7 +130,7 @@ export interface PagesWithImportedField {
       description?: string | null;
     };
     innerMedia?: {
-      image?: string | Media | null;
+      image?: (string | null) | Media;
     };
   };
   updatedAt: string;
@@ -146,6 +170,13 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
 

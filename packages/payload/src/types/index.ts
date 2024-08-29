@@ -68,7 +68,7 @@ type PayloadRequestData = {
    *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
    *    `await addDataAndFileToRequest(req)`
    * */
-  data?: Record<string, unknown>
+  data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
     data: Buffer
@@ -78,10 +78,10 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = Partial<Request> &
-  Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequestProperties &
-  PayloadRequestData
+export type PayloadRequest = CustomPayloadRequestProperties &
+  Partial<Request> &
+  PayloadRequestData &
+  Required<Pick<Request, 'headers'>>
 
 export interface RequestContext {
   [key: string]: unknown
@@ -89,8 +89,18 @@ export interface RequestContext {
 
 export type Operator = (typeof validOperators)[number]
 
+// Makes it so things like passing new Date() will error
+export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
+
+export interface JsonArray extends Array<JsonValue> {}
+
+export interface JsonObject {
+  [key: string]: any
+}
+
 export type WhereField = {
-  [key in Operator]?: unknown
+  // any json-serializable value
+  [key in Operator]?: JsonValue
 }
 
 export type Where = {

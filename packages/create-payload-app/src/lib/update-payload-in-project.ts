@@ -16,7 +16,9 @@ import { installPackages } from './install-packages.js'
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
 ): Promise<{ message: string; success: boolean }> {
-  if (!appDetails.nextConfigPath) return { message: 'No Next.js config found', success: false }
+  if (!appDetails.nextConfigPath) {
+    return { message: 'No Next.js config found', success: false }
+  }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
 
@@ -74,9 +76,11 @@ export async function updatePayloadInProject(
   info('Payload packages updated successfully.')
 
   info(`Updating Payload Next.js files...`)
-  const templateFilesPath = dirname.endsWith('dist')
-    ? path.resolve(dirname, '../..', 'dist/template')
-    : path.resolve(dirname, '../../../../templates/blank-3.0')
+
+  const templateFilesPath =
+    process.env.JEST_WORKER_ID !== undefined
+      ? path.resolve(dirname, '../../../../templates/blank')
+      : path.resolve(dirname, '../..', 'dist/template')
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
 

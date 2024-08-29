@@ -3,6 +3,8 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { PaginatedDocs, Payload } from 'payload'
 
 import { reload } from '@payloadcms/next/utilities'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
@@ -25,7 +27,6 @@ import {
 } from './collections/Tabs/constants.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { defaultText } from './collections/Text/shared.js'
-import configPromise from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
@@ -40,10 +41,13 @@ let restClient: NextRESTClient
 let user: any
 let payload: Payload
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Fields', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -111,7 +115,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -476,7 +479,6 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
@@ -527,7 +529,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })
@@ -585,7 +587,7 @@ describe('Fields', () => {
         indexes.forEach((index) => {
           const field = Object.keys(index[0])[0]
           definitions[field] = index[0][field]
-          // eslint-disable-next-line prefer-destructuring
+
           options[field] = index[1]
         })
       })
@@ -702,9 +704,18 @@ describe('Fields', () => {
         uniqueRequiredText: 'a',
         // uniqueText omitted on purpose
       }
-      await payload.create({
+      const doc = await payload.create({
         collection: 'indexed-fields',
         data,
+      })
+      // Update spanish so we do not run into the unique constraint for other locales
+      await payload.update({
+        id: doc.id,
+        collection: 'indexed-fields',
+        data: {
+          localizedUniqueRequiredText: 'es1',
+        },
+        locale: 'es',
       })
       data.uniqueRequiredText = 'b'
       const result = await payload.create({
@@ -956,7 +967,7 @@ describe('Fields', () => {
         collection: tabsFieldsSlug,
       })
 
-      await reload(payload.config, payload)
+      await reload(payload.config, payload, true)
 
       const testDoc2 = await payload.findByID({
         id: document.id,
@@ -1270,6 +1281,26 @@ describe('Fields', () => {
       expect(inHitResult.id).toStrictEqual(hit.id)
       expect(equalsMissResult).toBeUndefined()
       expect(inMissResult).toBeUndefined()
+    })
+
+    it('should allow localized array of blocks', async () => {
+      const result = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocksWithLocalizedArray: [
+            {
+              blockType: 'localizedArray',
+              array: [
+                {
+                  text: 'localized',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
     })
   })
 

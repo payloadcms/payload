@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { LexicalEditor } from 'lexical'
-import type { MutableRefObject } from 'react'
+import type { LexicalEditor, Spread } from 'lexical'
 import type React from 'react'
+import type { RefObject } from 'react'
 
 export type SlashMenuItem = {
   /** The icon which is rendered in your slash menu item. */
@@ -15,7 +15,13 @@ export type SlashMenuItem = {
    */
   keywords?: Array<string>
   /** The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function. */
-  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  label?:
+    | ((args: {
+        i18n: I18nClient<{}, string>
+        richTextComponentMap: Map<string, React.ReactNode>
+        schemaPath: string
+      }) => string)
+    | string
   /** A function which is called when the slash menu item is selected. */
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
 }
@@ -30,13 +36,22 @@ export type SlashMenuGroup = {
    */
   key: string
   /** The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function. */
-  label?: (({ i18n }: { i18n: I18nClient<{}, string> }) => string) | string
+  label?:
+    | ((args: {
+        i18n: I18nClient<{}, string>
+        richTextComponentMap: Map<string, React.ReactNode>
+        schemaPath: string
+      }) => string)
+    | string
 }
 
-export type SlashMenuItemInternal = SlashMenuItem & {
-  ref: MutableRefObject<HTMLButtonElement | null>
-}
+export type SlashMenuItemInternal = {
+  ref: RefObject<HTMLButtonElement | null>
+} & SlashMenuItem
 
-export type SlashMenuGroupInternal = SlashMenuGroup & {
-  items: Array<SlashMenuItemInternal>
-}
+export type SlashMenuGroupInternal = Spread<
+  {
+    items: Array<SlashMenuItemInternal>
+  },
+  SlashMenuGroup
+>

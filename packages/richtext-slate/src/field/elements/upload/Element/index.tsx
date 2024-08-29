@@ -1,7 +1,6 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, FormFieldBase } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -33,12 +32,12 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = FormFieldBase & {
+type Props = {
   name: string
   richTextComponentMap: Map<string, React.ReactNode>
-}
+} & FormFieldBase
 
-const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
+const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] } & Props> = ({
   enabledCollectionSlugs,
 }) => {
   const {
@@ -51,9 +50,11 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
   } = useElement<UploadElementType>()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
@@ -136,7 +137,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
   )
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const customFieldsMap = fieldProps.richTextComponentMap.get(relatedFieldSchemaPath)
+  const customFieldsMap = fieldProps.field.richTextComponentMap.get(relatedFieldSchemaPath)
 
   return (
     <div
@@ -160,7 +161,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
               {Boolean(customFieldsMap) && (
                 <DrawerToggler
                   className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={fieldProps?.readOnly}
+                  disabled={fieldProps?.field?.admin?.readOnly}
                   slug={drawerSlug}
                 >
                   <Button
@@ -177,11 +178,11 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
-                disabled={fieldProps?.readOnly}
+                disabled={fieldProps?.field?.admin?.readOnly}
               >
                 <Button
                   buttonStyle="icon-label"
-                  disabled={fieldProps?.readOnly}
+                  disabled={fieldProps?.field?.admin?.readOnly}
                   el="div"
                   icon="swap"
                   onClick={() => {
@@ -194,7 +195,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
-                disabled={fieldProps?.readOnly}
+                disabled={fieldProps?.field?.admin?.readOnly}
                 icon="x"
                 onClick={(e) => {
                   e.preventDefault()
@@ -220,10 +221,10 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
   )
 }
 
-export const Element = (props: Props): React.ReactNode => {
+export const UploadElement = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
-      <UploadElement {...props} />
+      <UploadElementComponent {...props} />
     </EnabledRelationshipsCondition>
   )
 }

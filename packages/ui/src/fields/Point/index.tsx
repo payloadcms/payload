@@ -1,6 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload'
+import type { PointFieldProps, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -13,47 +12,41 @@ import './index.scss'
 
 const baseClass = 'point'
 
-import type { FormFieldBase } from '../shared/index.js'
-
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
-export type PointFieldProps = FormFieldBase & {
-  name?: string
-  path?: string
-  placeholder?: string
-  step?: number
-  width?: string
-}
-
-export const _PointField: React.FC<PointFieldProps> = (props) => {
+export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        step,
+        style,
+        width,
+      } = {},
+      label,
+      required,
+    },
     labelProps,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    step,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
+  const memoizedValidate: PointFieldValidation = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
@@ -114,16 +107,16 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('longitude')} />
-          )}
+          <FieldLabel
+            Label={field?.admin?.components?.Label}
+            {...getCoordinateFieldLabel('longitude')}
+          />
           <div className="input-wrapper">
-            {BeforeInput}
+            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-longitude-${path.replace(/\./g, '__')}`}
@@ -134,17 +127,25 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            {AfterInput}
+            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
           </div>
         </li>
         <li>
-          {CustomLabel !== undefined ? (
-            CustomLabel
-          ) : (
-            <FieldLabel {...getCoordinateFieldLabel('latitude')} />
-          )}
+          <FieldLabel
+            Label={field?.admin?.components?.Label}
+            field={field}
+            {...getCoordinateFieldLabel('latitude')}
+          />
           <div className="input-wrapper">
-            {BeforeInput}
+            <FieldError
+              CustomError={field?.admin?.components?.Error}
+              field={field}
+              path={path}
+              {...(errorProps || {})}
+            />
+            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
               id={`field-latitude-${path.replace(/\./g, '__')}`}
@@ -155,17 +156,18 @@ export const _PointField: React.FC<PointFieldProps> = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            {AfterInput}
+            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
           </div>
         </li>
       </ul>
-      {CustomDescription !== undefined ? (
-        CustomDescription
-      ) : (
-        <FieldDescription {...(descriptionProps || {})} />
-      )}
+      <FieldDescription
+        Description={field?.admin?.components?.Description}
+        description={description}
+        field={field}
+        {...(descriptionProps || {})}
+      />
     </div>
   )
 }
 
-export const PointField = withCondition(_PointField)
+export const PointField = withCondition(PointFieldComponent)

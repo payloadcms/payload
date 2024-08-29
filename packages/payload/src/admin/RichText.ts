@@ -1,21 +1,20 @@
 import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type React from 'react'
 
+import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
-import type { Field, FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type {
+  Field,
+  FieldAffectingData,
+  RichTextField,
+  RichTextFieldClient,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../types/index.js'
-import type { WithServerSidePropsComponentProps } from './elements/WithServerSideProps.js'
-
-export type RichTextFieldProps<
-  Value extends object,
-  AdapterProps,
-  ExtraFieldProperties = {},
-> = Omit<RichTextField<Value, AdapterProps, ExtraFieldProperties>, 'type'> & {
-  path?: string
-}
+import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
+import type { RichTextFieldProps } from './fields/RichText.js'
+import type { CreateMappedComponent } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -86,7 +85,7 @@ export type BeforeChangeRichTextHookArgs<
   /**
    * The original data with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
-  docWithLocales?: Record<string, unknown>
+  docWithLocales?: JsonObject
 
   duplicate?: boolean
 
@@ -102,7 +101,7 @@ export type BeforeChangeRichTextHookArgs<
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
-  siblingDocWithLocales?: Record<string, unknown>
+  siblingDocWithLocales?: JsonObject
 
   skipValidation?: boolean
 }
@@ -146,8 +145,8 @@ export type AfterReadRichTextHook<
   TValue = any,
   TSiblingData = any,
 > = (
-  args: BaseRichTextHookArgs<TData, TValue, TSiblingData> &
-    AfterReadRichTextHookArgs<TData, TValue, TSiblingData>,
+  args: AfterReadRichTextHookArgs<TData, TValue, TSiblingData> &
+    BaseRichTextHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
 export type AfterChangeRichTextHook<
@@ -155,8 +154,8 @@ export type AfterChangeRichTextHook<
   TValue = any,
   TSiblingData = any,
 > = (
-  args: BaseRichTextHookArgs<TData, TValue, TSiblingData> &
-    AfterChangeRichTextHookArgs<TData, TValue, TSiblingData>,
+  args: AfterChangeRichTextHookArgs<TData, TValue, TSiblingData> &
+    BaseRichTextHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
 export type BeforeChangeRichTextHook<
@@ -184,19 +183,27 @@ export type RichTextHooks = {
   beforeValidate?: BeforeValidateRichTextHook[]
 }
 
+export type RichTextGenerateComponentMap = (args: {
+  clientField: RichTextFieldClient
+  createMappedComponent: CreateMappedComponent
+  field: RichTextField
+  i18n: I18nClient
+
+  importMap: ImportMap
+  payload: Payload
+  schemaPath: string
+}) => Map<string, unknown>
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentMap: (args: {
-    WithServerSideProps: React.FC<Omit<WithServerSidePropsComponentProps, 'serverOnlyProps'>>
-    config: SanitizedConfig
-    i18n: I18nClient
-    schemaPath: string
-  }) => Map<string, React.ReactNode>
+  generateComponentMap: PayloadComponent<any, never>
+  generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    field: RichTextField
     i18n: I18n<any, any>
     schemaMap: Map<string, Field[]>
     schemaPath: string
@@ -220,7 +227,7 @@ type RichTextAdapterBase<
     populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
-    siblingDoc: Record<string, unknown>
+    siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>
@@ -249,13 +256,13 @@ type RichTextAdapterBase<
 }
 
 export type RichTextAdapter<
-  Value extends object = object,
+  Value extends object = any,
   AdapterProps = any,
-  ExtraFieldProperties = {},
-> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> & {
-  CellComponent: React.FC<any>
-  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-}
+  ExtraFieldProperties = any,
+> = {
+  CellComponent: PayloadComponent<never>
+  FieldComponent: PayloadComponent<never, RichTextFieldProps>
+} & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<
   Value extends object = object,
@@ -264,6 +271,7 @@ export type RichTextAdapterProvider<
 > = ({
   config,
   isRoot,
+  parentIsLocalized,
 }: {
   config: SanitizedConfig
   /**
@@ -272,6 +280,7 @@ export type RichTextAdapterProvider<
    * @default false
    */
   isRoot?: boolean
+  parentIsLocalized: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

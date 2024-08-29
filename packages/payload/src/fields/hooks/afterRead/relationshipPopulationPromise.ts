@@ -126,24 +126,25 @@ export const relationshipPopulationPromise = async ({
 
   if (fieldSupportsMany(field) && field.hasMany) {
     if (
+      field.localized &&
       locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null
     ) {
-      Object.keys(siblingDoc[field.name]).forEach((key) => {
-        if (Array.isArray(siblingDoc[field.name][key])) {
-          siblingDoc[field.name][key].forEach((relatedDoc, index) => {
+      Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
+        if (Array.isArray(siblingDoc[field.name][localeKey])) {
+          siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
             const rowPromise = async () => {
               await populate({
                 currentDepth,
-                data: siblingDoc[field.name][key][index],
+                data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
                 draft,
                 fallbackLocale,
                 field,
                 index,
-                key,
+                key: localeKey,
                 locale,
                 overrideAccess,
                 req,
@@ -179,21 +180,22 @@ export const relationshipPopulationPromise = async ({
       })
     }
   } else if (
+    field.localized &&
+    locale === 'all' &&
     typeof siblingDoc[field.name] === 'object' &&
-    siblingDoc[field.name] !== null &&
-    locale === 'all'
+    siblingDoc[field.name] !== null
   ) {
-    Object.keys(siblingDoc[field.name]).forEach((key) => {
+    Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
       const rowPromise = async () => {
         await populate({
           currentDepth,
-          data: siblingDoc[field.name][key],
+          data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
           depth: populateDepth,
           draft,
           fallbackLocale,
           field,
-          key,
+          key: localeKey,
           locale,
           overrideAccess,
           req,

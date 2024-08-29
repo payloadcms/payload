@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { WithServerSideProps } from '@payloadcms/ui/shared'
+import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -28,47 +28,46 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     routes: { admin },
   } = config
 
-  const BeforeLogins = Array.isArray(beforeLogin)
-    ? beforeLogin.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
 
-  const AfterLogins = Array.isArray(afterLogin)
-    ? afterLogin.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const mappedBeforeLogins = createMappedComponent(beforeLogin, undefined, undefined, 'beforeLogin')
+
+  const mappedAfterLogins = createMappedComponent(afterLogin, undefined, undefined, 'afterLogin')
 
   if (user) {
     redirect(admin)
   }
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
+
+  const prefillAutoLogin =
+    typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
+
+  const prefillUsername =
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.username
+      : undefined
+
+  const prefillEmail =
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.email
+      : undefined
+
+  const prefillPassword =
+    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
+      ? config.admin?.autoLogin.password
+      : undefined
 
   return (
     <Fragment>
@@ -83,9 +82,16 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      {Array.isArray(BeforeLogins) && BeforeLogins.map((Component) => Component)}
-      {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
-      {Array.isArray(AfterLogins) && AfterLogins.map((Component) => Component)}
+      <RenderComponent mappedComponent={mappedBeforeLogins} />
+      {!collectionConfig?.auth?.disableLocalStrategy && (
+        <LoginForm
+          prefillEmail={prefillEmail}
+          prefillPassword={prefillPassword}
+          prefillUsername={prefillUsername}
+          searchParams={searchParams}
+        />
+      )}
+      <RenderComponent mappedComponent={mappedAfterLogins} />
     </Fragment>
   )
 }

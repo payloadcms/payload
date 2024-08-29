@@ -108,7 +108,7 @@ export const getFields = ({
           fields: [
             ...(adapter.fields || []),
             {
-              ...(existingSizeURLField || {}),
+              ...(existingSizeURLField || ({} as any)),
               ...baseURLField,
               hooks: {
                 afterRead: [

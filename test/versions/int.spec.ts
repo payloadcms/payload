@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { ValidationError } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -8,7 +10,6 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './clearAndSeedEverything.js'
 import AutosavePosts from './collections/Autosave.js'
-import configPromise from './config.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import { autosaveCollectionSlug, draftCollectionSlug } from './slugs.js'
 
@@ -32,13 +33,16 @@ let globalGraphQLVersionID
 const globalGraphQLOriginalTitle = 'updated global title'
 const updatedTitle = 'Here is an updated post title in EN'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 describe('Versions', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -414,6 +418,8 @@ describe('Versions', () => {
 
         expect(latestDraft).toMatchObject({
           ...versionToRestore.version,
+          // timestamps cannot be guaranteed to be the exact same to the milliseconds
+          createdAt: latestDraft.createdAt,
           updatedAt: latestDraft.updatedAt,
         })
         expect(latestDraft.blocksField).toHaveLength(0)
@@ -439,8 +445,8 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
-            title: patchedTitle,
             _status: 'draft',
+            title: patchedTitle,
           },
           draft: true,
           locale: 'en',
@@ -453,8 +459,8 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
-            title: spanishTitle,
             _status: 'draft',
+            title: spanishTitle,
           },
           draft: true,
           locale: 'es',
@@ -519,19 +525,19 @@ describe('Versions', () => {
         const doc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'initial value',
-            description: 'description to bulk update',
             _status: 'published',
+            description: 'description to bulk update',
+            title: 'initial value',
           },
         })
 
         await payload.update({
-          collection: draftCollectionSlug,
           id: doc.id,
-          draft: true,
+          collection: draftCollectionSlug,
           data: {
             title: 'updated title',
           },
+          draft: true,
         })
 
         // bulk publish
@@ -600,7 +606,7 @@ describe('Versions', () => {
         const result = await payload.db.queryDrafts({
           collection,
           where: {
-            id: {
+            parent: {
               in: drafts.docs.map(({ id }) => id),
             },
             // appendVersionToQueryKey,
@@ -684,6 +690,13 @@ describe('Versions', () => {
           data: {
             description: 'B',
             title: 'B',
+          },
+        })
+
+        const result = await payload.find({
+          collection: 'version-posts',
+          where: {
+            updatedAt: { less_than_equal: '2027-01-01T00:00:00.000Z' },
           },
         })
 
@@ -1314,14 +1327,14 @@ describe('Versions', () => {
           slug: globalSlug,
         })
 
-        expect(restore.title).toBeDefined()
+        expect(restore.version.title).toBeDefined()
 
         const restoredGlobal = await payload.findGlobal({
           slug: globalSlug,
           draft: true,
         })
 
-        expect(restoredGlobal.title).toBe(restore.title)
+        expect(restoredGlobal.title).toBe(restore.version.title.en)
       })
     })
 
@@ -1528,7 +1541,7 @@ describe('Versions', () => {
             },
           })
           .then((res) => res.json())
-        expect(data.AutosaveGlobal.title).toStrictEqual(globalGraphQLOriginalTitle)
+        expect(data.AutosaveGlobal).toEqual({ title: globalGraphQLOriginalTitle })
       })
     })
   })

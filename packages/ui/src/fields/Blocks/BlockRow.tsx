@@ -1,27 +1,27 @@
 'use client'
-import type { FieldPermissions, Labels, Row } from 'payload'
+import type { ClientBlock, FieldPermissions, Labels, Row } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
-import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = UseDraggableSortableReturn & {
-  addRow: (rowIndex: number, blockType: string) => void
-  block: ReducedBlock
-  blocks: ReducedBlock[]
+type BlockFieldProps = {
+  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
+  block: ClientBlock
+  blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   forceRender?: boolean
@@ -39,7 +39,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
-}
+} & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlockFieldProps> = ({
   addRow,
@@ -96,7 +96,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               blockType={row.blockType}
               blocks={blocks}
               duplicateRow={duplicateRow}
-              fieldMap={block.fieldMap}
+              fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
@@ -119,19 +119,26 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             : undefined
         }
         header={
-          <div className={`${baseClass}__block-header`}>
-            <span className={`${baseClass}__block-number`}>
-              {String(rowIndex + 1).padStart(2, '0')}
-            </span>
-            <Pill
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-              pillStyle="white"
-            >
-              {getTranslation(block.labels.singular, i18n)}
-            </Pill>
-            <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-          </div>
+          block?.admin?.components?.Label ? (
+            <RenderComponent
+              clientProps={{ blockKind: 'block', formData: row }}
+              mappedComponent={block.admin.components.Label}
+            />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              <span className={`${baseClass}__block-number`}>
+                {String(rowIndex + 1).padStart(2, '0')}
+              </span>
+              <Pill
+                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                pillStyle="white"
+              >
+                {getTranslation(block.labels.singular, i18n)}
+              </Pill>
+              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
+          )
         }
         isCollapsed={row.collapsed}
         key={row.id}
@@ -139,7 +146,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={block.fieldMap}
+          fields={block.fields}
           forceRender={forceRender}
           margins="small"
           path={path}

@@ -57,18 +57,18 @@ export type CreateArgs<
 export type UpdateByIDArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
-> = UpdateBaseArgs<TGeneratedTypes, TSlug> & {
+> = {
   id: number | string
   where?: never
-}
+} & UpdateBaseArgs<TGeneratedTypes, TSlug>
 
 export type UpdateManyArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
-> = UpdateBaseArgs<TGeneratedTypes, TSlug> & {
+> = {
   id: never
   where?: WhereField
-}
+} & UpdateBaseArgs<TGeneratedTypes, TSlug>
 
 export type UpdateBaseArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,

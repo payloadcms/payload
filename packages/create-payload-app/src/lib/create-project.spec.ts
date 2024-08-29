@@ -1,17 +1,20 @@
+import { jest } from '@jest/globals'
+import fs from 'fs'
 import fse from 'fs-extra'
+import globby from 'globby'
+import * as os from 'node:os'
 import path from 'path'
+
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
+
 import { createProject } from './create-project.js'
 import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
-import globby from 'globby'
-import { jest } from '@jest/globals'
-import fs from 'fs'
-import * as os from 'node:os'
 
 describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
+    // eslint-disable-next-line no-console
     console.log = jest.fn()
   })
 
@@ -27,11 +30,10 @@ describe('createProject', () => {
   })
 
   describe('#createProject', () => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
-      '--local-template': 'blank-3.0',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
@@ -41,30 +43,30 @@ describe('createProject', () => {
       const template: ProjectTemplate = {
         name: 'plugin',
         type: 'plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
         description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload-plugin-template',
       }
       await createProject({
         cliArgs: args,
-        projectName,
-        projectDir,
-        template,
         packageManager,
+        projectDir,
+        projectName,
+        template,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)
 
       // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
+      expect(packageJson.name).toStrictEqual(projectName)
     })
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()
 
       it.each([
-        ['blank-3.0', 'mongodb'],
-        ['blank-3.0', 'postgres'],
+        ['blank', 'mongodb'],
+        ['blank', 'postgres'],
 
         // TODO: Re-enable these once 3.0 is stable and templates updated
         // ['website', 'mongodb'],
@@ -84,14 +86,14 @@ describe('createProject', () => {
 
         await createProject({
           cliArgs,
-          projectName,
-          projectDir,
-          template: template as ProjectTemplate,
-          packageManager,
           dbDetails: {
-            dbUri: `${db}://localhost:27017/create-project-test`,
             type: db as DbType,
+            dbUri: `${db}://localhost:27017/create-project-test`,
           },
+          packageManager,
+          projectDir,
+          projectName,
+          template: template as ProjectTemplate,
         })
 
         const dbReplacement = dbReplacements[db as DbType]
@@ -113,10 +115,6 @@ describe('createProject', () => {
             cwd: projectDir,
           })
         )?.[0]
-
-        if (!payloadConfigPath) {
-          throw new Error(`Could not find payload.config.ts inside ${projectDir}`)
-        }
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 

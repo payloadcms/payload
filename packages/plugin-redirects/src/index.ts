@@ -1,10 +1,24 @@
-import type { CollectionConfig, Config, Field } from 'payload'
+import type { CollectionConfig, Config, Field, SelectField } from 'payload'
 
 import type { RedirectsPluginConfig } from './types.js'
 
+import { redirectOptions } from './redirectTypes.js'
+
+export { redirectOptions, redirectTypes } from './redirectTypes.js'
 export const redirectsPlugin =
   (pluginConfig: RedirectsPluginConfig) =>
   (incomingConfig: Config): Config => {
+    const redirectSelectField: SelectField = {
+      name: 'type',
+      type: 'select',
+      label: 'Redirect Type',
+      options: redirectOptions.filter((option) =>
+        pluginConfig?.redirectTypes?.includes(option.value),
+      ),
+      required: true,
+      ...(pluginConfig?.redirectTypeFieldOverride || {}),
+    }
+
     const defaultFields: Field[] = [
       {
         name: 'from',
@@ -58,6 +72,7 @@ export const redirectsPlugin =
         ],
         label: false,
       },
+      ...(pluginConfig?.redirectTypes ? [redirectSelectField] : []),
     ]
 
     const redirectsCollection: CollectionConfig = {

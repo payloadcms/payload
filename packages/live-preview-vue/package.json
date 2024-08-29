@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/live-preview-vue",
-  "version": "0.1.0",
-  "description": "The official live preview Vue SDK for Payload",
+  "version": "3.0.0-beta.96",
+  "description": "The official Vue SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -29,6 +29,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {

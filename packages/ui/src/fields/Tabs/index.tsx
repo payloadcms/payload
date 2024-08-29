@@ -1,12 +1,9 @@
 'use client'
-import type { DocumentPreferences } from 'payload'
+import type { DocumentPreferences, TabsFieldProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { toKebabCase } from 'payload/shared'
+import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
-
-import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
@@ -25,24 +22,16 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-export type TabsFieldProps = FormFieldBase & {
-  forceRender?: boolean
-  name?: string
-  path?: string
-  tabs?: MappedTab[]
-  width?: string
-}
-
-const _TabsField: React.FC<TabsFieldProps> = (props) => {
+const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    className,
-    descriptionProps,
+    field,
+    field: {
+      _path: pathFromProps,
+      admin: { className, readOnly: readOnlyFromAdmin } = {},
+      tabs = [],
+    },
     forceRender = false,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    tabs = [],
+    readOnly: readOnlyFromTopLevelProps,
   } = props
 
   const {
@@ -52,9 +41,10 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const readOnly = readOnlyFromProps || readOnlyFromContext
-  const path = pathFromContext ?? pathFromProps ?? name
+  const path = pathFromContext ?? pathFromProps
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
@@ -76,7 +66,7 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
   }, [path, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
-    async (incomingTabIndex: number) => {
+    async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
@@ -113,9 +103,9 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
 
   function generateTabPath() {
     let tabPath = path
-    if (path && activeTabConfig.name) {
+    if (path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = `${path}.${activeTabConfig.name}`
-    } else if (!path && activeTabConfig.name) {
+    } else if (!path && tabHasName(activeTabConfig) && activeTabConfig.name) {
       tabPath = activeTabConfig.name
     }
 
@@ -142,7 +132,9 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
                   parentPath={path}
-                  setIsActive={() => handleTabChange(tabIndex)}
+                  setIsActive={() => {
+                    void handleTabChange(tabIndex)
+                  }}
                   tab={tab}
                 />
               )
@@ -151,43 +143,37 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
-            <React.Fragment>
-              <div
-                className={[
-                  `${baseClass}__tab`,
-                  activeTabConfig.label &&
-                    `${baseClass}__tabConfigLabel-${toKebabCase(
-                      getTranslation(activeTabConfig.label, i18n),
-                    )}`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {CustomDescription ? (
-                  CustomDescription
-                ) : (
-                  <FieldDescription {...(descriptionProps || {})} />
-                )}
-                <RenderFields
-                  fieldMap={activeTabConfig.fieldMap}
-                  forceRender={forceRender}
-                  key={
-                    activeTabConfig.label
-                      ? getTranslation(activeTabConfig.label, i18n)
-                      : activeTabConfig['name']
-                  }
-                  margins="small"
-                  path={generateTabPath()}
-                  permissions={
-                    'name' in activeTabConfig && siblingPermissions?.[activeTabConfig.name]?.fields
-                      ? siblingPermissions[activeTabConfig.name]?.fields
-                      : siblingPermissions
-                  }
-                  readOnly={readOnly}
-                  schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
-                />
-              </div>
-            </React.Fragment>
+            <div
+              className={[
+                `${baseClass}__tab`,
+                activeTabConfig.label &&
+                  `${baseClass}__tabConfigLabel-${toKebabCase(
+                    getTranslation(activeTabConfig.label, i18n),
+                  )}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
+              <RenderFields
+                fields={activeTabConfig.fields}
+                forceRender={forceRender}
+                key={
+                  activeTabConfig.label
+                    ? getTranslation(activeTabConfig.label, i18n)
+                    : activeTabConfig['name']
+                }
+                margins="small"
+                path={generateTabPath()}
+                permissions={
+                  'name' in activeTabConfig && siblingPermissions?.[activeTabConfig.name]?.fields
+                    ? siblingPermissions[activeTabConfig.name]?.fields
+                    : siblingPermissions
+                }
+                readOnly={readOnly}
+                schemaPath={`${schemaPath ? `${schemaPath}` : ''}${tabHasName(activeTabConfig) && activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
+              />
+            </div>
           )}
         </div>
       </TabsProvider>
@@ -195,4 +181,4 @@ const _TabsField: React.FC<TabsFieldProps> = (props) => {
   )
 }
 
-export const TabsField = withCondition(_TabsField)
+export const TabsField = withCondition(TabsFieldComponent)

@@ -10,6 +10,11 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
@@ -68,6 +73,8 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'shops',
+      access: { read: () => true },
       fields: [
         {
           name: 'name',
@@ -76,14 +83,14 @@ export default buildConfigWithDefaults({
         {
           name: 'items',
           type: 'relationship',
-          relationTo: 'items',
           hasMany: true,
+          relationTo: 'items',
         },
       ],
-      slug: 'shops',
-      access: { read: () => true },
     },
     {
+      slug: 'items',
+      access: { read: () => true },
       fields: [
         {
           name: 'name',
@@ -92,22 +99,20 @@ export default buildConfigWithDefaults({
         {
           name: 'itemTags',
           type: 'relationship',
-          relationTo: 'itemTags',
           hasMany: true,
+          relationTo: 'itemTags',
         },
       ],
-      slug: 'items',
-      access: { read: () => true },
     },
     {
+      slug: 'itemTags',
+      access: { read: () => true },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      slug: 'itemTags',
-      access: { read: () => true },
     },
   ],
   onInit: async (payload) => {

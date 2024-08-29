@@ -51,10 +51,8 @@ export async function validateSearchParam({
   const { slug } = collectionConfig || globalConfig
 
   if (globalConfig && !policies.globals[slug]) {
-    // eslint-disable-next-line no-param-reassign
     globalConfig.fields = fields
 
-    // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
       type: 'global',
       entity: globalConfig,
@@ -85,7 +83,6 @@ export async function validateSearchParam({
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections[collectionSlug]) {
-            // eslint-disable-next-line no-param-reassign
             policies.collections[collectionSlug] = await getEntityPolicies({
               type: 'collection',
               entity: req.payload.collections[collectionSlug].config,
@@ -108,7 +105,10 @@ export async function validateSearchParam({
           fieldPath = path.slice(0, -(req.locale.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
-        if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          Array.isArray(field.relationTo)
+        ) {
           fieldPath = fieldPath.replace('.value', '')
         }
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
