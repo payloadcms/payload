@@ -82,6 +82,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       let pageQuery = 'page' in query ? query.page : currentQuery?.page
+
       if ('where' in query || 'search' in query) {
         pageQuery = '1'
       }
@@ -121,6 +122,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (typeof handlePageChangeFromProps === 'function') {
         await handlePageChangeFromProps(arg)
       }
+
       await refineListData({ page: String(arg) })
     },
     [refineListData, handlePageChangeFromProps],
@@ -131,6 +133,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (typeof handlePerPageChangeFromProps === 'function') {
         await handlePerPageChangeFromProps(arg)
       }
+
       await refineListData({ limit: String(arg) })
     },
     [refineListData, handlePerPageChangeFromProps],
@@ -141,6 +144,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (typeof handleSearchChangeFromProps === 'function') {
         await handleSearchChangeFromProps(arg)
       }
+
       await refineListData({ search: arg })
     },
     [refineListData, handleSearchChangeFromProps],
@@ -151,6 +155,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (typeof handleSortChangeFromProps === 'function') {
         await handleSortChangeFromProps(arg)
       }
+
       await refineListData({ sort: arg })
     },
     [refineListData, handleSortChangeFromProps],
@@ -161,6 +166,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (typeof handleWhereChangeFromProps === 'function') {
         await handleWhereChangeFromProps(arg)
       }
+
       await refineListData({ where: arg })
     },
     [refineListData, handleWhereChangeFromProps],
