@@ -1,6 +1,11 @@
 import type { AdminViewProps } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider, RenderComponent } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  RenderComponent,
+} from '@payloadcms/ui'
 import { getCreateMappedComponent } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
@@ -92,16 +97,15 @@ export const Account: React.FC<AdminViewProps> = async ({
         isEditing
       >
         <EditDepthProvider depth={1}>
-
-        <DocumentHeader
-          collectionConfig={collectionConfig}
-          hideTabs
-          i18n={i18n}
-          payload={payload}
-          permissions={permissions}
-        />
-        <HydrateAuthProvider permissions={permissions} />
-        <RenderComponent mappedComponent={mappedAccountComponent} />
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            hideTabs
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
+          />
+          <HydrateAuthProvider permissions={permissions} />
+          <RenderComponent mappedComponent={mappedAccountComponent} />
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>

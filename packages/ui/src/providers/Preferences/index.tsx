@@ -50,7 +50,9 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const getPreference = useCallback(
     async <T = any,>(key: string): Promise<T> => {
       const prefs = preferencesRef.current
-      if (typeof prefs[key] !== 'undefined') return prefs[key]
+      if (typeof prefs[key] !== 'undefined') {
+        return prefs[key]
+      }
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
           const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {

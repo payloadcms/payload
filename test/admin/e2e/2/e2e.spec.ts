@@ -485,7 +485,6 @@ describe('admin2', () => {
     describe('table columns', () => {
       const openColumnControls = async () => {
         await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
       }
 

@@ -43,7 +43,9 @@ export const Verify: React.FC<AdminViewProps> = async ({
     return redirect(formatAdminURL({ adminRoute, path: '/login' }))
   } catch (e) {
     // already verified
-    if (e?.status === 202) redirect(formatAdminURL({ adminRoute, path: '/login' }))
+    if (e?.status === 202) {
+      redirect(formatAdminURL({ adminRoute, path: '/login' }))
+    }
     textToRender = req.t('authentication:unableToVerify')
   }
 

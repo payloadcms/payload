@@ -29,7 +29,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if ('name' in field && field.name === 'id') return null
+        if ('name' in field && field.name === 'id') {
+          return null
+        }
 
         const Component = diffComponents[field.type]
 
@@ -53,7 +55,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
 
             const subFieldPermissions = fieldPermissions?.[fieldName]?.fields
 
-            if (hasPermission === false) return null
+            if (hasPermission === false) {
+              return null
+            }
 
             const baseCellProps: FieldDiffProps = {
               comparison: comparisonValue,

@@ -3,14 +3,14 @@ import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-export type FlattenFieldMapArgs = {
+type FlattenFieldMapArgs = {
   fields: ClientField[]
   i18n: I18nClient
   keepPresentationalFields?: boolean
   labelPrefix?: string
 }
 
-export type FlattenFieldMapResult = ({
+type FlattenFieldMapResult = ({
   labelWithPrefix?: string
 } & ClientField)[]
 

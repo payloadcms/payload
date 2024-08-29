@@ -14,6 +14,7 @@ import { deepMerge } from './deepMerge.js'
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
+  curly: ['warn', 'all'],
   'arrow-body-style': 0,
   'import-x/prefer-default-export': 'off',
   'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],

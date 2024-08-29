@@ -60,27 +60,32 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
-                  function getCellData(row: Record<string, unknown>, col: Column) {
-                    if (col.cellProps?.field?._schemaPath) {
-                      return col.cellProps.field._schemaPath.split('.').reduce((acc, key) => {
+                  const cellData = col.cellProps?.field?._schemaPath
+                    ? col.cellProps.field._schemaPath.split('.').reduce((acc, key) => {
                         return acc?.[key]
                       }, row)
-                    } else {
-                      return row[col.accessor]
-                    }
+                    : row[col.accessor]
+
+                  const isLink =
+                    (colIndex === 0 && col.accessor !== '_select') ||
+                    (colIndex === 1 && activeColumns[0]?.accessor === '_select')
+
+                  const cellProps = {
+                    link: isLink,
+                    ...(col.cellProps || {}),
                   }
 
                   return (
                     <td className={`cell-${col.accessor}`} key={colIndex}>
                       <TableCellProvider
-                        cellData={getCellData(row, col)}
-                        cellProps={col?.cellProps}
+                        cellData={cellData}
+                        cellProps={cellProps}
                         columnIndex={colIndex}
                         customCellContext={customCellContext}
                         rowData={row}
                       >
                         <RenderComponent
-                          clientProps={{ ...col?.cellProps }}
+                          clientProps={cellProps}
                           mappedComponent={col.components.Cell}
                         />
                       </TableCellProvider>

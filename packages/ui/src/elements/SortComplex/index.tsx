@@ -54,7 +54,9 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
     if (sortField?.value) {
       const newSortValue = `${sortOrder.value}${sortField.value}`
 
-      if (handleChange) handleChange(newSortValue)
+      if (handleChange) {
+        handleChange(newSortValue)
+      }
 
       if (searchParams.sort !== newSortValue && modifySearchQuery) {
         const search = qs.stringify(

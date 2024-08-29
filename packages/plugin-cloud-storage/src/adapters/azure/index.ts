@@ -35,7 +35,9 @@ export const azureBlobStorageAdapter = ({
 
   let storageClient: ContainerClient | null = null
   const getStorageClient = () => {
-    if (storageClient) return storageClient
+    if (storageClient) {
+      return storageClient
+    }
     let blobServiceClient = null
     try {
       blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)

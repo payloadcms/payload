@@ -197,14 +197,18 @@ function ReportAllErrors() {
 
   const reportFormErrorCount = React.useCallback(
     (errorCount) => {
-      if (errorCount === errorCountRef.current) return
+      if (errorCount === errorCountRef.current) {
+        return
+      }
       setFormTotalErrorCount({ errorCount, index: activeIndex })
       errorCountRef.current = errorCount
     },
     [activeIndex, setFormTotalErrorCount],
   )
 
-  if (!docConfig) return null
+  if (!docConfig) {
+    return null
+  }
 
   return <WatchChildErrors fields={docConfig.fields} path="" setErrorCount={reportFormErrorCount} />
 }

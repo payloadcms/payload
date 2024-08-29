@@ -99,7 +99,9 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={disabled}

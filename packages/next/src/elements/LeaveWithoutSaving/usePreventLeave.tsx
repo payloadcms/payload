@@ -145,7 +145,9 @@ export const usePreventLeave = ({
 
   useEffect(() => {
     if (hasAccepted && cancelledURL.current) {
-      if (onAccept) onAccept()
+      if (onAccept) {
+        onAccept()
+      }
       router.push(cancelledURL.current)
     }
   }, [hasAccepted, onAccept, router])

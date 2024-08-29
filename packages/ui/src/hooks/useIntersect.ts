@@ -34,7 +34,9 @@ export const useIntersect = (
     const { current: currentObserver } = observer
     currentObserver.disconnect()
 
-    if (node) currentObserver.observe(node)
+    if (node) {
+      currentObserver.observe(node)
+    }
 
     return () => currentObserver.disconnect()
   }, [node, disable])

@@ -102,7 +102,9 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       result = null
     }
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

@@ -56,7 +56,9 @@ export function getCreateMappedComponent({
         }
 
         // conditionally set props here to avoid bloating the HTML with `$undefined` props
-        if (clientProps) toReturn.props = clientProps
+        if (clientProps) {
+          toReturn.props = clientProps
+        }
 
         return toReturn
       }

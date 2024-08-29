@@ -75,7 +75,9 @@ const batchAndLoadDocs =
 
       let sanitizedID: number | string = id
 
-      if (idType === 'number') sanitizedID = parseFloat(id)
+      if (idType === 'number') {
+        sanitizedID = parseFloat(id)
+      }
 
       if (isValidID(sanitizedID, idType)) {
         return {

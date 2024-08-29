@@ -36,7 +36,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) return
+    if (forceDisable) {
+      return
+    }
 
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
@@ -44,7 +46,9 @@ export const DefaultSaveDraftButton: React.FC = () => {
 
     if (collectionSlug) {
       action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
-      if (id) method = 'PATCH'
+      if (id) {
+        method = 'PATCH'
+      }
     }
 
     if (globalSlug) {
@@ -96,6 +100,8 @@ type Props = {
 }
 
 export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return <RenderComponent mappedComponent={CustomComponent} />
+  if (CustomComponent) {
+    return <RenderComponent mappedComponent={CustomComponent} />
+  }
   return <DefaultSaveDraftButton />
 }

@@ -171,7 +171,9 @@ export function buildObjectType({
     collapsible: (objectTypeConfig: ObjectTypeConfig, field: CollapsibleField) =>
       field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(objectTypeConfigWithCollapsibleFields, subField)
+        if (addSubField) {
+          return addSubField(objectTypeConfigWithCollapsibleFields, subField)
+        }
         return objectTypeConfigWithCollapsibleFields
       }, objectTypeConfig),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
@@ -459,7 +461,9 @@ export function buildObjectType({
         },
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
-          if (typeof args.depth !== 'undefined') depth = args.depth
+          if (typeof args.depth !== 'undefined') {
+            depth = args.depth
+          }
           if (!field?.editor) {
             throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
           }
@@ -506,7 +510,9 @@ export function buildObjectType({
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) =>
       field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(objectTypeConfigWithRowFields, subField)
+        if (addSubField) {
+          return addSubField(objectTypeConfigWithRowFields, subField)
+        }
         return objectTypeConfigWithRowFields
       }, objectTypeConfig),
     select: (objectTypeConfig: ObjectTypeConfig, field: SelectField) => {
@@ -560,7 +566,9 @@ export function buildObjectType({
           ...tabSchema,
           ...tab.fields.reduce((subFieldSchema, subField) => {
             const addSubField = fieldToSchemaMap[subField.type]
-            if (addSubField) return addSubField(subFieldSchema, subField)
+            if (addSubField) {
+              return addSubField(subFieldSchema, subField)
+            }
             return subFieldSchema
           }, tabSchema),
         }
