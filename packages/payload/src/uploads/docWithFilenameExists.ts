@@ -17,7 +17,9 @@ const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): P
       },
     },
   })
-  if (doc) return true
+  if (doc) {
+    return true
+  }
 
   return false
 }

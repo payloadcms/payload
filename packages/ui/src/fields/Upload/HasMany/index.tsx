@@ -30,7 +30,9 @@ export function UploadComponentHasMany(props: Props) {
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      if (moveFromIndex === moveToIndex) return
+      if (moveFromIndex === moveToIndex) {
+        return
+      }
 
       const updatedArray = [...fileDocs]
       const [item] = updatedArray.splice(moveFromIndex, 1)

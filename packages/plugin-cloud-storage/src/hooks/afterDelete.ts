@@ -19,7 +19,9 @@ export const getAfterDeleteHook = ({
       ]
 
       const promises = filesToDelete.map(async (filename) => {
-        if (filename) await adapter.handleDelete({ collection, doc, filename, req })
+        if (filename) {
+          await adapter.handleDelete({ collection, doc, filename, req })
+        }
       })
 
       await Promise.all(promises)

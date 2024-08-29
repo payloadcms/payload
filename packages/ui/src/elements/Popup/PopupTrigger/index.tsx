@@ -41,7 +41,9 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
         className={classes}
         onClick={handleClick}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') handleClick()
+          if (e.key === 'Enter') {
+            handleClick()
+          }
         }}
         role="button"
         tabIndex={0}

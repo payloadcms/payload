@@ -49,7 +49,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) return null
+        if (!col) {
+          return null
+        }
 
         const {
           accessor,
@@ -64,7 +66,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
           },
         } = col
 
-        if (col.accessor === '_select' || Label === null) return null
+        if (col.accessor === '_select' || Label === null) {
+          return null
+        }
 
         return (
           <Pill

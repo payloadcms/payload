@@ -88,7 +88,9 @@ export const createClientCollectionConfig = ({
     if ('imageSizes' in clientCollection.upload && clientCollection.upload.imageSizes.length) {
       clientCollection.upload.imageSizes = clientCollection.upload.imageSizes.map((size) => {
         const sanitizedSize = { ...size }
-        if ('generateImageName' in sanitizedSize) delete sanitizedSize.generateImageName
+        if ('generateImageName' in sanitizedSize) {
+          delete sanitizedSize.generateImageName
+        }
         return sanitizedSize
       })
     }

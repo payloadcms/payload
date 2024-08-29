@@ -38,7 +38,9 @@ export const s3Adapter =
     }
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) return storageClient
+      if (storageClient) {
+        return storageClient
+      }
       try {
         storageClient = new AWS.S3(config)
       } catch (error) {

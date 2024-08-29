@@ -11,7 +11,9 @@ export const startSentry = (pluginOptions: PluginOptions, payload: Payload): voi
   const { dsn, options } = pluginOptions
   const { express: app } = payload
 
-  if (!dsn || !app) return
+  if (!dsn || !app) {
+    return
+  }
 
   try {
     Sentry.init({

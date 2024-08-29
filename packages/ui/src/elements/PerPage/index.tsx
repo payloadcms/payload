@@ -54,7 +54,9 @@ export const PerPage: React.FC<PerPageProps> = ({
                 key={i}
                 onClick={() => {
                   close()
-                  if (handleChange) handleChange(limitNumber)
+                  if (handleChange) {
+                    handleChange(limitNumber)
+                  }
                 }}
               >
                 {limitNumber === limitToUse && (

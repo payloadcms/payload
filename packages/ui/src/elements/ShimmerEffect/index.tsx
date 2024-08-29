@@ -55,7 +55,9 @@ export const StaggeredShimmers: React.FC<StaggeredShimmersProps> = ({
   const shimmerDelayToPass = typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay
   const [hasDelayed] = useDelay(renderDelay, true)
 
-  if (!hasDelayed) return null
+  if (!hasDelayed) {
+    return null
+  }
 
   return (
     <div className={className}>

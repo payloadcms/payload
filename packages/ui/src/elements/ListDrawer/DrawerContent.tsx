@@ -185,11 +185,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       }
     }
 
-    if (page) params.page = page
-    if (sort) params.sort = sort
-    if (cacheBust) params.cacheBust = cacheBust
-    if (copyOfWhere) params.where = copyOfWhere
-    if (versions?.drafts) params.draft = 'true'
+    if (page) {
+      params.page = page
+    }
+    if (sort) {
+      params.sort = sort
+    }
+    if (cacheBust) {
+      params.cacheBust = cacheBust
+    }
+    if (copyOfWhere) {
+      params.where = copyOfWhere
+    }
+    if (versions?.drafts) {
+      params.draft = 'true'
+    }
 
     setParams(params)
   }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])

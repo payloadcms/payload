@@ -89,8 +89,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
   function handleClick(event) {
     setShowTooltip(false)
-    if (type !== 'submit' && onClick) event.preventDefault()
-    if (onClick) onClick(event)
+    if (type !== 'submit' && onClick) {
+      event.preventDefault()
+    }
+    if (onClick) {
+      onClick(event)
+    }
   }
 
   const styleClasses = [
@@ -127,7 +131,9 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
       let LinkTag = Link // eslint-disable-line no-case-declarations
 
-      if (disabled) LinkTag = 'div'
+      if (disabled) {
+        LinkTag = 'div'
+      }
 
       buttonElement = (
         <LinkTag {...buttonProps} href={to || url} to={to || url}>
@@ -164,7 +170,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       )
       break
   }
-  if (SubMenuPopupContent)
+  if (SubMenuPopupContent) {
     return (
       <div className={styleClasses}>
         {buttonElement}
@@ -180,6 +186,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         </Popup>
       </div>
     )
+  }
 
   return buttonElement
 })

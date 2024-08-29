@@ -7,7 +7,9 @@ interface Args {
 export const getCacheUploadsAfterChangeHook =
   ({ endpoint }: Args): CollectionAfterChangeHook =>
   ({ doc, operation, req }) => {
-    if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
+    if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) {
+      return doc
+    }
 
     // WARNING:
     // TODO: Test this for 3.0
@@ -24,7 +26,9 @@ export const getCacheUploadsAfterChangeHook =
 export const getCacheUploadsAfterDeleteHook =
   ({ endpoint }: Args): CollectionAfterDeleteHook =>
   ({ doc, req }) => {
-    if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
+    if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) {
+      return doc
+    }
 
     const { payloadAPI } = req
 

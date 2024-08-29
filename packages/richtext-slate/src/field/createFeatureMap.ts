@@ -23,8 +23,12 @@ export const createFeatureMap = (
         }
       }
 
-      if (key.startsWith('leaf.button.')) features.leaves[leafName].Button = value
-      if (key.startsWith('leaf.component.')) features.leaves[leafName].Leaf = value
+      if (key.startsWith('leaf.button.')) {
+        features.leaves[leafName].Button = value
+      }
+      if (key.startsWith('leaf.component.')) {
+        features.leaves[leafName].Leaf = value
+      }
     }
 
     if (key.startsWith('element.button.') || key.startsWith('element.component.')) {
@@ -38,8 +42,12 @@ export const createFeatureMap = (
         }
       }
 
-      if (key.startsWith('element.button.')) features.elements[elementName].Button = value
-      if (key.startsWith('element.component.')) features.elements[elementName].Element = value
+      if (key.startsWith('element.button.')) {
+        features.elements[elementName].Button = value
+      }
+      if (key.startsWith('element.component.')) {
+        features.elements[elementName].Element = value
+      }
     }
 
     if (key.startsWith('leaf.plugin.') || key.startsWith('element.plugin.')) {

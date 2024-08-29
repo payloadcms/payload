@@ -50,7 +50,7 @@
     &:focus-within:not(:focus-visible) {
       outline: none;
     }
-    
+
     &:focus-visible {
       outline: var(--accessibility-outline);
       outline-offset: var(--accessibility-outline-offset);
