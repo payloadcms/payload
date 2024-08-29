@@ -26,7 +26,7 @@
     "eslint": "9.9.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import-x": "4.1.1",
-    "eslint-plugin-jest": "28.8.0",
+    "eslint-plugin-jest": "28.8.1",
     "eslint-plugin-jest-dom": "5.4.0",
     "eslint-plugin-jsx-a11y": "6.9.0",
     "eslint-plugin-perfectionist": "3.3.0",
