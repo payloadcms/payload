@@ -46,6 +46,7 @@ export function UploadComponent(props: UploadFieldProps) {
     filterOptions,
     formInitializing,
     formProcessing,
+    path,
     readOnly: readOnlyFromField,
     setValue,
     showError,
@@ -71,7 +72,7 @@ export function UploadComponent(props: UploadFieldProps) {
       label={label}
       maxRows={maxRows}
       onChange={setValue}
-      path={_path}
+      path={path}
       readOnly={disabled}
       relationTo={relationTo}
       required={required}

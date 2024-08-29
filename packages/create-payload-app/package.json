@@ -42,6 +42,8 @@
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
     "prepublishOnly": "pnpm clean && pnpm build",
     "test": "jest",

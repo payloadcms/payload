@@ -348,20 +348,52 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
-    throw error.code === '23505'
-      ? new ValidationError(
-          {
-            id,
-            errors: [
-              {
-                field: adapter.fieldConstraints[tableName][error.constraint],
-                message: req.t('error:valueMustBeUnique'),
-              },
-            ],
-          },
-          req.t,
-        )
-      : error
+    if (error.code === '23505') {
+      let fieldName: null | string = null
+      // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
+      if (adapter.fieldConstraints?.[tableName]) {
+        if (adapter.fieldConstraints[tableName]?.[error.constraint]) {
+          fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
+        } else {
+          const replacement = `${tableName}_`
+
+          if (error.constraint.includes(replacement)) {
+            const replacedConstraint = error.constraint.replace(replacement, '')
+
+            if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint])
+              fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
+          }
+        }
+      }
+
+      if (!fieldName) {
+        // Last case scenario we extract the key and value from the detail on the error
+        const detail = error.detail
+        const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
+        const match = detail.match(regex)
+
+        if (match) {
+          const key = match[1]
+
+          fieldName = key
+        }
+      }
+
+      throw new ValidationError(
+        {
+          id,
+          errors: [
+            {
+              field: fieldName,
+              message: req.t('error:valueMustBeUnique'),
+            },
+          ],
+        },
+        req.t,
+      )
+    } else {
+      throw error
+    }
   }
 
   if (ignoreResult) return data as T

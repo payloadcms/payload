@@ -25,12 +25,14 @@ type Args = {
   existingFieldNames?: Set<string>
   fields: Field[]
   joins?: SanitizedJoins
+  parentIsLocalized: boolean
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
+
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
@@ -45,11 +47,11 @@ type Args = {
 }
 
 export const sanitizeFields = async ({
-  collectionConfig,
   config,
   existingFieldNames = new Set(),
   fields,
   joins,
+  parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   schemaPath: schemaPathArg,
@@ -159,7 +161,17 @@ export const sanitizeFields = async ({
         existingFieldNames.add(field.name)
       }
 
-      if (field.localized && !config.localization) delete field.localized
+      if (typeof field.localized !== 'undefined') {
+        let shouldDisableLocalized = !config.localization
+
+        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+          shouldDisableLocalized = true
+        }
+
+        if (shouldDisableLocalized) {
+          delete field.localized
+        }
+      }
 
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
@@ -196,6 +208,7 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
+            parentIsLocalized: parentIsLocalized || field.localized,
           })
         }
 
@@ -223,6 +236,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -239,6 +253,7 @@ export const sanitizeFields = async ({
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
         joins,
+        parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         schemaPath,
@@ -261,6 +276,7 @@ export const sanitizeFields = async ({
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           joins,
+          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           schemaPath,

@@ -110,6 +110,7 @@ export type FeatureProviderServer<
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ServerFeatureProviderMap
         isRoot?: boolean
+        parentIsLocalized: boolean
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,

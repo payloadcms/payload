@@ -40,6 +40,7 @@ export function AddFilesView({ onCancel, onDrop }: Props) {
             aria-hidden="true"
             className={`${baseClass}__hidden-input`}
             hidden
+            multiple
             onChange={(e) => {
               if (e.target.files && e.target.files.length > 0) {
                 onDrop(e.target.files)
@@ -53,7 +54,6 @@ export function AddFilesView({ onCancel, onDrop }: Props) {
             {t('general:or')} {t('upload:dragAndDrop')}
           </p>
         </Dropzone>
-        {/* <Dropzone multipleFiles onChange={onDrop} /> */}
       </div>
     </div>
   )

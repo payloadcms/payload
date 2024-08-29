@@ -47,7 +47,7 @@ export const UploadFeature = createServerFeature<
   UploadFeatureProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = { collections: {} }
     }
@@ -70,6 +70,7 @@ export const UploadFeature = createServerFeature<
         props.collections[collection].fields = await sanitizeFields({
           config: _config as unknown as Config,
           fields: props.collections[collection].fields,
+          parentIsLocalized,
           requireFieldLevelRichTextEditor: isRoot,
           validRelationships,
         })

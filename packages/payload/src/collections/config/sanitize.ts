@@ -41,6 +41,7 @@ export const sanitizeCollection = async (
     config,
     fields: sanitized.fields,
     joins,
+    parentIsLocalized: false,
     richTextSanitizationPromises,
     schemaPath: '',
     validRelationships,

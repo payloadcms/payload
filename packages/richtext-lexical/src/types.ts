@@ -67,9 +67,11 @@ export type LexicalRichTextAdapterProvider =
   ({
     config,
     isRoot,
+    parentIsLocalized,
   }: {
     config: SanitizedConfig
     isRoot?: boolean
+    parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
 export type LexicalRichTextFieldProps = {

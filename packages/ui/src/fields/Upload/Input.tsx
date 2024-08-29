@@ -25,9 +25,11 @@ import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -139,12 +141,19 @@ export function UploadInput(props: UploadInputProps) {
     }
   }, [value, activeRelationTo, filterOptionsFromProps])
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
-    collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
-    filterOptions,
+  const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
+    useListDrawer({
+      collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
+      filterOptions,
+    })
+  const [
+    CreateDocDrawer,
+    ,
+    { closeDrawer: closeCreateDocDrawer, openDrawer: openCreateDocDrawer },
+  ] = useDocumentDrawer({
+    collectionSlug: activeRelationTo,
   })
 
-  const inputRef = React.useRef<HTMLInputElement>(null)
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
@@ -242,7 +251,7 @@ export function UploadInput(props: UploadInputProps) {
     [value, onChange, activeRelationTo, hasMany],
   )
 
-  const onFileSelection = React.useCallback(
+  const onLocalFileSelection = React.useCallback(
     (fileList?: FileList) => {
       let fileListToUse = fileList
       if (!hasMany && fileList && fileList.length > 1) {
@@ -293,6 +302,24 @@ export function UploadInput(props: UploadInputProps) {
       closeListDrawer()
     },
     [activeRelationTo, closeListDrawer, onChange, populateDocs, value],
+  )
+
+  const onDocCreate = React.useCallback(
+    (data) => {
+      if (data.doc) {
+        setPopulatedDocs((currentDocs) => [
+          ...(currentDocs || []),
+          {
+            relationTo: activeRelationTo,
+            value: data.doc,
+          },
+        ])
+
+        onChange(data.doc.id)
+      }
+      closeCreateDocDrawer()
+    },
+    [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
   const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
@@ -386,6 +413,7 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
@@ -445,20 +473,19 @@ export function UploadInput(props: UploadInputProps) {
         ) : null}
 
         {showDropzone ? (
-          <Dropzone multipleFiles={hasMany} onChange={onFileSelection}>
+          <Dropzone multipleFiles={hasMany} onChange={onLocalFileSelection}>
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
                 <Button
-                  buttonStyle="icon-label"
+                  buttonStyle="pill"
+                  className={`${baseClass}__createNewToggler`}
                   disabled={readOnly || !canCreate}
-                  icon="plus"
-                  iconPosition="left"
                   onClick={() => {
                     if (!readOnly) {
                       if (hasMany) {
-                        onFileSelection()
-                      } else if (inputRef.current) {
-                        inputRef.current.click()
+                        onLocalFileSelection()
+                      } else {
+                        openCreateDocDrawer()
                       }
                     }
                   }}
@@ -466,25 +493,19 @@ export function UploadInput(props: UploadInputProps) {
                 >
                   {t('general:createNew')}
                 </Button>
-                <input
-                  aria-hidden="true"
-                  className={`${baseClass}__hidden-input`}
+                <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
+                <Button
+                  buttonStyle="pill"
+                  className={`${baseClass}__listToggler`}
                   disabled={readOnly}
-                  hidden
-                  multiple={hasMany}
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      onFileSelection(e.target.files)
-                    }
-                  }}
-                  ref={inputRef}
-                  type="file"
-                />
-                <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                  <Button buttonStyle="icon-label" el="span" icon="plus" iconPosition="left">
-                    {t('fields:chooseFromExisting')}
-                  </Button>
-                </ListDrawerToggler>
+                  el="span"
+                  onClick={openListDrawer}
+                  size="small"
+                >
+                  {t('fields:chooseFromExisting')}
+                </Button>
+
+                <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
