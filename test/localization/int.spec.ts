@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
-import { englishLocale } from '../globals/config.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
@@ -15,6 +14,7 @@ import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArray
 import { tabSlug } from './collections/Tab/index.js'
 import {
   defaultLocale,
+  defaultLocale as englishLocale,
   englishTitle,
   hungarianLocale,
   localizedPostsSlug,
@@ -1396,6 +1396,17 @@ describe('Localization', () => {
     })
   })
 
+  describe('nested localized field sanitization', () => {
+    it('should sanitize nested localized fields', () => {
+      const collection = payload.collections['localized-within-localized'].config
+
+      expect(collection.fields[0].tabs[0].fields[0].localized).toBeUndefined()
+      expect(collection.fields[1].fields[0].localized).toBeUndefined()
+      expect(collection.fields[2].blocks[0].fields[0].localized).toBeUndefined()
+      expect(collection.fields[3].fields[0].localized).toBeUndefined()
+    })
+  })
+  
   describe('nested blocks', () => {
     let id
     it('should allow creating nested blocks per locale', async () => {

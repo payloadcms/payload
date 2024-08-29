@@ -812,6 +812,19 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
+   * Compatibility flags for prior Payload versions
+   */
+  compatibility?: {
+    /**
+     * By default, Payload will remove the `localized: true` property
+     * from fields if a parent field is localized. Set this property
+     * to `true` only if you have an existing Payload database from pre-3.0
+     * that you would like to maintain without migrating. This is only
+     * relevant for MongoDB databases.
+     */
+    allowLocalizedWithinLocalized: true
+  }
+  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"

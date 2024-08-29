@@ -41,7 +41,7 @@ import { richTextValidateHOC } from './validate/index.js'
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
-  return async ({ config, isRoot }) => {
+  return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
@@ -77,6 +77,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
           defaultEditorConfig,
           config,
+          parentIsLocalized,
         )
         features = deepCopyObject(defaultEditorFeatures)
       }
@@ -108,6 +109,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = await loadFeatures({
         config,
         isRoot,
+        parentIsLocalized,
         unSanitizedEditorConfig: {
           features,
           lexical,
