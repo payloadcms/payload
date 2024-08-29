@@ -3,7 +3,7 @@ import type { PayloadRequest, UpdateOne } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { handleError } from './utilities/handleError.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 import { withSession } from './withSession.js'
 

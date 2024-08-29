@@ -11,7 +11,7 @@ import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import { toWords } from 'payload'
 
 import { GraphQLJSONObject } from '../packages/graphql-type-json/index.js'
-import formatName from '../utilities/formatName.js'
+import { formatName } from '../utilities/formatName.js'
 
 type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'
 
@@ -199,7 +199,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   })
 }
 
-export default function buildPoliciesType(config: SanitizedConfig): GraphQLObjectType {
+export function buildPoliciesType(config: SanitizedConfig): GraphQLObjectType {
   const fields = {
     canAccessAdmin: {
       type: new GraphQLNonNull(GraphQLBoolean),

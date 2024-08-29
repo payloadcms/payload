@@ -7,7 +7,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(

@@ -2,9 +2,9 @@ import type { SanitizedLocalizationConfig } from 'payload'
 
 import { GraphQLEnumType } from 'graphql'
 
-import formatName from '../utilities/formatName.js'
+import { formatName } from '../utilities/formatName.js'
 
-const buildFallbackLocaleInputType = (
+export const buildFallbackLocaleInputType = (
   localization: SanitizedLocalizationConfig,
 ): GraphQLEnumType => {
   return new GraphQLEnumType({
@@ -20,5 +20,3 @@ const buildFallbackLocaleInputType = (
     ),
   })
 }
-
-export default buildFallbackLocaleInputType

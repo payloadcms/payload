@@ -40,10 +40,10 @@ import { flattenTopLevelFields, toWords } from 'payload'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
-import withNullableType from './withNullableType.js'
+import { withNullableType } from './withNullableType.js'
 
 const idFieldTypes = {
   number: GraphQLInt,

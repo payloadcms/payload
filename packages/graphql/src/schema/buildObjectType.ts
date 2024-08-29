@@ -44,24 +44,11 @@ import { tabHasName } from 'payload/shared'
 import type { Context } from '../resolvers/types.js'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
-import formatOptions from '../utilities/formatOptions.js'
-import buildWhereInputType from './buildWhereInputType.js'
-import isFieldNullable from './isFieldNullable.js'
-import withNullableType from './withNullableType.js'
-
-type LocaleInputType = {
-  fallbackLocale: {
-    type: GraphQLType
-  }
-  locale: {
-    type: GraphQLType
-  }
-  where: {
-    type: GraphQLType
-  }
-}
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
+import { formatOptions } from '../utilities/formatOptions.js'
+import { isFieldNullable } from './isFieldNullable.js'
+import { withNullableType } from './withNullableType.js'
 
 export type ObjectTypeConfig = {
   [path: string]: GraphQLFieldConfig<any, any>
@@ -297,7 +284,7 @@ export function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                resolveType(data, { req }) {
+                resolveType(data) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
@@ -626,7 +613,7 @@ export function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                resolveType(data, { req }) {
+                resolveType(data) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
