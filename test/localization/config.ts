@@ -8,6 +8,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
@@ -282,6 +283,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    LocalizedWithinLocalized,
   ],
   globals: [
     {

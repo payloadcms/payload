@@ -245,7 +245,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
-          parentIsLocalized,
+          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
