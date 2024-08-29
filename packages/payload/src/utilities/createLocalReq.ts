@@ -54,16 +54,16 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
   if (!req.pathname) {
     req.pathname = getURLObject().pathname
   }
-  // @ts-expect-error
   if (!req.searchParams) {
+    // @ts-expect-error
     req.searchParams = getURLObject().searchParams
   }
-  // @ts-expect-error
   if (!req.origin) {
+    // @ts-expect-error
     req.origin = getURLObject().origin
   }
-  // @ts-expect-error
   if (!req?.url) {
+    // @ts-expect-error
     req.url = getURLObject().href
   }
 }
@@ -102,8 +102,8 @@ export const createLocalReq: CreateLocalReq = async (
     req?.i18n ||
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
-  // @ts-expect-error
   if (!req.headers) {
+    // @ts-expect-error
     req.headers = new Headers()
   }
   req.context = getRequestContext(req, context)
