@@ -129,7 +129,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         return
       }
     }
-    if (!value || !inputValue || inputValue.trim() === '') return
+    if (!value || !inputValue || inputValue.trim() === '') {
+      return
+    }
     if (filterOption && !filterOption(null, inputValue)) {
       return
     }

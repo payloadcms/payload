@@ -10,7 +10,9 @@ export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): st
   if (str && variables) {
     return str.replace(regex, (_, variable) => {
       const foundVariable = variables.find(({ field: fieldName }) => variable === fieldName)
-      if (foundVariable) return foundVariable.value
+      if (foundVariable) {
+        return foundVariable.value
+      }
       return variable
     })
   }

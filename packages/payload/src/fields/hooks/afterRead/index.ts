@@ -58,7 +58,9 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     incomingDepth || incomingDepth === 0
       ? parseInt(String(incomingDepth), 10)
       : req.payload.config.defaultDepth
-  if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth
+  if (depth > req.payload.config.maxDepth) {
+    depth = req.payload.config.maxDepth
+  }
 
   const currentDepth = incomingCurrentDepth || 1
 

@@ -17,10 +17,14 @@ import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
-  if (isConditional) return false
+  if (isConditional) {
+    return false
+  }
 
   const isMarkedRequired = 'required' in field && field.required === true
-  if (fieldAffectsData(field) && isMarkedRequired) return true
+  if (fieldAffectsData(field) && isMarkedRequired) {
+    return true
+  }
 
   // if any subfields are required, this field is required
   if ('fields' in field && field.type !== 'array') {
@@ -139,7 +143,9 @@ export function withNullableJSONSchemaType(
   isRequired: boolean,
 ): JSONSchema4TypeName | JSONSchema4TypeName[] {
   const fieldTypes = [fieldType]
-  if (isRequired) return fieldType
+  if (isRequired) {
+    return fieldType
+  }
   fieldTypes.push('null')
   return fieldTypes
 }
@@ -169,7 +175,9 @@ export function fieldsToJSONSchema(
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-        if (isRequired) requiredFieldNames.add(field.name)
+        if (isRequired) {
+          requiredFieldNames.add(field.name)
+        }
 
         let fieldSchema: JSONSchema4
 

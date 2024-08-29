@@ -148,7 +148,9 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
 
   let operations = []
 
-  if (graphQL === false) return null
+  if (graphQL === false) {
+    return null
+  }
 
   if (type === 'collection') {
     operations = ['create', 'read', 'update', 'delete']

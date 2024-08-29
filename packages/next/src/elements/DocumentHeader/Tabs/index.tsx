@@ -40,9 +40,13 @@ export const DocumentTabs: React.FC<{
               // if no `order`, append the view to the end
               // TODO: open `order` to the config and merge `defaultViews` with `customViews`
               ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) return 0
-                else if (a.order === undefined) return 1
-                else if (b.order === undefined) return -1
+                if (a.order === undefined && b.order === undefined) {
+                  return 0
+                } else if (a.order === undefined) {
+                  return 1
+                } else if (b.order === undefined) {
+                  return -1
+                }
                 return a.order - b.order
               })
               ?.map(([name, tab], index) => {

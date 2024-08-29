@@ -31,7 +31,9 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   const handleClick = useCallback(
     (e) => {
       openModal(slug)
-      if (typeof onClick === 'function') onClick(e)
+      if (typeof onClick === 'function') {
+        onClick(e)
+      }
     },
     [openModal, slug, onClick],
   )

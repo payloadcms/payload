@@ -91,7 +91,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     let foundFirstActive = false
     const newColumns = columns.map((col) => {
       const linkColumn = col.active && !foundFirstActive && col.accessor !== '_select'
-      if (linkColumn) foundFirstActive = true
+      if (linkColumn) {
+        foundFirstActive = true
+      }
 
       return {
         ...col,

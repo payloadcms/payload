@@ -33,7 +33,9 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       req,
     })
 
-    if (accessResult instanceof Response) return accessResult
+    if (accessResult instanceof Response) {
+      return accessResult
+    }
 
     if (collection.config.upload.handlers?.length) {
       let customResponse = null
@@ -47,7 +49,9 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
         })
       }
 
-      if (customResponse instanceof Response) return customResponse
+      if (customResponse instanceof Response) {
+        return customResponse
+      }
     }
 
     const fileDir = collection.config.upload?.staticDir || collection.config.slug

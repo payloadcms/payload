@@ -54,7 +54,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
-    if (!hasGenerateDescriptionFn) return
+    if (!hasGenerateDescriptionFn) {
+      return
+    }
 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({

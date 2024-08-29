@@ -12,9 +12,12 @@ export const payloadCloudEmail = async (
     return undefined
   }
 
-  if (!args.apiKey) throw new Error('apiKey must be provided to use Payload Cloud Email')
-  if (!args.defaultDomain)
+  if (!args.apiKey) {
+    throw new Error('apiKey must be provided to use Payload Cloud Email')
+  }
+  if (!args.defaultDomain) {
     throw new Error('defaultDomain must be provided to use Payload Cloud Email')
+  }
 
   // Check if already has email configuration
 

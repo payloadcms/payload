@@ -69,8 +69,12 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
       if (currentToken) {
         const decoded = jwt.decode(currentToken) as jwt.JwtPayload
-        if (decoded) result.exp = decoded.exp
-        if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
+        if (decoded) {
+          result.exp = decoded.exp
+        }
+        if (!collection.config.auth.removeTokenFromResponses) {
+          result.token = currentToken
+        }
       }
     }
   }

@@ -461,7 +461,9 @@ export class BasePayload {
 
       let customIDType
 
-      if (customID?.type === 'number' || customID?.type === 'text') customIDType = customID.type
+      if (customID?.type === 'number' || customID?.type === 'text') {
+        customIDType = customID.type
+      }
 
       this.collections[collection.slug] = {
         config: collection,
@@ -554,8 +556,12 @@ export class BasePayload {
     }
 
     if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') await options.onInit(this)
-      if (typeof this.config.onInit === 'function') await this.config.onInit(this)
+      if (typeof options.onInit === 'function') {
+        await options.onInit(this)
+      }
+      if (typeof this.config.onInit === 'function') {
+        await this.config.onInit(this)
+      }
     }
 
     return this

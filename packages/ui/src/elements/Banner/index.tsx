@@ -52,8 +52,12 @@ export const Banner: React.FC<Props> = ({
 
   let RenderedType: React.ComponentType<RenderedTypeProps> | React.ElementType = 'div'
 
-  if (onClick && !to) RenderedType = 'button'
-  if (to) RenderedType = Link
+  if (onClick && !to) {
+    RenderedType = 'button'
+  }
+  if (to) {
+    RenderedType = Link
+  }
 
   return (
     <RenderedType className={classes} href={to || null} onClick={onClick}>

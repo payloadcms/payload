@@ -57,7 +57,9 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       config: { fields, graphQL = {} as SanitizedCollectionConfig['graphQL'], versions },
     } = collection
 
-    if (!graphQL) return
+    if (!graphQL) {
+      return
+    }
 
     let singularName
     let pluralName

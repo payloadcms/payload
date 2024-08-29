@@ -50,8 +50,12 @@ export const sanitizeCollection = async (
     let hasCreatedAt = null
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
-        if (field.name === 'updatedAt') hasUpdatedAt = true
-        if (field.name === 'createdAt') hasCreatedAt = true
+        if (field.name === 'updatedAt') {
+          hasUpdatedAt = true
+        }
+        if (field.name === 'createdAt') {
+          hasCreatedAt = true
+        }
       }
       return hasCreatedAt && hasUpdatedAt
     })
@@ -84,7 +88,9 @@ export const sanitizeCollection = async (
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) sanitized.versions = { drafts: false }
+    if (sanitized.versions === true) {
+      sanitized.versions = { drafts: false }
+    }
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
@@ -113,7 +119,9 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.upload) {
-    if (sanitized.upload === true) sanitized.upload = {}
+    if (sanitized.upload === true) {
+      sanitized.upload = {}
+    }
 
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)

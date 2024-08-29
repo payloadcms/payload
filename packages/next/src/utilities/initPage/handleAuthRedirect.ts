@@ -23,7 +23,9 @@ export const handleAuthRedirect = ({
   } = config
 
   if (!isAdminAuthRoute({ adminRoute, config, route })) {
-    if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
+    if (searchParams && 'redirect' in searchParams) {
+      delete searchParams.redirect
+    }
 
     const redirectRoute = encodeURIComponent(
       route + Object.keys(searchParams ?? {}).length

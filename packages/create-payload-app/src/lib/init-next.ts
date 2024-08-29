@@ -169,7 +169,9 @@ async function installAndConfigurePayload(
   }
 
   const logDebug = (message: string) => {
-    if (debug) origDebug(message)
+    if (debug) {
+      origDebug(message)
+    }
   }
 
   if (!fs.existsSync(projectDir)) {

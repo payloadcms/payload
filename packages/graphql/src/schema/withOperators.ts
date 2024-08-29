@@ -263,7 +263,9 @@ export const withOperators = (
   field: FieldAffectingData,
   parentName: string,
 ): GraphQLInputObjectType => {
-  if (!defaults?.[field.type]) throw new Error(`Error: ${field.type} has no defaults configured.`)
+  if (!defaults?.[field.type]) {
+    throw new Error(`Error: ${field.type} has no defaults configured.`)
+  }
 
   const name = `${combineParentName(parentName, field.name)}_operator`
 

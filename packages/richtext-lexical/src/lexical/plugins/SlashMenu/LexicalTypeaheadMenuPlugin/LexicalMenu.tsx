@@ -40,7 +40,9 @@ export type MenuRenderFn = (
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
   const typeaheadContainerNode = document.getElementById('slash-menu')
-  if (!typeaheadContainerNode) return
+  if (!typeaheadContainerNode) {
+    return
+  }
 
   const typeaheadRect = typeaheadContainerNode.getBoundingClientRect()
 
