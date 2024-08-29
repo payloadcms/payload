@@ -112,8 +112,6 @@ const DocumentInfo: React.FC<
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
   const hasInitializedDocPermissions = useRef(false)
-  // Separate locale cache used for handling permissions
-  const prevLocalePermissions = useRef(locale)
 
   const versionsConfig = docConfig?.versions
 
@@ -190,7 +188,7 @@ const DocumentInfo: React.FC<
         lockInProgress.current = false
       }
     },
-    [serverURL, api],
+    [serverURL, api, globalSlug],
   )
 
   const unlockDocument = useCallback(
@@ -223,7 +221,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [serverURL, api, isDocumentLocked],
+    [serverURL, api, isDocumentLocked, globalSlug],
   )
 
   const updateDocumentEditor = useCallback(
@@ -267,7 +265,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to update the document editor', error)
       }
     },
-    [serverURL, api, isDocumentLocked],
+    [serverURL, api, isDocumentLocked, globalSlug],
   )
 
   useEffect(() => {
@@ -282,22 +280,25 @@ const DocumentInfo: React.FC<
             : `where[document.value][equals]=${id}&where[document.relationTo][equals]=${slug}`
 
           const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
-
           const { docs } = await request.json()
 
           if (docs.length > 0) {
-            setIsDocumentLocked(true)
-            setLastEditedAt(new Date(docs[0]._lastEdited.editedAt))
-            setCurrentEditor(docs[0]._lastEdited.user.value)
+            const newEditor = docs[0]._lastEdited.user.value
+            if (newEditor.id !== currentEditor?.id) {
+              setCurrentEditor(newEditor)
+              setLastEditedAt(new Date(docs[0]._lastEdited.editedAt))
+              setIsDocumentLocked(true)
+            }
+          } else {
+            setIsDocumentLocked(false)
           }
         } catch (error) {
           console.error('Failed to fetch lock state', error)
         }
       }
     }
-
     void fetchLockState()
-  }, [id, serverURL, api])
+  }, [id, serverURL, api, collectionSlug, globalSlug, currentEditor])
 
   const getVersions = useCallback(async () => {
     let versionFetchURL

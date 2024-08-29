@@ -180,6 +180,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFilter: 'Добавить фильтр',
     adminTheme: 'Тема Панели',
     and: 'А также',
+    anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
     automatic: 'Автоматически',

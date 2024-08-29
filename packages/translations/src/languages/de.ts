@@ -182,6 +182,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Farbthema',
     and: 'Und',
+    anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     automatic: 'Automatisch',

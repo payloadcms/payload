@@ -26,6 +26,7 @@ export const DocumentTakeOver: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:editingTakenOver')}</h1>
+          <p>{t('general:anotherUserTakenOver')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button buttonStyle="primary" onClick={handleBackToDashboard} size="large">

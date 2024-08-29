@@ -178,6 +178,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addFilter: 'Lägg Till Filter',
     adminTheme: 'Admin Tema',
     and: 'Och',
+    anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
     automatic: 'Automatisk',

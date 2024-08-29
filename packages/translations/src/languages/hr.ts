@@ -179,6 +179,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
     and: 'I',
+    anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
     applyChanges: 'Primijeni promjene',
     ascending: 'Uzlazno',
     automatic: 'Automatsko',

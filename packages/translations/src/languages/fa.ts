@@ -177,6 +177,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addFilter: 'افزودن علامت',
     adminTheme: 'پوسته پیشخوان',
     and: 'و',
+    anotherUserTakenOver: 'کاربر دیگری ویرایش این سند را به دست گرفته است.',
     applyChanges: 'اعمال تغییرات',
     ascending: 'صعودی',
     automatic: 'خودکار',

@@ -182,6 +182,7 @@ export const esTranslations: DefaultTranslationsObject = {
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',
     and: 'Y',
+    anotherUserTakenOver: 'Otro usuario ha tomado el control de la edición de este documento.',
     applyChanges: 'Aplicar Cambios',
     ascending: 'Ascendente',
     automatic: 'Automático',

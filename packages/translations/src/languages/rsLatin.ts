@@ -178,6 +178,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
     and: 'I',
+    anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
     applyChanges: 'Primeni promene',
     ascending: 'Uzlazno',
     automatic: 'Automatsko',

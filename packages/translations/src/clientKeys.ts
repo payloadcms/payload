@@ -126,6 +126,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:addFilter',
   'general:adminTheme',
   'general:and',
+  'general:anotherUserTakenOver',
   'general:applyChanges',
   'general:ascending',
   'general:automatic',

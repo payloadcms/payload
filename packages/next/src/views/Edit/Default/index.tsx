@@ -161,7 +161,13 @@ export const DefaultEditView: React.FC = () => {
     setShowLockedModal(false)
     setIsLockedByAnotherUser(false)
     setShowTakeOverModal(false)
-  }, [user])
+  }, [])
+
+  const handleTakeOverWithinDoc = useCallback(() => {
+    setShowLockedModal(false)
+    setShowTakeOverModal(false)
+    setIsReadOnlyForIncomingUser(false)
+  }, [])
 
   useEffect(() => {
     if (documentLockStateRef.current && documentLockStateRef.current.user.id !== user.id) {
@@ -178,7 +184,7 @@ export const DefaultEditView: React.FC = () => {
     } else {
       setShowLockedModal(false)
     }
-  }, [isDocumentLocked, user.id])
+  }, [currentEditor, isDocumentLocked, showTakeOverModal, user.id])
 
   const handleGoBack = useCallback(() => {
     const redirectRoute = formatAdminURL({
@@ -303,6 +309,9 @@ export const DefaultEditView: React.FC = () => {
         }
       }
 
+      console.log('Is locked by another user: ', isLockedByAnotherUser)
+      console.log('Show take over modal: ', showTakeOverModal)
+
       if (
         isLockedByAnotherUser &&
         documentLockStateRef.current?.user?.id !== user.id &&
@@ -333,12 +342,12 @@ export const DefaultEditView: React.FC = () => {
       operation,
       serverURL,
       isLockedByAnotherUser,
-      shouldLockDocument,
       updateDocumentEditor,
       user,
       resetLockTimer,
       documentLockStateRef,
       showTakeOverModal,
+      setCurrentEditor,
     ],
   )
 
@@ -359,7 +368,7 @@ export const DefaultEditView: React.FC = () => {
 
       void lockDoc()
     }
-  }, [shouldLockDocument, lockDocument, id, user, resetLockTimer, globalSlug])
+  }, [shouldLockDocument, lockDocument, id, user, resetLockTimer, globalSlug, collectionSlug])
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
@@ -376,8 +385,10 @@ export const DefaultEditView: React.FC = () => {
           lockTimer.current = null
         }
       }
+
+      setShowTakeOverModal(false)
     }
-  }, [id, unlockDocument, user.id, globalSlug])
+  }, [collectionSlug, globalSlug, id, unlockDocument, user.id])
 
   console.log('Current Editor: ', currentEditor)
 
@@ -401,7 +412,10 @@ export const DefaultEditView: React.FC = () => {
               editedAt={lastEditedAt}
               handleGoBack={handleGoBack}
               isActive={showLockedModal}
-              onReadOnly={() => setIsReadOnlyForIncomingUser(true)}
+              onReadOnly={() => {
+                setIsReadOnlyForIncomingUser(true)
+                setShowTakeOverModal(false)
+              }}
               onTakeOver={handleTakeOver}
               user={currentEditor}
             />
@@ -435,7 +449,7 @@ export const DefaultEditView: React.FC = () => {
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
-            onTakeOver={() => setIsReadOnlyForIncomingUser(false)}
+            onTakeOver={handleTakeOverWithinDoc}
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             slug={collectionConfig?.slug || globalConfig?.slug}

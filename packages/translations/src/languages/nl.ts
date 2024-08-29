@@ -180,6 +180,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFilter: 'Filter toevoegen',
     adminTheme: 'Adminthema',
     and: 'En',
+    anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
     automatic: 'Automatisch',

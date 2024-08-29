@@ -178,6 +178,7 @@ export const plTranslations: DefaultTranslationsObject = {
     addFilter: 'Dodaj filtr',
     adminTheme: 'Motyw administratora',
     and: 'i',
+    anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',
     applyChanges: 'Zastosuj zmiany',
     ascending: 'Rosnąco',
     automatic: 'Automatyczny',

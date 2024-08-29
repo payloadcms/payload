@@ -178,6 +178,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',
     and: 'Og',
+    anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
     applyChanges: 'Bruk endringer',
     ascending: 'Stigende',
     automatic: 'Automatisk',
