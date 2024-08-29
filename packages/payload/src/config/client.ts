@@ -39,8 +39,9 @@ export type ClientConfig = {
         Logo: MappedComponent
       }
     }
+    dependencies?: Record<string, MappedComponent>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'livePreview'>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
