@@ -100,8 +100,9 @@ describe('plugin', () => {
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
-          // eslint-disable-next-line @typescript-eslint/require-await
+          // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
           send: async (mail) => {
+            // eslint-disable-next-line no-console
             console.log('mock send', mail)
           },
           version: '0.0.1',
