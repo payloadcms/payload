@@ -18,7 +18,7 @@ type Resolver<TSlug extends GlobalSlug> = (
   },
 ) => Promise<DataFromGlobalSlug<TSlug>>
 
-export default function updateResolver<TSlug extends GlobalSlug>(
+export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {

@@ -3,7 +3,7 @@ import type { FieldAffectingData } from 'payload'
 
 import { GraphQLNonNull } from 'graphql'
 
-const withNullableType = (
+export const withNullableType = (
   field: FieldAffectingData,
   type: GraphQLType,
   forceNullable = false,
@@ -26,5 +26,3 @@ const withNullableType = (
 
   return type
 }
-
-export default withNullableType

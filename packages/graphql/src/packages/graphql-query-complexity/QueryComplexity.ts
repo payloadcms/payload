@@ -122,7 +122,7 @@ export function getComplexity(options: {
   return visitor.complexity
 }
 
-export default class QueryComplexity {
+export class QueryComplexity {
   OperationDefinition: Record<string, any>
   complexity: number
   context: ValidationContext

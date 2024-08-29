@@ -4,7 +4,7 @@ import { generatePayloadCookie, isolateObjectProperty, resetPasswordOperation } 
 
 import type { Context } from '../types.js'
 
-function resetPasswordResolver(collection: Collection): any {
+export function resetPassword(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
@@ -34,5 +34,3 @@ function resetPasswordResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default resetPasswordResolver
