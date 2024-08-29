@@ -92,7 +92,18 @@ const typescriptRules = {
   '@typescript-eslint/no-base-to-string': 'warn',
   '@typescript-eslint/restrict-template-expressions': 'warn',
   '@typescript-eslint/no-redundant-type-constituents': 'warn',
-  '@typescript-eslint/no-unnecessary-type-constraint': 'warn'
+  '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
+  '@typescript-eslint/no-misused-promises': [
+    'error',
+    {
+      // See https://github.com/typescript-eslint/typescript-eslint/issues/4619 and https://github.com/typescript-eslint/typescript-eslint/pull/4623
+      // Don't want something like <button onClick={someAsyncFunction}> to error
+      checksVoidReturn: {
+        attributes: false,
+        arguments: false
+      }
+    },
+  ]
 }
 
 /** @typedef {import('eslint').Linter.FlatConfig} */
