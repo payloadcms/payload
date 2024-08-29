@@ -111,7 +111,7 @@ const localizeSchema = (
   return schema
 }
 
-const buildSchema = (
+export const buildSchema = (
   config: SanitizedConfig,
   configFields: Field[],
   buildSchemaOptions: BuildSchemaOptions = {},
@@ -669,5 +669,3 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     })
   },
 }
-
-export default buildSchema
