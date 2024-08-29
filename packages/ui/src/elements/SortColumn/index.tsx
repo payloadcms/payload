@@ -31,10 +31,14 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const asc = name
 
   const ascClasses = [`${baseClass}__asc`]
-  if (sort === asc) ascClasses.push(`${baseClass}--active`)
+  if (sort === asc) {
+    ascClasses.push(`${baseClass}--active`)
+  }
 
   const descClasses = [`${baseClass}__desc`]
-  if (sort === desc) descClasses.push(`${baseClass}--active`)
+  if (sort === desc) {
+    descClasses.push(`${baseClass}--active`)
+  }
 
   const setSort = useCallback(
     async (newSort: string) => {

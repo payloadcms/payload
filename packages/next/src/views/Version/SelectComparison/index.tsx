@@ -48,7 +48,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
   const getResults = useCallback(
     async ({ lastLoadedPage: lastLoadedPageArg }) => {
-      if (loadedAllOptionsRef.current) return
+      if (loadedAllOptionsRef.current) {
+        return
+      }
       const query: {
         [key: string]: unknown
         where: Where

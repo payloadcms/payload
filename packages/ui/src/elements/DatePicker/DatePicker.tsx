@@ -50,11 +50,17 @@ const DatePicker: React.FC<Props> = (props) => {
 
   if (!customDisplayFormat) {
     // when no displayFormat is provided, determine format based on the picker appearance
-    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy'
-    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a'
-    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a'
-    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd'
-    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM'
+    if (pickerAppearance === 'default') {
+      dateFormat = 'MM/dd/yyyy'
+    } else if (pickerAppearance === 'dayAndTime') {
+      dateFormat = 'MMM d, yyy h:mm a'
+    } else if (pickerAppearance === 'timeOnly') {
+      dateFormat = 'h:mm a'
+    } else if (pickerAppearance === 'dayOnly') {
+      dateFormat = 'MMM dd'
+    } else if (pickerAppearance === 'monthOnly') {
+      dateFormat = 'MMMM'
+    }
   }
 
   const onChange = (incomingDate: Date) => {
@@ -63,7 +69,9 @@ const DatePicker: React.FC<Props> = (props) => {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
     }
-    if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(newDate)
+    }
   }
 
   const dateTimePickerProps: ReactDatePickerProps = {

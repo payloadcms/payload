@@ -259,10 +259,14 @@ export function UploadInput(props: UploadInputProps) {
         dataTransfer.items.add(fileList[0])
         fileListToUse = dataTransfer.files
       }
-      if (fileListToUse) setInitialFiles(fileListToUse)
+      if (fileListToUse) {
+        setInitialFiles(fileListToUse)
+      }
       setCollectionSlug(relationTo)
       setOnSuccess(onUploadSuccess)
-      if (typeof maxRows === 'number') setMaxFiles(maxRows)
+      if (typeof maxRows === 'number') {
+        setMaxFiles(maxRows)
+      }
       openModal(drawerSlug)
     },
     [
@@ -498,7 +502,6 @@ export function UploadInput(props: UploadInputProps) {
                   buttonStyle="pill"
                   className={`${baseClass}__listToggler`}
                   disabled={readOnly}
-                  el="span"
                   onClick={openListDrawer}
                   size="small"
                 >

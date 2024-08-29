@@ -154,7 +154,9 @@ export async function getLocalizedPaths({
               lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false)
             }
 
-            if (i + 1 === pathSegments.length) lastIncompletePath.complete = true
+            if (i + 1 === pathSegments.length) {
+              lastIncompletePath.complete = true
+            }
             lastIncompletePath.path = currentPath
           }
         }

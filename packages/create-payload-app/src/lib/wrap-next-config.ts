@@ -42,8 +42,6 @@ export async function parseAndModifyConfigContent(
 ): Promise<{ modifiedConfigContent: string; success: boolean }> {
   content = withPayloadStatement[configType] + '\n' + content
 
-  console.log({ configType, content })
-
   if (configType === 'cjs' || configType === 'esm') {
     try {
       const ast = parseModule(content, { loc: true })

@@ -56,6 +56,8 @@ type Props = {
 }
 
 export const SaveButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return <RenderComponent mappedComponent={CustomComponent} />
+  if (CustomComponent) {
+    return <RenderComponent mappedComponent={CustomComponent} />
+  }
   return <DefaultSaveButton />
 }

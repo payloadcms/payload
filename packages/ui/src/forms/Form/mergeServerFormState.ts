@@ -24,7 +24,9 @@ export const mergeServerFormState = (
 
   if (existingState) {
     Object.entries(existingState).forEach(([path, newFieldState]) => {
-      if (!incomingState[path]) return
+      if (!incomingState[path]) {
+        return
+      }
 
       /**
        * Handle error paths

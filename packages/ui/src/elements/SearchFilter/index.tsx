@@ -28,7 +28,9 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
 
   useEffect(() => {
     if (debouncedSearch !== previousSearch.current) {
-      if (handleChange) handleChange(debouncedSearch)
+      if (handleChange) {
+        handleChange(debouncedSearch)
+      }
 
       previousSearch.current = debouncedSearch
     }

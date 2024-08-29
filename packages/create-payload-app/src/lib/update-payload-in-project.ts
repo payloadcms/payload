@@ -16,7 +16,9 @@ import { installPackages } from './install-packages.js'
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
 ): Promise<{ message: string; success: boolean }> {
-  if (!appDetails.nextConfigPath) return { message: 'No Next.js config found', success: false }
+  if (!appDetails.nextConfigPath) {
+    return { message: 'No Next.js config found', success: false }
+  }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
 

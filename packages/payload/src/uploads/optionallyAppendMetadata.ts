@@ -22,7 +22,9 @@ export async function optionallyAppendMetadata({
   } else if (typeof withMetadata === 'function') {
     const useMetadata = await withMetadata({ metadata, req })
 
-    if (useMetadata) return sharpFile.withMetadata()
+    if (useMetadata) {
+      return sharpFile.withMetadata()
+    }
   }
 
   return sharpFile

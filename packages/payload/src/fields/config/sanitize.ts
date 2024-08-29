@@ -53,7 +53,9 @@ export const sanitizeFields = async ({
   richTextSanitizationPromises,
   validRelationships,
 }: Args): Promise<Field[]> => {
-  if (!fields) return []
+  if (!fields) {
+    return []
+  }
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -62,7 +64,9 @@ export const sanitizeFields = async ({
       continue
     }
 
-    if (!field.type) throw new MissingFieldType(field)
+    if (!field.type) {
+      throw new MissingFieldType(field)
+    }
 
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
@@ -160,8 +164,12 @@ export const sanitizeFields = async ({
         }
       }
 
-      if (!field.hooks) field.hooks = {}
-      if (!field.access) field.access = {}
+      if (!field.hooks) {
+        field.hooks = {}
+      }
+      if (!field.access) {
+        field.access = {}
+      }
 
       setDefaultBeforeDuplicate(field)
     }

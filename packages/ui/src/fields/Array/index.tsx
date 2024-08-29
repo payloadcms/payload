@@ -89,8 +89,12 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
-    if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p.field && p.field.label) return { plural: undefined, singular: p.field.label }
+    if ('labels' in p && p?.labels) {
+      return p.labels
+    }
+    if ('label' in p.field && p.field.label) {
+      return { plural: undefined, singular: p.field.label }
+    }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 

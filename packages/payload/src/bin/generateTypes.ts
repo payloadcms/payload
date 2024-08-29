@@ -15,7 +15,9 @@ export async function generateTypes(
 
   const shouldLog = options?.log ?? true
 
-  if (shouldLog) logger.info('Compiling TS types for Collections and Globals...')
+  if (shouldLog) {
+    logger.info('Compiling TS types for Collections and Globals...')
+  }
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
 
@@ -54,5 +56,7 @@ export async function generateTypes(
   }
 
   fs.writeFileSync(outputFile, compiled)
-  if (shouldLog) logger.info(`Types written to ${outputFile}`)
+  if (shouldLog) {
+    logger.info(`Types written to ${outputFile}`)
+  }
 }
