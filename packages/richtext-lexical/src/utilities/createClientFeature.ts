@@ -9,14 +9,17 @@ import type {
   ResolvedClientFeatureMap,
 } from '../features/typesClient.js'
 import type { ClientEditorConfig } from '../lexical/config/types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { createClientComponent } from '../features/createClientComponent.js'
+import { useClientFeatureContext } from '../lexical/config/client/ClientFeatureContextProvider.js'
 
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
       clientFunctions: Record<string, any>
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
+      field: LexicalRichTextFieldProps['field']
       props: ClientComponentProps<UnSanitizedClientProps>
       // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
       resolvedFeatures: ResolvedClientFeatureMap
@@ -36,6 +39,8 @@ export const createClientFeature: <
       clientFeatureProps: props,
     }
 
+    const { field } = useClientFeatureContext()
+
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
         clientFunctions,
@@ -46,6 +51,7 @@ export const createClientFeature: <
         const toReturn = feature({
           clientFunctions,
           featureProviderMap,
+          field,
           props,
           resolvedFeatures,
           unSanitizedEditorConfig,

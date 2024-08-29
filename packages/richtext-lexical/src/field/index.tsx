@@ -7,6 +7,7 @@ import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { GeneratedFeatureProviderComponent, LexicalRichTextFieldProps } from '../types.js'
 
+import { ClientFeatureContextProvider } from '../lexical/config/client/ClientFeatureContextProvider.js'
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
@@ -19,6 +20,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     field: { richTextComponentMap },
+    field,
     lexicalEditorConfig,
   } = props
   const { schemaPath } = useFieldProps()
@@ -105,7 +107,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
 
   if (!hasLoadedFeatures) {
     return (
-      <React.Fragment>
+      <ClientFeatureContextProvider field={field}>
         {Array.isArray(featureProviderComponents) &&
           featureProviderComponents.map((featureProvider) => {
             // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
@@ -129,7 +131,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
               </React.Fragment>
             )
           })}
-      </React.Fragment>
+      </ClientFeatureContextProvider>
     )
   }
 
