@@ -152,7 +152,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       try {
-        const formStateWithoutFiles = await getFormState({
+        const { state: formStateWithoutFiles } = await getFormState({
           apiRoute: config.routes.api,
           body: {
             collectionSlug,

@@ -40,7 +40,7 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
-  onTakeOver: () => void
+  readonly onTakeOver?: () => void
   readonly permissions: CollectionPermission | GlobalPermission | null
   readonly readOnlyForIncomingUser?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
