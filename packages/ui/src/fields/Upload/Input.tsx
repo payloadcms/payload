@@ -498,7 +498,6 @@ export function UploadInput(props: UploadInputProps) {
                   buttonStyle="pill"
                   className={`${baseClass}__listToggler`}
                   disabled={readOnly}
-                  el="span"
                   onClick={openListDrawer}
                   size="small"
                 >
