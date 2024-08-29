@@ -182,6 +182,7 @@ const DocumentInfo: React.FC<
         if (error.response?.status === 409) {
           setIsDocumentLocked(true)
         } else {
+          // eslint-disable-next-line no-console
           console.error('Failed to lock the document', error)
         }
       } finally {
@@ -218,6 +219,7 @@ const DocumentInfo: React.FC<
           setIsDocumentLocked(false)
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to unlock the document', error)
       }
     },
@@ -262,6 +264,7 @@ const DocumentInfo: React.FC<
           setIsDocumentLocked(true)
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to update the document editor', error)
       }
     },
@@ -293,6 +296,7 @@ const DocumentInfo: React.FC<
             setIsDocumentLocked(false)
           }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to fetch lock state', error)
         }
       }
