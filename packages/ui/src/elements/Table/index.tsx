@@ -72,7 +72,7 @@ export const Table: React.FC<Props> = ({
 
                   return (
                     <RenderCell
-                      cellPropOverrides={{
+                      cellProps={{
                         link: isLink,
                         ...cellProps?.[colIndex],
                       }}
