@@ -39,6 +39,7 @@ export const sanitizeCollection = async (
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    parentIsLocalized: false,
     richTextSanitizationPromises,
     validRelationships,
   })
@@ -120,6 +121,7 @@ export const sanitizeCollection = async (
     // disable duplicate for uploads by default
     sanitized.disableDuplicate = sanitized.disableDuplicate || true
 
+    sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
       sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'

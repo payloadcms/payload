@@ -189,6 +189,7 @@ export const esTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Tus cambios no han sido guardados. Si te sales ahora, se perderán tus cambios.',
+    clearAll: undefined,
     close: 'Cerrar',
     collapse: 'Colapsar',
     collections: 'Colecciones',
@@ -250,6 +251,7 @@ export const esTranslations: DefaultTranslationsObject = {
     moveDown: 'Mover abajo',
     moveUp: 'Mover arriba',
     newPassword: 'Nueva contraseña',
+    next: 'Siguiente',
     noFiltersSet: 'No hay filtros establecidos',
     noLabel: '<Sin {{label}}>',
     noOptions: 'Sin opciones',
@@ -267,6 +269,7 @@ export const esTranslations: DefaultTranslationsObject = {
     password: 'Contraseña',
     payloadSettings: 'Configuración de la carga',
     perPage: 'Por página: {{limit}}',
+    previous: 'Anterior',
     remove: 'Remover',
     reset: 'Reiniciar',
     row: 'Fila',
@@ -324,6 +327,8 @@ export const esTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Añadir archivo',
+    addFiles: 'Añadir archivos',
+    bulkUpload: 'Subida en Masa',
     crop: 'Cultivo',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
@@ -332,6 +337,8 @@ export const esTranslations: DefaultTranslationsObject = {
     editImage: 'Editar imagen',
     fileName: 'Nombre del archivo',
     fileSize: 'Tamaño del archivo',
+    fileToUpload: 'Archivo para subir',
+    filesToUpload: 'Archivos para subir',
     focalPoint: 'Punto Focal',
     focalPointDescription:
       'Arrastra el punto focal directamente en la vista previa o ajusta los valores a continuación.',
@@ -400,6 +407,7 @@ export const esTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Guardado por última vez hace {{distance}}',
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noRowsFound: 'No encontramos {{label}}',
+    noRowsSelected: undefined,
     preview: 'Previsualizar',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocurrió un problema al restaurar esta versión',

@@ -15,7 +15,7 @@ interface HeaderClientProps {
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({ header }) => {
   /* Storing the value in a useState to avoid hydration errors */
-  const [theme, setTheme] = useState(null)
+  const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
 
@@ -25,7 +25,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ header }) => {
   }, [pathname])
 
   useEffect(() => {
-    if (headerTheme !== theme) setTheme(headerTheme)
+    if (headerTheme && headerTheme !== theme) setTheme(headerTheme)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerTheme])
 

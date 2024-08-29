@@ -41,7 +41,10 @@ export default buildConfigWithDefaults({
     },
     components: {
       actions: ['/components/AdminButton/index.js#AdminButton'],
-      afterDashboard: ['/components/AfterDashboard/index.js#AfterDashboard'],
+      afterDashboard: [
+        '/components/AfterDashboard/index.js#AfterDashboard',
+        '/components/AfterDashboardClient/index.js#AfterDashboardClient',
+      ],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       logout: {
@@ -104,6 +107,15 @@ export default buildConfigWithDefaults({
       titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
+    dependencies: {
+      myTestComponent: {
+        path: '/components/TestComponent.js#TestComponent',
+        type: 'component',
+        clientProps: {
+          test: 'hello',
+        },
+      },
+    },
   },
   collections: [
     UploadCollection,

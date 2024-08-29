@@ -1,7 +1,7 @@
 'use client'
 import { getCollapsedMargins } from '../utils/getCollapsedMargins.js'
 import { highlightElemOriginalPosition } from './highlightElemOriginalPosition.js'
-const TARGET_LINE_HALF_HEIGHT = 25
+const TARGET_LINE_HALF_HEIGHT = 0
 const TEXT_BOX_HORIZONTAL_PADDING = -24
 const DEBUG = false
 
@@ -115,31 +115,14 @@ export function setTargetLine(
   const left = TEXT_BOX_HORIZONTAL_PADDING - offsetLeft
 
   targetLineElem.style.width = `calc(${anchorWidth}px - ${offsetWidth})`
-  targetLineElem.style.opacity = '.4'
+  targetLineElem.style.opacity = '.8'
 
-  /**
-   * Move around element below or above the line (= the target / targetBlockElem). Creates "space" for the targetLineElem
-   *
-   * Not needed for empty paragraphs, as an empty paragraph is enough space for the targetLineElem anyways.
-   */
-  //targetBlockElem.style.opacity = '0.4'
-  const buffer = 12 // creates more spacing/padding so target line is not directly next to the targetBlockElem
-  if (!isFoundNodeEmptyParagraph) {
-    if (isBelow) {
-      targetBlockElem.style.marginBottom = TARGET_LINE_HALF_HEIGHT * 2 + buffer + 'px'
-      targetLineElem.style.transform = `translate(${left}px, calc(${top}px - ${'0px'}))`
-    } else {
-      targetBlockElem.style.marginTop = TARGET_LINE_HALF_HEIGHT * 2 + buffer + 'px'
-      targetLineElem.style.transform = `translate(${left}px, calc(${top - TARGET_LINE_HALF_HEIGHT * 2}px - ${'0px'}))`
-    }
-  } else {
-    targetLineElem.style.transform = `translate(${left}px, ${top - TARGET_LINE_HALF_HEIGHT}px)`
-  }
+  // if (DEBUG) {
+  //   //targetBlockElem.style.border = '3px solid red'
+  //   highlightElemOriginalPosition(debugHighlightRef, targetBlockElem, anchorElem)
+  // }
 
-  if (DEBUG) {
-    //targetBlockElem.style.border = '3px solid red'
-    highlightElemOriginalPosition(debugHighlightRef, targetBlockElem, anchorElem)
-  }
+  targetLineElem.style.transform = `translate(${left}px, calc(${top}px - ${'2px'}))`
 
   /**
    * Properly reset previous targetBlockElem styles

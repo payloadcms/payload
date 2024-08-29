@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "clean": {
       "cache": false,
       "dependsOn": ["^clean"]
@@ -14,8 +14,10 @@
       "cache": false
     },
     "lint": {
-      "cache": false,
-      "dependsOn": ["^lint"]
+      "cache": false
+    },
+    "lint:fix": {
+      "cache": false
     }
   }
 }

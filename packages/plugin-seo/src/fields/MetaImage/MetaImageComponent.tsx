@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldType, Options, UploadFieldProps } from '@payloadcms/ui'
+import type { FieldType, Options } from '@payloadcms/ui'
+import type { UploadFieldProps } from 'payload'
 
 import {
   FieldLabel,
@@ -156,6 +157,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
               setValue(null)
             }
           }}
+          path={field.path}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

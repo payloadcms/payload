@@ -22,7 +22,7 @@ export const BlocksFeature = createServerFeature<
   BlocksFeatureProps,
   BlocksFeatureClientProps
 >({
-  feature: async ({ config: _config, isRoot, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     // Build clientProps
     const clientProps: BlocksFeatureClientProps = {
       clientBlockSlugs: [],
@@ -44,6 +44,7 @@ export const BlocksFeature = createServerFeature<
           blocks: props.inlineBlocks ?? [],
         },
       ],
+      parentIsLocalized,
       requireFieldLevelRichTextEditor: isRoot,
       validRelationships,
     })

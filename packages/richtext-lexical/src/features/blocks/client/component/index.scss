@@ -17,7 +17,7 @@
     }
   }
 
-  margin: 0 0 1.5em;
+  margin-block: base(0.4);
 
   &__header {
     h3 {
@@ -98,7 +98,12 @@
     width: 100%;
     overflow: hidden;
     gap: calc(var(--base) * 0.375);
-    justify-content: space-between;
+    justify-content: flex-start;
+    pointer-events: none;
+
+    & > * {
+      pointer-events: all;
+    }
   }
 
   &__block-number {

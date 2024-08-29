@@ -186,6 +186,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
+    clearAll: undefined,
     close: 'Fechar',
     collapse: 'Recolher',
     collections: 'Coleções',
@@ -247,6 +248,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     moveDown: 'Mover para Baixo',
     moveUp: 'Mover para Cima',
     newPassword: 'Nova Senha',
+    next: 'Próximo',
     noFiltersSet: 'Nenhum filtro definido',
     noLabel: '<Nenhum(a) {{label}}>',
     noOptions: 'Sem opções',
@@ -264,6 +266,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     password: 'Senha',
     payloadSettings: 'Configurações do Payload',
     perPage: 'Itens por Página: {{limit}}',
+    previous: 'Anterior',
     remove: 'Remover',
     reset: 'Redefinir',
     row: 'Linha',
@@ -321,6 +324,8 @@ export const ptTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Adicionar arquivo',
+    addFiles: 'Adicionar Arquivos',
+    bulkUpload: 'Upload em Massa',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',
@@ -329,6 +334,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     editImage: 'Editar imagem',
     fileName: 'Nome do Arquivo',
     fileSize: 'Tamanho do Arquivo',
+    fileToUpload: 'Arquivo para upload',
+    filesToUpload: 'Arquivos para Carregar',
     focalPoint: 'Ponto Focal',
     focalPointDescription:
       'Arraste o ponto focal diretamente na pré-visualização ou ajuste os valores abaixo.',
@@ -397,6 +404,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Última gravação há {{distance}}',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
+    noRowsSelected: undefined,
     preview: 'Pré-visualização',
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocorreu um problema ao restaurar essa versão',

@@ -47,7 +47,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   locale: null;
@@ -78,9 +78,9 @@ export interface UserAuthOperations {
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: number;
-  image?: number | Media | null;
-  versionedImage?: number | Version | null;
+  id: string;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
   updatedAt: string;
   createdAt: string;
 }
@@ -89,7 +89,7 @@ export interface Relation {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -229,7 +229,7 @@ export interface Media {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -249,8 +249,8 @@ export interface Version {
  * via the `definition` "audio".
  */
 export interface Audio {
-  id: number;
-  audio?: number | Media | null;
+  id: string;
+  audio?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -259,7 +259,7 @@ export interface Audio {
  * via the `definition` "gif-resize".
  */
 export interface GifResize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -295,7 +295,7 @@ export interface GifResize {
  * via the `definition` "filename-compound-index".
  */
 export interface FilenameCompoundIndex {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -332,7 +332,7 @@ export interface FilenameCompoundIndex {
  * via the `definition` "no-image-sizes".
  */
 export interface NoImageSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -350,7 +350,7 @@ export interface NoImageSize {
  * via the `definition` "object-fit".
  */
 export interface ObjectFit {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -402,7 +402,7 @@ export interface ObjectFit {
  * via the `definition` "with-meta-data".
  */
 export interface WithMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -430,7 +430,7 @@ export interface WithMetaDatum {
  * via the `definition` "without-meta-data".
  */
 export interface WithoutMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -458,7 +458,7 @@ export interface WithoutMetaDatum {
  * via the `definition` "with-only-jpeg-meta-data".
  */
 export interface WithOnlyJpegMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -486,7 +486,7 @@ export interface WithOnlyJpegMetaDatum {
  * via the `definition` "crop-only".
  */
 export interface CropOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -530,7 +530,7 @@ export interface CropOnly {
  * via the `definition` "focal-only".
  */
 export interface FocalOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -574,7 +574,7 @@ export interface FocalOnly {
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -592,7 +592,7 @@ export interface FocalNoSize {
  * via the `definition` "animated-type-media".
  */
 export interface AnimatedTypeMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -644,7 +644,7 @@ export interface AnimatedTypeMedia {
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -704,7 +704,7 @@ export interface Enlarge {
  * via the `definition` "reduce".
  */
 export interface Reduce {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -756,7 +756,7 @@ export interface Reduce {
  * via the `definition` "media-trim".
  */
 export interface MediaTrim {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -800,7 +800,7 @@ export interface MediaTrim {
  * via the `definition` "custom-file-name-media".
  */
 export interface CustomFileNameMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -828,7 +828,7 @@ export interface CustomFileNameMedia {
  * via the `definition` "unstored-media".
  */
 export interface UnstoredMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -846,7 +846,7 @@ export interface UnstoredMedia {
  * via the `definition` "externally-served-media".
  */
 export interface ExternallyServedMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -864,8 +864,9 @@ export interface ExternallyServedMedia {
  * via the `definition` "uploads-1".
  */
 export interface Uploads1 {
-  id: number;
-  media?: number | Uploads2 | null;
+  id: string;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
   richText?: {
     root: {
       type: string;
@@ -898,7 +899,7 @@ export interface Uploads1 {
  * via the `definition` "uploads-2".
  */
 export interface Uploads2 {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -917,7 +918,7 @@ export interface Uploads2 {
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -935,7 +936,7 @@ export interface AdminThumbnailFunction {
  * via the `definition` "admin-thumbnail-size".
  */
 export interface AdminThumbnailSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -971,7 +972,7 @@ export interface AdminThumbnailSize {
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -989,7 +990,7 @@ export interface OptionalFile {
  * via the `definition` "required-file".
  */
 export interface RequiredFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1007,7 +1008,7 @@ export interface RequiredFile {
  * via the `definition` "custom-upload-field".
  */
 export interface CustomUploadField {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1026,7 +1027,7 @@ export interface CustomUploadField {
  * via the `definition` "media-with-relation-preview".
  */
 export interface MediaWithRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1045,7 +1046,7 @@ export interface MediaWithRelationPreview {
  * via the `definition` "media-without-relation-preview".
  */
 export interface MediaWithoutRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1064,13 +1065,13 @@ export interface MediaWithoutRelationPreview {
  * via the `definition` "relation-preview".
  */
 export interface RelationPreview {
-  id: number;
-  imageWithPreview1?: number | MediaWithRelationPreview | null;
-  imageWithPreview2?: number | MediaWithRelationPreview | null;
-  imageWithoutPreview1?: number | MediaWithRelationPreview | null;
-  imageWithoutPreview2?: number | MediaWithoutRelationPreview | null;
-  imageWithPreview3?: number | MediaWithoutRelationPreview | null;
-  imageWithoutPreview3?: number | MediaWithoutRelationPreview | null;
+  id: string;
+  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
@@ -1079,7 +1080,7 @@ export interface RelationPreview {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1096,10 +1097,10 @@ export interface User {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1119,7 +1120,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

@@ -23,18 +23,19 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  parentIsLocalized: boolean
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
+
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -47,6 +48,7 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
@@ -99,19 +101,26 @@ export const sanitizeFields = async ({
         })
       }
 
-      if (field.type === 'relationship') {
-        if (field.min && !field.minRows) {
-          console.warn(
-            `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
-          )
+      if (field.min && !field.minRows) {
+        console.warn(
+          `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
+        )
+      }
+      if (field.max && !field.maxRows) {
+        console.warn(
+          `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
+        )
+      }
+      field.minRows = field.minRows || field.min
+      field.maxRows = field.maxRows || field.max
+    }
+
+    if (field.type === 'upload') {
+      if (!field.admin || !('isSortable' in field.admin)) {
+        field.admin = {
+          isSortable: true,
+          ...field.admin,
         }
-        if (field.max && !field.maxRows) {
-          console.warn(
-            `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
-          )
-        }
-        field.minRows = field.minRows || field.min
-        field.maxRows = field.maxRows || field.max
       }
     }
 
@@ -130,7 +139,17 @@ export const sanitizeFields = async ({
         existingFieldNames.add(field.name)
       }
 
-      if (field.localized && !config.localization) delete field.localized
+      if (typeof field.localized !== 'undefined') {
+        let shouldDisableLocalized = !config.localization
+
+        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+          shouldDisableLocalized = true
+        }
+
+        if (shouldDisableLocalized) {
+          delete field.localized
+        }
+      }
 
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
@@ -167,6 +186,7 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
+            parentIsLocalized: parentIsLocalized || field.localized,
           })
         }
 
@@ -194,6 +214,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -206,6 +227,7 @@ export const sanitizeFields = async ({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -223,6 +245,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,

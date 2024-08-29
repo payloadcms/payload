@@ -6,6 +6,7 @@ import {
   type EditViewProps,
   type ImportMap,
   type Payload,
+  type PayloadComponent,
   type SanitizedConfig,
   deepCopyObjectSimple,
   serverOnlyConfigProperties,
@@ -112,6 +113,29 @@ export const createClientConfig = async ({
         undefined,
         'config.admin.components.graphics.Logo',
       )
+    }
+
+    if (config.admin?.dependencies) {
+      clientConfig.admin.dependencies = {}
+      for (const key in config.admin.dependencies) {
+        const dependency = config.admin.dependencies[key]
+
+        if (dependency.type === 'component') {
+          const payloadComponent: PayloadComponent = {
+            clientProps: dependency.clientProps,
+            path: dependency.path,
+            serverProps: dependency.serverProps,
+          }
+
+          clientConfig.admin.dependencies[key] = createMappedComponent(
+            payloadComponent,
+            undefined,
+            undefined,
+            `config.admin.dependencies.${key}`,
+          )
+          continue
+        }
+      }
     }
   }
 

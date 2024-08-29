@@ -185,6 +185,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    clearAll: undefined,
     close: 'Stänga',
     collapse: 'Kollapsa',
     collections: 'Samlingar',
@@ -246,6 +247,7 @@ export const svTranslations: DefaultTranslationsObject = {
     moveDown: 'Flytta Ner',
     moveUp: 'Flytta Upp',
     newPassword: 'Nytt Lösenord',
+    next: 'Nästa',
     noFiltersSet: 'Inga filter inställda',
     noLabel: '<Ingen {{label}}>',
     noOptions: 'Inga alternativ',
@@ -263,6 +265,7 @@ export const svTranslations: DefaultTranslationsObject = {
     password: 'Lösenord',
     payloadSettings: 'Payload Inställningar',
     perPage: 'Per Sida: {{limit}}',
+    previous: 'Föregående',
     remove: 'Ta bort',
     reset: 'Återställ',
     row: 'Rad',
@@ -320,6 +323,8 @@ export const svTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Lägg till fil',
+    addFiles: 'Lägg till filer',
+    bulkUpload: 'Massuppladdning',
     crop: 'Skörd',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',
@@ -328,6 +333,8 @@ export const svTranslations: DefaultTranslationsObject = {
     editImage: 'Redigera bild',
     fileName: 'Filnamn',
     fileSize: 'Filstorlek',
+    fileToUpload: 'Fil att ladda upp',
+    filesToUpload: 'Filer att ladda upp',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Dra fokuspunkten direkt på förhandsgranskningen eller justera värdena nedan.',
@@ -395,6 +402,7 @@ export const svTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noRowsFound: 'Inga {{label}} hittades',
+    noRowsSelected: undefined,
     preview: 'Förhandsvisa',
     previouslyPublished: 'Tidigare publicerad',
     problemRestoringVersion: 'Det uppstod ett problem när den här versionen skulle återställas',

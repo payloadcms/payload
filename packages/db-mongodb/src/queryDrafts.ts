@@ -6,7 +6,7 @@ import { combineQueries, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(

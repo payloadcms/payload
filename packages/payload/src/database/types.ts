@@ -101,6 +101,13 @@ export interface BaseDatabaseAdapter {
    */
   name: string
   /**
+   * Full package name of the database adapter
+   *
+   * @example @payloadcms/db-postgres
+   */
+  packageName: string
+
+  /**
    * reference to the instance of payload
    */
   payload: Payload
@@ -434,5 +441,6 @@ export type DBIdentifierName =
 export type MigrationTemplateArgs = {
   downSQL?: string
   imports?: string
+  packageName?: string
   upSQL?: string
 }

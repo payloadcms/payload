@@ -189,6 +189,7 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
+    clearAll: undefined,
     close: 'Schließen',
     collapse: 'Einklappen',
     collections: 'Sammlungen',
@@ -250,6 +251,7 @@ export const deTranslations: DefaultTranslationsObject = {
     moveDown: 'Nach unten bewegen',
     moveUp: 'Nach oben bewegen',
     newPassword: 'Neues Passwort',
+    next: 'Nächste',
     noFiltersSet: 'Keine Filter gesetzt',
     noLabel: '<Kein {{label}}>',
     noOptions: 'Keine Optionen',
@@ -267,6 +269,7 @@ export const deTranslations: DefaultTranslationsObject = {
     password: 'Passwort',
     payloadSettings: 'Payload Einstellungen',
     perPage: 'Pro Seite: {{limit}}',
+    previous: 'Vorherige',
     remove: 'Entfernen',
     reset: 'Zurücksetzen',
     row: 'Zeile',
@@ -325,6 +328,8 @@ export const deTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Datei hinzufügen',
+    addFiles: 'Dateien hinzufügen',
+    bulkUpload: 'Massenupload',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehen Sie die Ecken des ausgewählten Bereichs, zeichnen Sie einen neuen Bereich oder passen Sie die Werte unten an.',
@@ -333,6 +338,8 @@ export const deTranslations: DefaultTranslationsObject = {
     editImage: 'Bild bearbeiten',
     fileName: 'Dateiname',
     fileSize: 'Dateigröße',
+    fileToUpload: 'Datei zum Hochladen',
+    filesToUpload: 'Dateien zum Hochladen',
     focalPoint: 'Brennpunkt',
     focalPointDescription:
       'Ziehen Sie den Fokuspunkt direkt auf die Vorschau oder passen Sie die Werte unten an.',
@@ -400,6 +407,7 @@ export const deTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
     noRowsFound: 'Kein {{label}} gefunden',
+    noRowsSelected: undefined,
     preview: 'Vorschau',
     previouslyPublished: 'Zuvor Veröffentlicht',
     problemRestoringVersion: 'Es gab ein Problem bei der Wiederherstellung dieser Version',

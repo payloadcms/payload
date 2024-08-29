@@ -139,6 +139,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       migrateReset,
       migrateStatus,
       migrationDir,
+      packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
       rejectInitializing,

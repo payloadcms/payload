@@ -185,6 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
+    clearAll: undefined,
     close: 'Bağla',
     collapse: 'Bağla',
     collections: 'Kolleksiyalar',
@@ -246,6 +247,7 @@ export const azTranslations: DefaultTranslationsObject = {
     moveDown: 'Aşağı hərəkət et',
     moveUp: 'Yuxarı hərəkət et',
     newPassword: 'Yeni şifrə',
+    next: 'Növbəti',
     noFiltersSet: 'Filter təyin edilməyib',
     noLabel: '<Heç bir {{label}}>',
     noOptions: 'Heç bir seçim yoxdur',
@@ -263,6 +265,7 @@ export const azTranslations: DefaultTranslationsObject = {
     password: 'Şifrə',
     payloadSettings: 'Payload Parametrləri',
     perPage: 'Hər səhifədə: {{limit}}',
+    previous: 'Əvvəlki',
     remove: 'Sil',
     reset: 'Yenidən başlat',
     row: 'Sətir',
@@ -321,6 +324,8 @@ export const azTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Fayl əlavə et',
+    addFiles: 'Faylları Əlavə Edin',
+    bulkUpload: 'Kütləvi Yükləmə',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
@@ -329,6 +334,8 @@ export const azTranslations: DefaultTranslationsObject = {
     editImage: 'Şəkili Redaktə Et',
     fileName: 'Faylın Adı',
     fileSize: 'Faylım Ölçüsü',
+    fileToUpload: 'Yükləmək üçün Fayl',
+    filesToUpload: 'Yükləmək üçün fayllar',
     focalPoint: 'Mərkəzi Nöqtə',
     focalPointDescription:
       'Fokus nöqtəsini birbaşa önizləməyə sürükləyin və ya aşağıdakı dəyərləri düzəltin.',
@@ -396,6 +403,7 @@ export const azTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
+    noRowsSelected: undefined,
     preview: 'Öncədən baxış',
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',

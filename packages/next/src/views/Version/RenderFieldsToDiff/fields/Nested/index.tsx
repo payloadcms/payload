@@ -1,3 +1,4 @@
+'use client'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 

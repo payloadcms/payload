@@ -57,6 +57,12 @@ const Component: React.FC<ElementProps> = (props) => {
     nodeKey,
   } = props
 
+  if (typeof value === 'object') {
+    throw new Error(
+      'Upload value should be a string or number. The Lexical Upload component should not receive the populated value object.',
+    )
+  }
+
   const {
     config: {
       collections,

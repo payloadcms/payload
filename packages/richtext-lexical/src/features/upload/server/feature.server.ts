@@ -47,7 +47,7 @@ export const UploadFeature = createServerFeature<
   UploadFeatureProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = { collections: {} }
     }
@@ -70,6 +70,7 @@ export const UploadFeature = createServerFeature<
         props.collections[collection].fields = await sanitizeFields({
           config: _config as unknown as Config,
           fields: props.collections[collection].fields,
+          parentIsLocalized,
           requireFieldLevelRichTextEditor: isRoot,
           validRelationships,
         })
@@ -97,7 +98,15 @@ export const UploadFeature = createServerFeature<
         createNode({
           converters: {
             html: {
-              converter: async ({ draft, node, overrideAccess, req, showHiddenFields }) => {
+              converter: async ({
+                currentDepth,
+                depth,
+                draft,
+                node,
+                overrideAccess,
+                req,
+                showHiddenFields,
+              }) => {
                 // @ts-expect-error
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
@@ -110,9 +119,9 @@ export const UploadFeature = createServerFeature<
                     await populate({
                       id,
                       collectionSlug: node.relationTo,
-                      currentDepth: 0,
+                      currentDepth,
                       data: uploadDocument,
-                      depth: 1,
+                      depth,
                       draft,
                       key: 'value',
                       overrideAccess,

@@ -185,6 +185,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    clearAll: undefined,
     close: 'Lukk',
     collapse: 'Skjul',
     collections: 'Samlinger',
@@ -246,6 +247,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     moveDown: 'Flytt ned',
     moveUp: 'Flytt opp',
     newPassword: 'Nytt passord',
+    next: 'Neste',
     noFiltersSet: 'Ingen filtre satt',
     noLabel: '<Ingen {{label}}>',
     noOptions: 'Ingen alternativer',
@@ -263,6 +265,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     password: 'Passord',
     payloadSettings: 'Payload-innstillinger',
     perPage: 'Per side: {{limit}}',
+    previous: 'Forrige',
     remove: 'Fjern',
     reset: 'Tilbakestill',
     row: 'Rad',
@@ -320,6 +323,8 @@ export const nbTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Legg til fil',
+    addFiles: 'Legg til filer',
+    bulkUpload: 'Bulk opplasting',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
@@ -328,6 +333,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     editImage: 'Rediger bilde',
     fileName: 'Filnavn',
     fileSize: 'Filstørrelse',
+    fileToUpload: 'Fil til opplasting',
+    filesToUpload: 'Filer til opplasting',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Dra fokuspunktet direkte på forhåndsvisningen eller juster verdiene nedenfor.',
@@ -396,6 +403,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',
     noRowsFound: 'Ingen {{label}} funnet',
+    noRowsSelected: undefined,
     preview: 'Forhåndsvisning',
     previouslyPublished: 'Tidligere Publisert',
     problemRestoringVersion: 'Det oppstod et problem med gjenoppretting av denne versjonen',

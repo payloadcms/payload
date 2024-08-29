@@ -75,6 +75,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
+  if (!data) {
+    notFound()
+  }
+
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
     id,
     collectionConfig,
@@ -276,6 +280,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialData={data}
       initialState={formState}
       isEditing={isEditing}
+      key={locale?.code}
     >
       {!RootViewOverride && (
         <DocumentHeader

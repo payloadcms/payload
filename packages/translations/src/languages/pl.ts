@@ -185,6 +185,7 @@ export const plTranslations: DefaultTranslationsObject = {
     cancel: 'Anuluj',
     changesNotSaved:
       'Twoje zmiany nie zostały zapisane. Jeśli teraz wyjdziesz, stracisz swoje zmiany.',
+    clearAll: undefined,
     close: 'Zamknij',
     collapse: 'Zwiń',
     collections: 'Kolekcje',
@@ -246,6 +247,7 @@ export const plTranslations: DefaultTranslationsObject = {
     moveDown: 'Przesuń niżej',
     moveUp: 'Przesuń wyżej',
     newPassword: 'Nowe hasło',
+    next: 'Następny',
     noFiltersSet: 'Brak ustawionych filtrów',
     noLabel: '<Bez {{label}}>',
     noOptions: 'Brak opcji',
@@ -263,6 +265,7 @@ export const plTranslations: DefaultTranslationsObject = {
     password: 'Hasło',
     payloadSettings: 'Ustawienia Payload',
     perPage: 'Na stronę: {{limit}}',
+    previous: 'Poprzedni',
     remove: 'Usuń',
     reset: 'Zresetuj',
     row: 'Wiersz',
@@ -320,6 +323,8 @@ export const plTranslations: DefaultTranslationsObject = {
   },
   upload: {
     addFile: 'Dodaj plik',
+    addFiles: 'Dodaj pliki',
+    bulkUpload: 'Załaduj masowo',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',
@@ -328,6 +333,8 @@ export const plTranslations: DefaultTranslationsObject = {
     editImage: 'Edytuj obraz',
     fileName: 'Nazwa pliku',
     fileSize: 'Rozmiar pliku',
+    fileToUpload: 'Plik do przesłania',
+    filesToUpload: 'Pliki do przesłania',
     focalPoint: 'Punkt centralny',
     focalPointDescription:
       'Przeciągnij punkt centralny bezpośrednio na podglądzie lub dostosuj wartości poniżej.',
@@ -396,6 +403,7 @@ export const plTranslations: DefaultTranslationsObject = {
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
+    noRowsSelected: undefined,
     preview: 'Podgląd',
     previouslyPublished: 'Wcześniej opublikowane',
     problemRestoringVersion: 'Wystąpił problem podczas przywracania tej wersji',

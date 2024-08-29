@@ -40,10 +40,10 @@ import { flattenTopLevelFields, toWords } from 'payload'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
-import withNullableType from './withNullableType.js'
+import { withNullableType } from './withNullableType.js'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -307,10 +307,51 @@ export function buildMutationInputType({
       ...inputObjectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
-    upload: (inputObjectTypeConfig: InputObjectTypeConfig, field: UploadField) => ({
-      ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
-    }),
+    upload: (inputObjectTypeConfig: InputObjectTypeConfig, field: UploadField) => {
+      const { relationTo } = field
+      type PayloadGraphQLRelationshipType =
+        | GraphQLInputObjectType
+        | GraphQLList<GraphQLScalarType>
+        | GraphQLScalarType
+      let type: PayloadGraphQLRelationshipType
+
+      if (Array.isArray(relationTo)) {
+        const fullName = `${combineParentName(
+          parentName,
+          toWords(field.name, true),
+        )}RelationshipInput`
+        type = new GraphQLInputObjectType({
+          name: fullName,
+          fields: {
+            relationTo: {
+              type: new GraphQLEnumType({
+                name: `${fullName}RelationTo`,
+                values: relationTo.reduce(
+                  (values, option) => ({
+                    ...values,
+                    [formatName(option)]: {
+                      value: option,
+                    },
+                  }),
+                  {},
+                ),
+              }),
+            },
+            value: { type: GraphQLJSON },
+          },
+        })
+      } else {
+        type = getCollectionIDType(
+          config.db.defaultIDType,
+          graphqlResult.collections[relationTo].config,
+        )
+      }
+
+      return {
+        ...inputObjectTypeConfig,
+        [field.name]: { type: field.hasMany ? new GraphQLList(type) : type },
+      }
+    },
   }
 
   const fieldName = formatName(name)
