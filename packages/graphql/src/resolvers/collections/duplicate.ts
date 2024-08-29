@@ -17,7 +17,7 @@ export type Resolver<TData> = (
   },
 ) => Promise<TData>
 
-export default function duplicateResolver<TSlug extends CollectionSlug>(
+export function duplicateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<DataFromCollectionSlug<TSlug>> {
   return async function resolver(_, args, context: Context) {
