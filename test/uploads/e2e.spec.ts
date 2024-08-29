@@ -286,7 +286,7 @@ describe('uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
@@ -299,7 +299,7 @@ describe('uploads', () => {
     await wait(500) // flake workaround
     await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio  .upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '#field-audio  .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
@@ -334,7 +334,7 @@ describe('uploads', () => {
     await wait(500) // flake workaround
     await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '.upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
