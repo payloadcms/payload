@@ -704,7 +704,7 @@ export function buildObjectType({
 
               const result = await context.req.payloadDataLoader.load(
                 createDataloaderCacheKey({
-                  collectionSlug: collectionSlug as string,
+                  collectionSlug,
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
@@ -751,7 +751,7 @@ export function buildObjectType({
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
               createDataloaderCacheKey({
-                collectionSlug: relatedCollectionSlug as string,
+                collectionSlug: relatedCollectionSlug,
                 currentDepth: 0,
                 depth: 0,
                 docID: id,

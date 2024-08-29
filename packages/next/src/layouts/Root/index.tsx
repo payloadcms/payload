@@ -137,7 +137,7 @@ export const RootLayout = async ({
       )?.docs?.[0]
     : null
 
-  const isNavOpen = (navPreferences?.value as any)?.open ?? true
+  const isNavOpen = navPreferences?.value?.open ?? true
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>

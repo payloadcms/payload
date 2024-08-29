@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 

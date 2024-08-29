@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 export type BlocksMap = {
   [path: string]: Record<string, unknown>[]
 }
