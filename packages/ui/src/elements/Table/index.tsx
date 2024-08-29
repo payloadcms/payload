@@ -65,8 +65,8 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellCo
                     (colIndex === 1 && activeColumns[0]?.accessor === '_select')
 
                   const cellProps = {
-                    ...col.cellProps,
                     link: isLink,
+                    ...(col.cellProps || {}),
                   }
 
                   return (
