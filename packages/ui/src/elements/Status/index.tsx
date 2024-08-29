@@ -160,14 +160,16 @@ export const Status: React.FC = () => {
                   <div className={`${baseClass}__controls`}>
                     <Button
                       buttonStyle="secondary"
-                      onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
+                      onClick={() =>
+                        void (processing ? undefined : toggleModal(unPublishModalSlug))
+                      }
                       size="large"
                       type="button"
                     >
                       {t('general:cancel')}
                     </Button>
                     <Button
-                      onClick={processing ? undefined : () => void performAction('unpublish')}
+                      onClick={() => void (processing ? undefined : performAction('unpublish'))}
                       size="large"
                     >
                       {t(processing ? 'version:unpublishing' : 'general:confirm')}
@@ -197,9 +199,7 @@ export const Status: React.FC = () => {
                   <div className={`${baseClass}__controls`}>
                     <Button
                       buttonStyle="secondary"
-                      onClick={() =>
-                        void (processing ? undefined : () => toggleModal(revertModalSlug))
-                      }
+                      onClick={() => void (processing ? undefined : toggleModal(revertModalSlug))}
                       size="large"
                       type="button"
                     >
@@ -207,7 +207,7 @@ export const Status: React.FC = () => {
                     </Button>
                     <Button
                       id="action-revert-to-published-confirm"
-                      onClick={() => void (processing ? undefined : () => performAction('revert'))}
+                      onClick={() => void (processing ? undefined : performAction('revert'))}
                       size="large"
                     >
                       {t(processing ? 'version:reverting' : 'general:confirm')}
