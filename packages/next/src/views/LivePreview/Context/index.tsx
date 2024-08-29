@@ -146,7 +146,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     (type: 'iframe' | 'popup') => {
       setAppIsReady(false)
       setPreviewWindowType(type)
-      if (type === 'popup') openPopupWindow()
+      if (type === 'popup') {
+        openPopupWindow()
+      }
     },
     [openPopupWindow],
   )

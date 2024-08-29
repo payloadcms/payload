@@ -43,7 +43,9 @@ const Iterable: React.FC<DiffComponentProps> = ({
 
             let fields: ClientField[] = []
 
-            if (field.type === 'array' && 'fields' in field) fields = field.fields
+            if (field.type === 'array' && 'fields' in field) {
+              fields = field.fields
+            }
 
             if (field.type === 'blocks') {
               fields = [

@@ -110,7 +110,9 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
     void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
-  if (typeof collapsedOnMount !== 'boolean') return null
+  if (typeof collapsedOnMount !== 'boolean') {
+    return null
+  }
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 

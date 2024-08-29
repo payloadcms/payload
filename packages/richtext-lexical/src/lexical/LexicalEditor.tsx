@@ -129,7 +129,9 @@ export const LexicalEditor: React.FC<
           onChange={(editorState, editor, tags) => {
             // Ignore any onChange event triggered by focus only
             if (!tags.has('focus') || tags.size > 1) {
-              if (onChange != null) onChange(editorState, editor, tags)
+              if (onChange != null) {
+                onChange(editorState, editor, tags)
+              }
             }
           }}
         />

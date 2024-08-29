@@ -1287,6 +1287,7 @@ describe('Localization', () => {
         locale: englishLocale,
         id: result.id,
       })
+
       const docEs = await payload.findByID({
         collection: tabSlug,
         locale: spanishLocale,
@@ -1406,7 +1407,7 @@ describe('Localization', () => {
       expect(collection.fields[3].fields[0].localized).toBeUndefined()
     })
   })
-  
+
   describe('nested blocks', () => {
     let id
     it('should allow creating nested blocks per locale', async () => {
@@ -1416,6 +1417,18 @@ describe('Localization', () => {
           content: [
             {
               blockType: 'blockInsideBlock',
+              array: [
+                {
+                  link: {
+                    label: 'English 1',
+                  },
+                },
+                {
+                  link: {
+                    label: 'English 2',
+                  },
+                },
+              ],
               content: [
                 {
                   blockType: 'textBlock',
@@ -1429,6 +1442,11 @@ describe('Localization', () => {
 
       id = doc.id
 
+      const retrievedInEN = await payload.findByID({
+        collection: 'blocks-fields',
+        id,
+      })
+
       await payload.update({
         collection: 'blocks-fields',
         id,
@@ -1437,6 +1455,18 @@ describe('Localization', () => {
           content: [
             {
               blockType: 'blockInsideBlock',
+              array: [
+                {
+                  link: {
+                    label: 'Spanish 1',
+                  },
+                },
+                {
+                  link: {
+                    label: 'Spanish 2',
+                  },
+                },
+              ],
               content: [
                 {
                   blockType: 'textBlock',
@@ -1456,6 +1486,12 @@ describe('Localization', () => {
 
       expect(retrieved.content.en[0].content).toHaveLength(1)
       expect(retrieved.content.es[0].content).toHaveLength(1)
+
+      expect(retrieved.content.en[0].array[0].link.label).toStrictEqual('English 1')
+      expect(retrieved.content.en[0].array[1].link.label).toStrictEqual('English 2')
+
+      expect(retrieved.content.es[0].array[0].link.label).toStrictEqual('Spanish 1')
+      expect(retrieved.content.es[0].array[1].link.label).toStrictEqual('Spanish 2')
     })
   })
 
@@ -1480,16 +1516,25 @@ describe('Localization', () => {
           blockName: '1',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc.id,
+          myGroup: {
+            text: 'hello in english 1',
+          },
         },
         {
           blockName: '2',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc.id,
+          myGroup: {
+            text: 'hello in english 2',
+          },
         },
         {
           blockName: '3',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc.id,
+          myGroup: {
+            text: 'hello in english 3',
+          },
         },
       ]
 
@@ -1498,16 +1543,25 @@ describe('Localization', () => {
           blockName: '1',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc2.id,
+          myGroup: {
+            text: 'hello in spanish 1',
+          },
         },
         {
           blockName: '2',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc2.id,
+          myGroup: {
+            text: 'hello in spanish 2',
+          },
         },
         {
           blockName: '3',
           blockType: 'someBlock',
           relationWithinBlock: randomDoc2.id,
+          myGroup: {
+            text: 'hello in spanish 3',
+          },
         },
       ]
 

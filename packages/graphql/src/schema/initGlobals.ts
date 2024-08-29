@@ -36,7 +36,9 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
 
     const forceNullableObjectType = Boolean(versions?.drafts)
 
-    if (!graphqlResult.globals.graphQL) graphqlResult.globals.graphQL = {}
+    if (!graphqlResult.globals.graphQL) {
+      graphqlResult.globals.graphQL = {}
+    }
 
     const updateMutationInputType = buildMutationInputType({
       name: formattedName,

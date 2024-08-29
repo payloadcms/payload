@@ -109,9 +109,15 @@ export const promise = async <T>({
       }
 
       case 'checkbox': {
-        if (siblingData[field.name] === 'true') siblingData[field.name] = true
-        if (siblingData[field.name] === 'false') siblingData[field.name] = false
-        if (siblingData[field.name] === '') siblingData[field.name] = false
+        if (siblingData[field.name] === 'true') {
+          siblingData[field.name] = true
+        }
+        if (siblingData[field.name] === 'false') {
+          siblingData[field.name] = false
+        }
+        if (siblingData[field.name] === '') {
+          siblingData[field.name] = false
+        }
 
         break
       }
@@ -293,8 +299,12 @@ export const promise = async <T>({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
 
       const groupData = siblingData[field.name] as Record<string, unknown>
       const groupDoc = siblingDoc[field.name] as Record<string, unknown>
@@ -414,8 +424,12 @@ export const promise = async <T>({
       let tabSiblingData
       let tabSiblingDoc
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as Record<string, unknown>
         tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>

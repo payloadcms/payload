@@ -1,4 +1,4 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState } from '../admin/types.js'
 
 import { unflatten as flatleyUnflatten } from './unflatten.js'
 /**
@@ -15,7 +15,9 @@ export const reduceFieldsToValues = (
 ): Data => {
   let data = {}
 
-  if (!fields) return data
+  if (!fields) {
+    return data
+  }
 
   Object.keys(fields).forEach((key) => {
     if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {

@@ -28,7 +28,9 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       method: 'GET',
     })
 
-    if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
+    if (!res.ok) {
+      throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
+    }
 
     const data = await res.arrayBuffer()
 

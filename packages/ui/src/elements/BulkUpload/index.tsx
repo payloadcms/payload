@@ -25,7 +25,9 @@ function DrawerContent() {
     [addFiles],
   )
 
-  if (!collectionSlug) return null
+  if (!collectionSlug) {
+    return null
+  }
 
   if (!forms.length && !isInitializing) {
     return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />

@@ -45,7 +45,9 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         collection.versions.drafts &&
         child._status === 'published'
 
-      if (!parentDocIsPublished && childIsPublished) return
+      if (!parentDocIsPublished && childIsPublished) {
+        return
+      }
 
       await req.payload.update({
         id: child.id,

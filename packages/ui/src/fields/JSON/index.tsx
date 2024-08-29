@@ -49,8 +49,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, jsonError, required })
+      }
     },
     [validate, required, jsonError],
   )
@@ -67,7 +68,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleMount = useCallback(
     (editor, monaco) => {
-      if (!jsonSchema) return
+      if (!jsonSchema) {
+        return
+      }
 
       const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
       const modelUri = monaco.Uri.parse(jsonSchema.uri)
@@ -86,7 +89,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       setStringValue(val)
 
       try {
@@ -101,7 +106,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) return
+    if (hasLoadedValue || value === undefined) {
+      return
+    }
 
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',

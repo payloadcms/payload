@@ -144,7 +144,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     await Promise.all(
       fields.map(async (field) => {
         if ('name' in field && field.name) {
-          if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {}
+          if (!mutablePolicies[field.name]) {
+            mutablePolicies[field.name] = {}
+          }
 
           if ('access' in field && field.access && typeof field.access[operation] === 'function') {
             await createAccessPromise({
@@ -161,7 +163,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           }
 
           if ('fields' in field && field.fields) {
-            if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {}
+            if (!mutablePolicies[field.name].fields) {
+              mutablePolicies[field.name].fields = {}
+            }
 
             await executeFieldPolicies({
               entityPermission,
@@ -172,7 +176,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           }
 
           if ('blocks' in field && field?.blocks) {
-            if (!mutablePolicies[field.name]?.blocks) mutablePolicies[field.name].blocks = {}
+            if (!mutablePolicies[field.name]?.blocks) {
+              mutablePolicies[field.name].blocks = {}
+            }
 
             await Promise.all(
               field.blocks.map(async (block) => {

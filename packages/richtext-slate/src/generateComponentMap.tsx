@@ -61,11 +61,12 @@ export const getGenerateComponentMap =
         const ElementButton = element.Button
         const ElementComponent = element.Element
 
-        if (ElementButton)
+        if (ElementButton) {
           componentMap.set(
             `element.button.${element.name}`,
             createMappedComponent(ElementButton, undefined, undefined, 'slate-ElementButton'),
           )
+        }
         componentMap.set(
           `element.component.${element.name}`,
           createMappedComponent(ElementComponent, undefined, undefined, 'slate-ElementComponent'),

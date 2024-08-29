@@ -47,7 +47,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
         setLocaleCode(localeToSet)
         setLocale(findLocaleFromCode(localization, localeToSet))
         try {
-          if (user) await setPreference('locale', localeToSet)
+          if (user) {
+            await setPreference('locale', localeToSet)
+          }
         } catch (error) {
           // swallow error
         }

@@ -113,7 +113,9 @@ function DropDownItems({
   )
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
-    if (items == null) return
+    if (items == null) {
+      return
+    }
 
     const { key } = event
 
@@ -125,13 +127,17 @@ function DropDownItems({
       onClose()
     } else if (key === 'ArrowUp') {
       setHighlightedItem((prev) => {
-        if (prev == null) return items[0]
+        if (prev == null) {
+          return items[0]
+        }
         const index = items.indexOf(prev) - 1
         return items[index === -1 ? items.length - 1 : index]
       })
     } else if (key === 'ArrowDown') {
       setHighlightedItem((prev) => {
-        if (prev == null) return items[0]
+        if (prev == null) {
+          return items[0]
+        }
         return items[items.indexOf(prev) + 1]
       })
     }

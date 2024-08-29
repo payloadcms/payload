@@ -36,6 +36,10 @@ export const Account = () => {
     )
   }
 
-  if (!user?.email || avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
-  if (avatar === 'gravatar') return <GravatarAccountIcon />
+  if (!user?.email || avatar === 'default') {
+    return <DefaultAccountIcon active={isOnAccountPage} />
+  }
+  if (avatar === 'gravatar') {
+    return <GravatarAccountIcon />
+  }
 }

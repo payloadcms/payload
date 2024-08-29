@@ -58,9 +58,15 @@ export const buildColumnState = (args: Args): Column[] => {
     sortedFieldMap = sortedFieldMap.sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
-      if (aIndex === -1 && bIndex === -1) return 0
-      if (aIndex === -1) return 1
-      if (bIndex === -1) return -1
+      if (aIndex === -1 && bIndex === -1) {
+        return 0
+      }
+      if (aIndex === -1) {
+        return 1
+      }
+      if (bIndex === -1) {
+        return -1
+      }
       return aIndex - bIndex
     })
   }
@@ -85,8 +91,6 @@ export const buildColumnState = (args: Args): Column[] => {
     if (active && !activeColumnsIndices.includes(index)) {
       activeColumnsIndices.push(index)
     }
-
-    const isFirstActiveColumn = activeColumnsIndices[0] === index
 
     const CustomLabelToRender =
       field &&
@@ -131,7 +135,6 @@ export const buildColumnState = (args: Args): Column[] => {
             ...(cellProps?.[index]?.field || ({} as ClientField)),
           } as ClientField,
           ...cellProps?.[index],
-          link: isFirstActiveColumn,
         },
         components: {
           Cell: field.admin?.components?.Cell || {

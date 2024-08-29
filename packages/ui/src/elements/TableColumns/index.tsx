@@ -87,24 +87,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     [preferenceKey, setPreference],
   )
 
-  const reassignLinkColumn = (columns: Column[]): Column[] => {
-    let foundFirstActive = false
-    const newColumns = columns.map((col) => {
-      const linkColumn = col.active && !foundFirstActive && col.accessor !== '_select'
-      if (linkColumn) foundFirstActive = true
-
-      return {
-        ...col,
-        cellProps: {
-          ...col.cellProps,
-          link: linkColumn,
-        },
-      }
-    })
-
-    return newColumns
-  }
-
   const moveColumn = useCallback(
     (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
@@ -113,9 +95,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
 
-      const newColumns = reassignLinkColumn(withMovedColumn)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
+      setTableColumns(withMovedColumn)
+      updateColumnPreferences(withMovedColumn)
     },
     [tableColumns, updateColumnPreferences],
   )
@@ -134,9 +115,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
         }
       })
 
-      const newColumns = reassignLinkColumn(toggledColumns)
-      setTableColumns(newColumns)
-      updateColumnPreferences(newColumns)
+      setTableColumns(toggledColumns)
+      updateColumnPreferences(toggledColumns)
     },
     [tableColumns, updateColumnPreferences],
   )
@@ -150,8 +130,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
         }
       })
 
-      const newColumns = reassignLinkColumn(activeColumns)
-      updateColumnPreferences(newColumns)
+      updateColumnPreferences(activeColumns)
     },
     [tableColumns, updateColumnPreferences],
   )

@@ -74,7 +74,9 @@ const DocumentInfo: React.FC<
   const { uploadEdits } = useUploadEdits()
 
   const [documentTitle, setDocumentTitle] = useState(() => {
-    if (!initialDataFromProps) return ''
+    if (!initialDataFromProps) {
+      return ''
+    }
 
     return formatDocTitle({
       collectionConfig,
@@ -141,7 +143,7 @@ const DocumentInfo: React.FC<
 
   const lockDocument = useCallback(
     async (docId: number | string, slug: string, user: ClientUser) => {
-      if (lockInProgress.current) return
+      if (lockInProgress.current) {return}
       lockInProgress.current = true
 
       try {
@@ -591,7 +593,9 @@ const DocumentInfo: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
-      if (localeChanged) prevLocale.current = locale
+      if (localeChanged) {
+        prevLocale.current = locale
+      }
 
       const getInitialState = async () => {
         setIsError(false)
@@ -615,7 +619,9 @@ const DocumentInfo: React.FC<
           const data = reduceFieldsToValues(result, true)
           setData(data)
 
-          if (localeChanged) void getDocPermissions(data)
+          if (localeChanged) {
+            void getDocPermissions(data)
+          }
 
           setInitialState(result)
         } catch (err) {
@@ -713,7 +719,9 @@ const DocumentInfo: React.FC<
     })}`
   }, [baseURL, locale, pluralType, id, slug, uploadEdits])
 
-  if (isError) notFound()
+  if (isError) {
+    notFound()
+  }
 
   const value: DocumentInfoContext = {
     ...props,
