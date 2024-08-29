@@ -1,6 +1,6 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
-import perfectionistNatural from 'eslint-plugin-perfectionist/configs/recommended-natural'
+import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import payloadPlugin from '@payloadcms/eslint-plugin'
@@ -30,10 +30,10 @@ const baseRules = {
     {
       type: 'natural',
       order: 'asc',
-      'partition-by-comment': true,
-      'partition-by-new-line': true,
+      partitionByComment: true,
+      partitionByNewLine: true,
       groups: ['top', 'unknown'],
-      'custom-groups': {
+      customGroups: {
         top: ['_id', 'id', 'name', 'slug', 'type'],
       },
     },
@@ -41,13 +41,13 @@ const baseRules = {
   /*'perfectionist/sort-object-types': [
     'error',
     {
-      'partition-by-new-line': true,
+      partitionByNewLine: true,
     },
   ],
   'perfectionist/sort-interfaces': [
     'error',
     {
-      'partition-by-new-line': true,
+      partitionByNewLine': true,
     },
   ],*/
   'payload/no-jsx-import-statements': 'error',
@@ -101,7 +101,7 @@ let FlatConfig
 /** @type {FlatConfig} */
 const baseExtends = deepMerge(
   js.configs.recommended,
-  perfectionistNatural,
+  perfectionist.configs['recommended-natural'],
   regexpPluginConfigs['flat/recommended'],
 )
 
