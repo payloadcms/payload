@@ -86,8 +86,6 @@ export const buildColumnState = (args: Args): Column[] => {
       activeColumnsIndices.push(index)
     }
 
-    const isFirstActiveColumn = activeColumnsIndices[0] === index
-
     const CustomLabelToRender =
       field &&
       'admin' in field &&
@@ -131,7 +129,6 @@ export const buildColumnState = (args: Args): Column[] => {
             ...(cellProps?.[index]?.field || ({} as ClientField)),
           } as ClientField,
           ...cellProps?.[index],
-          link: isFirstActiveColumn,
         },
         components: {
           Cell: field.admin?.components?.Cell || {
