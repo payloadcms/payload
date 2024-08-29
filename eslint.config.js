@@ -40,6 +40,7 @@ export const rootEslintConfig = [
   {
     ignores: [
       ...defaultESLintIgnores,
+      'packages/eslint-*/**',
       'test/live-preview/next-app',
       'packages/**/*.spec.ts',
       'templates/**',

@@ -76,10 +76,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const refineListData = React.useCallback(
     async (query: RefineOverrides) => {
-      if (!modifySearchParams) return
+      if (!modifySearchParams) {
+        return
+      }
 
       let pageQuery = 'page' in query ? query.page : currentQuery?.page
-      if ('where' in query || 'search' in query) pageQuery = '1'
+      if ('where' in query || 'search' in query) {
+        pageQuery = '1'
+      }
 
       const updatedPreferences: Record<string, unknown> = {}
       let updatePreferences = false

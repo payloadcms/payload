@@ -133,7 +133,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [intersectionEntry, setPosition, windowHeight])
 
   useEffect(() => {
-    if (typeof onToggleOpen === 'function') onToggleOpen(active)
+    if (typeof onToggleOpen === 'function') {
+      onToggleOpen(active)
+    }
 
     if (active) {
       document.addEventListener('mousedown', handleClickOutside)

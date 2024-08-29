@@ -32,7 +32,9 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
   let urlObject
 
   function getURLObject() {
-    if (urlObject) return urlObject
+    if (urlObject) {
+      return urlObject
+    }
     const urlToUse = req?.url || req.payload.config?.serverURL || 'http://localhost'
     try {
       urlObject = new URL(urlToUse)
@@ -43,15 +45,27 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
     return urlObject
   }
 
-  if (!req.host) req.host = getURLObject().host
-  if (!req.protocol) req.protocol = getURLObject().protocol
-  if (!req.pathname) req.pathname = getURLObject().pathname
-  // @ts-expect-error
-  if (!req.searchParams) req.searchParams = getURLObject().searchParams
-  // @ts-expect-error
-  if (!req.origin) req.origin = getURLObject().origin
-  // @ts-expect-error
-  if (!req?.url) req.url = getURLObject().href
+  if (!req.host) {
+    req.host = getURLObject().host
+  }
+  if (!req.protocol) {
+    req.protocol = getURLObject().protocol
+  }
+  if (!req.pathname) {
+    req.pathname = getURLObject().pathname
+  }
+  if (!req.searchParams) {
+    // @ts-expect-error
+    req.searchParams = getURLObject().searchParams
+  }
+  if (!req.origin) {
+    // @ts-expect-error
+    req.origin = getURLObject().origin
+  }
+  if (!req?.url) {
+    // @ts-expect-error
+    req.url = getURLObject().href
+  }
 }
 
 type CreateLocalReq = (
@@ -88,8 +102,10 @@ export const createLocalReq: CreateLocalReq = async (
     req?.i18n ||
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
-  // @ts-expect-error
-  if (!req.headers) req.headers = new Headers()
+  if (!req.headers) {
+    // @ts-expect-error
+    req.headers = new Headers()
+  }
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload

@@ -64,8 +64,9 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   const memoizedValidate: TextareaFieldValidation = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, required, maxLength, minLength],
   )

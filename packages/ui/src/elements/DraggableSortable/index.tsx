@@ -43,7 +43,9 @@ export const DraggableSortable: React.FC<Props> = (props) => {
 
       event.activatorEvent.stopPropagation()
 
-      if (!active || !over) return
+      if (!active || !over) {
+        return
+      }
 
       if (typeof onDragEnd === 'function') {
         onDragEnd({

@@ -57,8 +57,9 @@ export const RenderField: React.FC<Props> = ({
   fieldComponentProps.readOnly = fieldComponentProps?.field?.admin?.readOnly
 
   // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
-  if (readOnlyFromContext && fieldComponentProps.readOnly !== false)
+  if (readOnlyFromContext && fieldComponentProps.readOnly !== false) {
     fieldComponentProps.readOnly = true
+  }
 
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {

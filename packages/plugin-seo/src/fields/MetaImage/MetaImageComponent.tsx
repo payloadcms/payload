@@ -51,7 +51,9 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
-    if (!hasGenerateImageFn) return
+    if (!hasGenerateImageFn) {
+      return
+    }
 
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({

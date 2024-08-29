@@ -260,7 +260,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           }
         }, Promise.resolve())
 
-        if (typeof onSuccess === 'function') onSuccess()
+        if (typeof onSuccess === 'function') {
+          onSuccess()
+        }
       }
     },
     [
@@ -466,7 +468,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   const valueToRender = findOptionsByValue({ options, value })
 
-  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
+  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
+    valueToRender.value = null
+  }
 
   return (
     <div
@@ -518,7 +522,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               disabled={readOnly || formProcessing || drawerIsOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
-                if (!option) return undefined
+                if (!option) {
+                  return undefined
+                }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
                   : option.value

@@ -81,7 +81,9 @@ export const UploadFeature = createServerFeature<
       ClientFeature: '@payloadcms/richtext-lexical/client#UploadFeatureClient',
       clientFeatureProps: clientProps,
       generateSchemaMap: ({ props }) => {
-        if (!props?.collections) return null
+        if (!props?.collections) {
+          return null
+        }
 
         const schemaMap = new Map<string, Field[]>()
 

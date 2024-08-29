@@ -24,7 +24,9 @@ export const PreviewFrameSizeInput: React.FC<{
     (e: React.ChangeEvent<HTMLInputElement>) => {
       let newValue = Number(e.target.value)
 
-      if (newValue < 0) newValue = 0
+      if (newValue < 0) {
+        newValue = 0
+      }
 
       setInternalState(newValue)
       setBreakpoint('custom')
@@ -46,8 +48,11 @@ export const PreviewFrameSizeInput: React.FC<{
   // so we need to take the measurements provided by `actualDeviceSize` and sync internal state
   useEffect(() => {
     if (breakpoint === 'responsive' && measuredDeviceSize) {
-      if (axis === 'x') setInternalState(Number(measuredDeviceSize.width.toFixed(0)) * zoom)
-      else setInternalState(Number(measuredDeviceSize.height.toFixed(0)) * zoom)
+      if (axis === 'x') {
+        setInternalState(Number(measuredDeviceSize.width.toFixed(0)) * zoom)
+      } else {
+        setInternalState(Number(measuredDeviceSize.height.toFixed(0)) * zoom)
+      }
     }
 
     if (breakpoint !== 'responsive' && size) {

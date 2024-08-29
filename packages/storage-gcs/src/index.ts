@@ -94,7 +94,9 @@ function gcsStorageInternal({ acl, bucket, options }: GcsStorageOptions): Adapte
     let storageClient: Storage | null = null
 
     const getStorageClient = (): Storage => {
-      if (storageClient) return storageClient
+      if (storageClient) {
+        return storageClient
+      }
       storageClient = new Storage(options)
       return storageClient
     }

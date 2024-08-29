@@ -76,7 +76,9 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const onToggle = useCallback(() => {
     if (!disabled) {
       setValue(!value)
-      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(!value)
+      }
     }
   }, [onChangeFromProps, disabled, setValue, value])
 

@@ -287,7 +287,9 @@ export function AuthProvider({
     }
 
     return () => {
-      if (reminder) clearTimeout(reminder)
+      if (reminder) {
+        clearTimeout(reminder)
+      }
     }
   }, [tokenExpiration, openModal])
 
@@ -308,7 +310,9 @@ export function AuthProvider({
     }
 
     return () => {
-      if (forceLogOut) clearTimeout(forceLogOut)
+      if (forceLogOut) {
+        clearTimeout(forceLogOut)
+      }
     }
   }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
 

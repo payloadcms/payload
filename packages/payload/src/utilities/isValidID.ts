@@ -15,7 +15,9 @@ export const isValidID = (
     return false
   }
 
-  if (typeof value === 'number' && !Number.isNaN(value)) return true
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return true
+  }
 
   if (type === 'ObjectID') {
     return ObjectId.isValid(String(value))

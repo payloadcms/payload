@@ -112,13 +112,19 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
-    if (dimension === 'width' && intValue >= uncroppedPixelWidth) return null
-    if (dimension === 'height' && intValue >= uncroppedPixelHeight) return null
+    if (dimension === 'width' && intValue >= uncroppedPixelWidth) {
+      return null
+    }
+    if (dimension === 'height' && intValue >= uncroppedPixelHeight) {
+      return null
+    }
 
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
 
-    if (percentage === 100 || percentage === 0) return null
+    if (percentage === 100 || percentage === 0) {
+      return null
+    }
 
     setCrop({
       ...crop,
@@ -140,13 +146,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   }
 
   const saveEdits = () => {
-    if (typeof onSave === 'function')
+    if (typeof onSave === 'function') {
       onSave({
         crop: crop ? crop : undefined,
         focalPoint: focalPosition,
         heightInPixels: Number(heightInputRef?.current?.value ?? uncroppedPixelHeight),
         widthInPixels: Number(widthInputRef?.current?.value ?? uncroppedPixelWidth),
       })
+    }
     closeModal(editDrawerSlug)
   }
 
@@ -393,7 +400,9 @@ const DraggableElement = ({
   }
 
   const handleMouseMove = (event) => {
-    if (!isDragging) return null
+    if (!isDragging) {
+      return null
+    }
     const { x, y } = getCoordinates(event.clientX, event.clientY)
 
     setPosition({ x, y })
@@ -405,7 +414,9 @@ const DraggableElement = ({
   }
 
   React.useEffect(() => {
-    if (isDragging || !dragRef.current) return
+    if (isDragging || !dragRef.current) {
+      return
+    }
     if (checkBounds) {
       const { height, left, top, width } = dragRef.current.getBoundingClientRect()
       const { x, y } = getCoordinates(left + width / 2, top + height / 2, true)

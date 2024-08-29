@@ -15,7 +15,9 @@ export const reduceFieldsToValues = (
 ): Data => {
   let data = {}
 
-  if (!fields) return data
+  if (!fields) {
+    return data
+  }
 
   Object.keys(fields).forEach((key) => {
     if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {
