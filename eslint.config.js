@@ -25,7 +25,6 @@ export const defaultESLintIgnores = [
 let FlatConfig
 
 export const rootParserOptions = {
-  EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
   sourceType: 'module',
   ecmaVersion: 'latest',
   projectService: {
