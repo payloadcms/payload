@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -374,9 +374,23 @@ describe('fields', () => {
     test('should render row fields inline and with explicit widths', async () => {
       await page.goto(url.create)
       const fieldA = page.locator('input#field-field_with_width_a')
-      await expect(fieldA).toBeVisible()
       const fieldB = page.locator('input#field-field_with_width_b')
+
+      const fieldAGrandprent = fieldA.locator('..').locator('..')
+      const fieldBGrandprent = fieldB.locator('..').locator('..')
+
+      await expect(fieldA).toBeVisible()
       await expect(fieldB).toBeVisible()
+
+      const hasCorrectCSS = async (el: Locator) => {
+        return await el.evaluate((el) => {
+          return el.style.width === '' && el.style.maxWidth === '50%'
+        })
+      }
+
+      expect(hasCorrectCSS(fieldAGrandprent)).toBeTruthy()
+      expect(hasCorrectCSS(fieldBGrandprent)).toBeTruthy()
+
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 

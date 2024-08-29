@@ -85,6 +85,19 @@ export const RenderField: React.FC<Props> = ({
       />
     )
   } else {
+    if (fieldComponentProps.field.type === 'row') {
+      for (const field of fieldComponentProps.field.fields) {
+        if (field.admin?.width) {
+          field.admin.style = {
+            ...field.admin.style,
+            maxWidth: field.admin.width,
+          }
+
+          field.admin.width = undefined
+        }
+      }
+    }
+
     RenderedField = (
       <RenderComponent
         Component={fieldComponents?.[fieldComponentProps?.field?.type]}
