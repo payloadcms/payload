@@ -177,7 +177,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return arrayResult
             }, {})
           } else {
-            result[field.name] = fieldData.map((row, i) => {
+            result[field.name] = fieldData.reduce((acc, row, i) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -187,22 +187,35 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 delete row._order
               }
 
-              return traverseFields<T>({
-                adapter,
-                blocks,
-                config,
-                dataRef: row,
-                deletions,
-                fieldPrefix: '',
-                fields: field.fields,
-                numbers,
-                path: `${sanitizedPath}${field.name}.${i}`,
-                relationships,
-                table: row,
-                texts,
-                withinArrayOrBlockLocale,
-              })
-            })
+              if (
+                !withinArrayOrBlockLocale ||
+                (withinArrayOrBlockLocale && withinArrayOrBlockLocale === row._locale)
+              ) {
+                if (row._locale) {
+                  delete row._locale
+                }
+
+                acc.push(
+                  traverseFields<T>({
+                    adapter,
+                    blocks,
+                    config,
+                    dataRef: row,
+                    deletions,
+                    fieldPrefix: '',
+                    fields: field.fields,
+                    numbers,
+                    path: `${sanitizedPath}${field.name}.${i}`,
+                    relationships,
+                    table: row,
+                    texts,
+                    withinArrayOrBlockLocale,
+                  }),
+                )
+              }
+
+              return acc
+            }, [])
           }
         }
 

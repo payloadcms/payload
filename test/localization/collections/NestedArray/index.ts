@@ -2,39 +2,62 @@ import type { CollectionConfig } from 'payload'
 
 export const NestedArray: CollectionConfig = {
   slug: 'nested-arrays',
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
-      name: 'arrayWithBlocks',
-      type: 'array',
-      localized: true,
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'blocksWithinArray',
-          type: 'blocks',
-          blocks: [
+          label: 'My Tab',
+          fields: [
             {
-              slug: 'someBlock',
+              name: 'arrayWithBlocks',
+              type: 'array',
+              localized: true,
               fields: [
                 {
-                  name: 'relationWithinBlock',
+                  name: 'blocksWithinArray',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'someBlock',
+                      fields: [
+                        {
+                          name: 'relationWithinBlock',
+                          type: 'relationship',
+                          relationTo: 'localized-posts',
+                        },
+                        {
+                          name: 'myGroup',
+                          type: 'group',
+                          fields: [
+                            {
+                              name: 'text',
+                              type: 'text',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'arrayWithLocalizedRelation',
+              type: 'array',
+              fields: [
+                {
+                  name: 'localizedRelation',
                   type: 'relationship',
+                  localized: true,
                   relationTo: 'localized-posts',
                 },
               ],
             },
           ],
-        },
-      ],
-    },
-    {
-      name: 'arrayWithLocalizedRelation',
-      type: 'array',
-      fields: [
-        {
-          name: 'localizedRelation',
-          type: 'relationship',
-          localized: true,
-          relationTo: 'localized-posts',
         },
       ],
     },

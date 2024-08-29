@@ -132,6 +132,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
           active: activeColumnAccessors.includes(col.accessor),
         }
       })
+
       updateColumnPreferences(activeColumns)
     },
     [tableColumns, updateColumnPreferences],
