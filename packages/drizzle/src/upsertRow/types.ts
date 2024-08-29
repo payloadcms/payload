@@ -18,18 +18,18 @@ type BaseArgs = {
   tableName: string
 }
 
-type CreateArgs = BaseArgs & {
+type CreateArgs = {
   id?: never
   operation: 'create'
   upsertTarget?: never
   where?: never
-}
+} & BaseArgs
 
-type UpdateArgs = BaseArgs & {
+type UpdateArgs = {
   id?: number | string
   operation: 'update'
   upsertTarget?: GenericColumn
   where?: SQL<unknown>
-}
+} & BaseArgs
 
 export type Args = CreateArgs | UpdateArgs

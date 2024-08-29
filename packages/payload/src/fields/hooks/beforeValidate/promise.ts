@@ -276,7 +276,7 @@ export const promise = async <T>({
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name] as any)
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
 
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {

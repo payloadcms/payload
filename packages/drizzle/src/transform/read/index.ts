@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Field, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
