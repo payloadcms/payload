@@ -6,12 +6,8 @@ import React from 'react'
 export * from './TableCellProvider/index.js'
 
 import { useTableColumns } from '../TableColumns/index.js'
-<<<<<<< HEAD
-import { RenderCell } from './RenderCell.js'
-import { TableCellProvider } from './TableCellProvider/index.js'
-=======
->>>>>>> beta
 import './index.scss'
+import { RenderCell } from './RenderCell.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 
 export { TableCellProvider }
@@ -19,21 +15,10 @@ export { TableCellProvider }
 const baseClass = 'table'
 
 export type Column = {
-<<<<<<< HEAD
+  readonly accessor: string
+  readonly active: boolean
+  readonly cellProps?: Partial<CellComponentProps>
   readonly Heading: React.ReactNode
-  readonly accessor: string
-  readonly active: boolean
-  readonly cellProps?: Partial<CellComponentProps>
-=======
-  readonly accessor: string
-  readonly active: boolean
-  readonly cellProps?: Partial<CellComponentProps>
-  readonly components: {
-    Cell: MappedComponent
-    Heading: React.ReactNode
-  }
-  readonly Label: React.ReactNode
->>>>>>> beta
 }
 
 export type Props = {

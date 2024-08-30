@@ -12,7 +12,6 @@ import {
   MissingEditorProp,
   MissingFieldType,
 } from '../../errors/index.js'
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
