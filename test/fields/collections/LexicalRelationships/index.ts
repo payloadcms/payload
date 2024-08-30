@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
 import {
-  RelationshipFeature,
   defaultEditorFeatures,
   lexicalEditor,
+  RelationshipFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalRelationshipFieldsSlug } from '../../slugs.js'

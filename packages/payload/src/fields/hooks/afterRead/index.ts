@@ -6,7 +6,7 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth?: number
   depth: number
@@ -15,7 +15,7 @@ type Args<T extends JsonObject> = {
   fallbackLocale: null | string
   findMany?: boolean
   flattenLocales?: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   locale: string
   overrideAccess: boolean
   req: PayloadRequest

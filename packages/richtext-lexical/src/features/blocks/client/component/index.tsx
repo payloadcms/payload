@@ -44,7 +44,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const [initialState, setInitialState] = useState<FormState | false>(false)
+  const [initialState, setInitialState] = useState<false | FormState>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()

@@ -24,17 +24,17 @@ export type PasswordFieldProps = {
 } & FormFieldBase
 
 export type PasswordInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly autoComplete?: string
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
+  readonly Error?: MappedComponent
   readonly errorProps: FieldErrorClientProps<MarkOptional<TextFieldClient, 'type'>>
   readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly Label?: MappedComponent
   readonly label: FieldBaseClient['label']
   readonly labelProps: FieldLabelClientProps<MarkOptional<TextFieldClient, 'type'>>
   readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void

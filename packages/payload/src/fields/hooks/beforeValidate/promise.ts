@@ -13,7 +13,7 @@ import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   /**
@@ -21,7 +21,7 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean

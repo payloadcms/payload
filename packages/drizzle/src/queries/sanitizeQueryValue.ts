@@ -1,4 +1,4 @@
-import { APIError, type Field, type TabAsField, createArrayFromCommaDelineated } from 'payload'
+import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../types.js'
@@ -21,7 +21,9 @@ export const sanitizeQueryValue = ({
   let operator = operatorArg
   let formattedValue = val
 
-  if (!fieldAffectsData(field)) return { operator, value: formattedValue }
+  if (!fieldAffectsData(field)) {
+    return { operator, value: formattedValue }
+  }
 
   if (
     (field.type === 'relationship' || field.type === 'upload') &&
@@ -43,8 +45,12 @@ export const sanitizeQueryValue = ({
 
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {
-    if (val.toLowerCase() === 'true') formattedValue = true
-    if (val.toLowerCase() === 'false') formattedValue = false
+    if (val.toLowerCase() === 'true') {
+      formattedValue = true
+    }
+    if (val.toLowerCase() === 'false') {
+      formattedValue = false
+    }
   }
 
   if (['all', 'in', 'not_in'].includes(operator)) {
@@ -71,7 +77,9 @@ export const sanitizeQueryValue = ({
       if (Number.isNaN(Date.parse(formattedValue))) {
         return { operator, value: undefined }
       }
-    } else if (typeof val === 'number') formattedValue = new Date(val).toISOString()
+    } else if (typeof val === 'number') {
+      formattedValue = new Date(val).toISOString()
+    }
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {

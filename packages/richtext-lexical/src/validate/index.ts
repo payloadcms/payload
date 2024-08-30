@@ -50,8 +50,8 @@ export const richTextValidateHOC = ({
     const rootNodes = value?.root?.children
     if (rootNodes && Array.isArray(rootNodes) && rootNodes?.length) {
       return await validateNodes({
-        nodeValidations: editorConfig.features.validations,
         nodes: rootNodes,
+        nodeValidations: editorConfig.features.validations,
         validation: {
           options,
           value,

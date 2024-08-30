@@ -10,8 +10,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 export type SortColumnProps = {
-  readonly Label: React.ReactNode
   readonly disable?: boolean
+  readonly Label: React.ReactNode
   readonly label?: FieldBase['label']
   readonly name: string
 }
@@ -19,7 +19,7 @@ export type SortColumnProps = {
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, Label, disable = false, label } = props
+  const { name, disable = false, Label, label } = props
   const { searchParams } = useSearchParams()
   const { handleSortChange } = useListQuery()
   const { t } = useTranslation()

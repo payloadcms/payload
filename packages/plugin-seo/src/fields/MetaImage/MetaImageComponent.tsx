@@ -101,7 +101,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} field={null} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -142,13 +142,13 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          api={api}
+          collection={collection}
           Error={{
             type: 'client',
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          api={api}
-          collection={collection}
           filterOptions={field.filterOptions}
           label={undefined}
           onChange={(incomingImage) => {

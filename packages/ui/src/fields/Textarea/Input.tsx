@@ -14,16 +14,16 @@ import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
     field,
+    Label,
     label,
     labelProps,
     onChange,
@@ -58,8 +58,8 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={Label}
         field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

@@ -176,7 +176,7 @@ const Component: React.FC<ElementProps> = (props) => {
     (_, data) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
-        const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
+        const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
         if (uploadNode) {
           const newData: UploadData = {
             ...uploadNode.getData(),

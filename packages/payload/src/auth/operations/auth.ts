@@ -16,7 +16,7 @@ export type AuthArgs = {
 export type AuthResult = {
   permissions: Permissions
   responseHeaders?: Headers
-  user: TypedUser | null
+  user: null | TypedUser
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {

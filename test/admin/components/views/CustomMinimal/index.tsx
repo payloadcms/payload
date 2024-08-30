@@ -38,14 +38,14 @@ export const CustomMinimalView: React.FC<AdminViewProps> = ({ initPageResult }) 
         <p>Here is a custom admin view that was added in the Payload config.</p>
         <div className={`${baseClass}__controls`}>
           <div className="custom-view__controls">
-            <Button Link={Link} buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+            <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
               Go to Dashboard
             </Button>
             &nbsp; &nbsp; &nbsp;
             <Button
-              Link={Link}
               buttonStyle="secondary"
               el="link"
+              Link={Link}
               to={`${adminRoute}/${customViewPath}`}
             >
               Go to Custom View

@@ -8,4 +8,4 @@ const { useWindowInfo } =
   facelessUIImport && 'useWindowInfo' in facelessUIImport
     ? facelessUIImport
     : { useWindowInfo: undefined }
-export { WindowInfoProvider, useWindowInfo }
+export { useWindowInfo, WindowInfoProvider }

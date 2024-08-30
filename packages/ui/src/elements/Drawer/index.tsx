@@ -47,10 +47,10 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
 export const Drawer: React.FC<Props> = ({
   slug,
-  Header,
   children,
   className,
   gutter = true,
+  Header,
   hoverTitle,
   title,
 }) => {

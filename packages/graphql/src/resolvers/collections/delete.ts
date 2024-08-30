@@ -33,7 +33,7 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
     }
 
     const draft: boolean =
-      args.draft ?? req.query?.draft === 'false'
+      (args.draft ?? req.query?.draft === 'false')
         ? false
         : req.query?.draft === 'true'
           ? true

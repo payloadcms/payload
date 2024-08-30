@@ -2,7 +2,7 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ChevronIcon, LinkIcon, Popup, PopupList, XIcon, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, LinkIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { useLivePreviewContext } from '../../Context/context.js'

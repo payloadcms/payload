@@ -107,7 +107,7 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: User | null
+  user: null | User
 }
 
 export type AuthStrategyFunction = (
@@ -144,7 +144,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
   lockTime?: number
-  loginWithUsername?: LoginWithUsernameOptions | boolean
+  loginWithUsername?: boolean | LoginWithUsernameOptions
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: AuthStrategy[]
@@ -169,10 +169,10 @@ export interface Auth
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
-  loginWithUsername: LoginWithUsernameOptions | false
-  verify?: VerifyConfig | boolean
+  loginWithUsername: false | LoginWithUsernameOptions
+  verify?: boolean | VerifyConfig
 }
 
-export function hasWhereAccessResult(result: Where | boolean): result is Where {
+export function hasWhereAccessResult(result: boolean | Where): result is Where {
   return result && typeof result === 'object'
 }

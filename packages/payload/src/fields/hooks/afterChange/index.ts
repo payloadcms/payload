@@ -6,7 +6,7 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /**
    * The data before hooks
@@ -16,7 +16,7 @@ type Args<T extends JsonObject> = {
    * The data after hooks
    */
   doc: T
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   previousDoc: T
   req: PayloadRequest

@@ -29,7 +29,7 @@ export const gcsAdapter =
       )
     }
 
-    let storageClient: Storage | null = null
+    let storageClient: null | Storage = null
 
     const getStorageClient = (): Storage => {
       if (storageClient) {

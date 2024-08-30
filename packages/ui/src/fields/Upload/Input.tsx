@@ -46,9 +46,6 @@ export const baseClass = 'upload'
 type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   /**
    * Controls the visibility of the "Create new collection" button
    */
@@ -57,13 +54,16 @@ export type UploadInputProps = {
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly Error?: MappedComponent
   readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly field?: MarkOptional<UploadFieldClient, 'type'>
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
   readonly isSortable?: boolean
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly maxRows?: number
@@ -81,19 +81,19 @@ export type UploadInputProps = {
 
 export function UploadInput(props: UploadInputProps) {
   const {
-    Description,
-    Error,
-    Label,
     allowNewUpload,
     api,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
     field,
     filterOptions: filterOptionsFromProps,
     hasMany,
     isSortable,
+    Label,
     label,
     labelProps,
     maxRows,
@@ -181,7 +181,7 @@ export function UploadInput(props: UploadInputProps) {
     async (
       ids: (number | string)[],
       relatedCollectionSlug: string,
-    ): Promise<PaginatedDocs | null> => {
+    ): Promise<null | PaginatedDocs> => {
       const query: {
         [key: string]: unknown
         where: Where

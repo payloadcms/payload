@@ -11,12 +11,12 @@ import { SelectCell } from './Select/index.js'
 import { TextareaCell } from './Textarea/index.js'
 
 export const cellComponents = {
-  File: FileCell,
   array: ArrayCell,
   blocks: BlocksCell,
   checkbox: CheckboxCell,
   code: CodeCell,
   date: DateCell,
+  File: FileCell,
   json: JSONCell,
   radio: SelectCell,
   relationship: RelationshipCell,

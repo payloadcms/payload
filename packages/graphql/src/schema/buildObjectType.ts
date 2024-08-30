@@ -21,8 +21,8 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
@@ -38,7 +38,7 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { MissingEditorProp, createDataloaderCacheKey, toWords } from 'payload'
+import { createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
 import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'

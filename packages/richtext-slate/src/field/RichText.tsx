@@ -19,7 +19,7 @@ import {
 } from '@payloadcms/ui'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
+import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 

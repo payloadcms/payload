@@ -91,7 +91,7 @@ export const gcsStorage: GcsStoragePlugin =
 
 function gcsStorageInternal({ acl, bucket, options }: GcsStorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    let storageClient: Storage | null = null
+    let storageClient: null | Storage = null
 
     const getStorageClient = (): Storage => {
       if (storageClient) {

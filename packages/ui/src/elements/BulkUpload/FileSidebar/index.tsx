@@ -99,7 +99,7 @@ export function FileSidebar() {
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
-            <Drawer Header={null} gutter={false} slug={addMoreFilesDrawerSlug}>
+            <Drawer gutter={false} Header={null} slug={addMoreFilesDrawerSlug}>
               <AddFilesView
                 onCancel={() => closeModal(addMoreFilesDrawerSlug)}
                 onDrop={handleAddFiles}

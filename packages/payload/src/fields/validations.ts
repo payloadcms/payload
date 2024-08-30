@@ -22,8 +22,8 @@ import type {
   RelationshipValue,
   RichTextField,
   SelectField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
   Validate,
 } from './config/types.js'

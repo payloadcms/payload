@@ -165,7 +165,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   })
 
   // TODO: Valid eslint error - this will likely be a floating promise. Evaluate if we need to handle this differently.
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
   busboy.on('finish', async () => {
     debugLog(options, `Busboy finished parsing request.`)
     if (options.parseNested) {
