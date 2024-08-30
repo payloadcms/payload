@@ -3,7 +3,6 @@ import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useEditDepth } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,6 +12,7 @@ import type { DocumentInfoContext } from '../../providers/DocumentInfo/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -197,7 +197,9 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               <Button
                 id="confirm-delete"
                 onClick={() => {
-                  if (!deleting) void handleDelete()
+                  if (!deleting) {
+                    void handleDelete()
+                  }
                 }}
               >
                 {deleting ? t('general:deleting') : t('general:confirm')}

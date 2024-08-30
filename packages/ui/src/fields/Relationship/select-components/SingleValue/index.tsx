@@ -1,10 +1,10 @@
 'use client'
-import type { DocumentInfoContext } from '@payloadcms/ui'
 import type { SingleValueProps } from 'react-select'
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
+import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types.js'
 import type { Option } from '../../types.js'
 
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'
@@ -54,7 +54,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   }, [isDrawerOpen, setDrawerIsOpen])
 
   const onDelete = useCallback<DocumentInfoContext['onDelete']>(
-    async (args) => {
+    (args) => {
       setDrawerIsOpen(false)
 
       if (typeof onDeleteFromProps === 'function') {
