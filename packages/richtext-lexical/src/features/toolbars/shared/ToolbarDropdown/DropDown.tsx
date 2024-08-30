@@ -174,20 +174,20 @@ function DropDownItems({
 }
 
 export function DropDown({
-  Icon,
   buttonAriaLabel,
   buttonClassName,
   children,
   disabled = false,
+  Icon,
   itemsContainerClassNames,
   label,
   stopCloseOnClickSelf,
 }: {
-  Icon?: React.FC
   buttonAriaLabel?: string
   buttonClassName: string
   children: ReactNode
   disabled?: boolean
+  Icon?: React.FC
   itemsContainerClassNames?: string[]
   label?: string
   stopCloseOnClickSelf?: boolean

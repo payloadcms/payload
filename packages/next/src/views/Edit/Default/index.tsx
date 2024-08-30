@@ -25,9 +25,9 @@ import { DocumentLocked } from '../../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
+import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -37,12 +37,12 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC = () => {
   const {
     id,
+    action,
     AfterDocument,
     AfterFields,
+    apiURL,
     BeforeDocument,
     BeforeFields,
-    action,
-    apiURL,
     collectionSlug,
     currentEditor,
     disableActions,
@@ -153,7 +153,9 @@ export const DefaultEditView: React.FC = () => {
   const isManualUnlockRef = useRef(false)
 
   const resetLockTimer = useCallback(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     if (lockTimer.current) {
       clearTimeout(lockTimer.current)
@@ -194,7 +196,9 @@ export const DefaultEditView: React.FC = () => {
   ])
 
   const handleTakeOver = useCallback(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     // Invalidate the previous user's timer
     if (lockTimer.current) {
@@ -233,7 +237,9 @@ export const DefaultEditView: React.FC = () => {
   ])
 
   const handleTakeOverWithinDoc = useCallback(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     // Invalidate the previous user's timer
     if (lockTimer.current) {
@@ -275,7 +281,9 @@ export const DefaultEditView: React.FC = () => {
   ])
 
   useEffect(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     if (documentLockStateRef.current && documentLockStateRef.current.user.id !== user.id) {
       setIsLockedByAnotherUser(true)
@@ -285,7 +293,9 @@ export const DefaultEditView: React.FC = () => {
   }, [user.id, isLockingEnabled])
 
   useEffect(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     if (isDocumentLocked && currentEditor && currentEditor.id !== user.id && !showTakeOverModal) {
       // Show the DocumentLocked modal for the incoming user
@@ -455,7 +465,9 @@ export const DefaultEditView: React.FC = () => {
   )
 
   useEffect(() => {
-    if (!isLockingEnabled) {return}
+    if (!isLockingEnabled) {
+      return
+    }
 
     if ((id || globalSlug) && shouldLockDocument && !isDocumentLockedRef.current) {
       const lockDoc = async () => {
@@ -477,7 +489,9 @@ export const DefaultEditView: React.FC = () => {
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (!isLockingEnabled) {return}
+      if (!isLockingEnabled) {
+        return
+      }
 
       if ((id || globalSlug) && isDocumentLockedRef.current) {
         // Check if this user is still the current editor

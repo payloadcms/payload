@@ -10,8 +10,8 @@ import type { EditFormProps } from './types.js'
 import { Form, useForm } from '../../../forms/Form/index.js'
 import { type FormProps } from '../../../forms/Form/types.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
-import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
@@ -33,11 +33,11 @@ const baseClass = 'collection-edit'
 
 export function EditForm({ submitted }: EditFormProps) {
   const {
+    action,
     AfterDocument,
     AfterFields,
     BeforeDocument,
     BeforeFields,
-    action,
     collectionSlug: docSlug,
     docPermissions,
     getDocPreferences,

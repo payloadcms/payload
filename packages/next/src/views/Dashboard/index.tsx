@@ -4,9 +4,9 @@ import type { AdminViewProps } from 'payload'
 import { HydrateAuthProvider } from '@payloadcms/ui'
 import {
   EntityType,
-  RenderComponent,
   getCreateMappedComponent,
   groupNavItems,
+  RenderComponent,
 } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'

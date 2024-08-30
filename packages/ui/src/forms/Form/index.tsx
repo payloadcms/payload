@@ -54,9 +54,9 @@ export const Form: React.FC<FormProps> = (props) => {
     beforeSubmit,
     children,
     className,
+    disabled: disabledFromProps,
     disableSuccessStatus,
     disableValidationOnSubmit,
-    disabled: disabledFromProps,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
@@ -186,7 +186,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       // create new toast promise which will resolve manually later
-      let successToast, errorToast
+      let errorToast, successToast
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
         errorToast = reject

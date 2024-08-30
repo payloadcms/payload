@@ -57,7 +57,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer Header={null} className={baseClass} gutter={false} slug={drawerSlug}>
+    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )

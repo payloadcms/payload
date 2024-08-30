@@ -5,9 +5,9 @@ import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked, SetStepNav, SetViewActions } from '@payloadcms/ui'
 import {
   EntityType,
-  RenderComponent,
   formatAdminURL,
   getCreateMappedComponent,
+  RenderComponent,
 } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
@@ -139,13 +139,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                       return (
                         <li key={entityIndex}>
                           <Card
-                            Link={Link}
                             actions={
                               lockStatus ? (
                                 <Locked className={`${baseClass}__locked`} user={userEditing} />
                               ) : hasCreatePermission && type === EntityType.collection ? (
                                 <Button
-                                  Link={Link}
                                   aria-label={t('general:createNewLabel', {
                                     label: getTranslation(entity.labels.singular, i18n),
                                   })}
@@ -153,6 +151,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                                   el="link"
                                   icon="plus"
                                   iconStyle="with-border"
+                                  Link={Link}
                                   round
                                   to={createHREF}
                                 />
@@ -161,6 +160,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                             buttonAriaLabel={buttonAriaLabel}
                             href={href}
                             id={`card-${entity.slug}`}
+                            Link={Link}
                             title={title}
                             titleAs="h3"
                           />

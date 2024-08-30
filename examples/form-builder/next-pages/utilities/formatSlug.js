@@ -1,4 +1,4 @@
-module.exports.formatSlug = reference => {
+module.exports.formatSlug = (reference) => {
   let slug = ''
 
   const { relationTo, value } = reference

@@ -10,8 +10,8 @@ export const processNested = function (data) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i],
-      value = data[key],
-      keyParts = key.replace(new RegExp(/\[/g), '.').replace(new RegExp(/\]/g), '').split('.')
+      keyParts = key.replace(new RegExp(/\[/g), '.').replace(new RegExp(/\]/g), '').split('.'),
+      value = data[key]
     let current = d
 
     for (let index = 0; index < keyParts.length; index++) {

@@ -8,8 +8,8 @@ import React from 'react'
 import type { diffComponents as _diffComponents } from './fields/index.js'
 import type { FieldDiffProps, Props } from './types.js'
 
-import Nested from './fields/Nested/index.js'
 import { diffMethods } from './fields/diffMethods.js'
+import Nested from './fields/Nested/index.js'
 import './index.scss'
 
 const baseClass = 'render-field-diffs'

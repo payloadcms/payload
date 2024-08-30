@@ -150,7 +150,7 @@ const Account: React.FC = () => {
               label="Confirm Password"
               required
               register={register}
-              validate={value => value === password.current || 'The passwords do not match'}
+              validate={(value) => value === password.current || 'The passwords do not match'}
               error={errors.passwordConfirm}
             />
           </Fragment>

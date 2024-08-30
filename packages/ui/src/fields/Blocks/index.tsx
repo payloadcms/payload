@@ -60,7 +60,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
-  const minRows = minRowsProp ?? required ? 1 : 0
+  const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -228,9 +228,9 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
               <FieldLabel
-                Label={field?.admin?.components?.Description}
                 as="span"
                 field={field}
+                Label={field?.admin?.components?.Description}
                 label={label}
                 required={required}
                 unstyled

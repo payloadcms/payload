@@ -10,11 +10,7 @@ export const index = [
   {
     languageOptions: {
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ['./*.ts', './*.tsx'],
-          defaultProject: './tsconfig.json',
-        },
-        tsconfigDirName: import.meta.dirname,
+        tsconfigRootDir: import.meta.dirname,
         ...rootParserOptions,
       },
     },

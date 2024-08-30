@@ -30,7 +30,7 @@ export type SearchPluginConfig = {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
-    [collection: string]: ((doc: any) => Promise<number> | number) | number
+    [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
   deleteDrafts?: boolean
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>

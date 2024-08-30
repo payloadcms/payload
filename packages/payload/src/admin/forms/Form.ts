@@ -12,7 +12,7 @@ export type Row = {
 }
 
 export type FilterOptionsResult = {
-  [relation: string]: Where | boolean
+  [relation: string]: boolean | Where
 }
 
 export type FormField = {

@@ -18,7 +18,7 @@ export type ValueWithRelation = {
   value: number | string
 }
 
-export type Value = ValueWithRelation | number | string
+export type Value = number | string | ValueWithRelation
 
 type CLEAR = {
   type: 'CLEAR'

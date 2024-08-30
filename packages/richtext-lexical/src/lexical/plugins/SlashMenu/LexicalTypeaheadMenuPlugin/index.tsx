@@ -112,7 +112,7 @@ export type TypeaheadMenuPluginProps = {
   onQueryChange: (matchingString: null | string) => void
   onSelectItem: (
     item: SlashMenuItem,
-    textNodeContainingQuery: TextNode | null,
+    textNodeContainingQuery: null | TextNode,
     closeMenu: () => void,
     matchingString: string,
   ) => void

@@ -100,10 +100,10 @@ const typescriptRules = {
       // Don't want something like <button onClick={someAsyncFunction}> to error
       checksVoidReturn: {
         attributes: false,
-        arguments: false
-      }
+        arguments: false,
+      },
     },
-  ]
+  ],
 }
 
 /** @typedef {import('eslint').Linter.FlatConfig} */

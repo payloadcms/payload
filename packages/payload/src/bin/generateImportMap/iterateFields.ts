@@ -3,7 +3,7 @@ import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 function hasKey<T, K extends string>(
-  obj: T | null | undefined,
+  obj: null | T | undefined,
   key: K,
 ): obj is { [P in K]: PayloadComponent | PayloadComponent[] } & T {
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)

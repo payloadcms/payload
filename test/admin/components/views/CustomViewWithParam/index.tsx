@@ -40,14 +40,14 @@ export const CustomViewWithParam: React.FC<AdminViewProps> = ({ initPageResult, 
         as `{customParamViewPath}`
       </p>
       <div className="custom-view__controls">
-        <Button Link={Link} buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+        <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
           Go to Dashboard
         </Button>
         &nbsp; &nbsp; &nbsp;
         <Button
-          Link={Link}
           buttonStyle="secondary"
           el="link"
+          Link={Link}
           to={`${adminRoute}/${customParamViewPathBase}${!paramValue ? '/123' : ''}`}
         >
           {`Go To ${paramValue ? 'Child' : 'Parent'} Param View`}
