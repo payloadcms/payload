@@ -16,6 +16,7 @@ overrides:
   react: 19.0.0-rc-06d0b89e-20240801
   react-dom: 19.0.0-rc-06d0b89e-20240801
   typescript: 5.5.4
+  '@lexical/markdown': file:./packages/richtext-lexical/lexical-markdown-0.17.0.tgz
 
 importers:
 
@@ -1190,7 +1191,7 @@ importers:
         specifier: 0.17.0
         version: 0.17.0
       '@lexical/markdown':
-        specifier: file:./lexical-markdown-0.17.0.tgz
+        specifier: file:lexical-markdown-0.17.0.tgz
         version: file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz
       '@lexical/react':
         specifier: 0.17.0
@@ -3592,9 +3593,6 @@ packages:
 
   '@lexical/mark@0.17.0':
     resolution: {integrity: sha512-Ynqh9KHXUcB9qLOTGC9s+bbWtawOwRStkeIeAugTqrwckyYWeDaePpyJ6IhBBJy1E1CfpiZn71NDeP+FuRjnXQ==}
-
-  '@lexical/markdown@0.17.0':
-    resolution: {integrity: sha512-6IuJ2l5p/Ma+VBUIStIRXwTC01GEzx21gvqqywuqBUzAOiMr1oRM+DGsQgrzZrcjX+LzUlZ5ZgjuWtK8XKVAZw==}
 
   '@lexical/markdown@file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz':
     resolution: {integrity: sha512-9mb0yJ1Jrhx4h6s5RMiFUbGzZHSMNG4f4hS2awNrAxCJbyLpkUD5I8DcOGOTU0UNZzaq05EvdNO4Ze8Dag0zEg==, tarball: file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz}
@@ -12258,16 +12256,6 @@ snapshots:
       '@lexical/utils': 0.17.0
       lexical: 0.17.0
 
-  '@lexical/markdown@0.17.0':
-    dependencies:
-      '@lexical/code': 0.17.0
-      '@lexical/link': 0.17.0
-      '@lexical/list': 0.17.0
-      '@lexical/rich-text': 0.17.0
-      '@lexical/text': 0.17.0
-      '@lexical/utils': 0.17.0
-      lexical: 0.17.0
-
   '@lexical/markdown@file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz':
     dependencies:
       '@lexical/code': 0.17.0
@@ -12304,7 +12292,7 @@ snapshots:
       '@lexical/link': 0.17.0
       '@lexical/list': 0.17.0
       '@lexical/mark': 0.17.0
-      '@lexical/markdown': 0.17.0
+      '@lexical/markdown': file:packages/richtext-lexical/lexical-markdown-0.17.0.tgz
       '@lexical/overflow': 0.17.0
       '@lexical/plain-text': 0.17.0
       '@lexical/rich-text': 0.17.0

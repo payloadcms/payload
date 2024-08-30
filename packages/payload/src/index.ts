@@ -880,6 +880,7 @@ export type {
   Block,
   BlockField,
   BlockFieldClient,
+  BlockJSX,
   CheckboxField,
   CheckboxFieldClient,
   ClientBlock,

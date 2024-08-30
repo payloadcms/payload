@@ -1195,6 +1195,45 @@ type BlockFields = {
   blockType?: string
 }
 
+export type BlockJSX = {
+  /**
+   * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere
+   */
+  customEndRegex?:
+    | {
+        /**
+         * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
+         * The entire text from regexpStart to the end of the document will then be matched.
+         */
+        optional?: true
+        regExp: RegExp
+      }
+    | RegExp
+  /**
+   * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
+   */
+  customStartRegex?: RegExp
+  export: (props: {
+    fields: BlockFields
+    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+  }) =>
+    | {
+        children?: string
+        props?: object
+      }
+    | false
+    | string
+  import: (props: {
+    children: string
+    closeMatch?: string[]
+    htmlToLexical?: (props: { html: string }) => any
+    linesInBetween?: string[]
+    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    openMatch?: string[]
+    props: Record<string, any>
+  }) => BlockFields | false
+}
+
 export type Block = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -1216,6 +1255,7 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1237,44 +1277,7 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
-  jsx?: {
-    /**
-     * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere
-     */
-    customEndRegex?:
-      | {
-          /**
-           * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
-           * The entire text from regexpStart to the end of the document will then be matched.
-           */
-          optional?: true
-          regExp: RegExp
-        }
-      | RegExp
-    /**
-     * Override the default regex used to search for the start of the block in the JSX. My default, it's <BlockSlugHere/>
-     */
-    customStartRegex?: RegExp
-    export: (props: {
-      fields: BlockFields
-      lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
-    }) =>
-      | {
-          children?: string
-          props?: object
-        }
-      | false
-      | string
-    import: (props: {
-      children: string
-      closeMatch?: string[]
-      htmlToLexical?: (props: { html: string }) => any
-      linesInBetween?: string[]
-      markdownToLexical?: (props: { markdown: string }) => Record<string, any>
-      openMatch?: string[]
-      props: Record<string, any>
-    }) => BlockFields | false
-  }
+  jsx?: BlockJSX
   labels?: Labels
   slug: string
 }

@@ -3,6 +3,7 @@ import type {
   AdminClient,
   ArrayFieldClient,
   BlockFieldClient,
+  BlockJSX,
   ClientBlock,
   ClientField,
   CreateMappedComponent,
@@ -160,7 +161,15 @@ export const createClientField = ({
             fields: field.blocks[i].fields,
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
-            jsx: block.jsx,
+          }
+          if (block?.admin?.jsx) {
+            const jsxResolved = getComponent({
+              identifier: 'block jsx',
+              importMap,
+              payloadComponent: block.admin.jsx,
+            })
+
+            clientBlock.jsx = jsxResolved.Component as unknown as BlockJSX
           }
 
           if (block.labels) {

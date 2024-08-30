@@ -44,12 +44,9 @@ export const getBlockMarkdownTransformers = ({
   }) => MultilineElementTransformer)[] = []
 
   for (const block of blocks) {
-    console.log('before reg block', block)
-
     if (!block.jsx) {
       continue
     }
-    console.log('Registering block!', block)
     const regex = createTagRegexes(block.slug)
     transformers.push(({ allTransformers, allNodes }) => ({
       dependencies: [BlockNode],
@@ -85,6 +82,15 @@ export const getBlockMarkdownTransformers = ({
       regExpStart: block.jsx?.customStartRegex ?? regex.regExpStart,
       replace: (rootNode, children, openMatch, closeMatch, linesInBetween) => {
         if (block.jsx.import) {
+          if (!linesInBetween) {
+            // convert children to linesInBetween
+            let line = ''
+            for (const child of children) {
+              line += child.getTextContent()
+            }
+            linesInBetween = [line]
+          }
+
           const childrenString = linesInBetween.join('\n').trim()
 
           const propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null

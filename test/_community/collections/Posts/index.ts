@@ -9,8 +9,8 @@ import {
 
 import { loadMDXAfterRead, saveMDXBeforeChange } from '../../mdx/hooks.js'
 import { BannerBlock } from '../../mdx/jsxBlocks/banner.js'
-import { CodeBlock } from '../../mdx/jsxBlocks/code.js'
-import { languages } from './shared.js'
+import { CodeBlock } from '../../mdx/jsxBlocks/code/code.js'
+import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
 
 export const postsSlug = 'posts'
 
@@ -61,7 +61,7 @@ export const PostsCollection: CollectionConfig = {
           EXPERIMENTAL_TableFeature(),
           FixedToolbarFeature(),
           BlocksFeature({
-            blocks: [BannerBlock, CodeBlock],
+            blocks: [BannerBlock, CodeBlock, PackageInstallOptions],
           }),
         ],
       }),

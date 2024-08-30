@@ -156,6 +156,7 @@
   },
   "overrides": {
     "@types/react": "npm:types-react@19.0.0-rc.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0"
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
+    "@lexical/markdown": "file:./lexical-markdown-0.17.0.tgz"
   }
 }
