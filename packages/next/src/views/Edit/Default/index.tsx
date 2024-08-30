@@ -102,7 +102,7 @@ export const DefaultEditView: React.FC = () => {
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const lockWhenEditingProp =
-    collectionConfig.lockWhenEditing !== undefined ? collectionConfig.lockWhenEditing : true
+    collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
 
   const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
 
