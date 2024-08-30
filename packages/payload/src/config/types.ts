@@ -905,6 +905,30 @@ export type Config = {
    */
   localization?: false | LocalizationConfig
 
+  /**
+   * Logger options, logger options with a destination stream, or an instantiated logger instance.
+   *
+   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
+   *
+   * ```ts
+   * // Logger options only
+   * logger: {
+   *   level: 'info',
+   * }
+   *
+   * // Logger options with destination stream
+   * logger: {
+   *  options: {
+   *   level: 'info',
+   *  },
+   *  destination: process.stdout
+   * },
+   *
+   * // Logger instance
+   * logger: pino({ name: 'my-logger' })
+   *
+   * ```
+   */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
 
   /**
