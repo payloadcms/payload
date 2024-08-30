@@ -39,6 +39,7 @@ jobs:
             db-mongodb
             db-postgres
             db-sqlite
+            drizzle
             email-nodemailer
             eslint
             graphql
