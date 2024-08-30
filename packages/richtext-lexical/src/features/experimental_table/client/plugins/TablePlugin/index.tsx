@@ -8,6 +8,7 @@ import type {
   LexicalNode,
   RangeSelection,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -42,7 +43,7 @@ export type CellEditorConfig = Readonly<{
   theme?: EditorThemeClasses
 }>
 
-export const OPEN_TABLE_DRAWER_COMMAND: LexicalCommand<{}> = createCommand(
+export const OPEN_TABLE_DRAWER_COMMAND: LexicalCommand<JsonObject> = createCommand(
   'OPEN_EMBED_DRAWER_COMMAND',
 )
 
@@ -101,7 +102,7 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand(
         OPEN_TABLE_DRAWER_COMMAND,
         () => {
-          let rangeSelection: RangeSelection | null = null
+          let rangeSelection: null | RangeSelection = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()
