@@ -19,8 +19,8 @@ import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import { SelectLocales } from '../SelectLocales/index.js'
-import { SetStepNav } from './SetStepNav.js'
 import './index.scss'
+import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
 

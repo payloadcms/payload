@@ -7,15 +7,14 @@ export * from './TableCellProvider/index.js'
 
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTableColumns } from '../TableColumns/index.js'
-import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
+import { TableCellProvider } from './TableCellProvider/index.js'
 
 export { TableCellProvider }
 
 const baseClass = 'table'
 
 export type Column = {
-  readonly Label: React.ReactNode
   readonly accessor: string
   readonly active: boolean
   readonly cellProps?: Partial<CellComponentProps>
@@ -23,6 +22,7 @@ export type Column = {
     Cell: MappedComponent
     Heading: React.ReactNode
   }
+  readonly Label: React.ReactNode
 }
 
 export type Props = {

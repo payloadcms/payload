@@ -3,13 +3,6 @@ import type React from 'react'
 import type { PayloadComponent } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 
-export type { LanguageOptions } from './LanguageOptions.js'
-export type {
-  RichTextAdapter,
-  RichTextAdapterProvider,
-  RichTextGenerateComponentMap,
-  RichTextHooks,
-} from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -17,14 +10,12 @@ export type { CustomPreviewButton } from './elements/PreviewButton.js'
 export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
-
 export type {
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
-
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -269,6 +260,15 @@ export type {
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
+export type { LanguageOptions } from './LanguageOptions.js'
+
+export type {
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextGenerateComponentMap,
+  RichTextHooks,
+} from './RichText.js'
+
 export type {
   AdminViewComponent,
   AdminViewConfig,
@@ -281,15 +281,15 @@ export type {
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
-  RenderedComponent: React.ReactNode
   props?: Partial<any>
+  RenderedComponent: React.ReactNode
   type: 'server'
 }
 
 export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
-  RenderedComponent?: React.ReactNode
   props?: Partial<TComponentClientProps>
+  RenderedComponent?: React.ReactNode
   type: 'client'
 }
 
@@ -305,7 +305,7 @@ export type MappedComponent<TComponentClientProps extends JsonObject = JsonObjec
 
 export type CreateMappedComponent = {
   <T extends JsonObject>(
-    component: { Component: React.FC<T> } | PayloadComponent<T> | null,
+    component: { Component: React.FC<T> } | null | PayloadComponent<T>,
     props: {
       clientProps?: JsonObject
       serverProps?: object

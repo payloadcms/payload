@@ -26,7 +26,7 @@ module.exports = async () => {
   let dynamicRedirects = []
 
   if (docs) {
-    docs.forEach(doc => {
+    docs.forEach((doc) => {
       const { from, to: { type, url, reference } = {} } = doc
 
       let source = from.replace(process.env.NEXT_PUBLIC_APP_URL, '').split('?')[0].toLowerCase()

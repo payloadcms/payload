@@ -132,8 +132,8 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         </li>
         <li>
           <FieldLabel
-            Label={field?.admin?.components?.Label}
             field={field}
+            Label={field?.admin?.components?.Label}
             {...getCoordinateFieldLabel('latitude')}
           />
           <div className="input-wrapper">

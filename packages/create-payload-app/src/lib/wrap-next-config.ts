@@ -2,7 +2,7 @@ import type { ExportDefaultExpression, ModuleItem } from '@swc/core'
 
 import { parse } from '@swc/core'
 import chalk from 'chalk'
-import { Syntax, parseModule } from 'esprima-next'
+import { parseModule, Syntax } from 'esprima-next'
 import fs from 'fs'
 
 import type { NextConfigType } from '../types.js'

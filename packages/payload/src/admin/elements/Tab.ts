@@ -26,7 +26,6 @@ export type DocumentTabCondition = (args: {
 // i.e. the config may override the `Default` view with a `label` but not an `href`
 export type DocumentTabConfig = {
   readonly Component?: DocumentTabComponent
-  readonly Pill?: PayloadComponent
   readonly condition?: DocumentTabCondition
   readonly href?:
     | ((args: {
@@ -40,6 +39,7 @@ export type DocumentTabConfig = {
   readonly isActive?: ((args: { href: string }) => boolean) | boolean
   readonly label?: ((args: { t: (key: string) => string }) => string) | string
   readonly newTab?: boolean
+  readonly Pill?: PayloadComponent
 }
 
 export type DocumentTabComponent = PayloadComponent<{

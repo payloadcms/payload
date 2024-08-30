@@ -2,11 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 import {
   HTMLConverterFeature,
+  lexicalEditor,
+  lexicalHTML,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
-  lexicalEditor,
-  lexicalHTML,
 } from '@payloadcms/richtext-lexical'
 import {
   LexicalPluginToLexicalFeature,

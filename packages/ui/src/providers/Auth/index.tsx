@@ -26,7 +26,7 @@ export type AuthContext<T = ClientUser> = {
   strategy?: string
   token?: string
   tokenExpiration?: number
-  user?: T | null
+  user?: null | T
 }
 
 const Context = createContext({} as AuthContext)

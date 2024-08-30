@@ -97,7 +97,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} field={null} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

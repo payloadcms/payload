@@ -150,7 +150,7 @@ export type GlobalConfig = {
    * Customize the SQL table name
    */
   dbName?: DBIdentifierName
-  endpoints?: Omit<Endpoint, 'root'>[] | false
+  endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   graphQL?:
     | {
@@ -175,7 +175,7 @@ export type GlobalConfig = {
      */
     interface?: string
   }
-  versions?: IncomingGlobalVersions | boolean
+  versions?: boolean | IncomingGlobalVersions
 }
 
 export interface SanitizedGlobalConfig

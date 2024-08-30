@@ -23,8 +23,8 @@ import {
   feedbackOutro,
   helpMessage,
   moveMessage,
-  successMessage,
   successfulNextInit,
+  successMessage,
 } from './utils/messages.js'
 
 export class Main {

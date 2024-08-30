@@ -146,7 +146,7 @@
     "p-limit": "^5.0.0",
     "playwright": "1.46.0",
     "playwright-core": "1.46.0",
-    "prettier": "3.3.2",
+    "prettier": "3.3.3",
     "prompts": "2.4.2",
     "react": "19.0.0-rc-06d0b89e-20240801",
     "react-dom": "19.0.0-rc-06d0b89e-20240801",

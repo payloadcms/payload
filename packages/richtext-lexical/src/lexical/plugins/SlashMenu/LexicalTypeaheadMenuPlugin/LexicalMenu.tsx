@@ -8,12 +8,12 @@ import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
+  createCommand,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
-  createCommand,
 } from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
@@ -31,12 +31,12 @@ export type MenuRenderFn = (
   anchorElementRef: RefObject<HTMLElement | null>,
   itemProps: {
     groups: Array<SlashMenuGroupInternal>
-    selectItemAndCleanUp: (selectedItem: SlashMenuItem) => void
     selectedItemKey: null | string
+    selectItemAndCleanUp: (selectedItem: SlashMenuItem) => void
     setSelectedItemKey: (itemKey: string) => void
   },
   matchingString: null | string,
-) => JSX.Element | ReactPortal | null
+) => JSX.Element | null | ReactPortal
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
   const typeaheadContainerNode = document.getElementById('slash-menu')
@@ -79,7 +79,7 @@ function getFullMatchOffset(documentText: string, entryText: string, offset: num
  * Split Lexical TextNode and return a new TextNode only containing matched text.
  * Common use cases include: removing the node, replacing with a new node.
  */
-function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | null {
+function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
   const selection = $getSelection()
   if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
     return null
@@ -215,7 +215,7 @@ export function LexicalMenu({
   menuRenderFn: MenuRenderFn
   onSelectItem: (
     item: SlashMenuItem,
-    textNodeContainingQuery: TextNode | null,
+    textNodeContainingQuery: null | TextNode,
     closeMenu: () => void,
     matchingString: string,
   ) => void
@@ -417,8 +417,8 @@ export function LexicalMenu({
   const listItemProps = useMemo(
     () => ({
       groups,
-      selectItemAndCleanUp,
       selectedItemKey,
+      selectItemAndCleanUp,
       setSelectedItemKey,
     }),
     [selectItemAndCleanUp, selectedItemKey, groups],

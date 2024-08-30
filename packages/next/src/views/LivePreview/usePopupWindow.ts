@@ -22,7 +22,7 @@ export const usePopupWindow = (props: {
 }): {
   isPopupOpen: boolean
   openPopupWindow: () => void
-  popupRef?: React.RefObject<Window | null>
+  popupRef?: React.RefObject<null | Window>
 } => {
   const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)
@@ -30,7 +30,7 @@ export const usePopupWindow = (props: {
   const {
     config: { serverURL },
   } = useConfig()
-  const popupRef = useRef<Window | null>(null)
+  const popupRef = useRef<null | Window>(null)
 
   // Optionally broadcast messages back out to the parent component
   useEffect(() => {

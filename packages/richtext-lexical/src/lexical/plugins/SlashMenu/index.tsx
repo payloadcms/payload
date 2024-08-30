@@ -15,8 +15,8 @@ import type {
 } from './LexicalTypeaheadMenuPlugin/types.js'
 
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
-import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import './index.scss'
+import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -178,7 +178,7 @@ export function SlashMenuPlugin({
   const onSelectItem = useCallback(
     (
       selectedItem: SlashMenuItemType,
-      nodeToRemove: TextNode | null,
+      nodeToRemove: null | TextNode,
       closeMenu: () => void,
       matchingString: string,
     ) => {
@@ -200,7 +200,7 @@ export function SlashMenuPlugin({
       groups={groups as SlashMenuGroupInternal[]}
       menuRenderFn={(
         anchorElementRef,
-        { selectItemAndCleanUp, selectedItemKey, setSelectedItemKey },
+        { selectedItemKey, selectItemAndCleanUp, setSelectedItemKey },
       ) =>
         anchorElementRef.current && groups.length
           ? ReactDOM.createPortal(

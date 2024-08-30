@@ -295,14 +295,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | {
         [key: string]: PayloadComponent
       }
-  generateSchemaMap?: (args: {
-    config: SanitizedConfig
-    field: RichTextField
-    i18n: I18nClient
-    props: ServerProps
-    schemaMap: Map<string, Field[]>
-    schemaPath: string
-  }) => Map<string, Field[]> | null
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
@@ -326,6 +318,14 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  generateSchemaMap?: (args: {
+    config: SanitizedConfig
+    field: RichTextField
+    i18n: I18nClient
+    props: ServerProps
+    schemaMap: Map<string, Field[]>
+    schemaPath: string
+  }) => Map<string, Field[]> | null
   hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.

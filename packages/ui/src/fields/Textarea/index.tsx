@@ -12,10 +12,10 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextareaInput } from './Input.js'
 import './index.scss'
+import { TextareaInput } from './Input.js'
 
-export { TextAreaInputProps, TextareaInput }
+export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
   const {
@@ -82,15 +82,15 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   return (
     <TextareaInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
       descriptionProps={descriptionProps}
+      Error={field?.admin?.components?.Error}
       errorProps={errorProps}
+      Label={field?.admin?.components?.Label}
       label={label}
       labelProps={labelProps}
       onChange={(e) => {

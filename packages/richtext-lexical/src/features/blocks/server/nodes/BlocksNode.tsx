@@ -131,7 +131,7 @@ export function $createServerBlockNode(fields: Exclude<BlockFields, 'id'>): Serv
 }
 
 export function $isServerBlockNode(
-  node: LexicalNode | ServerBlockNode | null | undefined,
+  node: LexicalNode | null | ServerBlockNode | undefined,
 ): node is ServerBlockNode {
   return node instanceof ServerBlockNode
 }

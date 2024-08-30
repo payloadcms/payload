@@ -16,9 +16,9 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 const baseClass = 'step-nav'
 
 const StepNav: React.FC<{
-  readonly Link?: React.ComponentType
   readonly className?: string
-}> = ({ Link, className }) => {
+  readonly Link?: React.ComponentType
+}> = ({ className, Link }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()

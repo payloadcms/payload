@@ -33,9 +33,9 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
       <h2>{i18n.t('error:unauthorized')}</h2>
       <p>{i18n.t('error:notAllowedToAccessPage')}</p>
       <Button
-        Link={Link}
         className={`${baseClass}__button`}
         el="link"
+        Link={Link}
         size="large"
         to={logoutRoute}
       >

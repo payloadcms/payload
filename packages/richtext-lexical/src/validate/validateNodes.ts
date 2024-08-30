@@ -4,12 +4,12 @@ import type { RichTextField, ValidateOptions } from 'payload'
 import type { NodeValidation } from '../features/typesServer.js'
 
 export async function validateNodes({
-  nodeValidations,
   nodes,
+  nodeValidations,
   validation: validationFromProps,
 }: {
-  nodeValidations: Map<string, Array<NodeValidation>>
   nodes: SerializedLexicalNode[]
+  nodeValidations: Map<string, Array<NodeValidation>>
   validation: {
     options: ValidateOptions<unknown, unknown, RichTextField, SerializedEditorState>
     value: SerializedEditorState
@@ -38,8 +38,8 @@ export async function validateNodes({
     // Validate node's children
     if ('children' in node && node?.children) {
       const childrenValidationResult = await validateNodes({
-        nodeValidations,
         nodes: node.children as SerializedLexicalNode[],
+        nodeValidations,
         validation: validationFromProps,
       })
       if (childrenValidationResult !== true) {

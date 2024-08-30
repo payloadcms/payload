@@ -14,8 +14,8 @@ import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { CheckboxInput } from './Input.js'
 import './index.scss'
+import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
 
@@ -111,12 +111,12 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         alignCaret="left"
       />
       <CheckboxInput
-        Label={field?.admin?.components?.Label}
         afterInput={field?.admin?.components?.afterInput}
         beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
+        Label={field?.admin?.components?.Label}
         label={label}
         labelProps={labelProps}
         name={path}

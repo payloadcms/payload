@@ -5,8 +5,8 @@ import type { Props } from './types.js'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderField } from './RenderField.js'
 import './index.scss'
+import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 

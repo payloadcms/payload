@@ -95,17 +95,17 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   return (
     <SelectInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
+      Error={field?.admin?.components?.Error}
       field={field}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
+      Label={field?.admin?.components?.Label}
       label={label}
       name={name}
       onChange={onChange}
