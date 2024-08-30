@@ -112,14 +112,14 @@ export type BaseRichTextHookArgs<
   TSiblingData = any,
 > = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
 
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData

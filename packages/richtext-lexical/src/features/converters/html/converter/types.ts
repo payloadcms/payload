@@ -14,7 +14,7 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
     /**
      * When the converter is called, req CAN be passed in depending on where it's run.
      */
-    req: PayloadRequest | null
+    req: null | PayloadRequest
     showHiddenFields: boolean
   }) => Promise<string> | string
   nodeTypes: string[]

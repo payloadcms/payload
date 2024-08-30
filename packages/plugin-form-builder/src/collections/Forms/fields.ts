@@ -581,5 +581,5 @@ export const fields = {
   text: Text,
   textarea: TextArea,
 } as {
-  [key: string]: ((fieldConfig?: FieldConfig | boolean) => Block) | Block
+  [key: string]: ((fieldConfig?: boolean | FieldConfig) => Block) | Block
 }

@@ -1,13 +1,13 @@
 import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
 
 import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
-import './index.scss'
 
 const baseClass = 'template-default'
 

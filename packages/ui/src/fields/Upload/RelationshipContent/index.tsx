@@ -74,8 +74,8 @@ export function RelationshipContent(props: Props) {
         <ThumbnailComponent
           alt={alt}
           className={`${baseClass}__thumbnail`}
-          fileSrc={src}
           filename={filename}
+          fileSrc={src}
           size="small"
         />
         <div className={`${baseClass}__details`}>

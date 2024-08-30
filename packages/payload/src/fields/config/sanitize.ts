@@ -4,13 +4,13 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'

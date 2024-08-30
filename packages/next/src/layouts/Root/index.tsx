@@ -69,10 +69,10 @@ export const RootLayout = async ({
   const { permissions, user } = await payload.auth({ headers, req })
 
   const { clientConfig, render } = await createClientConfig({
-    DefaultEditView,
-    DefaultListView,
     children,
     config,
+    DefaultEditView,
+    DefaultListView,
     i18n,
     importMap,
     payload,

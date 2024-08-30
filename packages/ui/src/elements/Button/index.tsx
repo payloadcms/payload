@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, forwardRef, isValidElement } from 'react'
+import React, { forwardRef, Fragment, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
@@ -51,8 +51,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const {
     id,
     type = 'button',
-    Link,
-    SubMenuPopupContent,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -62,10 +60,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
+    Link,
     newTab,
     onClick,
     round,
     size = 'medium',
+    SubMenuPopupContent,
     to,
     tooltip,
     url,
@@ -123,6 +123,20 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   let buttonElement
 
   switch (el) {
+    case 'anchor':
+      buttonElement = (
+        <a
+          {...buttonProps}
+          href={!disabled ? url : undefined}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+            {children}
+          </ButtonContents>
+        </a>
+      )
+      break
+
     case 'link':
       if (!Link) {
         console.error('Link is required when using el="link"', children)
@@ -141,20 +155,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
             {children}
           </ButtonContents>
         </LinkTag>
-      )
-      break
-
-    case 'anchor':
-      buttonElement = (
-        <a
-          {...buttonProps}
-          href={!disabled ? url : undefined}
-          ref={ref as React.Ref<HTMLAnchorElement>}
-        >
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </a>
       )
       break
 

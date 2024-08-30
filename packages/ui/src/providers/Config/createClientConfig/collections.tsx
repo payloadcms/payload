@@ -44,20 +44,20 @@ const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProp
 ]
 
 export const createClientCollectionConfig = ({
-  DefaultEditView,
-  DefaultListView,
   clientCollection,
   collection,
   createMappedComponent,
+  DefaultEditView,
+  DefaultListView,
   i18n,
   importMap,
   payload,
 }: {
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
   clientCollection: ClientCollectionConfig
   collection: SanitizedCollectionConfig
   createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<AdminViewProps>
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -372,20 +372,20 @@ export const createClientCollectionConfig = ({
 }
 
 export const createClientCollectionConfigs = ({
-  DefaultEditView,
-  DefaultListView,
   clientCollections,
   collections,
   createMappedComponent,
+  DefaultEditView,
+  DefaultListView,
   i18n,
   importMap,
   payload,
 }: {
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
   clientCollections: ClientCollectionConfig[]
   collections: SanitizedCollectionConfig[]
   createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<AdminViewProps>
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -394,11 +394,11 @@ export const createClientCollectionConfigs = ({
     const collection = collections[i]
     const clientCollection = clientCollections[i]
     clientCollections[i] = createClientCollectionConfig({
-      DefaultEditView,
-      DefaultListView,
       clientCollection,
       collection,
       createMappedComponent,
+      DefaultEditView,
+      DefaultListView,
       i18n,
       importMap,
       payload,

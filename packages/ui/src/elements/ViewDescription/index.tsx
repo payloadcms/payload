@@ -10,7 +10,7 @@ import './index.scss'
 
 export type ViewDescriptionComponent = React.ComponentType<any>
 
-type Description = DescriptionFunction | StaticDescription | ViewDescriptionComponent | string
+type Description = DescriptionFunction | StaticDescription | string | ViewDescriptionComponent
 
 export type ViewDescriptionProps = {
   readonly Description?: MappedComponent

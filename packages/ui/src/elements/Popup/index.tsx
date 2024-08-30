@@ -7,8 +7,8 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import { PopupTrigger } from './PopupTrigger/index.js'
 import './index.scss'
+import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
 

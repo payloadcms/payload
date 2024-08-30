@@ -43,7 +43,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   const mouseStartPosRef = useRef<MousePosition | null>(null)
   const [mouseCurrentPos, updateMouseCurrentPos] = useState<MousePosition | null>(null)
 
-  const [activeCell, updateActiveCell] = useState<TableDOMCell | null>(null)
+  const [activeCell, updateActiveCell] = useState<null | TableDOMCell>(null)
   const [isMouseDown, updateIsMouseDown] = useState<boolean>(false)
   const [draggingDirection, updateDraggingDirection] = useState<MouseDraggingDirection | null>(null)
 

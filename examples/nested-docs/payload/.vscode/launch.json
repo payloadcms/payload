@@ -12,10 +12,10 @@
       "preLaunchTask": "npm: build:server",
       "env": {
         "PAYLOAD_CONFIG_PATH": "${workspaceFolder}/src/payload.config.ts"
-      },
+      }
       // "outFiles": [
       //   "${workspaceFolder}/dist/**/*.js"
       // ]
-    },
+    }
   ]
 }

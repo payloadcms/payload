@@ -28,9 +28,8 @@ export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
   projectService: {
-    allowDefaultProject: ['./src/*.ts', './src/*.tsx'],
-    defaultProject: './tsconfig.json',
     maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
+    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.spec.ts'],
   },
 }
 
@@ -45,15 +44,6 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
     ],
-  },
-  {
-    languageOptions: {
-      parserOptions: {
-        project: './tsconfig.json',
-        tsconfigDirName: import.meta.dirname,
-        ...rootParserOptions,
-      },
-    },
   },
   {
     plugins: {
@@ -79,6 +69,15 @@ export const rootEslintConfig = [
 
 export default [
   ...rootEslintConfig,
+  {
+    languageOptions: {
+      parserOptions: {
+        ...rootParserOptions,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {

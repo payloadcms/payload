@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload'
 
-import { PayloadIcon, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import { NextResponse } from 'next/server.js'
@@ -61,9 +61,9 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
     return new ImageResponse(
       (
         <OGImage
-          Icon={mappedIcon}
           description={description}
           fontFamily={fontFamily}
+          Icon={mappedIcon}
           leader={leader}
           title={title}
         />

@@ -38,6 +38,6 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
+  "include": ["./**/*.ts", "./**/*.tsx", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }

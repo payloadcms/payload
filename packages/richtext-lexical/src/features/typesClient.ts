@@ -167,43 +167,43 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, an
  */
 export type SanitizedPlugin =
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponentWithAnchor
-      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.
     }
   | {
-      Component: PluginComponent
       clientProps: any
+      Component: PluginComponent
       key: string
       position: 'aboveContainer'
     }
   | {
-      Component: PluginComponent
       clientProps: any
+      Component: PluginComponent
       key: string
       position: 'belowContainer'
     }

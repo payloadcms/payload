@@ -66,7 +66,6 @@ export const VersionsViewClient: React.FC<{
               limit={data.limit}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onChange={handlePageChange}
               page={data.page}
               prevPage={data.prevPage}
@@ -82,7 +81,6 @@ export const VersionsViewClient: React.FC<{
                   {i18n.t('general:of')} {data.totalDocs}
                 </div>
                 <PerPage
-                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
                   handleChange={handlePerPageChange}
                   limit={limit ? Number(limit) : 10}
                   limits={paginationLimits}

@@ -23,7 +23,7 @@ const batchAndLoadDocs =
 
     // Create docs array of same length as keys, using null as value
     // We will replace nulls with injected docs as they are retrieved
-    const docs: (TypeWithID | null)[] = keys.map(() => null)
+    const docs: (null | TypeWithID)[] = keys.map(() => null)
 
     /**
     * Batch IDs by their `find` args
@@ -168,7 +168,7 @@ type CreateCacheKeyArgs = {
   locale: string
   overrideAccess: boolean
   showHiddenFields: boolean
-  transactionID: Promise<number | string> | number | string
+  transactionID: number | Promise<number | string> | string
 }
 export const createDataloaderCacheKey = ({
   collectionSlug,

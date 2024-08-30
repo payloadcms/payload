@@ -33,8 +33,8 @@ export const Country: React.FC<
             <ReactSelect
               instanceId={name}
               options={countryOptions}
-              value={countryOptions.find(c => c.value === value)}
-              onChange={val => onChange(val.value)}
+              value={countryOptions.find((c) => c.value === value)}
+              onChange={(val) => onChange(val.value)}
               className={classes.reactSelect}
               classNamePrefix="rs"
               inputId={name}

@@ -5,7 +5,7 @@ const ObjectId = (ObjectIdImport.default ||
 
 export const isValidID = (
   value: number | string,
-  type: 'ObjectID' | 'number' | 'text',
+  type: 'number' | 'ObjectID' | 'text',
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {

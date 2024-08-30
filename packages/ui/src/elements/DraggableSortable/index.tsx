@@ -2,10 +2,10 @@
 import type { DragEndEvent } from '@dnd-kit/core'
 
 import {
+  closestCenter,
   DndContext,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
   useDroppable,
   useSensor,
   useSensors,
