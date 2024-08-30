@@ -1,11 +1,9 @@
-import type { Post } from 'src/payload-types'
+import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import React from 'react'
 import RichText from '@/components/RichText'
-
-import type { ArchiveBlockProps } from './types'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
 
