@@ -13,8 +13,11 @@ import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import './globals.css'
+import { draftMode } from 'next/headers'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { isEnabled } = draftMode()
+
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
@@ -24,7 +27,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers>
-          <AdminBar />
+          <AdminBar
+            adminBarProps={{
+              preview: isEnabled,
+            }}
+          />
           <LivePreviewListener />
 
           <Header />

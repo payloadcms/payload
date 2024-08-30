@@ -6,6 +6,7 @@ import { cn } from '@/utilities/cn'
 import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar } from 'payload-admin-bar'
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const collectionLabels = {
   pages: {
@@ -31,6 +32,7 @@ export const AdminBar: React.FC<{
   const segments = useSelectedLayoutSegments()
   const [show, setShow] = useState(false)
   const collection = collectionLabels?.[segments?.[1]] ? segments?.[1] : 'pages'
+  const router = useRouter()
 
   const onAuthChange = React.useCallback((user) => {
     setShow(user?.id)
@@ -60,6 +62,12 @@ export const AdminBar: React.FC<{
           }}
           logo={<Title />}
           onAuthChange={onAuthChange}
+          onPreviewExit={() => {
+            fetch('/next/exit-preview').then(() => {
+              router.push('/')
+              router.refresh()
+            })
+          }}
           style={{
             backgroundColor: 'transparent',
             padding: 0,
