@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, forwardRef, isValidElement } from 'react'
+import React, { forwardRef, Fragment, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
@@ -51,8 +51,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   const {
     id,
     type = 'button',
-    Link,
-    SubMenuPopupContent,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -62,10 +60,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
+    Link,
     newTab,
     onClick,
     round,
     size = 'medium',
+    SubMenuPopupContent,
     to,
     tooltip,
     url,
@@ -89,8 +89,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
   function handleClick(event) {
     setShowTooltip(false)
-    if (type !== 'submit' && onClick) event.preventDefault()
-    if (onClick) onClick(event)
+    if (type !== 'submit' && onClick) {
+      event.preventDefault()
+    }
+    if (onClick) {
+      onClick(event)
+    }
   }
 
   const styleClasses = [
@@ -119,25 +123,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   let buttonElement
 
   switch (el) {
-    case 'link':
-      if (!Link) {
-        console.error('Link is required when using el="link"', children)
-        return null
-      }
-
-      let LinkTag = Link // eslint-disable-line no-case-declarations
-
-      if (disabled) LinkTag = 'div'
-
-      buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} to={to || url}>
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </LinkTag>
-      )
-      break
-
     case 'anchor':
       buttonElement = (
         <a
@@ -149,6 +134,27 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
             {children}
           </ButtonContents>
         </a>
+      )
+      break
+
+    case 'link':
+      if (!Link) {
+        console.error('Link is required when using el="link"', children)
+        return null
+      }
+
+      let LinkTag = Link // eslint-disable-line no-case-declarations
+
+      if (disabled) {
+        LinkTag = 'div'
+      }
+
+      buttonElement = (
+        <LinkTag {...buttonProps} href={to || url} to={to || url}>
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+            {children}
+          </ButtonContents>
+        </LinkTag>
       )
       break
 
@@ -164,7 +170,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       )
       break
   }
-  if (SubMenuPopupContent)
+  if (SubMenuPopupContent) {
     return (
       <div className={styleClasses}>
         {buttonElement}
@@ -180,6 +186,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         </Popup>
       </div>
     )
+  }
 
   return buttonElement
 })

@@ -84,7 +84,8 @@
     height: 100%;
   }
 
-  &__tableAddColumns, &__tableAddRows {
+  &__tableAddColumns,
+  &__tableAddRows {
     position: absolute;
     background-color: var(--theme-elevation-100);
     animation: table-controls 0.2s ease;
@@ -94,7 +95,8 @@
     min-height: 24px;
   }
 
-  &__tableAddColumns:after, &__tableAddRows:after {
+  &__tableAddColumns:after,
+  &__tableAddRows:after {
     background-image: url(../../../../../lexical/ui/icons/Add/index.svg);
     background-position: center;
     background-repeat: no-repeat;
@@ -108,7 +110,8 @@
     opacity: 0.4;
   }
 
-  &__tableAddColumns:hover, &__tableAddRows:hover {
+  &__tableAddColumns:hover,
+  &__tableAddRows:hover {
     background-color: var(--theme-elevation-200);
   }
 
@@ -167,7 +170,8 @@ html[data-theme='dark'] {
       background-color: var(--theme-elevation-50);
     }
 
-    &__tableAddColumns:after, &__tableAddRows:after {
+    &__tableAddColumns:after,
+    &__tableAddRows:after {
       background-image: url(../../../../../lexical/ui/icons/Add/light.svg);
     }
   }

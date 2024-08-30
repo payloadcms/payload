@@ -2,7 +2,7 @@
 
 import type { PaginatedDocs, Where } from 'payload'
 
-import { ReactSelect, fieldBaseClass, useConfig, useTranslation } from '@payloadcms/ui'
+import { fieldBaseClass, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -48,7 +48,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
   const getResults = useCallback(
     async ({ lastLoadedPage: lastLoadedPageArg }) => {
-      if (loadedAllOptionsRef.current) return
+      if (loadedAllOptionsRef.current) {
+        return
+      }
       const query: {
         [key: string]: unknown
         where: Where

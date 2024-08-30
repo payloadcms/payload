@@ -40,8 +40,12 @@ export const LoginForm: React.FC<{
   const canLoginWithUsername = authOptions.loginWithUsername
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
-    if (canLoginWithEmail && canLoginWithUsername) return 'emailOrUsername'
-    if (canLoginWithUsername) return 'username'
+    if (canLoginWithEmail && canLoginWithUsername) {
+      return 'emailOrUsername'
+    }
+    if (canLoginWithUsername) {
+      return 'username'
+    }
     return 'email'
   })
 

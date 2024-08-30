@@ -36,7 +36,7 @@ const Bracket = ({
 
 type Args = {
   isEmpty?: boolean
-  object: Record<string, any> | any[]
+  object: any[] | Record<string, any>
   objectKey?: string
   parentType?: 'array' | 'object'
   trailingComma?: boolean

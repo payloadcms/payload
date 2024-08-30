@@ -24,7 +24,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   overrideDelete,
   req,
 }) => {
-  if (!collectionConfig.upload) return
+  if (!collectionConfig.upload) {
+    return
+  }
   if (overrideDelete || files.length > 0) {
     const { staticDir: staticPath } = collectionConfig.upload
 

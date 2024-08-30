@@ -93,8 +93,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           !readOnly ? (
             <RowActions
               addRow={addRow}
-              blockType={row.blockType}
               blocks={blocks}
+              blockType={row.blockType}
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}

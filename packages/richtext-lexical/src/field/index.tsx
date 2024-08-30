@@ -1,7 +1,7 @@
 'use client'
 
 import { ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
-import React, { Suspense, lazy, useEffect, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'

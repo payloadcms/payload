@@ -4,12 +4,12 @@ import { RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const OGImage: React.FC<{
-  Icon: MappedComponent
   description?: string
   fontFamily?: string
+  Icon: MappedComponent
   leader?: string
   title?: string
-}> = ({ Icon, description, fontFamily = 'Arial, sans-serif', leader, title }) => {
+}> = ({ description, fontFamily = 'Arial, sans-serif', Icon, leader, title }) => {
   return (
     <div
       style={{
@@ -45,14 +45,14 @@ export const OGImage: React.FC<{
         )}
         <p
           style={{
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
             display: '-webkit-box',
             fontSize: 90,
             lineHeight: 1,
             marginBottom: 0,
             marginTop: 0,
             textOverflow: 'ellipsis',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
           }}
         >
           {title}
@@ -60,8 +60,6 @@ export const OGImage: React.FC<{
         {description && (
           <p
             style={{
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
               display: '-webkit-box',
               flexGrow: 1,
               fontSize: 30,
@@ -69,6 +67,8 @@ export const OGImage: React.FC<{
               marginBottom: 0,
               marginTop: 40,
               textOverflow: 'ellipsis',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
             }}
           >
             {description}

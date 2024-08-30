@@ -23,7 +23,9 @@ export const sentryPlugin =
     }
 
     config.onInit = async (payload) => {
-      if (incomingConfig.onInit) await incomingConfig.onInit(payload)
+      if (incomingConfig.onInit) {
+        await incomingConfig.onInit(payload)
+      }
       startSentry(pluginOptions, payload)
     }
 

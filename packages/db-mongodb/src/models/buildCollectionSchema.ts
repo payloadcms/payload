@@ -3,10 +3,10 @@ import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload'
 
 import paginate from 'mongoose-paginate-v2'
 
-import getBuildQueryPlugin from '../queries/buildQuery.js'
-import buildSchema from './buildSchema.js'
+import { getBuildQueryPlugin } from '../queries/buildQuery.js'
+import { buildSchema } from './buildSchema.js'
 
-const buildCollectionSchema = (
+export const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
   config: SanitizedConfig,
   schemaOptions = {},
@@ -44,5 +44,3 @@ const buildCollectionSchema = (
 
   return schema
 }
-
-export default buildCollectionSchema

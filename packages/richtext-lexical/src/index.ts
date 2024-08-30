@@ -5,16 +5,14 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 
-import { fileURLToPath } from 'node:url'
-import path from 'path'
 import {
   afterChangeTraverseFields,
   afterReadTraverseFields,
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
+  checkDependencies,
   deepCopyObject,
   deepCopyObjectSimple,
-  getDependencies,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -42,46 +40,32 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
-  return async ({ config, isRoot }) => {
+  return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
     ) {
-      const resolvedDependencies = await getDependencies(dirname, [
-        'lexical',
-        '@lexical/headless',
-        '@lexical/link',
-        '@lexical/list',
-        '@lexical/mark',
-        '@lexical/markdown',
-        '@lexical/react',
-        '@lexical/rich-text',
-        '@lexical/selection',
-        '@lexical/utils',
-      ])
-
-      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
-      const foundVersions: {
-        [version: string]: string
-      } = {}
-      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
-        if (!Object.keys(foundVersions).includes(version)) {
-          foundVersions[version] = _pkg
-        }
-      }
-      if (Object.keys(foundVersions).length > 1) {
-        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
-          .map(([version, pkg]) => `${pkg}@${version}`)
-          .join(', ')
-
-        throw new Error(
-          `Mismatching lexical dependency versions found: ${formattedVersionsWithPackageNameString}. All lexical and @lexical/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all lexical and @lexical/* packages have the same version.`,
-        )
-      }
+      await checkDependencies({
+        dependencyGroups: [
+          {
+            name: 'lexical',
+            dependencies: [
+              'lexical',
+              '@lexical/headless',
+              '@lexical/link',
+              '@lexical/list',
+              '@lexical/mark',
+              '@lexical/markdown',
+              '@lexical/react',
+              '@lexical/rich-text',
+              '@lexical/selection',
+              '@lexical/utils',
+            ],
+            targetVersion: '0.17.0',
+          },
+        ],
+      })
     }
 
     let features: FeatureProviderServer<any, any, any>[] = []
@@ -93,6 +77,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
           defaultEditorConfig,
           config,
+          parentIsLocalized,
         )
         features = deepCopyObject(defaultEditorFeatures)
       }
@@ -124,6 +109,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = await loadFeatures({
         config,
         isRoot,
+        parentIsLocalized,
         unSanitizedEditorConfig: {
           features,
           lexical,
@@ -991,8 +977,10 @@ export type * from './nodeTypes.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 
+export { populate } from './populateGraphQL/populate.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
+
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 
 export {

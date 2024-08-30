@@ -91,7 +91,9 @@ export const SetDocumentStepNav: React.FC<{
         })
       }
 
-      if (drawerDepth <= 1) setStepNav(nav)
+      if (drawerDepth <= 1) {
+        setStepNav(nav)
+      }
     }
   }, [
     setStepNav,

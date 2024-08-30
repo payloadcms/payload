@@ -173,13 +173,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   // Get deduped list of upload adapters
-  if (!config.upload) config.upload = { adapters: [] }
+  if (!config.upload) {
+    config.upload = { adapters: [] }
+  }
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
 
   // Pass through the email config as is so adapters don't break
-  if (incomingConfig.email) config.email = incomingConfig.email
+  if (incomingConfig.email) {
+    config.email = incomingConfig.email
+  }
 
   /*
     Execute richText sanitization
@@ -188,6 +192,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.editor = await incomingConfig.editor({
       config: config as SanitizedConfig,
       isRoot: true,
+      parentIsLocalized: false,
     })
     if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
       config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)

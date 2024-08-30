@@ -1,9 +1,9 @@
 'use client'
 
 export { RichTextCell } from '../../cell/index.js'
-export { ElementButton } from '../../field/elements/Button.js'
 export { BlockquoteElementButton } from '../../field/elements/blockquote/Button.js'
 export { BlockquoteElement } from '../../field/elements/blockquote/Element.js'
+export { ElementButton } from '../../field/elements/Button.js'
 export { H1ElementButton } from '../../field/elements/h1/Button.js'
 export { Heading1Element } from '../../field/elements/h1/Heading1.js'
 export { H2ElementButton } from '../../field/elements/h2/Button.js'
@@ -44,10 +44,10 @@ export { UploadElementButton } from '../../field/elements/upload/Button/index.js
 export { UploadElement } from '../../field/elements/upload/Element/index.js'
 export { WithUpload } from '../../field/elements/upload/plugin.js'
 export { RichTextField } from '../../field/index.js'
-export { LeafButton } from '../../field/leaves/Button.js'
 export { BoldLeaf } from '../../field/leaves/bold/Bold/index.js'
-
 export { BoldLeafButton } from '../../field/leaves/bold/LeafButton.js'
+
+export { LeafButton } from '../../field/leaves/Button.js'
 
 export { CodeLeaf } from '../../field/leaves/code/Code/index.js'
 
@@ -63,3 +63,4 @@ export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 export { UnderlineLeaf } from '../../field/leaves/underline/Underline/index.js'
 
 export { useLeaf } from '../../field/providers/LeafProvider.js'
+export { useSlatePlugin } from '../../utilities/useSlatePlugin.js'

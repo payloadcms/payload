@@ -445,7 +445,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
-        if (Array.isArray(field.relationTo) || (field.type === 'relationship' && field.hasMany)) {
+        if (Array.isArray(field.relationTo) || field.hasMany) {
           let relationshipFields
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
           const {

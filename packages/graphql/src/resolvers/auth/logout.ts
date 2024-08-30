@@ -4,7 +4,7 @@ import { generateExpiredPayloadCookie, isolateObjectProperty, logoutOperation } 
 
 import type { Context } from '../types.js'
 
-function logoutResolver(collection: Collection): any {
+export function logout(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
@@ -22,5 +22,3 @@ function logoutResolver(collection: Collection): any {
 
   return resolver
 }
-
-export default logoutResolver

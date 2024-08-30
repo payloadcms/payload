@@ -41,7 +41,9 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   })
 
   useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen)
+    if (typeof setDrawerIsOpen === 'function') {
+      setDrawerIsOpen(isDrawerOpen)
+    }
   }, [isDrawerOpen, setDrawerIsOpen])
 
   return (

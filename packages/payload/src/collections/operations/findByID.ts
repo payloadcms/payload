@@ -68,7 +68,9 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResult === false) return null
+    if (accessResult === false) {
+      return null
+    }
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
@@ -83,7 +85,9 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) throw new NotFound(t)
+    if (!findOneArgs.where.and[0].id) {
+      throw new NotFound(t)
+    }
 
     let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
 

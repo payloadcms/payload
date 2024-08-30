@@ -49,11 +49,15 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) return null
+        if (!col) {
+          return null
+        }
 
-        const { Label, accessor, active } = col
+        const { accessor, active, Label } = col
 
-        if (col.accessor === '_select') return null
+        if (col.accessor === '_select') {
+          return null
+        }
 
         return (
           <Pill

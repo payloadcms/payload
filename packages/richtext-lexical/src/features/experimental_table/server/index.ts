@@ -50,12 +50,13 @@ export type SerializedTableRowNode = Spread<
   _SerializedTableRowNode
 >
 export const EXPERIMENTAL_TableFeature = createServerFeature({
-  feature: async ({ config, isRoot }) => {
+  feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     const sanitizedFields = await sanitizeFields({
       config: config as unknown as Config,
       fields,
+      parentIsLocalized,
       requireFieldLevelRichTextEditor: isRoot,
       validRelationships,
     })
@@ -75,6 +76,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -84,6 +87,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -106,6 +111,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -115,6 +122,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,
@@ -146,6 +155,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             html: {
               converter: async ({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 node,
                 overrideAccess,
@@ -155,6 +166,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
               }) => {
                 const childrenText = await convertLexicalNodesToHTML({
                   converters,
+                  currentDepth,
+                  depth,
                   draft,
                   lexicalNodes: node.children,
                   overrideAccess,

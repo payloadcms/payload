@@ -117,7 +117,9 @@ export const initPage = async ({
 
     locale = findLocaleFromCode(localization, localeCode)
 
-    if (!locale) locale = findLocaleFromCode(localization, defaultLocaleCode)
+    if (!locale) {
+      locale = findLocaleFromCode(localization, defaultLocaleCode)
+    }
     req.locale = locale.code
   }
 

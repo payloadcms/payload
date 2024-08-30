@@ -8,7 +8,7 @@ export function useDebounce<T extends (...args: never[]) => void>(
   ms: number,
   maxWait?: number,
 ) {
-  const funcRef = useRef<T | null>(null)
+  const funcRef = useRef<null | T>(null)
   funcRef.current = fn
 
   return useMemo(

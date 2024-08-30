@@ -7,10 +7,10 @@ import type {
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import {
-  RenderComponent,
   formatAdminURL,
   getCreateMappedComponent,
   isEditing as getIsEditing,
+  RenderComponent,
 } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
@@ -74,6 +74,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     locale,
     req,
   })
+
+  if (!data) {
+    notFound()
+  }
 
   const { docPermissions, hasPublishPermission, hasSavePermission } = await getDocumentPermissions({
     id,
@@ -276,6 +280,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialData={data}
       initialState={formState}
       isEditing={isEditing}
+      key={locale?.code}
     >
       {!RootViewOverride && (
         <DocumentHeader

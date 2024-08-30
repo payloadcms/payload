@@ -13,6 +13,7 @@ export const jsonFieldsSlug = 'json-fields'
 export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
+export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
 export const radioFieldsSlug = 'radio-fields'
@@ -26,6 +27,9 @@ export const textFieldsSlug = 'text-fields'
 export const uploadsSlug = 'uploads'
 export const uploads2Slug = 'uploads2'
 export const uploads3Slug = 'uploads3'
+export const uploadsMulti = 'uploads-multi'
+export const uploadsMultiPoly = 'uploads-multi-poly'
+export const uploadsPoly = 'uploads-poly'
 export const uiSlug = 'ui-fields'
 
 export const collectionSlugs = [
@@ -42,6 +46,7 @@ export const collectionSlugs = [
   jsonFieldsSlug,
   lexicalFieldsSlug,
   lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,

@@ -2,8 +2,8 @@ import type { AdminViewProps } from 'payload'
 
 import React from 'react'
 
-import { LogoutClient } from './LogoutClient.js'
 import './index.scss'
+import { LogoutClient } from './LogoutClient.js'
 
 const baseClass = 'logout'
 

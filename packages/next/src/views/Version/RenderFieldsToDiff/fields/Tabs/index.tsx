@@ -1,3 +1,4 @@
+'use client'
 import type { TabsFieldClient } from 'payload'
 
 import React from 'react'

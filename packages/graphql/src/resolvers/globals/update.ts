@@ -18,12 +18,16 @@ type Resolver<TSlug extends GlobalSlug> = (
   },
 ) => Promise<DataFromGlobalSlug<TSlug>>
 
-export default function updateResolver<TSlug extends GlobalSlug>(
+export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    if (args.locale) {
+      context.req.locale = args.locale
+    }
+    if (args.fallbackLocale) {
+      context.req.fallbackLocale = args.fallbackLocale
+    }
 
     const { slug } = globalConfig
 

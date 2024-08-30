@@ -82,8 +82,8 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -99,7 +99,9 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={disabled}

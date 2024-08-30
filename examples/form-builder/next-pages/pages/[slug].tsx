@@ -6,7 +6,7 @@ import type { Page, MainMenu } from '../payload-types'
 const Page: React.FC<{
   mainMenu: MainMenu
   page: Page
-}> = props => {
+}> = (props) => {
   const {
     page: { layout },
   } = props
@@ -27,7 +27,7 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
 
   const pageQuery = await fetch(
     `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[slug][equals]=${slug}`,
-  ).then(res => res.json())
+  ).then((res) => res.json())
 
   return {
     props: {
@@ -39,10 +39,10 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
 export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
   const pagesQuery: { docs: Page[] } = await fetch(
     `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?limit=100`,
-  ).then(res => res.json())
+  ).then((res) => res.json())
 
   return {
-    paths: pagesQuery.docs.map(page => ({
+    paths: pagesQuery.docs.map((page) => ({
       params: {
         slug: page.slug,
       },

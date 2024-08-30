@@ -4,9 +4,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: base(0.4);
-  padding: base(1.6);
-  background: var(--theme-elevation-50);
+  padding: calc(var(--base) * 0.9) var(--base);
+  background: transparent;
   border: 1px dotted var(--theme-elevation-400);
   border-radius: var(--style-radius-s);
   height: 100%;
@@ -16,6 +15,9 @@
 
   .btn {
     margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   &.dragging {
@@ -28,29 +30,12 @@
     }
   }
 
-  &__label {
-    margin: 0;
-    text-transform: lowercase;
-  }
-
-  &__hidden-input {
-    position: absolute;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
   @include mid-break {
     display: block;
     text-align: center;
+  }
 
-    .btn {
-      margin: 0 auto;
-      width: 100%;
-      max-width: 200px;
-    }
-
-    &__label {
-      display: none;
-    }
+  &.dropzoneStyle--none {
+    all: unset;
   }
 }

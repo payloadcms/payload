@@ -182,6 +182,7 @@ export function mongooseAdapter({
       init,
       migrateFresh,
       migrationDir,
+      packageName: '@payloadcms/db-mongodb',
       payload,
       prodMigrations,
       queryDrafts,

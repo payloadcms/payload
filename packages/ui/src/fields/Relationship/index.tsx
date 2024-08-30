@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
+import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -21,7 +22,6 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { AddNewRelation } from './AddNew/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import './index.scss'
@@ -260,7 +260,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           }
         }, Promise.resolve())
 
-        if (typeof onSuccess === 'function') onSuccess()
+        if (typeof onSuccess === 'function') {
+          onSuccess()
+        }
       }
     },
     [
@@ -466,7 +468,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   const valueToRender = findOptionsByValue({ options, value })
 
-  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
+  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
+    valueToRender.value = null
+  }
 
   return (
     <div
@@ -488,8 +492,8 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -518,7 +522,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               disabled={readOnly || formProcessing || drawerIsOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
-                if (!option) return undefined
+                if (!option) {
+                  return undefined
+                }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
                   : option.value
@@ -591,15 +597,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             />
             {!readOnly && allowCreate && (
               <AddNewRelation
-                {...{
-                  dispatchOptions,
-                  hasMany,
-                  options,
-                  path,
-                  relationTo,
-                  setValue,
-                  value,
-                }}
+                hasMany={hasMany}
+                path={path}
+                relationTo={relationTo}
+                setValue={setValue}
+                value={value}
               />
             )}
           </div>

@@ -3,8 +3,8 @@ import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { DefaultAccountIcon } from './Default/index.js'
 import { GravatarAccountIcon } from './Gravatar/index.js'
@@ -36,6 +36,10 @@ export const Account = () => {
     )
   }
 
-  if (!user?.email || avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
-  if (avatar === 'gravatar') return <GravatarAccountIcon />
+  if (!user?.email || avatar === 'default') {
+    return <DefaultAccountIcon active={isOnAccountPage} />
+  }
+  if (avatar === 'gravatar') {
+    return <GravatarAccountIcon />
+  }
 }

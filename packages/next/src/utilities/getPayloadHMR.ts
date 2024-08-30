@@ -4,10 +4,10 @@ import { BasePayload, generateImportMap } from 'payload'
 import WebSocket from 'ws'
 
 let cached: {
-  payload: Payload | null
-  promise: Promise<Payload> | null
-  reload: Promise<void> | boolean
-  ws: WebSocket | null
+  payload: null | Payload
+  promise: null | Promise<Payload>
+  reload: boolean | Promise<void>
+  ws: null | WebSocket
 } = global._payload
 
 if (!cached) {
@@ -62,7 +62,9 @@ export const reload = async (
   }
 }
 
-export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
+export const getPayloadHMR = async (
+  options: Pick<InitOptions, 'config' | 'importMap'>,
+): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayloadHMR to work.')
   }

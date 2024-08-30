@@ -14,7 +14,9 @@ export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => 
 
   const format = (items) => {
     return items.map((item) => {
-      if (typeof item.label === 'string') return item
+      if (typeof item.label === 'string') {
+        return item
+      }
       if (typeof item.label !== 'string' && item.label[code]) {
         return {
           label: item.label[code],

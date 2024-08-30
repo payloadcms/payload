@@ -102,8 +102,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       where: combineQueries({ id: { equals: id } }, accessResults),
     })
 
-    if (!docToDelete && !hasWhereAccess) throw new NotFound(req.t)
-    if (!docToDelete && hasWhereAccess) throw new Forbidden(req.t)
+    if (!docToDelete && !hasWhereAccess) {
+      throw new NotFound(req.t)
+    }
+    if (!docToDelete && hasWhereAccess) {
+      throw new Forbidden(req.t)
+    }
 
     await deleteAssociatedFiles({
       collectionConfig,
@@ -213,7 +217,9 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {
