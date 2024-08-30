@@ -1,6 +1,6 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, Connection, ConnectOptions } from 'mongoose'
+import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
 
 import fs from 'fs'
@@ -83,7 +83,7 @@ export interface Args {
     name: string
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
-  transactionOptions?: false | TransactionOptions
+  transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -150,8 +150,8 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connection: undefined,
       connectOptions: connectOptions || {},
+      connection: undefined,
       count,
       disableIndexHints,
       globals: undefined,
@@ -221,9 +221,7 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) {
-    return migrationDir
-  }
+  if (migrationDir) return migrationDir
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

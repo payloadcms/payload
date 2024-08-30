@@ -1,6 +1,8 @@
 import {
-  and,
   type Column,
+  type SQL,
+  type SQLWrapper,
+  and,
   eq,
   gt,
   gte,
@@ -13,8 +15,6 @@ import {
   ne,
   notInArray,
   or,
-  type SQL,
-  type SQLWrapper,
 } from 'drizzle-orm'
 
 type OperatorKeys =

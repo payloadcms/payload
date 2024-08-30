@@ -20,8 +20,8 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextareaField,
   TextField,
+  TextareaField,
   UploadField,
 } from 'payload'
 

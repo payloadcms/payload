@@ -26,7 +26,7 @@ export type Args = {
   push?: boolean
   relationshipsSuffix?: string
   schemaName?: string
-  transactionOptions?: false | SQLiteTransactionConfig
+  transactionOptions?: SQLiteTransactionConfig | false
   versionsSuffix?: string
 }
 
