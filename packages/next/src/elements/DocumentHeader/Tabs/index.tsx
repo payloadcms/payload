@@ -6,14 +6,14 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { ShouldRenderTabs } from './ShouldRenderTabs.js'
-import { DocumentTab } from './Tab/index.js'
 import { getCustomViews } from './getCustomViews.js'
 import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
+import { ShouldRenderTabs } from './ShouldRenderTabs.js'
+import { DocumentTab } from './Tab/index.js'
 import { tabs as defaultTabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'

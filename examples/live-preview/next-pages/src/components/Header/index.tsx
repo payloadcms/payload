@@ -40,7 +40,7 @@ export const Header: React.FC<{
   globals: {
     mainMenu: MainMenu
   }
-}> = props => {
+}> = (props) => {
   const { globals } = props
 
   const {

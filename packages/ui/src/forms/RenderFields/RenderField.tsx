@@ -88,12 +88,12 @@ export const RenderField: React.FC<Props> = ({
   } else {
     RenderedField = (
       <RenderComponent
-        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
         clientProps={{
           field: fieldComponentProps.field,
           forceRender: fieldComponentProps.forceRender,
           readOnly: fieldComponentProps.readOnly,
         }}
+        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
         mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
       />
     )

@@ -23,8 +23,8 @@ import type { UploadElementType } from '../types.js'
 import { useElement } from '../../../providers/ElementProvider.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import { uploadFieldsSchemaPath, uploadName } from '../shared.js'
-import { UploadDrawer } from './UploadDrawer/index.js'
 import './index.scss'
+import { UploadDrawer } from './UploadDrawer/index.js'
 
 const baseClass = 'rich-text-upload'
 

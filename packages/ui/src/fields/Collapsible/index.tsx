@@ -136,13 +136,13 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           header={
             <div className={`${baseClass}__row-label-wrap`}>
               <RowLabel
+                i18n={i18n}
+                path={path}
                 RowLabel={
                   field?.admin?.components && 'RowLabel' in field.admin.components
                     ? field.admin.components.RowLabel
                     : undefined
                 }
-                i18n={i18n}
-                path={path}
                 rowLabel={label}
               />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

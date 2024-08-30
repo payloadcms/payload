@@ -18,7 +18,6 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = {
-  readonly RowLabel?: MappedComponent
   readonly addRow: (rowIndex: number) => Promise<void> | void
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
@@ -36,12 +35,12 @@ type ArrayRowProps = {
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
+  readonly RowLabel?: MappedComponent
   readonly schemaPath: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
-  RowLabel: CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
@@ -62,6 +61,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   row,
   rowCount,
   rowIndex,
+  RowLabel: CustomRowLabel,
   schemaPath,
   setCollapse,
   setNodeRef,
@@ -126,9 +126,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel
-              RowLabel={CustomRowLabel}
               i18n={i18n}
               path={path}
+              RowLabel={CustomRowLabel}
               rowLabel={fallbackLabel}
               rowNumber={rowIndex + 1}
             />

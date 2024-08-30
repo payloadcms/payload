@@ -43,7 +43,7 @@ import type { PayloadLogger } from '../utilities/logger.js'
 export type PayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
-> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | false | string
+> = false | RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
 
 // We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
 // We also NEED to actually use those generics for this to work, thus they are part of the props.
@@ -51,10 +51,10 @@ export type RawPayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
 > = {
-  clientProps?: TComponentClientProps | object
+  clientProps?: object | TComponentClientProps
   exportName?: string
   path: string
-  serverProps?: TComponentServerProps | object
+  serverProps?: object | TComponentServerProps
 }
 
 export type PayloadComponentProps<TPayloadComponent> =
@@ -100,8 +100,8 @@ export type ResolvedComponent<
   TComponentServerProps extends never | object,
   TComponentClientProps extends never | object,
 > = {
-  Component: React.FC<TComponentClientProps | TComponentServerProps>
   clientProps?: TComponentClientProps
+  Component: React.FC<TComponentClientProps | TComponentServerProps>
   serverProps?: TComponentServerProps
 }
 
@@ -232,9 +232,13 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions,
-) => Promise<null | string> | null | string
+) => null | Promise<null | string> | string
 
 export type GraphQLInfo = {
+  collections: {
+    [slug: string]: Collection
+  }
+  globals: Globals
   Mutation: {
     fields: Record<string, any>
     name: string
@@ -243,10 +247,6 @@ export type GraphQLInfo = {
     fields: Record<string, any>
     name: string
   }
-  collections: {
-    [slug: string]: Collection
-  }
-  globals: Globals
   types: {
     arrayTypes: Record<string, GraphQL.GraphQLType>
     blockInputTypes: Record<string, GraphQL.GraphQLInputObjectType>
@@ -315,7 +315,7 @@ export type InitOptions = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type AccessResult = Where | boolean
+export type AccessResult = boolean | Where
 
 export type AccessArgs<TData = any> = {
   /**
@@ -379,11 +379,11 @@ export type EditViewConfig = {
   meta?: MetaConfig
 } & (
   | {
-      Component: EditViewComponent
-      path?: string
+      actions?: CustomComponent[]
     }
   | {
-      actions?: CustomComponent[]
+      Component: EditViewComponent
+      path?: string
     }
   | {
       path?: string
@@ -506,11 +506,11 @@ export type SharpDependency = (
     | Int8Array
     | Int16Array
     | Int32Array
+    | string
     | Uint8Array
     | Uint8ClampedArray
     | Uint16Array
-    | Uint32Array
-    | string,
+    | Uint32Array,
   options?: sharp.SharpOptions,
 ) => sharp.Sharp
 
@@ -605,7 +605,7 @@ export type FetchAPIFileUploadOptions = {
    * @example
    * app.use(fileUpload({ safeFileNames: true }))
    */
-  safeFileNames?: RegExp | boolean | undefined
+  safeFileNames?: boolean | RegExp | undefined
   /**
    * Path to store temporary files.
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
@@ -676,10 +676,6 @@ export type Config = {
      */
     components?: {
       /**
-       * Replace the navigation with a custom component
-       */
-      Nav?: CustomComponent
-      /**
        * Add custom components to the top right of the Admin Panel
        */
       actions?: CustomComponent[]
@@ -719,6 +715,10 @@ export type Config = {
         /** Replace the logout button  */
         Button?: CustomComponent
       }
+      /**
+       * Replace the navigation with a custom component
+       */
+      Nav?: CustomComponent
       /**
        * Wrap the admin dashboard in custom context providers
        */
@@ -915,7 +915,7 @@ export type Config = {
    *
    * @default false // disable localization
    */
-  localization?: LocalizationConfig | false
+  localization?: false | LocalizationConfig
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
@@ -1006,7 +1006,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  localization: SanitizedLocalizationConfig | false
+  localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
     configDir: string

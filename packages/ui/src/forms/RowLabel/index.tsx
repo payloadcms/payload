@@ -11,7 +11,7 @@ import { RowLabelProvider } from '../RowLabel/Context/index.js'
 const baseClass = 'row-label'
 
 export const RowLabel: React.FC<RowLabelProps> = (props) => {
-  const { RowLabel: RowLabelComponent, className, i18n, path, rowLabel, rowNumber } = props
+  const { className, i18n, path, RowLabel: RowLabelComponent, rowLabel, rowNumber } = props
 
   if (RowLabelComponent) {
     return (

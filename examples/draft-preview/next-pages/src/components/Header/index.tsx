@@ -43,7 +43,7 @@ export const Header: React.FC<{
     mainMenu: MainMenu
   }
   adminBarProps: PayloadAdminBarProps
-}> = props => {
+}> = (props) => {
   const { globals, adminBarProps } = props
 
   const [user, setUser] = useState<PayloadMeUser>()

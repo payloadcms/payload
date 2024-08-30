@@ -15,16 +15,16 @@ import './index.scss'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     autoComplete = 'off',
     beforeInput,
     className,
+    Description,
+    Error,
     errorProps,
     field,
     inputRef,
+    Label,
     label,
     labelProps,
     onChange,
@@ -59,9 +59,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={Label}
         field={field}
         htmlFor={`field-${path.replace(/\./g, '__')}`}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

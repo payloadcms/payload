@@ -6,7 +6,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
@@ -20,7 +20,7 @@ type Args = {
   fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
   path: (number | string)[]

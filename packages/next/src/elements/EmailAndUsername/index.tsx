@@ -7,7 +7,7 @@ import { email, username } from 'payload/shared'
 import React from 'react'
 
 type Props = {
-  readonly loginWithUsername?: LoginWithUsernameOptions | false
+  readonly loginWithUsername?: false | LoginWithUsernameOptions
 }
 function EmailFieldComponent(props: Props) {
   const { loginWithUsername } = props
@@ -59,7 +59,7 @@ function UsernameFieldComponent(props: Props) {
 
 type RenderEmailAndUsernameFieldsProps = {
   className?: string
-  loginWithUsername?: LoginWithUsernameOptions | false
+  loginWithUsername?: false | LoginWithUsernameOptions
   operation?: 'create' | 'update'
   permissions?: {
     [fieldName: string]: FieldPermissions

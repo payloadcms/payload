@@ -14,9 +14,9 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { TabComponent } from './Tab/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
+import { TabComponent } from './Tab/index.js'
 
 const baseClass = 'tabs-field'
 

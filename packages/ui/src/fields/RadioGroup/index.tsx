@@ -9,8 +9,8 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { Radio } from './Radio/index.js'
 import './index.scss'
+import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
@@ -100,8 +100,8 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         alignCaret="left"
       />
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}

@@ -34,7 +34,7 @@ export const DocumentControls: React.FC<{
   readonly disableActions?: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
-  readonly id?: number | string
+  id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
   readonly permissions: CollectionPermission | GlobalPermission | null

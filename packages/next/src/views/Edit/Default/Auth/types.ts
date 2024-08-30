@@ -13,5 +13,5 @@ export type Props = {
   setValidateBeforeSubmit: (validate: boolean) => void
   useAPIKey?: boolean
   username: string
-  verify?: VerifyConfig | boolean
+  verify?: boolean | VerifyConfig
 }

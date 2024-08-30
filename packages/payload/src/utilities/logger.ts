@@ -1,5 +1,5 @@
 import { type DestinationStream, type Logger, type LoggerOptions, pino } from 'pino'
-import { type PrettyOptions, build } from 'pino-pretty'
+import { build, type PrettyOptions } from 'pino-pretty'
 
 export type PayloadLogger = Logger
 

@@ -46,7 +46,7 @@ export function BulkUploadDrawer() {
 
   return (
     <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer Header={null} gutter={false} slug={drawerSlug}>
+      <Drawer gutter={false} Header={null} slug={drawerSlug}>
         <FormsManagerProvider>
           <DrawerContent />
         </FormsManagerProvider>

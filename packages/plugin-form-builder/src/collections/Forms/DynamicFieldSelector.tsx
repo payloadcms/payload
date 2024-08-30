@@ -19,7 +19,7 @@ export const DynamicFieldSelector: React.FC<
 
     if (fields) {
       const allNonPaymentFields = fields
-        .map((block): SelectFieldOption | null => {
+        .map((block): null | SelectFieldOption => {
           const { name, blockType, label } = block
 
           if (blockType !== 'payment') {

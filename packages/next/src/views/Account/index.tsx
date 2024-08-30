@@ -14,8 +14,8 @@ import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { EditView } from '../Edit/index.js'
-import { Settings } from './Settings/index.js'
 import { AccountClient } from './index.client.js'
+import { Settings } from './Settings/index.js'
 
 export { generateAccountMetadata } from './meta.js'
 

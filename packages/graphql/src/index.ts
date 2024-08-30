@@ -33,6 +33,8 @@ export function configToSchema(config: SanitizedConfig): {
   }
 
   const graphqlResult: GraphQLInfo = {
+    collections,
+    globals,
     Mutation: {
       name: 'Mutation',
       fields: {},
@@ -41,8 +43,6 @@ export function configToSchema(config: SanitizedConfig): {
       name: 'Query',
       fields: {},
     },
-    collections,
-    globals,
     types: {
       arrayTypes: {},
       blockInputTypes: {},
