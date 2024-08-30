@@ -17,7 +17,6 @@ export const docsBasePath = '/Users/alessio/Documents/payloadcms-mdx-mock/docs'
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
-    MediaCollection,
     PostsCollection,
     {
       slug: 'simple',

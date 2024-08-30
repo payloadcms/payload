@@ -7,7 +7,7 @@ import {
 import type { ClientBlock } from 'payload'
 import type { Transformer } from '@lexical/markdown'
 
-import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx.js'
+import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 

@@ -8,7 +8,7 @@ import type { Block } from 'payload'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import type { Transformer } from '@lexical/markdown'
 
-import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx.js'
+import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
@@ -17,11 +17,27 @@ import { SerializedEditorState } from 'lexical'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+  // Regex components
+  const openingTag = `<${escapedTagName}`
+  const closingTag = `</${escapedTagName}`
+  const optionalAttributes = `([^>]*?)`
+  const optionalWhitespace = `\\s*`
+  const optionalSelfClosing = `(/?)`
+  const optionalClosingBracket = `>?`
+  const mandatoryClosingBracket = `>`
+  const selfClosingEnd = `\\s*/>` // New component for matching just "/>"
+
+  // Assembled regex patterns
+  const startPattern = `${openingTag}${optionalAttributes}${optionalWhitespace}${optionalSelfClosing}${optionalClosingBracket}`
+  const endPattern = `${closingTag}${optionalWhitespace}${mandatoryClosingBracket}|${openingTag}${optionalAttributes}${selfClosingEnd}|${selfClosingEnd}`
+
   return {
-    regExpStart: new RegExp(`<(${escapedTagName})([^>]*?)\\s*(/?)>`, 'i'),
-    regExpEnd: new RegExp(`</(${escapedTagName})\\s*>|<${escapedTagName}[^>]*?/>`, 'i'),
+    regExpStart: new RegExp(startPattern, 'i'),
+    regExpEnd: new RegExp(endPattern, 'i'),
   }
 }
+
 export const getBlockMarkdownTransformers = ({
   blocks,
 }: {
@@ -44,6 +60,7 @@ export const getBlockMarkdownTransformers = ({
       continue
     }
     const regex = createTagRegexes(block.slug)
+
     transformers.push(({ allTransformers, allNodes }) => ({
       dependencies: [ServerBlockNode],
       export: (node) => {
@@ -80,7 +97,11 @@ export const getBlockMarkdownTransformers = ({
         if (block.jsx.import) {
           const childrenString = linesInBetween.join('\n').trim()
 
-          const propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+          let propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+
+          if (closeMatch[0] === '/>') {
+            propsString += linesInBetween.join(' ').trim()
+          }
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 

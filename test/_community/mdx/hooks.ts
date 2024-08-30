@@ -1,15 +1,16 @@
 import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
+import { $convertToMarkdownString } from '@lexical/markdown'
 import { docsBasePath } from '@payload-config'
 import {
-  type LexicalRichTextAdapter,
-  type SanitizedServerEditorConfig,
+  $customConvertFromMarkdownString,
   extractFrontmatter,
   frontmatterToObject,
   getEnabledNodes,
+  type LexicalRichTextAdapter,
   objectToFrontmatter,
+  type SanitizedServerEditorConfig,
 } from '@payloadcms/richtext-lexical'
 import fs from 'node:fs'
 import path from 'path'
@@ -110,7 +111,7 @@ export const loadMDXAfterRead: CollectionAfterReadHook = ({ collection, doc, con
 
   headlessEditor.update(
     () => {
-      $convertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
+      $customConvertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
     },
     { discrete: true },
   )
