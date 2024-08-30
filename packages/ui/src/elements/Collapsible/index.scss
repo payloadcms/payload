@@ -19,8 +19,8 @@
     border-top-left-radius: $style-radius-m;
     width: 100%;
 
-    & > * {
-      z-index: 1;
+    &:hover {
+      background: var(--theme-elevation-100);
     }
 
     &:has(.collapsible__drag) {
@@ -31,7 +31,6 @@
   &__drag {
     display: flex;
     opacity: 0.5;
-    z-index: 2;
     top: var(--toggle-pad-v);
     width: base(1.2);
     height: base(1.2);
@@ -56,7 +55,6 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
 
     span {
       user-select: none;
@@ -74,9 +72,19 @@
         color: var(--theme-text);
       }
     }
-    &.collapsible--hovered {
-      > .collapsible__toggle-wrap .collapsible__toggle {
-        background: var(--theme-elevation-100);
+  }
+
+  &--style-error {
+    border: 1px solid var(--theme-error-400);
+    > .collapsible__toggle-wrap {
+      background-color: var(--theme-error-100);
+
+      &:hover {
+        background: var(--theme-error-150);
+      }
+
+      .row-label {
+        color: var(--theme-error-950);
       }
     }
   }
@@ -145,27 +153,6 @@
   @include small-break {
     &__content {
       padding: var(--gutter-h);
-    }
-  }
-
-  &--style-error {
-    border: 1px solid var(--theme-error-400);
-    &:hover {
-      border: 1px solid var(--theme-error-500);
-    }
-
-    > .collapsible__toggle-wrap {
-      .row-label {
-        color: var(--theme-error-950);
-      }
-      .collapsible__toggle {
-        background: var(--theme-error-100);
-      }
-    }
-    &.collapsible--hovered {
-      > .collapsible__toggle-wrap .collapsible__toggle {
-        background: var(--theme-error-150);
-      }
     }
   }
 }

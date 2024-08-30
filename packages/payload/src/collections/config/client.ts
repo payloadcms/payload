@@ -14,17 +14,25 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
   'hidden' | 'preview'
 >
 
+export type ServerOnlyUploadProperties = keyof Pick<
+  SanitizedCollectionConfig['upload'],
+  | 'adminThumbnail'
+  | 'externalFileHeaderFilter'
+  | 'handlers'
+  | 'modifyResponseHeaders'
+  | 'withMetadata'
+>
+
 export type ClientCollectionConfig = {
   _isPreviewEnabled?: true
   admin: {
     components: {
-      Description: MappedComponent
       afterList: MappedComponent[]
       afterListTable: MappedComponent[]
       beforeList: MappedComponent[]
       beforeListTable: MappedComponent[]
+      Description: MappedComponent
       edit: {
-        Description: MappedComponent
         PreviewButton: MappedComponent
         PublishButton: MappedComponent
         SaveButton: MappedComponent
@@ -41,8 +49,8 @@ export type ClientCollectionConfig = {
           versions: MappedView
         }
         list: {
-          Component: MappedComponent
           actions: MappedComponent[]
+          Component: MappedComponent
         }
       }
     }

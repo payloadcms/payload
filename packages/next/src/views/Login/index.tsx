@@ -1,12 +1,12 @@
 import type { AdminViewProps } from 'payload'
 
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
+import { LoginForm } from './LoginForm/index.js'
 
 export { generateLoginMetadata } from './meta.js'
 

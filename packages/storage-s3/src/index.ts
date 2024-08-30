@@ -106,7 +106,9 @@ function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adap
   return ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) return storageClient
+      if (storageClient) {
+        return storageClient
+      }
       storageClient = new AWS.S3(config)
       return storageClient
     }

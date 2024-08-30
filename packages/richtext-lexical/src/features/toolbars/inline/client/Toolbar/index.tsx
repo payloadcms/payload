@@ -61,7 +61,7 @@ function ToolbarGroupComponent({
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
+  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
@@ -93,10 +93,10 @@ function ToolbarGroupComponent({
         group.items.length &&
         (DropdownIcon ? (
           <ToolbarDropdown
-            Icon={DropdownIcon}
             anchorElem={anchorElem}
             editor={editor}
             groupKey={group.key}
+            Icon={DropdownIcon}
             items={group.items}
             maxActiveItems={1}
             onActiveChange={onActiveChange}
@@ -236,7 +236,7 @@ function InlineToolbar({
           horizontalPosition: 'center',
           specialHandlingForCaret: true,
           targetRect: rangeRect,
-          verticalGap: 10,
+          verticalGap: 8,
         })
       }
     } else {
@@ -314,7 +314,7 @@ function InlineToolbar({
 function useInlineToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLElement,
-): React.ReactElement | null {
+): null | React.ReactElement {
   const [isText, setIsText] = useState(false)
 
   const updatePopup = useCallback(() => {

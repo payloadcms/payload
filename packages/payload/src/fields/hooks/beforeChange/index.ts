@@ -7,13 +7,13 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   doc: T
   docWithLocales: JsonObject
   duplicate?: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
   req: PayloadRequest
@@ -71,6 +71,7 @@ export const beforeChange = async <T extends JsonObject>({
   if (errors.length > 0) {
     throw new ValidationError(
       {
+        id,
         collection: collection?.slug,
         errors,
         global: global?.slug,

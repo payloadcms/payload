@@ -8,18 +8,24 @@ import type { Column } from '../../elements/Table/index.js'
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 export type ListInfoProps = {
-  readonly Header?: React.ReactNode
+  readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientConfig['collections'][0]
   readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
   readonly hasCreatePermission: boolean
+  readonly Header?: React.ReactNode
   readonly newDocumentURL: string
   readonly titleField?: FieldAffectingData
 }
 
 export type ListInfoContext = {
-  readonly Header?: React.ReactNode
+  readonly beforeActions?: React.ReactNode[]
   readonly collectionSlug: string
+  readonly disableBulkDelete?: boolean
+  readonly disableBulkEdit?: boolean
   readonly hasCreatePermission: boolean
+  readonly Header?: React.ReactNode
   readonly newDocumentURL: string
 } & ListInfoProps
 

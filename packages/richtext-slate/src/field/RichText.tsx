@@ -19,7 +19,7 @@ import {
 } from '@payloadcms/ui'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
+import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
@@ -261,7 +261,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         const isButton = child.tagName === 'BUTTON'
         const isDisabling = clickState === 'disabled'
         child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
-        if (isButton) child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        if (isButton) {
+          child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        }
       })
     }
 
@@ -307,7 +309,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     }
   }
 
-  if (!valueToRender) valueToRender = defaultRichTextValue
+  if (!valueToRender) {
+    valueToRender = defaultRichTextValue
+  }
 
   return (
     <div

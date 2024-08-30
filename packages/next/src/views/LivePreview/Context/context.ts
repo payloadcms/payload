@@ -1,6 +1,8 @@
+'use client'
 import type { LivePreviewConfig } from 'payload'
 import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
+import type React from 'react'
 
 import { createContext, useContext } from 'react'
 
@@ -20,7 +22,7 @@ export interface LivePreviewContextType {
     width: number
   }
   openPopupWindow: ReturnType<typeof usePopupWindow>['openPopupWindow']
-  popupRef?: React.RefObject<Window | null>
+  popupRef?: React.RefObject<null | Window>
   previewWindowType: 'iframe' | 'popup'
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void

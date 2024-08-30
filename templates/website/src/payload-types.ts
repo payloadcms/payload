@@ -92,7 +92,7 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    media?: string | Media | null;
+    media?: (string | null) | Media;
   };
   layout: (
     | {
@@ -231,11 +231,12 @@ export interface Page {
   )[];
   meta?: {
     title?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
   slug?: string | null;
+  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -319,7 +320,7 @@ export interface Post {
   categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
@@ -331,6 +332,7 @@ export interface Post {
       }[]
     | null;
   slug?: string | null;
+  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;

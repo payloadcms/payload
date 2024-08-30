@@ -13,7 +13,9 @@ export const richTextValidate: Validate<
   const { t } = req
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)
-    if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true
+    if (value && JSON.stringify(value) !== stringifiedDefaultValue) {
+      return true
+    }
     return t('validation:required')
   }
 

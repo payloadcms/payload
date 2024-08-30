@@ -8,7 +8,9 @@ export function sanitizeUrl(url: string): string {
 
   url = String(url).trim()
 
-  if (url.match(SAFE_URL_PATTERN) != null || url.match(DATA_URL_PATTERN) != null) return url
+  if (url.match(SAFE_URL_PATTERN) != null || url.match(DATA_URL_PATTERN) != null) {
+    return url
+  }
 
   return 'https://'
 }
@@ -25,21 +27,41 @@ const absoluteRegExp =
  *  */
 const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
 
+/**
+ * Prevents unreasonable URLs from being inserted into the editor.
+ * @param url
+ */
+export function validateUrlMinimal(url: string): boolean {
+  if (!url) {
+    return false
+  }
+
+  return !url.includes(' ')
+}
+
 // Do not keep validateUrl function too loose. This is run when pasting in text, to determine if links are in that text and if it should create AutoLinkNodes.
 // This is why we do not allow stuff like anchors here, as we don't want copied anchors to be turned into AutoLinkNodes.
 export function validateUrl(url: string): boolean {
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
 
-  if (!url) return false
+  if (!url) {
+    return false
+  }
 
-  if (url === 'https://') return true
+  if (url === 'https://') {
+    return true
+  }
 
   // This makes sure URLs starting with www. instead of https are valid too
-  if (absoluteRegExp.test(url)) return true
+  if (absoluteRegExp.test(url)) {
+    return true
+  }
 
   // Check relative or anchor links
-  if (relativeOrAnchorRegExp.test(url)) return true
+  if (relativeOrAnchorRegExp.test(url)) {
+    return true
+  }
 
   // While this doesn't allow URLs starting with www (which is why we use the regex above), it does properly handle tel: URLs
   try {

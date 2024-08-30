@@ -5,6 +5,7 @@ import type { ChainedMethods } from '../find/chainMethods.js'
 import type {
   DrizzleAdapter,
   DrizzleTransaction,
+  GenericColumn,
   GenericPgColumn,
   TransactionPg,
   TransactionSQLite,
@@ -12,7 +13,6 @@ import type {
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { chainMethods } from '../find/chainMethods.js'
-import { type GenericColumn } from '../types.js'
 
 type Args = {
   adapter: DrizzleAdapter
@@ -35,7 +35,7 @@ export const selectDistinct = ({
   selectFields,
   tableName,
   where,
-}: Args): QueryPromise<Record<string, GenericColumn> & { id: number | string }[]> => {
+}: Args): QueryPromise<{ id: number | string }[] & Record<string, GenericColumn>> => {
   if (Object.keys(joins).length > 0) {
     if (where) {
       chainedMethods.push({ args: [where], method: 'where' })

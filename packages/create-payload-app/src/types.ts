@@ -57,7 +57,7 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'mongodb' | 'postgres' | 'sqlite'
+export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercelPostgres'
 
 export type DbDetails = {
   dbUri: string

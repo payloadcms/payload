@@ -30,9 +30,9 @@ export const LogoutClient: React.FC<{
         {inactivity && <h2>{t('authentication:loggedOutInactivity')}</h2>}
         {!inactivity && <h2>{t('authentication:loggedOutSuccessfully')}</h2>}
         <Button
-          Link={Link}
           buttonStyle="secondary"
           el="link"
+          Link={Link}
           size="large"
           url={formatAdminURL({
             adminRoute,

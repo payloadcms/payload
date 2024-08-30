@@ -15,7 +15,7 @@ import { reducer } from './reducer.js'
 // or set to the document returned
 export type Documents = {
   [slug: string]: {
-    [id: number | string]: TypeWithID | false | null
+    [id: number | string]: false | null | TypeWithID
   }
 }
 

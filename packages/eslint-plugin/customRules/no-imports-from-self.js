@@ -9,7 +9,6 @@ export const rule = {
       category: 'Best Practices',
       recommended: true,
     },
-    fixable: 'code',
     schema: [],
   },
 

@@ -1,26 +1,32 @@
-'use client'
-import { RelationshipField, useAuth, useFieldProps } from '@payloadcms/ui'
+import type { Payload } from 'payload'
+
+import { cookies as getCookies, headers as getHeaders } from 'next/headers'
 import React from 'react'
 
-import type { User } from '../../../../payload-types.js'
+import { TenantFieldComponentClient } from './Field.client'
 
-export const TenantFieldComponent = () => {
-  const { user } = useAuth<User>()
-  const { path, readOnly } = useFieldProps()
+export const TenantFieldComponent: React.FC<{
+  path: string
+  payload: Payload
+  readOnly: boolean
+}> = async (args) => {
+  const cookies = getCookies()
+  const headers = getHeaders()
+  const { user } = await args.payload.auth({ headers })
 
-  if (user) {
-    if ((user.tenants && user.tenants.length > 1) || user?.roles?.includes('super-admin')) {
-      return (
-        <RelationshipField
-          label="Tenant"
-          name={path}
-          path={path}
-          readOnly={readOnly}
-          relationTo="tenants"
-          required
-        />
-      )
-    }
+  if (
+    user &&
+    ((Array.isArray(user.tenants) && user.tenants.length > 1) ||
+      user?.roles?.includes('super-admin'))
+  ) {
+    return (
+      <TenantFieldComponentClient
+        initialValue={cookies.get('payload-tenant')?.value || undefined}
+        path={args.path}
+        readOnly={args.readOnly}
+      />
+    )
   }
+
   return null
 }

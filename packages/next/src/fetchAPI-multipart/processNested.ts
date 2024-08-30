@@ -1,15 +1,17 @@
 import { isSafeFromPollution } from './utilities.js'
 
 export const processNested = function (data) {
-  if (!data || data.length < 1) return Object.create(null)
+  if (!data || data.length < 1) {
+    return Object.create(null)
+  }
 
   const d = Object.create(null),
     keys = Object.keys(data)
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i],
-      value = data[key],
-      keyParts = key.replace(new RegExp(/\[/g), '.').replace(new RegExp(/\]/g), '').split('.')
+      keyParts = key.replace(new RegExp(/\[/g), '.').replace(new RegExp(/\]/g), '').split('.'),
+      value = data[key]
     let current = d
 
     for (let index = 0; index < keyParts.length; index++) {
@@ -23,7 +25,9 @@ export const processNested = function (data) {
       if (index >= keyParts.length - 1) {
         current[k] = value
       } else {
-        if (!current[k]) current[k] = !keyParts[index + 1] ? [] : Object.create(null)
+        if (!current[k]) {
+          current[k] = !keyParts[index + 1] ? [] : Object.create(null)
+        }
         current = current[k]
       }
     }

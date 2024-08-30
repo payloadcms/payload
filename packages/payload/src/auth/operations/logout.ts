@@ -18,9 +18,12 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     req,
   } = incomingArgs
 
-  if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST)
-  if (user.collection !== collectionConfig.slug)
+  if (!user) {
+    throw new APIError('No User', httpStatus.BAD_REQUEST)
+  }
+  if (user.collection !== collectionConfig.slug) {
     throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
+  }
 
   await collectionConfig.hooks.afterLogout.reduce(async (priorHook, hook) => {
     await priorHook

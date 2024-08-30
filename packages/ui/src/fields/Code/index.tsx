@@ -84,8 +84,8 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}

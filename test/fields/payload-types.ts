@@ -48,6 +48,7 @@ export interface Config {
     'number-fields': NumberField;
     'point-fields': PointField;
     'relationship-fields': RelationshipField;
+    'lexical-relationship-fields': LexicalRelationshipField;
     'rich-text-fields': RichTextField;
     'select-fields': SelectField;
     'tabs-fields-2': TabsFields2;
@@ -56,6 +57,9 @@ export interface Config {
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
+    'uploads-multi': UploadsMulti;
+    'uploads-poly': UploadsPoly;
+    'uploads-multi-poly': UploadsMultiPoly;
     'ui-fields': UiField;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -1086,6 +1090,45 @@ export interface RelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-relationship-fields".
+ */
+export interface LexicalRelationshipField {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richText2?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
@@ -1311,7 +1354,7 @@ export interface TabsField {
 export interface Upload {
   id: string;
   text?: string | null;
-  media?: string | Upload | null;
+  media?: (string | null) | Upload;
   richText?: {
     root: {
       type: string;
@@ -1346,7 +1389,7 @@ export interface Upload {
 export interface Uploads2 {
   id: string;
   text?: string | null;
-  media?: string | Uploads2 | null;
+  media?: (string | null) | Uploads2;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1365,7 +1408,7 @@ export interface Uploads2 {
  */
 export interface Uploads3 {
   id: string;
-  media?: string | Uploads3 | null;
+  media?: (string | null) | Uploads3;
   richText?: {
     root: {
       type: string;
@@ -1392,6 +1435,58 @@ export interface Uploads3 {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi".
+ */
+export interface UploadsMulti {
+  id: string;
+  text?: string | null;
+  media?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-poly".
+ */
+export interface UploadsPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | ({
+        relationTo: 'uploads';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string | Uploads2;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi-poly".
+ */
+export interface UploadsMultiPoly {
+  id: string;
+  text?: string | null;
+  media?:
+    | (
+        | {
+            relationTo: 'uploads';
+            value: string | Upload;
+          }
+        | {
+            relationTo: 'uploads2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -5,6 +5,7 @@ import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 import type { Props as DrawerProps } from '../Drawer/types.js'
 
 export type DocumentDrawerProps = {
+  readonly AfterFields?: React.ReactNode
   readonly collectionSlug: string
   readonly drawerSlug?: string
   readonly id?: null | number | string

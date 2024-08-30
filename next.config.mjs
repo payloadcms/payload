@@ -23,7 +23,7 @@ export default withBundleAnalyzer(
     env: {
       PAYLOAD_CORE_DEV: 'true',
       ROOT_DIR: path.resolve(dirname),
-      PAYLOAD_DISABLE_DEPENDENCY_CHECKER: 'true',
+      PAYLOAD_CI_DEPENDENCY_CHECKER: 'true',
     },
     async redirects() {
       return [

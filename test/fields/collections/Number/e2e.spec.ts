@@ -60,7 +60,9 @@ describe('Number', () => {
       snapshotKey: 'fieldsNumberTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    if (client) await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })

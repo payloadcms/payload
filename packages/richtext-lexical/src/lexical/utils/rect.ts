@@ -1,5 +1,5 @@
 'use client'
-import { type Point, isPoint } from './point.js'
+import { isPoint, type Point } from './point.js'
 
 interface ContainsPointReturn {
   reason: {
@@ -59,7 +59,7 @@ export class Rect {
 
   public contains({ bottom, left, right, top }: Rect): boolean
 
-  public contains(target: Point | Rect): ContainsPointReturn | boolean {
+  public contains(target: Point | Rect): boolean | ContainsPointReturn {
     if (isPoint(target)) {
       const { x, y } = target
 

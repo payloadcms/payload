@@ -55,7 +55,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
-    if (!hasGenerateTitleFn) return
+    if (!hasGenerateTitleFn) {
+      return
+    }
 
     const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
@@ -95,7 +97,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} field={null} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

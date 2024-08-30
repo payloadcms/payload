@@ -1,6 +1,6 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
-import type { Email, FormBuilderPluginConfig, FormattedEmail } from '../../../types.js'
+import type { Email, FormattedEmail, FormBuilderPluginConfig } from '../../../types.js'
 
 import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'

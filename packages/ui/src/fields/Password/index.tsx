@@ -84,16 +84,16 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   return (
     <PasswordInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       autoComplete={autoComplete}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
+      Error={field?.admin?.components?.Error}
       errorProps={errorProps}
       inputRef={inputRef}
+      Label={field?.admin?.components?.Label}
       label={label}
       labelProps={labelProps}
       onChange={(e) => {
