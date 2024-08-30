@@ -5,7 +5,7 @@ import type {
   ServerSideEditViewProps,
 } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DocumentInfoProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import {
   formatAdminURL,
   getCreateMappedComponent,
@@ -280,7 +280,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialData={data}
       initialState={formState}
       isEditing={isEditing}
-      key={locale?.code}
+      key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
     >
       {!RootViewOverride && (
         <DocumentHeader
@@ -291,7 +291,6 @@ export const Document: React.FC<AdminViewProps> = async ({
           permissions={permissions}
         />
       )}
-      <HydrateAuthProvider permissions={permissions} />
       {/**
        * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
        * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
@@ -300,19 +299,16 @@ export const Document: React.FC<AdminViewProps> = async ({
        *
        * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
        */}
-      <EditDepthProvider
-        key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
-      >
-        {ErrorView ? (
-          <RenderComponent mappedComponent={ErrorView} />
-        ) : (
-          <RenderComponent
-            mappedComponent={
-              RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
-            }
-          />
-        )}
-      </EditDepthProvider>
+      <HydrateAuthProvider permissions={permissions} />
+      {ErrorView ? (
+        <RenderComponent mappedComponent={ErrorView} />
+      ) : (
+        <RenderComponent
+          mappedComponent={
+            RootViewOverride ? RootViewOverride : CustomView ? CustomView : DefaultView
+          }
+        />
+      )}
     </DocumentInfoProvider>
   )
 }
