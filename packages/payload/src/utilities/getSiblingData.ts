@@ -1,4 +1,4 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState } from '../admin/types.js'
 
 import { reduceFieldsToValues } from './reduceFieldsToValues.js'
 import { unflatten } from './unflatten.js'
