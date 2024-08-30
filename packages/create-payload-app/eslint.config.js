@@ -7,6 +7,7 @@ let FlatConfig
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['bin/cli.js'],
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,

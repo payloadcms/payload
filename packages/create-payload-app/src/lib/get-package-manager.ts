@@ -30,7 +30,7 @@ export async function getPackageManager(args: {
     }
 
     return detected
-  } catch (error) {
+  } catch (ignore) {
     return 'npm'
   }
 }

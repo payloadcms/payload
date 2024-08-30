@@ -2,7 +2,6 @@ import type {
   Data,
   DocumentPreferences,
   Field,
-  FilterOptionsResult,
   FormField,
   FormState,
   PayloadRequest,
