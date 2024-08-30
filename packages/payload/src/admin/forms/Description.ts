@@ -20,8 +20,8 @@ export type StaticDescription = Record<string, string> | string
 export type Description = DescriptionFunction | StaticDescription
 
 export type GenericDescriptionProps = {
-  readonly Description?: MappedComponent
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly marginPlacement?: 'bottom' | 'top'
 }

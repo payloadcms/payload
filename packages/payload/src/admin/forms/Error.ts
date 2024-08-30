@@ -5,8 +5,8 @@ import type { ClientField, Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 
 export type GenericErrorProps = {
-  readonly CustomError?: MappedComponent
   readonly alignCaret?: 'center' | 'left' | 'right'
+  readonly CustomError?: MappedComponent
   readonly message?: string
   readonly path?: string
   readonly showError?: boolean

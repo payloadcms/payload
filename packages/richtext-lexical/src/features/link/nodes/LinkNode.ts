@@ -18,8 +18,8 @@ import {
   $getSelection,
   $isElementNode,
   $isRangeSelection,
-  ElementNode,
   createCommand,
+  ElementNode,
 } from 'lexical'
 
 import type { LinkPayload } from '../client/plugins/floatingLinkEditor/types.js'

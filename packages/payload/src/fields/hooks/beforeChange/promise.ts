@@ -13,7 +13,7 @@ import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
   doc: JsonObject
@@ -21,7 +21,7 @@ type Args = {
   duplicate: boolean
   errors: { field: string; message: string }[]
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation

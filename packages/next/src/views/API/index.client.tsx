@@ -20,9 +20,9 @@ import * as React from 'react'
 import { toast } from 'sonner'
 
 import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
+import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
-import './index.scss'
 
 const baseClass = 'query-inspector'
 

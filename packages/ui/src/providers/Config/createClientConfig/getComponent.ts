@@ -17,16 +17,16 @@ export const getComponent = <
   identifier?: string
   importMap: ImportMap
   payloadComponent:
-    | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | null
+    | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | undefined
   silent?: boolean
 }): ResolvedComponent<TComponentServerProps, TComponentClientProps> => {
   if (!payloadComponent) {
     // undefined, null or false
     return {
-      Component: undefined,
       clientProps: undefined,
+      Component: undefined,
       serverProps: undefined,
     }
   }
@@ -50,11 +50,11 @@ export const getComponent = <
   }
 
   return {
-    Component,
     clientProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.clientProps as TComponentClientProps)
         : undefined,
+    Component,
     serverProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.serverProps as TComponentServerProps)

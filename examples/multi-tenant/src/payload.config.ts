@@ -18,7 +18,7 @@ export default buildConfig({
   collections: [Users, Tenants, Pages],
   admin: {
     bundler: webpackBundler(),
-    webpack: config => ({
+    webpack: (config) => ({
       ...config,
       resolve: {
         ...config.resolve,

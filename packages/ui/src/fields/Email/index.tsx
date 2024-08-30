@@ -74,8 +74,8 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}

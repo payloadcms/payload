@@ -3,7 +3,10 @@ import type {
   CollectionConfig,
   JsonObject,
   PayloadRequest,
+  ValidationError,
 } from 'payload'
+
+import { APIError } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -69,6 +72,17 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       }.`,
     )
     req.payload.logger.error(err)
+
+    // Use type assertion until we can use instanceof reliably with our Error types
+    if (
+      (err as ValidationError)?.name === 'ValidationError' &&
+      (err as ValidationError)?.data?.errors?.length
+    ) {
+      throw new APIError(
+        'Could not publish or save changes: One or more children are invalid.',
+        400,
+      )
+    }
   }
 }
 

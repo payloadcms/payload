@@ -41,7 +41,7 @@
   margin-right: calc(var(--base) * -0.5);
   width: calc(100% + #{var(--base)});
 
-  >* {
+  > * {
     width: 100%;
   }
 }

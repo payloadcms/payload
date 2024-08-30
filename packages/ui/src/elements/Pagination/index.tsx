@@ -2,9 +2,9 @@
 import React from 'react'
 
 import { ClickableArrow } from './ClickableArrow/index.js'
+import './index.scss'
 import { Page } from './Page/index.js'
 import { Separator } from './Separator/index.js'
-import './index.scss'
 
 const nodeTypes = {
   ClickableArrow,

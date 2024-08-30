@@ -59,13 +59,13 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 type ThumbnailComponentProps = {
   readonly alt?: string
   readonly className?: string
-  readonly fileSrc: string
   readonly filename: string
+  readonly fileSrc: string
   readonly imageCacheTag?: string
   readonly size?: 'expand' | 'large' | 'medium' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
-  const { alt, className = '', fileSrc, filename, imageCacheTag, size } = props
+  const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')

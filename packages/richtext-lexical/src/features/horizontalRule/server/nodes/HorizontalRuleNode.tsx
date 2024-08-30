@@ -11,7 +11,7 @@ import type {
 import type * as React from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
-import { $applyNodeReplacement, DecoratorNode, createCommand } from 'lexical'
+import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
 /**
  * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.

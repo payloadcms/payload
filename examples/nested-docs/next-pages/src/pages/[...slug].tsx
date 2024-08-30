@@ -13,7 +13,7 @@ const Page: React.FC<
     mainMenu: MainMenu
     preview?: boolean
   }
-> = props => {
+> = (props) => {
   const { title, richText } = props
 
   return (
@@ -44,7 +44,7 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
     `${
       process.env.NEXT_PUBLIC_PAYLOAD_URL
     }/api/pages?where[slug][equals]=${lastSlug.toLowerCase()}&depth=1`,
-  )?.then(res => res.json()?.then(data => data.docs[0]))
+  )?.then((res) => res.json()?.then((data) => data.docs[0]))
 
   return {
     props: {
@@ -70,11 +70,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const pages: Page[] = await fetch(
     `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?depth=0&limit=300`,
   )
-    ?.then(res => res.json())
-    ?.then(data => data.docs)
+    ?.then((res) => res.json())
+    ?.then((data) => data.docs)
 
   if (pages && Array.isArray(pages) && pages.length > 0) {
-    paths = pages.map(page => {
+    paths = pages.map((page) => {
       const { slug, breadcrumbs } = page
 
       let slugs = [slug]
@@ -83,7 +83,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
       if (hasBreadcrumbs) {
         slugs = breadcrumbs
-          .map(crumb => {
+          .map((crumb) => {
             const { url } = crumb
             let slug: string = ''
 

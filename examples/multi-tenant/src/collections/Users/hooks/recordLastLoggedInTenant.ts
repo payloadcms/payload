@@ -13,7 +13,7 @@ export const recordLastLoggedInTenant: AfterLoginHook = async ({ req, user }) =>
         depth: 0,
         limit: 1,
       })
-      ?.then(res => res.docs?.[0])
+      ?.then((res) => res.docs?.[0])
 
     await req.payload.update({
       id: user.id,

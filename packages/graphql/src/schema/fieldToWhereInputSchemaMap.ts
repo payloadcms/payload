@@ -15,8 +15,8 @@ import type {
   RowField,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 

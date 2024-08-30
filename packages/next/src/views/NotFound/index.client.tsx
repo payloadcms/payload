@@ -41,9 +41,9 @@ export const NotFoundClient: React.FC<{
         <h1>{t('general:nothingFound')}</h1>
         <p>{t('general:sorryNotFound')}</p>
         <Button
-          Link={Link}
           className={`${baseClass}__button`}
           el="link"
+          Link={Link}
           size="large"
           to={adminRoute}
         >

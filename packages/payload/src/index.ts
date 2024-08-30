@@ -1,5 +1,5 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
-import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
+import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
 
 import { spawn } from 'child_process'
@@ -287,9 +287,9 @@ export class BasePayload {
     return forgotPassword<TSlug>(this, options)
   }
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
-
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+
+  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
 
   globals: Globals
 
@@ -741,8 +741,8 @@ export { migrateDown } from './database/migrations/migrateDown.js'
 export { migrateRefresh } from './database/migrations/migrateRefresh.js'
 export { migrateReset } from './database/migrations/migrateReset.js'
 export { migrateStatus } from './database/migrations/migrateStatus.js'
-export { migrationTemplate } from './database/migrations/migrationTemplate.js'
 export { migrationsCollection } from './database/migrations/migrationsCollection.js'
+export { migrationTemplate } from './database/migrations/migrationTemplate.js'
 export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
@@ -765,8 +765,8 @@ export type {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
-  DBIdentifierName,
   DatabaseAdapterResult as DatabaseAdapterObj,
+  DBIdentifierName,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -913,10 +913,10 @@ export type {
   TabAsFieldClient,
   TabsField,
   TabsFieldClient,
-  TextField,
-  TextFieldClient,
   TextareaField,
   TextareaFieldClient,
+  TextField,
+  TextFieldClient,
   UIField,
   UIFieldClient,
   UnnamedTab,
@@ -950,8 +950,8 @@ export type {
   RelationshipFieldValidation,
   RichTextFieldValidation,
   SelectFieldValidation,
-  TextFieldValidation,
   TextareaFieldValidation,
+  TextFieldValidation,
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
@@ -1017,9 +1017,9 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
+export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
-export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'

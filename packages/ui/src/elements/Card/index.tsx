@@ -7,11 +7,11 @@ import { Button } from '../Button/index.js'
 import './index.scss'
 
 export type Props = {
-  Link?: ElementType
   actions?: React.ReactNode
   buttonAriaLabel?: string
   href?: string
   id?: string
+  Link?: ElementType
   onClick?: () => void
   title: string
   titleAs?: ElementType
@@ -20,7 +20,7 @@ export type Props = {
 const baseClass = 'card'
 
 export const Card: React.FC<Props> = (props) => {
-  const { id, Link, actions, buttonAriaLabel, href, onClick, title, titleAs } = props
+  const { id, actions, buttonAriaLabel, href, Link, onClick, title, titleAs } = props
 
   const classes = [baseClass, id, (onClick || href) && `${baseClass}--has-onclick`]
     .filter(Boolean)
@@ -34,11 +34,11 @@ export const Card: React.FC<Props> = (props) => {
       {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
       {(onClick || href) && (
         <Button
-          Link={Link}
           aria-label={buttonAriaLabel}
           buttonStyle="none"
           className={`${baseClass}__click`}
           el="link"
+          Link={Link}
           onClick={onClick}
           to={href}
         />

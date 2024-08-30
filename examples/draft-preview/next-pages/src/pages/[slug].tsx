@@ -14,7 +14,7 @@ const Page: React.FC<
     mainMenu: MainMenu
     preview?: boolean
   }
-> = props => {
+> = (props) => {
   const { title, richText } = props
 
   return (
@@ -119,7 +119,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const { docs: pages } = pagesData
 
     if (pages && Array.isArray(pages) && pages.length > 0) {
-      paths = pages.map(page => ({ params: { slug: page.slug } }))
+      paths = pages.map((page) => ({ params: { slug: page.slug } }))
     }
   }
 

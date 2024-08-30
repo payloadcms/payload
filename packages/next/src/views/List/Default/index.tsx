@@ -21,7 +21,6 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  ViewDescription,
   useBulkUpload,
   useConfig,
   useEditDepth,
@@ -33,6 +32,7 @@ import {
   useStepNav,
   useTranslation,
   useWindowInfo,
+  ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -45,12 +45,12 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DefaultListView: React.FC = () => {
   const {
-    Header,
     beforeActions,
     collectionSlug,
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission,
+    Header,
     newDocumentURL,
   } = useListInfo()
 
@@ -68,11 +68,11 @@ export const DefaultListView: React.FC = () => {
   const {
     admin: {
       components: {
-        Description,
         afterList,
         afterListTable,
         beforeList,
         beforeListTable,
+        Description,
         views: {
           list: { actions },
         },
@@ -135,12 +135,12 @@ export const DefaultListView: React.FC = () => {
               {hasCreatePermission && (
                 <>
                   <Button
-                    Link={Link}
                     aria-label={i18n.t('general:createNewLabel', {
                       label: getTranslation(labels?.singular, i18n),
                     })}
                     buttonStyle="pill"
                     el={'link'}
+                    Link={Link}
                     size="small"
                     to={newDocumentURL}
                   >
@@ -193,7 +193,7 @@ export const DefaultListView: React.FC = () => {
             <div className={`${baseClass}__no-results`}>
               <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button Link={Link} el="link" to={newDocumentURL}>
+                <Button el="link" Link={Link} to={newDocumentURL}>
                   {i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}

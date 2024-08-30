@@ -9,11 +9,11 @@ import { useMemo } from 'react'
 import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
-import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import {
   EditorConfigProvider,
   useEditorConfigContext,
 } from './config/client/EditorConfigProvider.js'
+import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {

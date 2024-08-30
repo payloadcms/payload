@@ -7,17 +7,17 @@ import React from 'react'
  * Can be used to render both MappedComponents and React Components.
  */
 export const RenderComponent: React.FC<{
-  readonly Component?: React.ComponentType | React.ComponentType[]
   readonly clientProps?: object
+  readonly Component?: React.ComponentType | React.ComponentType[]
   readonly mappedComponent?: MappedComponent | MappedComponent[]
   readonly serverProps?: object
-}> = ({ Component, clientProps = {}, mappedComponent, serverProps }) => {
+}> = ({ clientProps = {}, Component, mappedComponent, serverProps }) => {
   if (!mappedComponent && Component) {
     if (Array.isArray(Component)) {
       return Component.map((c, index) => (
         <RenderComponent
-          Component={c}
           clientProps={clientProps}
+          Component={c}
           key={index}
           serverProps={serverProps}
         />

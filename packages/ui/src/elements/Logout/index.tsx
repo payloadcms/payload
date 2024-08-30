@@ -2,8 +2,8 @@
 import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 

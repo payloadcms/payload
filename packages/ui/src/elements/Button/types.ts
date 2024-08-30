@@ -2,8 +2,6 @@ import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
 
 export type Props = {
-  Link?: React.ElementType
-  SubMenuPopupContent?: React.ReactNode
   'aria-label'?: string
   buttonId?: string
   buttonStyle?: 'error' | 'icon-label' | 'none' | 'pill' | 'primary' | 'secondary' | 'transparent'
@@ -15,10 +13,12 @@ export type Props = {
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string
+  Link?: React.ElementType
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   round?: boolean
   size?: 'large' | 'medium' | 'small'
+  SubMenuPopupContent?: React.ReactNode
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'
