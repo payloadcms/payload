@@ -16,6 +16,10 @@ type Args = {
   sort?: string
   tableName: string
 }
+
+/**
+ * Gets the order by column and direction constructed from the sort argument adds the column to the select fields and joins if necessary
+ */
 export const buildOrderBy = ({
   adapter,
   fields,

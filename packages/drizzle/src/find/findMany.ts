@@ -43,7 +43,7 @@ export const findMany = async function find({
     limit = undefined
   }
 
-  const { joins, orderBy, selectFields, where } = await buildQuery({
+  const { joins, orderBy, selectFields, where } = buildQuery({
     adapter,
     fields,
     locale,
@@ -153,6 +153,7 @@ export const findMany = async function find({
       config: adapter.payload.config,
       data,
       fields,
+      joinQuery,
     })
   })
 

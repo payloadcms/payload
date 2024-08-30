@@ -1,4 +1,4 @@
-import type { Field, PaginatedDocs, SanitizedConfig, TabAsField } from 'payload'
+import type { Field, JoinQuery, SanitizedConfig, TabAsField } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
@@ -39,6 +39,10 @@ type TraverseFieldsArgs = {
    */
   fields: (Field | TabAsField)[]
   /**
+   *
+   */
+  joinQuery?: JoinQuery
+  /**
    * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
    */
   numbers: Record<string, Record<string, unknown>[]>
@@ -74,6 +78,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   deletions,
   fieldPrefix,
   fields,
+  joinQuery,
   numbers,
   path,
   relationships,
@@ -93,6 +98,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        joinQuery,
         numbers,
         path,
         relationships,
@@ -115,6 +121,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.fields,
+        joinQuery,
         numbers,
         path,
         relationships,
@@ -142,7 +149,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (field.localized) {
             result[field.name] = fieldData.reduce((arrayResult, row) => {
               if (typeof row._locale === 'string') {
-                if (!arrayResult[row._locale]) arrayResult[row._locale] = []
+                if (!arrayResult[row._locale]) {
+                  arrayResult[row._locale] = []
+                }
                 const locale = row._locale
                 const data = {}
                 delete row._locale
@@ -235,7 +244,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 delete row._uuid
               }
               if (typeof row._locale === 'string') {
-                if (!result[field.name][row._locale]) result[field.name][row._locale] = []
+                if (!result[field.name][row._locale]) {
+                  result[field.name][row._locale] = []
+                }
                 result[field.name][row._locale].push(row)
                 delete row._locale
               }
@@ -355,7 +366,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             relationPathMatch.forEach((row) => {
               if (typeof row.locale === 'string') {
-                if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
+                if (!relationsByLocale[row.locale]) {
+                  relationsByLocale[row.locale] = []
+                }
                 relationsByLocale[row.locale].push(row)
               }
             })
@@ -380,9 +393,49 @@ export const traverseFields = <T extends Record<string, unknown>>({
         }
       }
 
+      if (field.type === 'join') {
+        const { limit = 10 } = joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
+
+        let fieldResult:
+          | { docs: unknown[]; hasNextPage: boolean }
+          | Record<string, { docs: unknown[]; hasNextPage: boolean }>
+        if (Array.isArray(fieldData)) {
+          if (field.localized) {
+            fieldResult = fieldData.reduce((joinResult, row) => {
+              if (typeof row._locale === 'string') {
+                if (!joinResult[row._locale]) {
+                  joinResult[row._locale] = {
+                    docs: [],
+                    hasNextPage: false,
+                  }
+                }
+                joinResult[row._locale].docs.push(row._parentID)
+              }
+
+              return joinResult
+            }, {})
+            Object.keys(fieldResult).forEach((locale) => {
+              fieldResult[locale].hasNextPage = fieldResult[locale].docs.length > limit
+              fieldResult[locale].docs = fieldResult[locale].docs.slice(0, limit)
+            })
+          } else {
+            const hasNextPage = limit !== 0 && fieldData.length > limit
+            fieldResult = {
+              docs: hasNextPage ? fieldData.slice(0, limit) : fieldData,
+              hasNextPage,
+            }
+          }
+        }
+
+        result[field.name] = fieldResult
+        return result
+      }
+
       if (field.type === 'text' && field?.hasMany) {
         const textPathMatch = texts[`${sanitizedPath}${field.name}`]
-        if (!textPathMatch) return result
+        if (!textPathMatch) {
+          return result
+        }
 
         if (field.localized) {
           result[field.name] = {}
@@ -390,7 +443,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           textPathMatch.forEach((row) => {
             if (typeof row.locale === 'string') {
-              if (!textsByLocale[row.locale]) textsByLocale[row.locale] = []
+              if (!textsByLocale[row.locale]) {
+                textsByLocale[row.locale] = []
+              }
               textsByLocale[row.locale].push(row)
             }
           })
@@ -415,56 +470,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'join') {
-        let fieldResult: PaginatedDocs | Record<string, PaginatedDocs>
-        if (Array.isArray(fieldData)) {
-          if (field.localized) {
-            fieldResult = fieldData.reduce((joinResult, row) => {
-              if (typeof row._locale === 'string') {
-                if (!joinResult[row._locale]) {
-                  // TODO: handle pagination
-                  joinResult[row._locale] = {
-                    docs: [],
-                    hasNextPage: false,
-                    hasPrevPage: false,
-                    limit: 0,
-                    nextPage: 0,
-                    page: 1,
-                    pagingCounter: 0,
-                    prevPage: 0,
-                    totalDocs: 0,
-                    totalPages: 0,
-                  }
-                }
-                joinResult[row._locale].docs.push(row.id)
-              }
-
-              return joinResult
-            }, {})
-          } else {
-            // TODO: handle pagination
-            fieldResult = {
-              docs: fieldData,
-              hasNextPage: false,
-              hasPrevPage: false,
-              limit: 0,
-              nextPage: 0,
-              page: 1,
-              pagingCounter: 0,
-              prevPage: 0,
-              totalDocs: 0,
-              totalPages: 0,
-            }
-          }
-        }
-
-        result[field.name] = fieldResult
-        return result
-      }
-
       if (field.type === 'number' && field.hasMany) {
         const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
-        if (!numberPathMatch) return result
+        if (!numberPathMatch) {
+          return result
+        }
 
         if (field.localized) {
           result[field.name] = {}
@@ -472,7 +482,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           numberPathMatch.forEach((row) => {
             if (typeof row.locale === 'string') {
-              if (!numbersByLocale[row.locale]) numbersByLocale[row.locale] = []
+              if (!numbersByLocale[row.locale]) {
+                numbersByLocale[row.locale] = []
+              }
               numbersByLocale[row.locale].push(row)
             }
           })
@@ -502,7 +514,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
               if (typeof row.locale === 'string') {
-                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                if (!selectResult[row.locale]) {
+                  selectResult[row.locale] = []
+                }
                 selectResult[row.locale].push(row.value)
               }
 
@@ -541,7 +555,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
             const locale = table._locale as string
             const refKey = field.localized && locale ? locale : field.name
 
-            if (field.localized && locale) delete table._locale
+            if (field.localized && locale) {
+              delete table._locale
+            }
             ref[refKey] = traverseFields<Record<string, unknown>>({
               adapter,
               blocks,

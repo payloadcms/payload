@@ -374,6 +374,7 @@ export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
   draft?: boolean
+  joins?: JoinQuery
   locale?: string
   req: PayloadRequest
 } & (
@@ -391,6 +392,7 @@ export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }
@@ -399,6 +401,7 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
   collection: string
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }

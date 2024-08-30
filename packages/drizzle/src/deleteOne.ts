@@ -12,7 +12,7 @@ import { transform } from './transform/read/index.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req = {} as PayloadRequest, where: whereArg },
+  { collection: collectionSlug, joins: joinQuery, req = {} as PayloadRequest, where: whereArg },
 ) {
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
@@ -21,7 +21,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   let docToDelete: Record<string, unknown>
 
-  const { joins, selectFields, where } = await buildQuery({
+  const { joins, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.fields,
     locale: req.locale,
@@ -61,6 +61,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     config: this.payload.config,
     data: docToDelete,
     fields: collection.fields,
+    joinQuery,
   })
 
   await this.deleteWhere({

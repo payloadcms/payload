@@ -1,4 +1,4 @@
-import type { Count , SanitizedCollectionConfig } from 'payload'
+import type { Count, SanitizedCollectionConfig } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -16,7 +16,7 @@ export const count: Count = async function count(
 
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
 
-  const { joins, where } = await buildQuery({
+  const { joins, where } = buildQuery({
     adapter: this,
     fields: collectionConfig.fields,
     locale,

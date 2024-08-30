@@ -18,7 +18,7 @@ let restClient: NextRESTClient
 
 const { email, password } = devUser
 
-describe('Joins Field Tests', () => {
+describe('Joins Field', () => {
   let category: Category
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown

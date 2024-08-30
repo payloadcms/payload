@@ -37,7 +37,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
 
   const fields = buildVersionGlobalFields(globalConfig)
 
-  const { where } = await buildQuery({
+  const { where } = buildQuery({
     adapter: this,
     fields,
     locale,

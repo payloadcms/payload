@@ -30,14 +30,14 @@ export type BuildQueryResult = {
   selectFields: Record<string, GenericColumn>
   where: SQL
 }
-const buildQuery = async function buildQuery({
+const buildQuery = function buildQuery({
   adapter,
   fields,
   locale,
   sort,
   tableName,
   where: incomingWhere,
-}: BuildQueryArgs): Promise<BuildQueryResult> {
+}: BuildQueryArgs): BuildQueryResult {
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }
@@ -56,7 +56,7 @@ const buildQuery = async function buildQuery({
   let where: SQL
 
   if (incomingWhere && Object.keys(incomingWhere).length > 0) {
-    where = await parseParams({
+    where = parseParams({
       adapter,
       fields,
       joins,
