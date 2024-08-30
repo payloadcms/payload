@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.94",
+  "version": "3.0.0-beta.96",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -60,8 +60,8 @@
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
@@ -90,7 +90,7 @@
     "@babel/preset-typescript": "^7.24.1",
     "@next/eslint-plugin-next": "15.0.0-canary.104",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/busboy": "^1.5.3",
+    "@types/busboy": "1.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/uuid": "10.0.0",

@@ -22,8 +22,8 @@ import type {
   RelationshipValue,
   RichTextField,
   SelectField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
   Validate,
 } from './config/types.js'
@@ -50,16 +50,24 @@ export const text: TextFieldValidation = (
   let maxLength: number
 
   if (!required) {
-    if (!value) return true
+    if (!value) {
+      return true
+    }
   }
 
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
-    if (typeof lengthValidationResult === 'string') return lengthValidationResult
+    if (typeof lengthValidationResult === 'string') {
+      return lengthValidationResult
+    }
   }
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
 
   const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
 
@@ -99,8 +107,12 @@ export const password: PasswordFieldValidation = (
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
 
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
@@ -201,7 +213,9 @@ export const username: UsernameFieldValidation = (
     }
   }
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
 
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
@@ -229,8 +243,12 @@ export const textarea: TextareaFieldValidation = (
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
   }
@@ -282,7 +300,9 @@ export const json: JSONFieldValidation = async (
   }
 
   const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
-    if (uri && schema) return schema
+    if (uri && schema) {
+      return schema
+    }
     // @ts-expect-error
     return fetch(uri)
       .then((response) => {
@@ -380,7 +400,9 @@ const validateArrayLength = (
 
   const arrayLength = Array.isArray(value) ? value.length : value || 0
 
-  if (!required && arrayLength === 0) return true
+  if (!required && arrayLength === 0) {
+    return true
+  }
 
   if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('general:rows') })
@@ -404,19 +426,27 @@ export const number: NumberFieldValidation = (
 ) => {
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
-    if (typeof lengthValidationResult === 'string') return lengthValidationResult
+    if (typeof lengthValidationResult === 'string') {
+      return lengthValidationResult
+    }
   }
 
   if (!value && !isNumber(value)) {
     // if no value is present, validate based on required
-    if (required) return t('validation:required')
-    if (!required) return true
+    if (required) {
+      return t('validation:required')
+    }
+    if (!required) {
+      return true
+    }
   }
 
   const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
 
   for (const number of numbersToValidate) {
-    if (!isNumber(number)) return t('validation:enterNumber')
+    if (!isNumber(number)) {
+      return t('validation:enterNumber')
+    }
 
     const numberValue = parseFloat(number as unknown as string)
 
@@ -498,7 +528,9 @@ const validateFilterOptions: Validate<
             and: [{ id: { in: valueIDs } }],
           }
 
-          if (optionFilter && optionFilter !== true) findWhere.and.push(optionFilter)
+          if (optionFilter && optionFilter !== true) {
+            findWhere.and.push(optionFilter)
+          }
 
           if (optionFilter === false) {
             falseCollections.push(collection)
@@ -551,7 +583,9 @@ const validateFilterOptions: Validate<
         return true
       }
 
-      if (!options[collection]) return true
+      if (!options[collection]) {
+        return true
+      }
 
       return options[collection].indexOf(requestedID) === -1
     })
@@ -627,7 +661,9 @@ export const upload: UploadFieldValidation = async (value, options) => {
         requestedID = val.value
       }
 
-      if (requestedID === null) return false
+      if (requestedID === null) {
+        return false
+      }
 
       const idType =
         payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
@@ -708,7 +744,9 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         requestedID = val.value
       }
 
-      if (requestedID === null) return false
+      if (requestedID === null) {
+        return false
+      }
 
       const idType =
         payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'

@@ -12,8 +12,8 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -185,11 +185,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       }
     }
 
-    if (page) params.page = page
-    if (sort) params.sort = sort
-    if (cacheBust) params.cacheBust = cacheBust
-    if (copyOfWhere) params.where = copyOfWhere
-    if (versions?.drafts) params.draft = 'true'
+    if (page) {
+      params.page = page
+    }
+    if (sort) {
+      params.sort = sort
+    }
+    if (cacheBust) {
+      params.cacheBust = cacheBust
+    }
+    if (copyOfWhere) {
+      params.where = copyOfWhere
+    }
+    if (versions?.drafts) {
+      params.draft = 'true'
+    }
 
     setParams(params)
   }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])
@@ -228,6 +238,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <ListInfoProvider
+      beforeActions={
+        enableRowSelections ? [<SelectMany key="select-many" onClick={onBulkSelect} />] : undefined
+      }
+      collectionConfig={selectedCollectionConfig}
+      collectionSlug={selectedCollectionConfig.slug}
+      disableBulkDelete
+      disableBulkEdit
+      hasCreatePermission={hasCreatePermission}
       Header={
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
@@ -279,14 +297,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
         </header>
       }
-      beforeActions={
-        enableRowSelections ? [<SelectMany key="select-many" onClick={onBulkSelect} />] : undefined
-      }
-      collectionConfig={selectedCollectionConfig}
-      collectionSlug={selectedCollectionConfig.slug}
-      disableBulkDelete
-      disableBulkEdit
-      hasCreatePermission={hasCreatePermission}
       newDocumentURL={null}
     >
       <ListQueryProvider

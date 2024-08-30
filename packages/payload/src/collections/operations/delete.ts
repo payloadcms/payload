@@ -261,7 +261,9 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
       result,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

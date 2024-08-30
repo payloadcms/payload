@@ -4,10 +4,14 @@ import { isolateObjectProperty, verifyEmailOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
-function verifyEmailResolver(collection: Collection) {
+export function verifyEmail(collection: Collection) {
   async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    if (args.locale) {
+      context.req.locale = args.locale
+    }
+    if (args.fallbackLocale) {
+      context.req.fallbackLocale = args.fallbackLocale
+    }
 
     const options = {
       api: 'GraphQL',
@@ -22,5 +26,3 @@ function verifyEmailResolver(collection: Collection) {
 
   return resolver
 }
-
-export default verifyEmailResolver

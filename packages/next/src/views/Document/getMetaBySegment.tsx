@@ -14,8 +14,8 @@ import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export type GenerateEditViewMetadata = (
   args: {
-    collectionConfig?: SanitizedCollectionConfig | null
-    globalConfig?: SanitizedGlobalConfig | null
+    collectionConfig?: null | SanitizedCollectionConfig
+    globalConfig?: null | SanitizedGlobalConfig
     view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>

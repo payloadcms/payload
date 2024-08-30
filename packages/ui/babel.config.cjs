@@ -4,7 +4,10 @@ const fs = require('fs')
 const ReactCompilerConfig = {
   sources: (filename) => {
     const isInNodeModules = filename.includes('node_modules')
-    if (isInNodeModules || ( !filename.endsWith('.tsx') && !filename.endsWith('.jsx') && !filename.endsWith('.js'))) {
+    if (
+      isInNodeModules ||
+      (!filename.endsWith('.tsx') && !filename.endsWith('.jsx') && !filename.endsWith('.js'))
+    ) {
       return false
     }
 

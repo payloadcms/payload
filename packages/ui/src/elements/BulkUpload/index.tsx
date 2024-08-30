@@ -25,7 +25,9 @@ function DrawerContent() {
     [addFiles],
   )
 
-  if (!collectionSlug) return null
+  if (!collectionSlug) {
+    return null
+  }
 
   if (!forms.length && !isInitializing) {
     return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
@@ -44,7 +46,7 @@ export function BulkUploadDrawer() {
 
   return (
     <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer Header={null} gutter={false} slug={drawerSlug}>
+      <Drawer gutter={false} Header={null} slug={drawerSlug}>
         <FormsManagerProvider>
           <DrawerContent />
         </FormsManagerProvider>

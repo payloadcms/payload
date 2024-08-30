@@ -1,7 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
 import { Button } from '@payloadcms/ui'
-import { Translation, formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -56,7 +56,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
             t={i18n.t}
           />
         </p>
-        <Button Link={Link} buttonStyle="secondary" el="link" to={adminRoute}>
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </div>

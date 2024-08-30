@@ -16,7 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   const [user, setUser] = useState<User | null>()
 
   const create = useCallback<Create>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users`, args)
         setUser(user)
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   )
 
   const login = useCallback<Login>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/login`, args)
         setUser(user)
@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   }, [api])
 
   const forgotPassword = useCallback<ForgotPassword>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(
           `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/forgot-password`,
@@ -132,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   )
 
   const resetPassword = useCallback<ResetPassword>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(
           `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/reset-password`,

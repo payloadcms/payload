@@ -1,8 +1,8 @@
+import type { FetchAPIFileUploadOptions } from 'payload'
+
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
-
-import type { FetchAPIFileUploadOptions } from './index.js'
 
 // Parameters for safe file name parsing.
 const SAFE_FILE_NAME_REGEX = /[^\w-]/g
@@ -18,7 +18,9 @@ let tempCounter = 0
  */
 export const debugLog = (options: FetchAPIFileUploadOptions, msg: string) => {
   const opts = options || {}
-  if (!opts.debug) return false
+  if (!opts.debug) {
+    return false
+  }
   console.log(`Next-file-upload: ${msg}`) // eslint-disable-line
   return true
 }
@@ -84,7 +86,9 @@ export const isSafeFromPollution: IsSafeFromPollution = (base, key) => {
 type BuildFields = (instance: any, field: string, value: any) => any
 export const buildFields: BuildFields = (instance, field, value) => {
   // Do nothing if value is not set.
-  if (value === null || value === undefined) return instance
+  if (value === null || value === undefined) {
+    return instance
+  }
   instance = instance || Object.create(null)
 
   if (!isSafeFromPollution(instance, field)) {
@@ -110,11 +114,15 @@ export const buildFields: BuildFields = (instance, field, value) => {
  */
 type CheckAndMakeDir = (fileUploadOptions: FetchAPIFileUploadOptions, filePath: string) => boolean
 export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) => {
-  if (!fileUploadOptions.createParentPath) return false
+  if (!fileUploadOptions.createParentPath) {
+    return false
+  }
   // Check whether folder for the file exists.
   const parentPath = path.dirname(filePath)
   // Create folder if it doesn't exist.
-  if (!fs.existsSync(parentPath)) fs.mkdirSync(parentPath, { recursive: true })
+  if (!fs.existsSync(parentPath)) {
+    fs.mkdirSync(parentPath, { recursive: true })
+  }
   // Checks folder again and return a results.
   return fs.existsSync(parentPath)
 }
@@ -134,7 +142,9 @@ const copyFile: CopyFile = (src, dst, callback) => {
   // cbCalled flag and runCb helps to run cb only once.
   let cbCalled = false
   const runCb = (err?: Error) => {
-    if (cbCalled) return
+    if (cbCalled) {
+      return
+    }
     cbCalled = true
     callback(err)
   }
@@ -247,14 +257,18 @@ export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension
     name: fileName,
     extension: '',
   }
-  if (!preserveExtension) return defaultResult
+  if (!preserveExtension) {
+    return defaultResult
+  }
 
   // Define maximum extension length
   const maxExtLength =
     typeof preserveExtension === 'boolean' ? MAX_EXTENSION_LENGTH : preserveExtension
 
   const nameParts = fileName.split('.')
-  if (nameParts.length < 2) return defaultResult
+  if (nameParts.length < 2) {
+    return defaultResult
+  }
 
   let extension = nameParts.pop()
   if (extension.length > maxExtLength && maxExtLength > 0) {
@@ -274,13 +288,17 @@ export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension
 type ParseFileName = (opts: FetchAPIFileUploadOptions, fileName: string) => string
 export const parseFileName: ParseFileName = (opts, fileName) => {
   // Check fileName argument
-  if (!fileName || typeof fileName !== 'string') return getTempFilename()
+  if (!fileName || typeof fileName !== 'string') {
+    return getTempFilename()
+  }
   // Cut off file name if it's length more then 255.
   let parsedName = fileName.length <= 255 ? fileName : fileName.substr(0, 255)
   // Decode file name if uriDecodeFileNames option set true.
   parsedName = uriDecodeFileName(opts, parsedName)
   // Stop parsing file name if safeFileNames options hasn't been set.
-  if (!opts.safeFileNames) return parsedName
+  if (!opts.safeFileNames) {
+    return parsedName
+  }
   // Set regular expression for the file name.
   const nameRegex =
     typeof opts.safeFileNames === 'object' && opts.safeFileNames instanceof RegExp
@@ -288,8 +306,9 @@ export const parseFileName: ParseFileName = (opts, fileName) => {
       : SAFE_FILE_NAME_REGEX
   // Parse file name extension.
   const parsedFileName = parseFileNameExtension(opts.preserveExtension, parsedName)
-  if (parsedFileName.extension.length)
+  if (parsedFileName.extension.length) {
     parsedFileName.extension = '.' + parsedFileName.extension.replace(nameRegex, '')
+  }
 
   return parsedFileName.name.replace(nameRegex, '').concat(parsedFileName.extension)
 }

@@ -1,8 +1,8 @@
+import type { FetchAPIFileUploadOptions } from 'payload'
+
 import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
-
-import type { FetchAPIFileUploadOptions } from './index.js'
 
 import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities.js'
 
@@ -55,7 +55,9 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
     complete: () => {
       completed = true
       debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
-      if (writeStream instanceof WriteStream) writeStream.end()
+      if (writeStream instanceof WriteStream) {
+        writeStream.end()
+      }
       // Return empty buff since data was uploaded into a temp file.
       return Buffer.concat([])
     },

@@ -8,7 +8,7 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
 import './index.scss'
 
-const baseClass = 'uploadDocRelationshipContent'
+const baseClass = 'upload-relationship-details'
 
 type Props = {
   readonly allowEdit?: boolean
@@ -74,12 +74,16 @@ export function RelationshipContent(props: Props) {
         <ThumbnailComponent
           alt={alt}
           className={`${baseClass}__thumbnail`}
-          fileSrc={src}
           filename={filename}
+          fileSrc={src}
           size="small"
         />
         <div className={`${baseClass}__details`}>
-          <p className={`${baseClass}__title`}>{filename}</p>
+          <p className={`${baseClass}__filename`}>
+            <a href={src} target="_blank">
+              {filename}
+            </a>
+          </p>
           {withMeta ? <p className={`${baseClass}__meta`}>{metaText}</p> : null}
         </div>
       </div>
@@ -87,12 +91,18 @@ export function RelationshipContent(props: Props) {
       {allowEdit !== false || allowRemove !== false ? (
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
-            <Button buttonStyle="icon-label" icon="edit" iconStyle="none" onClick={openDrawer} />
+            <Button
+              buttonStyle="icon-label"
+              className={`${baseClass}__edit`}
+              icon="edit"
+              iconStyle="none"
+              onClick={openDrawer}
+            />
           ) : null}
           {allowRemove !== false ? (
             <Button
               buttonStyle="icon-label"
-              className={`${baseClass}__button`}
+              className={`${baseClass}__remove`}
               icon="x"
               iconStyle="none"
               onClick={() => onRemove()}

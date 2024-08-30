@@ -21,7 +21,7 @@ export const createIndex = ({ name, columnName, tableName, unique }: CreateIndex
       columns = [table[name]]
     }
     if (unique)
-      return uniqueIndex(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
+      {return uniqueIndex(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))}
     return index(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
   }
 }

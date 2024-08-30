@@ -51,8 +51,8 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
 
       tableDOMNodeRef.current = tableDOMNode
 
-      let hoveredRowNode: TableCellNode | null = null
-      let hoveredColumnNode: TableCellNode | null = null
+      let hoveredRowNode: null | TableCellNode = null
+      let hoveredColumnNode: null | TableCellNode = null
       let tableDOMElement: HTMLElement | null = null
 
       editor.update(() => {
@@ -232,6 +232,6 @@ export function TableHoverActionsPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
-}): React.ReactPortal | null {
+}): null | React.ReactPortal {
   return createPortal(<TableHoverActionsContainer anchorElem={anchorElem} />, anchorElem)
 }

@@ -115,14 +115,14 @@ const nativeMax = Math.max,
  */
 function debounce(func, wait, options) {
   let lastArgs,
+    lastCallTime,
+    lastInvokeTime = 0,
     lastThis,
+    leading = false,
+    maxing = false,
     maxWait,
     result,
     timerId,
-    lastCallTime,
-    lastInvokeTime = 0,
-    leading = false,
-    maxing = false,
     trailing = true
 
   if (typeof func != 'function') {

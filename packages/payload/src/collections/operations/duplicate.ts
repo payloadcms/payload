@@ -101,8 +101,12 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
+    if (!docWithLocales && !hasWherePolicy) {
+      throw new NotFound(req.t)
+    }
+    if (!docWithLocales && hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
 
     // remove the createdAt timestamp and id to rely on the db to set the default it
     delete docWithLocales.createdAt
@@ -324,7 +328,9 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

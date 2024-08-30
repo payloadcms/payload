@@ -21,7 +21,6 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  ViewDescription,
   useBulkUpload,
   useConfig,
   useEditDepth,
@@ -33,6 +32,7 @@ import {
   useStepNav,
   useTranslation,
   useWindowInfo,
+  ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -45,12 +45,12 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DefaultListView: React.FC = () => {
   const {
-    Header,
     beforeActions,
     collectionSlug,
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission,
+    Header,
     newDocumentURL,
   } = useListInfo()
 
@@ -68,11 +68,11 @@ export const DefaultListView: React.FC = () => {
   const {
     admin: {
       components: {
-        Description,
         afterList,
         afterListTable,
         beforeList,
         beforeListTable,
+        Description,
         views: {
           list: { actions },
         },
@@ -127,25 +127,37 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
           {Header || (
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
               {hasCreatePermission && (
-                <Button
-                  Link={!isBulkUploadEnabled ? Link : undefined}
-                  aria-label={i18n.t('general:createNewLabel', {
-                    label: getTranslation(labels?.singular, i18n),
-                  })}
-                  buttonStyle="pill"
-                  el={!isBulkUploadEnabled ? 'link' : 'button'}
-                  onClick={isBulkUploadEnabled ? openBulkUpload : undefined}
-                  size="small"
-                  to={!isBulkUploadEnabled ? newDocumentURL : undefined}
-                >
-                  {i18n.t('general:createNew')}
-                </Button>
+                <>
+                  <Button
+                    aria-label={i18n.t('general:createNewLabel', {
+                      label: getTranslation(labels?.singular, i18n),
+                    })}
+                    buttonStyle="pill"
+                    el={'link'}
+                    Link={Link}
+                    size="small"
+                    to={newDocumentURL}
+                  >
+                    {i18n.t('general:createNew')}
+                  </Button>
+
+                  {isBulkUploadEnabled && (
+                    <Button
+                      aria-label={t('upload:bulkUpload')}
+                      buttonStyle="pill"
+                      onClick={openBulkUpload}
+                      size="small"
+                    >
+                      {t('upload:bulkUpload')}
+                    </Button>
+                  )}
+                </>
               )}
               {!smallBreak && (
                 <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
@@ -181,7 +193,7 @@ export const DefaultListView: React.FC = () => {
             <div className={`${baseClass}__no-results`}>
               <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button Link={Link} el="link" to={newDocumentURL}>
+                <Button el="link" Link={Link} to={newDocumentURL}>
                   {i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
@@ -241,8 +253,8 @@ export const DefaultListView: React.FC = () => {
             </div>
           )}
         </Gutter>
+        <RenderComponent mappedComponent={afterList} />
       </SelectionProvider>
-      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }

@@ -9,7 +9,7 @@ import * as React from 'react'
 
 import type { UploadData } from '../../server/nodes/UploadNode.js'
 
-import { UploadServerNode, isGoogleDocCheckboxImg } from '../../server/nodes/UploadNode.js'
+import { isGoogleDocCheckboxImg, UploadServerNode } from '../../server/nodes/UploadNode.js'
 
 const RawUploadComponent = React.lazy(() =>
   import('../../client/component/index.js').then((module) => ({ default: module.UploadComponent })),

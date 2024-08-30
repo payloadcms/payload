@@ -18,7 +18,7 @@ import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/in
 
 export const CreateFirstUserClient: React.FC<{
   initialState: FormState
-  loginWithUsername?: LoginWithUsernameOptions | false
+  loginWithUsername?: false | LoginWithUsernameOptions
   userSlug: string
 }> = ({ initialState, loginWithUsername, userSlug }) => {
   const {

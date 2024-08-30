@@ -8,7 +8,6 @@ if (process.env.NODE_ENV === 'production') {
       // Configure a custom transport here
     },
   }
-
 } else {
   email = {
     fromName: 'Ethereal Email',

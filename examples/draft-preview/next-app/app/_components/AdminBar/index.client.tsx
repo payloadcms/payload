@@ -9,7 +9,7 @@ import classes from './index.module.scss'
 
 const Title: React.FC = () => <span>Dashboard</span>
 
-export const AdminBarClient: React.FC<PayloadAdminBarProps> = props => {
+export const AdminBarClient: React.FC<PayloadAdminBarProps> = (props) => {
   const [user, setUser] = useState<PayloadMeUser>()
 
   return (

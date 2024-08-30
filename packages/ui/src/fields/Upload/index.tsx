@@ -7,8 +7,8 @@ import React from 'react'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { UploadInput } from './Input.js'
 import './index.scss'
+import { UploadInput } from './Input.js'
 
 export { UploadInput } from './Input.js'
 export type { UploadInputProps } from './Input.js'
@@ -46,6 +46,7 @@ export function UploadComponent(props: UploadFieldProps) {
     filterOptions,
     formInitializing,
     formProcessing,
+    path,
     readOnly: readOnlyFromField,
     setValue,
     showError,
@@ -59,19 +60,20 @@ export function UploadComponent(props: UploadFieldProps) {
 
   return (
     <UploadInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       api={config.routes.api}
       className={className}
+      Description={field?.admin?.components?.Description}
+      description={field?.admin?.description}
+      Error={field?.admin?.components?.Error}
       field={field}
       filterOptions={filterOptions}
       hasMany={hasMany}
       isSortable={isSortable}
+      Label={field?.admin?.components?.Label}
       label={label}
       maxRows={maxRows}
       onChange={setValue}
-      path={_path}
+      path={path}
       readOnly={disabled}
       relationTo={relationTo}
       required={required}

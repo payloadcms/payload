@@ -46,8 +46,8 @@ export const sanitizeQueryValue = ({
 
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {
-    if (val.toLowerCase() === 'true') formattedValue = true
-    if (val.toLowerCase() === 'false') formattedValue = false
+    if (val.toLowerCase() === 'true') {formattedValue = true}
+    if (val.toLowerCase() === 'false') {formattedValue = false}
   }
 
   if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
@@ -96,10 +96,10 @@ export const sanitizeQueryValue = ({
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
         if (mongoose.Types.ObjectId.isValid(inVal))
-          newValues.push(new mongoose.Types.ObjectId(inVal))
+          {newValues.push(new mongoose.Types.ObjectId(inVal))}
 
         const parsedNumber = parseFloat(inVal)
-        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber)
+        if (!Number.isNaN(parsedNumber)) {newValues.push(parsedNumber)}
 
         return [...formattedValues, ...newValues]
       }, [])
@@ -129,8 +129,8 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance)
-      if (minDistance) formattedValue.$minDistance = parseFloat(minDistance)
+      if (maxDistance) {formattedValue.$maxDistance = parseFloat(maxDistance)}
+      if (minDistance) {formattedValue.$minDistance = parseFloat(minDistance)}
     }
   }
 

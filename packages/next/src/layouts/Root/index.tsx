@@ -69,10 +69,10 @@ export const RootLayout = async ({
   const { permissions, user } = await payload.auth({ headers, req })
 
   const { clientConfig, render } = await createClientConfig({
-    DefaultEditView,
-    DefaultListView,
     children,
     config,
+    DefaultEditView,
+    DefaultListView,
     i18n,
     importMap,
     payload,
@@ -137,7 +137,7 @@ export const RootLayout = async ({
       )?.docs?.[0]
     : null
 
-  const isNavOpen = (navPreferences?.value as any)?.open ?? true
+  const isNavOpen = navPreferences?.value?.open ?? true
 
   return (
     <html data-theme={theme} dir={dir} lang={languageCode}>

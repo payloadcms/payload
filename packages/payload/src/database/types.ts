@@ -166,9 +166,9 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type RollbackTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
-export type CommitTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
@@ -190,7 +190,7 @@ export type FindOneArgs = {
   where?: Where
 }
 
-export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
   collection: string

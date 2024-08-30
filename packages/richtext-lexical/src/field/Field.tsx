@@ -102,8 +102,8 @@ const RichTextComponent: React.FC<
         alignCaret="left"
       />
       <FieldLabel
-        Label={Label}
         field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

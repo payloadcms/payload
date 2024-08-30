@@ -12,7 +12,7 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
@@ -26,7 +26,7 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
   /**
@@ -313,7 +313,9 @@ export const promise = async ({
   switch (field.type) {
     case 'group': {
       let groupDoc = siblingDoc[field.name] as JsonObject
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
+      if (typeof siblingDoc[field.name] !== 'object') {
+        groupDoc = {}
+      }
 
       traverseFields({
         collection,
@@ -524,7 +526,9 @@ export const promise = async ({
       let tabDoc = siblingDoc
       if (tabHasName(field)) {
         tabDoc = siblingDoc[field.name] as JsonObject
-        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
+        if (typeof siblingDoc[field.name] !== 'object') {
+          tabDoc = {}
+        }
       }
 
       traverseFields({

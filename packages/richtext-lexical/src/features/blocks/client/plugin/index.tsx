@@ -140,7 +140,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
             return true
           }
 
-          let rangeSelection: RangeSelection | null = null
+          let rangeSelection: null | RangeSelection = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()

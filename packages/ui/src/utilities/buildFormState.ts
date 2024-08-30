@@ -133,7 +133,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
           },
         })) as unknown as { docs: { value: DocumentPreferences }[] }
 
-        if (preferencesResult?.docs?.[0]?.value) docPreferences = preferencesResult.docs[0].value
+        if (preferencesResult?.docs?.[0]?.value) {
+          docPreferences = preferencesResult.docs[0].value
+        }
       }
 
       promises.preferences = fetchPreferences()
@@ -142,7 +144,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   // If there is a form state,
   // then we can deduce data from that form state
-  if (formState) data = reduceFieldsToValues(formState, true)
+  if (formState) {
+    data = reduceFieldsToValues(formState, true)
+  }
 
   // If we do not have data at this point,
   // we can fetch it. This is useful for DocumentInfoProvider

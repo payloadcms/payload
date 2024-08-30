@@ -6,7 +6,7 @@ export const withDefault = (
   field: FieldAffectingData,
 ): PgColumnBuilder => {
   if (typeof field.defaultValue === 'undefined' || typeof field.defaultValue === 'function')
-    return column
+    {return column}
 
   if (typeof field.defaultValue === 'string' && field.defaultValue.includes("'")) {
     const escapedString = field.defaultValue.replaceAll("'", "''")

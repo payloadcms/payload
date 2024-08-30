@@ -1,7 +1,7 @@
 'use client'
 
 import { RenderComponent, ShimmerEffect, useClientFunctions, useFieldProps } from '@payloadcms/ui'
-import React, { Suspense, lazy, useEffect, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'
 import type { EnabledFeatures } from './types.js'
