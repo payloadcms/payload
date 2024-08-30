@@ -301,7 +301,6 @@ export const Document: React.FC<AdminViewProps> = async ({
        * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
        */}
       <EditDepthProvider
-        depth={1}
         key={`${collectionSlug || globalSlug}${locale?.code ? `-${locale?.code}` : ''}`}
       >
         {ErrorView ? (

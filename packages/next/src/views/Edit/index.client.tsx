@@ -33,7 +33,7 @@ export const EditViewClient: React.FC = () => {
           (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
         }
       />
-      <EditDepthProvider depth={0}>
+      <EditDepthProvider>
         <RenderComponent mappedComponent={Edit} />
       </EditDepthProvider>
     </Fragment>
