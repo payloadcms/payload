@@ -100,6 +100,7 @@ export async function migrateRefresh(this: DrizzleAdapter) {
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
       })
+      process.exit(1)
     }
   }
 }
