@@ -39,7 +39,7 @@ export const DocumentControls: React.FC<{
   id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
-  readonly onDelete: DocumentInfoContext['onDelete']
+  readonly onDelete?: DocumentInfoContext['onDelete']
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly permissions: CollectionPermission | GlobalPermission | null

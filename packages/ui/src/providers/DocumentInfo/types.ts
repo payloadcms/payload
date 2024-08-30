@@ -50,6 +50,7 @@ export type DocumentInfoProps = {
   onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
     doc: TypeWithID
+    operation: 'create' | 'update'
     result: Data
   }) => Promise<void> | void
   redirectAfterDelete?: boolean
