@@ -43,7 +43,7 @@ export const deleteExistingRowsByPath = async ({
     const whereConstraints = [eq(table[parentColumnName], parentID)]
 
     if (pathColumnName)
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))
+      {whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))}
 
     await adapter.deleteWhere({
       db,
@@ -56,7 +56,7 @@ export const deleteExistingRowsByPath = async ({
     const whereConstraints = [eq(table[parentColumnName], parentID)]
 
     if (pathColumnName)
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))
+      {whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))}
 
     await adapter.deleteWhere({
       db,

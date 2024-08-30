@@ -116,7 +116,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           if (typeof row.parent === 'undefined') {
             row.parent = insertedRow.id
           }
-          if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
+          if (!selectsToInsert[selectTableName]) {selectsToInsert[selectTableName] = []}
           selectsToInsert[selectTableName].push(row)
         })
       })
@@ -127,7 +127,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     Object.keys(rowToInsert.blocks).forEach((blockName) => {
       rowToInsert.blocks[blockName].forEach((blockRow) => {
         blockRow.row._parentID = insertedRow.id
-        if (!blocksToInsert[blockName]) blocksToInsert[blockName] = []
+        if (!blocksToInsert[blockName]) {blocksToInsert[blockName] = []}
         if (blockRow.row.uuid) {
           delete blockRow.row.uuid
         }
@@ -361,7 +361,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             const replacedConstraint = error.constraint.replace(replacement, '')
 
             if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint])
-              fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
+              {fieldName = adapter.fieldConstraints[tableName][replacedConstraint]}
           }
         }
       }
@@ -396,7 +396,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
   }
 
-  if (ignoreResult) return data as T
+  if (ignoreResult) {return data as T}
 
   // //////////////////////////////////
   // RETRIEVE NEWLY UPDATED ROW

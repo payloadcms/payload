@@ -521,8 +521,8 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
+          disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}

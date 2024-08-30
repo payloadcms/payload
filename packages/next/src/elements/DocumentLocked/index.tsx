@@ -11,7 +11,7 @@ const modalSlug = 'document-locked'
 const baseClass = 'document-locked'
 
 const formatDate = (date) => {
-  if (!date) return ''
+  if (!date) {return ''}
   return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     hour: 'numeric',
@@ -34,8 +34,8 @@ export const DocumentLocked: React.FC<{
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (isActive) openModal(modalSlug)
-    else closeModal(modalSlug)
+    if (isActive) {openModal(modalSlug)}
+    else {closeModal(modalSlug)}
   }, [isActive, openModal, closeModal])
 
   return (

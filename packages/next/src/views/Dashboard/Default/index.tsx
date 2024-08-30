@@ -16,8 +16,8 @@ import './index.scss'
 const baseClass = 'dashboard'
 
 export type DashboardProps = {
-  Link: React.ComponentType<any>
   globalData: Array<{ data: { isLocked: boolean; userEditing: ClientUser | null }; slug: string }>
+  Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: Permissions
   visibleEntities: VisibleEntities
@@ -25,10 +25,10 @@ export type DashboardProps = {
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {
-    Link,
     globalData,
     i18n,
     i18n: { t },
+    Link,
     locale,
     navGroups,
     params,

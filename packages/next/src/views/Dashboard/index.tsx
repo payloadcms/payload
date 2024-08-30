@@ -97,9 +97,9 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
   const createMappedComponent = getCreateMappedComponent({
     importMap: payload.importMap,
     serverProps: {
-      Link,
       globalData,
       i18n,
+      Link,
       locale,
       navGroups,
       params,
