@@ -127,8 +127,8 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
           {Header || (
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
@@ -253,8 +253,8 @@ export const DefaultListView: React.FC = () => {
             </div>
           )}
         </Gutter>
+        <RenderComponent mappedComponent={afterList} />
       </SelectionProvider>
-      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }
