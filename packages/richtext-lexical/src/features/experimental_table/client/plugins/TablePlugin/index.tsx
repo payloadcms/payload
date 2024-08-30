@@ -14,7 +14,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
-import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
+import { formatDrawerSlug, useDrawerDepth, useModal } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
@@ -84,12 +84,12 @@ export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const cellContext = useContext(CellContext)
   const { closeModal, toggleModal } = useModal()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const { uuid } = useEditorConfigContext()
 
   const drawerSlug = formatDrawerSlug({
     slug: 'lexical-table-create-' + uuid,
-    depth: editDepth,
+    depth: drawerDepth,
   })
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand(
         OPEN_TABLE_DRAWER_COMMAND,
         () => {
-          let rangeSelection: null | RangeSelection = null
+          let rangeSelection: RangeSelection | null = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()
@@ -118,7 +118,7 @@ export const TablePlugin: PluginComponent = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [cellContext, editor, toggleModal])
+  }, [cellContext, editor, toggleModal, drawerSlug])
 
   return (
     <React.Fragment>

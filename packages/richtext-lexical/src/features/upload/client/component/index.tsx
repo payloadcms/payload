@@ -12,7 +12,7 @@ import {
   formatDrawerSlug,
   useConfig,
   useDocumentDrawer,
-  useEditDepth,
+  useDrawerDepth,
   useModal,
   usePayloadAPI,
   useTranslation,
@@ -73,7 +73,7 @@ const Component: React.FC<ElementProps> = (props) => {
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { closeModal } = useModal()
   const { uuid } = useEditorConfigContext()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
@@ -89,7 +89,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-upload-drawer-` + uuid + componentID, // There can be multiple upload components, each with their own drawer, in one single editor => separate them by componentID
-    depth: editDepth,
+    depth: drawerDepth,
   })
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
@@ -176,7 +176,7 @@ const Component: React.FC<ElementProps> = (props) => {
     (_, data) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
-        const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
+        const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
         if (uploadNode) {
           const newData: UploadData = {
             ...uploadNode.getData(),

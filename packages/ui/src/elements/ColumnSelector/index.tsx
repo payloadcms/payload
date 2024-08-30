@@ -7,7 +7,7 @@ import type { Column } from '../Table/index.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useDrawerDepth } from '../../providers/DrawerDepth/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { Pill } from '../Pill/index.js'
 import { useTableColumns } from '../TableColumns/index.js'
@@ -29,7 +29,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
   const uuid = useId()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   if (!columns) {
     return null
@@ -53,7 +53,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
           return null
         }
 
-        const { accessor, active, Label } = col
+        const { Label, accessor, active } = col
 
         if (col.accessor === '_select') {
           return null
@@ -69,7 +69,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${col.cellProps?.field && 'name' in col.cellProps.field ? col.cellProps?.field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col.cellProps?.field && 'name' in col.cellProps.field ? col.cellProps?.field?.name : i}${drawerDepth ? `-${drawerDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

@@ -10,7 +10,7 @@ import {
   EditIcon,
   formatDrawerSlug,
   useConfig,
-  useEditDepth,
+  useDrawerDepth,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
@@ -53,7 +53,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [stateData, setStateData] = useState<{ id?: string; text: string } & LinkFields>(null)
 
   const { closeModal, toggleModal } = useModal()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
 
@@ -61,7 +61,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-rich-text-link-` + uuid,
-    depth: editDepth,
+    depth: drawerDepth,
   })
 
   const setNotLink = useCallback(() => {

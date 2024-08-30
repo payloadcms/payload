@@ -7,7 +7,7 @@ import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@le
 import { getTranslation } from '@payloadcms/translations'
 import {
   formatDrawerSlug,
-  useEditDepth,
+  useDrawerDepth,
   useFieldProps,
   useModal,
   useTranslation,
@@ -52,11 +52,11 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
   const { i18n, t } = useTranslation<string, any>()
   const { schemaPath } = useFieldProps()
   const { uuid } = useEditorConfigContext()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-` + uuid,
-    depth: editDepth,
+    depth: drawerDepth,
   })
 
   const {
@@ -140,7 +140,7 @@ export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
             return true
           }
 
-          let rangeSelection: null | RangeSelection = null
+          let rangeSelection: RangeSelection | null = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()

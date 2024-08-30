@@ -11,7 +11,7 @@ import {
   FieldError,
   FieldLabel,
   RenderComponent,
-  useEditDepth,
+  useDrawerDepth,
   useField,
   useFieldProps,
   useTranslation,
@@ -19,7 +19,7 @@ import {
 } from '@payloadcms/ui'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
+import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
@@ -82,7 +82,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const editorRef = useRef(null)
   const toolbarRef = useRef(null)
 
-  const drawerDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const drawerIsOpen = drawerDepth > 1
 
   const memoizedValidate = useCallback(
