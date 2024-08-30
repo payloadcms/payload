@@ -6,7 +6,7 @@ import {
   type StepNavItem,
   useConfig,
   useDocumentInfo,
-  useEditDepth,
+  useDrawerDepth,
   useEntityVisibility,
   useStepNav,
   useTranslation,
@@ -41,12 +41,12 @@ export const SetDocumentStepNav: React.FC<{
     },
   } = useConfig()
 
-  const drawerDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   useEffect(() => {
     const nav: StepNavItem[] = []
 
-    if (!isInitializing) {
+    if (!isInitializing && drawerDepth <= 1) {
       if (collectionSlug) {
         nav.push({
           label: getTranslation(pluralLabel, i18n),
@@ -91,9 +91,7 @@ export const SetDocumentStepNav: React.FC<{
         })
       }
 
-      if (drawerDepth <= 1) {
-        setStepNav(nav)
-      }
+      setStepNav(nav)
     }
   }, [
     setStepNav,

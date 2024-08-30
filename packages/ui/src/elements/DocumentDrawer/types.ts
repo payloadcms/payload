@@ -19,7 +19,7 @@ export type DocumentTogglerProps = {
   readonly disabled?: boolean
   readonly drawerSlug?: string
   readonly id?: string
-} & HTMLAttributes<HTMLButtonElement>
+} & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer

@@ -14,7 +14,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { RenderComponent } from '../../../providers/Config/RenderComponent.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../../providers/EditDepth/index.js'
+import { useDrawerDepth } from '../../../providers/DrawerDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
@@ -58,7 +58,7 @@ export function EditForm({ submitted }: EditFormProps) {
   } = useConfig()
 
   const router = useRouter()
-  const depth = useEditDepth()
+  const depth = useDrawerDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
@@ -86,7 +86,7 @@ export function EditForm({ submitted }: EditFormProps) {
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth <= 1) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,

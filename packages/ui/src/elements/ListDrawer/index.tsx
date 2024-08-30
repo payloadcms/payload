@@ -1,26 +1,18 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js'
 
 export * from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { useDrawerDepth } from '../../providers/DrawerDepth/index.js'
+import { Drawer, DrawerToggler, useDrawerSlug } from '../Drawer/index.js'
 import { ListDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
 export const baseClass = 'list-drawer'
-
-export const formatListDrawerSlug = ({
-  depth,
-  uuid,
-}: {
-  depth: number
-  uuid: string // supply when creating a new document and no id is available
-}) => `list-drawer_${depth}_${uuid}`
 
 export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   children,
@@ -60,16 +52,12 @@ export const useListDrawer: UseListDrawer = ({
   const {
     config: { collections },
   } = useConfig()
-  const drawerDepth = useEditDepth()
-  const uuid = useId()
+  const drawerDepth = useDrawerDepth()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
   const [collectionSlugs, setCollectionSlugs] = useState(collectionSlugsFromProps)
 
-  const drawerSlug = formatListDrawerSlug({
-    depth: drawerDepth,
-    uuid,
-  })
+  const drawerSlug = useDrawerSlug(`list-drawer_${drawerDepth}`)
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))

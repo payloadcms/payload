@@ -19,17 +19,17 @@ export type ListDrawerProps = {
 }
 
 export type ListTogglerProps = {
-  children?: React.ReactNode
-  className?: string
-  disabled?: boolean
-  drawerSlug?: string
-} & HTMLAttributes<HTMLButtonElement>
+  readonly children?: React.ReactNode
+  readonly className?: string
+  readonly disabled?: boolean
+  readonly drawerSlug?: string
+} & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseListDrawer = (args: {
-  collectionSlugs?: string[]
-  filterOptions?: FilterOptionsResult
-  selectedCollection?: string
-  uploads?: boolean // finds all collections with upload: true
+  readonly collectionSlugs?: string[]
+  readonly filterOptions?: FilterOptionsResult
+  readonly selectedCollection?: string
+  readonly uploads?: boolean // finds all collections with upload: true
 }) => [
   React.FC<Pick<ListDrawerProps, 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>>, // drawer
   React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler

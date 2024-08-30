@@ -23,7 +23,7 @@ import {
   UnpublishMany,
   useBulkUpload,
   useConfig,
-  useEditDepth,
+  useDrawerDepth,
   useListInfo,
   useListQuery,
   useModal,
@@ -85,7 +85,7 @@ export const DefaultListView: React.FC = () => {
 
   const { i18n, t } = useTranslation()
 
-  const drawerDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   const { setStepNav } = useStepNav()
 

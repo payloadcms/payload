@@ -1,30 +1,18 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
 
-import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useDrawerDepth } from '../../providers/DrawerDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer, DrawerToggler, useDrawerSlug } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
 export const baseClass = 'doc-drawer'
-
-const formatDocumentDrawerSlug = ({
-  id,
-  collectionSlug,
-  depth,
-  uuid,
-}: {
-  collectionSlug: string
-  depth: number
-  id: number | string
-  uuid: string // supply when creating a new document and no id is available
-}) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   id,
@@ -64,17 +52,13 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 }
 
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
-  const drawerDepth = useEditDepth()
-  const uuid = useId()
+  const drawerDepth = useDrawerDepth()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
 
-  const drawerSlug = formatDocumentDrawerSlug({
-    id,
-    collectionSlug,
-    depth: drawerDepth,
-    uuid,
-  })
+  const drawerSlug = useDrawerSlug(
+    `doc-drawer_${collectionSlug}_${drawerDepth}${id ? `_${id}` : ''}`,
+  )
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))

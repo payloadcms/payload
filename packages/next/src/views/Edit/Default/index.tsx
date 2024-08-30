@@ -14,7 +14,7 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
-  useEditDepth,
+  useDrawerDepth,
   useUploadEdits,
 } from '@payloadcms/ui'
 import { formatAdminURL, getFormState } from '@payloadcms/ui/shared'
@@ -70,7 +70,7 @@ export const DefaultEditView: React.FC = () => {
   } = useConfig()
 
   const router = useRouter()
-  const depth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
@@ -140,7 +140,7 @@ export const DefaultEditView: React.FC = () => {
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && drawerDepth <= 1) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -158,7 +158,7 @@ export const DefaultEditView: React.FC = () => {
       id,
       entitySlug,
       user,
-      depth,
+      drawerDepth,
       collectionSlug,
       getVersions,
       isEditing,
@@ -216,7 +216,7 @@ export const DefaultEditView: React.FC = () => {
           <SetDocumentTitle
             collectionConfig={collectionConfig}
             config={config}
-            fallback={depth <= 1 ? id?.toString() : undefined}
+            fallback={drawerDepth <= 1 ? id?.toString() : undefined}
             globalConfig={globalConfig}
           />
           <DocumentControls

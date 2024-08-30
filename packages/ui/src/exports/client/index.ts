@@ -201,6 +201,7 @@ export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentI
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
+export { DrawerDepthProvider, useDrawerDepth } from '../../providers/DrawerDepth/index.js'
 export {
   EntityVisibilityProvider,
   useEntityVisibility,

@@ -5,7 +5,7 @@ import type { JsonObject } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
+import { useDrawerDepth } from '../../providers/DrawerDepth/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
@@ -41,17 +41,14 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const currentDepth = useEditDepth()
   const { drawerSlug } = useBulkUpload()
 
   return (
-    <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer gutter={false} Header={null} slug={drawerSlug}>
-        <FormsManagerProvider>
-          <DrawerContent />
-        </FormsManagerProvider>
-      </Drawer>
-    </EditDepthProvider>
+    <Drawer gutter={false} Header={null} slug={drawerSlug}>
+      <FormsManagerProvider>
+        <DrawerContent />
+      </FormsManagerProvider>
+    </Drawer>
   )
 }
 
@@ -133,7 +130,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
 export const useBulkUpload = () => React.useContext(Context)
 
 export function useBulkUploadDrawerSlug() {
-  const depth = useEditDepth()
+  const depth = useDrawerDepth()
 
   return `${drawerSlug}-${depth || 1}`
 }

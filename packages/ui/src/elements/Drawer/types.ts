@@ -11,8 +11,8 @@ export type Props = {
 }
 
 export type TogglerProps = {
-  children: React.ReactNode
-  className?: string
-  disabled?: boolean
-  slug: string
-} & HTMLAttributes<HTMLButtonElement>
+  readonly children: React.ReactNode
+  readonly className?: string
+  readonly disabled?: boolean
+  readonly slug: string
+} & Readonly<HTMLAttributes<HTMLButtonElement>>
