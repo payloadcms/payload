@@ -75,6 +75,7 @@ The following options are available:
 | **`globals`**              | An array of Globals for Payload to manage. [More details](./globals).                                                                                                                          |
 | **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cors). |
 | **`localization`**         | Opt-in to translate your content into multiple locales. [More details](./localization).                                                                                                        |
+| **`logger`**               | Logger options, logger options with a destination stream, or an instantiated logger instance. [More details](https://getpino.io/#/docs/api?id=options).                                        |
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options).                              |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets.                                                                                                                               |
 | **`csrf`**                 | A whitelist array of URLs to allow Payload to accept cookies from. [More details](../authentication/overview#csrf-protection).                                                                 |
@@ -263,4 +264,4 @@ The Payload Config can accept compatibility flags for running the newest version
 
 Payload localization works on a field-by-field basis. As you can nest fields within other fields, you could potentially nest a localized field within a localized field—but this would be redundant and unnecessary. There would be no reason to define a localized field within a localized parent field, given that the entire data structure from the parent field onward would be localized.
 
-By default, Payload will remove the `localized: true` property from sub-fields if a parent field is localized. Set this compatibility flag to `true` only if you have an existing Payload MongoDB database from pre-3.0, and you have nested localized fields that you would like to maintain without migrating. 
+By default, Payload will remove the `localized: true` property from sub-fields if a parent field is localized. Set this compatibility flag to `true` only if you have an existing Payload MongoDB database from pre-3.0, and you have nested localized fields that you would like to maintain without migrating.
