@@ -57,7 +57,7 @@ export const useListDrawer: UseListDrawer = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionSlugs, setCollectionSlugs] = useState(collectionSlugsFromProps)
 
-  const drawerSlug = useDrawerSlug(`list-drawer_${drawerDepth}`)
+  const drawerSlug = useDrawerSlug(`list-drawer`)
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))

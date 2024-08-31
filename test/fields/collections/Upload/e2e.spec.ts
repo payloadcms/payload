@@ -214,7 +214,7 @@ describe('Upload', () => {
 
     await openDocDrawer(page, '.field-type.upload .upload__listToggler')
 
-    const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
+    const jpgImages = page.locator('[id^=drawer_1_list-drawer] .upload-gallery img[src$=".jpg"]')
     await expect
       .poll(async () => await jpgImages.count(), { timeout: POLL_TOPASS_TIMEOUT })
       .toEqual(0)

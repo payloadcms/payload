@@ -9,6 +9,7 @@ type Props = {
 
 export function EditDepthProvider({ children }: Props) {
   const parentDepth = useContext(EditDepthContext)
+  console.log({ parentDepth })
   const value = parentDepth + 1
   return <EditDepthContext.Provider value={value}>{children}</EditDepthContext.Provider>
 }

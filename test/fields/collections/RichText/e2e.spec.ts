@@ -217,7 +217,7 @@ describe('Rich Text', () => {
       await button.click()
 
       // check that the search is on the `name` field of the `text-fields` collection
-      const drawer = page.locator('[id^=list-drawer_1_]')
+      const drawer = page.locator('[id^=drawer_1_list-drawer]')
 
       await expect(drawer.locator('.search-filter__input')).toHaveAttribute(
         'placeholder',

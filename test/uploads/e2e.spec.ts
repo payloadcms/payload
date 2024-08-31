@@ -301,7 +301,7 @@ describe('uploads', () => {
 
     await openDocDrawer(page, '#field-audio  .upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    const listDrawer = page.locator('[id^=drawer_1_list-drawer]')
     await expect(listDrawer).toBeVisible()
 
     await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
@@ -336,7 +336,7 @@ describe('uploads', () => {
 
     await openDocDrawer(page, '.upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    const listDrawer = page.locator('[id^=drawer_1_list-drawer]')
     await expect(listDrawer).toBeVisible()
 
     await expect(listDrawer.locator('tbody tr')).toHaveCount(1)

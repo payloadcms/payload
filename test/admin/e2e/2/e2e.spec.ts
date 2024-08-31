@@ -508,18 +508,18 @@ describe('admin2', () => {
 
         await openDocDrawer(page, '.rich-text .list-drawer__toggler')
 
-        const listDrawer = page.locator('[id^=list-drawer_1_]')
+        const listDrawer = page.locator('[id^=drawer_1_list-drawer]')
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select',
         )
 
         // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -527,7 +527,9 @@ describe('admin2', () => {
           .click()
 
         // open the column controls
-        const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
+        const columnSelector = page.locator(
+          '[id^=drawer_1_list-drawer] .list-controls__toggle-columns',
+        )
         await columnSelector.click()
         // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
@@ -536,7 +538,7 @@ describe('admin2', () => {
         await expect(
           page
             .locator(
-              '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+              '[id^=drawer_1_list-drawer] .list-controls .column-selector .column-selector__column',
             )
             .first(),
         ).toHaveText('Number')
@@ -547,13 +549,15 @@ describe('admin2', () => {
 
         // Open the drawer
         await openDocDrawer(page, '.rich-text .list-drawer__toggler')
-        const listDrawer = page.locator('[id^=list-drawer_1_]')
+        const listDrawer = page.locator('[id^=drawer_1_list-drawer]')
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select',
         )
-        const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
+        const columnSelector = page.locator(
+          '[id^=drawer_1_list-drawer] .list-controls__toggle-columns',
+        )
 
         // open the column controls
         await columnSelector.click()
@@ -563,7 +567,7 @@ describe('admin2', () => {
         // deselect the "id" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            '[id^=drawer_1_list-drawer] .list-controls .column-selector .column-selector__column',
             {
               hasText: exactText('ID'),
             },
@@ -574,7 +578,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -584,7 +588,7 @@ describe('admin2', () => {
         // deselect the "number" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            '[id^=drawer_1_list-drawer] .list-controls .column-selector .column-selector__column',
             {
               hasText: exactText('Number'),
             },
@@ -595,7 +599,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select .rs__option',
             {
               hasText: exactText('User'),
             },
@@ -606,7 +610,7 @@ describe('admin2', () => {
         await expect(
           page
             .locator(
-              '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+              '[id^=drawer_1_list-drawer] .list-controls .column-selector .column-selector__column',
             )
             .first(),
         ).not.toHaveClass('column-selector__column--active')
@@ -616,7 +620,7 @@ describe('admin2', () => {
 
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=drawer_1_list-drawer] .list-drawer__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -627,7 +631,7 @@ describe('admin2', () => {
         await expect(
           page
             .locator(
-              '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+              '[id^=drawer_1_list-drawer] .list-controls .column-selector .column-selector__column',
             )
             .first(),
         ).not.toHaveClass('column-selector__column--active')

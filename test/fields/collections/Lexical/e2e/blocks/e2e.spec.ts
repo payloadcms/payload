@@ -541,7 +541,7 @@ describe('lexicalBlocks', () => {
         await wait(300)
         await chooseExistingUploadButton.click()
         await wait(500) // wait for drawer form state to initialize (it's a flake)
-        const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+        const uploadListDrawer = page.locator('dialog[id^=drawer_1_list-drawer]').first() // IDs starting with drawer_1_list-drawer (there's some other symbol after the underscore)
         await expect(uploadListDrawer).toBeVisible()
         await wait(300)
 
