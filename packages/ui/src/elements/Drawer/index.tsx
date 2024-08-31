@@ -5,8 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Props, TogglerProps } from './types.js'
 
 import { XIcon } from '../../icons/X/index.js'
-import { useDrawerDepth } from '../../providers/DrawerDepth/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
+import { DrawerDepthProvider, useDrawerDepth } from '../../providers/DrawerDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
@@ -103,7 +102,7 @@ export const Drawer: React.FC<Props> = ({
         >
           <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
-            <EditDepthProvider>
+            <DrawerDepthProvider>
               {Header}
               {Header === undefined && (
                 <div className={`${baseClass}__header`}>
@@ -125,7 +124,7 @@ export const Drawer: React.FC<Props> = ({
                 </div>
               )}
               {children}
-            </EditDepthProvider>
+            </DrawerDepthProvider>
           </Gutter>
         </div>
       </Modal>

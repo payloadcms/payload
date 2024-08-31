@@ -8,7 +8,7 @@ type Props = {
 }
 export function DrawerDepthProvider({ children }: Props) {
   const parentDepth = useDrawerDepth()
-  const value = (parentDepth || 0) + 1
+  const value = parentDepth + 1
   return <DrawerDepthContext.Provider value={value}>{children}</DrawerDepthContext.Provider>
 }
 
