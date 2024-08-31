@@ -917,6 +917,20 @@ export interface GroupField {
       };
     };
   };
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1338,6 +1352,20 @@ export interface TabsField {
     beforeChange?: boolean | null;
     afterChange?: boolean | null;
     afterRead?: boolean | null;
+  };
+  camelCaseTab?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   textarea?: string | null;
   anotherText: string;

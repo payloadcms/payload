@@ -91,8 +91,10 @@ export const traverseFields = ({
             with: {},
           }
 
+          const sanitizedPathForTableName = path ? `${toSnakeCase(path.slice(0, -1))}_` : ''
+
           const arrayTableName = adapter.tableNameMap.get(
-            `${currentTableName}_${path}${toSnakeCase(field.name)}`,
+            `${currentTableName}_${sanitizedPathForTableName}${toSnakeCase(field.name)}`,
           )
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
