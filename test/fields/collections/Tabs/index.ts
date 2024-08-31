@@ -247,6 +247,32 @@ const TabsFields: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'camelCaseTab',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
