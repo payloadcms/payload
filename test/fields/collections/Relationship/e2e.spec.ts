@@ -87,7 +87,7 @@ describe('relationship', () => {
     await textField.fill(textValue)
     await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+    await page.locator('[id^=close-drawer__drawer_1_doc-drawer__text-fields]').click()
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
@@ -125,7 +125,7 @@ describe('relationship', () => {
     // Save then close the second modal
     await page.locator('[id^=drawer_2_doc-drawer__relationship-fields] #action-save').click()
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
-    await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click()
+    await page.locator('[id^=close-drawer__drawer_2_doc-drawer__relationship-fields]').click()
 
     // Assert that the first modal is still open and the value matches
     await expect(page.locator('[id^=drawer_1_doc-drawer__relationship-fields]')).toBeVisible()
@@ -138,7 +138,7 @@ describe('relationship', () => {
     // Save then close the first modal
     await page.locator('[id^=drawer_1_doc-drawer__relationship-fields] #action-save').click()
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
-    await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click()
+    await page.locator('[id^=close-drawer__drawer_1_doc-drawer__relationship-fields]').click()
 
     // Expect the original field to have a value filled
     await expect(
@@ -251,7 +251,7 @@ describe('relationship', () => {
 
     await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+    await page.locator('[id^=close-drawer__drawer_1_doc-drawer__text-fields]').click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
@@ -264,7 +264,7 @@ describe('relationship', () => {
     // Save and close the drawer
     await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+    await page.locator('[id^=close-drawer__drawer_1_doc-drawer__text-fields]').click()
 
     // Now open the drawer again to edit the `text` field _using the keyboard_
     // Mimic real user behavior by typing into the field with spaces and backspaces
@@ -288,7 +288,7 @@ describe('relationship', () => {
     await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     // close drawer
-    await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+    await page.locator('[id^=close-drawer__drawer_1_doc-drawer__text-fields]').click()
     // save document and reload
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
