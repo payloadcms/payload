@@ -85,7 +85,7 @@ describe('relationship', () => {
     await expect(textField).toBeEnabled()
     const textValue = 'hello'
     await textField.fill(textValue)
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     await expect(
@@ -102,41 +102,41 @@ describe('relationship', () => {
     await openCreateDocDrawer(page, '#field-relationToSelf')
 
     // Fill first modal's required relationship field
-    await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
+    await page.locator('[id^=drawer_1_doc-drawer__relationship-fields] #field-relationship').click()
     await page
       .locator(
-        '[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")',
+        '[id^=drawer_1_doc-drawer__relationship-fields] .rs__option:has-text("Seeded text document")',
       )
       .click()
 
     const secondModalButton = page.locator(
-      '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
+      '[id^=drawer_1_doc-drawer__relationship-fields] #relationToSelf-add-new button',
     )
     await secondModalButton.click()
 
     // Fill second modal's required relationship field
-    await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
+    await page.locator('[id^=drawer_2_doc-drawer__relationship-fields] #field-relationship').click()
     await page
       .locator(
-        '[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")',
+        '[id^=drawer_q_collection__relationship-fields] .rs__option:has-text("Seeded text document")',
       )
       .click()
 
     // Save then close the second modal
-    await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
+    await page.locator('[id^=drawer_2_doc-drawer__relationship-fields] #action-save').click()
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
     await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click()
 
     // Assert that the first modal is still open and the value matches
-    await expect(page.locator('[id^=doc-drawer_relationship-fields_1_]')).toBeVisible()
+    await expect(page.locator('[id^=drawer_1_doc-drawer__relationship-fields]')).toBeVisible()
     await expect(
       page.locator(
-        '[id^=doc-drawer_relationship-fields_1_] #field-relationToSelf .relationship--single-value__text',
+        '[id^=drawer_1_doc-drawer__relationship-fields] #field-relationToSelf .relationship--single-value__text',
       ),
     ).toBeVisible() // TODO: use '.toContainText('doc_id')' with the doc in the second modal
 
     // Save then close the first modal
-    await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__relationship-fields] #action-save').click()
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
     await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click()
 
@@ -249,7 +249,7 @@ describe('relationship', () => {
 
     await page.locator('.drawer__content #field-text').fill('something')
 
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
     await page.locator('#action-save').click()
@@ -262,7 +262,7 @@ describe('relationship', () => {
     await page.locator('.drawer__content #field-text').fill(value)
 
     // Save and close the drawer
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
 
@@ -272,20 +272,20 @@ describe('relationship', () => {
     await page
       .locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler')
       .click()
-    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click()
+    await page.locator('[id^=drawer_1_doc-drawer__text-fields] #field-text').click()
     await page.keyboard.down('1')
     await page.keyboard.type('23')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+    await expect(page.locator('[id^=drawer_1_doc-drawer__text-fields] #field-text')).toHaveValue(
       `${value}123`,
     )
     await page.keyboard.type('4567')
     await page.keyboard.press('Backspace')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+    await expect(page.locator('[id^=drawer_1_doc-drawer__text-fields] #field-text')).toHaveValue(
       `${value}123456`,
     )
 
     // save drawer
-    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__text-fields] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     // close drawer
     await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()

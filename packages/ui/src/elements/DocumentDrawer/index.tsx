@@ -56,9 +56,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
 
-  const drawerSlug = useDrawerSlug(
-    `doc-drawer_${collectionSlug}_${drawerDepth}${id ? `_${id}` : ''}`,
-  )
+  const drawerSlug = useDrawerSlug(`doc-drawer__${collectionSlug}${id ? `_${id}` : ''}`)
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))

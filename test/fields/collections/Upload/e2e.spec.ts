@@ -130,12 +130,12 @@ describe('Upload', () => {
     await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
     await page
-      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      page.locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
-    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__uploads] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
     // Assert that the media field has the png upload
@@ -159,12 +159,12 @@ describe('Upload', () => {
     await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
     await page
-      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      page.locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
-    await page.locator('[id^=doc-drawer_uploads_1_] .file-field__edit').click()
+    await page.locator('[id^=drawer_1_doc-drawer__uploads] .file-field__edit').click()
     await page
       .locator('[id^=edit-upload] .edit-upload__input input[name="Width (px)"]')
       .nth(1)
@@ -174,7 +174,7 @@ describe('Upload', () => {
       .nth(1)
       .fill('200')
     await page.locator('[id^=edit-upload] button:has-text("Apply Changes")').nth(1).click()
-    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__uploads] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
     // Assert that the media field has the png upload
@@ -199,12 +199,12 @@ describe('Upload', () => {
     await wait(1000)
 
     await page
-      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      page.locator('[id^=drawer_1_doc-drawer__uploads] .file-field__upload .file-field__filename'),
     ).toHaveValue('payload.png')
-    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await page.locator('[id^=drawer_1_doc-drawer__uploads] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('.field-type.upload .upload-relationship-details__remove').click()
   })

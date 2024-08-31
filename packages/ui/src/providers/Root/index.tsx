@@ -5,7 +5,7 @@ import type { ClientConfig, LanguageOptions, Permissions, User } from 'payload'
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { Theme } from '../Theme/index.js'
 
@@ -14,6 +14,7 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { fieldComponents } from '../../fields/index.js'
+import { DrawerDepthProvider } from '../../providers/DrawerDepth/index.js'
 import { ActionsProvider } from '../Actions/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
@@ -59,7 +60,7 @@ export const RootProvider: React.FC<Props> = ({
   user,
 }) => {
   return (
-    <Fragment>
+    <DrawerDepthProvider>
       <RouteCache>
         <ConfigProvider config={config}>
           <FieldComponentsProvider fieldComponents={fieldComponents}>
@@ -116,6 +117,6 @@ export const RootProvider: React.FC<Props> = ({
         </ConfigProvider>
       </RouteCache>
       <ToastContainer />
-    </Fragment>
+    </DrawerDepthProvider>
   )
 }

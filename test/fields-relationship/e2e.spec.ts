@@ -410,14 +410,14 @@ describe('fields - relationship', () => {
       '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
     )
 
-    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
+    const documentDrawer = page.locator('[id^=drawer_1_doc-drawer__relation-one]')
     await expect(documentDrawer).toBeVisible()
   })
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await openCreateDocDrawer(page, '#field-relationshipHasMany')
-    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
+    const documentDrawer = page.locator('[id^=drawer_1_doc-drawer__relation-one]')
     await expect(documentDrawer).toBeVisible()
     const drawerField = documentDrawer.locator('#field-name')
     await drawerField.fill('Newly created document')

@@ -383,7 +383,7 @@ describe('Rich Text', () => {
 
       await button.click()
 
-      const documentDrawer = page.locator('[id^=doc-drawer_uploads_1_]')
+      const documentDrawer = page.locator('[id^=drawer_1_doc-drawer__uploads]')
       await expect(documentDrawer).toBeVisible()
     })
 
@@ -396,7 +396,7 @@ describe('Rich Text', () => {
 
       await button.click()
 
-      const documentDrawer = page.locator('[id^=doc-drawer_text-fields_1_]')
+      const documentDrawer = page.locator('[id^=drawer_1_doc-drawer__text-fields]')
       await expect(documentDrawer).toBeVisible()
     })
 

@@ -282,7 +282,9 @@ describe('access control', () => {
 
       await expect(addDocButton).toBeVisible()
       await addDocButton.click()
-      const documentDrawer = page.locator(`[id^=doc-drawer_${createNotUpdateCollectionSlug}_1_]`)
+      const documentDrawer = page.locator(
+        `[id^=drawer_1_doc-drawer__${createNotUpdateCollectionSlug}]`,
+      )
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
       await documentDrawer.locator('#field-name').fill('name')
@@ -339,7 +341,7 @@ describe('access control', () => {
           '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
         )
         await addDocButton.click()
-        const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
+        const documentDrawer = page.locator('[id^=drawer_1_doc-drawer__user-restricted-collection]')
         await expect(documentDrawer).toBeVisible()
         await documentDrawer.locator('#field-name').fill('anonymous@email.com')
         await documentDrawer.locator('#action-save').click()
@@ -348,7 +350,9 @@ describe('access control', () => {
         await documentDrawer.locator('button.doc-drawer__header-close').click()
         await expect(documentDrawer).toBeHidden()
         await addDocButton.click()
-        const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
+        const documentDrawer2 = page.locator(
+          '[id^=drawer_1_doc-drawer__user-restricted-collection]',
+        )
         await expect(documentDrawer2).toBeVisible()
         await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
         await documentDrawer2.locator('#action-save').click()

@@ -981,7 +981,7 @@ describe('admin1', () => {
         )
         .click()
       await wait(500)
-      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      const drawer1Content = page.locator('[id^=drawer_1_doc-drawer__posts] .drawer__content')
       await expect(drawer1Content).toBeVisible()
       const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
       await drawer1Content
@@ -989,7 +989,7 @@ describe('admin1', () => {
           '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
         )
         .click()
-      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
+      const drawer2Content = page.locator('[id^=drawer_2_doc-drawer__posts] .drawer__content')
       await expect(drawer2Content).toBeVisible()
       const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
