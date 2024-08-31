@@ -51,6 +51,35 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
+          name: 'field_with_width_30_percent',
+          label: 'Field with 30% width',
+          type: 'text',
+          admin: {
+            width: '30%',
+          },
+        },
+        {
+          name: 'field_with_width_60_percent',
+          label: 'Field with 60% width',
+          type: 'text',
+          admin: {
+            width: '60%',
+          },
+        },
+        {
+          name: 'field_with_width_20_percent',
+          label: 'Field with 20% width',
+          type: 'text',
+          admin: {
+            width: '20%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
           label: 'Collapsible within a row',
           type: 'collapsible',
           fields: [
@@ -60,6 +89,9 @@ const RowFields: CollectionConfig = {
               type: 'text',
             },
           ],
+          admin: {
+            width: '30%',
+          },
         },
         {
           label: 'Collapsible within a row',

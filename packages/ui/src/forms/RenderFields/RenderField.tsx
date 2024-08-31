@@ -85,15 +85,14 @@ export const RenderField: React.FC<Props> = ({
       />
     )
   } else {
-    if (fieldComponentProps.field.type === 'row') {
+    if ('fields' in fieldComponentProps.field && Array.isArray(fieldComponentProps.field.fields)) {
       for (const field of fieldComponentProps.field.fields) {
         if (field.admin?.width) {
           field.admin.style = {
             ...field.admin.style,
-            maxWidth: field.admin.width,
-          }
-
-          field.admin.width = undefined
+            '--field-width': field.admin.width,
+            width: undefined, // avoid needlessly adding this to the element's style attribute
+          } as unknown as { '--field-width': string } & React.CSSProperties
         }
       }
     }

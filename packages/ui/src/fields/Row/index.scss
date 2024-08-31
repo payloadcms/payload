@@ -4,10 +4,23 @@
   .row__fields {
     display: flex;
     flex-wrap: wrap;
-    gap: calc(var(--base) * 0.5);
 
     > * {
-      flex-grow: 1;
+      flex: 0 1 var(--field-width);
+      --field-width: 100%;
+    }
+
+    // If there is more than one child, add a gap.
+    // We ned this because if you use `flex-wrap: wrap` and `gap`
+    // and only have one child, the gap gets applied regardless
+    // meaning the child doesn't take up the full width.
+    &:has(> *:nth-child(2)) {
+      gap: calc(var(--base) * 0.5);
+      margin-inline-end: calc(var(--base) * -0.5); // add negative margin to counteract the gap.
+
+      > * {
+        flex: 0 1 calc(var(--field-width) - var(--base) * 0.5);
+      }
     }
   }
 

@@ -114,6 +114,11 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
+  const style: { '--field-width': string } & React.CSSProperties = {
+    ...field.admin?.style,
+    '--field-width': field.admin.width,
+  }
+
   return (
     <Fragment>
       <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
@@ -127,6 +132,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
           .filter(Boolean)
           .join(' ')}
         id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+        style={style}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}

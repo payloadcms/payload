@@ -267,7 +267,7 @@ type Admin = {
   position?: 'sidebar'
   readOnly?: boolean
   style?: CSSProperties
-  width?: string
+  width?: `${string}${'%' | 'px'}`
 }
 
 export type AdminClient = {
