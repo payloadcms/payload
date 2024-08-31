@@ -162,10 +162,29 @@ function $importMultiline(
     let endLineIndex = startLineIndex
     const linesLength = lines.length
 
+    let openedSubStartMatches = 0
+
     // check every single line for the closing match. It could also be on the same line as the opening match.
     while (endLineIndex < linesLength) {
+      const potentialSubStartMatch = lines[endLineIndex].match(regExpStart)
+
       const endMatch = regexpEndRegex ? lines[endLineIndex].match(regexpEndRegex) : null
-      if (!endMatch) {
+
+      if (potentialSubStartMatch) {
+        if (endMatch) {
+          if (potentialSubStartMatch.index < endMatch.index) {
+            openedSubStartMatches++
+          }
+        } else {
+          openedSubStartMatches++
+        }
+      }
+
+      if (endMatch) {
+        openedSubStartMatches--
+      }
+
+      if (!endMatch || openedSubStartMatches !== 0) {
         if (
           !isEndOptional ||
           (isEndOptional && endLineIndex < linesLength - 1) // Optional end, but didn't reach the end of the document yet => continue searching for potential closing match
