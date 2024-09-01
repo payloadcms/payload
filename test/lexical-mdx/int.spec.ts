@@ -4,6 +4,7 @@ import type {
   SanitizedServerEditorConfig,
   SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
+import type { SerializedLexicalNode } from 'lexical'
 import type { RichTextField, SanitizedConfig } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
@@ -13,6 +14,7 @@ import { fileURLToPath } from 'url'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { mdxToEditorJSON } from './mdx/hooks.js'
+import { tableJson } from './tableJson.js'
 
 let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
@@ -28,6 +30,7 @@ type Tests = Array<{
     'fields'
   >
   input: string
+  rootChildren?: any[]
 }>
 
 describe('Lexical MDX', () => {
@@ -203,9 +206,18 @@ there\`\`\`
         },
       },
     },
+    {
+      input: `
+| Option            | Default route           | Description                                     |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| \`account\`         |                         | The user's account page.                        |
+| \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
+`,
+      rootChildren: [tableJson],
+    },
   ]
 
-  for (const { input, blockNode } of INPUT_AND_OUTPUT) {
+  for (const { input, blockNode, rootChildren } of INPUT_AND_OUTPUT) {
     it(`can correctly convert to editor JSON: ${input}"`, () => {
       const result = mdxToEditorJSON({
         mdxWithFrontmatter: input,
@@ -233,9 +245,25 @@ there\`\`\`
         }
 
         expect(receivedBlockNodeToTest).toStrictEqual(blockNode)
+      } else if (rootChildren) {
+        const receivedRootChildren = result.editorState.root.children
+        removeUndefinedRecursively(receivedRootChildren)
+        //
+        expect(receivedRootChildren).toStrictEqual(rootChildren)
       } else {
-        throw new Error('Block node not found. Each test needs to define a block node')
+        throw new Error('Test not configured properly')
       }
     })
   }
 })
+
+function removeUndefinedRecursively(obj: object) {
+  for (const key in obj) {
+    const value = obj[key]
+    if (value && typeof value === 'object') {
+      removeUndefinedRecursively(value)
+    } else if (value === undefined) {
+      delete obj[key]
+    }
+  }
+}
