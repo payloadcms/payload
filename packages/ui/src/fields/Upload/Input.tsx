@@ -32,6 +32,7 @@ import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { fetchWithMethodOverride } from '../../utilities/fetchWithMethodOverride.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -200,11 +201,12 @@ export function UploadInput(props: UploadInputProps) {
         },
       }
 
-      const response = await fetch(`${serverURL}${api}/${relatedCollectionSlug}?${qs.stringify(query)}`, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
+      const response = await fetchWithMethodOverride({
+        api,
+        language: i18n.language,
+        queryStr: qs.stringify(query),
+        relation: relatedCollectionSlug,
+        serverURL,
       })
       if (response.ok) {
         const json = await response.json()

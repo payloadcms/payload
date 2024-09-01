@@ -18,6 +18,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { fetchWithMethodOverride } from '../../utilities/fetchWithMethodOverride.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -203,11 +204,12 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-              },
+            const response = await fetchWithMethodOverride({
+              api,
+              language: i18n.language,
+              queryStr: qs.stringify(query),
+              relation,
+              serverURL,
             })
 
             if (response.ok) {
@@ -330,11 +332,12 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-            },
+          const response = await fetchWithMethodOverride({
+            api,
+            language: i18n.language,
+            queryStr: qs.stringify(query),
+            relation,
+            serverURL,
           })
 
           const collection = collections.find((coll) => coll.slug === relation)
