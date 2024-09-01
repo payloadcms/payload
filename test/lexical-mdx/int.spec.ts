@@ -113,6 +113,86 @@ describe('Lexical MDX', () => {
         },
       },
     },
+    {
+      input: `
+\`\`\`ts hello\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`hello\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello',
+          language: '',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts
+hello
+\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts hello
+there
+\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello\nthere',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts hello
+there
+!!\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello\nthere\n!!',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts
+Hello
+there\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'hello\nthere',
+          language: 'ts',
+        },
+      },
+    },
   ]
 
   for (const { input, blockNode } of INPUT_AND_OUTPUT) {
