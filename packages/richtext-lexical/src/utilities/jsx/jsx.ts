@@ -1,33 +1,3 @@
-// Example input: type="info" hello={{heyyy: 'test', someNumber: 2}}
-export function extractPropsFromJSXPropsString({
-  propsString,
-}: {
-  propsString: string
-}): Record<string, any> {
-  const props = {}
-
-  // Parse simple key-value pairs
-  const simplePropsRegex = /(\w+)="([^"]*)"/g
-  let match
-  while ((match = simplePropsRegex.exec(propsString)) !== null) {
-    const [, key, value] = match
-    props[key] = value
-  }
-
-  // Parse complex JSON-like props
-  const complexPropsRegex = /(\w+)=\{\{(.*?)\}\}/g
-  while ((match = complexPropsRegex.exec(propsString)) !== null) {
-    const [, key, value] = match
-    try {
-      props[key] = JSON.parse(`{${value}}`)
-    } catch (error) {
-      console.error(`Error parsing complex prop ${key}:`, error)
-    }
-  }
-
-  return props
-}
-
 export function propsToJSXString({ props }: { props: Record<string, any> }): string {
   const propsArray: string[] = []
 
@@ -35,12 +5,21 @@ export function propsToJSXString({ props }: { props: Record<string, any> }): str
     if (typeof value === 'string') {
       // Handle simple string props
       propsArray.push(`${key}="${escapeQuotes(value)}"`)
-    } else if (typeof value === 'number' || typeof value === 'boolean') {
+    } else if (typeof value === 'number') {
       // Handle number and boolean props
       propsArray.push(`${key}={${value}}`)
+    } else if (typeof value === 'boolean') {
+      if (value) {
+        propsArray.push(`${key}`)
+      }
     } else if (value !== null && typeof value === 'object') {
-      // Handle complex object props
-      propsArray.push(`${key}={{${JSON.stringify(value, replacer)}}}`)
+      if (Array.isArray(value)) {
+        // Handle array props
+        propsArray.push(`${key}=[${value.map((v) => JSON.stringify(v, replacer)).join(', ')}]`)
+      } else {
+        // Handle complex object props
+        propsArray.push(`${key}={${JSON.stringify(value, replacer)}}`)
+      }
     }
   }
 
@@ -112,7 +91,8 @@ export function objectToFrontmatter(obj: Record<string, any>): null | string {
  * The resulting object contains the mdx content without the frontmatter and the frontmatter itself.
  */
 export function extractFrontmatter(mdxContent: string) {
-  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
+  const frontmatterRegex = /^---\s*\n[\s\S]*?\n---\s*\n/
   const match = mdxContent.match(frontmatterRegex)
 
   if (match) {

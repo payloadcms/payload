@@ -8,12 +8,13 @@ import type { Block } from 'payload'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import type { Transformer } from '@lexical/markdown'
 
-import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import { NodeWithHooks } from '../../typesServer.js'
 import { SerializedEditorState } from 'lexical'
+import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

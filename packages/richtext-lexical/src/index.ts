@@ -983,9 +983,9 @@ export { createServerFeature } from './utilities/createServerFeature.js'
 
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 
+export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
   extractFrontmatter,
-  extractPropsFromJSXPropsString,
   frontmatterToObject,
   objectToFrontmatter,
   propsToJSXString,

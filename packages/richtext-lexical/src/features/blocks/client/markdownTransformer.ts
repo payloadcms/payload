@@ -7,7 +7,7 @@ import {
 import type { ClientBlock } from 'payload'
 import type { Transformer } from '@lexical/markdown'
 
-import { extractPropsFromJSXPropsString, propsToJSXString } from '../../../utilities/jsx/jsx.js'
+import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 
@@ -18,6 +18,7 @@ import {
   SerializedEditorState,
 } from 'lexical'
 import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
+import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

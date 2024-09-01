@@ -1,105 +1,138 @@
-import fse from 'fs-extra'
-import globby from 'globby'
-import path from 'path'
+import { extractPropsFromJSXPropsString } from './extractPropsFromJSXPropsString.js'
+import { propsToJSXString } from './jsx.js'
 
 describe('jsx', () => {
   describe('prop string to object', () => {
-    const args = {
-      _: ['project-name'],
-      '--db': 'mongodb',
-      '--local-template': 'blank',
-      '--no-deps': true,
-    } as CliArgs
-    const packageManager = 'yarn'
-
-    it('creates plugin template', async () => {
-      const projectName = 'plugin'
-      const template: ProjectTemplate = {
-        name: 'plugin',
-        type: 'plugin',
-        description: 'Template for creating a Payload plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
-      }
-      await createProject({
-        cliArgs: args,
-        packageManager,
-        projectDir,
-        projectName,
-        template,
-      })
-
-      const packageJsonPath = path.resolve(projectDir, 'package.json')
-      const packageJson = fse.readJsonSync(packageJsonPath)
-
-      // Check package name and description
-      expect(packageJson.name).toStrictEqual(projectName)
-    })
-
-    describe('creates project from template', () => {
-      const templates = getValidTemplates()
-
-      it.each([
-        ['blank', 'mongodb'],
-        ['blank', 'postgres'],
-
-        // TODO: Re-enable these once 3.0 is stable and templates updated
-        // ['website', 'mongodb'],
-        // ['website', 'postgres'],
-        // ['ecommerce', 'mongodb'],
-        // ['ecommerce', 'postgres'],
-      ])('update config and deps: %s, %s', async (templateName, db) => {
-        const projectName = 'starter-project'
-
-        const template = templates.find((t) => t.name === templateName)
-
-        const cliArgs = {
-          ...args,
-          '--db': db,
-          '--local-template': templateName,
-        } as CliArgs
-
-        await createProject({
-          cliArgs,
-          dbDetails: {
-            type: db as DbType,
-            dbUri: `${db}://localhost:27017/create-project-test`,
+    const INPUT_AND_OUTPUT = [
+      {
+        input: 'key="value"',
+        output: {
+          key: 'value',
+        },
+      },
+      {
+        input: 'key=[1, 2, 3]',
+        output: {
+          key: [1, 2, 3],
+        },
+      },
+      {
+        input: 'key=[1, 2, 3, [1, 2]]',
+        output: {
+          key: [1, 2, 3, [1, 2]],
+        },
+      },
+      {
+        input: 'object={4}',
+        output: {
+          object: 4,
+        },
+      },
+      {
+        input: 'object={{"test": 1}}',
+        output: {
+          object: { test: 1 },
+        },
+      },
+      {
+        input: 'object={[1, 2, 3, [1, 2]]}',
+        inputFromOutput: 'object=[1, 2, 3, [1, 2]]',
+        output: {
+          object: [1, 2, 3, [1, 2]],
+        },
+      },
+      {
+        input: 'object={[1, 2]}',
+        inputFromOutput: 'object=[1, 2]',
+        output: {
+          object: [1, 2],
+        },
+      },
+      {
+        input: 'key="value" object={{key: "value"}}',
+        inputFromOutput: 'key="value" object={{"key": "value"}}',
+        output: {
+          key: 'value',
+          object: { key: 'value' },
+        },
+      },
+      {
+        input: 'global packageId="myId" uniqueId="some unique id!" update',
+        output: {
+          global: true,
+          packageId: 'myId',
+          uniqueId: 'some unique id!',
+          update: true,
+        },
+      },
+      {
+        input:
+          'global key="value" object={{key: "value", something: "test", hello: 1}} packageId="myId" uniqueId="some unique id!" update',
+        inputFromOutput:
+          'global key="value" object={{"hello": 1, "key": "value", "something": "test"}} packageId="myId" uniqueId="some unique id!" update',
+        output: {
+          global: true,
+          key: 'value',
+          object: { hello: 1, key: 'value', something: 'test' },
+          packageId: 'myId',
+          uniqueId: 'some unique id!',
+          update: true,
+        },
+      },
+      {
+        input:
+          'object={{hello: 1, key: "value", nested: { key: "value" }, something: "test", test: [1, 2, 3]}}',
+        inputFromOutput:
+          'object={{"hello": 1, "key": "value", "nested": {"key": "value"}, "something": "test", "test": [1, 2, 3]}}',
+        output: {
+          object: {
+            hello: 1,
+            key: 'value',
+            nested: { key: 'value' },
+            something: 'test',
+            test: [1, 2, 3],
           },
-          packageManager,
-          projectDir,
-          projectName,
-          template: template as ProjectTemplate,
-        })
+        },
+      },
+      {
+        input:
+          'global key="value" object={{hello: 1, key: "value", nested: { key: "value" }, something: "test", test: [1, 2, 3]}} packageId="myId" uniqueId="some unique id!" update',
+        inputFromOutput:
+          'global key="value" object={{"hello": 1, "key": "value", "nested": { "key": "value" }, "something": "test", "test": [1, 2, 3]}} packageId="myId" uniqueId="some unique id!" update',
+        output: {
+          global: true,
+          key: 'value',
+          object: {
+            hello: 1,
+            key: 'value',
+            nested: { key: 'value' },
+            something: 'test',
+            test: [1, 2, 3],
+          },
+          packageId: 'myId',
+          uniqueId: 'some unique id!',
+          update: true,
+        },
+      },
+    ]
 
-        const dbReplacement = dbReplacements[db as DbType]
+    for (const { input, output } of INPUT_AND_OUTPUT) {
+      it(`can correctly convert to object: "${input.replace(/\n/g, '\\n')}"`, () => {
+        const propsObject = extractPropsFromJSXPropsString({ propsString: input })
+        console.log({ output, propsObject })
 
-        const packageJsonPath = path.resolve(projectDir, 'package.json')
-        const packageJson = fse.readJsonSync(packageJsonPath)
-
-        // Verify git was initialized
-        expect(fse.existsSync(path.resolve(projectDir, '.git'))).toBe(true)
-
-        // Should only have one db adapter
-        expect(
-          Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
-        ).toHaveLength(1)
-
-        const payloadConfigPath = (
-          await globby('**/payload.config.ts', {
-            absolute: true,
-            cwd: projectDir,
-          })
-        )?.[0]
-
-        const content = fse.readFileSync(payloadConfigPath, 'utf-8')
-
-        // Check payload.config.ts
-        expect(content).not.toContain('// database-adapter-import')
-        expect(content).toContain(dbReplacement.importReplacement)
-
-        expect(content).not.toContain('// database-adapter-config-start')
-        expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+        expect(propsObject).toStrictEqual(output)
       })
-    })
+    }
+
+    for (const { input: originalInput, inputFromOutput, output } of INPUT_AND_OUTPUT) {
+      const input = inputFromOutput || originalInput
+      it(`can correctly convert from object: "${input.replace(/\n/g, '\\n')}"`, () => {
+        const propsString = propsToJSXString({ props: output })
+        console.log({ input, propsString })
+
+        expect(propsString.replaceAll(' ', '')).toBe(input.replaceAll(' ', ''))
+      })
+    }
   })
 })
