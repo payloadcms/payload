@@ -1,71 +1,64 @@
 import type { CollectionConfig } from 'payload'
 
-import {
-  BlocksFeature,
-  EXPERIMENTAL_TableFeature,
-  FixedToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
-import { loadMDXAfterRead, saveMDXBeforeChange } from '../../mdx/hooks.js'
-import { BannerBlock } from '../../mdx/jsxBlocks/banner.js'
-import { CodeBlock } from '../../mdx/jsxBlocks/code/code.js'
-import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
-
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
-    useAsTitle: 'docPath',
-  },
-  hooks: {
-    beforeChange: [saveMDXBeforeChange],
-    afterRead: [loadMDXAfterRead],
+    useAsTitle: 'text',
   },
   fields: [
     {
-      name: 'docPath',
+      admin: {
+        components: {
+          Label: '/collections/Posts/MyComponent.js#MyComponent',
+        },
+        description: 'This is a description',
+      },
+      name: 'text',
       type: 'text',
-      required: true,
     },
     {
-      type: 'collapsible',
-      label: 'FrontMatter',
-      admin: {
-        position: 'sidebar',
-      },
-      fields: [
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      name: 'myBlocks',
+      type: 'blocks',
+      blocks: [
         {
-          name: 'frontMatter',
-          type: 'array',
+          slug: 'test',
           fields: [
             {
+              name: 'test',
               type: 'text',
-              name: 'key',
             },
+          ],
+        },
+        {
+          slug: 'someBlock2',
+          fields: [
             {
+              name: 'test2',
               type: 'text',
-              name: 'value',
             },
           ],
         },
       ],
     },
-    {
-      name: 'richText',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          EXPERIMENTAL_TableFeature(),
-          FixedToolbarFeature(),
-          BlocksFeature({
-            blocks: [BannerBlock, CodeBlock, PackageInstallOptions],
-          }),
-        ],
-      }),
-    },
+    // {
+    //   type: 'row',
+    //   fields: [],
+    // },
+    // {
+    //   name: 'associatedMedia',
+    //   type: 'upload',
+    //   access: {
+    //     create: () => true,
+    //     update: () => false,
+    //   },
+    //   relationTo: mediaSlug,
+    // },
   ],
   versions: {
     drafts: true,

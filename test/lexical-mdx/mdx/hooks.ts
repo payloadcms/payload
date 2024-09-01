@@ -2,7 +2,6 @@ import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
-import { docsBasePath } from '@payload-config'
 import {
   $customConvertFromMarkdownString,
   extractFrontmatter,
@@ -15,6 +14,8 @@ import {
 import fs from 'node:fs'
 import path from 'path'
 import { deepCopyObjectSimple } from 'payload'
+
+import { docsBasePath } from '../config.js'
 
 export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
   collection,

@@ -21,10 +21,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {
-    menu: Menu;
-    'custom-ts': CustomT;
-  };
+  globals: {};
   locale: null;
   user: User & {
     collection: 'users';
@@ -54,7 +51,14 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  text?: string | null;
+  docPath: string;
+  frontMatter?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   richText?: {
     root: {
       type: string;
@@ -70,22 +74,6 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  myBlocks?:
-    | (
-        | {
-            test?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'test';
-          }
-        | {
-            test2?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'someBlock2';
-          }
-      )[]
-    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -194,39 +182,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu".
- */
-export interface Menu {
-  id: string;
-  globalText?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ts".
- */
-export interface CustomT {
-  id: string;
-  custom?: 'hello' | 'world';
-  withDefinitionsUsage?: ObjectWithNumber[];
-  json: {
-    id: string;
-    name: string;
-    age?: number;
-  }[];
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "objectWithNumber".
- */
-export interface ObjectWithNumber {
-  id?: number;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
