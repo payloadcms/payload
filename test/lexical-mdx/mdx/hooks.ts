@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from 'lexical'
 import type { CollectionAfterReadHook, CollectionBeforeChangeHook, RichTextField } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
@@ -83,26 +84,19 @@ export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
   return null // Do not save anything to database
 }
 
-export const loadMDXAfterRead: CollectionAfterReadHook = ({ collection, doc, context }) => {
-  if (context.seed) {
-    return doc
-  }
-  const field: RichTextField = collection.fields.find(
-    (field) => 'name' in field && field.name === 'richText',
-  ) as RichTextField
-
-  const docFilePath = path.join(docsBasePath, doc.docPath)
-
-  const mdxWithFrontmatter = fs.readFileSync(docFilePath, {
-    encoding: 'utf-8',
-  })
-
+export function mdxToEditorJSON({
+  mdxWithFrontmatter,
+  editorConfig,
+}: {
+  editorConfig: SanitizedServerEditorConfig
+  mdxWithFrontmatter: string
+}): {
+  editorState: SerializedEditorState
+  frontMatter: { key: string; value: string }[]
+} {
   const frontMatter = extractFrontmatter(mdxWithFrontmatter)
 
   const mdx = frontMatter.content
-
-  const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
-    .editorConfig
 
   const headlessEditor = createHeadlessEditor({
     nodes: getEnabledNodes({
@@ -125,8 +119,35 @@ export const loadMDXAfterRead: CollectionAfterReadHook = ({ collection, doc, con
     : []
 
   return {
-    ...doc,
-    richText: headlessEditor.getEditorState().toJSON(),
+    editorState: headlessEditor.getEditorState().toJSON(),
     frontMatter: frontMatterArray,
+  }
+}
+
+export const loadMDXAfterRead: CollectionAfterReadHook = ({ collection, doc, context }) => {
+  if (context.seed) {
+    return doc
+  }
+  const field: RichTextField = collection.fields.find(
+    (field) => 'name' in field && field.name === 'richText',
+  ) as RichTextField
+
+  const docFilePath = path.join(docsBasePath, doc.docPath)
+
+  const mdxWithFrontmatter = fs.readFileSync(docFilePath, {
+    encoding: 'utf-8',
+  })
+  const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
+    .editorConfig
+
+  const result = mdxToEditorJSON({
+    mdxWithFrontmatter,
+    editorConfig,
+  })
+
+  return {
+    ...doc,
+    richText: result.editorState,
+    frontMatter: result.frontMatter,
   }
 }
