@@ -219,7 +219,7 @@
     "noFiltersSet": "Nessun filtro impostato",
     "noLabel": "<No {{label}}>",
     "noOptions": "Nessuna opzione",
-    "noResults": "Nessun {{label}} trovato. Non esiste ancora nessun {{label}} oppure nessuno corrisponde ai filtri che hai specificato sopra.",
+    "noResults": "Non abbiamo trovato {{label}}. Potrebbero non esserci {{label}}, oppure nessuno corrisponde ai filtri che hai specificato sopra.",
     "noValue": "Nessun valore",
     "none": "Nessuno",
     "notFound": "Non Trovato",
