@@ -22,16 +22,13 @@ function createTagRegexes(tagName: string) {
   // Regex components
   const openingTag = `<${escapedTagName}`
   const closingTag = `</${escapedTagName}`
-  const optionalAttributes = `([^>]*?)`
   const optionalWhitespace = `\\s*`
-  const optionalSelfClosing = `(/?)`
-  const optionalClosingBracket = `>?`
   const mandatoryClosingBracket = `>`
-  const selfClosingEnd = `\\s*/>` // New component for matching just "/>"
+  const selfClosingEnd = `/>`
 
   // Assembled regex patterns
-  const startPattern = `${openingTag}${optionalAttributes}${optionalWhitespace}${optionalSelfClosing}${optionalClosingBracket}`
-  const endPattern = `${closingTag}${optionalWhitespace}${mandatoryClosingBracket}|${openingTag}${optionalAttributes}${selfClosingEnd}|${selfClosingEnd}`
+  const startPattern = `${openingTag}([^>]*?)${optionalWhitespace}(?:>|$)`
+  const endPattern = `${closingTag}${optionalWhitespace}${mandatoryClosingBracket}|${selfClosingEnd}`
 
   return {
     regExpStart: new RegExp(startPattern, 'i'),
@@ -98,10 +95,14 @@ export const getBlockMarkdownTransformers = ({
         if (block.jsx.import) {
           const childrenString = linesInBetween.join('\n').trim()
 
-          let propsString: string | null = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+          let propsString: string | null = openMatch?.length > 1 ? openMatch[1]?.trim() : null
 
           if (closeMatch[0] === '/>') {
             propsString += linesInBetween.join(' ').trim()
+          }
+
+          if (propsString.endsWith('"/')) {
+            propsString = propsString.slice(0, -1)
           }
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)

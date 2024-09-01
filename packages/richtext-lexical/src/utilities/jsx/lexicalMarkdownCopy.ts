@@ -184,7 +184,7 @@ function $importMultiline(
         openedSubStartMatches--
       }
 
-      if (!endMatch || openedSubStartMatches !== 0) {
+      if (!endMatch || openedSubStartMatches > 0) {
         if (
           !isEndOptional ||
           (isEndOptional && endLineIndex < linesLength - 1) // Optional end, but didn't reach the end of the document yet => continue searching for potential closing match
