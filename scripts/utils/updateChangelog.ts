@@ -126,9 +126,11 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
 async function createContributorSection(commits: GitCommit[]): Promise<string> {
   const contributors = await getContributors(commits)
-  if (!contributors.length) return ''
+  if (!contributors.length) {
+    return ''
+  }
 
-  let contributorsSection = `### Contributors\n\n`
+  let contributorsSection = `### 🤝 Contributors\n\n`
 
   for (const contributor of contributors) {
     contributorsSection += `- ${contributor.name} (@${contributor.username})\n`
