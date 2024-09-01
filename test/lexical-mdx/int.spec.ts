@@ -1,6 +1,7 @@
 import type {
   BlockFields,
   LexicalRichTextAdapter,
+  SanitizedServerEditorConfig,
   SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
 import type { RichTextField, SanitizedConfig } from 'payload'
@@ -14,6 +15,7 @@ import { postsSlug } from './collections/Posts/index.js'
 import { mdxToEditorJSON } from './mdx/hooks.js'
 
 let config: SanitizedConfig
+let editorConfig: SanitizedServerEditorConfig
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,6 +37,14 @@ describe('Lexical MDX', () => {
   beforeAll(async () => {
     const { config: incomingConfig } = await initPayloadInt(dirname, undefined, false)
     config = incomingConfig
+
+    const richTextField: RichTextField = config.collections
+      .find((collection) => collection.slug === postsSlug)
+      .fields.find(
+        (field) => 'name' in field && field.name === 'richText',
+      ) as unknown as RichTextField
+
+    editorConfig = (richTextField.editor as LexicalRichTextAdapter).editorConfig
   })
 
   const INPUT_AND_OUTPUT: Tests = [
@@ -197,14 +207,6 @@ there\`\`\`
 
   for (const { input, blockNode } of INPUT_AND_OUTPUT) {
     it(`can correctly convert to editor JSON: ${input}"`, () => {
-      const richTextField: RichTextField = config.collections
-        .find((collection) => collection.slug === postsSlug)
-        .fields.find(
-          (field) => 'name' in field && field.name === 'richText',
-        ) as unknown as RichTextField
-
-      const editorConfig = (richTextField.editor as LexicalRichTextAdapter).editorConfig
-
       const result = mdxToEditorJSON({
         mdxWithFrontmatter: input,
         editorConfig,
