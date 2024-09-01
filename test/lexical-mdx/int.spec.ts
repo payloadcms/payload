@@ -1,10 +1,10 @@
+/* eslint jest/no-conditional-in-test: 0 */
 import type {
   BlockFields,
   LexicalRichTextAdapter,
   SanitizedServerEditorConfig,
   SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
-import type { SerializedLexicalNode } from 'lexical'
 import type { RichTextField, SanitizedConfig } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
-import { mdxToEditorJSON } from './mdx/hooks.js'
+import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { tableJson } from './tableJson.js'
 
 let config: SanitizedConfig
@@ -218,7 +218,7 @@ there\`\`\`
   ]
 
   for (const { input, blockNode, rootChildren } of INPUT_AND_OUTPUT) {
-    it(`can correctly convert to editor JSON: ${input}"`, () => {
+    it(`can convert to editor JSON: ${input}"`, () => {
       const result = mdxToEditorJSON({
         mdxWithFrontmatter: input,
         editorConfig,
@@ -253,6 +253,37 @@ there\`\`\`
       } else {
         throw new Error('Test not configured properly')
       }
+    })
+
+    it(`can convert from editor JSON: ${input}"`, () => {
+      const editorState = {
+        root: {
+          children: blockNode
+            ? [
+                {
+                  format: '',
+                  type: 'block',
+                  version: 2,
+                  ...blockNode,
+                },
+              ]
+            : rootChildren,
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      }
+      const result = editorJSONToMDX({
+        editorConfig,
+        editorState,
+      })
+      // Remove all spaces and newlines
+      const resultNoSpace = result.replace(/\s/g, '')
+      const inputNoSpace = input.replace(/\s/g, '')
+
+      expect(resultNoSpace).toBe(inputNoSpace)
     })
   }
 })

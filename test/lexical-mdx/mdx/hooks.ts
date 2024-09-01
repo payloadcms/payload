@@ -18,25 +18,15 @@ import { deepCopyObjectSimple } from 'payload'
 
 import { docsBasePath } from '../collections/Posts/shared.js'
 
-export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
-  collection,
-  data,
-  context,
-  req,
+export const editorJSONToMDX = ({
+  editorState,
+  editorConfig,
+  frontMatterData,
+}: {
+  editorConfig: SanitizedServerEditorConfig
+  editorState: any
+  frontMatterData?: any
 }) => {
-  if (context.seed) {
-    return data
-  }
-  const docFilePath = path.join(docsBasePath, data.docPath)
-
-  const field: RichTextField = collection.fields.find(
-    (field) => 'name' in field && field.name === 'richText',
-  ) as RichTextField
-  const value = data[field.name]
-
-  const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
-    .editorConfig
-
   const headlessEditor = createHeadlessEditor({
     nodes: getEnabledNodes({
       editorConfig,
@@ -46,9 +36,9 @@ export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
   // Convert lexical state to markdown
   // Import editor state into your headless editor
   try {
-    headlessEditor.setEditorState(headlessEditor.parseEditorState(value)) // This should commit the editor state immediately
+    headlessEditor.setEditorState(headlessEditor.parseEditorState(editorState)) // This should commit the editor state immediately
   } catch (e) {
-    req.payload.logger.error({ err: e }, 'ERROR parsing editor state')
+    console.error('Error parsing editor state', e)
   }
 
   // Export to markdown
@@ -57,7 +47,11 @@ export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
     markdown = $convertToMarkdownString(editorConfig?.features?.markdownTransformers)
   })
 
-  const frontMatterOriginalData = deepCopyObjectSimple(data.frontMatter)
+  if (!frontMatterData) {
+    return markdown
+  }
+
+  const frontMatterOriginalData = deepCopyObjectSimple(frontMatterData)
 
   //Frontmatter
   const frontmatterData = {}
@@ -73,6 +67,29 @@ export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
       markdown = frontmatterString + '\n' + markdown
     }
   }
+
+  return markdown
+}
+
+export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({ collection, data, context }) => {
+  if (context.seed) {
+    return data
+  }
+  const docFilePath = path.join(docsBasePath, data.docPath)
+
+  const field: RichTextField = collection.fields.find(
+    (field) => 'name' in field && field.name === 'richText',
+  ) as RichTextField
+  const value = data[field.name]
+
+  const editorConfig: SanitizedServerEditorConfig = (field.editor as LexicalRichTextAdapter)
+    .editorConfig
+
+  const markdown = editorJSONToMDX({
+    editorState: value,
+    editorConfig,
+    frontMatterData: data.frontMatter,
+  })
 
   if (markdown?.trim()?.length) {
     // Write markdown to '../../../../docs/admin/overview.mdx'
