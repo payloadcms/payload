@@ -6,12 +6,10 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
-// import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
+import { docsBasePath } from './collections/Posts/shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-export const docsBasePath = '/Users/alessio/Documents/payloadcms-mdx-mock/docs'
 
 export default buildConfigWithDefaults({
   // ...extend config here

@@ -16,7 +16,7 @@ import fs from 'node:fs'
 import path from 'path'
 import { deepCopyObjectSimple } from 'payload'
 
-import { docsBasePath } from '../config.js'
+import { docsBasePath } from '../collections/Posts/shared.js'
 
 export const saveMDXBeforeChange: CollectionBeforeChangeHook = ({
   collection,

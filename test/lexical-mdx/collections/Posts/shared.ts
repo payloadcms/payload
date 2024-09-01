@@ -1,3 +1,5 @@
+export const docsBasePath = '/Users/alessio/Documents/payloadcms-mdx-mock/docs'
+
 export const languages = {
   ts: 'TypeScript',
   plaintext: 'Plain Text',

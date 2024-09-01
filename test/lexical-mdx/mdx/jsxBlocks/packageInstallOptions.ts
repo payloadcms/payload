@@ -1,9 +1,5 @@
 import type { Block } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-
-import { bannerTypes } from '../../collections/Posts/shared.js'
-
 export const PackageInstallOptions: Block = {
   slug: 'PackageInstallOptions',
   jsx: {
