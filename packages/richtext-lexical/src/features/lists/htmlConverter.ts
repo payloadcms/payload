@@ -97,7 +97,7 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
 
           </li>`
     } else {
-      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''} value=${node?.value}${style}>${childrenText}</li>`
+      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''}value=${node?.value}${style}>${childrenText}</li>`
     }
   },
   nodeTypes: [ListItemNode.getType()],
