@@ -38,7 +38,10 @@ export const buildFormState = async ({
   req,
 }: {
   req: PayloadRequest
-}): Promise<{ lockedState?: { isLocked: boolean; user: ClientUser }; state: FormState }> => {
+}): Promise<{
+  lockedState?: { isLocked: boolean; user: ClientUser | number | string }
+  state: FormState
+}> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
   const { collectionSlug, formState, globalSlug, locale, operation, returnLockStatus, schemaPath } =
     reqData
@@ -219,7 +222,7 @@ export const buildFormState = async ({
     }
   }
 
-  if (returnLockStatus) {
+  if (returnLockStatus && req.user) {
     let lockStatusQuery
 
     // Query based on whether it's a collection or global
@@ -238,6 +241,7 @@ export const buildFormState = async ({
       const lockStatus = await req.payload.find({
         collection: 'payload-locked-documents',
         depth: 1,
+        limit: 1,
         pagination: false,
         where: lockStatusQuery,
       })
@@ -246,6 +250,35 @@ export const buildFormState = async ({
         const lockedState = {
           isLocked: true,
           user: lockStatus.docs[0]?._lastEdited?.user?.value,
+        }
+
+        return { lockedState, state: result }
+      } else {
+        // If no lock document exists, create it
+        await req.payload.create({
+          collection: 'payload-locked-documents',
+          data: {
+            _lastEdited: {
+              editedAt: new Date().toISOString(),
+              user: {
+                relationTo: [req.user.collection],
+                value: req.user.id,
+              },
+            },
+            document: collectionSlug
+              ? {
+                  relationTo: collectionSlug,
+                  value: id,
+                }
+              : undefined,
+            globalSlug: globalSlug ? globalSlug : undefined,
+            isLocked: true,
+          },
+        })
+
+        const lockedState = {
+          isLocked: true,
+          user: req.user,
         }
 
         return { lockedState, state: result }

@@ -48,6 +48,7 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
+    documentIsLocked,
     getDocPreferences,
     getVersions,
     globalSlug,
@@ -55,32 +56,16 @@ export const DefaultEditView: React.FC = () => {
     hasSavePermission,
     initialData: data,
     initialState,
-    isDocumentLocked,
     isEditing,
     isInitializing,
-    lastEditedAt,
-    lockDocument,
     onSave: onSaveFromContext,
     setCurrentEditor,
+    setDocumentIsLocked,
     unlockDocument,
     updateDocumentEditor,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
-  const [showLockedModal, setShowLockedModal] = useState(false)
-  const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
-  const [showTakeOverModal, setShowTakeOverModal] = useState(false)
-
-  const [shouldLockDocument, setShouldLockDocument] = useState(false)
-
-  const documentLockStateRef = useRef<{
-    isLocked: boolean
-    user: ClientUser
-  } | null>(null)
-
-  const isDocumentLockedRef = useRef(false)
-  const [isLockedByAnotherUser, setIsLockedByAnotherUser] = useState(false)
-
   const {
     config,
     config: {
@@ -106,10 +91,10 @@ export const DefaultEditView: React.FC = () => {
 
   const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
 
-  const lockDuration =
-    typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
-      ? lockWhenEditingProp.lockDuration
-      : 300 // default to 300 seconds if no lockDuration is provided
+  // const lockDuration =
+  //   typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
+  //     ? lockWhenEditingProp.lockDuration
+  //     : 300 // default to 300 seconds if no lockDuration is provided
 
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
@@ -124,6 +109,19 @@ export const DefaultEditView: React.FC = () => {
     (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !disableLeaveWithoutSaving
+
+  const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
+  const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+
+  const documentLockStateRef = useRef<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser
+  } | null>({
+    hasShownLockedModal: false,
+    isLocked: false,
+    user: null,
+  })
 
   const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
 
@@ -149,77 +147,24 @@ export const DefaultEditView: React.FC = () => {
     return false
   })
 
-  const lockTimer = useRef<NodeJS.Timeout | null>(null)
-  const isManualUnlockRef = useRef(false)
-
-  const resetLockTimer = useCallback(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    if (lockTimer.current) {
-      clearTimeout(lockTimer.current)
-    }
-
-    lockTimer.current = setTimeout(() => {
-      if (id || globalSlug) {
-        // Check if this user is still the current editor
-        if (documentLockStateRef.current?.user.id !== user.id) {
-          return // Stop execution if the user is no longer the owner
-        }
-
-        try {
-          void unlockDocument(id, collectionSlug ?? globalSlug)
-
-          // Reset the locked state
-          isDocumentLockedRef.current = false
-          documentLockStateRef.current = null
-          setCurrentEditor(null)
-
-          // Set manual unlock flag to prevent immediate relock
-          isManualUnlockRef.current = true
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Failed to unlock the document', error)
-        }
-      }
-    }, lockDuration * 1000)
-  }, [
-    id,
-    globalSlug,
-    collectionSlug,
-    unlockDocument,
-    setCurrentEditor,
-    user.id,
-    lockDuration,
-    isLockingEnabled,
-  ])
-
   const handleTakeOver = useCallback(() => {
     if (!isLockingEnabled) {
       return
-    }
-
-    // Invalidate the previous user's timer
-    if (lockTimer.current) {
-      clearTimeout(lockTimer.current)
     }
 
     try {
       // Call updateDocumentEditor to update the document's owner to the current user
       void updateDocumentEditor(id, collectionSlug ?? globalSlug, user)
 
+      documentLockStateRef.current.hasShownLockedModal = true
+
       // Update the locked state to reflect the current user as the owner
-      documentLockStateRef.current = { isLocked: true, user }
+      documentLockStateRef.current = {
+        hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal,
+        isLocked: true,
+        user,
+      }
       setCurrentEditor(user)
-      setIsLockedByAnotherUser(false)
-
-      // Reset the lock timer after takeover
-      resetLockTimer()
-
-      // Close modals if any were open
-      setShowLockedModal(false)
-      setShowTakeOverModal(false)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error during document takeover:', error)
@@ -231,8 +176,6 @@ export const DefaultEditView: React.FC = () => {
     globalSlug,
     user,
     setCurrentEditor,
-    setIsLockedByAnotherUser,
-    resetLockTimer,
     isLockingEnabled,
   ])
 
@@ -241,29 +184,20 @@ export const DefaultEditView: React.FC = () => {
       return
     }
 
-    // Invalidate the previous user's timer
-    if (lockTimer.current) {
-      clearTimeout(lockTimer.current)
-    }
-
     try {
       // Call updateDocumentEditor to update the document's owner to the current user
       void updateDocumentEditor(id, collectionSlug ?? globalSlug, user)
 
       // Update the locked state to reflect the current user as the owner
-      documentLockStateRef.current = { isLocked: true, user }
+      documentLockStateRef.current = {
+        hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal,
+        isLocked: true,
+        user,
+      }
       setCurrentEditor(user)
-      setIsLockedByAnotherUser(false)
-
-      // Reset the lock timer after takeover
-      resetLockTimer()
 
       // Ensure the document is editable for the incoming user
       setIsReadOnlyForIncomingUser(false)
-
-      // Close modals if any were open
-      setShowLockedModal(false)
-      setShowTakeOverModal(false)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error during document takeover:', error)
@@ -275,35 +209,8 @@ export const DefaultEditView: React.FC = () => {
     globalSlug,
     user,
     setCurrentEditor,
-    setIsLockedByAnotherUser,
-    resetLockTimer,
     isLockingEnabled,
   ])
-
-  useEffect(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    if (documentLockStateRef.current && documentLockStateRef.current.user.id !== user.id) {
-      setIsLockedByAnotherUser(true)
-    } else {
-      setIsLockedByAnotherUser(false)
-    }
-  }, [user.id, isLockingEnabled])
-
-  useEffect(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    if (isDocumentLocked && currentEditor && currentEditor.id !== user.id && !showTakeOverModal) {
-      // Show the DocumentLocked modal for the incoming user
-      setShowLockedModal(true)
-    } else {
-      setShowLockedModal(false)
-    }
-  }, [currentEditor, isDocumentLocked, showTakeOverModal, user.id, isLockingEnabled])
 
   const handleGoBack = useCallback(() => {
     const redirectRoute = formatAdminURL({
@@ -314,16 +221,11 @@ export const DefaultEditView: React.FC = () => {
   }, [adminRoute, collectionSlug, router])
 
   const handleBackToDashboard = useCallback(() => {
+    setShowTakeOverModal(false)
     const redirectRoute = formatAdminURL({
       adminRoute,
       path: '/',
     })
-
-    // Clear the lock timer if they are still running
-    if (lockTimer.current) {
-      clearTimeout(lockTimer.current)
-      lockTimer.current = null
-    }
 
     router.push(redirectRoute)
   }, [adminRoute, router])
@@ -354,6 +256,7 @@ export const DefaultEditView: React.FC = () => {
       // Unlock the document after save
       if ((id || globalSlug) && isLockingEnabled) {
         void unlockDocument(id, collectionSlug ?? globalSlug)
+        setDocumentIsLocked(false)
       }
 
       if (!isEditing && depth < 2) {
@@ -386,17 +289,12 @@ export const DefaultEditView: React.FC = () => {
       unlockDocument,
       globalSlug,
       isLockingEnabled,
+      setDocumentIsLocked,
     ],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      // If the document was manually unlocked, skip further processing
-      if (isManualUnlockRef.current) {
-        isManualUnlockRef.current = false
-        return prevFormState // Return the previous form state unchanged
-      }
-
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormState({
@@ -414,6 +312,8 @@ export const DefaultEditView: React.FC = () => {
         serverURL,
       })
 
+      setDocumentIsLocked(true)
+
       if (isLockingEnabled) {
         const previousOwnerId = documentLockStateRef.current?.user?.id
 
@@ -421,26 +321,16 @@ export const DefaultEditView: React.FC = () => {
           if (!documentLockStateRef.current || lockedState.user.id !== previousOwnerId) {
             if (previousOwnerId === user.id && lockedState.user.id !== user.id) {
               setShowTakeOverModal(true)
+              documentLockStateRef.current.hasShownLockedModal = true
             }
 
-            documentLockStateRef.current = lockedState
+            documentLockStateRef.current = documentLockStateRef.current = {
+              hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
+              isLocked: true,
+              user: lockedState.user,
+            }
             setCurrentEditor(lockedState.user)
-
-            if (lockedState.user.id !== user.id) {
-              setIsLockedByAnotherUser(true)
-            } else {
-              setIsLockedByAnotherUser(false)
-            }
           }
-        }
-
-        if ((id || globalSlug) && !isLockedByAnotherUser) {
-          resetLockTimer() // Reset the timer on every change
-        }
-
-        // Lock the document if it's not locked and this user is the current editor
-        if ((id || globalSlug) && !isLockedByAnotherUser && !isDocumentLockedRef.current) {
-          setShouldLockDocument(true)
         }
       }
 
@@ -455,36 +345,13 @@ export const DefaultEditView: React.FC = () => {
       id,
       operation,
       serverURL,
-      isLockedByAnotherUser,
       user,
-      resetLockTimer,
       documentLockStateRef,
       setCurrentEditor,
       isLockingEnabled,
+      setDocumentIsLocked,
     ],
   )
-
-  useEffect(() => {
-    if (!isLockingEnabled) {
-      return
-    }
-
-    if ((id || globalSlug) && shouldLockDocument && !isDocumentLockedRef.current) {
-      const lockDoc = async () => {
-        try {
-          await lockDocument(id, collectionSlug ?? globalSlug, user)
-          isDocumentLockedRef.current = true
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Failed to lock the document', error)
-        } finally {
-          setShouldLockDocument(false)
-        }
-      }
-
-      void lockDoc()
-    }
-  }, [shouldLockDocument, lockDocument, id, user, globalSlug, collectionSlug, isLockingEnabled])
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
@@ -493,27 +360,36 @@ export const DefaultEditView: React.FC = () => {
         return
       }
 
-      if ((id || globalSlug) && isDocumentLockedRef.current) {
+      if ((id || globalSlug) && documentIsLocked) {
         // Check if this user is still the current editor
         if (documentLockStateRef.current?.user?.id === user.id) {
           void unlockDocument(id, collectionSlug ?? globalSlug)
-
-          // Reset the locked state
-          isDocumentLockedRef.current = false
-          documentLockStateRef.current = null
+          setDocumentIsLocked(false)
           setCurrentEditor(null)
-
-          // Clear the lock timer
-          if (lockTimer.current) {
-            clearTimeout(lockTimer.current)
-            lockTimer.current = null
-          }
         }
       }
 
       setShowTakeOverModal(false)
     }
-  }, [collectionSlug, globalSlug, id, unlockDocument, user.id, setCurrentEditor, isLockingEnabled])
+  }, [
+    collectionSlug,
+    globalSlug,
+    id,
+    unlockDocument,
+    user.id,
+    setCurrentEditor,
+    isLockingEnabled,
+    documentIsLocked,
+    setDocumentIsLocked,
+  ])
+
+  const shouldShowDocumentLockedModal =
+    documentIsLocked &&
+    currentEditor &&
+    currentEditor.id !== user.id &&
+    !isReadOnlyForIncomingUser &&
+    !showTakeOverModal &&
+    !documentLockStateRef.current?.hasShownLockedModal
 
   return (
     <main className={classes.filter(Boolean).join(' ')}>
@@ -530,11 +406,11 @@ export const DefaultEditView: React.FC = () => {
           onSuccess={onSave}
         >
           {BeforeDocument}
-          {isLockingEnabled && showLockedModal && (
+          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
             <DocumentLocked
-              editedAt={lastEditedAt}
+              // editedAt={lastEditedAt}
               handleGoBack={handleGoBack}
-              isActive={showLockedModal}
+              isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
                 setShowTakeOverModal(false)
@@ -547,7 +423,10 @@ export const DefaultEditView: React.FC = () => {
             <DocumentTakeOver
               handleBackToDashboard={handleBackToDashboard}
               isActive={showTakeOverModal}
-              onReadOnly={() => setIsReadOnlyForIncomingUser(true)}
+              onReadOnly={() => {
+                setIsReadOnlyForIncomingUser(true)
+                setShowTakeOverModal(false)
+              }}
             />
           )}
           {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}

@@ -41,16 +41,14 @@ export type DocumentInfoProps = {
 export type DocumentInfoContext = {
   currentEditor?: ClientUser
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
+  documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   initialData: Data
   initialState?: FormState
-  isDocumentLocked: boolean
   isInitializing: boolean
   isLoading: boolean
-  lastEditedAt: Date
-  lockDocument: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
@@ -58,6 +56,7 @@ export type DocumentInfoContext = {
     field: string,
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
+  setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
   slug?: string
   title: string

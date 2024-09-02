@@ -11,7 +11,9 @@ const modalSlug = 'document-locked'
 const baseClass = 'document-locked'
 
 const formatDate = (date) => {
-  if (!date) {return ''}
+  if (!date) {
+    return ''
+  }
   return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     hour: 'numeric',
@@ -23,7 +25,7 @@ const formatDate = (date) => {
 }
 
 export const DocumentLocked: React.FC<{
-  editedAt: Date | null
+  editedAt?: Date | null
   handleGoBack: () => void
   isActive: boolean
   onReadOnly: () => void
@@ -34,8 +36,11 @@ export const DocumentLocked: React.FC<{
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (isActive) {openModal(modalSlug)}
-    else {closeModal(modalSlug)}
+    if (isActive) {
+      openModal(modalSlug)
+    } else {
+      closeModal(modalSlug)
+    }
   }, [isActive, openModal, closeModal])
 
   return (
@@ -47,7 +52,7 @@ export const DocumentLocked: React.FC<{
             <strong>{user?.email ?? user?.id}</strong> {t('general:currentlyEditing')}
           </p>
           <p>
-            {t('general:editedSince')} <strong>{formatDate(editedAt)}</strong>
+            {t('general:editedSince')} <strong>{editedAt && formatDate(editedAt)}</strong>
           </p>
         </div>
         <div className={`${baseClass}__controls`}>

@@ -17,8 +17,11 @@ export const DocumentTakeOver: React.FC<{
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (isActive) {openModal(modalSlug)}
-    else {closeModal(modalSlug)}
+    if (isActive) {
+      openModal(modalSlug)
+    } else {
+      closeModal(modalSlug)
+    }
   }, [isActive, openModal, closeModal])
 
   return (

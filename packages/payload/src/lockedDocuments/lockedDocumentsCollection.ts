@@ -25,19 +25,6 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
         {
           name: 'user',
           type: 'relationship',
-          hooks: {
-            beforeValidate: [
-              ({ req }) => {
-                if (!req?.user) {
-                  return null
-                }
-                return {
-                  relationTo: req?.user.collection,
-                  value: req?.user.id,
-                }
-              },
-            ],
-          },
           relationTo: config.collections
             .filter((collectionConfig) => collectionConfig.auth)
             .map((collectionConfig) => collectionConfig.slug),
