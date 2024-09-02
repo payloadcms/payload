@@ -5,6 +5,7 @@ import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { SerializedListItemNode, SerializedListNode } from './plugin/index.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { getElementNodeDefaultStyle } from '../shared/defaultStyle/getElementNodeDefaultStyle.js'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
   converter: async ({
@@ -66,6 +67,10 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
       req,
       showHiddenFields,
     })
+    const defaultStyle = getElementNodeDefaultStyle({
+      node,
+    })
+    const style = defaultStyle ? ` style="${defaultStyle}"` : ''
 
     if ('listType' in parent && parent?.listType === 'check') {
       const uuid = uuidv4()
@@ -78,6 +83,7 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
           role="checkbox"
           tabIndex=${-1}
           value=${node?.value}
+          ${style}
       >
       ${
         hasSubLists
@@ -91,7 +97,7 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
 
           </li>`
     } else {
-      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''}value=${node?.value}>${childrenText}</li>`
+      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''} value=${node?.value}${style}>${childrenText}</li>`
     }
   },
   nodeTypes: [ListItemNode.getType()],

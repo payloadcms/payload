@@ -2,6 +2,7 @@ import type { SerializedParagraphNode } from 'lexical'
 
 import type { HTMLConverter } from '../types.js'
 
+import { getElementNodeDefaultStyle } from '../../../../shared/defaultStyle/getElementNodeDefaultStyle.js'
 import { convertLexicalNodesToHTML } from '../index.js'
 
 export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
@@ -30,7 +31,12 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
       req,
       showHiddenFields,
     })
-    return `<p>${childrenText}</p>`
+    const defaultStyle = getElementNodeDefaultStyle({
+      node,
+    })
+    const style = defaultStyle ? ` style="${defaultStyle}"` : ''
+
+    return `<p${style}>${childrenText}</p>`
   },
   nodeTypes: ['paragraph'],
 }

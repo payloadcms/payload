@@ -8,6 +8,7 @@ import { HeadingNode } from '@lexical/rich-text'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { getElementNodeDefaultStyle } from '../../shared/defaultStyle/getElementNodeDefaultStyle.js'
 import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
@@ -69,8 +70,12 @@ export const HeadingFeature = createServerFeature<
                   req,
                   showHiddenFields,
                 })
+                const defaultStyle = getElementNodeDefaultStyle({
+                  node,
+                })
+                const style = defaultStyle ? ` style="${defaultStyle}"` : ''
 
-                return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
+                return `<${node?.tag}${style}>${childrenText}</${node?.tag}>`
               },
               nodeTypes: [HeadingNode.getType()],
             },
