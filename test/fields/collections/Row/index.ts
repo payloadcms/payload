@@ -80,7 +80,7 @@ const RowFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
-          label: 'Collapsible within a row',
+          label: 'Collapsible 30% width within a row',
           type: 'collapsible',
           fields: [
             {
