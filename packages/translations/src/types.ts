@@ -9,7 +9,7 @@ type DateFNSKeys =
   | 'az'
   | 'bg'
   | 'cs'
-  | 'da-DK'
+  | 'da'
   | 'de'
   | 'en-US'
   | 'es'

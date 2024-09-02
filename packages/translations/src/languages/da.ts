@@ -438,6 +438,6 @@ export const daTranslations: DefaultTranslationsObject = {
 }
 
 export const da: Language = {
-  dateFNSKey: 'da-DK',
+  dateFNSKey: 'da',
   translations: daTranslations,
 }
