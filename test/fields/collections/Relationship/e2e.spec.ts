@@ -118,7 +118,7 @@ describe('relationship', () => {
     await page.locator('[id^=drawer_2_doc-drawer__relationship-fields] #field-relationship').click()
     await page
       .locator(
-        '[id^=drawer_q_collection__relationship-fields] .rs__option:has-text("Seeded text document")',
+        '[id^=drawer_2_doc-drawer__relationship-fields] .rs__option:has-text("Seeded text document")',
       )
       .click()
 
