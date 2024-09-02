@@ -47,7 +47,6 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
   const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const resetAll = useCallback(() => {
     const fields = getFields()
     const fieldsWithoutMeta = fields

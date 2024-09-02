@@ -4,7 +4,6 @@ import type { EntityToGroup } from '@payloadcms/ui/shared'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
-  ChevronIcon,
   NavGroup,
   useAuth,
   useConfig,

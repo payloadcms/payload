@@ -104,6 +104,7 @@ const typescriptRules = {
       },
     },
   ],
+  '@typescript-eslint/no-empty-object-type': 'warn'
 }
 
 /** @typedef {import('eslint').Linter.FlatConfig} */

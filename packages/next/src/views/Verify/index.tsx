@@ -17,7 +17,7 @@ export const Verify: React.FC<AdminViewProps> = async ({
   searchParams,
 }) => {
   // /:collectionSlug/verify/:token
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [collectionSlug, verify, token] = params.segments
   const { locale, permissions, req } = initPageResult
 
