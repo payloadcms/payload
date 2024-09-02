@@ -79,7 +79,7 @@ html[data-theme='dark'] {
       width: 1px;
       height: 15px;
       background-color: var(--theme-elevation-100);
-      margin: 0 6.25px;
+      margin: 0 6.25px 0 4.25px; // substract 2px from the gap
     }
   }
 
