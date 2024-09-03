@@ -35,7 +35,9 @@ export const getDBName = ({
     result = name ?? slug
   }
 
-  if (versions) result = `_${result}_versions`
+  if (versions) {
+    result = `_${result}_versions`
+  }
 
   return result
 }

@@ -7,7 +7,9 @@ export const convertPathToJSONTraversal = (incomingSegments: string[]) => {
   return segments.reduce((res, segment, i) => {
     const formattedSegment = formatJSONPathSegment(segment)
 
-    if (i + 1 === segments.length) return `${res}->>${formattedSegment}`
+    if (i + 1 === segments.length) {
+      return `${res}->>${formattedSegment}`
+    }
     return `${res}->${formattedSegment}`
   }, '')
 }
