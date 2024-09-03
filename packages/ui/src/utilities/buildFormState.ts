@@ -43,8 +43,16 @@ export const buildFormState = async ({
   state: FormState
 }> => {
   const reqData: BuildFormStateArgs = (req.data || {}) as BuildFormStateArgs
-  const { collectionSlug, formState, globalSlug, locale, operation, returnLockStatus, schemaPath } =
-    reqData
+  const {
+    collectionSlug,
+    formState,
+    globalSlug,
+    locale,
+    operation,
+    returnLockStatus,
+    schemaPath,
+    updateLastEdited,
+  } = reqData
 
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
@@ -250,6 +258,18 @@ export const buildFormState = async ({
         const lockedState = {
           isLocked: true,
           user: lockStatus.docs[0]?._lastEdited?.user?.value,
+        }
+
+        if (updateLastEdited) {
+          await req.payload.update({
+            id: lockStatus.docs[0].id,
+            collection: 'payload-locked-documents',
+            data: {
+              _lastEdited: {
+                editedAt: new Date().toISOString(),
+              },
+            },
+          })
         }
 
         return { lockedState, state: result }

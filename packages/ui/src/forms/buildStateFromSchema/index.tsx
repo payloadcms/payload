@@ -31,6 +31,7 @@ export type BuildFormStateArgs = {
   operation?: 'create' | 'update'
   returnLockStatus?: boolean
   schemaPath: string
+  updateLastEdited?: boolean
 }
 
 export const buildStateFromSchema = async (args: Args): Promise<FormState> => {

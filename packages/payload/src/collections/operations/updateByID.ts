@@ -134,6 +134,45 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       throw new Forbidden(req.t)
     }
 
+    // Check if the document is locked
+    const lockStatus = await payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      limit: 1,
+      pagination: false,
+      req,
+      where: {
+        'document.relationTo': {
+          equals: collectionConfig.slug,
+        },
+        'document.value': {
+          equals: id,
+        },
+      },
+    })
+
+    if (lockStatus.docs.length > 0) {
+      const lockedDoc = lockStatus.docs[0]
+      const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
+      const now = new Date()
+
+      const lockWhenEditingProp =
+        collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
+
+      const lockDuration =
+        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
+          ? lockWhenEditingProp.lockDuration
+          : 300 // 5 minutes in seconds
+
+      const lockDurationInMilliseconds = lockDuration * 1000
+
+      if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+        // Document is locked and the lock has not expired, skip update
+        throw new APIError(`Document with ID ${id} is currently locked and cannot be updated.`)
+      }
+      // If the lock has expired, proceed with update
+    }
+
     const originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,

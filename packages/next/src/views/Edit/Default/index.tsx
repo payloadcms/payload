@@ -91,11 +91,6 @@ export const DefaultEditView: React.FC = () => {
 
   const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
 
-  // const lockDuration =
-  //   typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
-  //     ? lockWhenEditingProp.lockDuration
-  //     : 300 // default to 300 seconds if no lockDuration is provided
-
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
@@ -122,6 +117,8 @@ export const DefaultEditView: React.FC = () => {
     isLocked: false,
     user: null,
   })
+
+  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now())
 
   const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
 
@@ -295,6 +292,15 @@ export const DefaultEditView: React.FC = () => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
+      const currentTime = Date.now()
+      const timeSinceLastUpdate = currentTime - lastUpdateTime
+
+      const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
+
+      if (updateLastEdited) {
+        setLastUpdateTime(currentTime)
+      }
+
       const docPreferences = await getDocPreferences()
 
       const { lockedState, state } = await getFormState({
@@ -308,6 +314,7 @@ export const DefaultEditView: React.FC = () => {
           operation,
           returnLockStatus: isLockingEnabled ? true : false,
           schemaPath,
+          updateLastEdited,
         },
         serverURL,
       })
@@ -350,6 +357,7 @@ export const DefaultEditView: React.FC = () => {
       setCurrentEditor,
       isLockingEnabled,
       setDocumentIsLocked,
+      lastUpdateTime,
     ],
   )
 

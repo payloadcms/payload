@@ -5,7 +5,7 @@ import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '..
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { Forbidden, NotFound } from '../../errors/index.js'
+import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
@@ -107,6 +107,45 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
     }
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
+    }
+
+    // Check if the document is locked
+    const lockStatus = await payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      limit: 1,
+      pagination: false,
+      req,
+      where: {
+        'document.relationTo': {
+          equals: collectionConfig.slug,
+        },
+        'document.value': {
+          equals: id,
+        },
+      },
+    })
+
+    if (lockStatus.docs.length > 0) {
+      const lockedDoc = lockStatus.docs[0]
+      const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
+      const now = new Date()
+
+      const lockWhenEditingProp =
+        collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
+
+      const lockDuration =
+        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
+          ? lockWhenEditingProp.lockDuration
+          : 300 // 5 minutes in seconds
+
+      const lockDurationInMilliseconds = lockDuration * 1000
+
+      if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+        // Document is locked and the lock has not expired, skip deletion
+        throw new APIError(`Document with ID ${id} is currently locked and cannot be deleted.`)
+      }
+      // If the lock has expired, proceed with deletion
     }
 
     await deleteAssociatedFiles({

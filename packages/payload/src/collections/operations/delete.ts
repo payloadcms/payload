@@ -116,7 +116,50 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
 
       const { id } = doc
 
+      const lockWhenEditingProp =
+        collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
+
+      const lockDuration =
+        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
+          ? lockWhenEditingProp.lockDuration
+          : 300 // 5 minutes in seconds
+
+      const lockDurationInMilliseconds = lockDuration * 1000
+
       try {
+        // Check if the document is locked
+        const lockStatus = await payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          pagination: false,
+          req,
+          where: {
+            'document.relationTo': {
+              equals: collectionConfig.slug,
+            },
+            'document.value': {
+              equals: id,
+            },
+          },
+        })
+
+        if (lockStatus.docs.length > 0) {
+          const lockedDoc = lockStatus.docs[0]
+          const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
+          const now = new Date()
+
+          if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+            // Document is locked and the lock has not expired, skip deletion
+            errors.push({
+              id,
+              message: 'Document is currently locked and cannot be deleted.',
+            })
+            return null
+          }
+          // If the lock has expired, proceed with deletion
+        }
+
         // /////////////////////////////////////
         // beforeDelete - Collection
         // /////////////////////////////////////
