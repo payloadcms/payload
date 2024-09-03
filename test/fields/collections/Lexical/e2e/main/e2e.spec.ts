@@ -405,7 +405,7 @@ describe('lexicalMain', () => {
     ).toBeVisible()
 
     await uploadListDrawer.getByText('Create New').first().click()
-    const createUploadDrawer = page.locator('dialog[id^=drawer_1_doc-drawer__uploads2]').first() // IDs starting with drawer_1_list-drawer (there's some other symbol after the underscore)
+    const createUploadDrawer = page.locator('dialog[id^=drawer_2_doc-drawer__uploads2]').first() // IDs starting with drawer_1_list-drawer (there's some other symbol after the underscore)
     await expect(createUploadDrawer).toBeVisible()
     await wait(500)
 
