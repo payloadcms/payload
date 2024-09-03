@@ -14,7 +14,7 @@ import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPr
 import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 
-function createTagRegexes(tagName: string) {
+export function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
   // Regex components
