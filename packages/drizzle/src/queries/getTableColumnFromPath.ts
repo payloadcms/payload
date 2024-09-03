@@ -539,7 +539,9 @@ export const getTableColumnFromPath = ({
               field,
               getNotNullColumnByValue: (val) => {
                 const matchedRelation = relationTo.find((relation) => relation === val)
-                if (matchedRelation) return `${matchedRelation}ID`
+                if (matchedRelation) {
+                  return `${matchedRelation}ID`
+                }
                 return undefined
               },
               table: aliasRelationshipTable,

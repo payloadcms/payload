@@ -48,12 +48,18 @@ export const transformBlocks = ({
   withinArrayOrBlockLocale,
 }: Args) => {
   data.forEach((blockRow, i) => {
-    if (typeof blockRow.blockType !== 'string') return
+    if (typeof blockRow.blockType !== 'string') {
+      return
+    }
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
-    if (!matchedBlock) return
+    if (!matchedBlock) {
+      return
+    }
     const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockType]) blocks[blockType] = []
+    if (!blocks[blockType]) {
+      blocks[blockType] = []
+    }
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -64,8 +70,12 @@ export const transformBlocks = ({
       },
     }
 
-    if (field.localized && locale) newRow.row._locale = locale
-    if (withinArrayOrBlockLocale) newRow.row._locale = withinArrayOrBlockLocale
+    if (field.localized && locale) {
+      newRow.row._locale = locale
+    }
+    if (withinArrayOrBlockLocale) {
+      newRow.row._locale = withinArrayOrBlockLocale
+    }
 
     const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 

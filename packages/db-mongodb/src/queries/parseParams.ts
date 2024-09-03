@@ -43,7 +43,9 @@ export async function parseParams({
           payload,
           where: condition,
         })
-        if (builtConditions.length > 0) result[conditionOperator] = builtConditions
+        if (builtConditions.length > 0) {
+          result[conditionOperator] = builtConditions
+        }
       } else {
         // It's a path - and there can be multiple comparisons on a single path.
         // For example - title like 'test' and title not equal to 'tester'
