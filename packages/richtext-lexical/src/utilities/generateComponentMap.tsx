@@ -117,9 +117,12 @@ export const getGenerateComponentMap =
             return null
           }
 
-          const clientFeatureProps = resolvedClientFeature.clientProps ?? {}
+          const clientFeatureProps = resolvedFeature.clientFeatureProps ?? {}
           clientFeatureProps.featureKey = resolvedFeature.key
           clientFeatureProps.order = resolvedFeature.order
+          if (resolvedClientFeature.clientProps) {
+            clientFeatureProps.clientProps = resolvedClientFeature.clientProps
+          }
 
           return {
             clientFeature: featureProviderProviderClient,
