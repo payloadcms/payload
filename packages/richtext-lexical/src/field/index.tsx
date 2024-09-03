@@ -1,5 +1,7 @@
 'use client'
 
+import type { RichTextFieldClient } from 'payload'
+
 import { ShimmerEffect } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
@@ -44,7 +46,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
-      field,
+      field: field as RichTextFieldClient,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
         lexical: finalLexicalEditorConfig,
