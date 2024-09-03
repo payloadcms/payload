@@ -153,8 +153,12 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
           label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
-              const { id: incomingID } = incomingImage
-              setValue(incomingID)
+              if (typeof incomingImage === 'object') {
+                const { id: incomingID } = incomingImage
+                setValue(incomingID)
+              } else {
+                setValue(incomingImage)
+              }
             } else {
               setValue(null)
             }
