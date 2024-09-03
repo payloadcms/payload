@@ -4,21 +4,22 @@ export const PackageInstallOptions: Block = {
   slug: 'PackageInstallOptions',
   jsx: {
     import: ({ props, children, markdownToLexical }) => {
-      console.log('Importing')
       return {
-        packageId: props?.packageId,
         global: props?.global,
-        update: props?.update,
+        packageId: props?.packageId,
+        someNestedObject: props?.someNestedObject,
         uniqueId: props?.uniqueId,
+        update: props?.update,
       }
     },
     export: ({ fields, lexicalToMarkdown }) => {
       return {
         props: {
-          packageId: fields?.packageId,
           global: fields?.global,
-          update: fields?.update,
+          packageId: fields?.packageId,
+          someNestedObject: fields?.someNestedObject,
           uniqueId: fields?.uniqueId,
+          update: fields?.update,
         },
       }
     },
@@ -39,6 +40,10 @@ export const PackageInstallOptions: Block = {
     {
       name: 'uniqueId',
       type: 'text',
+    },
+    {
+      name: 'someNestedObject',
+      type: 'code',
     },
   ],
 }

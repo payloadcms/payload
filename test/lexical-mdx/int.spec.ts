@@ -30,6 +30,7 @@ type Tests = Array<{
     'fields'
   >
   input: string
+  inputAfterConvertFromEditorJSON?: string
   rootChildren?: any[]
 }>
 
@@ -55,7 +56,7 @@ describe('Lexical MDX', () => {
       input: `
 <PackageInstallOptions
   packageId="444"
-  update uniqueId="xxx"/>
+  uniqueId="xxx" update/>
       `,
       blockNode: {
         fields: {
@@ -72,6 +73,7 @@ describe('Lexical MDX', () => {
   ignored
 </PackageInstallOptions>
 `,
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444"/>`,
       blockNode: {
         fields: {
           blockType: 'PackageInstallOptions',
@@ -85,6 +87,7 @@ describe('Lexical MDX', () => {
   ignored
 </PackageInstallOptions>
 `,
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
       blockNode: {
         fields: {
           blockType: 'PackageInstallOptions',
@@ -101,6 +104,7 @@ describe('Lexical MDX', () => {
   ignored
 </PackageInstallOptions>
 `,
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
       blockNode: {
         fields: {
           blockType: 'PackageInstallOptions',
@@ -110,12 +114,59 @@ describe('Lexical MDX', () => {
       },
     },
     {
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
       input: `
 <PackageInstallOptions
   update
   packageId="444"
 >
   ignored
+</PackageInstallOptions>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'PackageInstallOptions',
+          packageId: '444',
+          update: true,
+        },
+      },
+    },
+    {
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" someNestedObject={{"test":"hello"}} update/>`, // Not test - test is not part of the block
+      input: `
+<PackageInstallOptions
+  update
+  packageId="444"
+  someNestedObject={{test: "hello"}} test={4}
+>
+  ignored
+</PackageInstallOptions>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'PackageInstallOptions',
+          packageId: '444',
+          update: true,
+          someNestedObject: { test: 'hello' },
+        },
+      },
+    },
+    {
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
+
+      input: `
+<PackageInstallOptions
+  update
+  packageId="444"
+>
+  ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    ignored
+  </PackageInstallOptions>
 </PackageInstallOptions>
 `,
       blockNode: {
@@ -201,7 +252,24 @@ there\`\`\`
       blockNode: {
         fields: {
           blockType: 'Code',
-          code: 'hello\nthere',
+          code: 'Hello\nthere',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts
+Hello
+\`\`\`ts
+nested
+\`\`\`!
+there\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'Hello\n```ts\nnested\n```!\nthere',
           language: 'ts',
         },
       },
@@ -217,7 +285,12 @@ there\`\`\`
     },
   ]
 
-  for (const { input, blockNode, rootChildren } of INPUT_AND_OUTPUT) {
+  for (const {
+    input,
+    inputAfterConvertFromEditorJSON,
+    blockNode,
+    rootChildren,
+  } of INPUT_AND_OUTPUT) {
     it(`can convert to editor JSON: ${input}"`, () => {
       const result = mdxToEditorJSON({
         mdxWithFrontmatter: input,
@@ -243,6 +316,8 @@ there\`\`\`
             }
           }
         }
+
+        console.log({ receivedBlockNodeToTest, blockNode })
 
         expect(receivedBlockNodeToTest).toStrictEqual(blockNode)
       } else if (rootChildren) {
@@ -281,7 +356,9 @@ there\`\`\`
       })
       // Remove all spaces and newlines
       const resultNoSpace = result.replace(/\s/g, '')
-      const inputNoSpace = input.replace(/\s/g, '')
+      const inputNoSpace = (inputAfterConvertFromEditorJSON ?? input).replace(/\s/g, '')
+
+      console.log({ result, expected: inputAfterConvertFromEditorJSON ?? input })
 
       expect(resultNoSpace).toBe(inputNoSpace)
     })

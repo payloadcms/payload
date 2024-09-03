@@ -1303,9 +1303,7 @@ export type BlockJSX = {
     | string
   import: (props: {
     children: string
-    closeMatch?: string[]
     htmlToLexical?: (props: { html: string }) => any
-    linesInBetween?: string[]
     markdownToLexical?: (props: { markdown: string }) => Record<string, any>
     openMatch?: string[]
     props: Record<string, any>

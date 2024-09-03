@@ -8,13 +8,26 @@
 
 import type { ListItemNode } from '@lexical/list'
 import type {
+  MultilineElementTransformer as _MultilineElementTransformer,
   ElementTransformer,
-  MultilineElementTransformer,
   TextFormatTransformer,
   TextMatchTransformer,
   Transformer,
 } from '@lexical/markdown'
 import type { ElementNode, LexicalNode, TextNode } from 'lexical'
+
+export type MultilineElementTransformer = _MultilineElementTransformer & {
+  handleImportAfterStartMatch?: (args: {
+    lines: Array<string>
+    rootNode: ElementNode
+    startLineIndex: number
+    startMatch: RegExpMatchArray
+    transformer: MultilineElementTransformer
+  }) => {
+    continue?: boolean
+    return?: [boolean, number]
+  }
+}
 
 import { $isListItemNode, $isListNode } from '@lexical/list'
 import { TRANSFORMERS } from '@lexical/markdown'
@@ -145,10 +158,26 @@ function $importMultiline(
   multilineElementTransformers: Array<MultilineElementTransformer>,
   rootNode: ElementNode,
 ): [boolean, number] {
-  for (const { regExpEnd, regExpStart, replace } of multilineElementTransformers) {
+  for (const transformer of multilineElementTransformers) {
+    const { handleImportAfterStartMatch, regExpEnd, regExpStart, replace } = transformer
     const startMatch = lines[startLineIndex].match(regExpStart)
     if (!startMatch) {
       continue // Try next transformer
+    }
+
+    if (handleImportAfterStartMatch) {
+      const result = handleImportAfterStartMatch({
+        lines,
+        rootNode,
+        startLineIndex,
+        startMatch,
+        transformer,
+      })
+      if (result.continue) {
+        continue
+      } else if (result.return) {
+        return result.return
+      }
     }
 
     const regexpEndRegex: RegExp | undefined =

@@ -1,9 +1,5 @@
 /* eslint-disable */
-import {
-  $convertFromMarkdownString,
-  type MultilineElementTransformer,
-  $convertToMarkdownString,
-} from '@lexical/markdown'
+import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 import type { ClientBlock } from 'payload'
 import type { Transformer } from '@lexical/markdown'
 
@@ -19,6 +15,7 @@ import {
 } from 'lexical'
 import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
+import type { MultilineElementTransformer } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 
 function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
