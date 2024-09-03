@@ -15,6 +15,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { tableJson } from './tableJson.js'
+import { textToRichText } from './textToRichText.js'
 
 let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
@@ -312,6 +313,88 @@ there\`\`\`
 | \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
 `,
       rootChildren: [tableJson],
+    },
+    {
+      input: `
+<Banner>
+  children text
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: textToRichText('children text'),
+        },
+      },
+    },
+    {
+      input: `\`inline code\``,
+      rootChildren: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 16, // Format 16 => inline code
+              mode: 'normal',
+              style: '',
+              text: 'inline code',
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
+    },
+    {
+      // This test ensures that the JSX within the code block is does not disrupt the main JSX parsing
+      input: `
+<Banner>
+    \`https://<some link>.payloadcms.com/page\`
+</Banner>
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Banner',
+          content: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 16, // Format 16 => inline code
+                      mode: 'normal',
+                      style: '',
+                      text: 'https://<some link>.payloadcms.com/page',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      },
     },
   ]
 
