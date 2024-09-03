@@ -1303,9 +1303,10 @@ export type BlockJSX = {
     | string
   import: (props: {
     children: string
+    closeMatch?: RegExpMatchArray // Only available when customEndRegex is set
     htmlToLexical?: (props: { html: string }) => any
     markdownToLexical?: (props: { markdown: string }) => Record<string, any>
-    openMatch?: string[]
+    openMatch?: RegExpMatchArray
     props: Record<string, any>
   }) => BlockFields | false
 }

@@ -104,7 +104,6 @@ export const getBlockMarkdownTransformers = ({
               : {},
             openMatch,
             closeMatch,
-            linesInBetween,
             markdownToLexical: markdownToLexical,
             htmlToLexical: null, // TODO
           })

@@ -169,6 +169,7 @@ export const getBlockMarkdownTransformers = ({
                 })
               : {},
             openMatch,
+            closeMatch,
             markdownToLexical: markdownToLexical,
             htmlToLexical: null, // TODO
           })

@@ -179,13 +179,37 @@ describe('Lexical MDX', () => {
     },
     {
       input: `
-\`\`\`ts hello\`\`\`
+\`\`\`ts\n hello\`\`\`
 `,
       blockNode: {
         fields: {
           blockType: 'Code',
           code: 'hello',
           language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts x\n hello\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'x\n hello',
+          language: 'ts',
+        },
+      },
+    },
+    {
+      input: `
+\`\`\`ts hello\`\`\`
+`,
+      blockNode: {
+        fields: {
+          blockType: 'Code',
+          code: 'ts hello',
+          language: '',
         },
       },
     },
@@ -278,6 +302,12 @@ there\`\`\`
       input: `
 | Option            | Default route           | Description                                     |
 | ----------------- | ----------------------- | ----------------------------------------------- |
+| \`account\`         |                         | The user's account page.                        |
+| \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
+`,
+      inputAfterConvertFromEditorJSON: `
+| Option            | Default route           | Description                                     |
+|---|---|---|
 | \`account\`         |                         | The user's account page.                        |
 | \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
 `,

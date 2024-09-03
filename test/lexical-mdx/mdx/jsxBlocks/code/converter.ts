@@ -6,8 +6,19 @@ export const codeConverter: BlockJSX = {
     optional: true,
     regExp: /[ \t]*```$/,
   },
-  import: ({ openMatch, children }) => {
+  import: ({ openMatch, children, closeMatch }) => {
     const language = openMatch[1]
+
+    const isSingleLineAndComplete =
+      !!closeMatch && !children.includes('\n') && openMatch.input?.trim() !== '```' + language
+
+    if (isSingleLineAndComplete) {
+      return {
+        language: '',
+        code: language + (children?.length ? ` ${children}` : ''),
+      }
+    }
+
     return {
       language,
       code: children,
