@@ -32,6 +32,7 @@ export function linesFromStartToContentAndPropsString({
   let bracketCount = 0
   let quoteChar = null
   let isSelfClosing = false
+  let isWithinCodeBlockAmount = 0
 
   mainLoop: for (let lineIndex = startLineIndex; lineIndex < linesLength; lineIndex++) {
     const line = linesCopy[lineIndex].trim()
@@ -76,16 +77,23 @@ export function linesFromStartToContentAndPropsString({
 
         propsString += char
       } else {
-        if (char === '<' && line.slice(charIndex).startsWith('</')) {
-          contentSubStartMatchesAmount--
-          if (contentSubStartMatchesAmount < 0) {
-            content = content.slice(0, -1) // Remove the last newline
-            endLineIndex = lineIndex
-            break mainLoop
-          }
-        } else if (char === '<' && !line.slice(charIndex).startsWith('</')) {
-          contentSubStartMatchesAmount++
+        if (char === '`') {
+          isWithinCodeBlockAmount++
         }
+
+        if (isWithinCodeBlockAmount % 2 === 0) {
+          if (char === '<' && line.slice(charIndex).startsWith('</')) {
+            contentSubStartMatchesAmount--
+            if (contentSubStartMatchesAmount < 0) {
+              content = content.slice(0, -1) // Remove the last newline
+              endLineIndex = lineIndex
+              break mainLoop
+            }
+          } else if (char === '<' && !line.slice(charIndex).startsWith('</')) {
+            contentSubStartMatchesAmount++
+          }
+        }
+
         content += char
       }
 
