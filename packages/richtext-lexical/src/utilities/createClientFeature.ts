@@ -1,3 +1,5 @@
+import type { RichTextFieldClient } from 'payload'
+
 import type {
   BaseClientFeatureProps,
   ClientFeature,
@@ -12,6 +14,7 @@ export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
+      field?: RichTextFieldClient
       props: BaseClientFeatureProps<UnSanitizedClientProps>
       // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
       resolvedFeatures: ResolvedClientFeatureMap
@@ -34,11 +37,13 @@ export const createClientFeature: <
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
         featureProviderMap,
+        field,
         resolvedFeatures,
         unSanitizedEditorConfig,
       }) => {
         const toReturn = feature({
           featureProviderMap,
+          field,
           props,
           resolvedFeatures,
           unSanitizedEditorConfig,

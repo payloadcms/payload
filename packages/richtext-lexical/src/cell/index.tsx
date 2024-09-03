@@ -48,6 +48,7 @@ export const RichTextCell: React.FC<
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      field,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
         lexical: finalLexicalEditorConfig,

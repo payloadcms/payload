@@ -44,6 +44,9 @@ export const PackageInstallOptions: Block = {
     {
       name: 'someNestedObject',
       type: 'code',
+      admin: {
+        hidden: true,
+      },
     },
   ],
 }

@@ -6,6 +6,7 @@ import type {
   LexicalNodeReplacement,
   SerializedEditorState,
 } from 'lexical'
+import type { RichTextFieldClient } from 'payload'
 import type React from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
@@ -32,6 +33,7 @@ export type FeatureProviderClient<
     | ((props: {
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
+        field?: RichTextFieldClient
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedClientFeatureMap
         // unSanitized EditorConfig,
