@@ -384,7 +384,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') {return option.value}
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }
@@ -511,7 +513,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') {return option.value}
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }
