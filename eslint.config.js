@@ -29,7 +29,7 @@ export const rootParserOptions = {
   ecmaVersion: 'latest',
   projectService: {
     maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs'],
+    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
   },
 }
 

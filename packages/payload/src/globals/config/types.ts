@@ -16,7 +16,6 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
   MetaConfig,
-  OpenGraphConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'

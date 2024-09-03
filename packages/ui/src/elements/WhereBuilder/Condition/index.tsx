@@ -109,6 +109,7 @@ export const Condition: React.FC<Props> = (props) => {
   }> = {
     date: DateField,
     number: NumberField,
+    radio: Select,
     relationship: RelationshipField,
     select: Select,
     text: Text,

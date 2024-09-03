@@ -7,7 +7,7 @@ import type {
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { DestinationStream, LoggerOptions, pino } from 'pino'
+import type { DestinationStream, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
