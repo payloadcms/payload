@@ -33,6 +33,11 @@
       "types": "./src/exports/server/jsx.ts",
       "default": "./src/exports/server/jsx.ts"
     },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
     "./generateComponentMap": "./src/utilities/generateComponentMap.tsx"
   },
   "main": "./src/index.ts",
@@ -144,6 +149,11 @@
         "import": "./dist/exports/server/jsx.js",
         "types": "./dist/exports/server/jsx.d.ts",
         "default": "./dist/exports/server/jsx.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
       },
       "./generateComponentMap": {
         "import": "./dist/utilities/generateComponentMap.js",
