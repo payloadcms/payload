@@ -55,12 +55,10 @@ export const buildJoinAggregation = async ({
 
       const {
         limit: limitJoin = 10,
-        pagination = false,
         sort: sortJoin,
         where: whereJoin,
       } = joins?.[join.schemaPath] || {}
 
-      const useSimplePagination = pagination === false && limitJoin > 0
       const sort = buildSortParam({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.fields,
@@ -77,12 +75,6 @@ export const buildJoinAggregation = async ({
         where: whereJoin,
       })
 
-      let $limit
-      if (useSimplePagination) {
-        $limit = limitJoin + 1
-      } else if (limitJoin > 0) {
-        $limit = limitJoin
-      }
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
         {
@@ -90,9 +82,9 @@ export const buildJoinAggregation = async ({
         },
       ]
 
-      if ($limit) {
+      if (limitJoin > 0) {
         pipeline.push({
-          $limit,
+          $limit: limitJoin + 1,
         })
       }
 
