@@ -766,12 +766,24 @@ export const traverseFields = ({
           withinLocalizedArrayOrBlock,
         })
 
-        if (rowHasLocalizedField) {hasLocalizedField = true}
-        if (rowHasLocalizedRelationshipField) {hasLocalizedRelationshipField = true}
-        if (rowHasManyTextField) {hasManyTextField = true}
-        if (rowHasLocalizedManyTextField) {hasLocalizedManyTextField = true}
-        if (rowHasManyNumberField) {hasManyNumberField = true}
-        if (rowHasLocalizedManyNumberField) {hasLocalizedManyNumberField = true}
+        if (rowHasLocalizedField) {
+          hasLocalizedField = true
+        }
+        if (rowHasLocalizedRelationshipField) {
+          hasLocalizedRelationshipField = true
+        }
+        if (rowHasManyTextField) {
+          hasManyTextField = true
+        }
+        if (rowHasLocalizedManyTextField) {
+          hasLocalizedManyTextField = true
+        }
+        if (rowHasManyNumberField) {
+          hasManyNumberField = true
+        }
+        if (rowHasLocalizedManyNumberField) {
+          hasLocalizedManyNumberField = true
+        }
         break
       }
 
