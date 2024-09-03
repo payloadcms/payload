@@ -1,7 +1,6 @@
 'use client'
 
 import type { LexicalEditor } from 'lexical'
-import type { RichTextFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'

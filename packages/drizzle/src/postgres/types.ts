@@ -13,11 +13,11 @@ import type {
   IndexBuilder,
   PgColumn,
   PgEnum,
+  pgEnum,
   PgInsertOnConflictDoUpdateConfig,
   PgSchema,
   PgTableWithColumns,
   UniqueConstraintBuilder,
-  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'

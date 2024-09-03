@@ -189,6 +189,10 @@ export const sanitizeCollection = async (
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
+  if (collection?.admin?.pagination?.limits?.length) {
+    sanitized.admin.pagination.limits = collection.admin.pagination.limits
+  }
+
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins

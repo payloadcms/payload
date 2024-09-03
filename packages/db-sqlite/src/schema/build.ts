@@ -51,8 +51,8 @@ type Args = {
   disableUnique: boolean
   fields: Field[]
   locales?: [string, ...string[]]
-  rootRelationsToBuild?: RelationMap
   rootRelationships?: Set<string>
+  rootRelationsToBuild?: RelationMap
   rootTableIDColType?: IDType
   rootTableName?: string
   tableName: string
@@ -82,8 +82,8 @@ export const buildTable = ({
   disableUnique = false,
   fields,
   locales,
-  rootRelationsToBuild,
   rootRelationships,
+  rootRelationsToBuild,
   rootTableIDColType,
   rootTableName: incomingRootTableName,
   tableName,
@@ -131,8 +131,8 @@ export const buildTable = ({
     localesIndexes,
     newTableName: tableName,
     parentTableName: tableName,
-    relationsToBuild,
     relationships,
+    relationsToBuild,
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
@@ -375,8 +375,12 @@ export const buildTable = ({
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
-        if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
-        if (relatedCollectionCustomIDType === 'text') colType = 'text'
+        if (relatedCollectionCustomIDType === 'number') {
+          colType = 'numeric'
+        }
+        if (relatedCollectionCustomIDType === 'text') {
+          colType = 'text'
+        }
 
         relationshipColumns[`${relationTo}ID`] = getIDColumn({
           name: `${formattedRelationTo}_id`,

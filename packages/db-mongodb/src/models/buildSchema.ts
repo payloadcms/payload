@@ -24,8 +24,8 @@ import type {
   SelectField,
   Tab,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
@@ -92,7 +92,7 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
 const localizeSchema = (
   entity: NonPresentationalField | Tab,
   schema,
-  localization: SanitizedLocalizationConfig | false,
+  localization: false | SanitizedLocalizationConfig,
 ) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
@@ -388,7 +388,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') return option.value
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }
@@ -515,7 +517,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') return option.value
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }

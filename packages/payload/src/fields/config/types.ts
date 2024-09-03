@@ -5,13 +5,13 @@ import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
-import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   JoinFieldErrorClientComponent,
   JoinFieldErrorServerComponent,
   JoinFieldLabelClientComponent,
   JoinFieldLabelServerComponent,
 } from '../../admin/fields/Join.js'
+import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
@@ -98,10 +98,6 @@ import type {
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
-  UploadFieldErrorClientComponent,
-  UploadFieldErrorServerComponent,
-  UploadFieldLabelClientComponent,
-  UploadFieldLabelServerComponent,
   UploadFieldProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
@@ -1436,8 +1432,8 @@ export type Field =
   | DateField
   | EmailField
   | GroupField
-  | JSONField
   | JoinField
+  | JSONField
   | NumberField
   | PointField
   | RadioField
@@ -1460,8 +1456,8 @@ export type ClientField =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
-  | JSONFieldClient
   | JoinFieldClient
+  | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1509,8 +1505,8 @@ export type FieldAffectingData =
   | DateField
   | EmailField
   | GroupField
-  | JSONField
   | JoinField
+  | JSONField
   | NumberField
   | PointField
   | RadioField
@@ -1530,8 +1526,8 @@ export type FieldAffectingDataClient =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
-  | JSONFieldClient
   | JoinFieldClient
+  | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient

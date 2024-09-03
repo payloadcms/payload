@@ -16,8 +16,8 @@ import type {
   EmailField,
   Field,
   GroupField,
-  JSONField,
   JoinField,
+  JSONField,
   NumberField,
   Payload,
   PointField,
@@ -28,8 +28,8 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 

@@ -63,6 +63,7 @@ export function UploadComponent(props: UploadFieldProps) {
       api={config.routes.api}
       className={className}
       Description={field?.admin?.components?.Description}
+      description={field?.admin?.description}
       Error={field?.admin?.components?.Error}
       field={field}
       filterOptions={filterOptions}

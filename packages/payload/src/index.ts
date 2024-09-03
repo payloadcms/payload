@@ -441,9 +441,8 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
-    this.logger = getLogger('payload', options.loggerOptions, options.loggerDestination)
-
     this.config = await options.config
+    this.logger = getLogger('payload', this.config.logger)
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
@@ -631,6 +630,7 @@ interface RequestContext {
   [key: string]: unknown
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export type * from './admin/types.js'
@@ -878,10 +878,10 @@ export type {
   GroupField,
   GroupFieldClient,
   HookName,
-  JSONField,
-  JSONFieldClient,
   JoinField,
   JoinFieldClient,
+  JSONField,
+  JSONFieldClient,
   Labels,
   LabelsClient,
   NamedTab,

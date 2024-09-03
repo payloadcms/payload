@@ -4,15 +4,15 @@ import type { Field, TabAsField } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {
-  PgNumericBuilder,
-  PgUUIDBuilder,
-  PgVarcharBuilder,
   boolean,
   foreignKey,
   index,
   integer,
   jsonb,
   numeric,
+  PgNumericBuilder,
+  PgUUIDBuilder,
+  PgVarcharBuilder,
   text,
   timestamp,
   varchar,
@@ -52,8 +52,8 @@ type Args = {
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
-  relationsToBuild: RelationMap
   relationships: Set<string>
+  relationsToBuild: RelationMap
   rootRelationsToBuild?: RelationMap
   rootTableIDColType: string
   rootTableName: string
@@ -88,8 +88,8 @@ export const traverseFields = ({
   localesIndexes,
   newTableName,
   parentTableName,
-  relationsToBuild,
   relationships,
+  relationsToBuild,
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName,
@@ -404,8 +404,8 @@ export const traverseFields = ({
           disableNotNull: disableNotNullFromHere,
           disableUnique,
           fields: disableUnique ? idToUUID(field.fields) : field.fields,
-          rootRelationsToBuild,
           rootRelationships: relationships,
+          rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
           tableName: arrayTableName,
@@ -504,13 +504,13 @@ export const traverseFields = ({
 
             const baseExtraConfig: BaseExtraConfig = {
               _orderIdx: (cols) => index(`${blockTableName}_order_idx`).on(cols._order),
-              _parentIDIdx: (cols) => index(`${blockTableName}_parent_id_idx`).on(cols._parentID),
               _parentIdFk: (cols) =>
                 foreignKey({
                   name: `${blockTableName}_parent_id_fk`,
                   columns: [cols._parentID],
                   foreignColumns: [adapter.tables[rootTableName].id],
                 }).onDelete('cascade'),
+              _parentIDIdx: (cols) => index(`${blockTableName}_parent_id_idx`).on(cols._parentID),
               _pathIdx: (cols) => index(`${blockTableName}_path_idx`).on(cols._path),
             }
 
@@ -538,8 +538,8 @@ export const traverseFields = ({
               disableNotNull: disableNotNullFromHere,
               disableUnique,
               fields: disableUnique ? idToUUID(block.fields) : block.fields,
-              rootRelationsToBuild,
               rootRelationships: relationships,
+              rootRelationsToBuild,
               rootTableIDColType,
               rootTableName,
               tableName: blockTableName,
@@ -653,8 +653,8 @@ export const traverseFields = ({
             localesIndexes,
             newTableName,
             parentTableName,
-            relationsToBuild,
             relationships,
+            relationsToBuild,
             rootRelationsToBuild,
             rootTableIDColType,
             rootTableName,
@@ -706,8 +706,8 @@ export const traverseFields = ({
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,
           parentTableName,
-          relationsToBuild,
           relationships,
+          relationsToBuild,
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
@@ -760,8 +760,8 @@ export const traverseFields = ({
           localesIndexes,
           newTableName,
           parentTableName,
-          relationsToBuild,
           relationships,
+          relationsToBuild,
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
@@ -814,8 +814,8 @@ export const traverseFields = ({
           localesIndexes,
           newTableName,
           parentTableName,
-          relationsToBuild,
           relationships,
+          relationsToBuild,
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
