@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
