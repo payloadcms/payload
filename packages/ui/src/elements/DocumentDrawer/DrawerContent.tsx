@@ -6,13 +6,13 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
 import { XIcon } from '../../icons/X/index.js'
-import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Gutter } from '../Gutter/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import { RenderTitle } from '../RenderTitle/index.js'
@@ -20,12 +20,13 @@ import { baseClass } from './index.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
-  Header,
+  AfterFields,
   collectionSlug,
   drawerSlug,
+  Header,
   onSave: onSaveFromProps,
 }) => {
-  const config = useConfig()
+  const { config } = useConfig()
 
   const {
     routes: { api: apiRoute },
@@ -39,9 +40,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
 
-  const { componentMap } = useComponentMap()
+  const Edit = collectionConfig.admin.components.views.edit.default.Component
 
-  const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
   const isEditing = Boolean(docID)
   const apiURL = docID
     ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
@@ -76,6 +76,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   return (
     <DocumentInfoProvider
+      AfterFields={AfterFields}
+      apiURL={apiURL}
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
@@ -97,7 +99,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           <DocumentTitle />
         </Gutter>
       }
-      apiURL={apiURL}
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
@@ -106,7 +107,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onLoadError={onLoadError}
       onSave={onSave}
     >
-      {Edit}
+      <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>
   )
 }

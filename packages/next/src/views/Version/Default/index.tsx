@@ -1,10 +1,9 @@
 'use client'
-import type { OptionObject } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'payload'
 
 import {
   Gutter,
   SetViewActions,
-  useComponentMap,
   useConfig,
   useDocumentInfo,
   usePayloadAPI,
@@ -15,13 +14,13 @@ import React, { useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import diffComponents from '../RenderFieldsToDiff/fields/index.js'
+import { diffComponents } from '../RenderFieldsToDiff/fields/index.js'
 import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import { SelectLocales } from '../SelectLocales/index.js'
-import { SetStepNav } from './SetStepNav.js'
 import './index.scss'
+import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
 
@@ -34,22 +33,16 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   localeOptions,
   versionID,
 }) => {
-  const config = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
-  const { getComponentMap, getFieldMap } = useComponentMap()
-
-  const componentMap = getComponentMap({ collectionSlug, globalSlug })
-
-  const [fieldMap] = useState(() => getFieldMap({ collectionSlug, globalSlug }))
-
-  const [collectionConfig] = useState(() =>
-    config.collections.find((collection) => collection.slug === collectionSlug),
+  const [collectionConfig] = useState(
+    () => getEntityConfig({ collectionSlug }) as ClientCollectionConfig,
   )
 
-  const [globalConfig] = useState(() => config.globals.find((global) => global.slug === globalSlug))
+  const [globalConfig] = useState(() => getEntityConfig({ globalSlug }) as ClientGlobalConfig)
 
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
 
@@ -85,12 +78,16 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetViewActions actions={componentMap?.actionsMap?.Edit?.Version} />
+      <SetViewActions
+        actions={
+          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.version?.actions
+        }
+      />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}
         doc={doc}
-        fieldMap={fieldMap}
+        fields={(collectionConfig || globalConfig)?.fields}
         globalConfig={globalConfig}
         globalSlug={globalSlug}
         id={id}
@@ -136,8 +133,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <RenderFieldsToDiff
             comparison={comparison}
             diffComponents={diffComponents}
-            fieldMap={fieldMap}
             fieldPermissions={docPermissions?.fields}
+            fields={(collectionConfig || globalConfig)?.fields}
             i18n={i18n}
             locales={localeValues}
             version={

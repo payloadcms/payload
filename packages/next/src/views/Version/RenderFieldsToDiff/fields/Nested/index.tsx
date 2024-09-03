@@ -1,20 +1,21 @@
+'use client'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types.js'
+import type { DiffComponentProps } from '../types.js'
 
-import Label from '../../Label/index.js'
 import RenderFieldsToDiff from '../../index.js'
+import Label from '../../Label/index.js'
 import './index.scss'
 
 const baseClass = 'nested-diff'
 
-const Nested: React.FC<Props> = ({
+const Nested: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   disableGutter = false,
   field,
-  fieldMap,
+  fields,
   i18n,
   locale,
   locales,
@@ -23,14 +24,12 @@ const Nested: React.FC<Props> = ({
 }) => {
   return (
     <div className={baseClass}>
-      {'label' in field.fieldComponentProps &&
-        field.fieldComponentProps.label &&
-        typeof field.fieldComponentProps.label !== 'function' && (
-          <Label>
-            {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-            {getTranslation(field.fieldComponentProps.label, i18n)}
-          </Label>
-        )}
+      {'label' in field && field.label && typeof field.label !== 'function' && (
+        <Label>
+          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+          {getTranslation(field.label, i18n)}
+        </Label>
+      )}
       <div
         className={[`${baseClass}__wrap`, !disableGutter && `${baseClass}__wrap--gutter`]
           .filter(Boolean)
@@ -39,8 +38,8 @@ const Nested: React.FC<Props> = ({
         <RenderFieldsToDiff
           comparison={comparison}
           diffComponents={diffComponents}
-          fieldMap={fieldMap}
           fieldPermissions={permissions}
+          fields={fields}
           i18n={i18n}
           locales={locales}
           version={version}

@@ -1,17 +1,37 @@
+import type { MarkOptional } from 'ts-essentials'
+
+import type { RichTextField, RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { MappedField } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
-export type RichTextComponentProps = {
-  name: string
-  richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
-  validate?: RichTextFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
 
-export type RichTextFieldLabelComponent = LabelComponent<'richText'>
+export type RichTextFieldProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = {
+  readonly validate?: RichTextFieldValidation
+} & Omit<FormFieldBase<RichTextFieldClientWithoutType>, 'validate'>
 
-export type RichTextFieldDescriptionComponent = DescriptionComponent<'richText'>
+export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<RichTextField>
 
-export type RichTextFieldErrorComponent = ErrorComponent<'richText'>
+export type RichTextFieldLabelClientComponent =
+  FieldLabelClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<RichTextField>
+
+export type RichTextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<RichTextField>
+
+export type RichTextFieldErrorClientComponent =
+  FieldErrorClientComponent<RichTextFieldClientWithoutType>

@@ -1,6 +1,6 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { CellComponentProps } from 'payload'
+import type { CellComponentProps, RichTextFieldClient } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useClientFunctions, useTableCell } from '@payloadcms/ui'
@@ -18,18 +18,19 @@ import { getEnabledNodes } from '../lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<
   {
-    admin?: LexicalFieldAdminProps
-    lexicalEditorConfig: LexicalEditorConfig
-  } & CellComponentProps
+    readonly admin?: LexicalFieldAdminProps
+    readonly lexicalEditorConfig: LexicalEditorConfig
+  } & CellComponentProps<RichTextFieldClient>
 > = (props) => {
-  const { admin, lexicalEditorConfig, richTextComponentMap } = props
+  const {
+    admin,
+    field: { _schemaPath, richTextComponentMap },
+    lexicalEditorConfig,
+  } = props
 
   const [preview, setPreview] = React.useState('Loading...')
 
-  const {
-    cellData,
-    cellProps: { schemaPath },
-  } = useTableCell()
+  const { cellData } = useTableCell()
 
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
@@ -61,7 +62,7 @@ export const RichTextCell: React.FC<
       let featureProvidersAndComponentsLoaded = 0 // feature providers and components only
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
-        if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
+        if (key.startsWith(`lexicalFeature.${_schemaPath}.`)) {
           if (!key.includes('.lexical_internal_components.')) {
             featureProvidersLocal.push(plugin)
           }
@@ -79,7 +80,7 @@ export const RichTextCell: React.FC<
 
         const resolvedClientFeatures = loadClientFeatures({
           clientFunctions,
-          schemaPath,
+          schemaPath: _schemaPath,
           unSanitizedEditorConfig: {
             features: featureProvidersLocal,
             lexical: lexicalEditorConfig,
@@ -100,7 +101,7 @@ export const RichTextCell: React.FC<
     featureProviderComponents,
     hasLoadedFeatures,
     clientFunctions,
-    schemaPath,
+    _schemaPath,
     featureProviderComponents.length,
     featureProviders,
     finalSanitizedEditorConfig,
@@ -174,7 +175,7 @@ export const RichTextCell: React.FC<
 
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
-            })
+            }) as React.ReactNode[]
 
             return (
               <React.Fragment key={featureProvider.key}>

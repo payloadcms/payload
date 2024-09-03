@@ -1,7 +1,6 @@
 'use client'
 import type { TypeWithID } from 'payload'
 
-import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -15,7 +14,7 @@ import { reducer } from './reducer.js'
 // or set to the document returned
 export type Documents = {
   [slug: string]: {
-    [id: number | string]: TypeWithID | false | null
+    [id: number | string]: false | null | TypeWithID
   }
 }
 
@@ -31,18 +30,22 @@ type ListRelationshipContext = {
 
 const Context = createContext({} as ListRelationshipContext)
 
-export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNode }> = ({
+  children,
+}) => {
   const [documents, dispatchDocuments] = useReducer(reducer, {})
   const debouncedDocuments = useDebounce(documents, 100)
-  const config = useConfig()
+
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const { i18n } = useTranslation()
   const { code: locale } = useLocale()
   const prevLocale = useRef(locale)
-
-  const {
-    routes: { api },
-    serverURL,
-  } = config
 
   const loadRelationshipDocs = useCallback(
     (reloadAll = false) => {

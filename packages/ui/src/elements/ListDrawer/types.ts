@@ -2,13 +2,20 @@ import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
+import type { useSelection } from '../../providers/Selection/index.js'
+
 export type ListDrawerProps = {
-  collectionSlugs: string[]
-  customHeader?: React.ReactNode
-  drawerSlug?: string
-  filterOptions?: FilterOptionsResult
-  onSelect?: (args: { collectionSlug: SanitizedCollectionConfig['slug']; docID: string }) => void
-  selectedCollection?: string
+  readonly collectionSlugs: string[]
+  readonly customHeader?: React.ReactNode
+  readonly drawerSlug?: string
+  readonly enableRowSelections?: boolean
+  readonly filterOptions?: FilterOptionsResult
+  readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
+  readonly onSelect?: (args: {
+    collectionSlug: SanitizedCollectionConfig['slug']
+    docID: string
+  }) => void
+  readonly selectedCollection?: string
 }
 
 export type ListTogglerProps = {
@@ -24,7 +31,7 @@ export type UseListDrawer = (args: {
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<Pick<ListDrawerProps, 'onSelect'>>, // drawer
+  React.FC<Pick<ListDrawerProps, 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>>, // drawer
   React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled'>>, // toggler
   {
     closeDrawer: () => void

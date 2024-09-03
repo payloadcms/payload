@@ -2,7 +2,6 @@ import type { CompilerOptions } from 'typescript'
 
 import * as p from '@clack/prompts'
 import { parse, stringify } from 'comment-json'
-import execa from 'execa'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
@@ -53,8 +52,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     nextAppDetails.nextAppDir = createdAppDir
   }
 
-  const { hasTopLevelLayout, isPayloadInstalled, isSrcDir, nextAppDir, nextConfigType } =
-    nextAppDetails
+  const { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigType } = nextAppDetails
 
   if (!nextConfigType) {
     return {
@@ -169,7 +167,9 @@ async function installAndConfigurePayload(
   }
 
   const logDebug = (message: string) => {
-    if (debug) origDebug(message)
+    if (debug) {
+      origDebug(message)
+    }
   }
 
   if (!fs.existsSync(projectDir)) {
@@ -182,7 +182,7 @@ async function installAndConfigurePayload(
   const templateFilesPath =
     dirname.endsWith('dist') || useDistFiles
       ? path.resolve(dirname, '../..', 'dist/template')
-      : path.resolve(dirname, '../../../../templates/blank-3.0')
+      : path.resolve(dirname, '../../../../templates/blank')
 
   logDebug(`Using template files from: ${templateFilesPath}`)
 
@@ -210,7 +210,7 @@ async function installAndConfigurePayload(
   )
 
   // This is a little clunky and needs to account for isSrcDir
-  copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath), debug)
+  copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath))
 
   // Wrap next.config.js with withPayload
   await wrapNextConfig({ nextConfigPath, nextConfigType })

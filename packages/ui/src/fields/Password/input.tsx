@@ -1,10 +1,13 @@
 'use client'
 import type { ChangeEvent } from 'react'
 
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -12,15 +15,16 @@ import './index.scss'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
+    afterInput,
     autoComplete = 'off',
+    beforeInput,
     className,
+    Description,
+    Error,
     errorProps,
+    field,
     inputRef,
+    Label,
     label,
     labelProps,
     onChange,
@@ -35,6 +39,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     value,
     width,
   } = props
+
+  const { i18n } = useTranslation()
 
   return (
     <div
@@ -53,18 +59,19 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        CustomLabel={CustomLabel}
+        field={field}
         htmlFor={`field-${path.replace(/\./g, '__')}`}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <div>
-          {BeforeInput !== undefined && BeforeInput}
+          <RenderComponent mappedComponent={beforeInput} />
           <input
-            aria-label={label}
+            aria-label={getTranslation(label, i18n)}
             autoComplete={autoComplete}
             data-rtl={rtl}
             disabled={readOnly}
@@ -72,14 +79,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             ref={inputRef}
             type="password"
             value={value || ''}
           />
-          {AfterInput !== undefined && AfterInput}
+          <RenderComponent mappedComponent={afterInput} />
         </div>
-        {CustomDescription !== undefined && CustomDescription}
+        <RenderComponent mappedComponent={Description} />
       </div>
     </div>
   )

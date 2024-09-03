@@ -7,14 +7,14 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import { PopupTrigger } from './PopupTrigger/index.js'
 import './index.scss'
+import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
 
 export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
-  boundingRef?: React.MutableRefObject<HTMLElement>
+  boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   buttonClassName?: string
   buttonType?: 'custom' | 'default' | 'none'
@@ -25,6 +25,7 @@ export type PopupProps = {
   forceOpen?: boolean
   horizontalAlign?: 'center' | 'left' | 'right'
   initActive?: boolean
+  noBackground?: boolean
   onToggleOpen?: (active: boolean) => void
   render?: (any) => React.ReactNode
   showOnHover?: boolean
@@ -46,6 +47,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     forceOpen,
     horizontalAlign: horizontalAlignFromProps = 'left',
     initActive = false,
+    noBackground,
     onToggleOpen,
     render,
     showOnHover = false,
@@ -131,7 +133,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [intersectionEntry, setPosition, windowHeight])
 
   useEffect(() => {
-    if (typeof onToggleOpen === 'function') onToggleOpen(active)
+    if (typeof onToggleOpen === 'function') {
+      onToggleOpen(active)
+    }
 
     if (active) {
       document.addEventListener('mousedown', handleClickOutside)
@@ -170,12 +174,28 @@ export const Popup: React.FC<PopupProps> = (props) => {
             onMouseLeave={() => setActive(false)}
           >
             <PopupTrigger
-              {...{ active, button, buttonType, className: buttonClassName, disabled, setActive }}
+              {...{
+                active,
+                button,
+                buttonType,
+                className: buttonClassName,
+                disabled,
+                noBackground,
+                setActive,
+              }}
             />
           </div>
         ) : (
           <PopupTrigger
-            {...{ active, button, buttonType, className: buttonClassName, disabled, setActive }}
+            {...{
+              active,
+              button,
+              buttonType,
+              className: buttonClassName,
+              disabled,
+              noBackground,
+              setActive,
+            }}
           />
         )}
       </div>

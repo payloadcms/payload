@@ -50,7 +50,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   }))
 
   const { t } = useTranslation()
-  const config = useConfig()
+  const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const modified = useFormModified()
@@ -156,7 +156,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valueToValidate = getDataByPath(path)
         }
 
-        let errorMessage: string | undefined
+        let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
         const isValid =
@@ -173,7 +173,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                   },
                   t,
                   user,
-                } as PayloadRequest,
+                } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
               })
             : true

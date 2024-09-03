@@ -1,4 +1,4 @@
-# Payload Postgres Adapter
+# Payload SQLite Adapter
 
 Official SQLite adapter for [Payload](https://payloadcms.com).
 

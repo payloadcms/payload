@@ -1,19 +1,26 @@
-import type { Field, FieldMap, Operator, SanitizedCollectionConfig, Where } from 'payload'
+import type {
+  ClientField,
+  MappedComponent,
+  Operator,
+  SanitizedCollectionConfig,
+  Where,
+} from 'payload'
 
 export type WhereBuilderProps = {
-  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
-  collectionSlug: SanitizedCollectionConfig['slug']
-  fieldMap?: FieldMap
+  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionSlug: SanitizedCollectionConfig['slug']
+  readonly fields?: ClientField[]
 }
 
 export type FieldCondition = {
   component?: string
+  field: ClientField
+  Filter: MappedComponent
   label: string
   operators: {
     label: string
     value: Operator
   }[]
-  props: Field
   value: string
 }
 

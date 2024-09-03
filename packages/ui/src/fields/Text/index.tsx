@@ -12,49 +12,52 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextInput } from './Input.js'
 import './index.scss'
+import { TextInput } from './Input.js'
 
 export { TextInput, TextInputProps }
 
 const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        placeholder,
+        readOnly: readOnlyFromAdmin,
+        rtl,
+        style,
+        width,
+      } = {},
+      hasMany,
+      label,
+      localized,
+      maxLength,
+      maxRows,
+      minLength,
+      minRows,
+      required,
+    },
     inputRef,
-    label,
-    labelProps,
-    localized,
-    maxLength,
-    maxRows,
-    minLength,
-    minRows,
-    path: pathFromProps,
-    placeholder,
-    readOnly: readOnlyFromProps,
-    required,
-    rtl,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const locale = useLocale()
 
-  const { localization: localizationConfig } = useConfig()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, minLength, maxLength, required],
   )
@@ -118,18 +121,17 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={field?.admin?.components?.Description}
+      description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
+      Label={field?.admin?.components?.Label}
       label={label}
-      labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

@@ -1,11 +1,13 @@
 'use client'
-import type { FieldMap, FieldWithPath, MappedField } from 'payload'
+import type { ClientField, FieldWithPath, MappedComponent } from 'payload'
 
+import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 import React, { Fragment, type JSX, useState } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -13,8 +15,8 @@ import './index.scss'
 const baseClass = 'field-select'
 
 export type FieldSelectProps = {
-  fieldMap: FieldMap
-  setSelected: (fields: FieldWithPath[]) => void
+  readonly fields: ClientField[]
+  readonly setSelected: (fields: FieldWithPath[]) => void
 }
 
 export const combineLabel = ({
@@ -23,26 +25,41 @@ export const combineLabel = ({
   prefix,
 }: {
   customLabel?: string
-  field?: MappedField
+  field?: ClientField
   prefix?: JSX.Element | string
 }): JSX.Element => {
-  const CustomLabelToRender =
-    field &&
-    'CustomLabel' in field.fieldComponentProps &&
-    field.fieldComponentProps.CustomLabel !== undefined
-      ? field.fieldComponentProps.CustomLabel
+  const CustomLabelToRender: MappedComponent =
+    field?.admin?.components &&
+    'Label' in field.admin.components &&
+    field?.admin?.components?.Label !== undefined
+      ? field.admin.components.Label
       : null
-  const DefaultLabelToRender =
-    field && 'label' in field.fieldComponentProps && field.fieldComponentProps.label ? (
-      <FieldLabel
-        label={field.fieldComponentProps.label}
-        {...(field.fieldComponentProps.labelProps || {})}
-      />
-    ) : null
 
-  const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel
+  const DefaultLabelToRender: MappedComponent =
+    field && 'label' in field && field.label
+      ? {
+          type: 'client',
+          Component: FieldLabel,
+          props: {
+            Label:
+              field.admin?.components && 'Label' in field.admin.components
+                ? field.admin?.components?.Label
+                : null,
+            label: field.label,
+          },
+        }
+      : null
 
-  if (!LabelToRender) return null
+  const LabelToRender: MappedComponent = CustomLabelToRender ||
+    DefaultLabelToRender || {
+      type: 'client',
+      Component: null,
+      RenderedComponent: customLabel,
+    }
+
+  if (!LabelToRender) {
+    return null
+  }
 
   return (
     <Fragment>
@@ -52,61 +69,59 @@ export const combineLabel = ({
           {' > '}
         </Fragment>
       )}
-      <span style={{ display: 'inline-block' }}>{LabelToRender}</span>
+      <span style={{ display: 'inline-block' }}>
+        <RenderComponent mappedComponent={LabelToRender} />
+      </span>
     </Fragment>
   )
 }
 
 const reduceFields = ({
-  fieldMap,
+  fields,
   labelPrefix = null,
   path = '',
 }: {
-  fieldMap: FieldMap
+  fields: ClientField[]
   labelPrefix?: JSX.Element | string
   path?: string
 }): { Label: JSX.Element; value: FieldWithPath }[] => {
-  if (!fieldMap) {
+  if (!fields) {
     return []
   }
 
-  return fieldMap?.reduce((fieldsToUse, field) => {
-    const { isFieldAffectingData } = field
+  return fields?.reduce((fieldsToUse, field) => {
     // escape for a variety of reasons
     if (
-      isFieldAffectingData &&
-      (field.disableBulkEdit ||
+      fieldAffectsData(field) &&
+      (field.admin.disableBulkEdit ||
         field.unique ||
-        field.isHidden ||
-        ('readOnly' in field.fieldComponentProps && field.fieldComponentProps.readOnly))
+        field.admin.hidden ||
+        ('readOnly' in field && field.readOnly))
     ) {
       return fieldsToUse
     }
 
-    if (
-      !(field.type === 'array' || field.type === 'blocks') &&
-      'fieldMap' in field.fieldComponentProps
-    ) {
+    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
       return [
         ...fieldsToUse,
         ...reduceFields({
-          fieldMap: field.fieldComponentProps.fieldMap,
+          fields: field.fields,
           labelPrefix: combineLabel({ field, prefix: labelPrefix }),
           path: createNestedClientFieldPath(path, field),
         }),
       ]
     }
 
-    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...fieldsToUse,
-        ...field.fieldComponentProps.tabs.reduce((tabFields, tab) => {
-          if ('fieldMap' in tab) {
+        ...field.tabs.reduce((tabFields, tab) => {
+          if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
             return [
               ...tabFields,
               ...reduceFields({
-                fieldMap: tab.fieldMap,
+                fields: tab.fields,
                 labelPrefix,
                 path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
               }),
@@ -128,9 +143,9 @@ const reduceFields = ({
   }, [])
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { t } = useTranslation()
-  const [options] = useState(() => reduceFields({ fieldMap }))
+  const [options] = useState(() => reduceFields({ fields }))
 
   const { dispatchFields, getFields } = useForm()
 
@@ -162,7 +177,7 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected 
 
   return (
     <div className={baseClass}>
-      <FieldLabel label={t('fields:selectFieldsToEdit')} />
+      <FieldLabel field={null} label={t('fields:selectFieldsToEdit')} />
       <ReactSelect
         getOptionValue={(option) => {
           if (typeof option.value === 'object' && 'path' in option.value) {

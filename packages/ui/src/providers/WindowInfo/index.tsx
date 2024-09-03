@@ -1,3 +1,4 @@
+'use client'
 import * as facelessUIImport from '@faceless-ui/window-info'
 const { WindowInfoProvider } =
   facelessUIImport && 'WindowInfoProvider' in facelessUIImport
@@ -7,4 +8,4 @@ const { useWindowInfo } =
   facelessUIImport && 'useWindowInfo' in facelessUIImport
     ? facelessUIImport
     : { useWindowInfo: undefined }
-export { WindowInfoProvider, useWindowInfo }
+export { useWindowInfo, WindowInfoProvider }

@@ -6,20 +6,19 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
+  defaultEditorFeatures,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
+  getEnabledNodes,
   HeadingFeature,
+  lexicalEditor,
   LinkFeature,
+  sanitizeServerEditorConfig,
   TreeViewFeature,
   UploadFeature,
-  defaultEditorFeatures,
-  getEnabledNodes,
-  lexicalEditor,
-  sanitizeServerEditorConfig,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
-import { LabelComponent } from './LabelComponent.js'
 import {
   ConditionalLayoutBlock,
   RadioButtonsBlock,
@@ -87,12 +86,15 @@ const editorConfig: ServerEditorConfig = {
           slug: 'myInlineBlock',
           admin: {
             components: {
-              Label: LabelComponent,
+              Label: '/collections/Lexical/LabelComponent.js#LabelComponent',
             },
           },
           fields: [
             {
               name: 'key',
+              label: () => {
+                return 'Key'
+              },
               type: 'select',
               options: ['value1', 'value2', 'value3'],
             },

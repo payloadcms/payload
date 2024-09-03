@@ -3,7 +3,7 @@ import type { SlateNodeConverter } from '../../types.js'
 
 import { convertSlateNodesToLexical } from '../../index.js'
 
-export const _SlateLinkConverter: SlateNodeConverter = {
+export const SlateLinkConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'link',
@@ -19,7 +19,7 @@ export const _SlateLinkConverter: SlateNodeConverter = {
         doc: slateNode.doc || null,
         linkType: slateNode.linkType || 'custom',
         newTab: slateNode.newTab || false,
-        url: slateNode.url || undefined,
+        url: (slateNode.linkType || 'custom') === 'custom' ? slateNode.url || 'https' : undefined, // can be undefined only if linkType is not custom, otherwise: validation error
       },
       format: '',
       indent: 0,

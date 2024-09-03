@@ -13,13 +13,5 @@ export const VersionsPill: React.FC = () => {
   const hasVersions = versions?.totalDocs > 0
 
   if (hasVersions)
-    return (
-      <span
-        className={[`${baseClass}__count`, hasVersions ? `${baseClass}__count--has-count` : '']
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {versions.totalDocs.toString()}
-      </span>
-    )
+    return <span className={`${baseClass}__count`}>{versions.totalDocs.toString()}</span>
 }

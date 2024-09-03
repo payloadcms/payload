@@ -1,11 +1,5 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type {
-  FieldPermissions,
-  FieldTypes,
-  RichTextAdapter,
-  RichTextFieldProps,
-  SanitizedConfig,
-} from 'payload'
+import type { RichTextAdapter, RichTextFieldProps, SanitizedConfig } from 'payload'
 import type React from 'react'
 
 import type { FeatureProviderServer } from './features/typesServer.js'
@@ -58,7 +52,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps, any>
+} & RichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -67,17 +61,17 @@ export type LexicalRichTextAdapterProvider =
   ({
     config,
     isRoot,
+    parentIsLocalized,
   }: {
     config: SanitizedConfig
     isRoot?: boolean
+    parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
-export type FieldProps = {
-  fieldTypes: FieldTypes
-  indexPath: string
-  path?: string
-  permissions: FieldPermissions
-} & RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps>
+export type LexicalRichTextFieldProps = {
+  admin: LexicalFieldAdminProps
+  lexicalEditorConfig: LexicalEditorConfig
+} & RichTextFieldProps<SerializedEditorState, AdapterProps, object>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

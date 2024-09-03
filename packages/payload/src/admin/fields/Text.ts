@@ -1,25 +1,34 @@
-import type { TextField } from '../../fields/config/types.js'
+import type React from 'react'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { TextField, TextFieldClient } from '../../fields/config/types.js'
 import type { TextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
 
 export type TextFieldProps = {
-  hasMany?: boolean
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  maxLength?: number
-  maxRows?: number
-  minLength?: number
-  minRows?: number
-  name?: string
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  path?: string
-  placeholder?: TextField['admin']['placeholder']
-  validate?: TextFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+  readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  readonly validate?: TextFieldValidation
+} & Omit<FormFieldBase<TextFieldClientWithoutType>, 'validate'>
 
-export type TextFieldLabelComponent = LabelComponent<'text'>
+export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
 
-export type TextFieldDescriptionComponent = DescriptionComponent<'text'>
+export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldErrorComponent = ErrorComponent<'text'>
+export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextField>
+
+export type TextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<TextFieldClientWithoutType>
+
+export type TextFieldErrorServerComponent = FieldErrorServerComponent<TextField>
+
+export type TextFieldErrorClientComponent = FieldErrorClientComponent<TextFieldClientWithoutType>

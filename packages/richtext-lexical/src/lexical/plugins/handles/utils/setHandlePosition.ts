@@ -1,3 +1,4 @@
+'use client'
 import { doesLineHeightAffectElement } from './doesLineHeightAffectElement.js'
 
 export function setHandlePosition(
@@ -19,24 +20,20 @@ export function setHandlePosition(
 
   let top: number
 
-  const shouldDisplayHandleInCenter = targetRect.height < 60
+  const isBlockStyle = ['lexical-block', 'lexical-upload', 'lexical-relationship'].some((classes) =>
+    targetElem.firstElementChild?.classList.contains(classes),
+  )
 
-  if (!shouldDisplayHandleInCenter) {
+  if (!isBlockStyle) {
     // No need to let line height affect the re-positioning of the floating element if line height has no
     // visual effect on the element. Otherwise, the floating element will be positioned incorrectly.
     const actualLineHeight = doesLineHeightAffectElement(targetElem)
       ? parseInt(targetStyle.lineHeight, 10)
       : 0
 
-    top =
-      targetRect.top + (actualLineHeight - floatingElemRect.height) / 2 - anchorElementRect.top - 1 // 1px inaccuracy
+    top = targetRect.top + (actualLineHeight - floatingElemRect.height) / 2 - anchorElementRect.top
   } else {
-    top =
-      targetRect.top -
-      floatingElemRect.height / 2 -
-      anchorElementRect.top +
-      targetRect.height / 2 -
-      1 // 1px inaccuracy
+    top = targetRect.top + 8 - anchorElementRect.top
   }
 
   const left = leftOffset

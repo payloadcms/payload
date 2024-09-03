@@ -50,6 +50,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -61,6 +62,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -170,7 +172,8 @@ export interface CustomViewsTwo {
  */
 export interface CustomField {
   id: string;
-  customTextField?: string | null;
+  customTextServerField?: string | null;
+  customTextClientField?: string | null;
   descriptionAsString?: string | null;
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;

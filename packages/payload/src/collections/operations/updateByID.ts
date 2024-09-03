@@ -3,13 +3,13 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, GeneratedTypes } from '../../index.js'
+import type { Args } from '../../fields/hooks/beforeChange/index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
-  TypeWithID,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -73,6 +73,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         })) || args
     }, Promise.resolve())
 
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
+
     const {
       id,
       autosave = false,
@@ -130,21 +134,12 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    let publishedDocWithLocales
-
-    if (publishSpecificLocale) {
-      publishedDocWithLocales = await getLatestCollectionVersion({
-        id,
-        config: collectionConfig,
-        payload,
-        published: true,
-        query: findOneArgs,
-        req,
-      })
+    if (!docWithLocales && !hasWherePolicy) {
+      throw new NotFound(req.t)
     }
-
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
+    if (!docWithLocales && hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -264,41 +259,46 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    let result = await beforeChange({
+    let publishedDocWithLocales = docWithLocales
+    let versionSnapshotResult
+
+    const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
       id,
       collection: collectionConfig,
       context: req.context,
-      data,
+      data: { ...data, id },
       doc: originalDoc,
-      docWithLocales,
+      docWithLocales: undefined,
       global: null,
       operation: 'update',
-      publishSpecificLocale,
-      publishedDocWithLocales,
       req,
       skipValidation:
         shouldSaveDraft &&
         collectionConfig.versions.drafts &&
         !collectionConfig.versions.drafts.validate &&
         data._status !== 'published',
-    })
-
-    let versionResult = result
+    }
 
     if (publishSpecificLocale) {
-      versionResult = await beforeChange({
+      publishedDocWithLocales = await getLatestCollectionVersion({
         id,
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        doc: originalDoc,
-        docWithLocales,
-        global: null,
-        operation: 'update',
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: findOneArgs,
         req,
-        skipValidation: shouldSaveDraft || data._status === 'draft',
+      })
+
+      versionSnapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales,
       })
     }
+
+    let result = await beforeChange({
+      ...beforeChangeArgs,
+      docWithLocales: publishedDocWithLocales,
+    })
 
     // /////////////////////////////////////
     // Handle potential password update
@@ -342,13 +342,14 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         autosave,
         collection: collectionConfig,
         docWithLocales: {
-          ...versionResult,
+          ...result,
           createdAt: docWithLocales.createdAt,
         },
-        draft: publishSpecificLocale ? true : shouldSaveDraft,
+        draft: shouldSaveDraft,
         payload,
         publishSpecificLocale,
         req,
+        snapshot: versionSnapshotResult,
       })
     }
 
@@ -440,7 +441,9 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

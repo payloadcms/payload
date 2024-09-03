@@ -9,8 +9,8 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { Radio } from './Radio/index.js'
 import './index.scss'
+import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
@@ -20,33 +20,39 @@ import { FieldError } from '../FieldError/index.js'
 
 const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     errorProps,
-    label,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        layout = 'horizontal',
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as RadioFieldProps['field']['admin'],
+      label,
+      options = [],
+      required,
+    } = {} as RadioFieldProps['field'],
     labelProps,
-    layout = 'horizontal',
     onChange: onChangeFromProps,
-    options = [],
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
     value: valueFromProps,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, options, required })
+      }
     },
     [validate, options, required],
   )
@@ -86,9 +92,16 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError
+        CustomError={field?.admin?.components?.Error}
+        field={field}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <FieldLabel
-        CustomLabel={CustomLabel}
+        field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -131,11 +144,12 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
             )
           })}
         </ul>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription
+          Description={field?.admin?.components?.Description}
+          description={description}
+          field={field}
+          {...(descriptionProps || {})}
+        />
       </div>
     </div>
   )

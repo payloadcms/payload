@@ -1,5 +1,5 @@
 'use client'
-import type { FieldMap, Labels, ReducedBlock } from 'payload'
+import type { ClientBlock, ClientField, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -9,23 +9,23 @@ import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
-  addRow: (rowIndex: number, blockType: string) => Promise<void> | void
-  blockType: string
-  blocks: ReducedBlock[]
-  duplicateRow: (rowIndex: number, blockType: string) => void
-  fieldMap: FieldMap
-  hasMaxRows?: boolean
-  isSortable?: boolean
-  labels: Labels
-  moveRow: (fromIndex: number, toIndex: number) => void
-  removeRow: (rowIndex: number) => void
-  rowCount: number
-  rowIndex: number
+  readonly addRow: (rowIndex: number, blockType: string) => Promise<void> | void
+  readonly blocks: ClientBlock[]
+  readonly blockType: string
+  readonly duplicateRow: (rowIndex: number, blockType: string) => void
+  readonly fields: ClientField[]
+  readonly hasMaxRows?: boolean
+  readonly isSortable?: boolean
+  readonly labels: Labels
+  readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly removeRow: (rowIndex: number) => void
+  readonly rowCount: number
+  readonly rowIndex: number
 }> = (props) => {
   const {
     addRow,
-    blockType,
     blocks,
+    blockType,
     duplicateRow,
     hasMaxRows,
     isSortable,

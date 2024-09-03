@@ -57,6 +57,11 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
 }
 
 export const traverseFields = ({
@@ -80,6 +85,7 @@ export const traverseFields = ({
   row,
   selects,
   texts,
+  withinArrayOrBlockLocale,
 }: Args) => {
   fields.forEach((field) => {
     let columnName = ''
@@ -116,6 +122,7 @@ export const traverseFields = ({
                 relationshipsToDelete,
                 selects,
                 texts,
+                withinArrayOrBlockLocale: localeKey,
               })
 
               arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -137,6 +144,7 @@ export const traverseFields = ({
           relationshipsToDelete,
           selects,
           texts,
+          withinArrayOrBlockLocale,
         })
 
         arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -168,6 +176,7 @@ export const traverseFields = ({
                 relationshipsToDelete,
                 selects,
                 texts,
+                withinArrayOrBlockLocale: localeKey,
               })
             }
           })
@@ -186,6 +195,7 @@ export const traverseFields = ({
           relationshipsToDelete,
           selects,
           texts,
+          withinArrayOrBlockLocale,
         })
       }
 
@@ -217,6 +227,7 @@ export const traverseFields = ({
               row,
               selects,
               texts,
+              withinArrayOrBlockLocale: localeKey,
             })
           })
         } else {
@@ -240,6 +251,7 @@ export const traverseFields = ({
             row,
             selects,
             texts,
+            withinArrayOrBlockLocale,
           })
         }
       }
@@ -274,6 +286,7 @@ export const traverseFields = ({
                   row,
                   selects,
                   texts,
+                  withinArrayOrBlockLocale: localeKey,
                 })
               })
             } else {
@@ -297,6 +310,7 @@ export const traverseFields = ({
                 row,
                 selects,
                 texts,
+                withinArrayOrBlockLocale,
               })
             }
           }
@@ -321,6 +335,7 @@ export const traverseFields = ({
             row,
             selects,
             texts,
+            withinArrayOrBlockLocale,
           })
         }
       })
@@ -347,6 +362,7 @@ export const traverseFields = ({
         row,
         selects,
         texts,
+        withinArrayOrBlockLocale,
       })
     }
 
@@ -387,6 +403,7 @@ export const traverseFields = ({
 
         transformRelationship({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: relationshipPath,
           },
           data: fieldData,
@@ -440,6 +457,7 @@ export const traverseFields = ({
       } else if (Array.isArray(fieldData)) {
         transformTexts({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: textPath,
           },
           data: fieldData,
@@ -471,6 +489,7 @@ export const traverseFields = ({
       } else if (Array.isArray(fieldData)) {
         transformNumbers({
           baseRow: {
+            locale: withinArrayOrBlockLocale,
             path: numberPath,
           },
           data: fieldData,
@@ -503,6 +522,7 @@ export const traverseFields = ({
         const newRows = transformSelects({
           id: data._uuid || data.id,
           data: data[field.name],
+          locale: withinArrayOrBlockLocale,
         })
 
         selects[selectTableName] = selects[selectTableName].concat(newRows)

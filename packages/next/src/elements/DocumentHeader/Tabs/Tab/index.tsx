@@ -1,28 +1,32 @@
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
 
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
-import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
+import { DocumentTabLink } from './TabLink.js'
 
 export const baseClass = 'doc-tab'
 
-export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (props) => {
+export const DocumentTab: React.FC<
+  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
+> = (props) => {
   const {
-    Pill,
     apiURL,
     collectionConfig,
     condition,
-    config,
     globalConfig,
     href: tabHref,
     i18n,
     isActive: tabIsActive,
     label,
     newTab,
+    payload,
     permissions,
+    Pill,
+    Pill_Component,
   } = props
-
+  const { config } = payload
   const { routes } = config
 
   let href = typeof tabHref === 'string' ? tabHref : ''
@@ -55,6 +59,17 @@ export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (prop
           })
         : label
 
+    const createMappedComponent = getCreateMappedComponent({
+      importMap: payload.importMap,
+      serverProps: {
+        i18n,
+        payload,
+        permissions,
+      },
+    })
+
+    const mappedPin = createMappedComponent(Pill, undefined, Pill_Component, 'Pill')
+
     return (
       <DocumentTabLink
         adminRoute={routes.admin}
@@ -67,10 +82,10 @@ export const DocumentTab: React.FC<DocumentTabConfig & DocumentTabProps> = (prop
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
-          {Pill && (
+          {mappedPin && (
             <Fragment>
               &nbsp;
-              <Pill />
+              <RenderComponent mappedComponent={mappedPin} />
             </Fragment>
           )}
         </span>

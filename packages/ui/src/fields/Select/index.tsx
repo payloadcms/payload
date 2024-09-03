@@ -25,36 +25,37 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
   const {
-    name,
-    AfterInput,
-    BeforeInput,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
-    descriptionProps,
-    errorProps,
-    hasMany = false,
-    isClearable = true,
-    isSortable = true,
-    label,
-    labelProps,
+    field,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        description,
+        isClearable = true,
+        isSortable = true,
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {} as SelectFieldProps['field']['admin'],
+      hasMany = false,
+      label,
+      options: optionsFromProps = [],
+      required,
+    },
     onChange: onChangeFromProps,
-    options: optionsFromProps = [],
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate,
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, hasMany, options, required })
+      }
     },
     [validate, required, hasMany, options],
   )
@@ -94,19 +95,18 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   return (
     <SelectInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      CustomDescription={CustomDescription}
-      CustomError={CustomError}
-      CustomLabel={CustomLabel}
+      afterInput={field?.admin?.components?.afterInput}
+      beforeInput={field?.admin?.components?.beforeInput}
       className={className}
-      descriptionProps={descriptionProps}
-      errorProps={errorProps}
+      Description={field?.admin?.components?.Description}
+      description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
+      Label={field?.admin?.components?.Label}
       label={label}
-      labelProps={labelProps}
       name={name}
       onChange={onChange}
       options={options}

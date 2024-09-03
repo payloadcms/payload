@@ -3,15 +3,15 @@ import type { Metadata } from 'next'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { draftMode, headers } from 'next/headers'
+import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-import { homeStatic } from 'src/payload/seed/home-static'
+import { homeStatic } from '@/endpoints/seed/home-static'
 
-import type { Page as PageType } from '../../../payload-types'
+import type { Page as PageType } from '@/payload-types'
 
-import { Blocks } from '../../components/Blocks'
-import { Hero } from '../../components/Hero'
-import { generateMeta } from '../../utilities/generateMeta'
+import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { RenderHero } from '@/heros/RenderHero'
+import { generateMeta } from '@/utilities/generateMeta'
 
 export async function generateStaticParams() {
   const payload = await getPayloadHMR({ config: configPromise })
@@ -54,8 +54,8 @@ export default async function Page({ params: { slug = 'home' } }) {
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
-      <Hero {...hero} />
-      <Blocks blocks={layout} />
+      <RenderHero {...hero} />
+      <RenderBlocks blocks={layout} />
     </article>
   )
 }

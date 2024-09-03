@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload'
+import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
 
-import { WithServerSideProps, formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -22,14 +22,16 @@ export type GenerateViewMetadata = (args: {
 
 export const RootPage = async ({
   config: configPromise,
+  importMap,
   params,
   searchParams,
 }: {
-  config: Promise<SanitizedConfig>
-  params: {
+  readonly config: Promise<SanitizedConfig>
+  readonly importMap: ImportMap
+  readonly params: {
     segments: string[]
   }
-  searchParams: {
+  readonly searchParams: {
     [key: string]: string | string[]
   }
 }) => {
@@ -54,13 +56,14 @@ export const RootPage = async ({
     adminRoute,
     config,
     currentRoute,
+    importMap,
     searchParams,
     segments,
   })
 
   let dbHasUser = false
 
-  if (!DefaultView) {
+  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     notFound()
   }
 
@@ -92,18 +95,26 @@ export const RootPage = async ({
     }
   }
 
-  const RenderedView = (
-    <WithServerSideProps
-      Component={DefaultView}
-      serverOnlyProps={
-        {
-          initPageResult,
-          params,
-          searchParams,
-        } as any
-      }
-    />
+  const createMappedView = getCreateMappedComponent({
+    importMap,
+    serverProps: {
+      i18n: initPageResult?.req.i18n,
+      importMap,
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    },
+  })
+
+  const MappedView: MappedComponent = createMappedView(
+    DefaultView.payloadComponent,
+    undefined,
+    DefaultView.Component,
+    'createMappedView',
   )
+
+  const RenderedView = <RenderComponent mappedComponent={MappedView} />
 
   return (
     <Fragment>

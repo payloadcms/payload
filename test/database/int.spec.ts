@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +24,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
@@ -122,24 +121,21 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
-    })
-
-    afterAll(() => {
       removeFiles(path.join(dirname, './migrations'))
-    })
 
-    it('should run migrate:create', async () => {
       await payload.db.createMigration({
         forceAcceptWarning: true,
         migrationName: 'test',
         payload,
       })
+    })
 
+    it('should run migrate:create', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')

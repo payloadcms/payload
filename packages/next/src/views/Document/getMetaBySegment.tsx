@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
@@ -10,11 +10,13 @@ import { generateMetadata as livePreviewMeta } from '../LivePreview/meta.js'
 import { generateNotFoundMeta } from '../NotFound/meta.js'
 import { generateMetadata as versionMeta } from '../Version/meta.js'
 import { generateMetadata as versionsMeta } from '../Versions/meta.js'
+import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export type GenerateEditViewMetadata = (
   args: {
-    collectionConfig?: SanitizedCollectionConfig | null
-    globalConfig?: SanitizedGlobalConfig | null
+    collectionConfig?: null | SanitizedCollectionConfig
+    globalConfig?: null | SanitizedGlobalConfig
+    view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
 
@@ -36,54 +38,71 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     isGlobal || Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
 
   if (isCollection) {
-    // `/:id`
+    // `/:collection/:id`
     if (params.segments.length === 3) {
       fn = editMeta
     }
 
-    // `/:id/api`
-    if (params.segments.length === 4 && params.segments[3] === 'api') {
-      fn = apiMeta
+    // `/:collection/:id/:view`
+    if (params.segments.length === 4) {
+      switch (params.segments[3]) {
+        case 'api':
+          // `/:collection/:id/api`
+          fn = apiMeta
+          break
+        case 'preview':
+          // `/:collection/:id/preview`
+          fn = livePreviewMeta
+          break
+        case 'versions':
+          // `/:collection/:id/versions`
+          fn = versionsMeta
+          break
+        default:
+          break
+      }
     }
 
-    // `/:id/preview`
-    if (params.segments.length === 4 && params.segments[3] === 'preview') {
-      fn = livePreviewMeta
-    }
-
-    // `/:id/versions`
-    if (params.segments.length === 4 && params.segments[3] === 'versions') {
-      fn = versionsMeta
-    }
-
-    // `/:id/versions/:version`
-    if (params.segments.length === 5 && params.segments[3] === 'versions') {
-      fn = versionMeta
+    // `/:collection/:id/:slug-1/:slug-2`
+    if (params.segments.length === 5) {
+      switch (params.segments[3]) {
+        case 'versions':
+          // `/:collection/:id/versions/:version`
+          fn = versionMeta
+          break
+        default:
+          break
+      }
     }
   }
 
   if (isGlobal) {
-    // `/:slug`
+    // `/:global`
     if (params.segments?.length === 2) {
       fn = editMeta
     }
 
-    // `/:slug/api`
-    if (params.segments?.length === 3 && params.segments[2] === 'api') {
-      fn = apiMeta
+    // `/:global/:view`
+    if (params.segments?.length === 3) {
+      switch (params.segments[2]) {
+        case 'api':
+          // `/:global/api`
+          fn = apiMeta
+          break
+        case 'preview':
+          // `/:global/preview`
+          fn = livePreviewMeta
+          break
+        case 'versions':
+          // `/:global/versions`
+          fn = versionsMeta
+          break
+        default:
+          break
+      }
     }
 
-    // `/:slug/preview`
-    if (params.segments?.length === 3 && params.segments[2] === 'preview') {
-      fn = livePreviewMeta
-    }
-
-    // `/:slug/versions`
-    if (params.segments?.length === 3 && params.segments[2] === 'versions') {
-      fn = versionsMeta
-    }
-
-    // `/:slug/versions/:version`
+    // `/:global/versions/:version`
     if (params.segments?.length === 4 && params.segments[2] === 'versions') {
       fn = versionMeta
     }
@@ -101,6 +120,31 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       i18n,
       isEditing,
     })
+  } else {
+    const { viewKey } = getViewsFromConfig({
+      collectionConfig,
+      config,
+      globalConfig,
+      overrideDocPermissions: true,
+      routeSegments: typeof segments === 'string' ? [segments] : segments,
+    })
+
+    if (viewKey) {
+      const customViewConfig =
+        collectionConfig?.admin?.components?.views?.edit?.[viewKey] ||
+        globalConfig?.admin?.components?.views?.edit?.[viewKey]
+
+      if (customViewConfig) {
+        return editMeta({
+          collectionConfig,
+          config,
+          globalConfig,
+          i18n,
+          isEditing,
+          view: viewKey as keyof EditConfig,
+        })
+      }
+    }
   }
 
   return generateNotFoundMeta({ config, i18n })

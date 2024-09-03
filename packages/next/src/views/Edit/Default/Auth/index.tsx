@@ -50,8 +50,10 @@ export const Auth: React.FC<Props> = (props) => {
   const { docPermissions, isInitializing } = useDocumentInfo()
 
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
@@ -147,11 +149,16 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
-                disabled={disabled}
-                label={t('authentication:newPassword')}
-                name="password"
-                path="password"
-                required
+                autoComplete="new-password"
+                field={{
+                  name: 'password',
+                  _path: 'password',
+                  admin: {
+                    disabled,
+                  },
+                  label: t('authentication:newPassword'),
+                  required: true,
+                }}
               />
               <ConfirmPasswordField disabled={readOnly} />
             </div>
@@ -194,20 +201,22 @@ export const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <CheckboxField
-            disabled={disabled}
-            label={t('authentication:enableAPIKey')}
-            name="enableAPIKey"
-            readOnly={readOnly}
+            field={{
+              name: 'enableAPIKey',
+              admin: { disabled, readOnly },
+              label: t('authentication:enableAPIKey'),
+            }}
           />
           <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
         </div>
       )}
       {verify && (
         <CheckboxField
-          disabled={disabled}
-          label={t('authentication:verified')}
-          name="_verified"
-          readOnly={readOnly}
+          field={{
+            name: '_verified',
+            admin: { disabled, readOnly },
+            label: t('authentication:verified'),
+          }}
         />
       )}
     </div>

@@ -1,3 +1,4 @@
+'use client'
 import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -43,7 +44,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
     case 'REMOVE': {
       const newState = { ...state }
-      if (newState[action.path]) delete newState[action.path]
+      if (newState[action.path]) {
+        delete newState[action.path]
+      }
       return newState
     }
 
@@ -250,7 +253,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const rowsMetadata = [...(state[path].rows || [])]
 
       const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
+      if (duplicateRowMetadata.id) {
+        duplicateRowMetadata.id = new ObjectId().toHexString()
+      }
 
       const duplicateRowState = deepCopyObject(rows[rowIndex])
       if (duplicateRowState.id) {

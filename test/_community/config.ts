@@ -1,9 +1,10 @@
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-// import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 const filename = fileURLToPath(import.meta.url)
@@ -13,8 +14,82 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
     PostsCollection,
-    // MediaCollection
+    {
+      slug: 'simple',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    MediaCollection,
   ],
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    avatar: {
+      Component: '/collections/Posts/MyAvatar.js#MyAvatar',
+    },
+  },
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        inlineBlocks: [
+          {
+            admin: {
+              components: {
+                Label: '/collections/Posts/MyComponent2.js#MyComponent2',
+              },
+            },
+            slug: 'test',
+            fields: [
+              {
+                name: 'test',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'someBlock2',
+            fields: [
+              {
+                name: 'test2',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      }),
+    ],
+  }),
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [
     MenuGlobal,

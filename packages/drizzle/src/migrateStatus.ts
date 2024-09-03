@@ -30,7 +30,7 @@ export async function migrateStatus(this: DrizzleAdapter): Promise<void> {
     const existingMigration = existingMigrations.find((m) => m.name === migration.name)
     return {
       Name: migration.name,
-      // eslint-disable-next-line perfectionist/sort-objects
+
       Batch: existingMigration?.batch,
       Ran: existingMigration ? 'Yes' : 'No',
     }

@@ -1,17 +1,28 @@
-import type { ErrorComponent } from '../forms/Error.js'
-import type { FieldMap } from '../forms/FieldMap.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { MarkOptional } from 'ts-essentials'
 
-export type GroupFieldProps = {
-  fieldMap: FieldMap
-  forceRender?: boolean
-  hideGutter?: boolean
-  name?: string
-  width?: string
-} & FormFieldBase
+import type { GroupField, GroupFieldClient } from '../../fields/config/types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
-export type GroupFieldLabelComponent = LabelComponent<'group'>
+type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldDescriptionComponent = DescriptionComponent<'group'>
+export type GroupFieldProps = FormFieldBase<GroupFieldClientWithoutType>
 
-export type GroupFieldErrorComponent = ErrorComponent<'group'>
+export type GroupFieldLabelServerComponent = FieldLabelServerComponent<GroupField>
+
+export type GroupFieldLabelClientComponent = FieldLabelClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldDescriptionServerComponent = FieldDescriptionServerComponent<GroupField>
+
+export type GroupFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldErrorServerComponent = FieldErrorServerComponent<GroupField>
+
+export type GroupFieldErrorClientComponent = FieldErrorClientComponent<GroupFieldClientWithoutType>

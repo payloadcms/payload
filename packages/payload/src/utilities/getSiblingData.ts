@@ -1,10 +1,12 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState } from '../admin/types.js'
 
 import { reduceFieldsToValues } from './reduceFieldsToValues.js'
 import { unflatten } from './unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
-  if (!fields) return null
+  if (!fields) {
+    return null
+  }
 
   if (path.indexOf('.') === -1) {
     return reduceFieldsToValues(fields, true)

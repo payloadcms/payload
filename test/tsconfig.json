@@ -27,11 +27,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payloadcms/ui": ["../packages/ui/src/exports/client/index.ts"],
-      "@payloadcms/ui/shared": ["../packages/ui/src/exports/shared/index.ts"],
-      "@payloadcms/ui/scss": ["../packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["../packages/ui/src/scss/app.scss"],
-      "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
       "@payload-config": ["./_community/config.ts"]
     }
   },
@@ -43,6 +38,6 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
+  "include": ["./**/*.ts", "./**/*.tsx", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }

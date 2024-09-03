@@ -7,11 +7,14 @@ import type {
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
@@ -20,7 +23,6 @@ import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
-import configPromise from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
@@ -39,10 +41,13 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Lexical', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {
@@ -56,6 +61,7 @@ describe('Lexical', () => {
     createdArrayDocID = (
       await payload.find({
         collection: arrayFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'array doc 1',
@@ -67,6 +73,7 @@ describe('Lexical', () => {
     createdJPGDocID = (
       await payload.find({
         collection: uploadsSlug,
+        depth: 0,
         where: {
           filename: {
             equals: 'payload.jpg',
@@ -78,6 +85,7 @@ describe('Lexical', () => {
     createdTextDocID = (
       await payload.find({
         collection: textFieldsSlug,
+        depth: 0,
         where: {
           text: {
             equals: 'Seeded text document',
@@ -89,6 +97,7 @@ describe('Lexical', () => {
     createdRichTextDocID = (
       await payload.find({
         collection: richTextFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'Rich Text',
@@ -225,6 +234,7 @@ describe('Lexical', () => {
   it('ensure link nodes convert to markdown', async () => {
     const newLexicalDoc = await payload.create({
       collection: lexicalFieldsSlug,
+      depth: 0,
       data: {
         title: 'Lexical Markdown Test',
         lexicalWithBlocks: {

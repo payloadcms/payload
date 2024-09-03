@@ -22,10 +22,7 @@ const getTSConfigPaths = (): {
     const rootConfigDir = path.resolve(tsConfigDir, tsConfig.compilerOptions.baseUrl || '')
     const srcPath = tsConfig.compilerOptions?.rootDir || path.resolve(process.cwd(), 'src')
     const outPath = tsConfig.compilerOptions?.outDir || path.resolve(process.cwd(), 'dist')
-    let configPath = path.resolve(
-      rootConfigDir,
-      tsConfig.compilerOptions?.paths?.['@payload-config']?.[0],
-    )
+    let configPath = tsConfig.compilerOptions?.paths?.['@payload-config']?.[0]
 
     if (configPath) {
       configPath = path.resolve(rootConfigDir, configPath)
@@ -74,7 +71,9 @@ export const findConfig = (): string => {
       : [configPath, srcPath, rootPath]
 
   for (const searchPath of searchPaths) {
-    if (!searchPath) continue
+    if (!searchPath) {
+      continue
+    }
 
     const configPath = findUpSync(
       (dir) => {
@@ -109,13 +108,17 @@ export const findConfig = (): string => {
       cwd: path.resolve(process.cwd(), 'dist'),
     })
 
-    if (distConfigPath) return distConfigPath
+    if (distConfigPath) {
+      return distConfigPath
+    }
   } else {
     const srcConfigPath = findUpSync(['payload.config.js', 'payload.config.ts'], {
       cwd: path.resolve(process.cwd(), 'src'),
     })
 
-    if (srcConfigPath) return srcConfigPath
+    if (srcConfigPath) {
+      return srcConfigPath
+    }
   }
 
   throw new Error(

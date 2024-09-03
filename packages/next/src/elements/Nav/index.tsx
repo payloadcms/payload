@@ -1,15 +1,14 @@
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
-import './index.scss'
 
 const baseClass = 'nav'
-
-import { WithServerSideProps } from '@payloadcms/ui/shared'
 
 import { DefaultNavClient } from './index.client.js'
 
@@ -28,48 +27,38 @@ export const DefaultNav: React.FC<NavProps> = (props) => {
     },
   } = payload.config
 
-  const BeforeNavLinks = Array.isArray(beforeNavLinks)
-    ? beforeNavLinks.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const createMappedComponent = getCreateMappedComponent({
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
 
-  const AfterNavLinks = Array.isArray(afterNavLinks)
-    ? afterNavLinks.map((Component, i) => (
-        <WithServerSideProps
-          Component={Component}
-          key={i}
-          serverOnlyProps={{
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          }}
-        />
-      ))
-    : null
+  const mappedBeforeNavLinks = createMappedComponent(
+    beforeNavLinks,
+    undefined,
+    undefined,
+    'beforeNavLinks',
+  )
+  const mappedAfterNavLinks = createMappedComponent(
+    afterNavLinks,
+    undefined,
+    undefined,
+    'afterNavLinks',
+  )
 
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        {Array.isArray(BeforeNavLinks) && BeforeNavLinks.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedBeforeNavLinks} />
         <DefaultNavClient />
-        {Array.isArray(AfterNavLinks) && AfterNavLinks.map((Component) => Component)}
+        <RenderComponent mappedComponent={mappedAfterNavLinks} />
         <div className={`${baseClass}__controls`}>
           <Logout />
         </div>

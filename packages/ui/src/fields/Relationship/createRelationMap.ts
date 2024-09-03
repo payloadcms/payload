@@ -1,3 +1,4 @@
+'use client'
 import type { Value } from './types.js'
 
 type RelationMap = {
@@ -7,7 +8,7 @@ type RelationMap = {
 type CreateRelationMap = (args: {
   hasMany: boolean
   relationTo: string | string[]
-  value: Value | Value[] | null // really needs to be `ValueWithRelation`
+  value: null | Value | Value[] // really needs to be `ValueWithRelation`
 }) => RelationMap
 
 export const createRelationMap: CreateRelationMap = ({ hasMany, relationTo, value }) => {

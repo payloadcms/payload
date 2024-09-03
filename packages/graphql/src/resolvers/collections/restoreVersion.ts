@@ -15,7 +15,7 @@ export type Resolver = (
   },
 ) => Promise<Document>
 
-export default function restoreVersionResolver(collection: Collection): Resolver {
+export function restoreVersionResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {
     const options = {
       id: args.id,

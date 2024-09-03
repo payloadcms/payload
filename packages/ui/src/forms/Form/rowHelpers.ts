@@ -1,3 +1,4 @@
+'use client'
 import type { Row } from 'payload'
 
 export const extractRowsAndCollapsedIDs = ({
@@ -14,8 +15,12 @@ export const extractRowsAndCollapsedIDs = ({
 } => {
   return rows.reduce(
     (acc, row) => {
-      if (rowID === row.id) row.collapsed = collapsed
-      if (row.collapsed) acc.collapsedIDs.push(row.id)
+      if (rowID === row.id) {
+        row.collapsed = collapsed
+      }
+      if (row.collapsed) {
+        acc.collapsedIDs.push(row.id)
+      }
       acc.updatedRows.push(row)
       return acc
     },
@@ -36,7 +41,9 @@ export const toggleAllRows = ({
   return rows.reduce(
     (acc, row) => {
       row.collapsed = collapsed
-      if (collapsed) acc.collapsedIDs.push(row.id)
+      if (collapsed) {
+        acc.collapsedIDs.push(row.id)
+      }
       acc.updatedRows.push(row)
       return acc
     },

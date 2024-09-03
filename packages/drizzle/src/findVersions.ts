@@ -28,7 +28,7 @@ export const findVersions: FindVersions = async function findVersions(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   return findMany({
     adapter: this,

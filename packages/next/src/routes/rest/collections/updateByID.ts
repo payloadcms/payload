@@ -37,8 +37,12 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) message = req.t('version:draftSavedSuccessfully')
-  if (autosave) message = req.t('version:autosavedSuccessfully')
+  if (draft) {
+    message = req.t('version:draftSavedSuccessfully')
+  }
+  if (autosave) {
+    message = req.t('version:autosavedSuccessfully')
+  }
 
   return Response.json(
     {

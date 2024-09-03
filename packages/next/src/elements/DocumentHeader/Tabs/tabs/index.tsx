@@ -1,15 +1,16 @@
 import type { DocumentTabConfig } from 'payload'
+import type React from 'react'
 
 import { VersionsPill } from './VersionsPill/index.js'
 
 export const documentViewKeys = [
-  'API',
-  'Default',
-  'LivePreview',
-  'References',
-  'Relationships',
-  'Version',
-  'Versions',
+  'api',
+  'default',
+  'livePreview',
+  'references',
+  'relationships',
+  'version',
+  'versions',
 ]
 
 export type DocumentViewKey = (typeof documentViewKeys)[number]
@@ -18,9 +19,10 @@ export const tabs: Record<
   DocumentViewKey,
   {
     order?: number // TODO: expose this to the globalConfig config
+    Pill_Component?: React.FC
   } & DocumentTabConfig
 > = {
-  API: {
+  api: {
     condition: ({ collectionConfig, globalConfig }) =>
       (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
       (globalConfig && !globalConfig?.admin?.hideAPIURL),
@@ -28,14 +30,14 @@ export const tabs: Record<
     label: 'API',
     order: 1000,
   },
-  Default: {
+  default: {
     href: '',
     // isActive: ({ href, location }) =>
     // location.pathname === href || location.pathname === `${href}/create`,
     label: ({ t }) => t('general:edit'),
     order: 0,
   },
-  LivePreview: {
+  livePreview: {
     condition: ({ collectionConfig, config, globalConfig }) => {
       if (collectionConfig) {
         return Boolean(
@@ -57,17 +59,16 @@ export const tabs: Record<
     label: ({ t }) => t('general:livePreview'),
     order: 100,
   },
-  References: {
+  references: {
     condition: () => false,
   },
-  Relationships: {
+  relationships: {
     condition: () => false,
   },
-  Version: {
+  version: {
     condition: () => false,
   },
-  Versions: {
-    Pill: VersionsPill,
+  versions: {
     condition: ({ collectionConfig, globalConfig, permissions }) =>
       Boolean(
         (collectionConfig?.versions &&
@@ -78,5 +79,6 @@ export const tabs: Record<
     href: '/versions',
     label: ({ t }) => t('version:versions'),
     order: 200,
+    Pill_Component: VersionsPill,
   },
 }

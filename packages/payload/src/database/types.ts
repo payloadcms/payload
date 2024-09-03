@@ -101,6 +101,13 @@ export interface BaseDatabaseAdapter {
    */
   name: string
   /**
+   * Full package name of the database adapter
+   *
+   * @example @payloadcms/db-postgres
+   */
+  packageName: string
+
+  /**
    * reference to the instance of payload
    */
   payload: Payload
@@ -159,9 +166,9 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type RollbackTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
-export type CommitTransaction = (id: Promise<number | string> | number | string) => Promise<void>
+export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
@@ -183,7 +190,7 @@ export type FindOneArgs = {
   where?: Where
 }
 
-export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
   collection: string
@@ -304,7 +311,9 @@ export type CreateVersionArgs<T = TypeWithID> = {
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -319,7 +328,9 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   globalSlug: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -434,5 +445,6 @@ export type DBIdentifierName =
 export type MigrationTemplateArgs = {
   downSQL?: string
   imports?: string
+  packageName?: string
   upSQL?: string
 }

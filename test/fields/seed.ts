@@ -41,6 +41,7 @@ import {
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
@@ -49,6 +50,10 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
   uiSlug,
+  uploads2Slug,
+  uploadsMulti,
+  uploadsMultiPoly,
+  uploadsPoly,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
@@ -62,7 +67,9 @@ export const seed = async (_payload: Payload) => {
       _payload.config.collections.map(async (coll) => {
         await new Promise((resolve, reject) => {
           _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) reject(err)
+            if (err) {
+              reject(err)
+            }
             resolve(true)
           })
         })
@@ -122,6 +129,50 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
     overrideAccess: true,
   })
+
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
+
+  // Create hasMany upload
+  await _payload.create({
+    collection: uploadsMulti,
+    data: {
+      media: [createdPNGDoc.id, createdJPGDoc.id],
+    },
+  })
+
+  // Create hasMany poly upload
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
+
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+    },
+  })
+  // Create poly upload
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
 
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
@@ -306,6 +357,15 @@ export const seed = async (_payload: Payload) => {
       ) as any,
     },
     locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: lexicalRelationshipFieldsSlug,
+    data: {
+      richText: textToLexicalJSON({ text: 'English text' }) as any,
+    },
     depth: 0,
     overrideAccess: true,
   })

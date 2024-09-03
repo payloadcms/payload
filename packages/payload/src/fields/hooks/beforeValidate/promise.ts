@@ -13,7 +13,7 @@ import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
   /**
@@ -21,7 +21,7 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
@@ -109,9 +109,15 @@ export const promise = async <T>({
       }
 
       case 'checkbox': {
-        if (siblingData[field.name] === 'true') siblingData[field.name] = true
-        if (siblingData[field.name] === 'false') siblingData[field.name] = false
-        if (siblingData[field.name] === '') siblingData[field.name] = false
+        if (siblingData[field.name] === 'true') {
+          siblingData[field.name] = true
+        }
+        if (siblingData[field.name] === 'false') {
+          siblingData[field.name] = false
+        }
+        if (siblingData[field.name] === '') {
+          siblingData[field.name] = false
+        }
 
         break
       }
@@ -138,7 +144,7 @@ export const promise = async <T>({
           siblingData[field.name] === 'null' ||
           siblingData[field.name] === null
         ) {
-          if (field.type === 'relationship' && field.hasMany === true) {
+          if (field.hasMany === true) {
             siblingData[field.name] = []
           } else {
             siblingData[field.name] = null
@@ -153,32 +159,32 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = {
+                    ...relatedDoc,
+                    value: parseFloat(relatedDoc.value as string),
+                  }
+                }
+              }
+            })
+          }
+          if (field.hasMany !== true && valueIsValueWithRelation(value)) {
+            const relatedCollection = req.payload.config.collections.find(
+              (collection) => collection.slug === value.relationTo,
+            )
+            if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
                   fieldAffectsData(collectionField) && collectionField.name === 'id',
               )
               if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = {
-                  ...relatedDoc,
-                  value: parseFloat(relatedDoc.value as string),
-                }
+                siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
               }
-            })
-          }
-          if (
-            field.type === 'relationship' &&
-            field.hasMany !== true &&
-            valueIsValueWithRelation(value)
-          ) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === value.relationTo,
-            )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
             }
           }
         } else {
@@ -187,25 +193,31 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === field.relationTo,
               )
+
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = parseFloat(relatedDoc as string)
+                }
+              }
+            })
+          }
+          if (field.hasMany !== true && value) {
+            const relatedCollection = req.payload.config.collections.find(
+              (collection) => collection.slug === field.relationTo,
+            )
+
+            if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
                   fieldAffectsData(collectionField) && collectionField.name === 'id',
               )
               if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = parseFloat(relatedDoc as string)
+                siblingData[field.name] = parseFloat(value as string)
               }
-            })
-          }
-          if (field.type === 'relationship' && field.hasMany !== true && value) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === field.relationTo,
-            )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = parseFloat(value as string)
             }
           }
         }
@@ -270,7 +282,7 @@ export const promise = async <T>({
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name] as any)
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
 
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
@@ -287,8 +299,12 @@ export const promise = async <T>({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
 
       const groupData = siblingData[field.name] as Record<string, unknown>
       const groupDoc = siblingDoc[field.name] as Record<string, unknown>
@@ -408,8 +424,12 @@ export const promise = async <T>({
       let tabSiblingData
       let tabSiblingDoc
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as Record<string, unknown>
         tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>

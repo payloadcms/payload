@@ -10,7 +10,14 @@ import { upsertRow } from './upsertRow/index.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
-  { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
+  {
+    autosave,
+    globalSlug,
+    publishedLocale,
+    req = {} as PayloadRequest,
+    snapshot,
+    versionData,
+  }: CreateGlobalVersionArgs,
 ) {
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
@@ -22,10 +29,12 @@ export async function createGlobalVersion<T extends TypeWithID>(
     data: {
       autosave,
       latest: true,
+      publishedLocale,
+      snapshot,
       version: versionData,
     },
     db,
-    fields: buildVersionGlobalFields(global),
+    fields: buildVersionGlobalFields(this.payload.config, global),
     operation: 'create',
     req,
     tableName,

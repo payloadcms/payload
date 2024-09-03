@@ -2,7 +2,6 @@ import type {
   Data,
   DocumentPreferences,
   Field,
-  FilterOptionsResult,
   FormField,
   FormState,
   PayloadRequest,
@@ -381,7 +380,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
-
+      case 'upload':
       case 'relationship': {
         if (field.filterOptions) {
           if (typeof field.filterOptions === 'object') {
@@ -459,41 +458,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.value = relationshipValue
           fieldState.initialValue = relationshipValue
         }
-
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
-        }
-
-        break
-      }
-
-      case 'upload': {
-        if (field.filterOptions) {
-          if (typeof field.filterOptions === 'object') {
-            fieldState.filterOptions = {
-              [field.relationTo]: field.filterOptions,
-            }
-          }
-
-          if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
-              id,
-              data: fullData,
-              relationTo: field.relationTo,
-              siblingData: data,
-              user: req.user,
-            })
-
-            fieldState.filterOptions = query
-          }
-        }
-
-        const relationshipValue =
-          data[field.name] && typeof data[field.name] === 'object' && 'id' in data[field.name]
-            ? data[field.name].id
-            : data[field.name]
-        fieldState.value = relationshipValue
-        fieldState.initialValue = relationshipValue
 
         if (!filter || filter(args)) {
           state[`${path}${field.name}`] = fieldState

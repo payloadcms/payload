@@ -2,7 +2,7 @@ import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 
-import type { GenerateFileURL, GeneratedAdapter } from '../types.js'
+import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 
@@ -108,7 +108,7 @@ export const getFields = ({
           fields: [
             ...(adapter.fields || []),
             {
-              ...(existingSizeURLField || {}),
+              ...(existingSizeURLField || ({} as any)),
               ...baseURLField,
               hooks: {
                 afterRead: [

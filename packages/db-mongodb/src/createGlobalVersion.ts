@@ -6,7 +6,17 @@ import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  {
+    autosave,
+    createdAt,
+    globalSlug,
+    parent,
+    publishedLocale,
+    req = {} as PayloadRequest,
+    snapshot,
+    updatedAt,
+    versionData,
+  },
 ) {
   const VersionModel = this.versions[globalSlug]
   const options = await withSession(this, req)
@@ -18,6 +28,8 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
         createdAt,
         latest: true,
         parent,
+        publishedLocale,
+        snapshot,
         updatedAt,
         version: versionData,
       },

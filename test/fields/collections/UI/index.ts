@@ -1,6 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { UICustomClient } from './UICustomClient.js'
 import { uiFieldsSlug } from './shared.js'
 
 const UIFields: CollectionConfig = {
@@ -26,7 +25,7 @@ const UIFields: CollectionConfig = {
       name: 'uiCustomClient',
       admin: {
         components: {
-          Field: UICustomClient,
+          Field: '/collections/UI/UICustomClient.js#UICustomClient',
         },
         custom: {
           customValue: `client-side-configuration`,

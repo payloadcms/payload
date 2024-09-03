@@ -5,15 +5,15 @@ import type { Props } from './types.js'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { RenderField } from './RenderField.js'
 import './index.scss'
+import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldMap, forceRender, indexPath, margins, path, permissions, schemaPath } =
+  const { className, fields, forceRender, indexPath, margins, path, permissions, schemaPath } =
     props
 
   const { i18n } = useTranslation()
@@ -35,7 +35,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
+  if (!fields || (Array.isArray(fields) && fields.length === 0)) {
     return null
   }
 
@@ -43,7 +43,7 @@ export const RenderFields: React.FC<Props> = (props) => {
     console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
-  if (fieldMap) {
+  if (fields) {
     return (
       <div
         className={[
@@ -57,38 +57,22 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map((f, fieldIndex) => {
-            const {
-              type,
-              CustomField,
-              custom,
-              disabled,
-              fieldComponentProps,
-              fieldComponentProps: { readOnly },
-              isHidden,
-            } = f
-
+          fields?.map((field, fieldIndex) => {
             const forceRenderChildren =
               (typeof forceRender === 'number' && fieldIndex <= forceRender) || true
 
-            const name = 'name' in f ? f.name : undefined
+            const name = 'name' in field ? field.name : undefined
 
             return (
               <RenderField
-                CustomField={CustomField}
-                custom={custom}
-                disabled={disabled}
-                fieldComponentProps={{ ...fieldComponentProps, forceRender: forceRenderChildren }}
+                fieldComponentProps={{ field, forceRender: forceRenderChildren }}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
-                isHidden={isHidden}
                 key={fieldIndex}
                 name={name}
                 path={path}
                 permissions={permissions?.[name]}
-                readOnly={readOnly}
                 schemaPath={schemaPath}
                 siblingPermissions={permissions}
-                type={type}
               />
             )
           })}

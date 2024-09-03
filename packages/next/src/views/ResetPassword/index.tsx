@@ -59,7 +59,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
             />
           </p>
           <br />
-          <Button Link={Link} buttonStyle="secondary" el="link" to={adminRoute}>
+          <Button buttonStyle="secondary" el="link" Link={Link} to={adminRoute}>
             {i18n.t('general:backToDashboard')}
           </Button>
         </div>

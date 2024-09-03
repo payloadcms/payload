@@ -15,7 +15,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const tableName = this.tableNameMap.get(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
@@ -35,7 +35,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   return {
     ...result,
     docs: result.docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc = {
         id: doc.parent,
         ...doc.version,

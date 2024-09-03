@@ -1,6 +1,5 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
-import type { FormFieldBase } from 'payload'
 
 import {
   FieldDescription,
@@ -14,39 +13,43 @@ import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
+import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import './bundled.css'
 import './index.scss'
+import '../lexical/theme/EditorTheme.scss'
 
 const baseClass = 'rich-text-lexical'
 
 const RichTextComponent: React.FC<
   {
-    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-    name: string
-    richTextComponentMap: Map<string, React.ReactNode>
-    width?: string
-  } & FormFieldBase
+    readonly editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+  } & LexicalRichTextFieldProps
 > = (props) => {
   const {
-    name,
-    CustomDescription,
-    CustomError,
-    CustomLabel,
-    className,
     descriptionProps,
     editorConfig,
     errorProps,
-    label,
+    field: {
+      name,
+      _path: pathFromProps,
+      admin: {
+        className,
+        components: { Description, Error, Label },
+        readOnly: readOnlyFromAdmin,
+        style,
+        width,
+      } = {},
+      label,
+      required,
+    },
+    field,
     labelProps,
-    path: pathFromProps,
-    readOnly: readOnlyFromProps,
-    required,
-    style,
+    readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
-    width,
   } = props
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -66,17 +69,8 @@ const RichTextComponent: React.FC<
     validate: memoizedValidate,
   })
 
-  const {
-    errorMessage,
-    formInitializing,
-    formProcessing,
-    initialValue,
-    path,
-    schemaPath,
-    setValue,
-    showError,
-    value,
-  } = fieldType
+  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
+    fieldType
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
@@ -100,9 +94,16 @@ const RichTextComponent: React.FC<
         width,
       }}
     >
-      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} alignCaret="left" />
+      <FieldError
+        CustomError={Error}
+        field={field}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
       <FieldLabel
-        CustomLabel={CustomLabel}
+        field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}
@@ -111,7 +112,7 @@ const RichTextComponent: React.FC<
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
-            fieldProps={props}
+            field={field}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
@@ -130,11 +131,7 @@ const RichTextComponent: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription Description={Description} field={field} {...(descriptionProps || {})} />
       </div>
     </div>
   )
@@ -151,4 +148,4 @@ function fallbackRender({ error }): React.ReactElement {
   )
 }
 
-export const RichText = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)

@@ -11,6 +11,7 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const depth = searchParams.get('depth')
   const draft = searchParams.get('draft') === 'true'
   const autosave = searchParams.get('autosave') === 'true'
+  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const result = await updateOperationGlobal({
     slug: globalConfig.slug,
@@ -19,13 +20,18 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     globalConfig,
+    publishSpecificLocale,
     req,
   })
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) message = req.t('version:draftSavedSuccessfully')
-  if (autosave) message = req.t('version:autosavedSuccessfully')
+  if (draft) {
+    message = req.t('version:draftSavedSuccessfully')
+  }
+  if (autosave) {
+    message = req.t('version:autosavedSuccessfully')
+  }
 
   return Response.json(
     {

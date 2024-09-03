@@ -11,13 +11,13 @@ import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
+import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
-import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
-import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
@@ -112,7 +112,6 @@ export const LexicalEditor: React.FC<
           }
         })}
         <RichTextPlugin
-          ErrorBoundary={LexicalErrorBoundary}
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>
@@ -120,6 +119,7 @@ export const LexicalEditor: React.FC<
               </div>
             </div>
           }
+          ErrorBoundary={LexicalErrorBoundary}
         />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
@@ -129,7 +129,9 @@ export const LexicalEditor: React.FC<
           onChange={(editorState, editor, tags) => {
             // Ignore any onChange event triggered by focus only
             if (!tags.has('focus') || tags.size > 1) {
-              if (onChange != null) onChange(editorState, editor, tags)
+              if (onChange != null) {
+                onChange(editorState, editor, tags)
+              }
             }
           }}
         />

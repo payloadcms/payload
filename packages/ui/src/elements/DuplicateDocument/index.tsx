@@ -34,12 +34,10 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
   const { setModified } = useForm()
 
   const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = useConfig()
-
-  const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
@@ -115,7 +113,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
+      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
@@ -131,7 +129,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             >
               {t('general:cancel')}
             </Button>
-            <Button id="confirm-duplicate" onClick={confirm}>
+            <Button id="confirm-duplicate" onClick={() => void confirm()}>
               {t('general:duplicateWithoutSaving')}
             </Button>
           </div>

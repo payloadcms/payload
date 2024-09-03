@@ -5,7 +5,7 @@ const ObjectId = (ObjectIdImport.default ||
 
 export const isValidID = (
   value: number | string,
-  type: 'ObjectID' | 'number' | 'text',
+  type: 'number' | 'ObjectID' | 'text',
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {
@@ -15,7 +15,9 @@ export const isValidID = (
     return false
   }
 
-  if (typeof value === 'number' && !Number.isNaN(value)) return true
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return true
+  }
 
   if (type === 'ObjectID') {
     return ObjectId.isValid(String(value))

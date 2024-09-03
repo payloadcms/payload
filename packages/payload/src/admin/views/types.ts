@@ -1,34 +1,43 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { Permissions } from '../../auth/index.js'
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Locale } from '../../config/types.js'
+import type { ClientConfig } from '../../config/client.js'
+import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
+import type { MappedComponent } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
-  path: string
+  meta?: MetaConfig
+  path?: string
   sensitive?: boolean
   strict?: boolean
 }
 
-export type AdminViewProps = {
-  initPageResult: InitPageResult
-  params?: { [key: string]: string | string[] | undefined }
-  searchParams: { [key: string]: string | string[] | undefined }
+export type MappedView = {
+  actions?: MappedComponent[]
+  Component: MappedComponent
 }
 
-export type AdminViewComponent = React.ComponentType<AdminViewProps>
+export type AdminViewProps = {
+  readonly clientConfig: ClientConfig
+  readonly importMap: ImportMap
+  readonly initPageResult: InitPageResult
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly searchParams: { [key: string]: string | string[] | undefined }
+}
 
-export type AdminView = AdminViewComponent | AdminViewConfig
+export type AdminViewComponent = PayloadComponent<AdminViewProps>
 
 export type EditViewProps = {
-  collectionSlug?: string
-  globalSlug?: string
+  readonly collectionSlug?: string
+  readonly globalSlug?: string
 }
 
 export type VisibleEntities = {
@@ -50,8 +59,8 @@ export type InitPageResult = {
 }
 
 export type ServerSideEditViewProps = {
-  initPageResult: InitPageResult
-  params: { [key: string]: string | string[] | undefined }
-  routeSegments: string[]
-  searchParams: { [key: string]: string | string[] | undefined }
+  readonly initPageResult: InitPageResult
+  readonly params: { [key: string]: string | string[] | undefined }
+  readonly routeSegments: string[]
+  readonly searchParams: { [key: string]: string | string[] | undefined }
 }

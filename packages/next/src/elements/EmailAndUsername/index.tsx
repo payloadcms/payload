@@ -7,7 +7,7 @@ import { email, username } from 'payload/shared'
 import React from 'react'
 
 type Props = {
-  loginWithUsername?: LoginWithUsernameOptions | false
+  readonly loginWithUsername?: false | LoginWithUsernameOptions
 }
 function EmailFieldComponent(props: Props) {
   const { loginWithUsername } = props
@@ -21,10 +21,11 @@ function EmailFieldComponent(props: Props) {
     return (
       <EmailField
         autoComplete="off"
-        label={t('general:email')}
-        name="email"
-        path="email"
-        required={requireEmail}
+        field={{
+          name: 'email',
+          label: t('general:email'),
+          required: requireEmail,
+        }}
         validate={email}
       />
     )
@@ -43,10 +44,11 @@ function UsernameFieldComponent(props: Props) {
   if (showUsernameField) {
     return (
       <TextField
-        label={t('authentication:username')}
-        name="username"
-        path="username"
-        required={requireUsername}
+        field={{
+          name: 'username',
+          label: t('authentication:username'),
+          required: requireUsername,
+        }}
         validate={username}
       />
     )
@@ -57,7 +59,7 @@ function UsernameFieldComponent(props: Props) {
 
 type RenderEmailAndUsernameFieldsProps = {
   className?: string
-  loginWithUsername?: LoginWithUsernameOptions | false
+  loginWithUsername?: false | LoginWithUsernameOptions
   operation?: 'create' | 'update'
   permissions?: {
     [fieldName: string]: FieldPermissions
@@ -70,25 +72,34 @@ export function RenderEmailAndUsernameFields(props: RenderEmailAndUsernameFields
   return (
     <RenderFields
       className={className}
-      fieldMap={[
+      fields={[
         {
           name: 'email',
           type: 'text',
-          CustomField: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
-          cellComponentProps: null,
-          fieldComponentProps: { type: 'email', autoComplete: 'off', readOnly },
-          fieldIsPresentational: false,
-          isFieldAffectingData: true,
+          admin: {
+            autoComplete: 'off',
+            components: {
+              Field: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <EmailFieldComponent loginWithUsername={loginWithUsername} />,
+              },
+            },
+          },
           localized: false,
         },
         {
           name: 'username',
           type: 'text',
-          CustomField: <UsernameFieldComponent loginWithUsername={loginWithUsername} />,
-          cellComponentProps: null,
-          fieldComponentProps: { type: 'text', readOnly },
-          fieldIsPresentational: false,
-          isFieldAffectingData: true,
+          admin: {
+            components: {
+              Field: {
+                type: 'client',
+                Component: null,
+                RenderedComponent: <UsernameFieldComponent loginWithUsername={loginWithUsername} />,
+              },
+            },
+          },
           localized: false,
         },
       ]}

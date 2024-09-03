@@ -20,17 +20,15 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
-import Categories from './payload/collections/Categories'
-import { Media } from './payload/collections/Media'
-import { Pages } from './payload/collections/Pages'
-import { Posts } from './payload/collections/Posts'
-import Users from './payload/collections/Users'
-import BeforeDashboard from './payload/components/BeforeDashboard'
-import BeforeLogin from './payload/components/BeforeLogin'
-import { seed } from './payload/endpoints/seed'
-import { Footer } from './payload/globals/Footer/Footer'
-import { Header } from './payload/globals/Header/Header'
-import { revalidateRedirects } from './payload/hooks/revalidateRedirects'
+import Categories from './collections/Categories'
+import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import Users from './collections/Users'
+import { seedHandler } from './endpoints/seedHandler'
+import { Footer } from './Footer/config'
+import { Header } from './Header/config'
+import { revalidateRedirects } from './hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { Page, Post } from 'src/payload-types'
 
@@ -43,8 +41,8 @@ const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
   return doc?.slug
-    ? `${process.env.NEXT_PUBLIC_SERVER_URL}/${doc.slug}`
-    : process.env.NEXT_PUBLIC_SERVER_URL
+    ? `${process.env.NEXT_PUBLIC_SERVER_URL!}/${doc.slug}`
+    : process.env.NEXT_PUBLIC_SERVER_URL!
 }
 
 export default buildConfig({
@@ -52,10 +50,13 @@ export default buildConfig({
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
-      beforeLogin: [BeforeLogin],
+      beforeLogin: ['@/components/BeforeLogin'],
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
-      beforeDashboard: [BeforeDashboard],
+      beforeDashboard: ['@/components/BeforeDashboard'],
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: Users.slug,
     livePreview: {
@@ -115,7 +116,7 @@ export default buildConfig({
   }),
   // database-adapter-config-start
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URI!,
   }),
   // database-adapter-config-end
   collections: [Pages, Posts, Media, Categories, Users],
@@ -125,7 +126,7 @@ export default buildConfig({
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
     {
-      handler: seed,
+      handler: seedHandler,
       method: 'get',
       path: '/seed',
     },
@@ -189,7 +190,7 @@ export default buildConfig({
     }),
     payloadCloudPlugin(), // storage-adapter-placeholder
   ],
-  secret: process.env.PAYLOAD_SECRET,
+  secret: process.env.PAYLOAD_SECRET!,
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

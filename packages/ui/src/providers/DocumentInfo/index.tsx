@@ -54,11 +54,13 @@ const DocumentInfo: React.FC<
   } = props
 
   const {
-    admin: { dateFormat },
-    collections,
-    globals,
-    routes: { api },
-    serverURL,
+    config: {
+      admin: { dateFormat },
+      collections,
+      globals,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
@@ -70,7 +72,9 @@ const DocumentInfo: React.FC<
   const { uploadEdits } = useUploadEdits()
 
   const [documentTitle, setDocumentTitle] = useState(() => {
-    if (!initialDataFromProps) return ''
+    if (!initialDataFromProps) {
+      return ''
+    }
 
     return formatDocTitle({
       collectionConfig,
@@ -144,6 +148,12 @@ const DocumentInfo: React.FC<
         and: [],
       },
     }
+
+    versionParams.where.and.push({
+      snapshot: {
+        not_equals: true,
+      },
+    })
 
     const publishedVersionParams: { depth: number; locale: string; where: Where } = {
       depth: 0,
@@ -276,10 +286,13 @@ const DocumentInfo: React.FC<
 
         if (docAccessURL) {
           const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+            body: JSON.stringify(data),
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
             },
+            method: 'post',
           })
 
           const json: DocumentPermissions = await res.json()
@@ -287,14 +300,13 @@ const DocumentInfo: React.FC<
             `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
             {
               body: JSON.stringify({
-                data: {
-                  ...(data || {}),
-                  _status: 'published',
-                },
+                ...(data || {}),
+                _status: 'published',
               }),
               credentials: 'include',
               headers: {
                 'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
               },
               method: 'POST',
             },
@@ -415,7 +427,9 @@ const DocumentInfo: React.FC<
       initialDataFromProps === undefined ||
       localeChanged
     ) {
-      if (localeChanged) prevLocale.current = locale
+      if (localeChanged) {
+        prevLocale.current = locale
+      }
 
       const getInitialState = async () => {
         setIsError(false)
@@ -436,8 +450,13 @@ const DocumentInfo: React.FC<
             serverURL,
             signal: abortController.signal,
           })
+          const data = reduceFieldsToValues(result, true)
+          setData(data)
 
-          setData(reduceFieldsToValues(result, true))
+          if (localeChanged) {
+            void getDocPermissions(data)
+          }
+
           setInitialState(result)
         } catch (err) {
           if (!abortController.signal.aborted) {
@@ -472,6 +491,7 @@ const DocumentInfo: React.FC<
     onLoadError,
     initialDataFromProps,
     initialStateFromProps,
+    getDocPermissions,
   ])
 
   useEffect(() => {
@@ -492,13 +512,8 @@ const DocumentInfo: React.FC<
   }, [collectionConfig, data, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
-    const localeChanged = locale !== prevLocalePermissions.current
-
     if (data && (collectionSlug || globalSlug)) {
-      if (localeChanged) {
-        prevLocalePermissions.current = locale
-        void getDocPermissions(data)
-      } else if (
+      if (
         hasInitializedDocPermissions.current === false &&
         (!docPermissions ||
           hasSavePermission === undefined ||
@@ -519,7 +534,6 @@ const DocumentInfo: React.FC<
     collectionSlug,
     globalSlug,
     data,
-    locale,
     docPermissions,
     hasSavePermission,
     hasPublishPermission,
@@ -539,7 +553,9 @@ const DocumentInfo: React.FC<
     })}`
   }, [baseURL, locale, pluralType, id, slug, uploadEdits])
 
-  if (isError) notFound()
+  if (isError) {
+    notFound()
+  }
 
   const value: DocumentInfoContext = {
     ...props,
@@ -556,6 +572,7 @@ const DocumentInfo: React.FC<
     isInitializing,
     isLoading,
     onSave,
+    preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,

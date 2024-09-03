@@ -1,6 +1,5 @@
+'use client'
 import type { EditorThemeClasses } from 'lexical'
-
-import './EditorTheme.scss'
 
 export const LexicalEditorTheme: EditorThemeClasses = {
   block: 'LexicalEditorTheme__block',

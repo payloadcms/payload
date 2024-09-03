@@ -30,8 +30,10 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth()
   const {
-    routes: { api },
-    serverURL,
+    config: {
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const { toggleModal } = useModal()
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()
@@ -134,7 +136,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
           >
             {t('general:cancel')}
           </Button>
-          <Button id="confirm-delete" onClick={deleting ? undefined : () => void handleDelete()}>
+          <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
             {deleting ? t('general:deleting') : t('general:confirm')}
           </Button>
         </div>

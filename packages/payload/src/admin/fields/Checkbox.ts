@@ -1,21 +1,38 @@
+import type { MarkOptional } from 'ts-essentials'
+
+import type { CheckboxField, CheckboxFieldClient } from '../../fields/config/types.js'
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type CheckboxFieldClientWithoutType = MarkOptional<CheckboxFieldClient, 'type'>
 
 export type CheckboxFieldProps = {
-  checked?: boolean
-  disableFormData?: boolean
-  id?: string
-  name?: string
-  onChange?: (val: boolean) => void
-  partialChecked?: boolean
-  path?: string
-  validate?: CheckboxFieldValidation
-  width?: string
-} & Omit<FormFieldBase, 'validate'>
+  readonly checked?: boolean
+  readonly disableFormData?: boolean
+  readonly id?: string
+  readonly onChange?: (value: boolean) => void
+  readonly partialChecked?: boolean
+  readonly validate?: CheckboxFieldValidation
+} & Omit<FormFieldBase<CheckboxFieldClientWithoutType>, 'validate'>
 
-export type CheckboxFieldLabelComponent = LabelComponent<'checkbox'>
+export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<CheckboxField>
 
-export type CheckboxFieldDescriptionComponent = DescriptionComponent<'checkbox'>
+export type CheckboxFieldLabelClientComponent =
+  FieldLabelClientComponent<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldErrorComponent = ErrorComponent<'checkbox'>
+export type CheckboxFieldDescriptionServerComponent = FieldDescriptionServerComponent<CheckboxField>
+
+export type CheckboxFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<CheckboxFieldClientWithoutType>
+
+export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<CheckboxField>
+
+export type CheckboxFieldErrorClientComponent =
+  FieldErrorClientComponent<CheckboxFieldClientWithoutType>

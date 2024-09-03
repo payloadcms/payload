@@ -13,7 +13,9 @@ import { useSearchParams } from '../SearchParams/index.js'
 const LocaleContext = createContext({} as Locale)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const { localization } = useConfig()
+  const {
+    config: { localization },
+  } = useConfig()
 
   const { user } = useAuth()
   const defaultLocale =
@@ -45,7 +47,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
         setLocaleCode(localeToSet)
         setLocale(findLocaleFromCode(localization, localeToSet))
         try {
-          if (user) await setPreference('locale', localeToSet)
+          if (user) {
+            await setPreference('locale', localeToSet)
+          }
         } catch (error) {
           // swallow error
         }

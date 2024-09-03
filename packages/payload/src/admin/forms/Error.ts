@@ -1,19 +1,34 @@
-import type { CustomComponent, ServerProps } from '../../config/types.js'
-import type { FieldComponentProps } from '../types.js'
-import type { FieldTypes } from './FieldTypes.js'
+import type { MarkOptional } from 'ts-essentials'
+
+import type { ServerProps } from '../../config/types.js'
+import type { ClientField, Field } from '../../fields/config/types.js'
+import type { MappedComponent } from '../types.js'
 
 export type GenericErrorProps = {
-  CustomError?: React.ReactNode
-  alignCaret?: 'center' | 'left' | 'right'
-  message?: string
-  path?: string
-  showError?: boolean
+  readonly alignCaret?: 'center' | 'left' | 'right'
+  readonly CustomError?: MappedComponent
+  readonly message?: string
+  readonly path?: string
+  readonly showError?: boolean
 }
 
-export type ErrorProps<T extends keyof FieldTypes = any> = {
-  type: T
-} & FieldComponentProps &
-  GenericErrorProps &
+type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
+
+export type FieldErrorClientProps<
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  field: TFieldClient
+} & GenericErrorProps
+
+export type FieldErrorServerProps<TFieldServer extends Field> = {
+  field: TFieldServer
+} & GenericErrorProps &
   Partial<ServerProps>
 
-export type ErrorComponent<T extends keyof FieldTypes = any> = CustomComponent<ErrorProps<T>>
+export type FieldErrorClientComponent<
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldErrorClientProps<TFieldClient>>
+
+export type FieldErrorServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
+  FieldErrorServerProps<TFieldServer>
+>

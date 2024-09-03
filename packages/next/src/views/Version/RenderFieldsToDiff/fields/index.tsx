@@ -5,7 +5,7 @@ import Select from './Select/index.js'
 import Tabs from './Tabs/index.js'
 import Text from './Text/index.js'
 
-export default {
+export const diffComponents = {
   array: Iterable,
   blocks: Iterable,
   checkbox: Text,

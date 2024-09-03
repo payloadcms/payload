@@ -16,12 +16,13 @@ import { handleAuthRedirect } from './handleAuthRedirect.js'
 
 export const initPage = async ({
   config: configPromise,
+  importMap,
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise, importMap })
 
   const {
     collections,
@@ -116,7 +117,9 @@ export const initPage = async ({
 
     locale = findLocaleFromCode(localization, localeCode)
 
-    if (!locale) locale = findLocaleFromCode(localization, defaultLocaleCode)
+    if (!locale) {
+      locale = findLocaleFromCode(localization, defaultLocaleCode)
+    }
     req.locale = locale.code
   }
 
