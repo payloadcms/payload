@@ -1,4 +1,4 @@
-import type { SQL, asc, desc } from 'drizzle-orm'
+import type { asc, desc, SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { Field, Where } from 'payload'
 
@@ -15,6 +15,7 @@ export type BuildQueryJoinAliases = {
 type BuildQueryArgs = {
   adapter: DrizzleAdapter
   fields: Field[]
+  joins?: BuildQueryJoinAliases
   locale?: string
   sort?: string
   tableName: string
@@ -33,6 +34,7 @@ export type BuildQueryResult = {
 const buildQuery = function buildQuery({
   adapter,
   fields,
+  joins = [],
   locale,
   sort,
   tableName,
@@ -41,7 +43,6 @@ const buildQuery = function buildQuery({
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }
-  const joins: BuildQueryJoinAliases = []
 
   const orderBy = buildOrderBy({
     adapter,

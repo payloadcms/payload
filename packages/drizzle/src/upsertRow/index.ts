@@ -414,6 +414,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     adapter,
     depth: 0,
     fields,
+    joinQuery,
     tableName,
   })
 

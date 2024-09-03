@@ -4,10 +4,11 @@ import type { Field, JoinQuery } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { buildOrderBy } from '../queries/buildOrderBy.js'
+import buildQuery from '../queries/buildQuery.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -17,6 +18,7 @@ type TraverseFieldArgs = {
   depth?: number
   fields: Field[]
   joinQuery: JoinQuery
+  joins?: BuildQueryJoinAliases
   locale?: string
   path: string
   topLevelArgs: Record<string, unknown>
@@ -31,6 +33,7 @@ export const traverseFields = ({
   depth,
   fields,
   joinQuery = {},
+  joins,
   locale,
   path,
   topLevelArgs,
@@ -60,6 +63,7 @@ export const traverseFields = ({
         depth,
         fields: field.fields,
         joinQuery,
+        joins,
         path,
         topLevelArgs,
         topLevelTableName,
@@ -80,6 +84,7 @@ export const traverseFields = ({
           depth,
           fields: tab.fields,
           joinQuery,
+          joins,
           path: tabPath,
           topLevelArgs,
           topLevelTableName,
@@ -200,6 +205,7 @@ export const traverseFields = ({
             depth,
             fields: field.fields,
             joinQuery,
+            joins,
             path: `${path}${field.name}_`,
             topLevelArgs,
             topLevelTableName,
@@ -239,8 +245,10 @@ export const traverseFields = ({
           })
           const withJoin: DBQueryConfig<'many', true, any, any> = {
             columns: selectFields,
-            limit,
             orderBy: () => [orderBy.order(orderBy.column)],
+          }
+          if (limit) {
+            withJoin.limit = limit
           }
 
           if (field.localized) {
@@ -249,18 +257,18 @@ export const traverseFields = ({
           } else {
             withJoin.columns.id = true
           }
+
           if (where) {
-            // TODO: implement the where query
-            // const { where } = buildQuery({
-            //   adapter,
-            //   fields,
-            //   locale,
-            //   sort,
-            //   tableName: joinTableName,
-            //   where,
-            // })
-            // withJoin.where = () => (eq)
-            console.log('`join[][where]` not supported')
+            const { where: joinWhere } = buildQuery({
+              adapter,
+              fields,
+              joins,
+              locale,
+              sort,
+              tableName: joinTableName,
+              where,
+            })
+            withJoin.where = () => joinWhere
           }
           currentArgs.with[`${path.replaceAll('.', '_')}${field.name}`] = withJoin
           break

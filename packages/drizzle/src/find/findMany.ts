@@ -69,6 +69,7 @@ export const findMany = async function find({
     depth: 0,
     fields,
     joinQuery,
+    joins,
     tableName,
   })
 

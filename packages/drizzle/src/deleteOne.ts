@@ -48,6 +48,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
       adapter: this,
       depth: 0,
       fields: collection.fields,
+      joinQuery,
       tableName,
     })
 
