@@ -34,8 +34,6 @@ export function collectTopLevelJSXInLines(
       startMatch,
     })
 
-    console.log({ content, lines, propsString })
-
     finds.push({
       content,
       propsString,
