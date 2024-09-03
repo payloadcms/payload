@@ -212,8 +212,8 @@ export const sanitizeClientFeatures = (
 }
 
 export function sanitizeClientEditorConfig(
-  lexical: LexicalEditorConfig,
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
+  lexical?: LexicalEditorConfig,
   admin?: LexicalFieldAdminProps,
 ): SanitizedClientEditorConfig {
   return {

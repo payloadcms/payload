@@ -33,28 +33,30 @@ export const RichTextCell: React.FC<
   const { cellData } = useTableCell()
 
   const finalSanitizedEditorConfig = useMemo<SanitizedClientEditorConfig>(() => {
-    const clientFeatures: GeneratedFeatureProviderComponent[] = (
-      richTextComponentMap.get('features') as GeneratedFeatureProviderComponent[]
-    ).sort((a, b) => a.clientFeatureProps.order - b.clientFeatureProps.order) // order by order
+    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+      'features',
+    ) as GeneratedFeatureProviderComponent[]
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
     for (const clientFeature of clientFeatures) {
       featureProvidersLocal.push(clientFeature.clientFeature(clientFeature.clientFeatureProps))
     }
 
+    const finalLexicalEditorConfig = lexicalEditorConfig
+      ? lexicalEditorConfig
+      : defaultEditorLexicalConfig
+
     const resolvedClientFeatures = loadClientFeatures({
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
-        lexical: lexicalEditorConfig,
+        lexical: finalLexicalEditorConfig,
       },
     })
 
-    return sanitizeClientEditorConfig(
-      lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
-      resolvedClientFeatures,
-      admin,
-    )
-  }, [admin, lexicalEditorConfig, richTextComponentMap])
+    return sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig)
+  }, [richTextComponentMap, lexicalEditorConfig])
+
+  finalSanitizedEditorConfig.admin = admin
 
   useEffect(() => {
     let dataToUse = cellData

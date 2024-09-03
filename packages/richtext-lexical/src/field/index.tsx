@@ -23,28 +23,30 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   } = props
 
   const finalSanitizedEditorConfig = useMemo<SanitizedClientEditorConfig>(() => {
-    const clientFeatures: GeneratedFeatureProviderComponent[] = (
-      richTextComponentMap.get('features') as GeneratedFeatureProviderComponent[]
-    ).sort((a, b) => a.clientFeatureProps.order - b.clientFeatureProps.order) // order by order
+    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+      'features',
+    ) as GeneratedFeatureProviderComponent[]
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
     for (const clientFeature of clientFeatures) {
       featureProvidersLocal.push(clientFeature.clientFeature(clientFeature.clientFeatureProps))
     }
 
+    const finalLexicalEditorConfig = lexicalEditorConfig
+      ? lexicalEditorConfig
+      : defaultEditorLexicalConfig
+
     const resolvedClientFeatures = loadClientFeatures({
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
-        lexical: lexicalEditorConfig,
+        lexical: finalLexicalEditorConfig,
       },
     })
 
-    return sanitizeClientEditorConfig(
-      lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
-      resolvedClientFeatures,
-      admin,
-    )
-  }, [admin, lexicalEditorConfig, richTextComponentMap])
+    return sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig)
+  }, [richTextComponentMap, lexicalEditorConfig])
+
+  finalSanitizedEditorConfig.admin = admin
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>
