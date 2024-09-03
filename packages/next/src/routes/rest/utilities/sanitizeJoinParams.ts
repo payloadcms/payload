@@ -11,8 +11,6 @@ export const sanitizeJoinParams = (
     | {
         [schemaPath: string]: {
           limit?: unknown
-          page?: unknown
-          pagination?: unknown
           sort?: string
           where?: unknown
         }
@@ -24,12 +22,6 @@ export const sanitizeJoinParams = (
   Object.keys(joins).forEach((schemaPath) => {
     joinQuery[schemaPath] = {
       limit: isNumber(joins[schemaPath]?.limit) ? Number(joins[schemaPath].limit) : undefined,
-      page: isNumber(joins[schemaPath]?.page) ? Number(joins[schemaPath].page) : undefined,
-      pagination:
-        joins[schemaPath]?.pagination &&
-        (joins[schemaPath].pagination === 'true' || joins[schemaPath].pagination)
-          ? true
-          : undefined,
       sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
       where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
     }
