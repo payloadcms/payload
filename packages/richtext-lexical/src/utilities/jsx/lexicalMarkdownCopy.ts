@@ -16,7 +16,7 @@ import type {
 } from '@lexical/markdown'
 import type { ElementNode, LexicalNode, TextNode } from 'lexical'
 
-export type MultilineElementTransformer = _MultilineElementTransformer & {
+export type MultilineElementTransformer = {
   handleImportAfterStartMatch?: (args: {
     lines: Array<string>
     rootNode: ElementNode
@@ -27,7 +27,31 @@ export type MultilineElementTransformer = _MultilineElementTransformer & {
     continue?: boolean
     return?: [boolean, number]
   }
-}
+  /**
+   * `replace` is called only when markdown is imported in the editor, not when it's typed
+   *
+   * @return return false to cancel the transform, even though the regex matched. Lexical will then search for the next transformer.
+   */
+  replace: (
+    rootNode: ElementNode,
+    /**
+     * During markdown shortcut transforms, children nodes may be provided to the transformer. If this is the case, no `linesInBetween` will be provided and
+     * the children nodes should be used instead of the `linesInBetween` to create the new node.
+     */
+    children: Array<LexicalNode> | null,
+    startMatch: RegExpMatchArray,
+    endMatch: null | RegExpMatchArray,
+    /**
+     * linesInBetween includes the text between the start & end matches, split up by lines, not including the matches themselves.
+     * This is null when the transformer is triggered through markdown shortcuts (by typing in the editor)
+     */
+    linesInBetween: Array<string> | null,
+    /**
+     * Whether the match is from an import operation (e.g. through `$convertFromMarkdownString`) or not (e.g. through typing in the editor).
+     */
+    isImport: boolean,
+  ) => boolean | void
+} & Omit<_MultilineElementTransformer, 'replace'>
 
 import { $isListItemNode, $isListNode } from '@lexical/list'
 import { TRANSFORMERS } from '@lexical/markdown'
