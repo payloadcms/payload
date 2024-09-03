@@ -1,7 +1,5 @@
-import type React from 'react'
-
 import type {
-  ClientComponentProps,
+  BaseClientFeatureProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,
@@ -9,18 +7,12 @@ import type {
   ResolvedClientFeatureMap,
 } from '../features/typesClient.js'
 import type { ClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalRichTextFieldProps } from '../types.js'
-
-import { createClientComponent } from '../features/createClientComponent.js'
-import { useClientFeatureContext } from '../lexical/config/client/ClientFeatureContextProvider.js'
 
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
-      clientFunctions: Record<string, any>
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
-      field: LexicalRichTextFieldProps['field']
-      props: ClientComponentProps<UnSanitizedClientProps>
+      props: BaseClientFeatureProps<UnSanitizedClientProps>
       // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
       resolvedFeatures: ResolvedClientFeatureMap
       // unSanitized EditorConfig,
@@ -33,25 +25,20 @@ export const createClientFeature: <
   ClientProps = UnSanitizedClientProps,
 >(
   args: CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps>,
-) => React.FC<ClientComponentProps<ClientProps>> = (feature) => {
+) => FeatureProviderProviderClient<UnSanitizedClientProps, ClientProps> = (feature) => {
   const featureProviderProvideClient: FeatureProviderProviderClient<any, any> = (props) => {
     const featureProviderClient: Partial<FeatureProviderClient<any, any>> = {
       clientFeatureProps: props,
     }
 
-    const { field } = useClientFeatureContext()
-
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
-        clientFunctions,
         featureProviderMap,
         resolvedFeatures,
         unSanitizedEditorConfig,
       }) => {
         const toReturn = feature({
-          clientFunctions,
           featureProviderMap,
-          field,
           props,
           resolvedFeatures,
           unSanitizedEditorConfig,
@@ -78,5 +65,5 @@ export const createClientFeature: <
     return featureProviderClient as FeatureProviderClient<any, any>
   }
 
-  return createClientComponent(featureProviderProvideClient)
+  return featureProviderProvideClient
 }

@@ -889,7 +889,7 @@ export { InlineToolbarFeature } from './features/toolbars/inline/server/index.js
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
 export type {
-  ClientComponentProps,
+  BaseClientFeatureProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,

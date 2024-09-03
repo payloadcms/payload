@@ -77,7 +77,9 @@ export const connect: Connect = async function connect(
     }
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
-    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
 
@@ -90,7 +92,9 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
     await this.migrate({ migrations: this.prodMigrations })

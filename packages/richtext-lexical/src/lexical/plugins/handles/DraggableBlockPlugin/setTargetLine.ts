@@ -126,18 +126,21 @@ export function setTargetLine(
   /**
    * Properly reset previous targetBlockElem styles
    */
-  lastTargetBlock.elem.style.opacity = ''
+  if (lastTargetBlock?.elem) {
+    lastTargetBlock.elem.style.opacity = ''
 
-  if (lastTargetBlock?.elem === targetBlockElem) {
-    if (isBelow) {
-      lastTargetBlock.elem.style.marginTop = ''
+    if (lastTargetBlock?.elem === targetBlockElem) {
+      if (isBelow) {
+        lastTargetBlock.elem.style.marginTop = ''
+      } else {
+        lastTargetBlock.elem.style.marginBottom = ''
+      }
     } else {
       lastTargetBlock.elem.style.marginBottom = ''
+      lastTargetBlock.elem.style.marginTop = ''
     }
-  } else {
-    lastTargetBlock.elem.style.marginBottom = ''
-    lastTargetBlock.elem.style.marginTop = ''
   }
+
   animationTimer = 0
   return {
     isBelow,
