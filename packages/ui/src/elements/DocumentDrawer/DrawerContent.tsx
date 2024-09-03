@@ -10,7 +10,6 @@ import { XIcon } from '../../icons/X/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
@@ -108,9 +107,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onLoadError={onLoadError}
       onSave={onSave}
     >
-      <EditDepthProvider>
-        <RenderComponent mappedComponent={Edit} />
-      </EditDepthProvider>
+      <RenderComponent mappedComponent={Edit} />
     </DocumentInfoProvider>
   )
 }

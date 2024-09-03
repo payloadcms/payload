@@ -2,13 +2,7 @@
 
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
-import {
-  EditDepthProvider,
-  RenderComponent,
-  SetViewActions,
-  useConfig,
-  useDocumentInfo,
-} from '@payloadcms/ui'
+import { RenderComponent, SetViewActions, useConfig, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 export const EditViewClient: React.FC = () => {
@@ -33,9 +27,7 @@ export const EditViewClient: React.FC = () => {
           (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.default?.actions
         }
       />
-      <EditDepthProvider>
-        <RenderComponent mappedComponent={Edit} />
-      </EditDepthProvider>
+      <RenderComponent mappedComponent={Edit} />
     </Fragment>
   )
 }

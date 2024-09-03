@@ -410,7 +410,7 @@ export function UploadInput(props: UploadInputProps) {
     !readOnly &&
     (!value ||
       (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)))
-  // console.log({ hasMany, populatedDocs, value })
+
   return (
     <div
       className={[

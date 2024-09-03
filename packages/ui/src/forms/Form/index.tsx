@@ -25,6 +25,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -647,26 +648,28 @@ export const Form: React.FC<FormProps> = (props) => {
       onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
-      <FormContext.Provider value={contextRef.current}>
-        <FormWatchContext.Provider
-          value={{
-            fields,
-            ...contextRef.current,
-          }}
-        >
-          <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-              <ProcessingContext.Provider value={processing}>
-                <ModifiedContext.Provider value={modified}>
-                  <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
-                  </FormFieldsContext.Provider>
-                </ModifiedContext.Provider>
-              </ProcessingContext.Provider>
-            </InitializingContext.Provider>
-          </SubmittedContext.Provider>
-        </FormWatchContext.Provider>
-      </FormContext.Provider>
+      <EditDepthProvider>
+        <FormContext.Provider value={contextRef.current}>
+          <FormWatchContext.Provider
+            value={{
+              fields,
+              ...contextRef.current,
+            }}
+          >
+            <SubmittedContext.Provider value={submitted}>
+              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext.Provider value={processing}>
+                  <ModifiedContext.Provider value={modified}>
+                    <FormFieldsContext.Provider value={fieldsReducer}>
+                      {children}
+                    </FormFieldsContext.Provider>
+                  </ModifiedContext.Provider>
+                </ProcessingContext.Provider>
+              </InitializingContext.Provider>
+            </SubmittedContext.Provider>
+          </FormWatchContext.Provider>
+        </FormContext.Provider>
+      </EditDepthProvider>
     </form>
   )
 }
