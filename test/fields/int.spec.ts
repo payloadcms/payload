@@ -917,6 +917,7 @@ describe('Fields', () => {
         collection: 'group-fields',
         data: {
           camelCaseGroup: {
+            nesGroup: { arr: [{ text: 'nestedCamel' }] },
             array: [
               {
                 text: 'text',
@@ -933,6 +934,7 @@ describe('Fields', () => {
 
       expect(res.camelCaseGroup.array[0].text).toBe('text')
       expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
+      expect(res.camelCaseGroup.nesGroup.arr[0].text).toBe('nestedCamel')
     })
   })
 

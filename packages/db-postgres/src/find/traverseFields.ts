@@ -15,6 +15,7 @@ type TraverseFieldArgs = {
   depth?: number
   fields: Field[]
   path: string
+  tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
 }
@@ -27,6 +28,7 @@ export const traverseFields = ({
   depth,
   fields,
   path,
+  tablePath,
   topLevelArgs,
   topLevelTableName,
 }: TraverseFieldArgs) => {
@@ -38,6 +40,7 @@ export const traverseFields = ({
         currentArgs,
         currentTableName,
         depth,
+        tablePath,
         fields: field.fields,
         path,
         topLevelArgs,
@@ -50,6 +53,7 @@ export const traverseFields = ({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
+        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
 
         traverseFields({
           _locales,
@@ -59,6 +63,7 @@ export const traverseFields = ({
           depth,
           fields: tab.fields,
           path: tabPath,
+          tablePath: tabTablePath,
           topLevelArgs,
           topLevelTableName,
         })
@@ -78,10 +83,8 @@ export const traverseFields = ({
             with: {},
           }
 
-          const sanitizedPathForTableName = path ? `${toSnakeCase(path.slice(0, -1))}_` : ''
-
           const arrayTableName = adapter.tableNameMap.get(
-            `${currentTableName}_${sanitizedPathForTableName}${toSnakeCase(field.name)}`,
+            `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
           )
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
@@ -97,6 +100,7 @@ export const traverseFields = ({
             depth,
             fields: field.fields,
             path: '',
+            tablePath: '',
             topLevelArgs,
             topLevelTableName,
           })
@@ -149,6 +153,7 @@ export const traverseFields = ({
                 currentArgs: withBlock,
                 currentTableName: tableName,
                 depth,
+                tablePath: '',
                 fields: block.fields,
                 path: '',
                 topLevelArgs,
@@ -165,6 +170,7 @@ export const traverseFields = ({
             adapter,
             currentArgs,
             currentTableName,
+            tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             depth,
             fields: field.fields,
             path: `${path}${field.name}_`,
