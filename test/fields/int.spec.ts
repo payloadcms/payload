@@ -62,7 +62,6 @@ describe('Fields', () => {
       slug: 'users',
       credentials: devUser,
     })
-
     user = await payload.login({
       collection: 'users',
       data: {
@@ -956,6 +955,7 @@ describe('Fields', () => {
         data: {
           group: { text: 'required' },
           camelCaseGroup: {
+            nesGroup: { arr: [{ text: 'nestedCamel' }] },
             array: [
               {
                 text: 'text',
@@ -972,6 +972,7 @@ describe('Fields', () => {
 
       expect(res.camelCaseGroup.array[0].text).toBe('text')
       expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
+      expect(res.camelCaseGroup.nesGroup.arr[0].text).toBe('nestedCamel')
     })
   })
 
