@@ -181,7 +181,9 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(relationOneDoc.id)
     await saveDocAndAssert(page)
     await wait(200)
-    await trackNetworkRequests(page, `/api/${relationOneSlug}`)
+    await trackNetworkRequests(page, `/api/${relationOneSlug}`, {
+      beforePoll: async () => await page.reload(),
+    })
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
