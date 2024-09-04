@@ -66,7 +66,7 @@ export const traverseFields = ({
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
-        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : path
+        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
 
         traverseFields({
           _locales,
