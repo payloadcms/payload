@@ -70,7 +70,7 @@ function isTableSelectionRectangular(selection: TableSelection): boolean {
     const node = nodes[i]
     if ($isTableCellNode(node)) {
       const row = node.getParentOrThrow()
-      if ($isTableRowNode(row)) {
+      if (!$isTableRowNode(row)) {
         throw new Error('Expected CellNode to have a RowNode parent')
       }
       if (currentRow !== row) {

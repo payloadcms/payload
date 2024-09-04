@@ -11,7 +11,9 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
 
       rows.forEach((row) => {
         if ('_path' in row) {
-          if (!(row._path in blocksMap)) blocksMap[row._path] = []
+          if (!(row._path in blocksMap)) {
+            blocksMap[row._path] = []
+          }
 
           row.blockType = blockType
           blocksMap[row._path].push(row)
