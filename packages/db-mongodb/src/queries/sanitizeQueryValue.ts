@@ -142,6 +142,12 @@ export const sanitizeQueryValue = ({
         return [...formattedValues, ...newValues]
       }, [])
     }
+
+    if (operator === 'contains' && typeof formattedValue === 'string') {
+      if (mongoose.Types.ObjectId.isValid(formattedValue)) {
+        formattedValue = ObjectId(formattedValue)
+      }
+    }
   }
 
   // Set up specific formatting necessary by operators
@@ -183,7 +189,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
-    if (operator === 'contains') {
+    if (operator === 'contains' && !mongoose.Types.ObjectId.isValid(formattedValue)) {
       formattedValue = {
         $options: 'i',
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
