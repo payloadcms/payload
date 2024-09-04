@@ -944,14 +944,6 @@ export interface GroupField {
           id?: string | null;
         }[]
       | null;
-    nesGroup?: {
-      arr?:
-        | {
-            text?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-    };
   };
   updatedAt: string;
   createdAt: string;

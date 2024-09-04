@@ -219,23 +219,6 @@ const GroupFields: CollectionConfig = {
             },
           ],
         },
-        {
-          name: 'nesGroup',
-          type: 'group',
-          fields: [
-            {
-              type: 'array',
-              name: 'arr',
-              fields: [
-                {
-                  type: 'text',
-                  name: 'text',
-                  localized: true,
-                },
-              ],
-            },
-          ],
-        },
       ],
     },
   ],

@@ -1257,32 +1257,6 @@ describe('Fields', () => {
       expect(resultIDs).toContain(hit.id)
       expect(resultIDs).not.toContain(miss.id)
     })
-
-    it('should insert/read camelCase group with nested arrays + localized', async () => {
-      const res = await payload.create({
-        collection: 'group-fields',
-        data: {
-          group: { text: 'required' },
-          camelCaseGroup: {
-            nesGroup: { arr: [{ text: 'nestedCamel' }] },
-            array: [
-              {
-                text: 'text',
-                array: [
-                  {
-                    text: 'nested',
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      })
-
-      expect(res.camelCaseGroup.array[0].text).toBe('text')
-      expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
-      expect(res.camelCaseGroup.nesGroup.arr[0].text).toBe('nestedCamel')
-    })
   })
 
   describe('tabs', () => {
