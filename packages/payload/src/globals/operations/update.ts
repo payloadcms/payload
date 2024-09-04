@@ -107,6 +107,54 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     })
 
     // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    let shouldUnlockDocument = false
+
+    const lockStatusResult = await req.payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      limit: 1,
+      req,
+      where: {
+        globalSlug: {
+          equals: slug,
+        },
+      },
+    })
+
+    if (lockStatusResult && lockStatusResult.docs.length > 0) {
+      const lockedDoc = lockStatusResult.docs[0]
+      const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
+      const now = new Date()
+
+      const lockWhenEditingProp =
+        globalConfig?.lockWhenEditing !== undefined ? globalConfig?.lockWhenEditing : true
+
+      const lockDuration =
+        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
+          ? lockWhenEditingProp.lockDuration
+          : 300 // 5 minutes in seconds
+
+      const lockDurationInMilliseconds = lockDuration * 1000
+
+      const currentUserId = req.user?.id
+
+      if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
+        // If the global is locked by another user and the lock has not expired, skip update
+        if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+          throw new Error(
+            `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
+          )
+        }
+      } else {
+        // If the global is locked by the current user or the lock has expired, proceed and unlock later
+        shouldUnlockDocument = true
+      }
+    }
+
+    // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
@@ -211,6 +259,22 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
         req,
       })
       result.globalType = globalType
+    }
+
+    // /////////////////////////////////////
+    // Unlock the global after update
+    // /////////////////////////////////////
+
+    if (shouldUnlockDocument) {
+      await payload.delete({
+        collection: 'payload-locked-documents',
+        req,
+        where: {
+          globalSlug: {
+            equals: slug,
+          },
+        },
+      })
     }
 
     // /////////////////////////////////////

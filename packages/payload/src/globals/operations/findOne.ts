@@ -62,7 +62,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Include Lock Status if required
     // /////////////////////////////////////
 
-    if (includeLockStatus) {
+    if (includeLockStatus && slug) {
       let lockStatus = null
 
       try {
@@ -78,7 +78,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           },
         })
 
-        if (lockStatusResult.docs.length > 0) {
+        if (lockStatusResult && lockStatusResult.docs.length > 0) {
           lockStatus = lockStatusResult.docs[0]
         }
       } catch {

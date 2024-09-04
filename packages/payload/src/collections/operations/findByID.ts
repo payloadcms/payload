@@ -105,7 +105,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     // Include Lock Status if required
     // /////////////////////////////////////
 
-    if (includeLockStatus) {
+    if (includeLockStatus && id) {
       let lockStatus = null
 
       try {
@@ -125,7 +125,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
           },
         })
 
-        if (lockStatusResult.docs.length > 0) {
+        if (lockStatusResult && lockStatusResult.docs.length > 0) {
           lockStatus = lockStatusResult.docs[0]
         }
       } catch {
