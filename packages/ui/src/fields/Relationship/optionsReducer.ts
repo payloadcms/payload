@@ -27,7 +27,6 @@ const sortOptions = (options: Option[]): Option[] =>
   })
 
 export const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => {
-  console.log(action.type)
   switch (action.type) {
     case 'CLEAR': {
       const exemptValues = Array.isArray(action.exemptValues)
