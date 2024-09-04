@@ -69,6 +69,11 @@ const DocumentInfo: React.FC<
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
 
+  const lockWhenEditingProp =
+    docConfig?.lockWhenEditing !== undefined ? docConfig?.lockWhenEditing : true
+
+  const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
+
   const { i18n } = useTranslation()
 
   const { uploadEdits } = useUploadEdits()
@@ -208,6 +213,10 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
+    if (!isLockingEnabled || (!id && !globalSlug)) {
+      return
+    }
+
     const fetchDocumentLockState = async () => {
       if (id || globalSlug) {
         try {
@@ -226,18 +235,20 @@ const DocumentInfo: React.FC<
             if (newEditor && newEditor.id !== currentEditor?.id) {
               setCurrentEditor(newEditor)
               setDocumentIsLocked(true)
+            } else {
+              setCurrentEditor(null)
+              setDocumentIsLocked(false)
             }
           } else {
             setDocumentIsLocked(false)
           }
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Failed to fetch lock state', error)
+          // swallow error
         }
       }
     }
     void fetchDocumentLockState()
-  }, [id, serverURL, api, collectionSlug, globalSlug, currentEditor])
+  }, [id, serverURL, api, collectionSlug, globalSlug, currentEditor, isLockingEnabled])
 
   const getVersions = useCallback(async () => {
     let versionFetchURL

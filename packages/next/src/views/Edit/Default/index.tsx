@@ -86,11 +86,6 @@ export const DefaultEditView: React.FC = () => {
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
-  const lockWhenEditingProp =
-    collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
-
-  const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
-
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
@@ -99,6 +94,13 @@ export const DefaultEditView: React.FC = () => {
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
+
+  const docConfig = collectionConfig || globalConfig
+
+  const lockWhenEditingProp =
+    docConfig?.lockWhenEditing !== undefined ? docConfig?.lockWhenEditing : true
+
+  const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
 
   const preventLeaveWithoutSaving =
     (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
@@ -252,7 +254,6 @@ export const DefaultEditView: React.FC = () => {
 
       // Unlock the document after save
       if ((id || globalSlug) && isLockingEnabled) {
-        void unlockDocument(id, collectionSlug ?? globalSlug)
         setDocumentIsLocked(false)
       }
 
@@ -283,7 +284,6 @@ export const DefaultEditView: React.FC = () => {
       router,
       locale,
       resetUploadEdits,
-      unlockDocument,
       globalSlug,
       isLockingEnabled,
       setDocumentIsLocked,

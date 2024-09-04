@@ -92,7 +92,7 @@ export const buildFormState = async ({
 
   let fieldSchema: Field[]
 
-  if (schemaPathSegments.length === 1) {
+  if (schemaPathSegments && schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
     } else {
@@ -209,7 +209,7 @@ export const buildFormState = async ({
     promises.data = fetchData()
   }
 
-  if (Object.keys(promises).length > 0) {
+  if (Object.keys(promises) && Object.keys(promises).length > 0) {
     await Promise.all(Object.values(promises))
   }
 
@@ -230,7 +230,7 @@ export const buildFormState = async ({
     }
   }
 
-  if (returnLockStatus && req.user) {
+  if (returnLockStatus && req.user && (id || globalSlug)) {
     let lockStatusQuery
 
     // Query based on whether it's a collection or global
@@ -254,7 +254,7 @@ export const buildFormState = async ({
         where: lockStatusQuery,
       })
 
-      if (lockStatus.docs.length > 0) {
+      if (lockStatus.docs && lockStatus.docs.length > 0) {
         const lockedState = {
           isLocked: true,
           user: lockStatus.docs[0]?._lastEdited?.user?.value,
@@ -287,7 +287,7 @@ export const buildFormState = async ({
             },
             document: collectionSlug
               ? {
-                  relationTo: collectionSlug,
+                  relationTo: [collectionSlug],
                   value: id,
                 }
               : undefined,

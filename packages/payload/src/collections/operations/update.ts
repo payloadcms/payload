@@ -194,6 +194,8 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
           },
         })
 
+        let shouldUnlockDocument = false
+
         if (lockStatus.docs.length > 0) {
           const lockedDoc = lockStatus.docs[0]
           const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
@@ -211,11 +213,19 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
 
           const lockDurationInMilliseconds = lockDuration * 1000
 
-          if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-            // Document is locked and the lock has not expired, skip update
-            throw new APIError(`Document with ID ${id} is currently locked and cannot be updated.`)
+          const currentUserId = req.user?.id
+
+          if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
+            // If the document is locked by another user and the lock has not expired, skip update
+            if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+              throw new APIError(
+                `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+              )
+            }
+          } else {
+            // If the document is locked by the current user or the lock has expired, proceed and unlock later
+            shouldUnlockDocument = true
           }
-          // If the lock has expired, proceed with update
         }
 
         const originalDoc = await afterRead({
@@ -361,6 +371,25 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
             },
             payload,
             req,
+          })
+        }
+
+        // /////////////////////////////////////
+        // Unlock the document
+        // /////////////////////////////////////
+
+        if (shouldUnlockDocument) {
+          await payload.delete({
+            collection: 'payload-locked-documents',
+            req,
+            where: {
+              'document.relationTo': {
+                equals: collectionConfig.slug,
+              },
+              'document.value': {
+                equals: id,
+              },
+            },
           })
         }
 
