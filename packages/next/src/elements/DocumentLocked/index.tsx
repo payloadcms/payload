@@ -25,7 +25,7 @@ const formatDate = (date) => {
 }
 
 export const DocumentLocked: React.FC<{
-  editedAt?: Date | null
+  editedAt?: null | number
   handleGoBack: () => void
   isActive: boolean
   onReadOnly: () => void
@@ -52,7 +52,7 @@ export const DocumentLocked: React.FC<{
             <strong>{user?.email ?? user?.id}</strong> {t('general:currentlyEditing')}
           </p>
           <p>
-            {t('general:editedSince')} <strong>{editedAt && formatDate(editedAt)}</strong>
+            {t('general:editedSince')} <strong>{formatDate(editedAt)}</strong>
           </p>
         </div>
         <div className={`${baseClass}__controls`}>

@@ -235,9 +235,6 @@ const DocumentInfo: React.FC<
             if (newEditor && newEditor.id !== currentEditor?.id) {
               setCurrentEditor(newEditor)
               setDocumentIsLocked(true)
-            } else {
-              setCurrentEditor(null)
-              setDocumentIsLocked(false)
             }
           } else {
             setDocumentIsLocked(false)
