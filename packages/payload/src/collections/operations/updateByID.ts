@@ -270,13 +270,18 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (!shouldSaveDraft || data._status === 'published') {
-      result = await req.payload.db.updateOne({
+      const dbArgs = {
         id,
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
         req,
-      })
+      }
+      if (collectionConfig?.db?.updateOne) {
+        result = await collectionConfig.db.updateOne(dbArgs)
+      } else {
+        result = await req.payload.db.updateOne(dbArgs)
+      }
     }
 
     // /////////////////////////////////////

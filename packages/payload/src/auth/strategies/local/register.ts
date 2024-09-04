@@ -41,7 +41,7 @@ export const registerLocalStrategy = async ({
   const sanitizedDoc = { ...doc }
   if (sanitizedDoc.password) delete sanitizedDoc.password
 
-  return payload.db.create({
+  const dbArgs = {
     collection: collection.slug,
     data: {
       ...sanitizedDoc,
@@ -49,5 +49,10 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
-  })
+  }
+  if (collection?.db?.create) {
+    return collection.db.create(dbArgs)
+  } else {
+    return payload.db.create(dbArgs)
+  }
 }

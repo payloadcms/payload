@@ -118,6 +118,7 @@ const collectionSchema = joi.object().keys({
     joi.boolean(),
   ),
   custom: joi.object().pattern(joi.string(), joi.any()),
+  db: joi.object(),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultSort: joi.string(),
   endpoints: endpointsSchema,

@@ -3,7 +3,7 @@ import type { Response } from 'express'
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../'
+import type { DatabaseAdapter, GeneratedTypes } from '../../'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonType,
@@ -383,6 +383,14 @@ export type CollectionConfig = {
   auth?: IncomingAuthType | boolean
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+
+  /**
+   * Add a custom database adapter to this collection.
+   */
+  db?: Pick<
+    DatabaseAdapter,
+    'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'updateOne'
+  >
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
