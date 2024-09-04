@@ -2,8 +2,7 @@ import { dequal } from 'dequal/lite'
 import { useEffect, useRef } from 'react'
 
 /**
- * This hook is used to run an effect only when the dependencies change, but ignore some of them.
- * This is helpful when you're effect has a dependency that you don't want to trigger the effect.
+ * Allows for a `useEffect` hook to be precisely triggered based on whether a only _subset_ of its dependencies have changed, as opposed to all of them. This is useful if you have a list of dependencies that change often, but need to scope your effect's logic to only explicit dependencies within that list.
  * @constructor
  * @param {React.EffectCallback} effect - The effect to run
  * @param {React.DependencyList} deps - Dependencies that should trigger the effect
