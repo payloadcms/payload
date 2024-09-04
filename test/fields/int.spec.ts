@@ -62,6 +62,7 @@ describe('Fields', () => {
       slug: 'users',
       credentials: devUser,
     })
+
     user = await payload.login({
       collection: 'users',
       data: {
