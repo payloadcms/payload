@@ -41,7 +41,7 @@ export const getStaticHandler = (
           'Content-Disposition': contentDisposition,
           'Content-Length': String(size),
           'Content-Type': contentType,
-          'Cache-Control', `public, max-age=${cacheControlMaxAge}`
+          'Cache-Control': `public, max-age=${cacheControlMaxAge}`
         }),
         status: 200,
       })
