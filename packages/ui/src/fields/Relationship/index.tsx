@@ -28,6 +28,7 @@ import './index.scss'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
+import { useIgnoredEffect } from './useIgnoredEffect.js'
 
 const maxResultsPerRequest = 10
 
@@ -74,7 +75,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const hasMultipleRelations = Array.isArray(relationTo)
-  const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
@@ -107,6 +107,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     path: pathFromContext ?? pathFromProps ?? name,
     validate: memoizedValidate,
   })
+  const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
 
@@ -302,85 +303,88 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   // Ensure we have an option for each value
   // ///////////////////////////////////
 
-  useEffect(() => {
-    const relationMap = createRelationMap({
-      hasMany,
-      relationTo,
-      value,
-    })
-
-    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-      await priorRelation
-
-      const idsToLoad = ids.filter((id) => {
-        return !options.find((optionGroup) =>
-          optionGroup?.options?.find(
-            (option) => option.value === id && option.relationTo === relation,
-          ),
-        )
+  useIgnoredEffect(
+    () => {
+      const relationMap = createRelationMap({
+        hasMany,
+        relationTo,
+        value,
       })
 
-      if (idsToLoad.length > 0) {
-        const query = {
-          depth: 0,
-          draft: true,
-          limit: idsToLoad.length,
-          locale,
-          where: {
-            id: {
-              in: idsToLoad,
+      void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+        await priorRelation
+
+        const idsToLoad = ids.filter((id) => {
+          return !options.find((optionGroup) =>
+            optionGroup?.options?.find(
+              (option) => option.value === id && option.relationTo === relation,
+            ),
+          )
+        })
+
+        if (idsToLoad.length > 0) {
+          const query = {
+            depth: 0,
+            draft: true,
+            limit: idsToLoad.length,
+            locale,
+            where: {
+              id: {
+                in: idsToLoad,
+              },
             },
-          },
-        }
-
-        if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}`, {
-            body: qs.stringify(query),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-HTTP-Method-Override': 'GET',
-            },
-            method: 'POST',
-          })
-
-          const collection = collections.find((coll) => coll.slug === relation)
-          let docs = []
-
-          if (response.ok) {
-            const data = await response.json()
-            docs = data.docs
           }
 
-          dispatchOptions({
-            type: 'ADD',
-            collection,
-            // TODO: fix this
-            // @ts-expect-error-next-line
-            config,
-            docs,
-            i18n,
-            ids: idsToLoad,
-            sort: true,
-          })
+          if (!errorLoading) {
+            const response = await fetch(`${serverURL}${api}/${relation}`, {
+              body: qs.stringify(query),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-HTTP-Method-Override': 'GET',
+              },
+              method: 'POST',
+            })
+
+            const collection = collections.find((coll) => coll.slug === relation)
+            let docs = []
+
+            if (response.ok) {
+              const data = await response.json()
+              docs = data.docs
+            }
+
+            dispatchOptions({
+              type: 'ADD',
+              collection,
+              // TODO: fix this
+              // @ts-expect-error-next-line
+              config,
+              docs,
+              i18n,
+              ids: idsToLoad,
+              sort: true,
+            })
+          }
         }
-      }
-    }, Promise.resolve())
-  }, [
-    options,
-    value,
-    hasMany,
-    errorLoading,
-    collections,
-    hasMultipleRelations,
-    serverURL,
-    api,
-    i18n,
-    relationTo,
-    locale,
-    config,
-  ])
+      }, Promise.resolve())
+    },
+    [value],
+    [
+      options,
+      hasMany,
+      errorLoading,
+      collections,
+      hasMultipleRelations,
+      serverURL,
+      api,
+      i18n,
+      relationTo,
+      locale,
+      config,
+    ],
+  )
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
@@ -395,41 +399,36 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
-  useEffect(() => {
-    // If the menu is open while filterOptions changes
-    // due to latency of getFormState and fast clicking into this field,
-    // re-fetch options
+  useIgnoredEffect(
+     
+    () => {
+      // If the menu is open while filterOptions changes
+      // due to latency of getFormState and fast clicking into this field,
+      // re-fetch options
 
-    if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
-      setIsLoading(true)
-      void getResults({
-        lastLoadedPage: {},
-        onSuccess: () => {
-          hasLoadedFirstPageRef.current = true
-          setIsLoading(false)
-        },
-        value: valueRef.current,
-      })
-    }
+      if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
+        setIsLoading(true)
+        void getResults({
+          lastLoadedPage: {},
+          onSuccess: () => {
+            hasLoadedFirstPageRef.current = true
+            setIsLoading(false)
+          },
+          value: valueRef.current,
+        })
+      }
 
-    // If the menu is not open, still reset the field state
-    // because we need to get new options next time the menu
-    // opens by the user
+      // If the menu is not open, still reset the field state
+      // because we need to get new options next time the menu
+      // opens by the user
 
-    dispatchOptions({ type: 'CLEAR' })
-    setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
-    hasLoadedFirstPageRef.current = false
-  }, [
-    relationTo,
-    filterOptions,
-    locale,
-    menuIsOpen,
-    getResults,
-    valueRef,
-    hasLoadedFirstPageRef,
-    path,
-  ])
+      dispatchOptions({ type: 'CLEAR' })
+      setLastFullyLoadedRelation(-1)
+      setLastLoadedPage({})
+    },
+    [relationTo, filterOptions, locale, path],
+    [getResults],
+  )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
