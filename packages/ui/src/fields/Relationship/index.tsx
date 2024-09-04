@@ -14,6 +14,7 @@ import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -28,7 +29,6 @@ import './index.scss'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
-import { useIgnoredEffect } from './useIgnoredEffect.js'
 
 const maxResultsPerRequest = 10
 
@@ -400,7 +400,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useIgnoredEffect(
-     
+    // eslint-disable-next-line
     () => {
       // If the menu is open while filterOptions changes
       // due to latency of getFormState and fast clicking into this field,
