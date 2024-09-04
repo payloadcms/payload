@@ -1,8 +1,8 @@
 import {
+  buildVersionCollectionFields,
   type CreateVersion,
   type Document,
   type PayloadRequest,
-  buildVersionCollectionFields,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -50,7 +50,7 @@ export const createVersion: CreateVersion = async function createVersion(
         },
         {
           parent: {
-            $eq: parent,
+            $eq: data.parent,
           },
         },
         {
