@@ -148,7 +148,7 @@ function vercelBlobStorageInternal(
         prefix,
         token,
       }),
-      staticHandler: getStaticHandler({ baseUrl, token }, collection),
+      staticHandler: getStaticHandler({ baseUrl, token, cacheControlMaxAge }, collection),
     }
   }
 }
