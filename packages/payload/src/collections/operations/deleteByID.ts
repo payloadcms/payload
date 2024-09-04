@@ -141,8 +141,8 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     let result
     const deleteOneArgs = {
       collection: collectionConfig.slug,
-        req,
-        where: { id: { equals: id } },
+      req,
+      where: { id: { equals: id } },
     }
     if (collectionConfig?.db?.deleteOne) {
       result = await collectionConfig?.db.deleteOne(deleteOneArgs)
