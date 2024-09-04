@@ -250,7 +250,7 @@ describe('Versions', () => {
 
       const publishedOnlyEN = await payload.findByID({
         collection,
-        id: published.id,
+        id: draft.id,
         locale: 'all',
       })
 
@@ -281,7 +281,7 @@ describe('Versions', () => {
 
       const publishedOnlyEN = await payload.findByID({
         collection,
-        id: published.id,
+        id: draft.id,
         locale: 'all',
       })
 
@@ -443,6 +443,7 @@ describe('Versions', () => {
           title: 'Eng published',
           _status: 'published',
         },
+        draft: false,
         locale: 'en',
         publishSpecificLocale: 'en',
       })
