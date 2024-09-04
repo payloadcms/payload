@@ -138,11 +138,17 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete document
     // /////////////////////////////////////
 
-    let result = await (collectionConfig?.db?.deleteOne || req.payload.db.deleteOne)({
+    let result
+    const deleteOneArgs = {
       collection: collectionConfig.slug,
-      req,
-      where: { id: { equals: id } },
-    })
+        req,
+        where: { id: { equals: id } },
+    }
+    if (collectionConfig?.db?.deleteOne) {
+      result = await collectionConfig?.db.deleteOne(deleteOneArgs)
+    } else {
+      result = await payload.db.deleteOne(deleteOneArgs)
+    }
 
     // /////////////////////////////////////
     // Delete Preferences

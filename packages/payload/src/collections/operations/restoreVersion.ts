@@ -111,12 +111,18 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // Update
     // /////////////////////////////////////
 
-    let result = await (collectionConfig?.db?.updateOne || req.payload.db.updateOne)({
+    const restoreVersionArgs = {
       id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
       req,
-    })
+    }
+    let result
+    if (collectionConfig?.db?.updateOne) {
+      result = await collectionConfig.db.updateOne(restoreVersionArgs)
+    } else {
+      result = await req.payload.db.updateOne(restoreVersionArgs)
+    }
 
     // /////////////////////////////////////
     // Save `previousDoc` as a version after restoring

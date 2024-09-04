@@ -168,7 +168,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         // Delete document
         // /////////////////////////////////////
 
-        await (collectionConfig?.db?.deleteOne || payload.db.deleteOne)({
+        const deleteOneArgs = {
           collection: collectionConfig.slug,
           req,
           where: {
@@ -176,7 +176,12 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
               equals: id,
             },
           },
-        })
+        }
+        if (collectionConfig?.db?.deleteOne) {
+          await collectionConfig.db.deleteOne(deleteOneArgs)
+        } else {
+          await payload.db.deleteOne(deleteOneArgs)
+        }
 
         // /////////////////////////////////////
         // afterRead - Fields
