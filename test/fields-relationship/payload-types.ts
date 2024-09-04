@@ -62,6 +62,8 @@ export interface UserAuthOperations {
  */
 export interface FieldsRelationship {
   id: string;
+  relationship?: (string | null) | RelationOne;
+  relationshipHasMany?: (string | RelationOne)[] | null;
   relationshipMultiple?:
     | ({
         relationTo: 'relation-one';
@@ -71,6 +73,44 @@ export interface FieldsRelationship {
         relationTo: 'relation-two';
         value: string | RelationTwo;
       } | null);
+  relationshipHasManyMultiple?:
+    | (
+        | {
+            relationTo: 'relation-one';
+            value: string | RelationOne;
+          }
+        | {
+            relationTo: 'relation-two';
+            value: string | RelationTwo;
+          }
+      )[]
+    | null;
+  relationshipRestricted?: (string | null) | RelationRestricted;
+  relationshipWithTitle?: (string | null) | RelationWithTitle;
+  relationshipFiltered?: (string | null) | RelationOne;
+  relationshipFilteredAsync?: (string | null) | RelationOne;
+  relationshipManyFiltered?:
+    | (
+        | {
+            relationTo: 'relation-with-title';
+            value: string | RelationWithTitle;
+          }
+        | {
+            relationTo: 'relation-filter-false';
+            value: string | RelationFilterFalse;
+          }
+        | {
+            relationTo: 'relation-filter-true';
+            value: string | RelationFilterTrue;
+          }
+        | {
+            relationTo: 'relation-one';
+            value: string | RelationOne;
+          }
+      )[]
+    | null;
+  filter?: string | null;
+  relationshipReadOnly?: (string | null) | RelationOne;
   updatedAt: string;
   createdAt: string;
 }
@@ -96,26 +136,6 @@ export interface RelationTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-filter-false".
- */
-export interface RelationFilterFalse {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-filter-true".
- */
-export interface RelationFilterTrue {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-restricted".
  */
 export interface RelationRestricted {
@@ -134,6 +154,26 @@ export interface RelationWithTitle {
   meta?: {
     title?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-false".
+ */
+export interface RelationFilterFalse {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-true".
+ */
+export interface RelationFilterTrue {
+  id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
