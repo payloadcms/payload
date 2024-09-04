@@ -73,29 +73,4 @@ describe('_Community Tests', () => {
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
-
-  it('should insert/read camelCase group with nested arrays + localized', async () => {
-    const res = await payload.create({
-      collection: 'simple',
-      data: {
-        group: { text: 'required' },
-        camelCaseGroup: {
-          nesGroup: { arr: [{ text: 'nestedCamel' }] },
-          array: [
-            {
-              text: 'text',
-              array: [
-                {
-                  text: 'nested',
-                },
-              ],
-            },
-          ],
-        },
-      },
-    })
-
-    expect(res.camelCaseGroup.array[0].text).toBe('text')
-    expect(res.camelCaseGroup.array[0].array[0].text).toBe('nested')
-  })
 })

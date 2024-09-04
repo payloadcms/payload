@@ -97,20 +97,6 @@ export interface Post {
 export interface Simple {
   id: string;
   text?: string | null;
-  camelCaseGroup?: {
-    array?:
-      | {
-          text?: string | null;
-          array?:
-            | {
-                text?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
