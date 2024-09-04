@@ -74,6 +74,19 @@ export const init: Init = function init(this: SQLiteAdapter) {
       }
     }
 
+    const baseExtraConfig: BaseExtraConfig = {}
+
+    if (collection.upload.filenameCompoundIndex) {
+      const indexName = `${tableName}_filename_compound_idx`
+
+      baseExtraConfig.filename_compound_index = (cols) => {
+        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
+          return cols[f]
+        })
+        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
+      }
+    }
+
     buildTable({
       adapter: this,
       disableNotNull: !!collection?.versions?.drafts,
