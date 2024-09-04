@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.0.0-beta.97",
+  "version": "3.0.0-beta.98",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
