@@ -116,10 +116,16 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
     [api, collectionSlug, globalSlug, id, serverURL, submit],
   )
 
-  if (!hasPublishPermission) return null
+  if (!hasPublishPermission) {
+    return null
+  }
 
   return (
     <FormSubmit
+      buttonId="action-save"
+      disabled={!canPublish}
+      onClick={publish}
+      size="medium"
       SubMenuPopupContent={
         localization
           ? localization.locales.map((locale) => {
@@ -130,7 +136,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
 
               const isActive = typeof locale === 'string' ? locale === code : locale.code === code
 
-              if (isActive)
+              if (isActive) {
                 return (
                   <PopupList.ButtonGroup key={locale.code}>
                     <PopupList.Button onClick={() => publishSpecificLocale(locale.code)}>
@@ -138,13 +144,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
                     </PopupList.Button>
                   </PopupList.ButtonGroup>
                 )
+              }
             })
           : null
       }
-      buttonId="action-save"
-      disabled={!canPublish}
-      onClick={publish}
-      size="medium"
       type="button"
     >
       {label}

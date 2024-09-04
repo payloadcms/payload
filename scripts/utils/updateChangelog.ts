@@ -1,6 +1,5 @@
-import type { GitCommit, RawGitCommit } from 'changelogen'
+import type { GitCommit } from 'changelogen'
 
-import chalk from 'chalk'
 import { execSync } from 'child_process'
 import fse from 'fs-extra'
 import minimist from 'minimist'
@@ -63,9 +62,10 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
 
   const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
 
-  const sections: Record<'breaking' | 'feat' | 'fix', string[]> = {
+  const sections: Record<'breaking' | 'feat' | 'fix' | 'perf', string[]> = {
     feat: [],
     fix: [],
+    perf: [],
     breaking: [],
   }
 
@@ -75,7 +75,7 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
       sections.breaking.push(formatCommitForChangelog(c, true))
     }
 
-    if (c.type === 'feat' || c.type === 'fix') {
+    if (c.type === 'feat' || c.type === 'fix' || c.type === 'perf') {
       sections[c.type].push(formatCommitForChangelog(c))
     }
   })
@@ -88,6 +88,9 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
   let changelog = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
   if (sections.feat.length) {
     changelog += `### 🚀 Features\n\n${sections.feat.join('\n')}\n\n`
+  }
+  if (sections.perf.length) {
+    changelog += `### ⚡ Performance\n\n${sections.perf.join('\n')}\n\n`
   }
   if (sections.fix.length) {
     changelog += `### 🐛 Bug Fixes\n\n${sections.fix.join('\n')}\n\n`

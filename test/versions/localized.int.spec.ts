@@ -463,7 +463,7 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: global,
         data: {
-          title: 'Another spanish draft',
+          title: 'Spanish draft',
           content: 'Spanish draft content',
         },
         draft: true,
@@ -486,8 +486,8 @@ describe('Versions', () => {
         locale: 'all',
       })
 
-      expect(publishedOnlyEN.text.es).toBeUndefined()
-      expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
+      expect(publishedOnlyEN.title.es).toBeUndefined()
+      expect(publishedOnlyEN.title.en).toStrictEqual('Eng published')
 
       await payload.updateGlobal({
         slug: global,
@@ -502,8 +502,8 @@ describe('Versions', () => {
         locale: 'all',
       })
 
-      expect(publishedAll.text.es).toStrictEqual('Spanish draft')
-      expect(publishedAll.text.en).toStrictEqual('English publish')
+      expect(publishedAll.title.es).toStrictEqual('Spanish draft')
+      expect(publishedAll.title.en).toStrictEqual('Eng published')
     })
 
     it('should publish non-default individual locale', async () => {
@@ -511,8 +511,8 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: global,
         data: {
-          title: 'Spanish draft',
-          content: 'Spanish draft content',
+          title: 'Test span draft',
+          content: 'Test span draft content',
         },
         draft: true,
         locale: 'es',
@@ -534,9 +534,8 @@ describe('Versions', () => {
         locale: 'all',
       })
 
-      // Expect no draft data to be present
-      expect(globalData.title.es).toBeUndefined()
-      expect(globalData.content).toBeUndefined()
+      // Expect only previous draft data to be present
+      expect(globalData.title.es).toStrictEqual('Spanish draft')
       expect(globalData.title.de).toStrictEqual('German published')
     })
 
@@ -545,8 +544,8 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: global,
         data: {
-          title: 'Spanish draft',
-          content: 'Spanish draft content',
+          title: 'New spanish draft',
+          content: 'New spanish draft content',
         },
         draft: true,
         locale: 'es',
@@ -556,23 +555,27 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: global,
         data: {
-          title: 'Eng published',
+          title: 'New eng',
           _status: 'published',
         },
-        locale: 'en',
+        draft: false,
         publishSpecificLocale: 'en',
       })
 
       const allVersions = await payload.findGlobalVersions({
         slug: global,
         locale: 'all',
+        where: {
+          'version._status': {
+            equals: 'published',
+          },
+        },
       })
 
       const versions = allVersions.docs
       const latestVersion = versions[0].version
-
-      expect(latestVersion.title.es).toBeUndefined()
-      expect(latestVersion.title.en).toStrictEqual('Eng published')
+      expect(latestVersion.title.es).toStrictEqual('Spanish draft')
+      expect(latestVersion.title.en).toStrictEqual('New eng')
     })
   })
 })

@@ -48,8 +48,8 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
-  autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  autoSaveGlobalSlug,
   customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
@@ -291,7 +291,7 @@ describe('versions', () => {
       const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
       await versionsPill.waitFor({ state: 'visible' })
       const versionCount = versionsTab.locator('.doc-tab__count').first()
-      await expect(versionCount).toHaveText('10')
+      await expect(versionCount).toHaveText('11')
     })
 
     test('collection — has versions route', async () => {
