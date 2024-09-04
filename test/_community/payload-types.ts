@@ -16,7 +16,6 @@ export interface Config {
     media: Media;
     users: User;
     'payload-preferences': PayloadPreference;
-    'payload-locks': PayloadLock;
     'payload-migrations': PayloadMigration;
   };
   db: {
@@ -34,6 +33,7 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
     email: string;
@@ -45,6 +45,7 @@ export interface UserAuthOperations {
   };
   unlock: {
     email: string;
+    password: string;
   };
 }
 /**
@@ -185,24 +186,6 @@ export interface PayloadPreference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locks".
- */
-export interface PayloadLock {
-  id: string;
-  docId?: string | null;
-  _lastEdited: {
-    user: {
-      relationTo: 'users';
-      value: string | User;
-    };
-    editedAt?: string | null;
-  };
-  isLocked?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
@@ -255,6 +238,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
