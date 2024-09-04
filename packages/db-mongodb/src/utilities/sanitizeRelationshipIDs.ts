@@ -30,7 +30,9 @@ const convertValue = ({
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
-  if (!customIDField) return new mongoose.Types.ObjectId(value)
+  if (!customIDField) {
+    return new mongoose.Types.ObjectId(value)
+  }
 
   return value
 }
@@ -114,7 +116,7 @@ export const sanitizeRelationshipIDs = ({
         const locales = config.localization.locales
         const fieldRef = ref[field.name]
         for (const { code } of locales) {
-          if (ref[field.name][code]) {
+          if (ref[field.name]?.[code]) {
             const value = ref[field.name][code]
             sanitizeRelationship({ config, field, locale: code, ref: fieldRef, value })
           }
