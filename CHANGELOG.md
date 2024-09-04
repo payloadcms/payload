@@ -1,3 +1,17 @@
+## [2.28.0](https://github.com/payloadcms/payload/compare/v2.27.0...v2.28.0) (2024-09-04)
+
+
+### Features
+
+* collections can use custom database operations ([#7675](https://github.com/payloadcms/payload/issues/7675)) ([6ba293c](https://github.com/payloadcms/payload/commit/6ba293c0f84f91bf89cf089a20e47de130013ebb))
+
+
+### Bug Fixes
+
+* **db-postgres:** migration exit codes ([#7873](https://github.com/payloadcms/payload/issues/7873)) ([25e9bc6](https://github.com/payloadcms/payload/commit/25e9bc62dbcbabcb3619cf83e3dc0110e0a4cabf)), closes [#7031](https://github.com/payloadcms/payload/issues/7031)
+* **db-postgres:** query hasMany text/number in array/blocks ([#8033](https://github.com/payloadcms/payload/issues/8033)) ([96a624a](https://github.com/payloadcms/payload/commit/96a624ad5c5259b197b4ca793d8419d1e827de9c))
+* **plugin-cloud:** better logging on static handler ([#7924](https://github.com/payloadcms/payload/issues/7924)) ([1f09348](https://github.com/payloadcms/payload/commit/1f0934877ce5aabb771c936c3677a26d2ef006ec))
+
 ## [2.27.0](https://github.com/payloadcms/payload/compare/v2.26.0...v2.27.0) (2024-08-26)
 
 
