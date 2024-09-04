@@ -1042,7 +1042,49 @@ export interface PointField {
 export interface RelationshipField {
   id: string;
   text?: string | null;
+  relationship:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }
+    | {
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      };
+  relationHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
+    | null;
   relationToSelf?: (string | null) | RelationshipField;
+  relationToSelfSelectOnly?: (string | null) | RelationshipField;
+  relationWithDynamicDefault?: (string | null) | User;
+  relationHasManyWithDynamicDefault?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  relationshipWithMin?: (string | TextField)[] | null;
+  relationshipWithMax?: (string | TextField)[] | null;
+  relationshipHasMany?: (string | TextField)[] | null;
+  array?:
+    | {
+        relationship?: (string | null) | TextField;
+        id?: string | null;
+      }[]
+    | null;
+  relationshipWithMinRows?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

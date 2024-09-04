@@ -81,7 +81,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
-  const menuIsOpen = useRef(false)
+  const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
 
   const memoizedValidate = useCallback(
@@ -118,6 +118,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   const getResults: GetResults = useCallback(
     async ({
+      filterOptions,
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
       lastLoadedPage: lastLoadedPageArg,
       onSuccess,
@@ -274,7 +275,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       search,
       collections,
       locale,
-      filterOptions,
       serverURL,
       sortOptions,
       api,
@@ -285,7 +285,13 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    void getResults({ lastLoadedPage: {}, search: searchArg, sort: true, value: valueArg })
+    void getResults({
+      filterOptions,
+      lastLoadedPage: {},
+      search: searchArg,
+      sort: true,
+      value: valueArg,
+    })
     setSearch(searchArg)
   }, 300)
 
@@ -400,15 +406,15 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useIgnoredEffect(
-    // eslint-disable-next-line
+     
     () => {
       // If the menu is open while filterOptions changes
       // due to latency of getFormState and fast clicking into this field,
       // re-fetch options
-
-      if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
+      if (hasLoadedFirstPageRef.current && menuIsOpen) {
         setIsLoading(true)
         void getResults({
+          filterOptions,
           lastLoadedPage: {},
           onSuccess: () => {
             hasLoadedFirstPageRef.current = true
@@ -419,14 +425,16 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       }
 
       // If the menu is not open, still reset the field state
-      // because we need to get new options next time the menu
-      // opens by the user
+      // because we need to get new options next time the menu opens
+      dispatchOptions({
+        type: 'CLEAR',
+        exemptValues: valueRef.current,
+      })
 
-      dispatchOptions({ type: 'CLEAR' })
       setLastFullyLoadedRelation(-1)
       setLastLoadedPage({})
     },
-    [relationTo, filterOptions, locale, path],
+    [relationTo, filterOptions, locale, path, menuIsOpen],
     [getResults],
   )
 
@@ -564,14 +572,15 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               }
               onInputChange={(newSearch) => handleInputChange(newSearch, value)}
               onMenuClose={() => {
-                menuIsOpen.current = false
+                setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                menuIsOpen.current = true
+                setMenuIsOpen(true)
 
                 if (!hasLoadedFirstPageRef.current) {
                   setIsLoading(true)
                   void getResults({
+                    filterOptions,
                     lastLoadedPage: {},
                     onSuccess: () => {
                       hasLoadedFirstPageRef.current = true
@@ -583,6 +592,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               }}
               onMenuScrollToBottom={() => {
                 void getResults({
+                  filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
                   search,

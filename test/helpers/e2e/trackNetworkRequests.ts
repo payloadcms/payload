@@ -3,8 +3,8 @@ import type { Page, Request } from '@playwright/test'
 import { expect } from '@playwright/test'
 
 // Allows you to test the number of network requests triggered by an action
-// For example, when loading the relationship component, this can be used to test
-// the number of front-end requests made to the API over a period of time
+// This can be used to ensure various actions do not trigger unnecessary requests
+// For example, an effect within a component might fetch data multiple times unnecessarily
 export const trackNetworkRequests = async (
   page: Page,
   url: string,
@@ -33,7 +33,8 @@ export const trackNetworkRequests = async (
   const startTime = Date.now()
 
   // continuously poll even after a request has been matched
-  // this will ensure subsequent requests are not made
+  // this will ensure no subsequent requests are made
+  // such as a result of a `useEffect` within a component
   while (Date.now() - startTime < timeout) {
     if (matchedRequests.length > 0) {
       expect(matchedRequests.length).toBeLessThanOrEqual(allowedNumberOfRequests)
