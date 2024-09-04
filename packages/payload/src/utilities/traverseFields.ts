@@ -2,6 +2,32 @@ import type { Field } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
+export type TraverseFieldsCallback = (args: {
+  /**
+   * The current field
+   */
+  field: Field
+  /**
+   * Function that when called will skip the current field and continue to the next
+   */
+  next?: () => void
+  /**
+   * The parent reference object
+   */
+  parentRef?: Record<string, unknown> | unknown
+  /**
+   * The current reference object
+   */
+  ref?: Record<string, unknown> | unknown
+}) => boolean | void
+
+type TraverseFieldsArgs = {
+  callback: TraverseFieldsCallback
+  fields: Field[]
+  parentRef?: Record<string, unknown> | unknown
+  ref?: Record<string, unknown> | unknown
+}
+
 /**
  * Iterate a recurse an array of fields, calling a callback for each field
  *
@@ -10,27 +36,32 @@ import { fieldHasSubFields } from '../fields/config/types.js'
  * @param ref
  * @param parentRef
  */
-export const traverseFields = (
-  fields: Field[],
-  callback?: (
-    field: Field,
-    ref: Record<string, unknown> | unknown,
-    parentRef: Record<string, unknown> | unknown,
-  ) => boolean | void,
-  ref: Record<string, unknown> | unknown = {},
-  parentRef: Record<string, unknown> | unknown = {},
-): void => {
+export const traverseFields = ({
+  callback,
+  fields,
+  parentRef = {},
+  ref = {},
+}: TraverseFieldsArgs): void => {
   fields.some((field) => {
+    let skip = false
+    const next = () => {
+      skip = true
+    }
+    if (callback && callback({ field, next, parentRef, ref })) {
+      return true
+    }
+    if (skip) {
+      return false
+    }
     if (fieldHasSubFields(field)) {
       const parentRef = ref
       if ('name' in field && field.name) {
-        if (typeof ref[field.name] === 'undefined') ref[field.name] = {}
+        if (typeof ref[field.name] === 'undefined') {
+          ref[field.name] = {}
+        }
         ref = ref[field.name]
       }
-      if (callback && callback(field, ref, parentRef)) {
-        return true
-      }
-      traverseFields(field.fields, callback, ref, parentRef)
+      traverseFields({ callback, fields: field.fields, parentRef, ref })
     }
 
     if (field.type === 'tabs' && 'tabs' in field) {
@@ -41,11 +72,8 @@ export const traverseFields = (
           }
           ref = ref[tab.name]
         }
-        traverseFields(tab.fields, callback, ref, parentRef)
+        traverseFields({ callback, fields: tab.fields, parentRef, ref })
       })
-    }
-    if (callback && callback(field, ref, parentRef)) {
-      return true
     }
   })
 }

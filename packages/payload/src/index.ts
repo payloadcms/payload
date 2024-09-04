@@ -45,7 +45,6 @@ import type {
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
-import type { Field } from './fields/config/types.js'
 import type { DataFromGlobalSlug, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
@@ -53,6 +52,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type { JsonObject } from './types/index.js'
+import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -455,8 +455,12 @@ export class BasePayload {
     }
 
     this.config.collections.forEach((collection) => {
-      let customIDType
-      const callback = (field: Field) => {
+      let customIDType = undefined
+      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+        if (['array', 'blocks'].includes(field.type)) {
+          next()
+          return
+        }
         if (!fieldAffectsData(field)) {
           return
         }
@@ -466,7 +470,7 @@ export class BasePayload {
         }
       }
 
-      traverseFields(collection.fields, callback)
+      traverseFields({ callback: findCustomID, fields: collection.fields })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -1024,6 +1028,7 @@ export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { traverseFields } from './utilities/traverseFields.js'
+export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { checkDependencies }

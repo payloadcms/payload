@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, SanitizedConfig } from 'payload'
+import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback } from 'payload'
 
 import mongoose from 'mongoose'
 import { traverseFields } from 'payload'
@@ -109,7 +109,7 @@ export const sanitizeRelationshipIDs = ({
   data,
   fields,
 }: Args): Record<string, unknown> => {
-  const sanitize = (field: Field, ref: unknown) => {
+  const sanitize: TraverseFieldsCallback = ({ field, ref }) => {
     if (field.type === 'relationship' || field.type === 'upload') {
       // handle localized relationships
       if (config.localization && field.localized) {
@@ -134,7 +134,7 @@ export const sanitizeRelationshipIDs = ({
     }
   }
 
-  traverseFields(fields, sanitize, data, data)
+  traverseFields({ callback: sanitize, fields, ref: data })
 
   return data
 }
