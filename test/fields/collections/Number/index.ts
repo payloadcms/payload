@@ -79,6 +79,33 @@ const NumberFields: CollectionConfig = {
       hasMany: true,
       minRows: 2,
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'numbers',
+          type: 'number',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'numbers',
+              type: 'number',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

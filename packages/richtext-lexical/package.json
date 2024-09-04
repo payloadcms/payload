@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "repository": {
     "type": "git",

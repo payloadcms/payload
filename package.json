@@ -120,8 +120,9 @@
   },
   "engines": {
     "node": ">=14",
-    "pnpm": ">=8"
+    "pnpm": ">=9.7.0"
   },
+  "packageManager": "pnpm@9.7.0",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write"

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.25.0",
+  "version": "2.27.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -129,7 +129,7 @@
     "react-router-dom": "5.3.4",
     "react-router-navigation-prompt": "1.9.6",
     "react-select": "5.7.4",
-    "react-toastify": "8.2.0",
+    "react-toastify": "10.0.5",
     "sanitize-filename": "1.6.3",
     "sass": "1.69.4",
     "scheduler": "0.23.0",

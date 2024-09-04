@@ -641,6 +641,20 @@ export interface TextField {
   withMaxRows?: string[] | null
   disableListColumnText?: string | null
   disableListFilterText?: string | null
+  array?:
+    | {
+        texts?: string[] | null
+        id?: string | null
+      }[]
+    | null
+  blocks?:
+    | {
+        texts?: string[] | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -898,6 +912,20 @@ export interface NumberField {
   validatesHasMany?: number[] | null
   localizedHasMany?: number[] | null
   withMinRows?: number[] | null
+  array?:
+    | {
+        numbers?: number[] | null
+        id?: string | null
+      }[]
+    | null
+  blocks?:
+    | {
+        numbers?: number[] | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -955,6 +983,8 @@ export interface RelationshipField {
           }
       )[]
     | null
+  relationNoHasManyNonPolymorphic?: (string | null) | TextField
+  relationHasManyNonPolymorphic?: (string | TextField)[] | null
   relationToSelf?: (string | null) | RelationshipField
   relationToSelfSelectOnly?: (string | null) | RelationshipField
   relationWithDynamicDefault?: (string | null) | User

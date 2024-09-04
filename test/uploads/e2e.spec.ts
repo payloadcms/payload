@@ -24,6 +24,7 @@ import {
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
+  customFileNameMediaSlug,
 } from './shared'
 
 const { beforeAll, describe } = test
@@ -40,6 +41,7 @@ let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
+let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -62,6 +64,7 @@ describe('uploads', () => {
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
+    customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -425,6 +428,25 @@ describe('uploads', () => {
 
     // With metadata, the animated image filesize would be 218762
     expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
+  })
+
+  test('should have custom file name for image size', async () => {
+    await page.goto(customFileNameURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+
+    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+
+    await page.locator('.file-field__previewSizes').click()
+
+    const renamedImageSizeFile = page
+      .locator('.preview-sizes__list .preview-sizes__sizeOption')
+      .nth(1)
+
+    await expect(renamedImageSizeFile).toContainText('custom-500x500.png')
   })
 
   describe('image manipulation', () => {
