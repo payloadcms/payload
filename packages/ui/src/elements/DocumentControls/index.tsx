@@ -12,7 +12,9 @@ import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
@@ -34,6 +36,7 @@ export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly data?: any
   readonly disableActions?: boolean
+  readonly disableCreate?: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
   id?: number | string
@@ -52,6 +55,7 @@ export const DocumentControls: React.FC<{
     slug,
     data,
     disableActions,
+    disableCreate,
     hasSavePermission,
     isAccountView,
     isEditing,
@@ -63,6 +67,12 @@ export const DocumentControls: React.FC<{
   } = props
 
   const { i18n } = useTranslation()
+
+  const editDepth = useEditDepth()
+
+  const [DocumentDrawer, DocumentDrawerToggler, { openDrawer }] = useDocumentDrawer({
+    collectionSlug: slug,
+  })
 
   const { config, getEntityConfig } = useConfig()
 
@@ -229,15 +239,25 @@ export const DocumentControls: React.FC<{
               <PopupList.ButtonGroup>
                 {hasCreatePermission && (
                   <React.Fragment>
-                    <PopupList.Button
-                      href={formatAdminURL({
-                        adminRoute,
-                        path: `/collections/${collectionConfig?.slug}/create`,
-                      })}
-                      id="action-create"
-                    >
-                      {i18n.t('general:createNew')}
-                    </PopupList.Button>
+                    {!disableCreate && (
+                      <Fragment>
+                        {editDepth > 1 ? (
+                          <PopupList.Button onClick={openDrawer}>
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        ) : (
+                          <PopupList.Button
+                            href={formatAdminURL({
+                              adminRoute,
+                              path: `/collections/${collectionConfig?.slug}/create`,
+                            })}
+                            id="action-create"
+                          >
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        )}
+                      </Fragment>
+                    )}
                     {!collectionConfig.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
@@ -266,6 +286,7 @@ export const DocumentControls: React.FC<{
         </div>
       </div>
       <div className={`${baseClass}__divider`} />
+      <DocumentDrawer />
     </Gutter>
   )
 }

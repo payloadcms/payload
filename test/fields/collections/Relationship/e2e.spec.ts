@@ -373,7 +373,7 @@ describe('relationship', () => {
 
       const title = 'Created from drawer'
 
-      await page.locator('#field-title').fill(title)
+      await drawer1Content.locator('#field-text').fill(title)
       await saveDocAndAssert(page)
 
       const newDrawerID = drawer1Content.locator('.id-label')

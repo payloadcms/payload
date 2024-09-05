@@ -24,6 +24,7 @@ export type DocumentInfoProps = {
   BeforeFields?: React.ReactNode
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableActions?: boolean
+  disableCreate?: boolean
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
