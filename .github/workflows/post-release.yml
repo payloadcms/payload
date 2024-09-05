@@ -1,0 +1,30 @@
+name: post-release
+
+on:
+  release:
+    types:
+      - published
+    branches:
+      - beta
+
+jobs:
+  post_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
+      - uses: apexskier/github-release-commenter@v1
+        continue-on-error: true
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Disable commenting for now
+          # Possible limitation because we release off of main and beta branches:
+          # https://github.com/apexskier/github-release-commenter#known-limitations
+          comment-template: ''
+
+          # TODO: Re-enable this after verifying that the action works as expected
+          # comment-template: |
+          #   🚀 This is included in version {release_link}
