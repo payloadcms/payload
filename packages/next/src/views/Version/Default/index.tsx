@@ -2,13 +2,13 @@
 import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'payload'
 
 import {
+  CheckboxInput,
   Gutter,
   SetViewActions,
   useConfig,
   useDocumentInfo,
   usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
+ useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
@@ -47,7 +47,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
 
   const [compareValue, setCompareValue] = useState<CompareOption>()
-
+  const [modifieldOnly, setModifiedOnly] = useState(false)
+  function onToggleModifiedOnly() {
+    setModifiedOnly(!modifieldOnly)
+  }
   const {
     admin: { dateFormat },
     localization,
@@ -113,6 +116,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 versionID={versionID}
               />
             )}
+            <span className={`${baseClass}__modifiedCheckBox`}>
+              <CheckboxInput
+                checked={modifieldOnly}
+                id={'modifieldOnly'}
+                label={i18n.t('version:modifieldOnly')}
+                onToggle={onToggleModifiedOnly}
+              />
+            </span>
           </header>
         </div>
         <div className={`${baseClass}__controls`}>
@@ -137,6 +148,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             fields={(collectionConfig || globalConfig)?.fields}
             i18n={i18n}
             locales={localeValues}
+            modifieldOnly={modifieldOnly}
             version={
               globalConfig
                 ? {

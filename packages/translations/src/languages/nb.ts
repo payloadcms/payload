@@ -401,6 +401,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftSavedSuccessfully: 'Utkast lagret.',
     lastSavedAgo: 'Sist lagret {{distance}} siden',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',
     noRowsFound: 'Ingen {{label}} funnet',
     noRowsSelected: undefined,

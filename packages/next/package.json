@@ -74,6 +74,7 @@
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "http-status": "1.6.2",
+    "lodash": "4.17.21",
     "path-to-regexp": "^6.2.1",
     "qs-esm": "7.0.2",
     "react-diff-viewer-continued": "3.2.6",

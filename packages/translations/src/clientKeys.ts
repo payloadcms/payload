@@ -313,6 +313,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:draft',
   'version:draftSavedSuccessfully',
   'version:lastSavedAgo',
+  'version:modifieldOnly',
   'version:noFurtherVersionsFound',
   'version:noRowsFound',
   'version:noRowsSelected',

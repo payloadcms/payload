@@ -403,6 +403,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     draft: 'Черновик',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
     noRowsSelected: undefined,

@@ -404,6 +404,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     draft: 'Concept',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
     noRowsFound: 'Geen {{label}} gevonden',
     noRowsSelected: undefined,

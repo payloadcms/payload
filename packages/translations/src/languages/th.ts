@@ -392,6 +392,7 @@ export const thTranslations: DefaultTranslationsObject = {
     draft: 'ฉบับร่าง',
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
     lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
     noRowsFound: 'ไม่พบ {{label}}',
     noRowsSelected: undefined,

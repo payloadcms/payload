@@ -400,6 +400,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     draft: 'Чернова',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Не са открити повече версии',
     noRowsFound: 'Не е открит {{label}}',
     noRowsSelected: undefined,

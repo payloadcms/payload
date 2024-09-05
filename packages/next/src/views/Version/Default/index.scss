@@ -40,7 +40,10 @@
       flex-basis: 100%;
     }
   }
-
+  &__modifiedCheckBox {
+    margin-left: 2rem;
+    margin-top: 0.2rem;
+  }
   &__restore {
     margin: 0 0 0 var(--base);
   }

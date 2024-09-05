@@ -401,6 +401,7 @@ export const azTranslations: DefaultTranslationsObject = {
     draft: 'Qaralama',
     draftSavedSuccessfully: 'Qaralama uğurla yadda saxlandı.',
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
     noRowsSelected: undefined,

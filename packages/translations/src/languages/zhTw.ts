@@ -385,6 +385,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     draft: '草稿',
     draftSavedSuccessfully: '草稿儲存成功。',
     lastSavedAgo: '上次儲存在{{distance}}之前',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: '沒有發現其他版本',
     noRowsFound: '沒有發現{{label}}',
     noRowsSelected: undefined,

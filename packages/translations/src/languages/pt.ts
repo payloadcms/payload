@@ -402,6 +402,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     draft: 'Rascunho',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
     noRowsSelected: undefined,

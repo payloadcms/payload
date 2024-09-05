@@ -399,6 +399,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     draft: 'ドラフト',
     draftSavedSuccessfully: '下書きは正常に保存されました。',
     lastSavedAgo: '{{distance}}前に最後に保存されました',
+    modifieldOnly: 'Modified only',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',
     noRowsFound: '{{label}} は未設定です',
     noRowsSelected: undefined,
