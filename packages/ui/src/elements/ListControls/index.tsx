@@ -14,7 +14,6 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListInfo } from '../../providers/ListInfo/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
@@ -48,17 +47,13 @@ export type ListControlsProps = {
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { collectionConfig, enableColumns = true, enableSort = false, fields } = props
 
-  const { handleSearchChange } = useListQuery()
+  const { handleSearchChange, params } = useListQuery()
   const { beforeActions, collectionSlug, disableBulkDelete, disableBulkEdit } = useListInfo()
-  const { searchParams } = useSearchParams()
   const titleField = useUseTitleField(collectionConfig, fields)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-  const [search, setSearch] = useState(
-    typeof searchParams?.search === 'string' ? searchParams?.search : '',
-  )
 
   const searchLabel =
     (titleField &&
@@ -81,21 +76,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
   )
 
-  const hasWhereParam = useRef(Boolean(searchParams?.where))
+  const hasWhereParam = useRef(Boolean(params?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
+  const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
 
   useEffect(() => {
-    if (hasWhereParam.current && !searchParams?.where) {
+    if (hasWhereParam.current && !params?.where) {
       setVisibleDrawer(undefined)
       hasWhereParam.current = false
-    } else if (searchParams?.where) {
+    } else if (params?.where) {
       hasWhereParam.current = true
     }
-  }, [setVisibleDrawer, searchParams?.where])
+  }, [setVisibleDrawer, params?.where])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
@@ -134,11 +129,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           handleChange={(search) => {
             return void handleSearchChange(search)
           }}
-          initialParams={searchParams}
+          // @ts-expect-error @todo: fix types
+          initialParams={params}
           key={collectionSlug}
           label={searchLabelTranslated.current}
-          setValue={setSearch}
-          value={search}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
@@ -216,7 +210,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={fields}
-          key={String(hasWhereParam.current && !searchParams?.where)}
+          key={String(hasWhereParam.current && !params?.where)}
         />
       </AnimateHeight>
       {enableSort && (
