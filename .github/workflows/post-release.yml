@@ -20,6 +20,7 @@ jobs:
         continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag-filter: 'v\\d'
 
           # Disable commenting for now
           # Possible limitation because we release off of main and beta branches:
