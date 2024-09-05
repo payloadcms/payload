@@ -8,11 +8,11 @@ import path from 'path'
 type StaticHandlerArgs = {
   baseUrl: string
   token: string
-  cacheControlMaxAge: number
+  cacheControlMaxAge?: number
 }
 
 export const getStaticHandler = (
-  { baseUrl, token, cacheControlMaxAge }: StaticHandlerArgs,
+  { baseUrl, token, cacheControlMaxAge = 0 }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
   return async (req, { params: { filename } }) => {
