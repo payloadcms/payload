@@ -36,10 +36,13 @@ const Restore: React.FC<Props> = ({
 }) => {
   const {
     config: {
+      collections,
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
   } = useConfig()
+
+  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
@@ -54,7 +57,8 @@ const Restore: React.FC<Props> = ({
 
   let fetchURL = `${serverURL}${apiRoute}`
   let redirectURL: string
-  const canRestoreAsDraft = status !== 'draft'
+
+  const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   if (collectionSlug) {
     fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
