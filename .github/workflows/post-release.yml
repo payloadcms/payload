@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
-      - uses: apexskier/github-release-commenter@v1
+      - uses: ./.github/actions/release-commenter
         continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
