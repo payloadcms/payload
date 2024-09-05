@@ -109,16 +109,16 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
-      setDocID(null)
-
       if (typeof onDeleteFromProps === 'function') {
         void onDeleteFromProps({
           ...args,
           collectionConfig,
         })
       }
+
+      closeModal(drawerSlug)
     },
-    [onDeleteFromProps, collectionConfig],
+    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
   )
 
   return (

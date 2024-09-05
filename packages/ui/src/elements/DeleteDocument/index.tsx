@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/index.js'
@@ -58,7 +58,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
-  const { toggleModal } = useModal()
+  const { closeModal, toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { title } = useDocumentInfo()
@@ -72,6 +72,12 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     setDeleting(false)
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
+
+  useEffect(() => {
+    return () => {
+      closeModal(modalSlug)
+    }
+  }, [closeModal, modalSlug])
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)

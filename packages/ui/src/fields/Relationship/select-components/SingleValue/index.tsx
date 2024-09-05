@@ -42,7 +42,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, isDrawerOpen }] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     id: value.toString(),
     collectionSlug: relationTo,
   })
@@ -56,12 +56,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const onDelete = useCallback<DocumentInfoContext['onDelete']>(
     (args) => {
       setDrawerIsOpen(false)
-
       if (typeof onDeleteFromProps === 'function') {
         void onDeleteFromProps(args)
       }
-
-      // closeDrawer() // TODO: determine if this is needed
     },
     [onDeleteFromProps, setDrawerIsOpen],
   )

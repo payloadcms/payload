@@ -21,6 +21,7 @@ export const seed = async (_payload) => {
         await new Promise((resolve, reject) => {
           _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
             if (err) {
+              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
               reject(err)
             }
             resolve(true)
