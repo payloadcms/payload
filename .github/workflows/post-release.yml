@@ -4,8 +4,7 @@ on:
   release:
     types:
       - published
-    branches:
-      - beta
+  workflow_dispatch:
 
 jobs:
   post_release:
