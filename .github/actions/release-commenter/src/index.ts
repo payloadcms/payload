@@ -26,8 +26,8 @@ const releaseTagTemplateRegex = /{release_tag}/g
       per_page: 2,
     })
 
-    // Get the current release tag
-    const currentTag = payload.release.tag_name
+    // Get the current release tag or latest tag
+    const currentTag = payload?.release?.tag_name || rawReleases?.[0]?.tag_name
 
     let releases = rawReleases
 

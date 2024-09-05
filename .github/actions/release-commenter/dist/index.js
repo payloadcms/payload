@@ -8595,15 +8595,15 @@ var releaseLinkTemplateRegex = /{release_link}/g;
 var releaseNameTemplateRegex = /{release_name}/g;
 var releaseTagTemplateRegex = /{release_tag}/g;
 (function main() {
-    var _a;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _b, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, baseRequest, request, request, error_1;
-        var e_1, _c;
+        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, baseRequest, request, request, error_1;
+        var e_1, _e;
         var _this = this;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        return __generator(this, function (_f) {
+            switch (_f.label) {
                 case 0:
-                    _d.trys.push([0, 5, , 6]);
+                    _f.trys.push([0, 5, , 6]);
                     payload_1 = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload;
                     githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('GITHUB_TOKEN');
                     tagFilter = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('tag-filter') || undefined // Accept tag filter as an input
@@ -8613,16 +8613,16 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     labelTemplate = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('label-template') || null;
                     skipLabelTemplate = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('skip-label') || null;
                     return [4 /*yield*/, octokit_1.rest.repos.listReleases(__assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { per_page: 2 }))
-                        // Get the current release tag
+                        // Get the current release tag or latest tag
                     ];
                 case 1:
-                    rawReleases = (_d.sent()).data;
-                    currentTag = payload_1.release.tag_name;
+                    rawReleases = (_f.sent()).data;
+                    currentTag = ((_a = payload_1 === null || payload_1 === void 0 ? void 0 : payload_1.release) === null || _a === void 0 ? void 0 : _a.tag_name) || ((_b = rawReleases === null || rawReleases === void 0 ? void 0 : rawReleases[0]) === null || _b === void 0 ? void 0 : _b.tag_name);
                     releases = rawReleases;
                     // Filter releases by the tag filter if provided
                     if (tagFilter) {
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Filtering releases by tag filter: ".concat(tagFilter));
-                        regexMatch_1 = (_a = currentTag.match(tagFilter)) === null || _a === void 0 ? void 0 : _a[0];
+                        regexMatch_1 = (_c = currentTag.match(tagFilter)) === null || _c === void 0 ? void 0 : _c[0];
                         if (!regexMatch_1) {
                             _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Current release tag ".concat(currentTag, " does not match the tag filter ").concat(tagFilter));
                             return [2 /*return*/];
@@ -8642,11 +8642,11 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('first release');
                         return [2 /*return*/];
                     }
-                    _b = __read(releases, 2), currentRelease_1 = _b[0], priorRelease = _b[1];
+                    _d = __read(releases, 2), currentRelease_1 = _d[0], priorRelease = _d[1];
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("".concat(priorRelease.tag_name, "...").concat(currentRelease_1.tag_name));
                     return [4 /*yield*/, octokit_1.rest.repos.compareCommits(__assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { base: priorRelease.tag_name, head: currentRelease_1.tag_name }))];
                 case 2:
-                    commits = (_d.sent()).data.commits;
+                    commits = (_f.sent()).data.commits;
                     if (!currentRelease_1.name) {
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('Current release has no name, will fall back to the tag name.');
                     }
@@ -8764,7 +8764,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                             }); })();
                         }))];
                 case 3:
-                    _d.sent();
+                    _f.sent();
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issues/PRs: \n".concat(Array.from(linkedIssuesPrs_2).join('\n')));
                     requests = [];
                     try {
@@ -8786,16 +8786,16 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     catch (e_1_1) { e_1 = { error: e_1_1 }; }
                     finally {
                         try {
-                            if (linkedIssuesPrs_1_1 && !linkedIssuesPrs_1_1.done && (_c = linkedIssuesPrs_1.return)) _c.call(linkedIssuesPrs_1);
+                            if (linkedIssuesPrs_1_1 && !linkedIssuesPrs_1_1.done && (_e = linkedIssuesPrs_1.return)) _e.call(linkedIssuesPrs_1);
                         }
                         finally { if (e_1) throw e_1.error; }
                     }
                     return [4 /*yield*/, Promise.all(requests)];
                 case 4:
-                    _d.sent();
+                    _f.sent();
                     return [3 /*break*/, 6];
                 case 5:
-                    error_1 = _d.sent();
+                    error_1 = _f.sent();
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_1);
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error_1.message);
                     return [3 /*break*/, 6];
