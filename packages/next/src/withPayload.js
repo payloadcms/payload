@@ -46,7 +46,7 @@ export const withPayload = (nextConfig = {}) => {
       return [
         ...(headersFromConfig || []),
         {
-          source: '/:path*',
+          source: '/admin/:path*',
           headers: [
             {
               key: 'Accept-CH',
