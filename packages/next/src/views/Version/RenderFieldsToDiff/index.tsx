@@ -52,8 +52,12 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
-            if (modifieldOnly && (_.isEqual(versionValue, comparisonValue) || field.admin?.hidden))
-              {return null}
+            if (
+              modifieldOnly &&
+              (_.isEqual(versionValue, comparisonValue) || field.admin?.hidden)
+            ) {
+              return null
+            }
 
             const hasPermission = fieldPermissions?.[fieldName]?.read?.permission
 
@@ -73,6 +77,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               i18n,
               isRichText,
               locales,
+              modifieldOnly,
               version: versionValue,
             }
 
