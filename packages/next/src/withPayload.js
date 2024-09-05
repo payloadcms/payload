@@ -1,9 +1,11 @@
 /**
  * @param {import('next').NextConfig} nextConfig
+ * @param {Object} [options] - Optional configuration object.
+ * @param {string} [options.adminRoute='/admin'] - The route for the admin panel. This should match the routes.admin value in the Payload config.
  *
  * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}, payloadConfig = {}) => {
+export const withPayload = (nextConfig = {}, { adminRoute = '/admin' } = {}) => {
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
       'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This may cause stale data to load in the Admin Panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
@@ -42,7 +44,6 @@ export const withPayload = (nextConfig = {}, payloadConfig = {}) => {
     },
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
-      const adminRoute = payloadConfig?.adminRoute ?? '/admin'
 
       return [
         ...(headersFromConfig || []),
