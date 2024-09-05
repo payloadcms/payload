@@ -56,11 +56,17 @@ export const DocumentLocked: React.FC<{
           </p>
         </div>
         <div className={`${baseClass}__controls`}>
-          <Button buttonStyle="secondary" onClick={handleGoBack} size="large">
+          <Button
+            buttonStyle="secondary"
+            id={`${modalSlug}-go-back`}
+            onClick={handleGoBack}
+            size="large"
+          >
             {t('general:goBack')}
           </Button>
           <Button
             buttonStyle="secondary"
+            id={`${modalSlug}-view-read-only`}
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
@@ -71,6 +77,7 @@ export const DocumentLocked: React.FC<{
           </Button>
           <Button
             buttonStyle="primary"
+            id={`${modalSlug}-take-over`}
             onClick={() => {
               void onTakeOver()
               closeModal(modalSlug)

@@ -8,40 +8,12 @@ export const PostsCollection: CollectionConfig = {
     useAsTitle: 'text',
   },
   lockWhenEditing: {
-    lockDuration: 60,
+    lockDuration: 180,
   },
   fields: [
     {
       name: 'text',
       type: 'text',
-    },
-    {
-      name: 'richText',
-      type: 'richText',
-    },
-    {
-      name: 'myBlocks',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'test',
-          fields: [
-            {
-              name: 'test',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'someBlock2',
-          fields: [
-            {
-              name: 'test2',
-              type: 'text',
-            },
-          ],
-        },
-      ],
     },
   ],
   versions: {

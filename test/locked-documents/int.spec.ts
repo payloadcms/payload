@@ -4,37 +4,62 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { Page, Post } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 let payload: Payload
 let token: string
 let restClient: NextRESTClient
 
-const { email, password } = devUser
+const { email: devEmail, password: devPassword } = devUser
+const { email: regEmail, password: regPassword } = regularUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Locked Documents Tests', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
+describe('Locked Documents', () => {
+  let post1: Post
+  let page1: Page
+  let user1: any
+  let user2: any
+
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload, restClient } = initialized)
+    ;({ payload } = await initPayloadInt(dirname))
+  })
 
-    const data = await restClient
-      .POST('/users/login', {
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-      .then((res) => res.json())
+  beforeEach(async () => {
+    post1 = await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'SOME POST',
+      },
+    })
 
-    token = data.token
+    page1 = await payload.create({
+      collection: pagesSlug,
+      data: {
+        text: 'SOME PAGE',
+      },
+    })
+
+    user2 = await payload.create({
+      collection: 'users',
+      data: {
+        email: regEmail,
+        password: regPassword,
+      },
+    })
+
+    user1 = await payload.login({
+      collection: 'users',
+      data: {
+        email: devEmail,
+        password: devPassword,
+      },
+    })
   })
 
   afterAll(async () => {
@@ -42,11 +67,6 @@ describe('Locked Documents Tests', () => {
       await payload.db.destroy()
     }
   })
-
-  // --__--__--__--__--__--__--__--__--__
-  // You can run tests against the local API or the REST API
-  // use the tests below as a guide
-  // --__--__--__--__--__--__--__--__--__
 
   it('local API example', async () => {
     const newPost = await payload.create({

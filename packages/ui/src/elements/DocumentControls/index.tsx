@@ -215,6 +215,7 @@ export const DocumentControls: React.FC<{
             {user && readOnlyForIncomingUser && (
               <Button
                 buttonStyle="secondary"
+                id="take-over"
                 onClick={() => void onTakeOver()}
                 size="medium"
                 type="button"

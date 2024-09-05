@@ -32,11 +32,17 @@ export const DocumentTakeOver: React.FC<{
           <p>{t('general:anotherUserTakenOver')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
-          <Button buttonStyle="primary" onClick={handleBackToDashboard} size="large">
+          <Button
+            buttonStyle="primary"
+            id={`${modalSlug}-back-to-dashboard`}
+            onClick={handleBackToDashboard}
+            size="large"
+          >
             {t('general:backToDashboard')}
           </Button>
           <Button
             buttonStyle="secondary"
+            id={`${modalSlug}-view-read-only`}
             onClick={() => {
               onReadOnly()
               closeModal(modalSlug)
