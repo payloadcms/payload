@@ -403,7 +403,7 @@ export const enTranslations = {
     draft: 'Draft',
     draftSavedSuccessfully: 'Draft saved successfully.',
     lastSavedAgo: 'Last saved {{distance}} ago',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: 'Modified only',
     noFurtherVersionsFound: 'No further versions found',
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',

@@ -395,7 +395,7 @@ export const viTranslations: DefaultTranslationsObject = {
     draft: 'Bản nháp',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
     lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Không tìm thấy phiên bản cũ hơn',
     noRowsFound: 'Không tìm thấy: {{label}}',
     noRowsSelected: undefined,

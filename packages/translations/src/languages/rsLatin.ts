@@ -397,7 +397,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     draft: 'Nacrt',
     draftSavedSuccessfully: 'Nacrt uspešno sačuvan.',
     lastSavedAgo: 'Zadnji put sačuvano pre {{distance}',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nisu pronađene naredne verzije',
     noRowsFound: '{{label}} nije pronađeno',
     noRowsSelected: undefined,

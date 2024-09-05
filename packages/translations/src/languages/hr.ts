@@ -398,7 +398,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     draft: 'Nacrt',
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
     lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',
     noRowsFound: '{{label}} nije pronađeno',
     noRowsSelected: undefined,

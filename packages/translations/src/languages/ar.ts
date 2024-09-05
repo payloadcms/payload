@@ -394,7 +394,7 @@ export const arTranslations: DefaultTranslationsObject = {
     draft: 'مسودّة',
     draftSavedSuccessfully: 'تمّ حفظ المسودّة بنجاح.',
     lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
     noRowsSelected: undefined,

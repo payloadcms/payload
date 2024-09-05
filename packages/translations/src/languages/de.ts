@@ -405,7 +405,7 @@ export const deTranslations: DefaultTranslationsObject = {
     draft: 'Entwurf',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
     noRowsFound: 'Kein {{label}} gefunden',
     noRowsSelected: undefined,

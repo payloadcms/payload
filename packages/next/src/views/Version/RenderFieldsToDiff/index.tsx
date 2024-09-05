@@ -21,7 +21,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   fields,
   i18n,
   locales,
-  modifieldOnly,
+  modifiedOnly,
   version,
 }) => {
   // typing it as `as typeof _diffComponents` here ensures the TField generics of DiffComponentProps are respected.
@@ -52,10 +52,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
-            if (
-              modifieldOnly &&
-              (_.isEqual(versionValue, comparisonValue) || field.admin?.hidden)
-            ) {
+            if (modifiedOnly && (_.isEqual(versionValue, comparisonValue) || field.admin?.hidden)) {
               return null
             }
 
@@ -77,7 +74,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               i18n,
               isRichText,
               locales,
-              modifieldOnly,
+              modifiedOnly,
               version: versionValue,
             }
 

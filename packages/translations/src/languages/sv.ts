@@ -400,7 +400,7 @@ export const svTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftSavedSuccessfully: 'Utkastet sparades framgångsrikt.',
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noRowsFound: 'Inga {{label}} hittades',
     noRowsSelected: undefined,

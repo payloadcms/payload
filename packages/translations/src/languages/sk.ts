@@ -401,7 +401,7 @@ export const skTranslations: DefaultTranslationsObject = {
     draft: 'Návrh',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',
     noRowsFound: 'Nenájdené {{label}}',
     noRowsSelected: undefined,

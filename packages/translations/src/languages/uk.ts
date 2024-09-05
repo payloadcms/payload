@@ -400,7 +400,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     draft: 'Чернетка',
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Інших версій не знайдено',
     noRowsFound: 'Не знайдено {{label}}',
     noRowsSelected: undefined,

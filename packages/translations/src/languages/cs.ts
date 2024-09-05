@@ -399,7 +399,7 @@ export const csTranslations: DefaultTranslationsObject = {
     draft: 'Koncept',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
-    modifieldOnly: 'Modified only',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Nenalezeny další verze',
     noRowsFound: 'Nenalezen {{label}}',
     noRowsSelected: undefined,
