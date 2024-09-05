@@ -11,6 +11,9 @@
   &__template {
     z-index: 1;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: base(1);
   }
 
   &__toggle {
@@ -24,6 +27,6 @@
   &__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: $baseline;
+    gap: base(1);
   }
 }
