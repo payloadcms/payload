@@ -86,7 +86,7 @@ const typescriptRules = {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
       destructuredArrayIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^ignore',
+      caughtErrorsIgnorePattern: '^(_|ignore)',
     },
   ],
   '@typescript-eslint/no-base-to-string': 'warn',
@@ -104,6 +104,7 @@ const typescriptRules = {
       },
     },
   ],
+  '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
 /** @typedef {import('eslint').Linter.FlatConfig} */

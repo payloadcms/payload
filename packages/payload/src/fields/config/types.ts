@@ -92,10 +92,6 @@ import type {
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
-  UploadFieldErrorClientComponent,
-  UploadFieldErrorServerComponent,
-  UploadFieldLabelClientComponent,
-  UploadFieldLabelServerComponent,
   UploadFieldProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'

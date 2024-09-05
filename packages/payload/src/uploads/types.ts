@@ -1,4 +1,4 @@
-import type { ResizeOptions, Sharp, Metadata as SharpMetadata } from 'sharp'
+import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'

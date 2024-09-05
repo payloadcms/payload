@@ -1,13 +1,10 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type {
-  FieldPermissions,
-  FieldTypes,
-  RichTextAdapter,
-  RichTextFieldProps,
-  SanitizedConfig,
-} from 'payload'
-import type React from 'react'
+import type { RichTextAdapter, RichTextFieldProps, SanitizedConfig } from 'payload'
 
+import type {
+  BaseClientFeatureProps,
+  FeatureProviderProviderClient,
+} from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
@@ -84,7 +81,6 @@ export type AdapterProps = {
 }
 
 export type GeneratedFeatureProviderComponent = {
-  ClientFeature: React.ReactNode
-  key: string
-  order: number
+  clientFeature: FeatureProviderProviderClient<any, any>
+  clientFeatureProps: BaseClientFeatureProps<object>
 }
