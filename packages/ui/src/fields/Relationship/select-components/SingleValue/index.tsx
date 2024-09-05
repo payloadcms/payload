@@ -24,8 +24,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
       customProps: {
         // @ts-expect-error
-        onCreate,
-        // @ts-expect-error
         onDelete: onDeleteFromProps,
         // @ts-expect-error
         onDuplicate,
@@ -92,12 +90,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
         </div>
       </div>
       {relationTo && hasReadPermission && (
-        <DocumentDrawer
-          onCreate={onCreate}
-          onDelete={onDelete}
-          onDuplicate={onDuplicate}
-          onSave={onSave}
-        />
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
     </SelectComponents.SingleValue>
   )

@@ -22,9 +22,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
   AfterFields,
   collectionSlug,
+  disableActions,
   drawerSlug,
   Header,
-  onCreate: onCreateFromProps,
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
@@ -93,20 +93,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onDuplicateFromProps, collectionConfig],
   )
 
-  const onCreate = useCallback<DocumentDrawerProps['onCreate']>(
-    (args) => {
-      setDocID(args.doc.id)
-
-      if (typeof onCreateFromProps === 'function') {
-        void onCreateFromProps({
-          ...args,
-          collectionConfig,
-        })
-      }
-    },
-    [onCreateFromProps, collectionConfig],
-  )
-
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       if (typeof onDeleteFromProps === 'function') {
@@ -147,10 +133,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         </Gutter>
       }
       collectionSlug={collectionConfig.slug}
+      disableActions={disableActions}
       disableLeaveWithoutSaving
       id={docID}
       isEditing={isEditing}
-      onCreate={onCreate}
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       onLoadError={onLoadError}

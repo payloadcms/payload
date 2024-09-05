@@ -34,10 +34,6 @@ export type DocumentInfoProps = {
   initialData?: Data
   initialState?: FormState
   isEditing?: boolean
-  onCreate?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
-  }) => Promise<void> | void
   onDelete?: (args: {
     collectionConfig?: ClientCollectionConfig
     id: string

@@ -235,6 +235,7 @@ export const DefaultEditView: React.FC = () => {
             isEditing={isEditing}
             onDelete={onDelete}
             onDuplicate={onDuplicate}
+            onSave={onSave}
             permissions={docPermissions}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
