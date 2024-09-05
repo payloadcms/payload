@@ -55,9 +55,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 }) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { setPreference } = usePreferences()
+  const { getPreference, setPreference } = usePreferences()
   const { closeModal, isModalOpen } = useModal()
   const [limit, setLimit] = useState<number>()
+  // Track the page limit so we can reset the page number when it changes
+  const previousLimit = useRef<number>(limit || null)
   const [sort, setSort] = useState<string>(null)
   const [page, setPage] = useState<number>(1)
   const [where, setWhere] = useState<Where>(null)
@@ -116,7 +118,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   }, [selectedCollection, enabledCollectionConfigs, onSelect, t])
 
-  const preferenceKey = `${selectedCollectionConfig.slug}-list`
+  const preferencesKey = `${selectedCollectionConfig.slug}-list`
 
   // this is the 'create new' drawer
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
@@ -152,6 +154,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       admin: { listSearchableFields, useAsTitle } = {},
       versions,
     } = selectedCollectionConfig
+
     const params: {
       cacheBust?: number
       depth?: number
@@ -199,6 +202,17 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     if (cacheBust) {
       params.cacheBust = cacheBust
     }
+    if (limit) {
+      params.limit = limit
+
+      if (limit !== previousLimit.current) {
+        previousLimit.current = limit
+
+        // Reset page if limit changes
+        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+        setPage(1)
+      }
+    }
     if (copyOfWhere) {
       params.where = copyOfWhere
     }
@@ -207,7 +221,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
 
     setParams(params)
-  }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])
+  }, [
+    page,
+    sort,
+    where,
+    search,
+    limit,
+    cacheBust,
+    filterOptions,
+    selectedCollectionConfig,
+    t,
+    setParams,
+  ])
 
   useEffect(() => {
     const newPreferences = {
@@ -215,8 +240,24 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       sort,
     }
 
-    void setPreference(preferenceKey, newPreferences, true)
-  }, [sort, limit, setPreference, preferenceKey])
+    if (limit || sort) {
+      void setPreference(preferencesKey, newPreferences, true)
+    }
+  }, [sort, limit, setPreference, preferencesKey])
+
+  // Get existing preferences if they exist
+  useEffect(() => {
+    if (preferencesKey && !limit) {
+      const getInitialPref = async () => {
+        const existingPreferences = await getPreference<{ limit?: number }>(preferencesKey)
+
+        if (existingPreferences?.limit) {
+          setLimit(existingPreferences?.limit)
+        }
+      }
+      void getInitialPref()
+    }
+  }, [getPreference, limit, preferencesKey])
 
   useThrottledEffect(
     () => {
@@ -341,7 +382,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           modifySearchParams={false}
           // @ts-expect-error todo: fix types
           params={params}
-          preferenceKey={preferenceKey}
+          preferenceKey={preferencesKey}
         >
           <TableColumnsProvider
             cellProps={[
@@ -360,7 +401,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             ]}
             collectionSlug={selectedCollectionConfig.slug}
             enableRowSelections={enableRowSelections}
-            preferenceKey={preferenceKey}
+            preferenceKey={preferencesKey}
           >
             <RenderComponent mappedComponent={List} />
             <DocumentDrawer onSave={onCreateNew} />

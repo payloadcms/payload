@@ -151,7 +151,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         await handlePerPageChangeFromProps(arg)
       }
 
-      await refineListData({ limit: String(arg) })
+      await refineListData({ limit: String(arg), page: '1' })
     },
     [refineListData, handlePerPageChangeFromProps],
   )
@@ -193,6 +193,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   useEffect(() => {
     if (paramsFromProps) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setParams(paramsFromProps)
     } else {
       if (modifySearchParams) {
