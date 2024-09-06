@@ -374,7 +374,9 @@ describe('Versions', () => {
         locale: 'all',
       })
 
-      const versions = allVersions.docs.filter((version) => version.parent === published.id)
+      const versions = allVersions.docs.filter(
+        (version) => version.parent === published.id && version.snapshot !== true,
+      )
       const latestVersion = versions[0].version
 
       expect(latestVersion.text.es).toBeUndefined()
