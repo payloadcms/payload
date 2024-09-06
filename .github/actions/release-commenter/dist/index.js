@@ -33964,22 +33964,23 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     linkedIssuesPrs_2 = new Set();
                     return [4 /*yield*/, Promise.all(commits.map(function (commit) {
                             return (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var query, response, html, _a, _b, match, _c, num, seen, associatedPRs, _loop_1, associatedPRs_1, associatedPRs_1_1, associatedPR;
+                                var query, response, associatedClosedPREdges, html, _a, _b, match, _c, num, seen, _loop_1, associatedClosedPREdges_1, associatedClosedPREdges_1_1, associatedPR;
                                 var e_2, _d, e_3, _e;
                                 return __generator(this, function (_f) {
                                     switch (_f.label) {
                                         case 0:
-                                            query = "\n            {\n              resource(url: \"".concat(payload_1.repository.html_url, "/commit/").concat(commit.sha, "\") {\n                ... on Commit {\n                  messageHeadlineHTML\n                  messageBodyHTML\n                  associatedPullRequests(first: 10) {\n                    pageInfo {\n                      hasNextPage\n                    }\n                    edges {\n                      node {\n                        bodyHTML\n                        number\n                        labels(first: 10) {\n                          pageInfo {\n                            hasNextPage\n                          }\n                          nodes {\n                            name\n                          }\n                        }\n                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {\n                          pageInfo {\n                            hasNextPage\n                          }\n                          nodes {\n                            ... on ConnectedEvent {\n                              __typename\n                              isCrossRepository\n                              subject {\n                                ... on Issue {\n                                  number\n                                }\n                              }\n                            }\n                            ... on DisconnectedEvent {\n                              __typename\n                              isCrossRepository\n                              subject {\n                                ... on Issue {\n                                  number\n                                }\n                              }\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          ");
+                                            query = "\n            {\n              resource(url: \"".concat(payload_1.repository.html_url, "/commit/").concat(commit.sha, "\") {\n                ... on Commit {\n                  messageHeadlineHTML\n                  messageBodyHTML\n                  associatedPullRequests(first: 10) {\n                    pageInfo {\n                      hasNextPage\n                    }\n                    edges {\n                      node {\n                        bodyHTML\n                        number\n                        state\n                        labels(first: 10) {\n                          pageInfo {\n                            hasNextPage\n                          }\n                          nodes {\n                            name\n                          }\n                        }\n                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {\n                          pageInfo {\n                            hasNextPage\n                          }\n                          nodes {\n                            ... on ConnectedEvent {\n                              __typename\n                              isCrossRepository\n                              subject {\n                                ... on Issue {\n                                  number\n                                }\n                              }\n                            }\n                            ... on DisconnectedEvent {\n                              __typename\n                              isCrossRepository\n                              subject {\n                                ... on Issue {\n                                  number\n                                }\n                              }\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          ");
                                             return [4 /*yield*/, octokit_1.graphql(query)];
                                         case 1:
                                             response = _f.sent();
                                             if (!response.resource) {
                                                 return [2 /*return*/];
                                             }
+                                            associatedClosedPREdges = response.resource.associatedPullRequests.edges.filter(function (e) { return e.node.state === 'MERGED'; });
                                             html = __spreadArray([
                                                 response.resource.messageHeadlineHTML,
                                                 response.resource.messageBodyHTML
-                                            ], __read(response.resource.associatedPullRequests.edges.map(function (pr) { return pr.node.bodyHTML; })), false).join(' ');
+                                            ], __read(associatedClosedPREdges.map(function (pr) { return pr.node.bodyHTML; })), false).join(' ');
                                             try {
                                                 for (_a = __values(html.matchAll(closesMatcher)), _b = _a.next(); !_b.done; _b = _a.next()) {
                                                     match = _b.value;
@@ -33998,7 +33999,6 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Too many PRs associated with ".concat(commit.sha));
                                             }
                                             seen = new Set();
-                                            associatedPRs = response.resource.associatedPullRequests.edges;
                                             _loop_1 = function (associatedPR) {
                                                 var e_4, _g;
                                                 if (associatedPR.node.timelineItems.pageInfo.hasNextPage) {
@@ -34041,15 +34041,15 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 }
                                             };
                                             try {
-                                                for (associatedPRs_1 = __values(associatedPRs), associatedPRs_1_1 = associatedPRs_1.next(); !associatedPRs_1_1.done; associatedPRs_1_1 = associatedPRs_1.next()) {
-                                                    associatedPR = associatedPRs_1_1.value;
+                                                for (associatedClosedPREdges_1 = __values(associatedClosedPREdges), associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next(); !associatedClosedPREdges_1_1.done; associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next()) {
+                                                    associatedPR = associatedClosedPREdges_1_1.value;
                                                     _loop_1(associatedPR);
                                                 }
                                             }
                                             catch (e_3_1) { e_3 = { error: e_3_1 }; }
                                             finally {
                                                 try {
-                                                    if (associatedPRs_1_1 && !associatedPRs_1_1.done && (_e = associatedPRs_1.return)) _e.call(associatedPRs_1);
+                                                    if (associatedClosedPREdges_1_1 && !associatedClosedPREdges_1_1.done && (_e = associatedClosedPREdges_1.return)) _e.call(associatedClosedPREdges_1);
                                                 }
                                                 finally { if (e_3) throw e_3.error; }
                                             }

@@ -121,6 +121,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
                       node {
                         bodyHTML
                         number
+                        state
                         labels(first: 10) {
                           pageInfo {
                             hasNextPage
@@ -171,6 +172,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
                   node: {
                     bodyHTML: string
                     number: number
+                    state: 'OPEN' | 'CLOSED' | 'MERGED'
                     labels: {
                       pageInfo: { hasNextPage: boolean }
                       nodes: ReadonlyArray<{
@@ -199,11 +201,16 @@ const releaseTagTemplateRegex = /{release_tag}/g
 
           // core.info(JSON.stringify(response.resource, null, 2))
 
+          const associatedClosedPREdges = response.resource.associatedPullRequests.edges.filter(
+            e => e.node.state === 'MERGED',
+          )
+
           const html = [
             response.resource.messageHeadlineHTML,
             response.resource.messageBodyHTML,
-            ...response.resource.associatedPullRequests.edges.map(pr => pr.node.bodyHTML),
+            ...associatedClosedPREdges.map(pr => pr.node.bodyHTML),
           ].join(' ')
+
           for (const match of html.matchAll(closesMatcher)) {
             const [, num] = match
             linkedIssuesPrs.add(parseInt(num, 10))
@@ -214,8 +221,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
           }
 
           const seen = new Set<number>()
-          const associatedPRs = response.resource.associatedPullRequests.edges
-          for (const associatedPR of associatedPRs) {
+          for (const associatedPR of associatedClosedPREdges) {
             if (associatedPR.node.timelineItems.pageInfo.hasNextPage) {
               core.warning(`Too many links for #${associatedPR.node.number}`)
             }
