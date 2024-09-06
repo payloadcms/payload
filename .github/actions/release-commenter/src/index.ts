@@ -49,6 +49,8 @@ const releaseTagTemplateRegex = /{release_tag}/g
       })
     }
 
+    core.info(`Releases: ${JSON.stringify(releases, null, 2)}`)
+
     if (releases.length < 2) {
       if (!releases.length) {
         core.error(`No releases found with the provided tag filter: '${tagFilter}'`)

@@ -8634,6 +8634,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                             return match;
                         });
                     }
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Releases: ".concat(JSON.stringify(releases, null, 2)));
                     if (releases.length < 2) {
                         if (!releases.length) {
                             _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("No releases found with the provided tag filter: '".concat(tagFilter, "'"));
