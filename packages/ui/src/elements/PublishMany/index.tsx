@@ -136,7 +136,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
             <Button
               buttonStyle="secondary"
               id="confirm-cancel"
-              onClick={() => void (submitted ? undefined : toggleModal(modalSlug))}
+              onClick={submitted ? undefined : () => toggleModal(modalSlug)}
               size="large"
               type="button"
             >
@@ -144,7 +144,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
             </Button>
             <Button
               id="confirm-publish"
-              onClick={() => void (submitted ? undefined : handlePublish())}
+              onClick={submitted ? undefined : handlePublish}
               size="large"
             >
               {submitted ? t('version:publishing') : t('general:confirm')}

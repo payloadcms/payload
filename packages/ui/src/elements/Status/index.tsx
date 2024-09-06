@@ -160,16 +160,14 @@ export const Status: React.FC = () => {
                   <div className={`${baseClass}__controls`}>
                     <Button
                       buttonStyle="secondary"
-                      onClick={() =>
-                        void (processing ? undefined : toggleModal(unPublishModalSlug))
-                      }
+                      onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
                       size="large"
                       type="button"
                     >
                       {t('general:cancel')}
                     </Button>
                     <Button
-                      onClick={() => void (processing ? undefined : performAction('unpublish'))}
+                      onClick={processing ? undefined : () => performAction('unpublish')}
                       size="large"
                     >
                       {t(processing ? 'version:unpublishing' : 'general:confirm')}
@@ -199,7 +197,7 @@ export const Status: React.FC = () => {
                   <div className={`${baseClass}__controls`}>
                     <Button
                       buttonStyle="secondary"
-                      onClick={() => void (processing ? undefined : toggleModal(revertModalSlug))}
+                      onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
                       size="large"
                       type="button"
                     >
@@ -207,7 +205,7 @@ export const Status: React.FC = () => {
                     </Button>
                     <Button
                       id="action-revert-to-published-confirm"
-                      onClick={() => void (processing ? undefined : performAction('revert'))}
+                      onClick={processing ? undefined : () => performAction('revert')}
                       size="large"
                     >
                       {t(processing ? 'version:reverting' : 'general:confirm')}
