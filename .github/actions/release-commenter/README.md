@@ -2,6 +2,17 @@
 
 This GitHub Action automatically comments on and/or labels Issues and PRs when a fix is released for them.
 
+> [!IMPORTANT]
+> 🍴 Forked version of https://github.comapexskier/github-release-commenter
+
+## Fork Modifications
+
+- Filters to closed PRs only
+- Adds tag filter to support non-linear releases
+- Better logging
+- Moved to pnpm
+- Uses @vercel/ncc for packaging
+
 ## How it works
 
 Use this action in a workflow [triggered by a release](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#release). It will scan commits between that and the prior release, find associated Issues and PRs, and comment on them to let people know a release has been made. Associated Issues and PRs can be directly [linked](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue) to the commit or manually linked from a PR associated with the commit.
