@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`tests feature tests can apply labels 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "issue_number": 123,
-      "labels": Array [
+      "labels": [
         ":dart: landed",
         "release-current_tag_name",
         "Release Name",
       ],
     },
   ],
-  Array [
-    Object {
+  [
+    {
       "issue_number": 7,
-      "labels": Array [
+      "labels": [
         ":dart: landed",
         "release-current_tag_name",
         "Release Name",
@@ -26,13 +26,13 @@ Array [
 `;
 
 exports[`tests main test 1`] = `
-Object {
+{
   "graphql": [MockFunction] {
-    "calls": Array [
-      Array [
+    "calls": [
+      [
         "
             {
-              resource(url: \\"http://repository/commit/SHA1\\") {
+              resource(url: "http://repository/commit/SHA1") {
                 ... on Commit {
                   messageHeadlineHTML
                   messageBodyHTML
@@ -44,6 +44,7 @@ Object {
                       node {
                         bodyHTML
                         number
+                        state
                         labels(first: 10) {
                           pageInfo {
                             hasNextPage
@@ -85,10 +86,10 @@ Object {
             }
           ",
       ],
-      Array [
+      [
         "
             {
-              resource(url: \\"http://repository/commit/SHA2\\") {
+              resource(url: "http://repository/commit/SHA2") {
                 ... on Commit {
                   messageHeadlineHTML
                   messageBodyHTML
@@ -100,6 +101,7 @@ Object {
                       node {
                         bodyHTML
                         number
+                        state
                         labels(first: 10) {
                           pageInfo {
                             hasNextPage
@@ -142,124 +144,84 @@ Object {
           ",
       ],
     ],
-    "results": Array [
-      Object {
+    "results": [
+      {
         "type": "return",
         "value": Promise {},
       },
-      Object {
+      {
         "type": "return",
         "value": Promise {},
       },
     ],
   },
-  "rest": Object {
-    "issues": Object {
+  "rest": {
+    "issues": {
       "addLabels": [MockFunction],
       "createComment": [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
+        "calls": [
+          [
+            {
               "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
               "issue_number": 3,
             },
           ],
-          Array [
-            Object {
+          [
+            {
               "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
               "issue_number": 123,
             },
           ],
-          Array [
-            Object {
+          [
+            {
               "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
               "issue_number": 7,
             },
           ],
-          Array [
-            Object {
-              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
-              "issue_number": 4,
-            },
-          ],
-          Array [
-            Object {
-              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
-              "issue_number": 5,
-            },
-          ],
-          Array [
-            Object {
-              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
-              "issue_number": 9,
-            },
-          ],
-          Array [
-            Object {
-              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
-              "issue_number": 2,
-            },
-          ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": Promise {},
           },
-          Object {
+          {
             "type": "return",
             "value": Promise {},
           },
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-          Object {
+          {
             "type": "return",
             "value": Promise {},
           },
         ],
       },
     },
-    "repos": Object {
+    "repos": {
       "compareCommits": [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
+        "calls": [
+          [
+            {
               "base": "prior_tag_name",
               "head": "current_tag_name",
             },
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": Promise {},
           },
         ],
       },
       "listReleases": [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "per_page": 2,
+        "calls": [
+          [
+            {
+              "per_page": 100,
             },
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": Promise {},
           },
