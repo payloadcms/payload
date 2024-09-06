@@ -4,6 +4,9 @@ dist
 /.idea/*
 !/.idea/runConfigurations
 
+# Custom actions
+!.github/actions/**/dist
+
 test-results
 .devcontainer
 .localstack
@@ -134,7 +137,6 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/

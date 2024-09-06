@@ -13,11 +13,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.release.target_commitish || github.ref }}
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
-      - uses: apexskier/github-release-commenter@v1
+      - uses: ./.github/actions/release-commenter
         continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag-filter: 'v\d'
 
           # Disable commenting for now
           # Possible limitation because we release off of main and beta branches:
