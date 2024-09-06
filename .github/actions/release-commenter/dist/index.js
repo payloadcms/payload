@@ -33921,11 +33921,13 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                             return [2 /*return*/];
                         }
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Matched string from filter: ".concat(regexMatch_1));
-                        releases = releases.filter(function (release) {
+                        releases = releases
+                            .filter(function (release) {
                             var _a;
                             var match = (_a = release.tag_name.match(regexMatch_1)) === null || _a === void 0 ? void 0 : _a[0];
                             return match;
-                        });
+                        })
+                            .slice(0, 2);
                     }
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Releases: ".concat(JSON.stringify(releases, null, 2)));
                     if (releases.length < 2) {
@@ -33974,7 +33976,6 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                             if (!response.resource) {
                                                 return [2 /*return*/];
                                             }
-                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(JSON.stringify(response.resource, null, 2));
                                             html = __spreadArray([
                                                 response.resource.messageHeadlineHTML,
                                                 response.resource.messageBodyHTML
@@ -34067,12 +34068,12 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                             baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
                             if (comment) {
                                 request = __assign(__assign({}, baseRequest), { body: comment });
-                                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(JSON.stringify(request, null, 2));
+                                // core.info(JSON.stringify(request, null, 2))
                                 requests.push(octokit_1.rest.issues.createComment(request));
                             }
                             if (labels) {
                                 request = __assign(__assign({}, baseRequest), { labels: labels });
-                                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(JSON.stringify(request, null, 2));
+                                // core.info(JSON.stringify(request, null, 2))
                                 requests.push(octokit_1.rest.issues.addLabels(request));
                             }
                         }

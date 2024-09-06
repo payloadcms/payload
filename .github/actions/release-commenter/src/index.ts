@@ -43,10 +43,12 @@ const releaseTagTemplateRegex = /{release_tag}/g
 
       core.info(`Matched string from filter: ${regexMatch}`)
 
-      releases = releases.filter(release => {
-        const match = release.tag_name.match(regexMatch)?.[0]
-        return match
-      })
+      releases = releases
+        .filter(release => {
+          const match = release.tag_name.match(regexMatch)?.[0]
+          return match
+        })
+        .slice(0, 2)
     }
 
     core.info(`Releases: ${JSON.stringify(releases, null, 2)}`)
@@ -195,7 +197,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
             return
           }
 
-          core.info(JSON.stringify(response.resource, null, 2))
+          // core.info(JSON.stringify(response.resource, null, 2))
 
           const html = [
             response.resource.messageHeadlineHTML,
@@ -259,7 +261,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
           ...baseRequest,
           body: comment,
         }
-        core.info(JSON.stringify(request, null, 2))
+        // core.info(JSON.stringify(request, null, 2))
         requests.push(octokit.rest.issues.createComment(request))
       }
       if (labels) {
@@ -267,7 +269,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
           ...baseRequest,
           labels,
         }
-        core.info(JSON.stringify(request, null, 2))
+        // core.info(JSON.stringify(request, null, 2))
         requests.push(octokit.rest.issues.addLabels(request))
       }
     }
