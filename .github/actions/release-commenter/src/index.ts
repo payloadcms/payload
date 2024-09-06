@@ -201,15 +201,19 @@ const releaseTagTemplateRegex = /{release_tag}/g
 
           // core.info(JSON.stringify(response.resource, null, 2))
 
-          core.info(`Commit: ${payload.repository.html_url}/commit/${commit.sha}`)
+          core.info(`Checking commit: ${payload.repository.html_url}/commit/${commit.sha}`)
 
           const associatedClosedPREdges = response.resource.associatedPullRequests.edges.filter(
             e => e.node.state === 'MERGED',
           )
 
-          core.info(
-            `  Associated Merged PRs:\n    ${associatedClosedPREdges.map(pr => `${payload.repository.html_url}/pull/${pr.node.number}`).join('\n    ')}`,
-          )
+          if (associatedClosedPREdges.length) {
+            core.info(
+              `  Associated Merged PRs:\n    ${associatedClosedPREdges.map(pr => `${payload.repository.html_url}/pull/${pr.node.number}`).join('\n    ')}`,
+            )
+          } else {
+            core.info('  No associated merged PRs')
+          }
 
           const html = [
             response.resource.messageHeadlineHTML,
@@ -221,7 +225,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
             const [, num] = match
             linkedIssuesPrs.add(parseInt(num, 10))
             core.info(
-              `Linked issue/PR from closesMatcher: ${payload.repository.html_url}/pull/${num}`,
+              `  Linked issue/PR from closesMatcher: ${payload.repository.html_url}/pull/${num}`,
             )
           }
 
@@ -246,10 +250,10 @@ const releaseTagTemplateRegex = /{release_tag}/g
 
             linkedIssuesPrs.add(associatedPR.node.number)
             core.info(
-              `Linked issue/PR from associated PR: ${payload.repository.html_url}/pull/${associatedPR.node.number}`,
+              `  Linked issue/PR from associated PR: ${payload.repository.html_url}/pull/${associatedPR.node.number}`,
             )
 
-            // these are sorted by creation date in ascending order. The latest event for a given issue/PR is all we need
+            // These are sorted by creation date in ascending order. The latest event for a given issue/PR is all we need
             // ignore links that aren't part of this repo
             const links = associatedPR.node.timelineItems.nodes
               .filter(node => !node.isCrossRepository)
@@ -272,7 +276,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
     )
 
     core.info(
-      `Linked issues/PRs: \n${Array.from(linkedIssuesPrs)
+      `\n✏️ Final issues/PRs to be commented on: \n${Array.from(linkedIssuesPrs)
         .map(num => `  ${payload.repository.html_url}/pull/${num}`)
         .join('\n')}`,
     )
