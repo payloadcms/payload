@@ -16,13 +16,15 @@ export const Locked: React.FC<{ className?: string; user: ClientUser }> = ({ cla
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
 
-  const userToUse = user ? user?.email ?? user?.id : rowData?.id
+  const userToUse = user ? (user?.email ?? user?.id) : rowData?.id
 
   return (
     <div
       className={[baseClass, className].filter(Boolean).join(' ')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      role="button"
+      tabIndex={0}
     >
       <Tooltip
         alignCaret="left"
