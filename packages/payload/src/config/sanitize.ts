@@ -17,7 +17,6 @@ import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
-import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {

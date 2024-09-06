@@ -358,8 +358,12 @@ export const buildTable = ({
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
-        if (relatedCollectionCustomIDType === 'number') {colType = 'numeric'}
-        if (relatedCollectionCustomIDType === 'text') {colType = 'varchar'}
+        if (relatedCollectionCustomIDType === 'number') {
+          colType = 'numeric'
+        }
+        if (relatedCollectionCustomIDType === 'text') {
+          colType = 'varchar'
+        }
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,

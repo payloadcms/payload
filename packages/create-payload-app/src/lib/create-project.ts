@@ -1,6 +1,5 @@
 import * as p from '@clack/prompts'
 import chalk from 'chalk'
-import degit from 'degit'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
@@ -11,6 +10,7 @@ import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../typ
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
+import { downloadTemplate } from './download-template.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +37,8 @@ async function installDeps(args: {
     installCmd = 'yarn'
   } else if (packageManager === 'pnpm') {
     installCmd = 'pnpm install'
+  } else if (packageManager === 'bun') {
+    installCmd = 'bun install'
   }
 
   try {
@@ -81,8 +83,11 @@ export async function createProject(args: {
       templateUrl = `${template.url}#${cliArgs['--template-branch']}`
       debug(`Using template url: ${templateUrl}`)
     }
-    const emitter = degit(templateUrl)
-    await emitter.clone(projectDir)
+    await downloadTemplate({
+      name: template.name,
+      branch: 'beta',
+      projectDir,
+    })
   }
 
   const spinner = p.spinner()

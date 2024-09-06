@@ -1,12 +1,8 @@
-import execa from 'execa'
 import fse from 'fs-extra'
 
 import type { CliArgs, PackageManager } from '../types.js'
 
-export async function getPackageManager(args: {
-  cliArgs?: CliArgs
-  projectDir: string
-}): Promise<PackageManager> {
+export function getPackageManager(args: { cliArgs?: CliArgs; projectDir: string }): PackageManager {
   const { cliArgs, projectDir } = args
 
   try {
@@ -18,28 +14,33 @@ export async function getPackageManager(args: {
       detected = 'yarn'
     } else if (cliArgs?.['--use-npm'] || fse.existsSync(`${projectDir}/package-lock.json`)) {
       detected = 'npm'
+    } else if (cliArgs?.['--use-bun'] || fse.existsSync(`${projectDir}/bun.lockb`)) {
+      detected = 'bun'
     } else {
-      // Otherwise check for existing commands
-      if (await commandExists('pnpm')) {
-        detected = 'pnpm'
-      } else if (await commandExists('yarn')) {
-        detected = 'yarn'
-      } else {
-        detected = 'npm'
-      }
+      // Otherwise check the execution environment
+      detected = getEnvironmentPackageManager()
     }
 
     return detected
-  } catch (error) {
+  } catch (ignore) {
     return 'npm'
   }
 }
 
-async function commandExists(command: string): Promise<boolean> {
-  try {
-    await execa.command(`command -v ${command}`)
-    return true
-  } catch {
-    return false
+function getEnvironmentPackageManager(): PackageManager {
+  const userAgent = process.env.npm_config_user_agent || ''
+
+  if (userAgent.startsWith('yarn')) {
+    return 'yarn'
   }
+
+  if (userAgent.startsWith('pnpm')) {
+    return 'pnpm'
+  }
+
+  if (userAgent.startsWith('bun')) {
+    return 'bun'
+  }
+
+  return 'npm'
 }

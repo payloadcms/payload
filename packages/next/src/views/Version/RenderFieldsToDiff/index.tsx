@@ -1,7 +1,6 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import { UIFieldClient } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 import React from 'react'
 

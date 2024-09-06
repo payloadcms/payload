@@ -9,7 +9,7 @@ export type UpdatedDocument = {
 
 const Context = createContext({
   mostRecentUpdate: null,
-  reportUpdate: (doc: UpdatedDocument) => null, // eslint-disable-line @typescript-eslint/no-unused-vars
+  reportUpdate: (doc: UpdatedDocument) => null,
 })
 
 export const DocumentEventsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

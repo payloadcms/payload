@@ -25,7 +25,6 @@ import type {
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
-  OpenGraphConfig,
   PayloadComponent,
   StaticLabel,
 } from '../../config/types.js'

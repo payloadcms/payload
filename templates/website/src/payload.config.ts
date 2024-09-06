@@ -25,7 +25,7 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import Users from './collections/Users'
-import { seed } from './endpoints/seed'
+import { seedHandler } from './endpoints/seedHandler'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { revalidateRedirects } from './hooks/revalidateRedirects'
@@ -126,7 +126,7 @@ export default buildConfig({
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
     {
-      handler: seed,
+      handler: seedHandler,
       method: 'get',
       path: '/seed',
     },

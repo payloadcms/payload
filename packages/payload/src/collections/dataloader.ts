@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { JsonValue, PayloadRequest } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'

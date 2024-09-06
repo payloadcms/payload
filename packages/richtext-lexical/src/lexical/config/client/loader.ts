@@ -2,7 +2,7 @@
 
 import type {
   ClientFeatureProviderMap,
-  FeatureProviderClient,
+  ResolvedClientFeature,
   ResolvedClientFeatureMap,
 } from '../../../features/typesClient.js'
 import type { ClientEditorConfig } from '../types.js'
@@ -12,12 +12,8 @@ import type { ClientEditorConfig } from '../types.js'
  * @param unSanitizedEditorConfig
  */
 export function loadClientFeatures({
-  clientFunctions,
-  schemaPath,
   unSanitizedEditorConfig,
 }: {
-  clientFunctions?: Record<string, any>
-  schemaPath: string
   unSanitizedEditorConfig: ClientEditorConfig
 }): ResolvedClientFeatureMap {
   for (const featureProvider of unSanitizedEditorConfig.features) {
@@ -37,50 +33,32 @@ export function loadClientFeatures({
     (a, b) => a.clientFeatureProps.order - b.clientFeatureProps.order,
   )
 
-  const featureProviderMap: ClientFeatureProviderMap = new Map(
-    unSanitizedEditorConfig.features.map(
-      (f) =>
-        [f.clientFeatureProps.featureKey, f] as [string, FeatureProviderClient<unknown, unknown>],
-    ),
-  )
+  const featureProviderMap: ClientFeatureProviderMap = new Map()
+  for (const feature of unSanitizedEditorConfig.features) {
+    featureProviderMap.set(feature.clientFeatureProps.featureKey, feature)
+  }
 
   const resolvedFeatures: ResolvedClientFeatureMap = new Map()
 
   // Make sure all dependencies declared in the respective features exist
   let loaded = 0
   for (const featureProvider of unSanitizedEditorConfig.features) {
-    /**
-     * Load relevant clientFunctions scoped to this feature and then pass them to the client feature
-     */
-    const relevantClientFunctions: Record<string, any> = {}
-    Object.entries(clientFunctions).forEach(([key, plugin]) => {
-      if (
-        key.startsWith(
-          `lexicalFeature.${schemaPath}.${featureProvider.clientFeatureProps.featureKey}.components.`,
-        )
-      ) {
-        const featureComponentKey = key.split(
-          `${schemaPath}.${featureProvider.clientFeatureProps.featureKey}.components.`,
-        )[1]
-        relevantClientFunctions[featureComponentKey] = plugin
-      }
-    })
-
-    const feature =
+    const feature: Partial<ResolvedClientFeature<any>> =
       typeof featureProvider.feature === 'function'
         ? featureProvider.feature({
-            clientFunctions: relevantClientFunctions,
             featureProviderMap,
             resolvedFeatures,
             unSanitizedEditorConfig,
           })
         : featureProvider.feature
 
-    resolvedFeatures.set(featureProvider.clientFeatureProps.featureKey, {
-      ...feature,
-      key: featureProvider.clientFeatureProps.featureKey,
-      order: loaded,
-    })
+    feature.key = featureProvider.clientFeatureProps.featureKey
+    feature.order = loaded
+
+    resolvedFeatures.set(
+      featureProvider.clientFeatureProps.featureKey,
+      feature as ResolvedClientFeature<any>,
+    )
 
     loaded++
   }
