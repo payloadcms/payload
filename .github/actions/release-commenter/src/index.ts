@@ -23,7 +23,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
     // Fetch the releases with the optional tag filter applied
     const { data: rawReleases } = await octokit.rest.repos.listReleases({
       ...github.context.repo,
-      per_page: 25,
+      per_page: 100,
     })
 
     // Get the current release tag or latest tag
@@ -201,8 +201,14 @@ const releaseTagTemplateRegex = /{release_tag}/g
 
           // core.info(JSON.stringify(response.resource, null, 2))
 
+          core.info(`Commit: ${payload.repository.html_url}/commit/${commit.sha}`)
+
           const associatedClosedPREdges = response.resource.associatedPullRequests.edges.filter(
             e => e.node.state === 'MERGED',
+          )
+
+          core.info(
+            `  Associated Merged PRs:\n    ${associatedClosedPREdges.map(pr => `${payload.repository.html_url}/pull/${pr.node.number}`).join('\n    ')}`,
           )
 
           const html = [
@@ -214,6 +220,9 @@ const releaseTagTemplateRegex = /{release_tag}/g
           for (const match of html.matchAll(closesMatcher)) {
             const [, num] = match
             linkedIssuesPrs.add(parseInt(num, 10))
+            core.info(
+              `Linked issue/PR from closesMatcher: ${payload.repository.html_url}/pull/${num}`,
+            )
           }
 
           if (response.resource.associatedPullRequests.pageInfo.hasNextPage) {
@@ -234,7 +243,12 @@ const releaseTagTemplateRegex = /{release_tag}/g
             ) {
               continue
             }
+
             linkedIssuesPrs.add(associatedPR.node.number)
+            core.info(
+              `Linked issue/PR from associated PR: ${payload.repository.html_url}/pull/${associatedPR.node.number}`,
+            )
+
             // these are sorted by creation date in ascending order. The latest event for a given issue/PR is all we need
             // ignore links that aren't part of this repo
             const links = associatedPR.node.timelineItems.nodes
@@ -246,6 +260,9 @@ const releaseTagTemplateRegex = /{release_tag}/g
               }
               if (link.__typename == 'ConnectedEvent') {
                 linkedIssuesPrs.add(link.subject.number)
+                core.info(
+                  `Linked issue/PR from connected event: ${payload.repository.html_url}/pull/${link.subject.number}`,
+                )
               }
               seen.add(link.subject.number)
             }
@@ -254,7 +271,11 @@ const releaseTagTemplateRegex = /{release_tag}/g
       ),
     )
 
-    core.info(`Linked issues/PRs: \n${Array.from(linkedIssuesPrs).join('\n')}`)
+    core.info(
+      `Linked issues/PRs: \n${Array.from(linkedIssuesPrs)
+        .map(num => `  ${payload.repository.html_url}/pull/${num}`)
+        .join('\n')}`,
+    )
 
     const requests: Array<Promise<unknown>> = []
     for (const issueNumber of linkedIssuesPrs) {

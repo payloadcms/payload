@@ -33905,7 +33905,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     commentTemplate = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('comment-template');
                     labelTemplate = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('label-template') || null;
                     skipLabelTemplate = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('skip-label') || null;
-                    return [4 /*yield*/, octokit_1.rest.repos.listReleases(__assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { per_page: 25 }))
+                    return [4 /*yield*/, octokit_1.rest.repos.listReleases(__assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { per_page: 100 }))
                         // Get the current release tag or latest tag
                     ];
                 case 1:
@@ -33976,7 +33976,10 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                             if (!response.resource) {
                                                 return [2 /*return*/];
                                             }
+                                            // core.info(JSON.stringify(response.resource, null, 2))
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Commit: ".concat(payload_1.repository.html_url, "/commit/").concat(commit.sha));
                                             associatedClosedPREdges = response.resource.associatedPullRequests.edges.filter(function (e) { return e.node.state === 'MERGED'; });
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("  Associated Merged PRs:\n    ".concat(associatedClosedPREdges.map(function (pr) { return "".concat(payload_1.repository.html_url, "/pull/").concat(pr.node.number); }).join('\n    ')));
                                             html = __spreadArray([
                                                 response.resource.messageHeadlineHTML,
                                                 response.resource.messageBodyHTML
@@ -33986,6 +33989,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                     match = _b.value;
                                                     _c = __read(match, 2), num = _c[1];
                                                     linkedIssuesPrs_2.add(parseInt(num, 10));
+                                                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issue/PR from closesMatcher: ".concat(payload_1.repository.html_url, "/pull/").concat(num));
                                                 }
                                             }
                                             catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -34015,6 +34019,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                     return "continue";
                                                 }
                                                 linkedIssuesPrs_2.add(associatedPR.node.number);
+                                                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issue/PR from associated PR: ".concat(payload_1.repository.html_url, "/pull/").concat(associatedPR.node.number));
                                                 // these are sorted by creation date in ascending order. The latest event for a given issue/PR is all we need
                                                 // ignore links that aren't part of this repo
                                                 var links = associatedPR.node.timelineItems.nodes
@@ -34028,6 +34033,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                         }
                                                         if (link.__typename == 'ConnectedEvent') {
                                                             linkedIssuesPrs_2.add(link.subject.number);
+                                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issue/PR from connected event: ".concat(payload_1.repository.html_url, "/pull/").concat(link.subject.number));
                                                         }
                                                         seen.add(link.subject.number);
                                                     }
@@ -34060,7 +34066,9 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         }))];
                 case 3:
                     _f.sent();
-                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issues/PRs: \n".concat(Array.from(linkedIssuesPrs_2).join('\n')));
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issues/PRs: \n".concat(Array.from(linkedIssuesPrs_2)
+                        .map(function (num) { return "  ".concat(payload_1.repository.html_url, "/pull/").concat(num); })
+                        .join('\n')));
                     requests = [];
                     try {
                         for (linkedIssuesPrs_1 = __values(linkedIssuesPrs_2), linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next(); !linkedIssuesPrs_1_1.done; linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next()) {
