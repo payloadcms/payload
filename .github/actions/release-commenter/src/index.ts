@@ -275,8 +275,9 @@ const releaseTagTemplateRegex = /{release_tag}/g
       ),
     )
 
+    core.info('')
     core.info(
-      `\n✏️ Final issues/PRs to be commented on: \n${Array.from(linkedIssuesPrs)
+      `Final issues/PRs to be commented on: \n${Array.from(linkedIssuesPrs)
         .map(num => `  ${payload.repository.html_url}/pull/${num}`)
         .join('\n')}`,
     )

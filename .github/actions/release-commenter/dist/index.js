@@ -34071,7 +34071,8 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         }))];
                 case 3:
                     _f.sent();
-                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("\n\u270F\uFE0F Final issues/PRs to be commented on: \n".concat(Array.from(linkedIssuesPrs_2)
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('');
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Final issues/PRs to be commented on: \n".concat(Array.from(linkedIssuesPrs_2)
                         .map(function (num) { return "  ".concat(payload_1.repository.html_url, "/pull/").concat(num); })
                         .join('\n')));
                     requests = [];
