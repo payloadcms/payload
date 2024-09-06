@@ -1,5 +1,0 @@
-/node_modules/
-.yarn-integrity
-
-# types aren't required at runtime, so it's not worth checking them
-/dst/node_modules/@types/
