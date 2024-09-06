@@ -233,7 +233,6 @@ export const buildFormState = async ({
   if (returnLockStatus && req.user && (id || globalSlug)) {
     let lockStatusQuery
 
-    // Query based on whether it's a collection or global
     if (collectionSlug) {
       lockStatusQuery = {
         'document.relationTo': { equals: collectionSlug },
