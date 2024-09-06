@@ -1,15 +1,12 @@
 import type { Document, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
-import executeAccess from '../../auth/executeAccess.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
-async function deleteOperation(args: PreferenceRequest): Promise<Document> {
+export async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
     key,
-    overrideAccess,
     req: { payload },
     req,
     user,
@@ -17,10 +14,6 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
 
   if (!user) {
     throw new UnauthorizedError(req.t)
-  }
-
-  if (!overrideAccess) {
-    await executeAccess({ req }, defaultAccess)
   }
 
   const where: Where = {
@@ -42,5 +35,3 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   }
   throw new NotFound(req.t)
 }
-
-export default deleteOperation

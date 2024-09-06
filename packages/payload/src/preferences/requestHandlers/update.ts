@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import update from '../operations/update.js'
+import { update } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (incomingReq) => {
   // We cannot import the addDataAndFileToRequest utility here from the 'next' package because of dependency issues
@@ -23,7 +23,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
     reqWithData.json = () => Promise.resolve(data)
   }
 
-  const doc = await update({
+  const doc = update({
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData?.user,
