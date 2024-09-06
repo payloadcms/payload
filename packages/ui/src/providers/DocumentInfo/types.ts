@@ -38,6 +38,7 @@ export type DocumentInfoProps = {
     collectionConfig?: ClientCollectionConfig
     id: string
   }) => Promise<void> | void
+  onDrawerCreate?: () => void
   /* only available if `redirectAfterDuplicate` is `false` */
   onDuplicate?: (args: {
     collectionConfig?: ClientCollectionConfig

@@ -138,6 +138,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       id={docID}
       isEditing={isEditing}
       onDelete={onDelete}
+      onDrawerCreate={() => {
+        setDocID(null)
+      }}
       onDuplicate={onDuplicate}
       onLoadError={onLoadError}
       onSave={onSave}

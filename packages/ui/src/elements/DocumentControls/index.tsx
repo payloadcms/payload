@@ -8,11 +8,10 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useEffect } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 
-import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -43,6 +42,7 @@ export const DocumentControls: React.FC<{
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
   readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDrawerCreate?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
   readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly onSave?: DocumentInfoContext['onSave']
@@ -61,8 +61,8 @@ export const DocumentControls: React.FC<{
     isAccountView,
     isEditing,
     onDelete,
+    onDrawerCreate,
     onDuplicate,
-    onSave: onSaveFromProps,
     permissions,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -71,10 +71,6 @@ export const DocumentControls: React.FC<{
   const { i18n } = useTranslation()
 
   const editDepth = useEditDepth()
-
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
-    collectionSlug: slug,
-  })
 
   const { config, getEntityConfig } = useConfig()
 
@@ -111,20 +107,6 @@ export const DocumentControls: React.FC<{
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
-
-  const onSave = useCallback<DocumentInfoContext['onSave']>(
-    (args) => {
-      if (typeof onSaveFromProps === 'function') {
-        void onSaveFromProps({
-          ...args,
-          collectionConfig,
-        })
-      }
-
-      closeDrawer()
-    },
-    [onSaveFromProps, collectionConfig, closeDrawer],
-  )
 
   return (
     <Gutter className={baseClass}>
@@ -258,7 +240,7 @@ export const DocumentControls: React.FC<{
                     {!disableCreate && (
                       <Fragment>
                         {editDepth > 1 ? (
-                          <PopupList.Button id="action-create" onClick={openDrawer}>
+                          <PopupList.Button id="action-create" onClick={onDrawerCreate}>
                             {i18n.t('general:createNew')}
                           </PopupList.Button>
                         ) : (
@@ -302,7 +284,6 @@ export const DocumentControls: React.FC<{
         </div>
       </div>
       <div className={`${baseClass}__divider`} />
-      <DocumentDrawer disableActions onSave={onSave} />
     </Gutter>
   )
 }
