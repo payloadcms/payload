@@ -3,7 +3,8 @@ name: post-release
 on:
   release:
     types:
-      - published
+      # - published
+      - prereleased
   workflow_dispatch:
 
 jobs:
@@ -22,11 +23,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag-filter: 'v\d'
 
-          # Disable commenting for now
-          # Possible limitation because we release off of main and beta branches:
-          # https://github.com/apexskier/github-release-commenter#known-limitations
-          comment-template: ''
 
-          # TODO: Re-enable this after verifying that the action works as expected
-          # comment-template: |
-          #   🚀 This is included in version {release_link}
+          # Change to blank to disable commenting
+          # comment-template: ''
+
+          comment-template: |
+            🚀 This is included in version {release_link}
