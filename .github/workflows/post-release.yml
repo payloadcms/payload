@@ -13,8 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # TODO: remove this after testing
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.release.target_commitish || github.ref }}
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
