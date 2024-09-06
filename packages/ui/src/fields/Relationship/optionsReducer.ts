@@ -38,6 +38,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
           if (exemptValues) {
             return exemptValues.some((exemptValue) => {
               return (
+                exemptValue &&
                 option.value === (typeof exemptValue === 'object' ? exemptValue.value : exemptValue)
               )
             })
