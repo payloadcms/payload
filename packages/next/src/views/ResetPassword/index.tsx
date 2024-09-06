@@ -1,11 +1,10 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, Translation } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { Button } from '@payloadcms/ui'
+import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { ResetPasswordClient } from './index.client.js'
 import './index.scss'
 
@@ -37,42 +36,37 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
 
   if (user) {
     return (
-      <MinimalTemplate className={resetPasswordBaseClass}>
-        <div className={`${resetPasswordBaseClass}__wrap`}>
-          <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
-          <p>
-            <Translation
-              elements={{
-                '0': ({ children }) => (
-                  <Link
-                    href={formatAdminURL({
-                      adminRoute,
-                      path: accountRoute,
-                    })}
-                  >
-                    {children}
-                  </Link>
-                ),
-              }}
-              i18nKey="authentication:loggedInChangePassword"
-              t={i18n.t}
-            />
-          </p>
-          <br />
-          <Button buttonStyle="secondary" el="link" Link={Link} to={adminRoute}>
-            {i18n.t('general:backToDashboard')}
-          </Button>
-        </div>
-      </MinimalTemplate>
+      <div className={`${resetPasswordBaseClass}__wrap`}>
+        <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
+        <p>
+          <Translation
+            elements={{
+              '0': ({ children }) => (
+                <Link
+                  href={formatAdminURL({
+                    adminRoute,
+                    path: accountRoute,
+                  })}
+                >
+                  {children}
+                </Link>
+              ),
+            }}
+            i18nKey="authentication:loggedInChangePassword"
+            t={i18n.t}
+          />
+        </p>
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
+          {i18n.t('general:backToDashboard')}
+        </Button>
+      </div>
     )
   }
 
   return (
-    <MinimalTemplate className={resetPasswordBaseClass}>
-      <div className={`${resetPasswordBaseClass}__wrap`}>
-        <h1>{i18n.t('authentication:resetPassword')}</h1>
-        <ResetPasswordClient token={token} />
-      </div>
-    </MinimalTemplate>
+    <div className={`${resetPasswordBaseClass}__wrap`}>
+      <h1>{i18n.t('authentication:resetPassword')}</h1>
+      <ResetPasswordClient token={token} />
+    </div>
   )
 }

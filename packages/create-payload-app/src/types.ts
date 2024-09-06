@@ -16,6 +16,7 @@ export interface Args extends arg.Spec {
   '--secret': StringConstructor
   '--template': StringConstructor
   '--template-branch': StringConstructor
+  '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
