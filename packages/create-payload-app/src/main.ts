@@ -1,6 +1,5 @@
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
-import commandExists from 'command-exists'
 
 import type { CliArgs, PackageManager } from './types'
 
@@ -68,7 +67,7 @@ export class Main {
       const template = await parseTemplate(this.args, validTemplates)
 
       const projectDir = projectName === '.' ? process.cwd() : `./${slugify(projectName)}`
-      const packageManager = await getPackageManager(this.args)
+      const packageManager = getPackageManager(this.args)
 
       if (template.type !== 'plugin') {
         const dbDetails = await selectDb(this.args, projectName)
@@ -109,7 +108,7 @@ export class Main {
   }
 }
 
-async function getPackageManager(args: CliArgs): Promise<PackageManager> {
+function getPackageManager(args: CliArgs): PackageManager {
   let packageManager: PackageManager = 'npm'
 
   if (args['--use-npm']) {
@@ -119,15 +118,22 @@ async function getPackageManager(args: CliArgs): Promise<PackageManager> {
   } else if (args['--use-pnpm']) {
     packageManager = 'pnpm'
   } else {
-    try {
-      if (await commandExists('yarn')) {
-        packageManager = 'yarn'
-      } else if (await commandExists('pnpm')) {
-        packageManager = 'pnpm'
-      }
-    } catch (error: unknown) {
-      packageManager = 'npm'
-    }
+    packageManager = getEnvironmentPackageManager()
   }
+
   return packageManager
+}
+
+function getEnvironmentPackageManager(): PackageManager {
+  const userAgent = process.env.npm_config_user_agent || ''
+
+  if (userAgent.startsWith('yarn')) {
+    return 'yarn'
+  }
+
+  if (userAgent.startsWith('pnpm')) {
+    return 'pnpm'
+  }
+
+  return 'npm'
 }
