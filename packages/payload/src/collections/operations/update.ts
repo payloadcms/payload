@@ -221,9 +221,12 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
               throw new APIError(
                 `Document with ID ${id} is currently locked by another user and cannot be updated.`,
               )
+            } else {
+              // If the lock has expired, proceed and unlock the document later
+              shouldUnlockDocument = true
             }
           } else {
-            // If the document is locked by the current user or the lock has expired, proceed and unlock later
+            // If the document is locked by the current user, proceed and unlock later
             shouldUnlockDocument = true
           }
         }
@@ -375,7 +378,7 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         }
 
         // /////////////////////////////////////
-        // Unlock the document
+        // Unlock the document if necessary
         // /////////////////////////////////////
 
         if (shouldUnlockDocument) {

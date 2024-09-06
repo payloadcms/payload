@@ -126,6 +126,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       },
     })
 
+    let shouldUnlockDocument = false
+
     if (lockStatus.docs.length > 0) {
       const lockedDoc = lockStatus.docs[0]
       const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
@@ -140,12 +142,20 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
           : 300 // 5 minutes in seconds
 
       const lockDurationInMilliseconds = lockDuration * 1000
+      const currentUserId = req.user?.id
 
-      if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-        // Document is locked and the lock has not expired, skip deletion
-        throw new APIError(`Document with ID ${id} is currently locked and cannot be deleted.`)
+      if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
+        // Document is locked by another user and the lock has not expired, skip deletion
+        if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+          throw new APIError(`Document with ID ${id} is currently locked and cannot be deleted.`)
+        } else {
+          // Lock has expired, proceed and unlock later
+          shouldUnlockDocument = true
+        }
+      } else {
+        // Document is locked by the current user, proceed and unlock later
+        shouldUnlockDocument = true
       }
-      // If the lock has expired, proceed with deletion
     }
 
     await deleteAssociatedFiles({
@@ -178,6 +188,25 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       req,
       where: { id: { equals: id } },
     })
+
+    // /////////////////////////////////////
+    // Unlock the document if necessary
+    // /////////////////////////////////////
+
+    if (shouldUnlockDocument) {
+      await payload.delete({
+        collection: 'payload-locked-documents',
+        req,
+        where: {
+          'document.relationTo': {
+            equals: collectionConfig.slug,
+          },
+          'document.value': {
+            equals: id,
+          },
+        },
+      })
+    }
 
     // /////////////////////////////////////
     // Delete Preferences

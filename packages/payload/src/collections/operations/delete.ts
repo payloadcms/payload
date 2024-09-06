@@ -144,18 +144,30 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
           },
         })
 
+        let shouldUnlockDocument = false
+
         if (lockStatus.docs.length > 0) {
           const lockedDoc = lockStatus.docs[0]
           const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
           const now = new Date()
 
-          if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-            // Document is locked and the lock has not expired, skip deletion
-            errors.push({
-              id,
-              message: 'Document is currently locked and cannot be deleted.',
-            })
-            return null
+          const currentUserId = req.user?.id
+
+          if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
+            // Document is locked by another user and the lock has not expired
+            if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
+              errors.push({
+                id,
+                message: 'Document is currently locked and cannot be deleted.',
+              })
+              return null
+            } else {
+              // Lock has expired, proceed and unlock later
+              shouldUnlockDocument = true
+            }
+          } else {
+            // Document is locked by the current user, proceed and unlock later
+            shouldUnlockDocument = true
           }
           // If the lock has expired, proceed with deletion
         }
@@ -209,6 +221,25 @@ export const deleteOperation = async <TSlug extends CollectionSlug>(
             },
           },
         })
+
+        // /////////////////////////////////////
+        // Unlock the document if necessary
+        // /////////////////////////////////////
+
+        if (shouldUnlockDocument) {
+          await payload.delete({
+            collection: 'payload-locked-documents',
+            req,
+            where: {
+              'document.relationTo': {
+                equals: collectionConfig.slug,
+              },
+              'document.value': {
+                equals: id,
+              },
+            },
+          })
+        }
 
         // /////////////////////////////////////
         // afterRead - Fields

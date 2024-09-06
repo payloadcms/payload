@@ -5,6 +5,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -138,18 +139,20 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
           : 300 // 5 minutes in seconds
 
       const lockDurationInMilliseconds = lockDuration * 1000
-
       const currentUserId = req.user?.id
 
       if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
         // If the global is locked by another user and the lock has not expired, skip update
         if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-          throw new Error(
+          throw new APIError(
             `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
           )
+        } else {
+          // Lock has expired, proceed and unlock later
+          shouldUnlockDocument = true
         }
       } else {
-        // If the global is locked by the current user or the lock has expired, proceed and unlock later
+        // If the global is locked by the current user, proceed and unlock later
         shouldUnlockDocument = true
       }
     }
@@ -262,7 +265,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     }
 
     // /////////////////////////////////////
-    // Unlock the global after update
+    // Unlock the global if necessary
     // /////////////////////////////////////
 
     if (shouldUnlockDocument) {
