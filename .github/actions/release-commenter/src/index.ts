@@ -23,7 +23,7 @@ const releaseTagTemplateRegex = /{release_tag}/g
     // Fetch the releases with the optional tag filter applied
     const { data: rawReleases } = await octokit.rest.repos.listReleases({
       ...github.context.repo,
-      per_page: 2,
+      per_page: 25,
     })
 
     // Get the current release tag or latest tag
