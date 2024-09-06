@@ -13,7 +13,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.release.target_commitish || github.ref }}
+          # Only needed if debugging on a branch other than default
+          # ref: ${{ github.event.release.target_commitish || github.ref }}
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
