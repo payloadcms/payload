@@ -1,24 +1,14 @@
 {
-  "name": "github-release-commenter",
+  "name": "release-commenter",
   "version": "0.0.0",
   "description": "GitHub Action to automatically comment on PRs and Issues when a fix is released.",
   "main": "dist/index.js",
-  "repository": "git@github.com:apexskier/github-release-commenter.git",
-  "author": "Cameron Little <cameron@camlittle.com>",
   "license": "MIT",
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
     "build": "ncc build src/index.ts -t -o dist",
-    "test": "jest",
-    "lint": "concurrently 'pnpm:lint:*'",
-    "lint:eslint": "eslint --ignore-path .checkignore \"**/*.{ts,js}\"",
-    "lint:prettier": "prettier --ignore-path .checkignore --check \"**/*.{ts,js,json,md,yml}\"",
-    "lint:json": "find . -name node_modules -prune -false -o -type f -name '*.json' -exec node -e 'require(\"{}\")' \\;",
-    "fix": "concurrently 'pnpm:fix:*'",
-    "fix:eslint": "eslint --fix --ignore-path .checkignore \"**/*.{ts,js}\"",
-    "fix:prettier": "prettier --ignore-path .checkignore --write \"**/*.{ts,js,json,md,yml}\"",
-    "watch": "tsc --watch"
+    "test": "jest"
   },
   "dependencies": {
     "@actions/core": "^1.3.0",
