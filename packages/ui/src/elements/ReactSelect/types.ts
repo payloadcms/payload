@@ -9,6 +9,11 @@ type CustomSelectProps = {
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
   onDelete?: DocumentDrawerProps['onDelete']
+  onDocumentDrawerOpen: (args: {
+    collectionSlug: string
+    hasReadPermission: boolean
+    id: number | string
+  }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
 }

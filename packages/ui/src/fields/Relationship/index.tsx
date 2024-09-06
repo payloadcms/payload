@@ -6,6 +6,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
@@ -76,7 +77,15 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const hasMultipleRelations = Array.isArray(relationTo)
-  const [currentlyOpenRelation, setCurrentlyOpenRelation] = useState('')
+
+  const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+  >({
+    id: undefined,
+    collectionSlug: undefined,
+    hasReadPermission: false,
+  })
+
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
@@ -115,6 +124,13 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   const valueRef = useRef(value)
   valueRef.current = value
+
+  const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    id: currentlyOpenRelationship.id,
+    collectionSlug: currentlyOpenRelationship.collectionSlug,
+  })
+
+  const openDrawerWhenRelationChanges = useRef(false)
 
   const getResults: GetResults = useCallback(
     async ({
@@ -513,10 +529,23 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     return r.test(string.slice(-breakApartThreshold))
   }, [])
 
-  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
-    id: value.toString(),
-    collectionSlug: currentlyOpenRelation,
-  })
+  const onDocumentDrawerOpen = useCallback<
+    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+  >(({ id, collectionSlug, hasReadPermission }) => {
+    openDrawerWhenRelationChanges.current = true
+    setCurrentlyOpenRelationship({
+      id,
+      collectionSlug,
+      hasReadPermission,
+    })
+  }, [])
+
+  useEffect(() => {
+    if (openDrawerWhenRelationChanges.current) {
+      openDrawer()
+      openDrawerWhenRelationChanges.current = false
+    }
+  }, [openDrawer, currentlyOpenRelationship])
 
   const valueToRender = findOptionsByValue({ options, value })
 
@@ -568,9 +597,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               customProps={{
                 disableKeyDown: isDrawerOpen,
                 disableMouseDown: isDrawerOpen,
-                DocumentDrawerToggler,
-                onDelete,
-                onDuplicate: onSave,
+                onDocumentDrawerOpen,
                 onSave,
               }}
               disabled={readOnly || formProcessing || isDrawerOpen}
@@ -670,8 +697,8 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           {...(descriptionProps || {})}
         />
       </div>
-      {currentlyOpenRelation && hasReadPermission && (
-        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+      {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onSave} onSave={onSave} />
       )}
     </div>
   )

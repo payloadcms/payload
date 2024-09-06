@@ -438,7 +438,7 @@ All [Field Components](./fields) automatically receive their respective Client F
 import React from 'react'
 import type { TextFieldProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldProps = ({ field: { name } }) => {
+export const MyClientFieldComponent = ({ field: { name } }: TextFieldProps) => {
   return (
     <p>
       {`This field's name is ${name}`}

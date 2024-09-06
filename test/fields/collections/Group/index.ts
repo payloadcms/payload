@@ -194,6 +194,33 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'camelCaseGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+              localized: true,
+            },
+            {
+              type: 'array',
+              name: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

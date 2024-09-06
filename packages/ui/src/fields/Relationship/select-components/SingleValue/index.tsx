@@ -1,7 +1,7 @@
 'use client'
 import type { SingleValueProps } from 'react-select'
 
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
 import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
@@ -26,9 +26,7 @@ export const SingleValue: React.FC<
   const {
     children,
     data: { label, relationTo, value },
-    selectProps: {
-      customProps: { DocumentDrawerToggler, onDelete: onDeleteFromProps, onDuplicate, onSave } = {},
-    } = {},
+    selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
@@ -37,33 +35,45 @@ export const SingleValue: React.FC<
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
   return (
-    <SelectComponents.SingleValue {...props} className={baseClass}>
-      <div className={`${baseClass}__label`}>
-        <div className={`${baseClass}__label-text`}>
-          <div className={`${baseClass}__text`}>{children}</div>
-          {relationTo && hasReadPermission && (
-            <DocumentDrawerToggler
-              aria-label={t('general:editLabel', { label })}
-              className={`${baseClass}__drawer-toggler`}
-              onClick={() => setShowTooltip(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.stopPropagation()
-                }
-              }}
-              onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            >
-              <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                {t('general:edit')}
-              </Tooltip>
-              <EditIcon />
-            </DocumentDrawerToggler>
-          )}
+    <React.Fragment>
+      <SelectComponents.SingleValue {...props} className={baseClass}>
+        <div className={`${baseClass}__label`}>
+          <div className={`${baseClass}__label-text`}>
+            <div className={`${baseClass}__text`}>{children}</div>
+            {relationTo && hasReadPermission && (
+              <Fragment>
+                <button
+                  aria-label={t('general:editLabel', { label })}
+                  className={`${baseClass}__drawer-toggler`}
+                  onClick={() => {
+                    setShowTooltip(false)
+                    onDocumentDrawerOpen({
+                      id: value,
+                      collectionSlug: relationTo,
+                      hasReadPermission,
+                    })
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.stopPropagation()
+                    }
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                  onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                  type="button"
+                >
+                  <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+                    {t('general:edit')}
+                  </Tooltip>
+                  <EditIcon />
+                </button>
+              </Fragment>
+            )}
+          </div>
         </div>
-      </div>
-    </SelectComponents.SingleValue>
+      </SelectComponents.SingleValue>
+    </React.Fragment>
   )
 }
