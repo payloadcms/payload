@@ -24,7 +24,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
 
   const whereQuery = published
     ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
-    : { parent: { equals: id } }
+    : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
 
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({

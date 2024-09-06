@@ -47,7 +47,7 @@ describe('Versions', () => {
         locale: 'es',
       })
 
-      postID = draft1.id
+      postID = draft1.id as any
 
       // save english draft
       const draft2 = await payload.update({
@@ -366,6 +366,9 @@ describe('Versions', () => {
         locale: 'all',
       })
 
+      expect(publishedOnlyEN.text.es).toBeUndefined()
+      expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
+
       const allVersions = await payload.findVersions({
         collection,
         locale: 'all',
@@ -374,7 +377,7 @@ describe('Versions', () => {
       const versions = allVersions.docs.filter((version) => version.parent === published.id)
       const latestVersion = versions[0].version
 
-      expect(latestVersion.text.es).toStrictEqual('Spanish draft')
+      expect(latestVersion.text.es).toBeUndefined()
       expect(latestVersion.text.en).toStrictEqual('English publish')
     })
   })
@@ -430,7 +433,6 @@ describe('Versions', () => {
         slug: global,
         data: {
           title: 'Another spanish draft',
-          content: 'Spanish draft content',
         },
         draft: true,
         locale: 'es',
@@ -455,7 +457,6 @@ describe('Versions', () => {
 
       // Expect no draft data to be present
       expect(globalData.title.es).toBeUndefined()
-      expect(globalData.content).toBeUndefined()
       expect(globalData.title.en).toStrictEqual('Eng published')
     })
 
@@ -495,7 +496,6 @@ describe('Versions', () => {
         data: {
           _status: 'published',
         },
-        draft: false,
       })
 
       const publishedAll = await payload.findGlobal({

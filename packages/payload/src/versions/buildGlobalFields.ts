@@ -41,7 +41,6 @@ export const buildVersionGlobalFields = (
           disableBulkEdit: true,
           disabled: true,
         },
-        hasMany: true,
         index: true,
         options: config.localization.locales.map((locale) => {
           if (typeof locale === 'string') {
