@@ -1,13 +1,12 @@
 'use client'
 import type { SingleValueProps } from 'react-select'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
-import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types.js'
+import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
 import type { Option } from '../../types.js'
 
-import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
@@ -16,22 +15,19 @@ import './index.scss'
 
 const baseClass = 'relationship--single-value'
 
-export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
+export const SingleValue: React.FC<
+  {
+    selectProps: {
+      // TODO Fix this - moduleResolution 16 breaks our declare module
+      customProps: ReactSelectAdapterProps['customProps']
+    }
+  } & SingleValueProps<Option>
+> = (props) => {
   const {
     children,
     data: { label, relationTo, value },
     selectProps: {
-      // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
-      customProps: {
-        // @ts-expect-error
-        onDelete: onDeleteFromProps,
-        // @ts-expect-error
-        onDuplicate,
-        // @ts-expect-error
-        onSave,
-        // @ts-expect-error
-        setDrawerIsOpen,
-      } = {},
+      customProps: { DocumentDrawerToggler, onDelete: onDeleteFromProps, onDuplicate, onSave } = {},
     } = {},
   } = props
 
@@ -39,27 +35,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const { t } = useTranslation()
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
-
-  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
-    id: value.toString(),
-    collectionSlug: relationTo,
-  })
-
-  useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') {
-      setDrawerIsOpen(isDrawerOpen)
-    }
-  }, [isDrawerOpen, setDrawerIsOpen])
-
-  const onDelete = useCallback<DocumentInfoContext['onDelete']>(
-    (args) => {
-      setDrawerIsOpen(false)
-      if (typeof onDeleteFromProps === 'function') {
-        void onDeleteFromProps(args)
-      }
-    },
-    [onDeleteFromProps, setDrawerIsOpen],
-  )
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>
@@ -89,9 +64,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
           )}
         </div>
       </div>
-      {relationTo && hasReadPermission && (
-        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
-      )}
     </SelectComponents.SingleValue>
   )
 }

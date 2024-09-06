@@ -9,6 +9,7 @@ import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -75,6 +76,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const hasMultipleRelations = Array.isArray(relationTo)
+  const [currentlyOpenRelation, setCurrentlyOpenRelation] = useState('')
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
@@ -113,8 +115,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
 
   const valueRef = useRef(value)
   valueRef.current = value
-
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false)
 
   const getResults: GetResults = useCallback(
     async ({
@@ -440,8 +440,30 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         doc: args.doc,
         i18n,
       })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).map((option) => {
+                if (option.value === args.doc.id) {
+                  return {
+                    relationTo: args.collectionConfig.slug,
+                    value: args.doc.id,
+                  }
+                }
+
+                return option
+              })
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
     },
-    [i18n, config],
+    [i18n, config, hasMany, setValue],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -491,6 +513,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     return r.test(string.slice(-breakApartThreshold))
   }, [])
 
+  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
+    id: value.toString(),
+    collectionSlug: currentlyOpenRelation,
+  })
+
   const valueToRender = findOptionsByValue({ options, value })
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
@@ -533,20 +560,20 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!drawerIsOpen}
+              backspaceRemovesValue={!isDrawerOpen}
               components={{
                 MultiValueLabel,
                 SingleValue,
               }}
               customProps={{
-                disableKeyDown: drawerIsOpen,
-                disableMouseDown: drawerIsOpen,
+                disableKeyDown: isDrawerOpen,
+                disableMouseDown: isDrawerOpen,
+                DocumentDrawerToggler,
                 onDelete,
                 onDuplicate: onSave,
                 onSave,
-                setDrawerIsOpen,
               }}
-              disabled={readOnly || formProcessing || drawerIsOpen}
+              disabled={readOnly || formProcessing || isDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -643,6 +670,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           {...(descriptionProps || {})}
         />
       </div>
+      {currentlyOpenRelation && hasReadPermission && (
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+      )}
     </div>
   )
 }
