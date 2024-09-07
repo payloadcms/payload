@@ -124,20 +124,29 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         {t('version:unpublish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
-          <h1>{t('version:confirmUnpublish')}</h1>
-          <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
-          <Button
-            buttonStyle="secondary"
-            id="confirm-cancel"
-            onClick={submitted ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button id="confirm-unpublish" onClick={submitted ? undefined : handleUnpublish}>
-            {submitted ? t('version:unpublishing') : t('general:confirm')}
-          </Button>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('version:confirmUnpublish')}</h1>
+            <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              id="confirm-cancel"
+              onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button
+              id="confirm-unpublish"
+              onClick={submitted ? undefined : handleUnpublish}
+              size="large"
+            >
+              {submitted ? t('version:unpublishing') : t('general:confirm')}
+            </Button>
+          </div>
         </div>
       </Modal>
     </React.Fragment>

@@ -75,21 +75,23 @@ export const ResetPasswordClient: React.FC<Args> = ({ token }) => {
       method="POST"
       onSuccess={onSuccess}
     >
-      <PasswordField
-        field={{
-          name: 'password',
-          label: i18n.t('authentication:newPassword'),
-          required: true,
-        }}
-      />
-      <ConfirmPasswordField />
-      <HiddenField
-        field={{
-          name: 'token',
-        }}
-        forceUsePathFromProps
-        value={token}
-      />
+      <div className={'inputWrap'}>
+        <PasswordField
+          field={{
+            name: 'password',
+            label: i18n.t('authentication:newPassword'),
+            required: true,
+          }}
+        />
+        <ConfirmPasswordField />
+        <HiddenField
+          field={{
+            name: 'token',
+          }}
+          forceUsePathFromProps
+          value={token}
+        />
+      </div>
       <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
     </Form>
   )

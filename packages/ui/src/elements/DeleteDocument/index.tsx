@@ -176,26 +176,29 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             zIndex: drawerZBase + editDepth,
           }}
         >
-          <div className={`${baseClass}__template`}>
-            <h1>{t('general:confirmDeletion')}</h1>
-            <p>
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey="general:aboutToDelete"
-                t={t}
-                variables={{
-                  label: getTranslation(singularLabel, i18n),
-                  title: titleToRender,
-                }}
-              />
-            </p>
-            <div className={`${baseClass}__actions`}>
+          <div className={`${baseClass}__wrapper`}>
+            <div className={`${baseClass}__content`}>
+              <h1>{t('general:confirmDeletion')}</h1>
+              <p>
+                <Translation
+                  elements={{
+                    '1': ({ children }) => <strong>{children}</strong>,
+                  }}
+                  i18nKey="general:aboutToDelete"
+                  t={t}
+                  variables={{
+                    label: getTranslation(singularLabel, i18n),
+                    title: titleToRender,
+                  }}
+                />
+              </p>
+            </div>
+            <div className={`${baseClass}__controls`}>
               <Button
                 buttonStyle="secondary"
                 id="confirm-cancel"
                 onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+                size="large"
                 type="button"
               >
                 {t('general:cancel')}
@@ -207,6 +210,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                     void handleDelete()
                   }
                 }}
+                size="large"
               >
                 {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>

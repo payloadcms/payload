@@ -105,6 +105,9 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+    },
     custom: {
       client: {
         'new-value': 'client available',

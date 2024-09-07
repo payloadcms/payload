@@ -152,20 +152,25 @@ export const DuplicateDocument: React.FC<Props> = ({
             zIndex: drawerZBase + editDepth,
           }}
         >
-          <div className={`${baseClass}__modal-template`}>
-            <h1>{t('general:confirmDuplication')}</h1>
-            <p>{t('general:unsavedChangesDuplicate')}</p>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={() => toggleModal(modalSlug)}
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button id="confirm-duplicate" onClick={() => void confirm()}>
-              {t('general:duplicateWithoutSaving')}
-            </Button>
+          <div className={`${baseClass}__wrapper`}>
+            <div className={`${baseClass}__content`}>
+              <h1>{t('general:confirmDuplication')}</h1>
+              <p>{t('general:unsavedChangesDuplicate')}</p>
+            </div>
+            <div className={`${baseClass}__controls`}>
+              <Button
+                buttonStyle="secondary"
+                id="confirm-cancel"
+                onClick={() => toggleModal(modalSlug)}
+                size="large"
+                type="button"
+              >
+                {t('general:cancel')}
+              </Button>
+              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
+                {t('general:duplicateWithoutSaving')}
+              </Button>
+            </div>
           </div>
         </Modal>
       )}
