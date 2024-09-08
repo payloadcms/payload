@@ -3,7 +3,7 @@ name: post-release
 on:
   release:
     types:
-      # - published
+      # - published # Re-enable this line for this to work with 2.x releases
       - prereleased
   workflow_dispatch:
 
@@ -19,6 +19,8 @@ jobs:
       - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
+        env:
+          ACTIONS_STEP_DEBUG: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag-filter: 'v\d'

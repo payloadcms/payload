@@ -7,7 +7,9 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
-    "build": "ncc build src/index.ts -t -o dist",
+    "build": "pnpm build:typecheck && pnpm build:ncc",
+    "build:ncc": "ncc build src/index.ts -t -o dist",
+    "build:typecheck": "tsc",
     "test": "jest"
   },
   "dependencies": {

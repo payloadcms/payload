@@ -2,13 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["es2020.string"],
+    "noEmit": true,
     "strict": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
-    "outDir": "./dst"
+    "skipLibCheck": true,
   },
   "exclude": ["src/**/*.test.ts"]
 }

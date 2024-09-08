@@ -3,7 +3,7 @@
 This GitHub Action automatically comments on and/or labels Issues and PRs when a fix is released for them.
 
 > [!IMPORTANT]
-> 🍴 Forked version of https://github.comapexskier/github-release-commenter
+> 🔧 Heavily modified version of https://github.com/apexskier/github-release-commenter
 
 ## Fork Modifications
 
@@ -12,6 +12,7 @@ This GitHub Action automatically comments on and/or labels Issues and PRs when a
 - Better logging
 - Moved to pnpm
 - Uses @vercel/ncc for packaging
+- Comments on locked issues by unlocking then re-locking
 
 ## How it works
 

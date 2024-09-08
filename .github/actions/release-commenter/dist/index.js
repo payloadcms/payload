@@ -33890,13 +33890,13 @@ var releaseTagTemplateRegex = /{release_tag}/g;
 (function main() {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, _loop_1, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, error_1;
+        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, _loop_1, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, e_1_1, error_1;
         var e_1, _e;
         var _this = this;
         return __generator(this, function (_f) {
             switch (_f.label) {
                 case 0:
-                    _f.trys.push([0, 5, , 6]);
+                    _f.trys.push([0, 13, , 14]);
                     payload_1 = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload;
                     githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('GITHUB_TOKEN');
                     tagFilter = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('tag-filter') || undefined // Accept tag filter as an input
@@ -34076,59 +34076,118 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         .join('\n')));
                     requests = [];
                     _loop_1 = function (issueNumber) {
-                        var baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
-                        if (comment) {
-                            var request_1 = __assign(__assign({}, baseRequest), { body: comment });
-                            var safeCreateComment = function () { return __awaiter(_this, void 0, void 0, function () {
-                                var error_2;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            _a.trys.push([0, 2, , 3]);
-                                            return [4 /*yield*/, octokit_1.rest.issues.createComment(request_1)];
-                                        case 1:
-                                            _a.sent();
-                                            return [3 /*break*/, 3];
-                                        case 2:
-                                            error_2 = _a.sent();
-                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_2);
-                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to comment on issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
-                                            return [3 /*break*/, 3];
-                                        case 3: return [2 /*return*/];
+                        var baseRequest, commentRequest_1, issue, createCommentPromise, request;
+                        return __generator(this, function (_g) {
+                            switch (_g.label) {
+                                case 0:
+                                    baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
+                                    if (!comment) return [3 /*break*/, 2];
+                                    commentRequest_1 = __assign(__assign({}, baseRequest), { body: comment });
+                                    return [4 /*yield*/, octokit_1.rest.issues.get(baseRequest)];
+                                case 1:
+                                    issue = (_g.sent()).data;
+                                    createCommentPromise = void 0;
+                                    if (!issue.locked) {
+                                        createCommentPromise = function () { return __awaiter(_this, void 0, void 0, function () {
+                                            var error_2;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0:
+                                                        _a.trys.push([0, 2, , 3]);
+                                                        return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest_1)];
+                                                    case 1:
+                                                        _a.sent();
+                                                        return [3 /*break*/, 3];
+                                                    case 2:
+                                                        error_2 = _a.sent();
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_2);
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to comment on issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                                        return [3 /*break*/, 3];
+                                                    case 3: return [2 /*return*/];
+                                                }
+                                            });
+                                        }); };
+                                        requests.push(createCommentPromise());
                                     }
-                                });
-                            }); };
-                            requests.push(safeCreateComment());
-                        }
-                        if (labels) {
-                            var request = __assign(__assign({}, baseRequest), { labels: labels });
-                            // core.info(JSON.stringify(request, null, 2))
-                            requests.push(octokit_1.rest.issues.addLabels(request));
-                        }
+                                    else {
+                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue/PR is locked: ".concat(issueNumber, ". Unlocking, commenting, and re-locking. ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                        createCommentPromise = function () { return __awaiter(_this, void 0, void 0, function () {
+                                            var error_3;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0:
+                                                        _a.trys.push([0, 4, , 5]);
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Unlocking issue/PR: ".concat(issueNumber));
+                                                        return [4 /*yield*/, octokit_1.rest.issues.unlock(baseRequest)];
+                                                    case 1:
+                                                        _a.sent();
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Commenting on issue/PR: ".concat(issueNumber));
+                                                        return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest_1)];
+                                                    case 2:
+                                                        _a.sent();
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Re-locking issue/PR: ".concat(issueNumber));
+                                                        return [4 /*yield*/, octokit_1.rest.issues.lock(baseRequest)];
+                                                    case 3:
+                                                        _a.sent();
+                                                        return [3 /*break*/, 5];
+                                                    case 4:
+                                                        error_3 = _a.sent();
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_3);
+                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to unlock, comment, and re-lock issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                                        return [3 /*break*/, 5];
+                                                    case 5: return [2 /*return*/];
+                                                }
+                                            });
+                                        }); };
+                                    }
+                                    requests.push(createCommentPromise());
+                                    _g.label = 2;
+                                case 2:
+                                    if (labels) {
+                                        request = __assign(__assign({}, baseRequest), { labels: labels });
+                                        // core.info(JSON.stringify(request, null, 2))
+                                        requests.push(octokit_1.rest.issues.addLabels(request));
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
                     };
-                    try {
-                        for (linkedIssuesPrs_1 = __values(linkedIssuesPrs_2), linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next(); !linkedIssuesPrs_1_1.done; linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next()) {
-                            issueNumber = linkedIssuesPrs_1_1.value;
-                            _loop_1(issueNumber);
-                        }
-                    }
-                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                    finally {
-                        try {
-                            if (linkedIssuesPrs_1_1 && !linkedIssuesPrs_1_1.done && (_e = linkedIssuesPrs_1.return)) _e.call(linkedIssuesPrs_1);
-                        }
-                        finally { if (e_1) throw e_1.error; }
-                    }
-                    return [4 /*yield*/, Promise.all(requests)];
+                    _f.label = 4;
                 case 4:
-                    _f.sent();
-                    return [3 /*break*/, 6];
+                    _f.trys.push([4, 9, 10, 11]);
+                    linkedIssuesPrs_1 = __values(linkedIssuesPrs_2), linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next();
+                    _f.label = 5;
                 case 5:
+                    if (!!linkedIssuesPrs_1_1.done) return [3 /*break*/, 8];
+                    issueNumber = linkedIssuesPrs_1_1.value;
+                    return [5 /*yield**/, _loop_1(issueNumber)];
+                case 6:
+                    _f.sent();
+                    _f.label = 7;
+                case 7:
+                    linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next();
+                    return [3 /*break*/, 5];
+                case 8: return [3 /*break*/, 11];
+                case 9:
+                    e_1_1 = _f.sent();
+                    e_1 = { error: e_1_1 };
+                    return [3 /*break*/, 11];
+                case 10:
+                    try {
+                        if (linkedIssuesPrs_1_1 && !linkedIssuesPrs_1_1.done && (_e = linkedIssuesPrs_1.return)) _e.call(linkedIssuesPrs_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                    return [7 /*endfinally*/];
+                case 11: return [4 /*yield*/, Promise.all(requests)];
+                case 12:
+                    _f.sent();
+                    return [3 /*break*/, 14];
+                case 13:
                     error_1 = _f.sent();
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_1);
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error_1.message);
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
+                    return [3 /*break*/, 14];
+                case 14: return [2 /*return*/];
             }
         });
     });
