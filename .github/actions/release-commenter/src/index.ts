@@ -292,8 +292,19 @@ const releaseTagTemplateRegex = /{release_tag}/g
           ...baseRequest,
           body: comment,
         }
-        // core.info(JSON.stringify(request, null, 2))
-        requests.push(octokit.rest.issues.createComment(request))
+
+        const safeCreateComment = async () => {
+          try {
+            await octokit.rest.issues.createComment(request)
+          } catch (error) {
+            core.error(error as Error)
+            core.error(
+              `Failed to comment on issue/PR: ${issueNumber}. ${payload.repository.html_url}/pull/${issueNumber}`,
+            )
+          }
+        }
+
+        requests.push(safeCreateComment())
       }
       if (labels) {
         const request = {

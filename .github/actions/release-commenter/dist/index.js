@@ -33890,7 +33890,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
 (function main() {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, baseRequest, request, request, error_1;
+        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, _loop_1, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, error_1;
         var e_1, _e;
         var _this = this;
         return __generator(this, function (_f) {
@@ -33964,7 +33964,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     linkedIssuesPrs_2 = new Set();
                     return [4 /*yield*/, Promise.all(commits.map(function (commit) {
                             return (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var query, response, associatedClosedPREdges, html, _a, _b, match, _c, num, seen, _loop_1, associatedClosedPREdges_1, associatedClosedPREdges_1_1, associatedPR;
+                                var query, response, associatedClosedPREdges, html, _a, _b, match, _c, num, seen, _loop_2, associatedClosedPREdges_1, associatedClosedPREdges_1_1, associatedPR;
                                 var e_2, _d, e_3, _e;
                                 return __generator(this, function (_f) {
                                     switch (_f.label) {
@@ -34008,7 +34008,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Too many PRs associated with ".concat(commit.sha));
                                             }
                                             seen = new Set();
-                                            _loop_1 = function (associatedPR) {
+                                            _loop_2 = function (associatedPR) {
                                                 var e_4, _g;
                                                 if (associatedPR.node.timelineItems.pageInfo.hasNextPage) {
                                                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Too many links for #".concat(associatedPR.node.number));
@@ -34054,7 +34054,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                             try {
                                                 for (associatedClosedPREdges_1 = __values(associatedClosedPREdges), associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next(); !associatedClosedPREdges_1_1.done; associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next()) {
                                                     associatedPR = associatedClosedPREdges_1_1.value;
-                                                    _loop_1(associatedPR);
+                                                    _loop_2(associatedPR);
                                                 }
                                             }
                                             catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -34075,20 +34075,41 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         .map(function (num) { return "  ".concat(payload_1.repository.html_url, "/pull/").concat(num); })
                         .join('\n')));
                     requests = [];
+                    _loop_1 = function (issueNumber) {
+                        var baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
+                        if (comment) {
+                            var request_1 = __assign(__assign({}, baseRequest), { body: comment });
+                            var safeCreateComment = function () { return __awaiter(_this, void 0, void 0, function () {
+                                var error_2;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            _a.trys.push([0, 2, , 3]);
+                                            return [4 /*yield*/, octokit_1.rest.issues.createComment(request_1)];
+                                        case 1:
+                                            _a.sent();
+                                            return [3 /*break*/, 3];
+                                        case 2:
+                                            error_2 = _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_2);
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to comment on issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                            return [3 /*break*/, 3];
+                                        case 3: return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            requests.push(safeCreateComment());
+                        }
+                        if (labels) {
+                            var request = __assign(__assign({}, baseRequest), { labels: labels });
+                            // core.info(JSON.stringify(request, null, 2))
+                            requests.push(octokit_1.rest.issues.addLabels(request));
+                        }
+                    };
                     try {
                         for (linkedIssuesPrs_1 = __values(linkedIssuesPrs_2), linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next(); !linkedIssuesPrs_1_1.done; linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next()) {
                             issueNumber = linkedIssuesPrs_1_1.value;
-                            baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
-                            if (comment) {
-                                request = __assign(__assign({}, baseRequest), { body: comment });
-                                // core.info(JSON.stringify(request, null, 2))
-                                requests.push(octokit_1.rest.issues.createComment(request));
-                            }
-                            if (labels) {
-                                request = __assign(__assign({}, baseRequest), { labels: labels });
-                                // core.info(JSON.stringify(request, null, 2))
-                                requests.push(octokit_1.rest.issues.addLabels(request));
-                            }
+                            _loop_1(issueNumber);
                         }
                     }
                     catch (e_1_1) { e_1 = { error: e_1_1 }; }
