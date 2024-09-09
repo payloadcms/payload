@@ -209,6 +209,7 @@ export type {
 
 export type {
   RowFieldClientComponent,
+  RowFieldClientProps,
   RowFieldDescriptionClientComponent,
   RowFieldDescriptionServerComponent,
   RowFieldErrorClientComponent,
@@ -273,13 +274,16 @@ export type {
 } from './fields/Textarea.js'
 
 export type {
+  UploadFieldClientComponent,
+  UploadFieldClientProps,
   UploadFieldDescriptionClientComponent,
   UploadFieldDescriptionServerComponent,
   UploadFieldErrorClientComponent,
   UploadFieldErrorServerComponent,
   UploadFieldLabelClientComponent,
   UploadFieldLabelServerComponent,
-  UploadFieldProps,
+  UploadFieldServerComponent,
+  UploadFieldServerProps,
 } from './fields/Upload.js'
 
 export type {

@@ -7,92 +7,92 @@ import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
+  ArrayFieldClientProps,
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
   ArrayFieldLabelServerComponent,
-  ArrayFieldProps,
   BlockFieldErrorClientComponent,
   BlockFieldErrorServerComponent,
-  BlockFieldProps,
+  BlocksFieldClientProps,
+  CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
   CheckboxFieldLabelClientComponent,
   CheckboxFieldLabelServerComponent,
-  CheckboxFieldProps,
   ClientTab,
+  CodeFieldClientProps,
   CodeFieldErrorClientComponent,
   CodeFieldErrorServerComponent,
   CodeFieldLabelClientComponent,
   CodeFieldLabelServerComponent,
-  CodeFieldProps,
+  CollapsibleFieldClientProps,
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
-  CollapsibleFieldProps,
   ConditionalDateProps,
+  DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
-  DateFieldProps,
   Description,
+  EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  EmailFieldProps,
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
-  GroupFieldProps,
   HiddenFieldProps,
+  JSONFieldClientProps,
   JSONFieldErrorClientComponent,
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  JSONFieldProps,
   MappedComponent,
+  NumberFieldClientProps,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
   NumberFieldLabelClientComponent,
   NumberFieldLabelServerComponent,
-  NumberFieldProps,
+  PointFieldClientProps,
   PointFieldErrorClientComponent,
   PointFieldErrorServerComponent,
   PointFieldLabelClientComponent,
   PointFieldLabelServerComponent,
-  PointFieldProps,
+  RadioFieldClientProps,
   RadioFieldErrorClientComponent,
   RadioFieldErrorServerComponent,
   RadioFieldLabelClientComponent,
   RadioFieldLabelServerComponent,
-  RadioFieldProps,
+  RelationshipFieldClientProps,
   RelationshipFieldErrorClientComponent,
   RelationshipFieldErrorServerComponent,
   RelationshipFieldLabelClientComponent,
   RelationshipFieldLabelServerComponent,
-  RelationshipFieldProps,
-  RichTextFieldProps,
-  RowFieldProps,
+  RichTextFieldClientProps,
+  RowFieldClientProps,
   RowLabelComponent,
+  SelectFieldClientProps,
   SelectFieldErrorClientComponent,
   SelectFieldErrorServerComponent,
   SelectFieldLabelClientComponent,
   SelectFieldLabelServerComponent,
-  SelectFieldProps,
   StaticDescription,
-  TabsFieldProps,
+  TabsFieldClientProps,
+  TextareaFieldClientProps,
   TextareaFieldErrorClientComponent,
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
-  TextareaFieldProps,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
-  UploadFieldProps,
+  UploadFieldClientProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
@@ -1425,26 +1425,26 @@ export type ClientField =
   | UploadFieldClient
 
 export type ClientFieldProps =
-  | ArrayFieldProps
-  | BlockFieldProps
-  | CheckboxFieldProps
-  | CodeFieldProps
-  | CollapsibleFieldProps
-  | DateFieldProps
-  | EmailFieldProps
-  | GroupFieldProps
+  | ArrayFieldClientProps
+  | BlocksFieldClientProps
+  | CheckboxFieldClientProps
+  | CodeFieldClientProps
+  | CollapsibleFieldClientProps
+  | DateFieldClientProps
+  | EmailFieldClientProps
+  | GroupFieldClientProps
   | HiddenFieldProps
-  | JSONFieldProps
-  | NumberFieldProps
-  | PointFieldProps
-  | RadioFieldProps
-  | RelationshipFieldProps
-  | RichTextFieldProps
-  | RowFieldProps
-  | SelectFieldProps
-  | TabsFieldProps
-  | TextareaFieldProps
-  | UploadFieldProps
+  | JSONFieldClientProps
+  | NumberFieldClientProps
+  | PointFieldClientProps
+  | RadioFieldClientProps
+  | RelationshipFieldClientProps
+  | RichTextFieldClientProps
+  | RowFieldClientProps
+  | SelectFieldClientProps
+  | TabsFieldClientProps
+  | TextareaFieldClientProps
+  | UploadFieldClientProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
 

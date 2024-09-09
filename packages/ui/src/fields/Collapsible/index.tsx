@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldProps, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -21,7 +21,7 @@ const baseClass = 'collapsible-field'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 
-const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
+const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     descriptionProps,
     field,
