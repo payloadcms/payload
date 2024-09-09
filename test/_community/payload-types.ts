@@ -54,7 +54,8 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  text?: string | null;
+  customClientField?: string | null;
+  customServerField?: string | null;
   richText?: {
     root: {
       type: string;

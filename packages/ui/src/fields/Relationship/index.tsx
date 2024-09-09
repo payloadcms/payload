@@ -1,5 +1,5 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
+import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -36,7 +36,7 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,

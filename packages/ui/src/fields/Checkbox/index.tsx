@@ -1,5 +1,9 @@
 'use client'
-import type { CheckboxFieldProps, CheckboxFieldValidation } from 'payload'
+import type {
+  CheckboxFieldClientComponent,
+  CheckboxFieldClientProps,
+  CheckboxFieldValidation,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -19,9 +23,9 @@ import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
 
-export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
+export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const {
     id,
     checked: checkedFromProps,
@@ -38,10 +42,10 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      } = {} as CheckboxFieldProps['field']['admin'],
+      } = {} as CheckboxFieldClientProps['field']['admin'],
       label,
       required,
-    } = {} as CheckboxFieldProps['field'],
+    } = {} as CheckboxFieldClientProps['field'],
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
