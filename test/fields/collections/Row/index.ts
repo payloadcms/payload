@@ -112,7 +112,7 @@ const RowFields: CollectionConfig = {
         {
           label: 'Explicit 20% width within a row (A)',
           type: 'text',
-          name: '20_percent_width_within_row_a',
+          name: 'field_20_percent_width_within_row_a',
           admin: {
             width: '20%',
           },
@@ -130,7 +130,7 @@ const RowFields: CollectionConfig = {
         {
           label: 'Explicit 20% width within a row (D)',
           type: 'text',
-          name: '20_percent_width_within_row_d',
+          name: 'field_20_percent_width_within_row_d',
           admin: {
             width: '20%',
           },

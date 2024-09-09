@@ -401,7 +401,7 @@ describe('fields', () => {
       )
 
       const field_20_percent_width_within_row_a = page.locator(
-        '.field-type.text:has(input#field-20_percent_width_within_row_a)',
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_a)',
       )
       const field_no_set_width_within_row_b = page.locator(
         '.field-type.text:has(input#field-no_set_width_within_row_b)',
@@ -410,7 +410,7 @@ describe('fields', () => {
         '.field-type.text:has(input#field-no_set_width_within_row_c)',
       )
       const field_20_percent_width_within_row_d = page.locator(
-        '.field-type.text:has(input#field-20_percent_width_within_row_a)',
+        '.field-type.text:has(input#field-field_20_percent_width_within_row_d)',
       )
 
       await expect(field_30_percent).toBeVisible()
