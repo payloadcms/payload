@@ -76,7 +76,7 @@ export type UploadInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: (number | string)[] | (number | string)
-  readonly width?: string
+  readonly width?: React.CSSProperties['width']
 }
 
 export function UploadInput(props: UploadInputProps) {

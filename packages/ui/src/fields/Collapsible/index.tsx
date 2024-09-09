@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldProps, DocumentPreferences } from 'payload'
+import type { AdminClient, CollapsibleFieldProps, DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -114,7 +114,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldProps> = (props) => {
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
-  const style: { '--field-width': string } & React.CSSProperties = {
+  const style: AdminClient['style'] = {
     ...field.admin?.style,
     '--field-width': field.admin.width,
   }

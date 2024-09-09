@@ -9,7 +9,7 @@ import type {
   StaticDescription,
   TextFieldClient,
 } from 'payload'
-import type { ChangeEvent } from 'react'
+import type { CSSProperties, ChangeEvent } from 'react'
 import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
@@ -47,5 +47,5 @@ export type PasswordInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string
-  readonly width?: string
+  readonly width?: CSSProperties['width']
 }
