@@ -220,9 +220,6 @@ export default buildConfigWithDefaults({
       slug: relationWithTitleSlug,
     },
     {
-      admin: {
-        useAsTitle: 'name',
-      },
       fields: [
         {
           fields: [
