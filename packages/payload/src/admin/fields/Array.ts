@@ -4,20 +4,37 @@ import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
   MappedComponent,
 } from '../types.js'
 
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
-export type ArrayFieldProps = {
+type ArrayFieldBaseClientProps = {
   readonly CustomRowLabel?: MappedComponent
   readonly validate?: ArrayFieldValidation
-} & Omit<FormFieldBase<ArrayFieldClientWithoutType>, 'validate'>
+}
+
+export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
+  ClientFieldBase<ArrayFieldClientWithoutType>
+
+export type ArrayFieldServerProps = ServerFieldBase<ArrayField>
+
+export type ArrayFieldServerComponent = FieldServerComponent<ArrayField>
+
+export type ArrayFieldClientComponent = FieldClientComponent<
+  ArrayFieldClientWithoutType,
+  ArrayFieldBaseClientProps
+>
 
 export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<ArrayField>
 

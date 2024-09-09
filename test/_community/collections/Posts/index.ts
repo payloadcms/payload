@@ -14,7 +14,7 @@ export const PostsCollection: CollectionConfig = {
           Label: '/collections/Posts/MyClientComponent.js#MyClientComponent',
         },
       },
-      name: 'customClientField',
+      name: 'clientTextField',
       type: 'text',
     },
     {
@@ -23,7 +23,7 @@ export const PostsCollection: CollectionConfig = {
           Label: '/collections/Posts/MyServerComponent.js#MyServerComponent',
         },
       },
-      name: 'customServerField',
+      name: 'serverTextField',
       type: 'text',
     },
     {

@@ -4,19 +4,36 @@ import type { EmailField, EmailFieldClient } from '../../fields/config/types.js'
 import type { EmailFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 
-export type EmailFieldProps = {
+type EmailFieldBaseClientProps = {
   readonly autoComplete?: string
   readonly validate?: EmailFieldValidation
-} & Omit<FormFieldBase<EmailFieldClientWithoutType>, 'validate'>
+}
+
+export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType> &
+  EmailFieldBaseClientProps
+
+export type EmailFieldServerProps = ServerFieldBase<EmailField>
+
+export type EmailFieldServerComponent = FieldServerComponent<EmailField>
+
+export type EmailFieldClientComponent = FieldClientComponent<
+  EmailFieldClientWithoutType,
+  EmailFieldBaseClientProps
+>
 
 export type EmailFieldLabelServerComponent = FieldLabelServerComponent<EmailField>
 

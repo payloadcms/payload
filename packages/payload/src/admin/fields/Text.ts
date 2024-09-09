@@ -28,8 +28,6 @@ type TextFieldBaseClientProps = {
 export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
   TextFieldBaseClientProps
 
-export type TextFieldProps = TextFieldClientProps // For backwards compatibility
-
 export type TextFieldServerProps = ServerFieldBase<TextField>
 
 export type TextFieldServerComponent = FieldServerComponent<TextField>
