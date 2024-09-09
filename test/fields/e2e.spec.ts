@@ -400,15 +400,40 @@ describe('fields', () => {
         '.collapsible-field:has(#field-field_within_collapsible_a)',
       )
 
+      const field_20_percent_width_within_row_a = page.locator(
+        '.field-type.text:has(input#field-20_percent_width_within_row_a)',
+      )
+      const field_no_set_width_within_row_b = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_b)',
+      )
+      const field_no_set_width_within_row_c = page.locator(
+        '.field-type.text:has(input#field-no_set_width_within_row_c)',
+      )
+      const field_20_percent_width_within_row_d = page.locator(
+        '.field-type.text:has(input#field-20_percent_width_within_row_a)',
+      )
+
       await expect(field_30_percent).toBeVisible()
       await expect(field_60_percent).toBeVisible()
       await expect(field_20_percent).toBeVisible()
       await expect(collapsible_30_percent).toBeVisible()
+      await expect(field_20_percent_width_within_row_a).toBeVisible()
+      await expect(field_no_set_width_within_row_b).toBeVisible()
+      await expect(field_no_set_width_within_row_c).toBeVisible()
+      await expect(field_20_percent_width_within_row_d).toBeVisible()
 
       const field_30_boundingBox = await field_30_percent.boundingBox()
       const field_60_boundingBox = await field_60_percent.boundingBox()
       const field_20_boundingBox = await field_20_percent.boundingBox()
       const collapsible_30_boundingBox = await collapsible_30_percent.boundingBox()
+      const field_20_percent_width_within_row_a_box =
+        await field_20_percent_width_within_row_a.boundingBox()
+      const field_no_set_width_within_row_b_box =
+        await field_no_set_width_within_row_b.boundingBox()
+      const field_no_set_width_within_row_c_box =
+        await field_no_set_width_within_row_c.boundingBox()
+      const field_20_percent_width_within_row_d_box =
+        await field_20_percent_width_within_row_d.boundingBox()
 
       await expect(() => {
         expect(field_30_boundingBox.y).toEqual(field_60_boundingBox.y)
@@ -416,6 +441,21 @@ describe('fields', () => {
         expect(field_30_boundingBox.y).not.toEqual(field_20_boundingBox.y)
         expect(field_30_boundingBox.height).toEqual(field_60_boundingBox.height)
         expect(collapsible_30_boundingBox.width).toEqual(field_30_boundingBox.width)
+
+        expect(field_20_percent_width_within_row_a_box.y).toEqual(
+          field_no_set_width_within_row_b_box.y,
+        )
+        expect(field_no_set_width_within_row_b_box.y).toEqual(field_no_set_width_within_row_c_box.y)
+        expect(field_no_set_width_within_row_c_box.y).toEqual(
+          field_20_percent_width_within_row_d_box.y,
+        )
+
+        expect(field_20_percent_width_within_row_a_box.width).toEqual(
+          field_20_percent_width_within_row_d_box.width,
+        )
+        expect(field_no_set_width_within_row_b_box.width).toEqual(
+          field_no_set_width_within_row_c_box.width,
+        )
       }).toPass()
     })
 

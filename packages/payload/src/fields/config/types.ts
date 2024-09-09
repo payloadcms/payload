@@ -267,7 +267,7 @@ type Admin = {
   position?: 'sidebar'
   readOnly?: boolean
   style?: CSSProperties
-  width?: `${number}${'%' | 'ch' | 'em' | 'pc' | 'pt' | 'px' | 'rem' | 'vh' | 'vmax' | 'vmin' | 'vw'}`
+  width?: CSSProperties['width']
 }
 
 export type AdminClient = {
@@ -299,8 +299,8 @@ export type AdminClient = {
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
-  style?: CSSProperties
-  width?: string
+  style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
+  width?: CSSProperties['width']
 }
 
 export type Labels = {
@@ -805,7 +805,7 @@ export type UIField = {
      */
     disableListColumn?: boolean
     position?: string
-    width?: string
+    width?: CSSProperties['width']
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>

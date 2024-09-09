@@ -106,6 +106,37 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: 'Explicit 20% width within a row (A)',
+          type: 'text',
+          name: '20_percent_width_within_row_a',
+          admin: {
+            width: '20%',
+          },
+        },
+        {
+          label: 'No set width within a row (B)',
+          type: 'text',
+          name: 'no_set_width_within_row_b',
+        },
+        {
+          label: 'No set width within a row (C)',
+          type: 'text',
+          name: 'no_set_width_within_row_c',
+        },
+        {
+          label: 'Explicit 20% width within a row (D)',
+          type: 'text',
+          name: '20_percent_width_within_row_d',
+          admin: {
+            width: '20%',
+          },
+        },
+      ],
+    },
   ],
 }
 
