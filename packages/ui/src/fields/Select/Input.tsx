@@ -23,19 +23,19 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
+  readonly Error?: MappedComponent
   readonly errorProps?: Record<string, unknown>
   readonly field?: MarkOptional<SelectFieldClient, 'type'>
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly name: string
@@ -52,19 +52,19 @@ export type SelectInputProps = {
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
     field,
     hasMany = false,
     isClearable = true,
     isSortable = true,
+    Label,
     label,
     labelProps,
     onChange,
@@ -116,8 +116,8 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={Label}
         field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

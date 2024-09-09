@@ -7,6 +7,11 @@ type CustomSelectProps = {
   disableMouseDown?: boolean
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
+  onDocumentDrawerOpen: (args: {
+    collectionSlug: string
+    hasReadPermission: boolean
+    id: number | string
+  }) => void
   onSave?: DocumentDrawerProps['onSave']
   setDrawerIsOpen?: (isOpen: boolean) => void
 }

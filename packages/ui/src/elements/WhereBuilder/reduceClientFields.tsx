@@ -29,7 +29,9 @@ export const reduceClientFields = ({
   pathPrefix,
 }: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if (field.admin?.disableListFilter) return reduced
+    if (field.admin?.disableListFilter) {
+      return reduced
+    }
 
     if (field.type === 'tabs' && 'tabs' in field) {
       const tabs = field.tabs

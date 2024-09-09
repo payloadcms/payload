@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.0.0-beta.95",
+  "version": "3.0.0-beta.102",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -42,6 +42,8 @@
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
     "prepublishOnly": "pnpm clean && pnpm build",
     "test": "jest",
@@ -54,16 +56,15 @@
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
     "comment-json": "^4.2.3",
-    "degit": "^2.8.4",
     "esprima-next": "^6.0.3",
     "execa": "^5.0.0",
     "figures": "^6.1.0",
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
+    "tar": "^7.4.3",
     "terminal-link": "^2.1.1"
   },
   "devDependencies": {
-    "@types/degit": "^2.8.3",
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "29.5.12",

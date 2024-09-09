@@ -1,4 +1,3 @@
-import type { User } from '../auth/index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {

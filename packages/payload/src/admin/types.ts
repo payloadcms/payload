@@ -3,13 +3,6 @@ import type React from 'react'
 import type { PayloadComponent } from '../config/types.js'
 import type { JsonObject } from '../types/index.js'
 
-export type { LanguageOptions } from './LanguageOptions.js'
-export type {
-  RichTextAdapter,
-  RichTextAdapterProvider,
-  RichTextGenerateComponentMap,
-  RichTextHooks,
-} from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -17,14 +10,12 @@ export type { CustomPreviewButton } from './elements/PreviewButton.js'
 export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
-
 export type {
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
-
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -33,13 +24,16 @@ export type {
 } from './elements/WithServerSideProps.js'
 
 export type {
+  ArrayFieldClientComponent,
+  ArrayFieldClientProps,
   ArrayFieldDescriptionClientComponent,
   ArrayFieldDescriptionServerComponent,
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
   ArrayFieldLabelServerComponent,
-  ArrayFieldProps,
+  ArrayFieldServerComponent,
+  ArrayFieldServerProps,
 } from './fields/Array.js'
 
 export type {
@@ -49,190 +43,247 @@ export type {
   BlockFieldErrorServerComponent,
   BlockFieldLabelClientComponent,
   BlockFieldLabelServerComponent,
-  BlockFieldProps,
+  BlocksFieldClientComponent,
+  BlocksFieldClientProps,
+  BlocksFieldServerComponent,
+  BlocksFieldServerProps,
 } from './fields/Blocks.js'
 
 export type {
+  CheckboxFieldClientComponent,
+  CheckboxFieldClientProps,
   CheckboxFieldDescriptionClientComponent,
   CheckboxFieldDescriptionServerComponent,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
   CheckboxFieldLabelClientComponent,
   CheckboxFieldLabelServerComponent,
-  CheckboxFieldProps,
+  CheckboxFieldServerComponent,
+  CheckboxFieldServerProps,
 } from './fields/Checkbox.js'
 
 export type {
+  CodeFieldClientComponent,
+  CodeFieldClientProps,
   CodeFieldDescriptionClientComponent,
   CodeFieldDescriptionServerComponent,
   CodeFieldErrorClientComponent,
   CodeFieldErrorServerComponent,
   CodeFieldLabelClientComponent,
   CodeFieldLabelServerComponent,
-  CodeFieldProps,
+  CodeFieldServerComponent,
+  CodeFieldServerProps,
 } from './fields/Code.js'
 
 export type {
+  CollapsibleFieldClientComponent,
+  CollapsibleFieldClientProps,
   CollapsibleFieldDescriptionClientComponent,
   CollapsibleFieldDescriptionServerComponent,
   CollapsibleFieldErrorClientComponent,
   CollapsibleFieldErrorServerComponent,
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
-  CollapsibleFieldProps,
+  CollapsibleFieldServerComponent,
+  CollapsibleFieldServerProps,
 } from './fields/Collapsible.js'
 
 export type {
+  DateFieldClientComponent,
+  DateFieldClientProps,
   DateFieldDescriptionClientComponent,
   DateFieldDescriptionServerComponent,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
-  DateFieldProps,
+  DateFieldServerComponent,
+  DateFieldServerProps,
 } from './fields/Date.js'
 
 export type {
+  EmailFieldClientComponent,
+  EmailFieldClientProps,
   EmailFieldDescriptionClientComponent,
   EmailFieldDescriptionServerComponent,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  EmailFieldProps,
+  EmailFieldServerComponent,
+  EmailFieldServerProps,
 } from './fields/Email.js'
 
 export type {
+  GroupFieldClientComponent,
+  GroupFieldClientProps,
   GroupFieldDescriptionClientComponent,
   GroupFieldDescriptionServerComponent,
   GroupFieldErrorClientComponent,
   GroupFieldErrorServerComponent,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
-  GroupFieldProps,
+  GroupFieldServerComponent,
+  GroupFieldServerProps,
 } from './fields/Group.js'
 
 export type { HiddenFieldProps } from './fields/Hidden.js'
 
 export type {
+  JSONFieldClientComponent,
+  JSONFieldClientProps,
   JSONFieldDescriptionClientComponent,
   JSONFieldDescriptionServerComponent,
   JSONFieldErrorClientComponent,
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  JSONFieldProps,
+  JSONFieldServerComponent,
+  JSONFieldServerProps,
 } from './fields/JSON.js'
 
 export type {
+  NumberFieldClientComponent,
+  NumberFieldClientProps,
   NumberFieldDescriptionClientComponent,
   NumberFieldDescriptionServerComponent,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
   NumberFieldLabelClientComponent,
   NumberFieldLabelServerComponent,
-  NumberFieldProps,
+  NumberFieldServerComponent,
+  NumberFieldServerProps,
 } from './fields/Number.js'
 
 export type {
+  PointFieldClientComponent,
+  PointFieldClientProps,
   PointFieldDescriptionClientComponent,
   PointFieldDescriptionServerComponent,
   PointFieldErrorClientComponent,
   PointFieldErrorServerComponent,
   PointFieldLabelClientComponent,
   PointFieldLabelServerComponent,
-  PointFieldProps,
+  PointFieldServerComponent,
+  PointFieldServerProps,
 } from './fields/Point.js'
 
 export type {
+  RadioFieldClientComponent,
+  RadioFieldClientProps,
   RadioFieldDescriptionClientComponent,
   RadioFieldDescriptionServerComponent,
   RadioFieldErrorClientComponent,
   RadioFieldErrorServerComponent,
   RadioFieldLabelClientComponent,
   RadioFieldLabelServerComponent,
-  RadioFieldProps,
+  RadioFieldServerComponent,
+  RadioFieldServerProps,
 } from './fields/Radio.js'
 
 export type {
+  RelationshipFieldClientComponent,
+  RelationshipFieldClientProps,
   RelationshipFieldDescriptionClientComponent,
   RelationshipFieldDescriptionServerComponent,
   RelationshipFieldErrorClientComponent,
   RelationshipFieldErrorServerComponent,
   RelationshipFieldLabelClientComponent,
   RelationshipFieldLabelServerComponent,
-  RelationshipFieldProps,
+  RelationshipFieldServerComponent,
+  RelationshipFieldServerProps,
 } from './fields/Relationship.js'
 
 export type {
+  RichTextFieldClientComponent,
+  RichTextFieldClientProps,
   RichTextFieldDescriptionClientComponent,
   RichTextFieldDescriptionServerComponent,
   RichTextFieldErrorClientComponent,
   RichTextFieldErrorServerComponent,
   RichTextFieldLabelClientComponent,
   RichTextFieldLabelServerComponent,
-  RichTextFieldProps,
+  RichTextFieldServerComponent,
+  RichTextFieldServerProps,
 } from './fields/RichText.js'
 
 export type {
+  RowFieldClientComponent,
+  RowFieldClientProps,
   RowFieldDescriptionClientComponent,
   RowFieldDescriptionServerComponent,
   RowFieldErrorClientComponent,
   RowFieldErrorServerComponent,
   RowFieldLabelClientComponent,
   RowFieldLabelServerComponent,
-  RowFieldProps,
+  RowFieldServerComponent,
+  RowFieldServerProps,
 } from './fields/Row.js'
 
 export type {
+  SelectFieldClientComponent,
+  SelectFieldClientProps,
   SelectFieldDescriptionClientComponent,
   SelectFieldDescriptionServerComponent,
   SelectFieldErrorClientComponent,
   SelectFieldErrorServerComponent,
   SelectFieldLabelClientComponent,
   SelectFieldLabelServerComponent,
-  SelectFieldProps,
+  SelectFieldServerComponent,
+  SelectFieldServerProps,
 } from './fields/Select.js'
 
 export type {
   ClientTab,
+  TabsFieldClientComponent,
+  TabsFieldClientProps,
   TabsFieldDescriptionClientComponent,
   TabsFieldDescriptionServerComponent,
   TabsFieldErrorClientComponent,
   TabsFieldErrorServerComponent,
   TabsFieldLabelClientComponent,
   TabsFieldLabelServerComponent,
-  TabsFieldProps,
+  TabsFieldServerComponent,
+  TabsFieldServerProps,
 } from './fields/Tabs.js'
 
 export type {
+  TextFieldClientComponent,
+  TextFieldClientProps,
   TextFieldDescriptionClientComponent,
   TextFieldDescriptionServerComponent,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
-  TextFieldProps,
+  TextFieldServerComponent,
+  TextFieldServerProps,
 } from './fields/Text.js'
 
 export type {
+  TextareaFieldClientComponent,
+  TextareaFieldClientProps,
   TextareaFieldDescriptionClientComponent,
   TextareaFieldDescriptionServerComponent,
   TextareaFieldErrorClientComponent,
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
-  TextareaFieldProps,
+  TextareaFieldServerComponent,
+  TextareaFieldServerProps,
 } from './fields/Textarea.js'
 
 export type {
+  UploadFieldClientComponent,
+  UploadFieldClientProps,
   UploadFieldDescriptionClientComponent,
   UploadFieldDescriptionServerComponent,
   UploadFieldErrorClientComponent,
   UploadFieldErrorServerComponent,
   UploadFieldLabelClientComponent,
   UploadFieldLabelServerComponent,
-  UploadFieldProps,
+  UploadFieldServerComponent,
+  UploadFieldServerProps,
 } from './fields/Upload.js'
 
 export type {
@@ -269,6 +320,15 @@ export type {
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 
+export type { LanguageOptions } from './LanguageOptions.js'
+
+export type {
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextGenerateComponentMap,
+  RichTextHooks,
+} from './RichText.js'
+
 export type {
   AdminViewComponent,
   AdminViewConfig,
@@ -281,15 +341,15 @@ export type {
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
-  RenderedComponent: React.ReactNode
   props?: Partial<any>
+  RenderedComponent: React.ReactNode
   type: 'server'
 }
 
 export type MappedClientComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component: React.ComponentType<TComponentClientProps>
-  RenderedComponent?: React.ReactNode
   props?: Partial<TComponentClientProps>
+  RenderedComponent?: React.ReactNode
   type: 'client'
 }
 
@@ -305,7 +365,7 @@ export type MappedComponent<TComponentClientProps extends JsonObject = JsonObjec
 
 export type CreateMappedComponent = {
   <T extends JsonObject>(
-    component: { Component: React.FC<T> } | PayloadComponent<T> | null,
+    component: { Component: React.FC<T> } | null | PayloadComponent<T>,
     props: {
       clientProps?: JsonObject
       serverProps?: object

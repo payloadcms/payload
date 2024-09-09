@@ -13,7 +13,7 @@ export interface Config {
   collections: {
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
-    'nested-fields': NestedField;
+    'nested-field-tables': NestedFieldTable;
     users: User;
     'localized-posts': LocalizedPost;
     'array-fields': ArrayField;
@@ -30,7 +30,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     'global-array': GlobalArray;
@@ -63,7 +63,7 @@ export interface UserAuthOperations {
  * via the `definition` "blocks-fields".
  */
 export interface BlocksField {
-  id: number;
+  id: string;
   content?:
     | {
         content?:
@@ -87,12 +87,12 @@ export interface BlocksField {
  * via the `definition` "nested-arrays".
  */
 export interface NestedArray {
-  id: number;
+  id: string;
   arrayWithBlocks?:
     | {
         blocksWithinArray?:
           | {
-              relationWithinBlock?: (number | null) | LocalizedPost;
+              relationWithinBlock?: (string | null) | LocalizedPost;
               id?: string | null;
               blockName?: string | null;
               blockType: 'someBlock';
@@ -103,7 +103,7 @@ export interface NestedArray {
     | null;
   arrayWithLocalizedRelation?:
     | {
-        localizedRelation?: (number | null) | LocalizedPost;
+        localizedRelation?: (string | null) | LocalizedPost;
         id?: string | null;
       }[]
     | null;
@@ -115,12 +115,12 @@ export interface NestedArray {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   title?: string | null;
   description?: string | null;
   localizedDescription?: string | null;
   localizedCheckbox?: boolean | null;
-  children?: (number | LocalizedPost)[] | null;
+  children?: (string | LocalizedPost)[] | null;
   group?: {
     children?: string | null;
   };
@@ -129,21 +129,21 @@ export interface LocalizedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nested-fields".
+ * via the `definition` "nested-field-tables".
  */
-export interface NestedField {
-  id: number;
+export interface NestedFieldTable {
+  id: string;
   array?:
     | {
         relation?: {
           relationTo: 'localized-posts';
-          value: number | LocalizedPost;
+          value: string | LocalizedPost;
         } | null;
-        hasManyRelation?: (number | LocalizedPost)[] | null;
+        hasManyRelation?: (string | LocalizedPost)[] | null;
         hasManyPolyRelation?:
           | {
               relationTo: 'localized-posts';
-              value: number | LocalizedPost;
+              value: string | LocalizedPost;
             }[]
           | null;
         select?: ('one' | 'two' | 'three')[] | null;
@@ -160,8 +160,8 @@ export interface NestedField {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  relation?: (number | null) | LocalizedPost;
+  id: string;
+  relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -178,7 +178,7 @@ export interface User {
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
-  id: number;
+  id: string;
   items?:
     | {
         text: string;
@@ -193,7 +193,7 @@ export interface ArrayField {
  * via the `definition` "localized-required".
  */
 export interface LocalizedRequired {
-  id: number;
+  id: string;
   title: string;
   layout: (
     | {
@@ -217,27 +217,27 @@ export interface LocalizedRequired {
  * via the `definition` "with-localized-relationship".
  */
 export interface WithLocalizedRelationship {
-  id: number;
-  localizedRelationship?: (number | null) | LocalizedPost;
-  localizedRelationHasManyField?: (number | LocalizedPost)[] | null;
+  id: string;
+  localizedRelationship?: (string | null) | LocalizedPost;
+  localizedRelationHasManyField?: (string | LocalizedPost)[] | null;
   localizedRelationMultiRelationTo?:
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'dummy';
-        value: number | Dummy;
+        value: string | Dummy;
       } | null);
   localizedRelationMultiRelationToHasMany?:
     | (
         | {
             relationTo: 'localized-posts';
-            value: number | LocalizedPost;
+            value: string | LocalizedPost;
           }
         | {
             relationTo: 'dummy';
-            value: number | Dummy;
+            value: string | Dummy;
           }
       )[]
     | null;
@@ -249,7 +249,7 @@ export interface WithLocalizedRelationship {
  * via the `definition` "dummy".
  */
 export interface Dummy {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -259,33 +259,33 @@ export interface Dummy {
  * via the `definition` "relationship-localized".
  */
 export interface RelationshipLocalized {
-  id: number;
-  relationship?: (number | null) | LocalizedPost;
-  relationshipHasMany?: (number | LocalizedPost)[] | null;
+  id: string;
+  relationship?: (string | null) | LocalizedPost;
+  relationshipHasMany?: (string | LocalizedPost)[] | null;
   relationMultiRelationTo?:
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'dummy';
-        value: number | Dummy;
+        value: string | Dummy;
       } | null);
   relationMultiRelationToHasMany?:
     | (
         | {
             relationTo: 'localized-posts';
-            value: number | LocalizedPost;
+            value: string | LocalizedPost;
           }
         | {
             relationTo: 'dummy';
-            value: number | Dummy;
+            value: string | Dummy;
           }
       )[]
     | null;
   arrayField?:
     | {
-        nestedRelation?: (number | null) | LocalizedPost;
+        nestedRelation?: (string | null) | LocalizedPost;
         id?: string | null;
       }[]
     | null;
@@ -297,7 +297,7 @@ export interface RelationshipLocalized {
  * via the `definition` "nested".
  */
 export interface Nested {
-  id: number;
+  id: string;
   blocks?:
     | {
         array?:
@@ -320,7 +320,7 @@ export interface Nested {
  * via the `definition` "groups".
  */
 export interface Group {
-  id: number;
+  id: string;
   groupLocalized?: {
     title?: string | null;
   };
@@ -351,7 +351,7 @@ export interface Group {
  * via the `definition` "tabs".
  */
 export interface Tab {
-  id: number;
+  id: string;
   tabLocalized?: {
     title?: string | null;
   };
@@ -382,7 +382,7 @@ export interface Tab {
  * via the `definition` "localized-sort".
  */
 export interface LocalizedSort {
-  id: number;
+  id: string;
   title?: string | null;
   date?: string | null;
   updatedAt: string;
@@ -393,7 +393,7 @@ export interface LocalizedSort {
  * via the `definition` "blocks-same-name".
  */
 export interface BlocksSameName {
-  id: number;
+  id: string;
   blocks?:
     | (
         | {
@@ -418,10 +418,10 @@ export interface BlocksSameName {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -441,7 +441,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -452,7 +452,7 @@ export interface PayloadMigration {
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
-  id: number;
+  id: string;
   array?:
     | {
         text?: string | null;

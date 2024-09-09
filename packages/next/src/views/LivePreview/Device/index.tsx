@@ -54,8 +54,11 @@ export const DeviceContainer: React.FC<{
       if (deviceIsLargerThanFrame) {
         if (zoom > 1) {
           const differenceFromDeviceToFrame = measuredDeviceSize.width - outerFrameSize.width
-          if (differenceFromDeviceToFrame < 0) x = `${differenceFromDeviceToFrame / 2}px`
-          else x = '0'
+          if (differenceFromDeviceToFrame < 0) {
+            x = `${differenceFromDeviceToFrame / 2}px`
+          } else {
+            x = '0'
+          }
         } else {
           x = '0'
         }

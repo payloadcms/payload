@@ -15,7 +15,9 @@ export const createUploadTimer: CreateUploadTimer = (timeout = 0, callback = () 
 
   const set = () => {
     // Do not start a timer if zero timeout or it hasn't been set.
-    if (!timeout) return false
+    if (!timeout) {
+      return false
+    }
     clear()
     timer = setTimeout(callback, timeout)
     return true

@@ -25,8 +25,11 @@ const Component: React.FC<{
   // }, [modalState, isActive, onCancel])
 
   useEffect(() => {
-    if (isActive) openModal(modalSlug)
-    else closeModal(modalSlug)
+    if (isActive) {
+      openModal(modalSlug)
+    } else {
+      closeModal(modalSlug)
+    }
   }, [isActive, openModal, closeModal])
 
   return (

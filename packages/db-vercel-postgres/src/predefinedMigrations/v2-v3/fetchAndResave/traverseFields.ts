@@ -193,7 +193,9 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
               const matchedRelationship = rows.find((row) => {
                 const matchesPath = row.path === relationshipPath
 
-                if (locale) return matchesPath && locale === row.locale
+                if (locale) {
+                  return matchesPath && locale === row.locale
+                }
 
                 return row.path === relationshipPath
               })

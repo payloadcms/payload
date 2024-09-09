@@ -91,13 +91,15 @@
 
   &__dropzoneContent {
     display: flex;
+    flex-wrap: wrap;
+    gap: base(0.4);
     justify-content: space-between;
     width: 100%;
   }
 
   &__dropzoneButtons {
     display: flex;
-    gap: calc(var(--base) * .5);
+    gap: calc(var(--base) * 0.5);
   }
 
   &__orText {
@@ -106,6 +108,7 @@
   }
 
   &__dragAndDropText {
+    flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
     align-self: center;

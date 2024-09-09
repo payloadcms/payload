@@ -4,19 +4,36 @@ import type { CodeField, CodeFieldClient } from '../../fields/config/types.js'
 import type { CodeFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
 
-export type CodeFieldProps = {
+type CodeFieldBaseClientProps = {
   readonly autoComplete?: string
-  readonly validate?: CodeFieldValidation
-} & Omit<FormFieldBase<CodeFieldClientWithoutType>, 'validate'>
+  readonly valiCode?: CodeFieldValidation
+}
+
+export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
+  CodeFieldBaseClientProps
+
+export type CodeFieldServerProps = ServerFieldBase<CodeField>
+
+export type CodeFieldServerComponent = FieldServerComponent<CodeField>
+
+export type CodeFieldClientComponent = FieldClientComponent<
+  CodeFieldClientWithoutType,
+  CodeFieldBaseClientProps
+>
 
 export type CodeFieldLabelServerComponent = FieldLabelServerComponent<CodeField>
 

@@ -1,5 +1,9 @@
 'use client'
-import type { EmailFieldProps, EmailFieldValidation } from 'payload'
+import type {
+  EmailFieldClientComponent,
+  EmailFieldClientProps,
+  EmailFieldValidation,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -15,7 +19,7 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
+const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
     autoComplete,
     descriptionProps,
@@ -31,10 +35,10 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
         placeholder,
         style,
         width,
-      } = {} as EmailFieldProps['field']['admin'],
+      } = {} as EmailFieldClientProps['field']['admin'],
       label,
       required,
-    } = {} as EmailFieldProps['field'],
+    } = {} as EmailFieldClientProps['field'],
     field,
     labelProps,
     readOnly: readOnlyFromTopLevelProps,
@@ -74,8 +78,8 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}

@@ -9,12 +9,12 @@ export const RenderParams: React.FC<{
 }> = ({ params = ['error', 'message', 'success'], message, className }) => {
   const router = useRouter()
   const searchParams = new URLSearchParams(router.query as any)
-  const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
+  const paramValues = params.map((param) => searchParams.get(param)).filter(Boolean)
 
   if (paramValues.length) {
     return (
       <div className={className}>
-        {paramValues.map(paramValue => (
+        {paramValues.map((paramValue) => (
           <Message key={paramValue} message={(message || 'PARAM')?.replace('PARAM', paramValue)} />
         ))}
       </div>

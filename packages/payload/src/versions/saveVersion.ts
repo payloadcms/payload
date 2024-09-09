@@ -32,8 +32,12 @@ export const saveVersion = async ({
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
-  if (draft) versionData._status = 'draft'
-  if (versionData._id) delete versionData._id
+  if (draft) {
+    versionData._status = 'draft'
+  }
+  if (versionData._id) {
+    delete versionData._id
+  }
 
   try {
     if (autosave) {
@@ -124,10 +128,12 @@ export const saveVersion = async ({
   } catch (err) {
     let errorMessage: string
 
-    if (collection)
+    if (collection) {
       errorMessage = `There was an error while saving a version for the ${collection.labels.singular} with ID ${id}.`
-    if (global)
+    }
+    if (global) {
       errorMessage = `There was an error while saving a version for the global ${global.label}.`
+    }
     payload.logger.error(errorMessage)
     payload.logger.error(err)
     return
@@ -135,9 +141,12 @@ export const saveVersion = async ({
 
   let max = 100
 
-  if (collection && typeof collection.versions.maxPerDoc === 'number')
+  if (collection && typeof collection.versions.maxPerDoc === 'number') {
     max = collection.versions.maxPerDoc
-  if (global && typeof global.versions.max === 'number') max = global.versions.max
+  }
+  if (global && typeof global.versions.max === 'number') {
+    max = global.versions.max
+  }
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({

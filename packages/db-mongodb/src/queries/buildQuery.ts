@@ -18,7 +18,10 @@ export type BuildQueryArgs = {
 
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
-const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPluginArgs = {}) => {
+export const getBuildQueryPlugin = ({
+  collectionSlug,
+  versionsFields,
+}: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema
     async function buildQuery({
@@ -57,5 +60,3 @@ const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPl
     modifiedSchema.statics.buildQuery = buildQuery
   }
 }
-
-export default getBuildQueryPlugin

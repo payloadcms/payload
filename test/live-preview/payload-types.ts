@@ -85,7 +85,7 @@ export interface Page {
           [k: string]: unknown;
         }[]
       | null;
-    media?: string | Media | null;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -212,7 +212,7 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
-  relationshipAsUpload?: string | Media | null;
+  relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
   relationshipPolyHasOne?: {
@@ -227,7 +227,7 @@ export interface Page {
     | null;
   arrayOfRelationships?:
     | {
-        uploadInArray?: string | Media | null;
+        uploadInArray?: (string | null) | Media;
         richTextInArray?: {
           root: {
             type: string;
@@ -264,7 +264,7 @@ export interface Page {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -315,7 +315,7 @@ export interface Post {
           [k: string]: unknown;
         }[]
       | null;
-    media?: string | Media | null;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -426,7 +426,7 @@ export interface Post {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -457,7 +457,7 @@ export interface Ssr {
           [k: string]: unknown;
         }[]
       | null;
-    media?: string | Media | null;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -567,7 +567,7 @@ export interface Ssr {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;
@@ -588,7 +588,7 @@ export interface SsrAutosave {
           [k: string]: unknown;
         }[]
       | null;
-    media?: string | Media | null;
+    media?: (string | null) | Media;
   };
   layout?:
     | (
@@ -698,7 +698,7 @@ export interface SsrAutosave {
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: string | Media | null;
+    image?: (string | null) | Media;
   };
   updatedAt: string;
   createdAt: string;

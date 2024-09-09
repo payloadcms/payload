@@ -4,10 +4,10 @@ import { BasePayload, generateImportMap } from 'payload'
 import WebSocket from 'ws'
 
 let cached: {
-  payload: Payload | null
-  promise: Promise<Payload> | null
-  reload: Promise<void> | boolean
-  ws: WebSocket | null
+  payload: null | Payload
+  promise: null | Promise<Payload>
+  reload: boolean | Promise<void>
+  ws: null | WebSocket
 } = global._payload
 
 if (!cached) {

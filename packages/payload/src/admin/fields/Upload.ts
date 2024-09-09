@@ -4,18 +4,35 @@ import type { UploadField, UploadFieldClient } from '../../fields/config/types.j
 import type { UploadFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
 
-export type UploadFieldProps = {
+type UploadFieldBaseClientProps = {
   readonly validate?: UploadFieldValidation
-} & Omit<FormFieldBase<UploadFieldClientWithoutType>, 'validate'>
+}
+
+export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutType> &
+  UploadFieldBaseClientProps
+
+export type UploadFieldServerProps = ServerFieldBase<UploadField>
+
+export type UploadFieldServerComponent = FieldServerComponent<UploadField>
+
+export type UploadFieldClientComponent = FieldClientComponent<
+  UploadFieldClientWithoutType,
+  UploadFieldBaseClientProps
+>
 
 export type UploadFieldLabelServerComponent = FieldLabelServerComponent<UploadField>
 

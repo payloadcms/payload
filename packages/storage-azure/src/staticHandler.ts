@@ -26,7 +26,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       )
 
       const blob = await blockBlobClient.download(start, end)
-       
+
       const response = blob._response
 
       // Manually create a ReadableStream for the web from a Node.js stream.

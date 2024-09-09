@@ -2,7 +2,7 @@ import type { FieldAffectingData } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
-const isFieldNullable = (field: FieldAffectingData, force: boolean): boolean => {
+export const isFieldNullable = (field: FieldAffectingData, force: boolean): boolean => {
   const hasReadAccessControl = field.access && field.access.read
   const condition = field.admin && field.admin.condition
   return !(
@@ -15,5 +15,3 @@ const isFieldNullable = (field: FieldAffectingData, force: boolean): boolean => 
     !hasReadAccessControl
   )
 }
-
-export default isFieldNullable

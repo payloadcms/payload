@@ -30,7 +30,7 @@ export default async function Page({ params }: PageParams) {
     `${
       process.env.NEXT_PUBLIC_PAYLOAD_URL
     }/api/pages?where[slug][equals]=${lastSlug.toLowerCase()}&depth=1`,
-  )?.then(res => res.json()?.then(data => data.docs[0]))
+  )?.then((res) => res.json()?.then((data) => data.docs[0]))
 
   if (!page) {
     return notFound()
@@ -50,10 +50,10 @@ export async function generateStaticParams() {
 
   const pages: Page[] = await fetch(
     `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?depth=0&limit=300`,
-  )?.then(res => res.json()?.then(data => data.docs))
+  )?.then((res) => res.json()?.then((data) => data.docs))
 
   if (pages && Array.isArray(pages) && pages.length > 0) {
-    paths = pages.map(page => {
+    paths = pages.map((page) => {
       const { slug, breadcrumbs } = page
 
       let slugs = [slug]
@@ -62,7 +62,7 @@ export async function generateStaticParams() {
 
       if (hasBreadcrumbs) {
         slugs = breadcrumbs
-          .map(crumb => {
+          .map((crumb) => {
             const { url } = crumb
             let slug: string = ''
 

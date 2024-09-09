@@ -148,7 +148,7 @@ export function $createServerRelationshipNode(data: RelationshipData): Relations
 }
 
 export function $isServerRelationshipNode(
-  node: LexicalNode | RelationshipServerNode | null | undefined,
+  node: LexicalNode | null | RelationshipServerNode | undefined,
 ): node is RelationshipServerNode {
   return node instanceof RelationshipServerNode
 }

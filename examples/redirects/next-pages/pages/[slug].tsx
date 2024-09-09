@@ -13,7 +13,7 @@ const Page: React.FC<
     mainMenu: MainMenu
     preview?: boolean
   }
-> = props => {
+> = (props) => {
   const { title, richText } = props
 
   return (

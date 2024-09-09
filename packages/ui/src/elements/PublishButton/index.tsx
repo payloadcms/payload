@@ -7,8 +7,8 @@ import React, { useCallback } from 'react'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -48,7 +48,9 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) return
+    if (forceDisable) {
+      return
+    }
 
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
@@ -56,7 +58,9 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
 
     if (collectionSlug) {
       action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
-      if (id) method = 'PATCH'
+      if (id) {
+        method = 'PATCH'
+      }
     }
 
     if (globalSlug) {
@@ -90,7 +94,9 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
     })
   }, [submit])
 
-  if (!hasPublishPermission) return null
+  if (!hasPublishPermission) {
+    return null
+  }
 
   return (
     <FormSubmit
@@ -110,6 +116,8 @@ type Props = {
 }
 
 export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) return <RenderComponent mappedComponent={CustomComponent} />
+  if (CustomComponent) {
+    return <RenderComponent mappedComponent={CustomComponent} />
+  }
   return <DefaultPublishButton />
 }

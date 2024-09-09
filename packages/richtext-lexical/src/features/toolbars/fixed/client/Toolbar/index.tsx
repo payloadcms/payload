@@ -59,7 +59,7 @@ function ToolbarGroupComponent({
     field: { richTextComponentMap },
   } = useEditorConfigContext()
   const [dropdownLabel, setDropdownLabel] = React.useState<null | string>(null)
-  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | null>(null)
+  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
@@ -101,10 +101,10 @@ function ToolbarGroupComponent({
         group.items.length &&
         (DropdownIcon ? (
           <ToolbarDropdown
-            Icon={DropdownIcon}
             anchorElem={anchorElem}
             editor={editor}
             groupKey={group.key}
+            Icon={DropdownIcon}
             items={group.items}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}

@@ -2,6 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { isImage } from 'payload/shared'
 import React from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
@@ -13,6 +14,7 @@ import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
+import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -99,7 +101,7 @@ export function FileSidebar() {
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
-            <Drawer Header={null} gutter={false} slug={addMoreFilesDrawerSlug}>
+            <Drawer gutter={false} Header={null} slug={addMoreFilesDrawerSlug}>
               <AddFilesView
                 onCancel={() => closeModal(addMoreFilesDrawerSlug)}
                 onDrop={handleAddFiles}
@@ -144,7 +146,12 @@ export function FileSidebar() {
                     onClick={() => setActiveIndex(index)}
                     type="button"
                   >
-                    <img alt={currentFile.name} src={URL.createObjectURL(currentFile)} />
+                    <Thumbnail
+                      className={`${baseClass}__thumbnail`}
+                      fileSrc={
+                        isImage(currentFile.type) ? URL.createObjectURL(currentFile) : undefined
+                      }
+                    />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
                         {currentFile.name}

@@ -32,8 +32,8 @@ export const Select: React.FC<
             <ReactSelect
               instanceId={name}
               options={options}
-              value={options.find(s => s.value === value)}
-              onChange={val => onChange(val.value)}
+              value={options.find((s) => s.value === value)}
+              onChange={(val) => onChange(val.value)}
               className={classes.reactSelect}
               classNamePrefix="rs"
               inputId={name}

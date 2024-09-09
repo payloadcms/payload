@@ -58,7 +58,9 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (doc) throw new Forbidden(req.t)
+    if (doc) {
+      throw new Forbidden(req.t)
+    }
 
     // /////////////////////////////////////
     // Register first user
@@ -93,7 +95,9 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return {
       exp,

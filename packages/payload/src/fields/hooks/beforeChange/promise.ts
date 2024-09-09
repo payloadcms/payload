@@ -13,7 +13,7 @@ import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
   doc: JsonObject
@@ -21,7 +21,7 @@ type Args = {
   duplicate: boolean
   errors: { field: string; message: string }[]
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
@@ -233,10 +233,15 @@ export const promise = async ({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
-      if (typeof siblingDocWithLocales[field.name] !== 'object')
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
+      if (typeof siblingDocWithLocales[field.name] !== 'object') {
         siblingDocWithLocales[field.name] = {}
+      }
 
       await traverseFields({
         id,
@@ -384,10 +389,15 @@ export const promise = async ({
       let tabSiblingDocWithLocales = siblingDocWithLocales
 
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
-        if (typeof siblingDocWithLocales[field.name] !== 'object')
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+        if (typeof siblingDocWithLocales[field.name] !== 'object') {
           siblingDocWithLocales[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as JsonObject
         tabSiblingDoc = siblingDoc[field.name] as JsonObject

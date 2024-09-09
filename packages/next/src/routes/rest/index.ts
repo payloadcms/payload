@@ -246,7 +246,9 @@ export const GET =
         request,
       })
 
-      if (disableEndpoints) return disableEndpoints
+      if (disableEndpoints) {
+        return disableEndpoints
+      }
 
       collection = req.payload.collections?.[slug1]
 
@@ -256,7 +258,9 @@ export const GET =
           endpoints: collection.config.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
@@ -327,7 +331,9 @@ export const GET =
           endpoints: globalConfig.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: globalConfig.endpoints,
@@ -403,7 +409,9 @@ export const GET =
         req,
       })
 
-      if (customEndpointResponse) return customEndpointResponse
+      if (customEndpointResponse) {
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,
@@ -445,7 +453,9 @@ export const POST =
         request,
       })
 
-      if (disableEndpoints) return disableEndpoints
+      if (disableEndpoints) {
+        return disableEndpoints
+      }
 
       if (collection) {
         req.routeParams.collection = slug1
@@ -453,7 +463,9 @@ export const POST =
           endpoints: collection.config.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
@@ -516,7 +528,9 @@ export const POST =
           endpoints: globalConfig.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: globalConfig.endpoints,
@@ -585,7 +599,9 @@ export const POST =
         req,
       })
 
-      if (customEndpointResponse) return customEndpointResponse
+      if (customEndpointResponse) {
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,
@@ -620,7 +636,9 @@ export const DELETE =
         endpoints: req.payload.config.endpoints,
         request,
       })
-      if (disableEndpoints) return disableEndpoints
+      if (disableEndpoints) {
+        return disableEndpoints
+      }
 
       if (collection) {
         req.routeParams.collection = slug1
@@ -629,7 +647,9 @@ export const DELETE =
           endpoints: collection.config.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
@@ -679,7 +699,9 @@ export const DELETE =
         req,
       })
 
-      if (customEndpointResponse) return customEndpointResponse
+      if (customEndpointResponse) {
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,
@@ -714,7 +736,9 @@ export const PATCH =
         endpoints: req.payload.config.endpoints,
         request,
       })
-      if (disableEndpoints) return disableEndpoints
+      if (disableEndpoints) {
+        return disableEndpoints
+      }
 
       if (collection) {
         req.routeParams.collection = slug1
@@ -723,7 +747,9 @@ export const PATCH =
           endpoints: collection.config.endpoints,
           request,
         })
-        if (disableEndpoints) return disableEndpoints
+        if (disableEndpoints) {
+          return disableEndpoints
+        }
 
         const customEndpointResponse = await handleCustomEndpoints({
           endpoints: collection.config.endpoints,
@@ -774,7 +800,9 @@ export const PATCH =
         req,
       })
 
-      if (customEndpointResponse) return customEndpointResponse
+      if (customEndpointResponse) {
+        return customEndpointResponse
+      }
 
       return RouteNotFoundResponse({
         slug,

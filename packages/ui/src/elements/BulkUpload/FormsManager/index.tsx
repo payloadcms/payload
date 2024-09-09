@@ -327,7 +327,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   )
 
   React.useEffect(() => {
-    if (!collectionSlug) return
+    if (!collectionSlug) {
+      return
+    }
     if (!hasInitializedState) {
       void initializeSharedFormState()
     }

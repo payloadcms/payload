@@ -16,17 +16,17 @@ export type SharedTextFieldProps =
     }
 
 export type TextInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
+  readonly Error?: MappedComponent
   readonly errorProps?: Record<string, unknown>
   readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly maxRows?: number

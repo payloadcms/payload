@@ -34,11 +34,8 @@
         "./node_modules/@types/react"
       ],
       "@/*": [
-        "./src/app/*"
+        "./src/*"
       ],
-      "@/payload/*": [
-        "./src/payload/*"
-      ]
     }
   },
   "include": [

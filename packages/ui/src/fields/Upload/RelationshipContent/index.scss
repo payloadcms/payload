@@ -1,4 +1,4 @@
-.uploadDocRelationshipContent {
+.upload-relationship-details {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -22,14 +22,17 @@
     flex-direction: column;
     gap: 0;
     overflow: hidden;
-    margin-right: calc(var(--base)* 2);
+    margin-right: calc(var(--base) * 2);
   }
 
-  &__title {
+  &__filename {
     margin: 0;
     text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    a {
+      text-decoration: none;
+    }
   }
 
   &__meta {

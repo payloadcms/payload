@@ -21,8 +21,8 @@ export type AdminViewConfig = {
 }
 
 export type MappedView = {
-  Component: MappedComponent
   actions?: MappedComponent[]
+  Component: MappedComponent
 }
 
 export type AdminViewProps = {

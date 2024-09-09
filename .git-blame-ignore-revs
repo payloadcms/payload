@@ -22,3 +22,9 @@ fb7d1be2f3325d076b7c967b1730afcef37922c2
 
 # 3.0 prettier & lint everywhere again
 83fd4c66222d7846eeb5cc332dfa99bf1e830831
+
+# Upgrade to typescript-eslint v8, then prettier & lint everywhere
+86fdad0bb8ab27810599c8a32f3d8cba1341e1df
+
+# Prettier and lint remaining db packages
+7fd736ea5b2e9fc4ef936e9dc9e5e3d722f6d8bf

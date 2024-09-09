@@ -1,5 +1,5 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
-import type { Field, PayloadRequest, TextField, TextareaField, UploadField } from 'payload'
+import type { Field, PayloadRequest, TextareaField, TextField, UploadField } from 'payload'
 
 export type PartialDocumentInfoContext = Pick<
   DocumentInfoContext,

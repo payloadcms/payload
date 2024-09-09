@@ -16,7 +16,7 @@ describe('get localized sort property', () => {
       },
     } as Config)
   })
-  it('passes through a non-localized sort property', async () => {
+  it('passes through a non-localized sort property', () => {
     const result = getLocalizedSortProperty({
       config,
       fields: [

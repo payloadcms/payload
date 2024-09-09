@@ -29,7 +29,6 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -46,9 +45,6 @@ export const baseClass = 'upload'
 type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   /**
    * Controls the visibility of the "Create new collection" button
    */
@@ -57,13 +53,16 @@ export type UploadInputProps = {
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly Error?: MappedComponent
   readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly field?: MarkOptional<UploadFieldClient, 'type'>
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
   readonly isSortable?: boolean
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly maxRows?: number
@@ -81,19 +80,19 @@ export type UploadInputProps = {
 
 export function UploadInput(props: UploadInputProps) {
   const {
-    Description,
-    Error,
-    Label,
     allowNewUpload,
     api,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
     field,
     filterOptions: filterOptionsFromProps,
     hasMany,
     isSortable,
+    Label,
     label,
     labelProps,
     maxRows,
@@ -141,13 +140,14 @@ export function UploadInput(props: UploadInputProps) {
     }
   }, [value, activeRelationTo, filterOptionsFromProps])
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
-    collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
-    filterOptions,
-  })
+  const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
+    useListDrawer({
+      collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
+      filterOptions,
+    })
   const [
     CreateDocDrawer,
-    _,
+    ,
     { closeDrawer: closeCreateDocDrawer, openDrawer: openCreateDocDrawer },
   ] = useDocumentDrawer({
     collectionSlug: activeRelationTo,
@@ -180,7 +180,7 @@ export function UploadInput(props: UploadInputProps) {
     async (
       ids: (number | string)[],
       relatedCollectionSlug: string,
-    ): Promise<PaginatedDocs | null> => {
+    ): Promise<null | PaginatedDocs> => {
       const query: {
         [key: string]: unknown
         where: Where
@@ -212,7 +212,12 @@ export function UploadInput(props: UploadInputProps) {
       })
       if (response.ok) {
         const json = await response.json()
-        const sortedDocs = ids.map((id) => json.docs.find((doc) => doc.id === id))
+        const sortedDocs = ids.map((id) =>
+          json.docs.find((doc) => {
+            return String(doc.id) === String(id)
+          }),
+        )
+
         return { ...json, docs: sortedDocs }
       }
 
@@ -258,10 +263,14 @@ export function UploadInput(props: UploadInputProps) {
         dataTransfer.items.add(fileList[0])
         fileListToUse = dataTransfer.files
       }
-      if (fileListToUse) setInitialFiles(fileListToUse)
+      if (fileListToUse) {
+        setInitialFiles(fileListToUse)
+      }
       setCollectionSlug(relationTo)
       setOnSuccess(onUploadSuccess)
-      if (typeof maxRows === 'number') setMaxFiles(maxRows)
+      if (typeof maxRows === 'number') {
+        setMaxFiles(maxRows)
+      }
       openModal(drawerSlug)
     },
     [
@@ -412,6 +421,7 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
@@ -476,6 +486,7 @@ export function UploadInput(props: UploadInputProps) {
               <div className={`${baseClass}__dropzoneContent__buttons`}>
                 <Button
                   buttonStyle="pill"
+                  className={`${baseClass}__createNewToggler`}
                   disabled={readOnly || !canCreate}
                   onClick={() => {
                     if (!readOnly) {
@@ -491,11 +502,15 @@ export function UploadInput(props: UploadInputProps) {
                   {t('general:createNew')}
                 </Button>
                 <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
-                <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
-                  <Button buttonStyle="pill" el="span" size="small">
-                    {t('fields:chooseFromExisting')}
-                  </Button>
-                </ListDrawerToggler>
+                <Button
+                  buttonStyle="pill"
+                  className={`${baseClass}__listToggler`}
+                  disabled={readOnly}
+                  onClick={openListDrawer}
+                  size="small"
+                >
+                  {t('fields:chooseFromExisting')}
+                </Button>
 
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer

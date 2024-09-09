@@ -18,8 +18,8 @@ export type DocumentViewKey = (typeof documentViewKeys)[number]
 export const tabs: Record<
   DocumentViewKey,
   {
-    Pill_Component?: React.FC
     order?: number // TODO: expose this to the globalConfig config
+    Pill_Component?: React.FC
   } & DocumentTabConfig
 > = {
   api: {
@@ -69,7 +69,6 @@ export const tabs: Record<
     condition: () => false,
   },
   versions: {
-    Pill_Component: VersionsPill,
     condition: ({ collectionConfig, globalConfig, permissions }) =>
       Boolean(
         (collectionConfig?.versions &&
@@ -80,5 +79,6 @@ export const tabs: Record<
     href: '/versions',
     label: ({ t }) => t('version:versions'),
     order: 200,
+    Pill_Component: VersionsPill,
   },
 }

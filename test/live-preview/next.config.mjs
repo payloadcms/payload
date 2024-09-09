@@ -11,5 +11,5 @@ export default {
   env: {
     PAYLOAD_CORE_DEV: 'true',
     ROOT_DIR: path.resolve(dirname),
-  }
+  },
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { UploadFieldProps } from 'payload'
+import type { UploadFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -23,7 +23,7 @@ import { Pill } from '../../ui/Pill.js'
 
 type MetaImageProps = {
   readonly hasGenerateImageFn: boolean
-} & UploadFieldProps
+} & UploadFieldClientProps
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
@@ -51,7 +51,9 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
-    if (!hasGenerateImageFn) return
+    if (!hasGenerateImageFn) {
+      return
+    }
 
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
@@ -99,7 +101,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} field={null} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -140,19 +142,23 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          api={api}
+          collection={collection}
           Error={{
             type: 'client',
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          api={api}
-          collection={collection}
           filterOptions={field.filterOptions}
           label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
-              const { id: incomingID } = incomingImage
-              setValue(incomingID)
+              if (typeof incomingImage === 'object') {
+                const { id: incomingID } = incomingImage
+                setValue(incomingID)
+              } else {
+                setValue(incomingImage)
+              }
             } else {
               setValue(null)
             }

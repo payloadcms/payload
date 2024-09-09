@@ -13,17 +13,17 @@ import type { MarkOptional } from 'ts-essentials'
 import { type ChangeEvent } from 'react'
 
 export type TextAreaInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<TextareaFieldClient, 'type'>>
+  readonly Error?: MappedComponent
   readonly errorProps?: FieldErrorClientProps<MarkOptional<TextareaFieldClient, 'type'>>
   readonly field?: MarkOptional<TextareaFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<TextareaFieldClient, 'type'>>
   readonly onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void

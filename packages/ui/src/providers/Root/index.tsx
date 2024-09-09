@@ -41,7 +41,7 @@ type Props = {
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: User | null
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({

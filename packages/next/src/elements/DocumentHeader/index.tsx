@@ -9,8 +9,8 @@ import type {
 import { Gutter, RenderTitle } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
-import { DocumentTabs } from './Tabs/index.js'
 import './index.scss'
+import { DocumentTabs } from './Tabs/index.js'
 
 const baseClass = `doc-header`
 

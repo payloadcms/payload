@@ -24,7 +24,9 @@ export const DropdownIndicator: React.FC<
       ref={ref}
       {...restInnerProps}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') e.key = ' '
+        if (e.key === 'Enter') {
+          e.key = ' '
+        }
       }}
       type="button"
     >

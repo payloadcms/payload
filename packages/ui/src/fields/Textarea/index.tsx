@@ -1,5 +1,5 @@
 'use client'
-import type { TextareaFieldProps, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -12,12 +12,12 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextareaInput } from './Input.js'
 import './index.scss'
+import { TextareaInput } from './Input.js'
 
-export { TextAreaInputProps, TextareaInput }
+export { TextareaInput, TextAreaInputProps }
 
-const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
+const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -64,8 +64,9 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   const memoizedValidate: TextareaFieldValidation = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, required, maxLength, minLength],
   )
@@ -81,15 +82,15 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
 
   return (
     <TextareaInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
       descriptionProps={descriptionProps}
+      Error={field?.admin?.components?.Error}
       errorProps={errorProps}
+      Label={field?.admin?.components?.Label}
       label={label}
       labelProps={labelProps}
       onChange={(e) => {

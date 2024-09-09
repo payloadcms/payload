@@ -9,6 +9,8 @@
 
   &__dropzoneContent {
     display: flex;
+    flex-wrap: wrap;
+    gap: base(0.4);
     justify-content: space-between;
     width: 100%;
   }
@@ -22,18 +24,19 @@
     .btn .btn__content {
       gap: calc(var(--base) / 5);
     }
-    
+
     .btn__label {
       font-weight: 100;
     }
   }
-  
+
   &__dropzoneContent__orText {
     color: var(--theme-elevation-500);
     text-transform: lowercase;
   }
 
   &__dragAndDropText {
+    flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
     align-self: center;

@@ -7,7 +7,6 @@ export { RichTextCell } from '../../cell/index.js'
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
-export { createClientComponent } from '../../features/createClientComponent.js'
 export { TestRecorderFeatureClient } from '../../features/debug/testRecorder/client/index.js'
 export { TreeViewFeatureClient } from '../../features/debug/treeView/client/index.js'
 export { BoldFeatureClient } from '../../features/format/bold/feature.client.js'
@@ -60,7 +59,7 @@ export { isHTMLElement } from '../../lexical/utils/guard.js'
 export { joinClasses } from '../../lexical/utils/joinClasses.js'
 
 export { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
-export { Point, isPoint } from '../../lexical/utils/point.js'
+export { isPoint, Point } from '../../lexical/utils/point.js'
 export { Rect } from '../../lexical/utils/rect.js'
 export { setFloatingElemPosition } from '../../lexical/utils/setFloatingElemPosition.js'
 export { setFloatingElemPositionForLinkEditor } from '../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
@@ -80,8 +79,8 @@ export {
   ELEMENT_TYPE_TO_FORMAT,
   IS_ALL_FORMATTING,
   LTR_REGEX,
-  NON_BREAKING_SPACE,
   NodeFormat,
+  NON_BREAKING_SPACE,
   RTL_REGEX,
   TEXT_MODE_TO_TYPE,
   TEXT_TYPE_TO_FORMAT,

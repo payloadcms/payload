@@ -4,14 +4,15 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
-import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { baseBeforeDuplicateArrays } from '../baseFields/baseBeforeDuplicateArrays.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
@@ -23,18 +24,19 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  parentIsLocalized: boolean
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
+
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -47,11 +49,14 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
 }: Args): Promise<Field[]> => {
-  if (!fields) return []
+  if (!fields) {
+    return []
+  }
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -60,7 +65,9 @@ export const sanitizeFields = async ({
       continue
     }
 
-    if (!field.type) throw new MissingFieldType(field)
+    if (!field.type) {
+      throw new MissingFieldType(field)
+    }
 
     // assert that field names do not contain forbidden characters
     if (fieldAffectsData(field) && field.name.includes('.')) {
@@ -124,6 +131,15 @@ export const sanitizeFields = async ({
 
     if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField)
+      if (field.localized) {
+        if (!field.hooks) {
+          field.hooks = {}
+        }
+        if (!field.hooks.beforeDuplicate) {
+          field.hooks.beforeDuplicate = []
+        }
+        field.hooks.beforeDuplicate.push(baseBeforeDuplicateArrays)
+      }
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {
@@ -137,7 +153,17 @@ export const sanitizeFields = async ({
         existingFieldNames.add(field.name)
       }
 
-      if (field.localized && !config.localization) delete field.localized
+      if (typeof field.localized !== 'undefined') {
+        let shouldDisableLocalized = !config.localization
+
+        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+          shouldDisableLocalized = true
+        }
+
+        if (shouldDisableLocalized) {
+          delete field.localized
+        }
+      }
 
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
@@ -148,8 +174,12 @@ export const sanitizeFields = async ({
         }
       }
 
-      if (!field.hooks) field.hooks = {}
-      if (!field.access) field.access = {}
+      if (!field.hooks) {
+        field.hooks = {}
+      }
+      if (!field.access) {
+        field.access = {}
+      }
 
       setDefaultBeforeDuplicate(field)
     }
@@ -174,6 +204,7 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
+            parentIsLocalized: parentIsLocalized || field.localized,
           })
         }
 
@@ -189,6 +220,15 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
+      if (field.localized) {
+        if (!field.hooks) {
+          field.hooks = {}
+        }
+        if (!field.hooks.beforeDuplicate) {
+          field.hooks.beforeDuplicate = []
+        }
+        field.hooks.beforeDuplicate.push(baseBeforeDuplicateArrays)
+      }
       for (const block of field.blocks) {
         if (block._sanitized === true) {
           continue
@@ -201,6 +241,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -213,6 +254,7 @@ export const sanitizeFields = async ({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -230,6 +272,7 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,

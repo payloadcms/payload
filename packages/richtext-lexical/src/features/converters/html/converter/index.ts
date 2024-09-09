@@ -18,19 +18,6 @@ export type ConvertLexicalToHTMLArgs = {
       /**
        * This payload property will only be used if req is undefined.
        */
-      payload?: Payload
-      /**
-       * When the converter is called, req CAN be passed in depending on where it's run.
-       * If this is undefined and config is passed through, lexical will create a new req object for you. If this is null or
-       * config is undefined, lexical will not create a new req object for you and local API / server-side-only
-       * functionality will be disabled.
-       */
-      req?: null | undefined
-    }
-  | {
-      /**
-       * This payload property will only be used if req is undefined.
-       */
       payload?: never
       /**
        * When the converter is called, req CAN be passed in depending on where it's run.
@@ -39,6 +26,19 @@ export type ConvertLexicalToHTMLArgs = {
        * functionality will be disabled.
        */
       req: PayloadRequest
+    }
+  | {
+      /**
+       * This payload property will only be used if req is undefined.
+       */
+      payload?: Payload
+      /**
+       * When the converter is called, req CAN be passed in depending on where it's run.
+       * If this is undefined and config is passed through, lexical will create a new req object for you. If this is null or
+       * config is undefined, lexical will not create a new req object for you and local API / server-side-only
+       * functionality will be disabled.
+       */
+      req?: null | undefined
     }
 )
 
@@ -102,7 +102,7 @@ export async function convertLexicalNodesToHTML({
   /**
    * When the converter is called, req CAN be passed in depending on where it's run.
    */
-  req: PayloadRequest | null
+  req: null | PayloadRequest
   showHiddenFields: boolean
 }): Promise<string> {
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))

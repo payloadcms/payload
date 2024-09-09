@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation.js'
 import { useCallback, useEffect, useRef } from 'react'
 
 function on<T extends Document | EventTarget | HTMLElement | Window>(
-  obj: T | null,
+  obj: null | T,
   ...args: [string, Function | null, ...any] | Parameters<T['addEventListener']>
 ): void {
   if (obj && obj.addEventListener) {
@@ -16,7 +16,7 @@ function on<T extends Document | EventTarget | HTMLElement | Window>(
 }
 
 function off<T extends Document | EventTarget | HTMLElement | Window>(
-  obj: T | null,
+  obj: null | T,
   ...args: [string, Function | null, ...any] | Parameters<T['removeEventListener']>
 ): void {
   if (obj && obj.removeEventListener) {
@@ -145,7 +145,9 @@ export const usePreventLeave = ({
 
   useEffect(() => {
     if (hasAccepted && cancelledURL.current) {
-      if (onAccept) onAccept()
+      if (onAccept) {
+        onAccept()
+      }
       router.push(cancelledURL.current)
     }
   }, [hasAccepted, onAccept, router])

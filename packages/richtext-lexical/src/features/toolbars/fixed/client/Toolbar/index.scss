@@ -21,13 +21,6 @@ html[data-theme='dark'] {
     }
 
     .toolbar-popup {
-      &__button {
-        &.active,
-        &:hover:not([disabled]) {
-          background: var(--theme-elevation-100);
-        }
-      }
-
       &__dropdown {
         transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
@@ -73,7 +66,7 @@ html[data-theme='dark'] {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0;
+    gap: 2px;
     z-index: 1;
 
     .icon {
@@ -86,7 +79,7 @@ html[data-theme='dark'] {
       width: 1px;
       height: 15px;
       background-color: var(--theme-elevation-100);
-      margin: 0 6.25px;
+      margin: 0 6.25px 0 4.25px; // substract 2px from the gap
     }
   }
 

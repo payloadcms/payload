@@ -33,7 +33,7 @@ export const populateBreadcrumbs = async (
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
     formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
-  )  
+  )
 
   return {
     ...newData,

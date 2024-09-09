@@ -30,8 +30,11 @@ export function ActionsBar() {
             buttonStyle="none"
             onClick={() => {
               const nextIndex = activeIndex - 1
-              if (nextIndex < 0) setActiveIndex(forms.length - 1)
-              else setActiveIndex(nextIndex)
+              if (nextIndex < 0) {
+                setActiveIndex(forms.length - 1)
+              } else {
+                setActiveIndex(nextIndex)
+              }
             }}
             type="button"
           >
@@ -42,8 +45,11 @@ export function ActionsBar() {
             buttonStyle="none"
             onClick={() => {
               const nextIndex = activeIndex + 1
-              if (nextIndex === forms.length) setActiveIndex(0)
-              else setActiveIndex(nextIndex)
+              if (nextIndex === forms.length) {
+                setActiveIndex(0)
+              } else {
+                setActiveIndex(nextIndex)
+              }
             }}
             type="button"
           >

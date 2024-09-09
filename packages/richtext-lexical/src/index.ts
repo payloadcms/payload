@@ -41,7 +41,7 @@ import { richTextValidateHOC } from './validate/index.js'
 let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
-  return async ({ config, isRoot }) => {
+  return async ({ config, isRoot, parentIsLocalized }) => {
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
@@ -77,6 +77,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
           defaultEditorConfig,
           config,
+          parentIsLocalized,
         )
         features = deepCopyObject(defaultEditorFeatures)
       }
@@ -108,6 +109,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       resolvedFeatureMap = await loadFeatures({
         config,
         isRoot,
+        parentIsLocalized,
         unSanitizedEditorConfig: {
           features,
           lexical,
@@ -140,6 +142,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         },
         path: '@payloadcms/richtext-lexical/client#RichTextCell',
       },
+      editorConfig: finalSanitizedEditorConfig,
+      features,
       FieldComponent: {
         clientProps: {
           admin: props?.admin,
@@ -147,8 +151,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         },
         path: '@payloadcms/richtext-lexical/client#RichTextField',
       },
-      editorConfig: finalSanitizedEditorConfig,
-      features,
       generateComponentMap: {
         path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
         serverProps: {
@@ -886,9 +888,8 @@ export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'
 export { InlineToolbarFeature } from './features/toolbars/inline/server/index.js'
 
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
-export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 export type {
-  ClientComponentProps,
+  BaseClientFeatureProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,
@@ -900,7 +901,6 @@ export type {
   SanitizedClientFeatures,
   SanitizedPlugin,
 } from './features/typesClient.js'
-
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
@@ -922,6 +922,8 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './features/typesServer.js'
+
+export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 
 export { UploadFeature } from './features/upload/server/feature.server.js'
 
@@ -962,8 +964,8 @@ export {
   ELEMENT_TYPE_TO_FORMAT,
   IS_ALL_FORMATTING,
   LTR_REGEX,
-  NON_BREAKING_SPACE,
   NodeFormat,
+  NON_BREAKING_SPACE,
   RTL_REGEX,
   TEXT_MODE_TO_TYPE,
   TEXT_TYPE_TO_FORMAT,

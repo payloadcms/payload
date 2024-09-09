@@ -142,7 +142,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (field.localized) {
             result[field.name] = fieldData.reduce((arrayResult, row) => {
               if (typeof row._locale === 'string') {
-                if (!arrayResult[row._locale]) arrayResult[row._locale] = []
+                if (!arrayResult[row._locale]) {
+                  arrayResult[row._locale] = []
+                }
                 const locale = row._locale
                 const data = {}
                 delete row._locale
@@ -177,7 +179,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return arrayResult
             }, {})
           } else {
-            result[field.name] = fieldData.map((row, i) => {
+            result[field.name] = fieldData.reduce((acc, row, i) => {
               if (row._uuid) {
                 row.id = row._uuid
                 delete row._uuid
@@ -187,22 +189,35 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 delete row._order
               }
 
-              return traverseFields<T>({
-                adapter,
-                blocks,
-                config,
-                dataRef: row,
-                deletions,
-                fieldPrefix: '',
-                fields: field.fields,
-                numbers,
-                path: `${sanitizedPath}${field.name}.${i}`,
-                relationships,
-                table: row,
-                texts,
-                withinArrayOrBlockLocale,
-              })
-            })
+              if (
+                !withinArrayOrBlockLocale ||
+                (withinArrayOrBlockLocale && withinArrayOrBlockLocale === row._locale)
+              ) {
+                if (row._locale) {
+                  delete row._locale
+                }
+
+                acc.push(
+                  traverseFields<T>({
+                    adapter,
+                    blocks,
+                    config,
+                    dataRef: row,
+                    deletions,
+                    fieldPrefix: '',
+                    fields: field.fields,
+                    numbers,
+                    path: `${sanitizedPath}${field.name}.${i}`,
+                    relationships,
+                    table: row,
+                    texts,
+                    withinArrayOrBlockLocale,
+                  }),
+                )
+              }
+
+              return acc
+            }, [])
           }
         }
 
@@ -222,7 +237,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 delete row._uuid
               }
               if (typeof row._locale === 'string') {
-                if (!result[field.name][row._locale]) result[field.name][row._locale] = []
+                if (!result[field.name][row._locale]) {
+                  result[field.name][row._locale] = []
+                }
                 result[field.name][row._locale].push(row)
                 delete row._locale
               }
@@ -342,7 +359,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             relationPathMatch.forEach((row) => {
               if (typeof row.locale === 'string') {
-                if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = []
+                if (!relationsByLocale[row.locale]) {
+                  relationsByLocale[row.locale] = []
+                }
                 relationsByLocale[row.locale].push(row)
               }
             })
@@ -369,7 +388,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'text' && field?.hasMany) {
         const textPathMatch = texts[`${sanitizedPath}${field.name}`]
-        if (!textPathMatch) return result
+        if (!textPathMatch) {
+          return result
+        }
 
         if (field.localized) {
           result[field.name] = {}
@@ -377,7 +398,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           textPathMatch.forEach((row) => {
             if (typeof row.locale === 'string') {
-              if (!textsByLocale[row.locale]) textsByLocale[row.locale] = []
+              if (!textsByLocale[row.locale]) {
+                textsByLocale[row.locale] = []
+              }
               textsByLocale[row.locale].push(row)
             }
           })
@@ -404,7 +427,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'number' && field.hasMany) {
         const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
-        if (!numberPathMatch) return result
+        if (!numberPathMatch) {
+          return result
+        }
 
         if (field.localized) {
           result[field.name] = {}
@@ -412,7 +437,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           numberPathMatch.forEach((row) => {
             if (typeof row.locale === 'string') {
-              if (!numbersByLocale[row.locale]) numbersByLocale[row.locale] = []
+              if (!numbersByLocale[row.locale]) {
+                numbersByLocale[row.locale] = []
+              }
               numbersByLocale[row.locale].push(row)
             }
           })
@@ -442,7 +469,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
               if (typeof row.locale === 'string') {
-                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                if (!selectResult[row.locale]) {
+                  selectResult[row.locale] = []
+                }
                 selectResult[row.locale].push(row.value)
               }
 
@@ -481,7 +510,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
             const locale = table._locale as string
             const refKey = field.localized && locale ? locale : field.name
 
-            if (field.localized && locale) delete table._locale
+            if (field.localized && locale) {
+              delete table._locale
+            }
             ref[refKey] = traverseFields<Record<string, unknown>>({
               adapter,
               blocks,

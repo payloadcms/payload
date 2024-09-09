@@ -41,7 +41,9 @@ export const readMigrationFiles = async ({
         typeof require === 'function'
           ? await eval(`require('${filePath.replaceAll('\\', '/')}')`)
           : await eval(`import('${pathToFileURL(filePath).href}')`)
-      if ('default' in migration) migration = migration.default
+      if ('default' in migration) {
+        migration = migration.default
+      }
 
       const result: Migration = {
         name: path.basename(filePath).split('.')?.[0],

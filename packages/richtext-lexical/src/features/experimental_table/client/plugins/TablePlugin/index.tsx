@@ -101,7 +101,7 @@ export const TablePlugin: PluginComponent = () => {
       editor.registerCommand(
         OPEN_TABLE_DRAWER_COMMAND,
         () => {
-          let rangeSelection: RangeSelection | null = null
+          let rangeSelection: null | RangeSelection = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()

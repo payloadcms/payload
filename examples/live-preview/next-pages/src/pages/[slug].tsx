@@ -14,7 +14,7 @@ const Page: React.FC<
   PageType & {
     mainMenu: MainMenu
   }
-> = initialPage => {
+> = (initialPage) => {
   const { data } = useLivePreview({
     serverURL: process.env.NEXT_PUBLIC_PAYLOAD_URL || '',
     depth: 2,
@@ -103,7 +103,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const { docs: pages } = pagesData
 
     if (pages && Array.isArray(pages) && pages.length > 0) {
-      paths = pages.map(page => ({ params: { slug: page.slug } }))
+      paths = pages.map((page) => ({ params: { slug: page.slug } }))
     }
   }
 

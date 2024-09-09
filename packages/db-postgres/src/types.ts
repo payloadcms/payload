@@ -28,7 +28,7 @@ export type Args = {
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
-  transactionOptions?: PgTransactionConfig | false
+  transactionOptions?: false | PgTransactionConfig
   versionsSuffix?: string
 }
 

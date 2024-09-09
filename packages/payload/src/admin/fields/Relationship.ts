@@ -4,18 +4,35 @@ import type { RelationshipField, RelationshipFieldClient } from '../../fields/co
 import type { RelationshipFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type RelationshipFieldClientWithoutType = MarkOptional<RelationshipFieldClient, 'type'>
 
-export type RelationshipFieldProps = {
+type RelationshipFieldBaseClientProps = {
   readonly validate?: RelationshipFieldValidation
-} & Omit<FormFieldBase<RelationshipFieldClientWithoutType>, 'validate'>
+}
+
+export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClientWithoutType> &
+  RelationshipFieldBaseClientProps
+
+export type RelationshipFieldServerProps = ServerFieldBase<RelationshipField>
+
+export type RelationshipFieldServerComponent = FieldServerComponent<RelationshipField>
+
+export type RelationshipFieldClientComponent = FieldClientComponent<
+  RelationshipFieldClientWithoutType,
+  RelationshipFieldBaseClientProps
+>
 
 export type RelationshipFieldLabelServerComponent = FieldLabelServerComponent<RelationshipField>
 

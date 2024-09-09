@@ -64,7 +64,7 @@ export const LinkFeature = createServerFeature<
   LinkFeatureServerProps,
   ClientProps
 >({
-  feature: async ({ config: _config, isRoot, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = {}
     }
@@ -81,6 +81,7 @@ export const LinkFeature = createServerFeature<
     const sanitizedFields = await sanitizeFields({
       config: _config as unknown as Config,
       fields: _transformedFields,
+      parentIsLocalized,
       requireFieldLevelRichTextEditor: isRoot,
       validRelationships,
     })

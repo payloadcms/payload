@@ -16,13 +16,21 @@ function comparePreRelease(v1: string, v2: string): number {
   const num2 = extractNumbers(v2)
 
   for (let i = 0; i < Math.max(num1.length, num2.length); i++) {
-    if ((num1[i] || 0) < (num2[i] || 0)) return -1
-    if ((num1[i] || 0) > (num2[i] || 0)) return 1
+    if ((num1[i] || 0) < (num2[i] || 0)) {
+      return -1
+    }
+    if ((num1[i] || 0) > (num2[i] || 0)) {
+      return 1
+    }
   }
 
   // If numeric parts are equal, compare the whole string
-  if (v1 < v2) return -1
-  if (v1 > v2) return 1
+  if (v1 < v2) {
+    return -1
+  }
+  if (v1 > v2) {
+    return 1
+  }
   return 0
 }
 
@@ -53,15 +61,23 @@ export function compareVersions(
 
   // Compare main version parts
   for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-    if ((parts1[i] || 0) > (parts2[i] || 0)) return 'greater'
-    if ((parts1[i] || 0) < (parts2[i] || 0)) return 'lower'
+    if ((parts1[i] || 0) > (parts2[i] || 0)) {
+      return 'greater'
+    }
+    if ((parts1[i] || 0) < (parts2[i] || 0)) {
+      return 'lower'
+    }
   }
 
   // Compare pre-release parts if main versions are equal
   if (preReleases1?.length || preReleases2?.length) {
     for (let i = 0; i < Math.max(preReleases1.length, preReleases2.length); i++) {
-      if (!preReleases1[i]) return 'greater'
-      if (!preReleases2[i]) return 'lower'
+      if (!preReleases1[i]) {
+        return 'greater'
+      }
+      if (!preReleases2[i]) {
+        return 'lower'
+      }
 
       const result = comparePreRelease(preReleases1[i], preReleases2[i])
       if (result !== 0) {

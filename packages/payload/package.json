@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.95",
+  "version": "3.0.0-beta.102",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -78,12 +78,13 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {
+    "@monaco-editor/react": "4.6.0",
     "@next/env": "^15.0.0-canary.104",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
@@ -98,10 +99,9 @@
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "image-size": "^1.1.1",
-    "json-schema-to-typescript": "11.0.3",
+    "json-schema-to-typescript": "15.0.1",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
-    "monaco-editor": "0.38.0",
     "pino": "9.3.1",
     "pino-pretty": "11.2.1",
     "pluralize": "8.0.0",
@@ -113,7 +113,6 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
-    "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "8.5.9",

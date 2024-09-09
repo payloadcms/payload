@@ -21,8 +21,8 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
@@ -40,10 +40,10 @@ import { flattenTopLevelFields, toWords } from 'payload'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
-import withNullableType from './withNullableType.js'
+import { withNullableType } from './withNullableType.js'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -97,7 +97,9 @@ export function buildMutationInputType({
         parentName: fullName,
       })
 
-      if (!type) return inputObjectTypeConfig
+      if (!type) {
+        return inputObjectTypeConfig
+      }
 
       type = new GraphQLList(withNullableType(field, type, forceNullable))
       return {
@@ -120,7 +122,9 @@ export function buildMutationInputType({
     collapsible: (inputObjectTypeConfig: InputObjectTypeConfig, field: CollapsibleField) =>
       field.fields.reduce((acc, subField: CollapsibleField) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(acc, subField)
+        if (addSubField) {
+          return addSubField(acc, subField)
+        }
         return acc
       }, inputObjectTypeConfig),
     date: (inputObjectTypeConfig: InputObjectTypeConfig, field: DateField) => ({
@@ -142,9 +146,13 @@ export function buildMutationInputType({
         parentName: fullName,
       })
 
-      if (!type) return inputObjectTypeConfig
+      if (!type) {
+        return inputObjectTypeConfig
+      }
 
-      if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
+      if (requiresAtLeastOneField) {
+        type = new GraphQLNonNull(type)
+      }
       return {
         ...inputObjectTypeConfig,
         [field.name]: { type },
@@ -227,7 +235,9 @@ export function buildMutationInputType({
     row: (inputObjectTypeConfig: InputObjectTypeConfig, field: RowField) =>
       field.fields.reduce((acc, subField: Field) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(acc, subField)
+        if (addSubField) {
+          return addSubField(acc, subField)
+        }
         return acc
       }, inputObjectTypeConfig),
     select: (inputObjectTypeConfig: InputObjectTypeConfig, field: SelectField) => {
@@ -274,9 +284,13 @@ export function buildMutationInputType({
             parentName: fullName,
           })
 
-          if (!type) return acc
+          if (!type) {
+            return acc
+          }
 
-          if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
+          if (requiresAtLeastOneField) {
+            type = new GraphQLNonNull(type)
+          }
           return {
             ...acc,
             [tab.name]: { type },
@@ -287,7 +301,9 @@ export function buildMutationInputType({
           ...acc,
           ...tab.fields.reduce((subFieldSchema, subField) => {
             const addSubField = fieldToSchemaMap[subField.type]
-            if (addSubField) return addSubField(subFieldSchema, subField)
+            if (addSubField) {
+              return addSubField(subFieldSchema, subField)
+            }
             return subFieldSchema
           }, acc),
         }

@@ -1,5 +1,5 @@
 'use client'
-import type { NumberFieldProps } from 'payload'
+import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
@@ -19,7 +19,7 @@ import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
-const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
+const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -35,7 +35,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         step = 1,
         style,
         width,
-      } = {} as NumberFieldProps['field']['admin'],
+      } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
       label,
       max = Infinity,
@@ -148,8 +148,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={field?.admin?.components?.Label}
         field={field}
+        Label={field?.admin?.components?.Label}
         label={label}
         required={required}
         {...(labelProps || {})}

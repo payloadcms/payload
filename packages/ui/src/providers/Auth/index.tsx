@@ -26,7 +26,7 @@ export type AuthContext<T = ClientUser> = {
   strategy?: string
   token?: string
   tokenExpiration?: number
-  user?: T | null
+  user?: null | T
 }
 
 const Context = createContext({} as AuthContext)
@@ -287,7 +287,9 @@ export function AuthProvider({
     }
 
     return () => {
-      if (reminder) clearTimeout(reminder)
+      if (reminder) {
+        clearTimeout(reminder)
+      }
     }
   }, [tokenExpiration, openModal])
 
@@ -308,7 +310,9 @@ export function AuthProvider({
     }
 
     return () => {
-      if (forceLogOut) clearTimeout(forceLogOut)
+      if (forceLogOut) {
+        clearTimeout(forceLogOut)
+      }
     }
   }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
 

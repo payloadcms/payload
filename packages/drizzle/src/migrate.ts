@@ -100,5 +100,6 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
       err,
       msg: parseError(err, `Error running migration ${migration.name}`),
     })
+    process.exit(1)
   }
 }

@@ -29,6 +29,22 @@ export const BlocksCollection: CollectionConfig = {
                 },
               ],
             },
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'link',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
       ],

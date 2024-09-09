@@ -62,7 +62,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       },
     } = args
 
-    if (!args.req.user) throw new Forbidden(args.req.t)
+    if (!args.req.user) {
+      throw new Forbidden(args.req.t)
+    }
 
     const parsedURL = url.parse(args.req.url)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -143,7 +145,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

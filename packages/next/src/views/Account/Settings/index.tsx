@@ -5,8 +5,8 @@ import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
 import { ToggleTheme } from '../ToggleTheme/index.js'
-import { LanguageSelector } from './LanguageSelector.js'
 import './index.scss'
+import { LanguageSelector } from './LanguageSelector.js'
 
 const baseClass = 'payload-settings'
 

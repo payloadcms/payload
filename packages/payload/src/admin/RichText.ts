@@ -13,7 +13,7 @@ import type {
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
-import type { RichTextFieldProps } from './fields/RichText.js'
+import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { CreateMappedComponent } from './types.js'
 
 export type AfterReadRichTextHookArgs<
@@ -112,14 +112,14 @@ export type BaseRichTextHookArgs<
   TSiblingData = any,
 > = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<TData>
   /** The field which the hook is running against. */
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
 
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
@@ -261,7 +261,7 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<never, RichTextFieldProps>
+  FieldComponent: PayloadComponent<never, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<
@@ -271,6 +271,7 @@ export type RichTextAdapterProvider<
 > = ({
   config,
   isRoot,
+  parentIsLocalized,
 }: {
   config: SanitizedConfig
   /**
@@ -279,6 +280,7 @@ export type RichTextAdapterProvider<
    * @default false
    */
   isRoot?: boolean
+  parentIsLocalized: boolean
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

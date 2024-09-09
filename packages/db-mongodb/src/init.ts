@@ -8,10 +8,10 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel } from './types.js'
 
-import buildCollectionSchema from './models/buildCollectionSchema.js'
+import { buildCollectionSchema } from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'
-import buildSchema from './models/buildSchema.js'
-import getBuildQueryPlugin from './queries/buildQuery.js'
+import { buildSchema } from './models/buildSchema.js'
+import { getBuildQueryPlugin } from './queries/buildQuery.js'
 import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {

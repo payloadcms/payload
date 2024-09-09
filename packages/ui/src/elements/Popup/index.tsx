@@ -7,8 +7,8 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import { PopupTrigger } from './PopupTrigger/index.js'
 import './index.scss'
+import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
 
@@ -133,7 +133,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [intersectionEntry, setPosition, windowHeight])
 
   useEffect(() => {
-    if (typeof onToggleOpen === 'function') onToggleOpen(active)
+    if (typeof onToggleOpen === 'function') {
+      onToggleOpen(active)
+    }
 
     if (active) {
       document.addEventListener('mousedown', handleClickOutside)

@@ -1,6 +1,5 @@
 'use client'
 import { getCollapsedMargins } from '../utils/getCollapsedMargins.js'
-import { highlightElemOriginalPosition } from './highlightElemOriginalPosition.js'
 const TARGET_LINE_HALF_HEIGHT = 0
 const TEXT_BOX_HORIZONTAL_PADDING = -24
 const DEBUG = false
@@ -127,18 +126,21 @@ export function setTargetLine(
   /**
    * Properly reset previous targetBlockElem styles
    */
-  lastTargetBlock.elem.style.opacity = ''
+  if (lastTargetBlock?.elem) {
+    lastTargetBlock.elem.style.opacity = ''
 
-  if (lastTargetBlock?.elem === targetBlockElem) {
-    if (isBelow) {
-      lastTargetBlock.elem.style.marginTop = ''
+    if (lastTargetBlock?.elem === targetBlockElem) {
+      if (isBelow) {
+        lastTargetBlock.elem.style.marginTop = ''
+      } else {
+        lastTargetBlock.elem.style.marginBottom = ''
+      }
     } else {
       lastTargetBlock.elem.style.marginBottom = ''
+      lastTargetBlock.elem.style.marginTop = ''
     }
-  } else {
-    lastTargetBlock.elem.style.marginBottom = ''
-    lastTargetBlock.elem.style.marginTop = ''
   }
+
   animationTimer = 0
   return {
     isBelow,

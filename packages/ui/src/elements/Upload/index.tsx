@@ -50,7 +50,9 @@ export const UploadActions = ({
 
   const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
 
-  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) return null
+  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) {
+    return null
+  }
 
   return (
     <div className={`${baseClass}__upload-actions`}>

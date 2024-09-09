@@ -7,96 +7,92 @@ import type { DeepUndefinable } from 'ts-essentials'
 
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
+  ArrayFieldClientProps,
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
   ArrayFieldLabelServerComponent,
-  ArrayFieldProps,
   BlockFieldErrorClientComponent,
   BlockFieldErrorServerComponent,
-  BlockFieldProps,
+  BlocksFieldClientProps,
+  CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
   CheckboxFieldLabelClientComponent,
   CheckboxFieldLabelServerComponent,
-  CheckboxFieldProps,
   ClientTab,
+  CodeFieldClientProps,
   CodeFieldErrorClientComponent,
   CodeFieldErrorServerComponent,
   CodeFieldLabelClientComponent,
   CodeFieldLabelServerComponent,
-  CodeFieldProps,
+  CollapsibleFieldClientProps,
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
-  CollapsibleFieldProps,
   ConditionalDateProps,
+  DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
-  DateFieldProps,
   Description,
+  EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  EmailFieldProps,
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
-  GroupFieldProps,
   HiddenFieldProps,
+  JSONFieldClientProps,
   JSONFieldErrorClientComponent,
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  JSONFieldProps,
   MappedComponent,
+  NumberFieldClientProps,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
   NumberFieldLabelClientComponent,
   NumberFieldLabelServerComponent,
-  NumberFieldProps,
+  PointFieldClientProps,
   PointFieldErrorClientComponent,
   PointFieldErrorServerComponent,
   PointFieldLabelClientComponent,
   PointFieldLabelServerComponent,
-  PointFieldProps,
+  RadioFieldClientProps,
   RadioFieldErrorClientComponent,
   RadioFieldErrorServerComponent,
   RadioFieldLabelClientComponent,
   RadioFieldLabelServerComponent,
-  RadioFieldProps,
+  RelationshipFieldClientProps,
   RelationshipFieldErrorClientComponent,
   RelationshipFieldErrorServerComponent,
   RelationshipFieldLabelClientComponent,
   RelationshipFieldLabelServerComponent,
-  RelationshipFieldProps,
-  RichTextFieldProps,
-  RowFieldProps,
+  RichTextFieldClientProps,
+  RowFieldClientProps,
   RowLabelComponent,
+  SelectFieldClientProps,
   SelectFieldErrorClientComponent,
   SelectFieldErrorServerComponent,
   SelectFieldLabelClientComponent,
   SelectFieldLabelServerComponent,
-  SelectFieldProps,
   StaticDescription,
-  TabsFieldProps,
-  TextFieldErrorClientComponent,
-  TextFieldErrorServerComponent,
-  TextFieldLabelClientComponent,
-  TextFieldLabelServerComponent,
+  TabsFieldClientProps,
+  TextareaFieldClientProps,
   TextareaFieldErrorClientComponent,
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
-  TextareaFieldProps,
-  UploadFieldErrorClientComponent,
-  UploadFieldErrorServerComponent,
-  UploadFieldLabelClientComponent,
-  UploadFieldLabelServerComponent,
-  UploadFieldProps,
+  TextFieldErrorClientComponent,
+  TextFieldErrorServerComponent,
+  TextFieldLabelClientComponent,
+  TextFieldLabelServerComponent,
+  UploadFieldClientProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
@@ -113,7 +109,7 @@ import type { Operation, PayloadRequest, RequestContext, Where } from '../../typ
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   /**
    * Only available in `afterRead` hooks
@@ -133,7 +129,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -192,7 +188,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-}) => Promise<boolean> | boolean
+}) => boolean | Promise<boolean>
 
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   data: Partial<TData>,
@@ -225,12 +221,12 @@ export type FilterOptionsProps<TData = any> = {
 
 export type FilterOptionsFunc<TData = any> = (
   options: FilterOptionsProps<TData>,
-) => Promise<Where | boolean> | Where | boolean
+) => boolean | Promise<boolean | Where> | Where
 
 export type FilterOptions<TData = any> =
-  | ((options: FilterOptionsProps<TData>) => Promise<Where | boolean> | Where | boolean)
-  | Where
+  | ((options: FilterOptionsProps<TData>) => boolean | Promise<boolean | Where> | Where)
   | null
+  | Where
 
 type Admin = {
   className?: string
@@ -252,6 +248,7 @@ type Admin = {
   custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
+  disabled?: boolean
   /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean
@@ -262,7 +259,6 @@ type Admin = {
    * @type boolean
    */
   disableListFilter?: boolean
-  disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
@@ -285,6 +281,7 @@ export type AdminClient = {
   custom?: Record<string, any>
   description?: StaticDescription
   disableBulkEdit?: boolean
+  disabled?: boolean
   /**
    * Shows / hides fields from appearing in the list view column selector.
    * @type boolean
@@ -295,7 +292,6 @@ export type AdminClient = {
    * @type boolean
    */
   disableListFilter?: boolean
-  disabled?: boolean
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
@@ -376,7 +372,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: LabelFunction | StaticLabel | false
+  label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
    * The name of the field. Must be alphanumeric and cannot contain ' . '
@@ -427,10 +423,10 @@ export type NumberField = {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<NumberFieldErrorClientComponent | NumberFieldErrorServerComponent>
-      Label?: CustomComponent<NumberFieldLabelClientComponent | NumberFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<NumberFieldErrorClientComponent | NumberFieldErrorServerComponent>
+      Label?: CustomComponent<NumberFieldLabelClientComponent | NumberFieldLabelServerComponent>
     } & Admin['components']
     /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
@@ -466,10 +462,10 @@ export type NumberField = {
 export type NumberFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<NumberField['admin'], 'autoComplete' | 'placeholder' | 'step'>
@@ -480,10 +476,10 @@ export type TextField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
-      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
+      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
     } & Admin['components']
     placeholder?: Record<string, string> | string
     rtl?: boolean
@@ -515,10 +511,10 @@ export type TextField = {
 export type TextFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
@@ -529,10 +525,10 @@ export type EmailField = {
   admin?: {
     autoComplete?: string
     components?: {
-      Error?: CustomComponent<EmailFieldErrorClientComponent | EmailFieldErrorServerComponent>
-      Label?: CustomComponent<EmailFieldLabelClientComponent | EmailFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<EmailFieldErrorClientComponent | EmailFieldErrorServerComponent>
+      Label?: CustomComponent<EmailFieldLabelClientComponent | EmailFieldLabelServerComponent>
     } & Admin['components']
     placeholder?: Record<string, string> | string
   } & Admin
@@ -543,10 +539,10 @@ export type EmailField = {
 export type EmailFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<EmailField['admin'], 'placeholder'>
@@ -556,10 +552,10 @@ export type EmailFieldClient = {
 export type TextareaField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<TextareaFieldErrorClientComponent | TextareaFieldErrorServerComponent>
-      Label?: CustomComponent<TextareaFieldLabelClientComponent | TextareaFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<TextareaFieldErrorClientComponent | TextareaFieldErrorServerComponent>
+      Label?: CustomComponent<TextareaFieldLabelClientComponent | TextareaFieldLabelServerComponent>
     } & Admin['components']
     placeholder?: Record<string, string> | string
     rows?: number
@@ -574,10 +570,10 @@ export type TextareaField = {
 export type TextareaFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
@@ -587,10 +583,10 @@ export type TextareaFieldClient = {
 export type CheckboxField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<CheckboxFieldErrorClientComponent | CheckboxFieldErrorServerComponent>
-      Label?: CustomComponent<CheckboxFieldLabelClientComponent | CheckboxFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<CheckboxFieldErrorClientComponent | CheckboxFieldErrorServerComponent>
+      Label?: CustomComponent<CheckboxFieldLabelClientComponent | CheckboxFieldLabelServerComponent>
     } & Admin['components']
   } & Admin
   type: 'checkbox'
@@ -600,10 +596,10 @@ export type CheckboxField = {
 export type CheckboxFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient
 } & FieldBaseClient &
@@ -612,10 +608,10 @@ export type CheckboxFieldClient = {
 export type DateField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<DateFieldErrorClientComponent | DateFieldErrorServerComponent>
-      Label?: CustomComponent<DateFieldLabelClientComponent | DateFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<DateFieldErrorClientComponent | DateFieldErrorServerComponent>
+      Label?: CustomComponent<DateFieldLabelClientComponent | DateFieldLabelServerComponent>
     } & Admin['components']
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
@@ -627,10 +623,10 @@ export type DateField = {
 export type DateFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<DateField['admin'], 'date' | 'placeholder'>
@@ -935,10 +931,10 @@ export type UploadFieldClient = /* PolymorphicUploadFieldClient | */ SingleUploa
 export type CodeField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<CodeFieldErrorClientComponent | CodeFieldErrorServerComponent>
-      Label?: CustomComponent<CodeFieldLabelClientComponent | CodeFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<CodeFieldErrorClientComponent | CodeFieldErrorServerComponent>
+      Label?: CustomComponent<CodeFieldLabelClientComponent | CodeFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
     language?: string
@@ -952,10 +948,10 @@ export type CodeField = {
 export type CodeFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<CodeField['admin'], 'editorOptions' | 'language'>
@@ -965,10 +961,10 @@ export type CodeFieldClient = {
 export type JSONField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<JSONFieldErrorClientComponent | JSONFieldErrorServerComponent>
-      Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<JSONFieldErrorClientComponent | JSONFieldErrorServerComponent>
+      Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
   } & Admin
@@ -985,10 +981,10 @@ export type JSONField = {
 export type JSONFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<JSONField['admin'], 'editorOptions'>
@@ -998,10 +994,10 @@ export type JSONFieldClient = {
 export type SelectField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<SelectFieldErrorClientComponent | SelectFieldErrorServerComponent>
-      Label?: CustomComponent<SelectFieldLabelClientComponent | SelectFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<SelectFieldErrorClientComponent | SelectFieldErrorServerComponent>
+      Label?: CustomComponent<SelectFieldLabelClientComponent | SelectFieldLabelServerComponent>
     } & Admin['components']
     isClearable?: boolean
     isSortable?: boolean
@@ -1023,10 +1019,10 @@ export type SelectField = {
 export type SelectFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
@@ -1144,9 +1140,9 @@ export function valueIsValueWithRelation(value: unknown): value is ValueWithRela
 
 export type RelationshipValue =
   | (number | string)[]
+  | (number | string)
   | ValueWithRelation
   | ValueWithRelation[]
-  | (number | string)
 
 export type RichTextField<
   TValue extends object = any,
@@ -1357,10 +1353,10 @@ export type BlockFieldClient = {
 export type PointField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<PointFieldErrorClientComponent | PointFieldErrorServerComponent>
-      Label?: CustomComponent<PointFieldLabelClientComponent | PointFieldLabelServerComponent>
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
+      Error?: CustomComponent<PointFieldErrorClientComponent | PointFieldErrorServerComponent>
+      Label?: CustomComponent<PointFieldLabelClientComponent | PointFieldLabelServerComponent>
     } & Admin['components']
     placeholder?: Record<string, string> | string
     step?: number
@@ -1372,10 +1368,10 @@ export type PointField = {
 export type PointFieldClient = {
   admin?: {
     components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
       afterInput?: MappedComponent[]
       beforeInput?: MappedComponent[]
+      Error?: MappedComponent
+      Label?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
     Pick<PointField['admin'], 'placeholder' | 'step'>
@@ -1400,8 +1396,8 @@ export type Field =
   | RowField
   | SelectField
   | TabsField
-  | TextField
   | TextareaField
+  | TextField
   | UIField
   | UploadField
 
@@ -1423,32 +1419,32 @@ export type ClientField =
   | RowFieldClient
   | SelectFieldClient
   | TabsFieldClient
-  | TextFieldClient
   | TextareaFieldClient
+  | TextFieldClient
   | UIFieldClient
   | UploadFieldClient
 
 export type ClientFieldProps =
-  | ArrayFieldProps
-  | BlockFieldProps
-  | CheckboxFieldProps
-  | CodeFieldProps
-  | CollapsibleFieldProps
-  | DateFieldProps
-  | EmailFieldProps
-  | GroupFieldProps
+  | ArrayFieldClientProps
+  | BlocksFieldClientProps
+  | CheckboxFieldClientProps
+  | CodeFieldClientProps
+  | CollapsibleFieldClientProps
+  | DateFieldClientProps
+  | EmailFieldClientProps
+  | GroupFieldClientProps
   | HiddenFieldProps
-  | JSONFieldProps
-  | NumberFieldProps
-  | PointFieldProps
-  | RadioFieldProps
-  | RelationshipFieldProps
-  | RichTextFieldProps
-  | RowFieldProps
-  | SelectFieldProps
-  | TabsFieldProps
-  | TextareaFieldProps
-  | UploadFieldProps
+  | JSONFieldClientProps
+  | NumberFieldClientProps
+  | PointFieldClientProps
+  | RadioFieldClientProps
+  | RelationshipFieldClientProps
+  | RichTextFieldClientProps
+  | RowFieldClientProps
+  | SelectFieldClientProps
+  | TabsFieldClientProps
+  | TextareaFieldClientProps
+  | UploadFieldClientProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
 
@@ -1470,8 +1466,8 @@ export type FieldAffectingData =
   | RichTextField
   | SelectField
   | TabAsField
-  | TextField
   | TextareaField
+  | TextField
   | UploadField
 
 export type FieldAffectingDataClient =
@@ -1490,8 +1486,8 @@ export type FieldAffectingDataClient =
   | RichTextFieldClient
   | SelectFieldClient
   | TabAsFieldClient
-  | TextFieldClient
   | TextareaFieldClient
+  | TextFieldClient
   | UploadFieldClient
 
 export type NonPresentationalField =
@@ -1512,8 +1508,8 @@ export type NonPresentationalField =
   | RowField
   | SelectField
   | TabsField
-  | TextField
   | TextareaField
+  | TextField
   | UploadField
 
 export type NonPresentationalFieldClient =
@@ -1534,8 +1530,8 @@ export type NonPresentationalFieldClient =
   | RowFieldClient
   | SelectFieldClient
   | TabsFieldClient
-  | TextFieldClient
   | TextareaFieldClient
+  | TextFieldClient
   | UploadFieldClient
 
 export type FieldWithPath = {

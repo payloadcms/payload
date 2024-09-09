@@ -40,7 +40,9 @@ export function createLinkMatcherWithRegExp(
 ) {
   return (text: string) => {
     const match = regExp.exec(text)
-    if (match === null) return null
+    if (match === null) {
+      return null
+    }
     return {
       index: match.index,
       length: match[0].length,

@@ -55,7 +55,9 @@ const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
 }) => {
   let placeholder = ''
 
-  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
+  if (version === comparison) {
+    placeholder = `[${i18n.t('general:noValue')}]`
+  }
 
   const options = 'options' in field && field.options
 

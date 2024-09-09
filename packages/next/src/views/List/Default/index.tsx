@@ -21,7 +21,6 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  ViewDescription,
   useBulkUpload,
   useConfig,
   useEditDepth,
@@ -29,10 +28,10 @@ import {
   useListQuery,
   useModal,
   useRouteCache,
-  useSearchParams,
   useStepNav,
   useTranslation,
   useWindowInfo,
+  ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -45,17 +44,16 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DefaultListView: React.FC = () => {
   const {
-    Header,
     beforeActions,
     collectionSlug,
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission,
+    Header,
     newDocumentURL,
   } = useListInfo()
 
-  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
-  const { searchParams } = useSearchParams()
+  const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
   const { openModal } = useModal()
   const { clearRouteCache } = useRouteCache()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -68,11 +66,11 @@ export const DefaultListView: React.FC = () => {
   const {
     admin: {
       components: {
-        Description,
         afterList,
         afterListTable,
         beforeList,
         beforeListTable,
+        Description,
         views: {
           list: { actions },
         },
@@ -127,20 +125,20 @@ export const DefaultListView: React.FC = () => {
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
           {Header || (
             <ListHeader heading={getTranslation(labels?.plural, i18n)}>
               {hasCreatePermission && (
                 <>
                   <Button
-                    Link={Link}
                     aria-label={i18n.t('general:createNewLabel', {
                       label: getTranslation(labels?.singular, i18n),
                     })}
                     buttonStyle="pill"
                     el={'link'}
+                    Link={Link}
                     size="small"
                     to={newDocumentURL}
                   >
@@ -193,7 +191,7 @@ export const DefaultListView: React.FC = () => {
             <div className={`${baseClass}__no-results`}>
               <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button Link={Link} el="link" to={newDocumentURL}>
+                <Button el="link" Link={Link} to={newDocumentURL}>
                   {i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
@@ -226,9 +224,7 @@ export const DefaultListView: React.FC = () => {
                   </div>
                   <PerPage
                     handleChange={(limit) => void handlePerPageChange(limit)}
-                    limit={
-                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
-                    }
+                    limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
                     limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
@@ -253,8 +249,8 @@ export const DefaultListView: React.FC = () => {
             </div>
           )}
         </Gutter>
+        <RenderComponent mappedComponent={afterList} />
       </SelectionProvider>
-      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }

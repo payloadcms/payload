@@ -134,6 +134,33 @@ const TextFields: CollectionConfig = {
         disableListFilter: true,
       },
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'texts',
+          type: 'text',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'texts',
+              type: 'text',
+              hasMany: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

@@ -51,7 +51,9 @@ export const bin = async () => {
   const configPath = findConfig()
   const configPromise = await import(pathToFileURL(configPath).toString())
   let config = await configPromise
-  if (config.default) config = await config.default
+  if (config.default) {
+    config = await config.default
+  }
 
   const userBinScript = Array.isArray(config.bin)
     ? config.bin.find(({ key }) => key === script)

@@ -11,7 +11,7 @@ export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
   user?: PayloadMeUser
   setUser?: (user: PayloadMeUser) => void // eslint-disable-line no-unused-vars
-}> = props => {
+}> = (props) => {
   const { adminBarProps, user, setUser } = props
 
   return (

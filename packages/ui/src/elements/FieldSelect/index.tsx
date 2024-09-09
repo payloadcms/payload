@@ -57,7 +57,9 @@ export const combineLabel = ({
       RenderedComponent: customLabel,
     }
 
-  if (!LabelToRender) return null
+  if (!LabelToRender) {
+    return null
+  }
 
   return (
     <Fragment>

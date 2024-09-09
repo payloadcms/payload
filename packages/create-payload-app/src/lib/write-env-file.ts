@@ -36,7 +36,9 @@ export async function writeEnvFile(args: {
           .split('\n')
           .filter((e) => e)
           .map((line) => {
-            if (line.startsWith('#') || !line.includes('=')) return line
+            if (line.startsWith('#') || !line.includes('=')) {
+              return line
+            }
 
             const split = line.split('=')
             const key = split[0]

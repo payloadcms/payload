@@ -1,5 +1,3 @@
-import type React from 'react'
-
 import fs from 'fs'
 import process from 'node:process'
 import path from 'path'

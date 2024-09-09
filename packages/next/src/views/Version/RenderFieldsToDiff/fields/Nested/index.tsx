@@ -4,8 +4,8 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import Label from '../../Label/index.js'
 import RenderFieldsToDiff from '../../index.js'
+import Label from '../../Label/index.js'
 import './index.scss'
 
 const baseClass = 'nested-diff'

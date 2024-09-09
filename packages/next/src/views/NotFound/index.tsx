@@ -7,9 +7,8 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { HydrateAuthProvider } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'

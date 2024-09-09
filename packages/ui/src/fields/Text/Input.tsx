@@ -17,18 +17,18 @@ import './index.scss'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
     field,
     hasMany,
     inputRef,
+    Label,
     label,
     labelProps,
     maxRows,
@@ -66,8 +66,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       }}
     >
       <FieldLabel
-        Label={Label}
         field={field}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

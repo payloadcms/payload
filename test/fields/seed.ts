@@ -67,7 +67,9 @@ export const seed = async (_payload: Payload) => {
       _payload.config.collections.map(async (coll) => {
         await new Promise((resolve, reject) => {
           _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) reject(err)
+            if (err) {
+              reject(err)
+            }
             resolve(true)
           })
         })

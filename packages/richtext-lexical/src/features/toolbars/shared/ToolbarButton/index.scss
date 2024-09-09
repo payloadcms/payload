@@ -18,9 +18,16 @@
     margin-right: 2px;
   }
 
+  &:hover:not([disabled]) {
+    background-color: var(--theme-elevation-100);
+  }
+
   &.active {
-    background-color: var(--them-elevation-150);
+    background-color: var(--theme-elevation-150);
     color: var(--theme-text);
+    &:hover {
+      background-color: var(--theme-elevation-200);
+    }
 
     .icon {
       opacity: 1;
@@ -33,9 +40,5 @@
     .icon {
       opacity: 0.2;
     }
-  }
-
-  &:hover:not([disabled]) {
-    background-color: var(--theme-elevation-100);
   }
 }

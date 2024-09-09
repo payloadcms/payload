@@ -85,33 +85,33 @@ describe('Upload', () => {
     await uploadImage()
   })
 
-  // test('should upload files from remote URL', async () => {
-  //   await uploadImage()
+  test('should upload files from remote URL', async () => {
+    await uploadImage()
 
-  //   await page.goto(url.create)
+    await page.goto(url.create)
 
-  //   const pasteURLButton = page.locator('.file-field__upload .dropzone__file-button', {
-  //     hasText: 'Paste URL',
-  //   })
-  //   await pasteURLButton.click()
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
 
-  //   const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
 
-  //   const inputField = page.locator('.file-field__upload .file-field__remote-file')
-  //   await inputField.fill(remoteImage)
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
 
-  //   const addFileButton = page.locator('.file-field__add-file')
-  //   await addFileButton.click()
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
 
-  //   await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
+    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
 
-  //   await saveDocAndAssert(page)
+    await saveDocAndAssert(page)
 
-  //   await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
-  //     'src',
-  //     /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
-  //   )
-  // })
+    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
+      'src',
+      /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
+    )
+  })
 
   // test that the image renders
   test('should render uploaded image', async () => {
@@ -122,99 +122,97 @@ describe('Upload', () => {
     )
   })
 
-  // test('should upload using the document drawer', async () => {
-  //   await uploadImage()
-  //   await wait(1000)
-  //   // Open the media drawer and create a png upload
+  test('should upload using the document drawer', async () => {
+    await uploadImage()
+    await wait(1000)
+    // Open the media drawer and create a png upload
 
-  //   await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
-  //   await page
-  //     .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
-  //     .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
-  //   await expect(
-  //     page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
-  //   ).toHaveValue('payload.png')
-  //   await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-  //   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page
+      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+    await expect(
+      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+    ).toHaveValue('payload.png')
+    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
-  //   // Assert that the media field has the png upload
-  //   await expect(
-  //     page.locator('.field-type.upload .file-details .file-meta__url a'),
-  //   ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
-  //   await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toContainText(
-  //     'payload-1.png',
-  //   )
-  //   await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
-  //     'src',
-  //     '/api/uploads/file/payload-1.png',
-  //   )
-  //   await saveDocAndAssert(page)
-  // })
+    // Assert that the media field has the png upload
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details__filename a'),
+    ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details__filename a'),
+    ).toContainText('payload-1.png')
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details img'),
+    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    await saveDocAndAssert(page)
+  })
 
-  // test('should upload after editing image inside a document drawer', async () => {
-  //   await uploadImage()
-  //   await wait(1000)
-  //   // Open the media drawer and create a png upload
+  test('should upload after editing image inside a document drawer', async () => {
+    await uploadImage()
+    await wait(1000)
+    // Open the media drawer and create a png upload
 
-  //   await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
-  //   await page
-  //     .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
-  //     .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
-  //   await expect(
-  //     page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
-  //   ).toHaveValue('payload.png')
-  //   await page.locator('[id^=doc-drawer_uploads_1_] .file-field__edit').click()
-  //   await page
-  //     .locator('[id^=edit-upload] .edit-upload__input input[name="Width (px)"]')
-  //     .nth(1)
-  //     .fill('200')
-  //   await page
-  //     .locator('[id^=edit-upload] .edit-upload__input input[name="Height (px)"]')
-  //     .nth(1)
-  //     .fill('200')
-  //   await page.locator('[id^=edit-upload] button:has-text("Apply Changes")').nth(1).click()
-  //   await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-  //   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page
+      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+    await expect(
+      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+    ).toHaveValue('payload.png')
+    await page.locator('[id^=doc-drawer_uploads_1_] .file-field__edit').click()
+    await page
+      .locator('[id^=edit-upload] .edit-upload__input input[name="Width (px)"]')
+      .nth(1)
+      .fill('200')
+    await page
+      .locator('[id^=edit-upload] .edit-upload__input input[name="Height (px)"]')
+      .nth(1)
+      .fill('200')
+    await page.locator('[id^=edit-upload] button:has-text("Apply Changes")').nth(1).click()
+    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
-  //   // Assert that the media field has the png upload
-  //   await expect(
-  //     page.locator('.field-type.upload .file-details .file-meta__url a'),
-  //   ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
-  //   await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toContainText(
-  //     'payload-1.png',
-  //   )
-  //   await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
-  //     'src',
-  //     '/api/uploads/file/payload-1.png',
-  //   )
-  //   await saveDocAndAssert(page)
-  // })
+    // Assert that the media field has the png upload
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details__filename a'),
+    ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details__filename a'),
+    ).toContainText('payload-1.png')
+    await expect(
+      page.locator('.field-type.upload .upload-relationship-details img'),
+    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    await saveDocAndAssert(page)
+  })
 
-  // test('should clear selected upload', async () => {
-  //   await uploadImage()
-  //   await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
+  test('should clear selected upload', async () => {
+    await uploadImage()
+    await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
 
-  //   await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+    await openDocDrawer(page, '#field-media .upload__createNewToggler')
 
-  //   await wait(1000)
+    await wait(1000)
 
-  //   await page
-  //     .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
-  //     .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
-  //   await expect(
-  //     page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
-  //   ).toHaveValue('payload.png')
-  //   await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-  //   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-  //   await page.locator('.field-type.upload .file-details__remove').click()
-  // })
+    await page
+      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+    await expect(
+      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+    ).toHaveValue('payload.png')
+    await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.locator('.field-type.upload .upload-relationship-details__remove').click()
+  })
 
   test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
     await uploadImage()
 
-    await openDocDrawer(page, '.field-type.upload .upload__toggler.list-drawer__toggler')
+    await openDocDrawer(page, '.field-type.upload .upload__listToggler')
 
     const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
     await expect

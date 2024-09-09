@@ -15,17 +15,17 @@ import type {
   RowField,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
-import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
+import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
 
 type Args = {
@@ -33,7 +33,7 @@ type Args = {
   parentName: string
 }
 
-const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
+export const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
   array: (field: ArrayField) =>
     recursivelyBuildNestedPaths({
       field,
@@ -161,5 +161,3 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
     }
   },
 })
-
-export default fieldToSchemaMap

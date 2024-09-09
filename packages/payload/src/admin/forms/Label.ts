@@ -1,19 +1,16 @@
-import type { MarkOptional } from 'ts-essentials'
-
 import type { ServerProps, StaticLabel } from '../../config/types.js'
 import type { ClientField, Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
+import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type GenericLabelProps = {
-  readonly Label?: MappedComponent
   readonly as?: 'label' | 'span'
   readonly htmlFor?: string
+  readonly Label?: MappedComponent
   readonly label?: StaticLabel
   readonly required?: boolean
   readonly unstyled?: boolean
 }
-
-type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldLabelClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
