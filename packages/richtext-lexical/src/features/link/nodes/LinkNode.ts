@@ -386,9 +386,8 @@ function $getAncestor(
   predicate: (ancestor: LexicalNode) => boolean,
 ): LexicalNode | null {
   let parent: LexicalNode | null = node
-  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {
-    /** empty block */
-  }
+  // eslint-disable-next-line no-empty
+  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {}
   return parent
 }
 

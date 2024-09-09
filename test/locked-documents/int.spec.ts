@@ -79,7 +79,7 @@ describe('Locked documents', () => {
 
   // Update unlocked documents (collection & global)
 
-  it('update unlocked document - collection', async () => {
+  it('should update unlocked document - collection', async () => {
     const updatedPost = await payload.update({
       collection: postsSlug,
       data: {
@@ -91,7 +91,7 @@ describe('Locked documents', () => {
     expect(updatedPost.text).toEqual('updated post')
   })
 
-  it('update unlocked document - global', async () => {
+  it('should update unlocked document - global', async () => {
     const updatedGlobalMenu = await payload.updateGlobal({
       slug: menuSlug,
       data: {
@@ -104,7 +104,7 @@ describe('Locked documents', () => {
 
   // Delete unlocked document (collection)
 
-  it('delete unlocked document - collection', async () => {
+  it('should delete unlocked document - collection', async () => {
     const { docs } = await payload.find({
       collection: postsSlug,
       depth: 0,
@@ -172,7 +172,7 @@ describe('Locked documents', () => {
     expect(newPost.text).toEqual('some post')
   })
 
-  it('update locked document - global', async () => {
+  it('should not allow update of locked document - global', async () => {
     // Give locking ownership to another user
     const globalDocInstance = await payload.create({
       collection: lockedDocumentCollection,
@@ -213,7 +213,7 @@ describe('Locked documents', () => {
 
   // Try to update locked document (stale) (collection & global)
 
-  it('update stale locked document - collection', async () => {
+  it('should allow update of stale locked document - collection', async () => {
     const newPost2 = await payload.create({
       collection: postsSlug,
       data: {
@@ -281,7 +281,7 @@ describe('Locked documents', () => {
     // in the payload-locked-documents collection
   })
 
-  it('update stale locked document - global', async () => {
+  it('should allow update of stale locked document - global', async () => {
     // Subtract 5.5 minutes (330 seconds) from the current time
     const pastEditedAt = new Date()
     pastEditedAt.setMinutes(pastEditedAt.getMinutes() - 5)
@@ -339,7 +339,7 @@ describe('Locked documents', () => {
   })
 
   // Try to delete locked document (collection)
-  it('delete locked document - collection', async () => {
+  it('should not allow delete of locked document - collection', async () => {
     const newPost3 = await payload.create({
       collection: postsSlug,
       data: {
@@ -380,7 +380,7 @@ describe('Locked documents', () => {
 
   // Try to delete locked document (stale) (collection)
 
-  it('delete stale locked document - collection', async () => {
+  it('should allow delete of stale locked document - collection', async () => {
     const newPost4 = await payload.create({
       collection: postsSlug,
       data: {
