@@ -24,9 +24,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -348,7 +348,9 @@ export default buildConfigWithDefaults({
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          }
           resolve(true)
         })
       })

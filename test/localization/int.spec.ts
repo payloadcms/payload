@@ -22,9 +22,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -1117,6 +1117,57 @@ describe('Localization', () => {
 
       expect(allLocales.localizedCheckbox.en).toBeTruthy()
       expect(allLocales.localizedCheckbox.es).toBeFalsy()
+    })
+
+    it('should duplicate with localized blocks', async () => {
+      const englishText = 'english'
+      const spanishText = 'spanish'
+      const doc = await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: englishText,
+            },
+          ],
+          title: 'hello',
+        },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: spanishText,
+            },
+          ],
+          title: 'hello',
+        },
+        locale: spanishLocale,
+      })
+
+      const result = await payload.duplicate({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        locale: defaultLocale,
+      })
+
+      const allLocales = await payload.findByID({
+        id: result.id,
+        collection: withRequiredLocalizedFields,
+        locale: 'all',
+      })
+
+      // check fields
+      expect(result.layout[0].text).toStrictEqual(englishText)
+
+      expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
+      expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
     })
   })
 
