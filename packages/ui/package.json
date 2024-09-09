@@ -20,6 +20,11 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
+    "./server": {
+      "import": "./src/exports/server/index.ts",
+      "types": "./src/exports/server/index.ts",
+      "default": "./src/exports/server/index.ts"
+    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
