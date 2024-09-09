@@ -471,15 +471,11 @@ describe('fields', () => {
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
 
-      // Check that the top value of the fields are the same
-      // Give it some wiggle room of like 2px to account for differences in rendering
-      const tolerance = 2
-      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
-
-      // Check that the widths of the fields are the same
-      const collapsibleDifference = Math.abs(fieldABox.width - fieldBBox.width)
-
-      expect(collapsibleDifference).toBeLessThanOrEqual(tolerance)
+      await expect(() => {
+        // Check that the top value of the fields are the same
+        expect(fieldABox.y).toEqual(fieldBBox.y)
+        expect(fieldABox.height).toEqual(fieldBBox.height)
+      }).toPass()
     })
   })
 
