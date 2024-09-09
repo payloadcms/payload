@@ -5,7 +5,7 @@ export const postsSlug = 'posts'
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
-    useAsTitle: 'text',
+    useAsTitle: 'clientTextField',
   },
   fields: [
     {
