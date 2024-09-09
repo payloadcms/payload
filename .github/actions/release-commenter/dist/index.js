@@ -34107,7 +34107,6 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 }
                                             });
                                         }); };
-                                        requests.push(createCommentPromise());
                                     }
                                     else {
                                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue/PR is locked: ".concat(issueNumber, ". Unlocking, commenting, and re-locking. ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
