@@ -59,7 +59,73 @@ describe('sanitize - collections -', () => {
       }).not.toThrow()
     })
 
-    it('should throw on nested field', async () => {
+    it('should not throw on valid field inside tabs', async () => {
+      const collectionConfig: CollectionConfig = {
+        ...defaultCollection,
+        admin: {
+          useAsTitle: 'title',
+        },
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                label: 'General',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }
+      await expect(async () => {
+        await sanitizeCollection(
+          // @ts-expect-error
+          {
+            ...config,
+            collections: [collectionConfig],
+          },
+          collectionConfig,
+        )
+      }).not.toThrow()
+    })
+
+    it('should not throw on valid field inside collapsibles', async () => {
+      const collectionConfig: CollectionConfig = {
+        ...defaultCollection,
+        admin: {
+          useAsTitle: 'title',
+        },
+        fields: [
+          {
+            type: 'collapsible',
+            label: 'Collapsible',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      }
+      await expect(async () => {
+        await sanitizeCollection(
+          // @ts-expect-error
+          {
+            ...config,
+            collections: [collectionConfig],
+          },
+          collectionConfig,
+        )
+      }).not.toThrow()
+    })
+
+    it('should throw on nested useAsTitle', async () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {

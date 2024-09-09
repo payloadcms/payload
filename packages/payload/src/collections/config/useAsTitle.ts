@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../index.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import flattenFields from '../../utilities/flattenTopLevelFields.js'
 
 /**
  * Validate useAsTitle for collections.
@@ -13,31 +15,25 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
   }
 
   if (config?.admin && config.admin?.useAsTitle && config.admin.useAsTitle !== 'id') {
+    const fields = flattenFields(config.fields)
+    const useAsTitleField = fields.find((field) => {
+      if (fieldAffectsData(field) && config.admin) {
+        return field.name === config.admin.useAsTitle
+      }
+      return false
+    })
+
     // If auth is enabled then we don't need to
     if (config.auth) {
       if (config.admin.useAsTitle !== 'email') {
-        if (
-          !config.fields.find((field) => {
-            if ('name' in field && config.admin) {
-              return field.name === config.admin.useAsTitle
-            }
-            return false
-          })
-        ) {
+        if (!useAsTitleField) {
           throw new InvalidConfiguration(
             `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" does not exist in the collection "${config.slug}"`,
           )
         }
       }
     } else {
-      if (
-        !config.fields.find((field) => {
-          if ('name' in field && config.admin) {
-            return field.name === config.admin.useAsTitle
-          }
-          return false
-        })
-      ) {
+      if (!useAsTitleField) {
         throw new InvalidConfiguration(
           `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" does not exist in the collection "${config.slug}"`,
         )
