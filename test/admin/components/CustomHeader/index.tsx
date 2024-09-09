@@ -1,10 +1,12 @@
-import type { SanitizedConfig } from 'payload'
+import type { PayloadServerReactComponent, SanitizedConfig } from 'payload'
 
 import React from 'react'
 
 const baseClass = 'custom-header'
 
-export const CustomHeader: SanitizedConfig['admin']['components']['header'][0] = () => {
+export const CustomHeader: PayloadServerReactComponent<
+  SanitizedConfig['admin']['components']['header'][0]
+> = () => {
   return (
     <div
       className={baseClass}
