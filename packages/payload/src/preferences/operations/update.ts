@@ -3,7 +3,7 @@ import type { PreferenceUpdateRequest } from '../types.js'
 
 import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
-export function update(args: PreferenceUpdateRequest) {
+export async function update(args: PreferenceUpdateRequest) {
   const {
     key,
     req: { payload },
@@ -35,21 +35,23 @@ export function update(args: PreferenceUpdateRequest) {
     value,
   }
 
+  let result
+
   try {
     // try/catch because we attempt to update without first reading to check if it exists first to save on db calls
-    void payload.db.updateOne({
+    result = await payload.db.updateOne({
       collection,
       data: preference,
       req,
       where,
     })
   } catch (err: unknown) {
-    void payload.db.create({
+    result = await payload.db.create({
       collection,
       data: preference,
       req,
     })
   }
 
-  return preference
+  return result
 }

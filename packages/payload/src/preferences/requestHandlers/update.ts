@@ -23,7 +23,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
     reqWithData.json = () => Promise.resolve(data)
   }
 
-  const doc = update({
+  const doc = await update({
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData?.user,
