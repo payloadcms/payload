@@ -12,8 +12,8 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextInput } from './Input.js'
 import './index.scss'
+import { TextInput } from './Input.js'
 
 export { TextInput, TextInputProps }
 
@@ -31,7 +31,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
         rtl,
         style,
         width,
-      },
+      } = {},
       hasMany,
       label,
       localized,
@@ -55,8 +55,9 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, minLength, maxLength, required],
   )
@@ -120,15 +121,16 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
+      Label={field?.admin?.components?.Label}
       label={label}
       maxRows={maxRows}
       minRows={minRows}

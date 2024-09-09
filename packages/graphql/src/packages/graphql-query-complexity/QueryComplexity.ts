@@ -22,15 +22,15 @@ import type {
 } from 'graphql'
 
 import {
+  getNamedType,
   GraphQLError,
   GraphQLInterfaceType,
   GraphQLObjectType,
+  isAbstractType,
+  isCompositeType,
   Kind,
   TypeInfo,
   ValidationContext,
-  getNamedType,
-  isAbstractType,
-  isCompositeType,
   visit,
   visitWithTypeInfo,
 } from 'graphql'
@@ -122,12 +122,12 @@ export function getComplexity(options: {
   return visitor.complexity
 }
 
-export default class QueryComplexity {
-  OperationDefinition: Record<string, any>
+export class QueryComplexity {
   complexity: number
   context: ValidationContext
   estimators: Array<ComplexityEstimator>
   includeDirectiveDef: GraphQLDirective
+  OperationDefinition: Record<string, any>
   options: QueryComplexityOptions
   requestContext?: Record<string, any>
   skipDirectiveDef: GraphQLDirective

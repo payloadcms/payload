@@ -21,14 +21,19 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
   customAdminRoutes,
+  customCollectionMetaTitle,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
+  customRootViewMetaTitle,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
   customViewPath,
   customViewTitle,
   slugPluralLabel,
@@ -120,102 +125,154 @@ describe('admin1', () => {
   })
 
   describe('metadata', () => {
-    test('should render custom page title suffix', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.title()).resolves.toMatch(/- Custom CMS$/)
+    describe('root title and description', () => {
+      test('should render custom page title suffix', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description/,
+        )
+      })
+
+      test('should render custom meta description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+          'content',
+          /This is a custom meta description for posts/,
+        )
+      })
+
+      test('should fallback to root meta for custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-default-view`)
+        await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
+      })
+
+      test('should render custom meta title from custom root views', async () => {
+        await page.goto(`${serverURL}/admin/custom-minimal-view`)
+        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
 
-    test('should render custom meta description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description/,
-      )
+    describe('favicons', () => {
+      test('should render custom favicons', async () => {
+        await page.goto(postsUrl.admin)
+        const favicons = page.locator('link[rel="icon"]')
+
+        await expect(favicons).toHaveCount(2)
+        await expect(favicons.nth(0)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
+        )
+        await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
+        await expect(favicons.nth(1)).toHaveAttribute(
+          'href',
+          /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
+        )
+      })
     })
 
-    test('should render custom meta description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
+    describe('og meta', () => {
+      test('should render custom og:title from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title/,
+        )
+      })
 
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-        'content',
-        /This is a custom meta description for posts/,
-      )
+      test('should render custom og:description from root config', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description/,
+        )
+      })
+
+      test('should render custom og:title from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG title for posts/,
+        )
+      })
+
+      test('should render custom og:description from collection config', async () => {
+        await page.goto(postsUrl.collection(postsCollectionSlug))
+        await page.locator('.collection-list .table a').first().click()
+
+        await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+          'content',
+          /This is a custom OG description for posts/,
+        )
+      })
+
+      test('should render og:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
+
+      test('should render twitter:image with dynamic URL', async () => {
+        await page.goto(postsUrl.admin)
+
+        const encodedOGDescription = encodeURIComponent('This is a custom OG description')
+        const encodedOGTitle = encodeURIComponent('This is a custom OG title')
+
+        await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+          'content',
+          new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
+        )
+      })
     })
 
-    test('should render custom favicons', async () => {
-      await page.goto(postsUrl.admin)
-      const favicons = page.locator('link[rel="icon"]')
+    describe('document meta', () => {
+      test('should render custom meta title from collection config', async () => {
+        await page.goto(customViewsURL.list)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-      await expect(favicons).toHaveCount(2)
-      await expect(favicons.nth(0)).toHaveAttribute(
-        'href',
-        /\/custom-favicon-dark(\.[a-z\d]+)?\.png/,
-      )
-      await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-      await expect(favicons.nth(1)).toHaveAttribute(
-        'href',
-        /\/custom-favicon-light(\.[a-z\d]+)?\.png/,
-      )
-    })
+      test('should render custom meta title from default edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        const pattern = new RegExp(`^${customDefaultTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:title from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title/,
-      )
-    })
+      test('should render custom meta title from nested edit view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/versions`)
+        const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:description from root config', async () => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description/,
-      )
-    })
+      test('should render custom meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}/custom-tab-view`)
+        const pattern = new RegExp(`^${customViewMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
 
-    test('should render custom og:title from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG title for posts/,
-      )
-    })
-
-    test('should render custom og:description from collection config', async () => {
-      await page.goto(postsUrl.collection(postsCollectionSlug))
-      await page.locator('.collection-list .table a').first().click()
-
-      await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
-        'content',
-        /This is a custom OG description for posts/,
-      )
-    })
-
-    test('should render og:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
-    })
-
-    test('should render twitter:image with dynamic URL', async () => {
-      await page.goto(postsUrl.admin)
-
-      const encodedOGDescription = encodeURIComponent('This is a custom OG description')
-      const encodedOGTitle = encodeURIComponent('This is a custom OG title')
-
-      await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
-        'content',
-        new RegExp(`/api/og\\?description=${encodedOGDescription}&title=${encodedOGTitle}`),
-      )
+      test('should render fallback meta title from nested custom view', async () => {
+        await navigateToDoc(page, customViewsURL)
+        await page.goto(`${page.url()}${customTabViewPath}`)
+        const pattern = new RegExp(`^${customCollectionMetaTitle}`)
+        await expect(page.title()).resolves.toMatch(pattern)
+      })
     })
   })
 
@@ -279,6 +336,20 @@ describe('admin1', () => {
   })
 
   describe('routing', () => {
+    test('should 404 not found root pages', async () => {
+      await page.goto(`${serverURL}/admin/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should 404 not found documents', async () => {
+      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
     test('should use custom logout route', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
 
@@ -498,25 +569,47 @@ describe('admin1', () => {
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-label')).toBeVisible()
+      await expect(page.locator('#custom-client-field-label')).toBeVisible()
+      await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
-    test('renders custom description component', async () => {
+    test('renders custom field description text', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-description')).toBeVisible()
+      await expect(page.locator('#custom-client-field-description')).toBeVisible()
+      await expect(page.locator('#custom-server-field-description')).toBeVisible()
     })
 
-    // test('ensure custom components receive field props', async () => {
-    //   await page.goto(customFieldsURL.create)
-    //   await page.waitForURL(customFieldsURL.create)
-    //   await expect(page.locator('#custom-field-label')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    //   await expect(page.locator('#custom-field-description')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    // })
+    test('custom server components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-server-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#custom-server-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('custom client components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-client-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('#custom-client-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
 
     describe('field descriptions', () => {
       test('should render static field description', async () => {
@@ -549,10 +642,10 @@ describe('admin1', () => {
     test('should render custom error component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
       await input.fill('ab')
       await expect(input).toHaveValue('ab')
-      const error = page.locator('.custom-error:near(input[id="field-customTextField"])')
+      const error = page.locator('.custom-error:near(input[id="field-customTextClientField"])')
       const submit = page.locator('button[type="button"][id="action-save"]')
       await submit.click()
       await expect(error).toHaveText('#custom-error')
@@ -560,17 +653,19 @@ describe('admin1', () => {
 
     test('should render beforeInput and afterInput', async () => {
       await page.goto(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
 
       const prevSibling = await input.evaluateHandle((el) => {
         return el.previousElementSibling
       })
+
       const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
       expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
+
       const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
@@ -889,18 +984,14 @@ describe('admin1', () => {
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await page
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       await wait(500)
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
       const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
       await drawer1Content
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
       await expect(drawer2Content).toBeVisible()
@@ -1030,6 +1121,30 @@ describe('admin1', () => {
       await saveDocAndAssert(page)
       await page.locator('.doc-controls__popup >> .popup-button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
+    })
+
+    test('should properly close leave-without-saving modal after clicking leave-anyway button', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const title = 'title'
+      await page.locator('#field-title').fill(title)
+      await saveDocHotkeyAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+
+      const newTitle = 'new title'
+      await page.locator('#field-title').fill(newTitle)
+
+      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
+      await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
   })
 

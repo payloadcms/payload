@@ -17,10 +17,14 @@ import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
-  if (isConditional) return false
+  if (isConditional) {
+    return false
+  }
 
   const isMarkedRequired = 'required' in field && field.required === true
-  if (fieldAffectsData(field) && isMarkedRequired) return true
+  if (fieldAffectsData(field) && isMarkedRequired) {
+    return true
+  }
 
   // if any subfields are required, this field is required
   if ('fields' in field && field.type !== 'array') {
@@ -139,7 +143,9 @@ export function withNullableJSONSchemaType(
   isRequired: boolean,
 ): JSONSchema4TypeName | JSONSchema4TypeName[] {
   const fieldTypes = [fieldType]
-  if (isRequired) return fieldType
+  if (isRequired) {
+    return fieldType
+  }
   fieldTypes.push('null')
   return fieldTypes
 }
@@ -169,7 +175,9 @@ export function fieldsToJSONSchema(
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-        if (isRequired) requiredFieldNames.add(field.name)
+        if (isRequired) {
+          requiredFieldNames.add(field.name)
+        }
 
         let fieldSchema: JSONSchema4
 
@@ -291,6 +299,7 @@ export function fieldsToJSONSchema(
             break
           }
 
+          case 'upload':
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
@@ -380,56 +389,48 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'upload': {
-            fieldSchema = {
-              oneOf: [
-                {
-                  type: collectionIDFieldTypes[field.relationTo],
-                },
-                {
-                  $ref: `#/definitions/${field.relationTo}`,
-                },
-              ],
-            }
-            if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
-            break
-          }
-
           case 'blocks': {
+            // Check for a case where no blocks are provided.
+            // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
+            // so the best we can get is `unknown[]`
+            const hasBlocks = Boolean(field.blocks.length)
+
             fieldSchema = {
               type: withNullableJSONSchemaType('array', isRequired),
-              items: {
-                oneOf: field.blocks.map((block) => {
-                  const blockFieldSchemas = fieldsToJSONSchema(
-                    collectionIDFieldTypes,
-                    block.fields,
-                    interfaceNameDefinitions,
-                    config,
-                  )
+              items: hasBlocks
+                ? {
+                    oneOf: field.blocks.map((block) => {
+                      const blockFieldSchemas = fieldsToJSONSchema(
+                        collectionIDFieldTypes,
+                        block.fields,
+                        interfaceNameDefinitions,
+                        config,
+                      )
 
-                  const blockSchema: JSONSchema4 = {
-                    type: 'object',
-                    additionalProperties: false,
-                    properties: {
-                      ...blockFieldSchemas.properties,
-                      blockType: {
-                        const: block.slug,
-                      },
-                    },
-                    required: ['blockType', ...blockFieldSchemas.required],
+                      const blockSchema: JSONSchema4 = {
+                        type: 'object',
+                        additionalProperties: false,
+                        properties: {
+                          ...blockFieldSchemas.properties,
+                          blockType: {
+                            const: block.slug,
+                          },
+                        },
+                        required: ['blockType', ...blockFieldSchemas.required],
+                      }
+
+                      if (block.interfaceName) {
+                        interfaceNameDefinitions.set(block.interfaceName, blockSchema)
+
+                        return {
+                          $ref: `#/definitions/${block.interfaceName}`,
+                        }
+                      }
+
+                      return blockSchema
+                    }),
                   }
-
-                  if (block.interfaceName) {
-                    interfaceNameDefinitions.set(block.interfaceName, blockSchema)
-
-                    return {
-                      $ref: `#/definitions/${block.interfaceName}`,
-                    }
-                  }
-
-                  return blockSchema
-                }),
-              },
+                : {},
             }
             break
           }

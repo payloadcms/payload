@@ -95,8 +95,12 @@ const StaticPill: React.FC<PillProps> = (props) => {
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div'
 
-  if (onClick && !to) Element = 'button'
-  if (to) Element = Link
+  if (onClick && !to) {
+    Element = 'button'
+  }
+  if (to) {
+    Element = Link
+  }
 
   return (
     <Element
@@ -119,6 +123,8 @@ const StaticPill: React.FC<PillProps> = (props) => {
 export const Pill: React.FC<PillProps> = (props) => {
   const { draggable } = props
 
-  if (draggable) return <DraggablePill {...props} />
+  if (draggable) {
+    return <DraggablePill {...props} />
+  }
   return <StaticPill {...props} />
 }

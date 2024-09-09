@@ -4,7 +4,7 @@ import type { Permissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
-import type { Locale, PayloadComponent } from '../../config/types.js'
+import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
@@ -14,14 +14,15 @@ export type AdminViewConfig = {
   Component: AdminViewComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
+  meta?: MetaConfig
   path?: string
   sensitive?: boolean
   strict?: boolean
 }
 
 export type MappedView = {
-  Component: MappedComponent
   actions?: MappedComponent[]
+  Component: MappedComponent
 }
 
 export type AdminViewProps = {

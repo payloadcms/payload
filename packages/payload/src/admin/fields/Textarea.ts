@@ -1,20 +1,36 @@
 import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { TextareaFieldClient } from '../../fields/config/types.js'
+import type { TextareaField, TextareaFieldClient } from '../../fields/config/types.js'
 import type { TextareaFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type TextareaFieldClientWithoutType = MarkOptional<TextareaFieldClient, 'type'>
 
 export type TextareaFieldProps = {
-  readonly field: MarkOptional<TextareaFieldClient, 'type'>
   readonly inputRef?: React.Ref<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextareaFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<TextareaFieldClientWithoutType>, 'validate'>
 
-export type TextareaFieldLabelComponent = LabelComponent<'textarea'>
+export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<TextareaField>
 
-export type TextareaFieldDescriptionComponent = DescriptionComponent<'textarea'>
+export type TextareaFieldLabelClientComponent =
+  FieldLabelClientComponent<TextareaFieldClientWithoutType>
 
-export type TextareaFieldErrorComponent = ErrorComponent<'textarea'>
+export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextareaField>
+
+export type TextareaFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<TextareaFieldClientWithoutType>
+
+export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<TextareaField>
+
+export type TextareaFieldErrorClientComponent =
+  FieldErrorClientComponent<TextareaFieldClientWithoutType>

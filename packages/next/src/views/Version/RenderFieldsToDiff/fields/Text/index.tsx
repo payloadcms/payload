@@ -1,3 +1,4 @@
+'use client'
 import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -23,14 +24,20 @@ const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
 }) => {
   let placeholder = ''
 
-  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
+  if (version === comparison) {
+    placeholder = `[${i18n.t('general:noValue')}]`
+  }
 
   let versionToRender = version
   let comparisonToRender = comparison
 
   if (isRichText) {
-    if (typeof version === 'object') versionToRender = JSON.stringify(version, null, 2)
-    if (typeof comparison === 'object') comparisonToRender = JSON.stringify(comparison, null, 2)
+    if (typeof version === 'object') {
+      versionToRender = JSON.stringify(version, null, 2)
+    }
+    if (typeof comparison === 'object') {
+      comparisonToRender = JSON.stringify(comparison, null, 2)
+    }
   }
 
   return (

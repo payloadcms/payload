@@ -20,7 +20,7 @@ const start = async (): Promise<void> => {
   const payload = await getPayloadClient({
     initOptions: {
       express: app,
-      onInit: async newPayload => {
+      onInit: async (newPayload) => {
         newPayload.logger.info(`Payload Admin URL: ${newPayload.getAdminURL()}`)
       },
     },

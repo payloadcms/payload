@@ -32,7 +32,9 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     }
 
     authFields.push(emailField)
-    if (usernameField) authFields.push(usernameField)
+    if (usernameField) {
+      authFields.push(usernameField)
+    }
 
     authFields.push(...baseAuthFields)
 

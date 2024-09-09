@@ -1,3 +1,4 @@
+'use client'
 import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
@@ -23,7 +24,9 @@ export const mergeServerFormState = (
 
   if (existingState) {
     Object.entries(existingState).forEach(([path, newFieldState]) => {
-      if (!incomingState[path]) return
+      if (!incomingState[path]) {
+        return
+      }
 
       /**
        * Handle error paths

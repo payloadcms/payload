@@ -1,6 +1,7 @@
-import type { MappedComponent, StaticDescription, StaticLabel } from 'payload'
+import type { MappedComponent, StaticDescription, StaticLabel, TextFieldClient } from 'payload'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
+import type { MarkOptional } from 'ts-essentials'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
@@ -15,16 +16,17 @@ export type SharedTextFieldProps =
     }
 
 export type TextInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
+  readonly Error?: MappedComponent
   readonly errorProps?: Record<string, unknown>
+  readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
+  readonly Label?: MappedComponent
   readonly label: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly maxRows?: number

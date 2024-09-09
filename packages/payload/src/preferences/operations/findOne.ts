@@ -10,7 +10,9 @@ async function findOne(args: PreferenceRequest): Promise<TypedCollection['_prefe
     user,
   } = args
 
-  if (!user) return null
+  if (!user) {
+    return null
+  }
 
   const where: Where = {
     and: [

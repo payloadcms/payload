@@ -1,4 +1,4 @@
-import type { ClientField, Data, Field, FormField, FormState, Row, User } from 'payload'
+import type { ClientField, Data, FormField, FormState, Row, User } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -10,13 +10,13 @@ export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
+  disabled?: boolean
   disableSuccessStatus?: boolean
   /**
    * If you would like to solely leverage server-side validation on submit,
    * you can disable checks that the form makes before it submits
    */
   disableValidationOnSubmit?: boolean
-  disabled?: boolean
   /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks

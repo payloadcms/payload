@@ -35,7 +35,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },
@@ -82,6 +82,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       }}
     >
       <FieldLabel
+        field={field}
         Label={field?.admin?.components?.Label}
         label={label}
         required={required}
@@ -90,6 +91,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -97,7 +99,9 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={disabled}
@@ -108,6 +112,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

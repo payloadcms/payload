@@ -14,9 +14,9 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { TabComponent } from './Tab/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
+import { TabComponent } from './Tab/index.js'
 
 const baseClass = 'tabs-field'
 
@@ -27,7 +27,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
     field,
     field: {
       _path: pathFromProps,
-      admin: { className, readOnly: readOnlyFromAdmin },
+      admin: { className, readOnly: readOnlyFromAdmin } = {},
       tabs = [],
     },
     forceRender = false,
@@ -154,7 +154,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} />
+              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

@@ -6,7 +6,7 @@ import {
   ListQueryProvider,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { RenderComponent, formatAdminURL, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
 import { notFound } from 'next/navigation.js'
 import { deepCopyObjectSimple, mergeListSearchAndWhere } from 'payload'
@@ -156,11 +156,11 @@ export const ListView: React.FC<AdminViewProps> = async ({
       collectionConfig,
     ) as unknown as ClientCollectionConfig
     clientCollectionConfig = createClientCollectionConfig({
-      DefaultEditView,
-      DefaultListView,
       clientCollection: clientCollectionConfig,
       collection: collectionConfig,
       createMappedComponent,
+      DefaultEditView,
+      DefaultListView,
       i18n,
       importMap: payload.importMap,
       payload,

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { MetaConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatDate } from '@payloadcms/ui/shared'
@@ -15,9 +16,9 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 }): Promise<Metadata> => {
   const { t } = i18n
 
-  let title: string = ''
-  let description: string = ''
-  const keywords: string = ''
+  let metaToUse: MetaConfig = {
+    ...(config.admin.meta || {}),
+  }
 
   const doc: any = {} // TODO: figure this out
 
@@ -29,23 +30,30 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
     const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
     const titleFromData = doc?.[useAsTitle]
-    title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`
-    description = t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel })
+
+    metaToUse = {
+      ...(config.admin.meta || {}),
+      description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
+      title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
+      ...(collectionConfig?.admin?.meta || {}),
+      ...(collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}),
+    }
   }
 
   if (globalConfig) {
     const entityLabel = getTranslation(globalConfig.label, i18n)
-    title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`
-    description = t('version:viewingVersionGlobal', { entityLabel })
+
+    metaToUse = {
+      ...(config.admin.meta || {}),
+      description: t('version:viewingVersionGlobal', { entityLabel }),
+      title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
+      ...(globalConfig?.admin?.meta || {}),
+      ...(globalConfig?.admin?.components?.views?.edit?.version?.meta || {}),
+    }
   }
 
   return meta({
-    ...(config.admin.meta || {}),
-    description,
-    keywords,
+    ...metaToUse,
     serverURL: config.serverURL,
-    title,
-    ...(collectionConfig?.admin.meta || {}),
-    ...(globalConfig?.admin.meta || {}),
   })
 }

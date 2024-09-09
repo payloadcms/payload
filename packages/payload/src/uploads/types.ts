@@ -1,4 +1,4 @@
-import type { ResizeOptions, Sharp, Metadata as SharpMetadata } from 'sharp'
+import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -95,6 +95,11 @@ export type UploadConfig = {
    * - A function that generates a fully qualified URL for the thumbnail, receives the doc as the only argument.
    **/
   adminThumbnail?: GetAdminThumbnail | string
+  /**
+   * Enables bulk upload of files from the list view.
+   * @default true
+   */
+  bulkUpload?: boolean
   /**
    * Enables cropping of images.
    * @default true

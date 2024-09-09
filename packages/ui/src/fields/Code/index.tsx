@@ -37,7 +37,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },
@@ -84,6 +84,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       }}
     >
       <FieldLabel
+        field={field}
         Label={field?.admin?.components?.Label}
         label={label}
         required={required}
@@ -92,6 +93,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -108,6 +110,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

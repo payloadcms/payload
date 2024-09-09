@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud",
-  "version": "3.0.0-beta.79",
+  "version": "3.0.0-beta.100",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -26,7 +26,9 @@
     "build": "pnpm build:types && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo} && rimraf dev/yarn.lock",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "jest"
   },

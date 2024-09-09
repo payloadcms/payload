@@ -1,15 +1,14 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import { UIFieldClient } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 import React from 'react'
 
 import type { diffComponents as _diffComponents } from './fields/index.js'
 import type { FieldDiffProps, Props } from './types.js'
 
-import Nested from './fields/Nested/index.js'
 import { diffMethods } from './fields/diffMethods.js'
+import Nested from './fields/Nested/index.js'
 import './index.scss'
 
 const baseClass = 'render-field-diffs'
@@ -29,7 +28,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if ('name' in field && field.name === 'id') return null
+        if ('name' in field && field.name === 'id') {
+          return null
+        }
 
         const Component = diffComponents[field.type]
 
@@ -53,7 +54,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
 
             const subFieldPermissions = fieldPermissions?.[fieldName]?.fields
 
-            if (hasPermission === false) return null
+            if (hasPermission === false) {
+              return null
+            }
 
             const baseCellProps: FieldDiffProps = {
               comparison: comparisonValue,
@@ -100,7 +103,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs' && 'fields' in field) {
+          if (field.type === 'tabs' && 'tabs' in field) {
             const Tabs = diffComponents.tabs
 
             return (

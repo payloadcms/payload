@@ -156,7 +156,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           valueToValidate = getDataByPath(path)
         }
 
-        let errorMessage: string | undefined
+        let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
         const isValid =

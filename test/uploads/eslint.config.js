@@ -10,8 +10,7 @@ export const index = [
   {
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.eslint.json',
-        tsconfigDirName: import.meta.dirname,
+        tsconfigRootDir: import.meta.dirname,
         ...rootParserOptions,
       },
     },

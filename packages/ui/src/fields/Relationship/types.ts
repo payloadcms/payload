@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, SanitizedConfig } from 'payload'
+import type { ClientCollectionConfig, FilterOptionsResult, SanitizedConfig } from 'payload'
 
 export type Option = {
   label: string
@@ -18,9 +18,10 @@ export type ValueWithRelation = {
   value: number | string
 }
 
-export type Value = ValueWithRelation | number | string
+export type Value = number | string | ValueWithRelation
 
 type CLEAR = {
+  exemptValues?: Value | Value[]
   type: 'CLEAR'
 }
 
@@ -45,6 +46,7 @@ type ADD = {
 export type Action = ADD | CLEAR | UPDATE
 
 export type GetResults = (args: {
+  filterOptions?: FilterOptionsResult
   lastFullyLoadedRelation?: number
   lastLoadedPage: Record<string, number>
   onSuccess?: () => void

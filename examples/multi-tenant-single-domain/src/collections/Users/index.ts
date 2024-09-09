@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import type { User } from '../../../payload-types'
+import type { User } from '../../payload-types'
 
 import { getTenantAdminTenantAccessIDs } from '../../utilities/getTenantAccessIDs'
 import { createAccess } from './access/create'
@@ -37,32 +37,6 @@ const Users: CollectionConfig = {
         {
           name: 'tenant',
           type: 'relationship',
-          filterOptions: ({ user }) => {
-            if (!user) {
-              // Would like to query where exists true on id
-              // but that is not working
-              return {
-                id: {
-                  like: '',
-                },
-              }
-            }
-            if (user?.roles?.includes('super-admin')) {
-              // Would like to query where exists true on id
-              // but that is not working
-              return {
-                id: {
-                  like: '',
-                },
-              }
-            }
-            const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(user as User)
-            return {
-              id: {
-                in: adminTenantAccessIDs,
-              },
-            }
-          },
           index: true,
           relationTo: 'tenants',
           required: true,

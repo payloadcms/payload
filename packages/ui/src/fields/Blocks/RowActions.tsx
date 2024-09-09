@@ -10,8 +10,8 @@ import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
   readonly addRow: (rowIndex: number, blockType: string) => Promise<void> | void
-  readonly blockType: string
   readonly blocks: ClientBlock[]
+  readonly blockType: string
   readonly duplicateRow: (rowIndex: number, blockType: string) => void
   readonly fields: ClientField[]
   readonly hasMaxRows?: boolean
@@ -24,8 +24,8 @@ export const RowActions: React.FC<{
 }> = (props) => {
   const {
     addRow,
-    blockType,
     blocks,
+    blockType,
     duplicateRow,
     hasMaxRows,
     isSortable,

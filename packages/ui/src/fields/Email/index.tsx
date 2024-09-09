@@ -20,7 +20,6 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
     autoComplete,
     descriptionProps,
     errorProps,
-    field,
     field: {
       name,
       _path: pathFromProps,
@@ -36,10 +35,12 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       label,
       required,
     } = {} as EmailFieldProps['field'],
+    field,
     labelProps,
     readOnly: readOnlyFromTopLevelProps,
     validate,
   } = props
+
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
@@ -73,6 +74,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       }}
     >
       <FieldLabel
+        field={field}
         Label={field?.admin?.components?.Label}
         label={label}
         required={required}
@@ -81,6 +83,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -103,6 +106,7 @@ const EmailFieldComponent: React.FC<EmailFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

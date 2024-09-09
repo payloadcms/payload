@@ -26,7 +26,8 @@ export const deleteFromSearch: CollectionAfterDeleteHook = async ({
     }
   } catch (err: unknown) {
     payload.logger.error({
-      err: `Error deleting search doc: ${err}`,
+      err,
+      msg: `Error deleting search doc.`,
     })
   }
 

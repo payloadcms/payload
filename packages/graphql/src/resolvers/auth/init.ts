@@ -2,7 +2,7 @@ import { initOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
-function initResolver(collection: string) {
+export function init(collection: string) {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,
@@ -14,5 +14,3 @@ function initResolver(collection: string) {
 
   return resolver
 }
-
-export default initResolver

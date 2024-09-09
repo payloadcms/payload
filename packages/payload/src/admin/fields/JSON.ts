@@ -1,17 +1,31 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { JSONFieldClient } from '../../fields/config/types.js'
+import type { JSONField, JSONFieldClient } from '../../fields/config/types.js'
 import type { JSONFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
 
 export type JSONFieldProps = {
-  readonly field: MarkOptional<JSONFieldClient, 'type'>
   readonly validate?: JSONFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<JSONFieldClientWithoutType>, 'validate'>
 
-export type JSONFieldLabelComponent = LabelComponent<'json'>
+export type JSONFieldLabelServerComponent = FieldLabelServerComponent<JSONField>
 
-export type JSONFieldDescriptionComponent = DescriptionComponent<'json'>
+export type JSONFieldLabelClientComponent = FieldLabelClientComponent<JSONFieldClientWithoutType>
 
-export type JSONFieldErrorComponent = ErrorComponent<'json'>
+export type JSONFieldDescriptionServerComponent = FieldDescriptionServerComponent<JSONField>
+
+export type JSONFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<JSONFieldClientWithoutType>
+
+export type JSONFieldErrorServerComponent = FieldErrorServerComponent<JSONField>
+
+export type JSONFieldErrorClientComponent = FieldErrorClientComponent<JSONFieldClientWithoutType>

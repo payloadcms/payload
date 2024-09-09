@@ -28,7 +28,7 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
-import type { ClientComponentProps } from '../../../typesClient.js'
+import type { BaseClientFeatureProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 import type { UploadNode } from '../nodes/UploadNode.js'
@@ -56,6 +56,12 @@ const Component: React.FC<ElementProps> = (props) => {
     data: { fields, relationTo, value },
     nodeKey,
   } = props
+
+  if (typeof value === 'object') {
+    throw new Error(
+      'Upload value should be a string or number. The Lexical Upload component should not receive the populated value object.',
+    )
+  }
 
   const {
     config: {
@@ -132,45 +138,48 @@ const Component: React.FC<ElementProps> = (props) => {
     },
     [isSelected, nodeKey],
   )
-  const onClick = useCallback(
-    (event: MouseEvent) => {
-      // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
-      if (event.target === uploadRef.current || uploadRef.current?.contains(event.target as Node)) {
-        if (event.shiftKey) {
-          setSelected(!isSelected)
-        } else {
-          if (!isSelected) {
-            clearSelection()
-            setSelected(true)
-          }
-        }
-        return true
-      }
-
-      return false
-    },
-    [isSelected, setSelected, clearSelection],
-  )
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
+      editor.registerCommand<MouseEvent>(
+        CLICK_COMMAND,
+        (event: MouseEvent) => {
+          // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
+          if (
+            event.target === uploadRef.current ||
+            uploadRef.current?.contains(event.target as Node)
+          ) {
+            if (event.shiftKey) {
+              setSelected(!isSelected)
+            } else {
+              if (!isSelected) {
+                clearSelection()
+                setSelected(true)
+              }
+            }
+            return true
+          }
+
+          return false
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
 
       editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
       editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
     )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
+      ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   const onExtraFieldsDrawerSubmit = useCallback(
     (_, data) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
-        const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
+        const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
         if (uploadNode) {
           const newData: UploadData = {
             ...uploadNode.getData(),
@@ -266,7 +275,7 @@ const Component: React.FC<ElementProps> = (props) => {
           </DocumentDrawerToggler>
         </div>
       </div>
-      {value && <DocumentDrawer onSave={updateUpload} />}
+      {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
           data={fields}

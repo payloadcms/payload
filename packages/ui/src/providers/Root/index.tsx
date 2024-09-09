@@ -30,17 +30,18 @@ import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 
 type Props = {
-  children: React.ReactNode
-  config: ClientConfig
-  dateFNSKey: Language['dateFNSKey']
-  fallbackLang: ClientConfig['i18n']['fallbackLanguage']
-  languageCode: string
-  languageOptions: LanguageOptions
-  permissions: Permissions
-  switchLanguageServerAction?: (lang: string) => Promise<void>
-  theme: Theme
-  translations: I18nClient['translations']
-  user: User | null
+  readonly children: React.ReactNode
+  readonly config: ClientConfig
+  readonly dateFNSKey: Language['dateFNSKey']
+  readonly fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  readonly isNavOpen?: boolean
+  readonly languageCode: string
+  readonly languageOptions: LanguageOptions
+  readonly permissions: Permissions
+  readonly switchLanguageServerAction?: (lang: string) => Promise<void>
+  readonly theme: Theme
+  readonly translations: I18nClient['translations']
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -48,6 +49,7 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  isNavOpen,
   languageCode,
   languageOptions,
   permissions,
@@ -90,7 +92,9 @@ export const RootProvider: React.FC<Props> = ({
                                     <LoadingOverlayProvider>
                                       <DocumentEventsProvider>
                                         <ActionsProvider>
-                                          <NavProvider>{children}</NavProvider>
+                                          <NavProvider initialIsOpen={isNavOpen}>
+                                            {children}
+                                          </NavProvider>
                                         </ActionsProvider>
                                       </DocumentEventsProvider>
                                     </LoadingOverlayProvider>

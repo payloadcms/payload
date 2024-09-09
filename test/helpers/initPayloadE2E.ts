@@ -32,6 +32,8 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
 
   const port = 3000
   process.env.PORT = String(port)
+  process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
+
   const serverURL = `http://localhost:${port}`
 
   // @ts-expect-error
@@ -53,7 +55,7 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   // which seeds test data twice + other bad things.
   // We initialize Payload above so we can have access to it in the tests
   void app.prepare().then(() => {
-    createServer(async (req, res) => {
+    createServer((req, res) => {
       const parsedUrl = parse(req.url, true)
       await handle(req, res, parsedUrl)
     }).listen(port, () => {

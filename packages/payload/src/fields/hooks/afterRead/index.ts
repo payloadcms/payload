@@ -6,7 +6,7 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth?: number
   depth: number
@@ -15,7 +15,7 @@ type Args<T extends JsonObject> = {
   fallbackLocale: null | string
   findMany?: boolean
   flattenLocales?: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   locale: string
   overrideAccess: boolean
   req: PayloadRequest
@@ -58,7 +58,9 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     incomingDepth || incomingDepth === 0
       ? parseInt(String(incomingDepth), 10)
       : req.payload.config.defaultDepth
-  if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth
+  if (depth > req.payload.config.maxDepth) {
+    depth = req.payload.config.maxDepth
+  }
 
   const currentDepth = incomingCurrentDepth || 1
 

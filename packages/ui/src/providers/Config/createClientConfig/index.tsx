@@ -3,11 +3,12 @@ import type { I18nClient } from '@payloadcms/translations'
 import {
   type AdminViewProps,
   type ClientConfig,
+  deepCopyObjectSimple,
   type EditViewProps,
   type ImportMap,
   type Payload,
+  type PayloadComponent,
   type SanitizedConfig,
-  deepCopyObjectSimple,
   serverOnlyConfigProperties,
 } from 'payload'
 import React from 'react'
@@ -26,18 +27,18 @@ export {
 }
 
 export const createClientConfig = async ({
-  DefaultEditView,
-  DefaultListView,
   children,
   config,
+  DefaultEditView,
+  DefaultListView,
   i18n,
   importMap,
   payload,
 }: {
-  DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<AdminViewProps>
   children: React.ReactNode
   config: SanitizedConfig
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<AdminViewProps>
   i18n: I18nClient
   importMap: ImportMap
   payload: Payload
@@ -113,6 +114,29 @@ export const createClientConfig = async ({
         'config.admin.components.graphics.Logo',
       )
     }
+
+    if (config.admin?.dependencies) {
+      clientConfig.admin.dependencies = {}
+      for (const key in config.admin.dependencies) {
+        const dependency = config.admin.dependencies[key]
+
+        if (dependency.type === 'component') {
+          const payloadComponent: PayloadComponent = {
+            clientProps: dependency.clientProps,
+            path: dependency.path,
+            serverProps: dependency.serverProps,
+          }
+
+          clientConfig.admin.dependencies[key] = createMappedComponent(
+            payloadComponent,
+            undefined,
+            undefined,
+            `config.admin.dependencies.${key}`,
+          )
+          continue
+        }
+      }
+    }
   }
 
   if (
@@ -124,20 +148,20 @@ export const createClientConfig = async ({
   }
 
   clientConfig.collections = createClientCollectionConfigs({
-    DefaultEditView,
-    DefaultListView,
     clientCollections: clientConfig.collections,
     collections: config.collections,
     createMappedComponent,
+    DefaultEditView,
+    DefaultListView,
     i18n,
     importMap,
     payload,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
-    DefaultEditView,
     clientGlobals: clientConfig.globals,
     createMappedComponent,
+    DefaultEditView,
     globals: config.globals,
     i18n,
     importMap,

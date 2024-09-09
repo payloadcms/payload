@@ -14,6 +14,7 @@ import { getValidTemplates } from './templates.js'
 describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
+    // eslint-disable-next-line no-console
     console.log = jest.fn()
   })
 
@@ -57,7 +58,7 @@ describe('createProject', () => {
       const packageJson = fse.readJsonSync(packageJsonPath)
 
       // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
+      expect(packageJson.name).toStrictEqual(projectName)
     })
 
     describe('creates project from template', () => {
@@ -114,10 +115,6 @@ describe('createProject', () => {
             cwd: projectDir,
           })
         )?.[0]
-
-        if (!payloadConfigPath) {
-          throw new Error(`Could not find payload.config.ts inside ${projectDir}`)
-        }
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 

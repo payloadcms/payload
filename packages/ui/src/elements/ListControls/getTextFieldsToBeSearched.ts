@@ -1,3 +1,4 @@
+'use client'
 import type { ClientField } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'

@@ -6,11 +6,12 @@ export const CustomViews1: CollectionConfig = {
   slug: customViews1CollectionSlug,
   admin: {
     components: {
+      Description: '/components/ViewDescription/index.js#ViewDescription',
       views: {
         // This will override the entire Edit View including all nested views, i.e. `/edit/:id/*`
         // To override one specific nested view, use the nested view's slug as the key
         edit: {
-          default: {
+          root: {
             Component: '/components/views/CustomEdit/index.js#CustomEditView',
           },
         },

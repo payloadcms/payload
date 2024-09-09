@@ -13,22 +13,22 @@ export type SanitizedDrafts = {
 }
 
 export type IncomingCollectionVersions = {
-  drafts?: IncomingDrafts | boolean
+  drafts?: boolean | IncomingDrafts
   maxPerDoc?: number
 }
 
 export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVersions, 'drafts'> {
-  drafts: SanitizedDrafts | false
+  drafts: false | SanitizedDrafts
   maxPerDoc?: number
 }
 
 export type IncomingGlobalVersions = {
-  drafts?: IncomingDrafts | boolean
+  drafts?: boolean | IncomingDrafts
   max?: number
 }
 
 export type SanitizedGlobalVersions = {
-  drafts: SanitizedDrafts | false
+  drafts: false | SanitizedDrafts
   max: number
 }
 

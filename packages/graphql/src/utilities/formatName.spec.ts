@@ -1,5 +1,5 @@
 /* eslint-disable jest/prefer-strict-equal */
-import formatName from './formatName'
+import { formatName } from './formatName'
 
 describe('formatName', () => {
   it.each`

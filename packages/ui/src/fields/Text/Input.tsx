@@ -17,17 +17,18 @@ import './index.scss'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
+    field,
     hasMany,
     inputRef,
+    Label,
     label,
     labelProps,
     maxRows,
@@ -64,9 +65,15 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        field={field}
+        Label={Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
         {hasMany ? (
           <ReactSelect
@@ -111,6 +118,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         <FieldDescription
           Description={Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

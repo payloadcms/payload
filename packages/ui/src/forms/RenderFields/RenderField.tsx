@@ -2,10 +2,11 @@
 
 import type { ClientField, FieldPermissions } from 'payload'
 
-import { HiddenField, useFieldComponents } from '@payloadcms/ui'
 import React from 'react'
 
+import { HiddenField } from '../../fields/Hidden/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { useFieldComponents } from '../../providers/FieldComponents/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
@@ -56,8 +57,9 @@ export const RenderField: React.FC<Props> = ({
   fieldComponentProps.readOnly = fieldComponentProps?.field?.admin?.readOnly
 
   // if parent field is `readOnly: true`, but this field is `readOnly: false`, the field should still be editable
-  if (readOnlyFromContext && fieldComponentProps.readOnly !== false)
+  if (readOnlyFromContext && fieldComponentProps.readOnly !== false) {
     fieldComponentProps.readOnly = true
+  }
 
   // if the user does not have access control to begin with, force it to be read-only
   if (permissions?.[operation]?.permission === false) {
@@ -86,12 +88,12 @@ export const RenderField: React.FC<Props> = ({
   } else {
     RenderedField = (
       <RenderComponent
-        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
         clientProps={{
           field: fieldComponentProps.field,
           forceRender: fieldComponentProps.forceRender,
           readOnly: fieldComponentProps.readOnly,
         }}
+        Component={fieldComponents?.[fieldComponentProps?.field?.type]}
         mappedComponent={fieldComponentProps?.field?.admin?.components?.Field}
       />
     )

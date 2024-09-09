@@ -149,8 +149,10 @@ export const Auth: React.FC<Props> = (props) => {
           {(showPasswordFields || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
+                autoComplete="new-password"
                 field={{
                   name: 'password',
+                  _path: 'password',
                   admin: {
                     disabled,
                   },

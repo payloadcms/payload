@@ -24,7 +24,7 @@ import { LengthIndicator } from '../../ui/LengthIndicator.js'
 const { maxLength, minLength } = defaults.description
 
 type MetaDescriptionProps = {
-  hasGenerateDescriptionFn: boolean
+  readonly hasGenerateDescriptionFn: boolean
 } & TextareaFieldProps
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
@@ -54,14 +54,23 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
-    if (!hasGenerateDescriptionFn) return
+    if (!hasGenerateDescriptionFn) {
+      return
+    }
 
     const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
       body: JSON.stringify({
-        ...docInfo,
-        doc: { ...getData() },
+        id: docInfo.id,
+        slug: docInfo.slug,
+        doc: getData(),
+        docPermissions: docInfo.docPermissions,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
-      } satisfies Parameters<GenerateDescription>[0]),
+        title: docInfo.title,
+      } satisfies Omit<Parameters<GenerateDescription>[0], 'req'>),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +96,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

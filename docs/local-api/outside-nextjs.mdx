@@ -61,14 +61,27 @@ payload run src/seed.ts
 The `payload run` command does two things for you:
 
 1. It loads the environment variables the same way Next.js loads them, eliminating the need for additional dependencies like `dotenv`. The usage of `dotenv` is not recommended, as Next.js loads environment variables differently. By using `payload run`, you ensure consistent environment variable handling across your Payload and Next.js setup.
-2. It initializes swc, allowing direct execution of TypeScript files without requiring tools like tsx or ts-node.
+2. It initializes tsx, allowing direct execution of TypeScript files manually installing tools like tsx or ts-node.
 
 ### Troubleshooting
 
-If you encounter import-related errors, try running the script in TSX mode:
+If you encounter import-related errors, you have 2 options:
 
+#### Option 1: enable swc mode by appending `--use-swc` to the `payload` command:
+
+Example:
 ```sh
-payload run src/seed.ts --use-tsx
+payload run src/seed.ts --use-swc
 ```
 
-Note: Install tsx in your project first. Be aware that TSX mode is slower than the default swc mode, so only use it if necessary.
+Note: Install @swc-node/register in your project first. While swc mode is faster than the default tsx mode, it might break for some imports.
+
+#### Option 2: use an alternative runtime like bun
+
+While we do not guarantee support for alternative runtimes, you are free to use them and disable payloads own transpilation by appending the `--disable-transpilation` flag to the `payload` command:
+
+```sh
+bunx --bun payload run src/seed.ts --disable-transpile
+```
+
+You will need to have bun installed on your system for this to work.

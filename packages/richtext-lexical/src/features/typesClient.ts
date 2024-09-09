@@ -15,7 +15,7 @@ import type { ToolbarGroup } from './toolbars/types.js'
 export type FeatureProviderProviderClient<
   UnSanitizedClientFeatureProps = undefined,
   ClientFeatureProps = UnSanitizedClientFeatureProps,
-> = (props: ClientComponentProps<ClientFeatureProps>) => FeatureProviderClient<ClientFeatureProps>
+> = (props: BaseClientFeatureProps<ClientFeatureProps>) => FeatureProviderClient<ClientFeatureProps>
 
 /**
  * No dependencies => Features need to be sorted on the server first, then sent to client in right order
@@ -27,10 +27,9 @@ export type FeatureProviderClient<
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
-  clientFeatureProps: ClientComponentProps<UnSanitizedClientFeatureProps>
+  clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
-        clientFunctions: Record<string, any>
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
@@ -105,7 +104,7 @@ export type ClientFeature<ClientFeatureProps> = {
   /**
    * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
    */
-  sanitizedClientFeatureProps?: ClientComponentProps<ClientFeatureProps>
+  sanitizedClientFeatureProps?: BaseClientFeatureProps<ClientFeatureProps>
   slashMenu?: {
     /**
      * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
@@ -143,7 +142,7 @@ export type ClientFeature<ClientFeatureProps> = {
   }
 }
 
-export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps extends undefined
+export type BaseClientFeatureProps<ClientFeatureProps> = ClientFeatureProps extends undefined
   ? {
       featureKey: string
       order: number
@@ -167,43 +166,43 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, an
  */
 export type SanitizedPlugin =
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponent
-      clientProps: any
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
   | {
+      clientProps: any
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
       Component: PluginComponentWithAnchor
-      clientProps: any
       desktopOnly?: boolean
       key: string
       position: 'floatingAnchorElem' // Determines at which position the Component will be added.
     }
   | {
-      Component: PluginComponent
       clientProps: any
+      Component: PluginComponent
       key: string
       position: 'aboveContainer'
     }
   | {
-      Component: PluginComponent
       clientProps: any
+      Component: PluginComponent
       key: string
       position: 'belowContainer'
     }

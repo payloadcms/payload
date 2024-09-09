@@ -9,7 +9,9 @@ let storageClient: ContainerClient | null = null
 export function getStorageClient(
   options: Pick<AzureStorageOptions, 'connectionString' | 'containerName'>,
 ): ContainerClient {
-  if (storageClient) return storageClient
+  if (storageClient) {
+    return storageClient
+  }
 
   const { connectionString, containerName } = options
 

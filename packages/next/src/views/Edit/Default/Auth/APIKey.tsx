@@ -124,12 +124,13 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
         <FieldLabel
+          field={null}
+          htmlFor={path}
           Label={{
             type: 'client',
             Component: null,
             RenderedComponent: APIKeyLabel,
           }}
-          htmlFor={path}
         />
         <input
           aria-label={apiKeyLabel}

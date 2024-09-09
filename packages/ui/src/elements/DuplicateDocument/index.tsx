@@ -35,8 +35,8 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   const {
     config: {
-      serverURL,
       routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
   } = useConfig()
 
@@ -113,25 +113,30 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
+      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
         <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-          <div className={`${baseClass}__modal-template`}>
-            <h1>{t('general:confirmDuplication')}</h1>
-            <p>{t('general:unsavedChangesDuplicate')}</p>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={() => toggleModal(modalSlug)}
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button id="confirm-duplicate" onClick={confirm}>
-              {t('general:duplicateWithoutSaving')}
-            </Button>
+          <div className={`${baseClass}__wrapper`}>
+            <div className={`${baseClass}__content`}>
+              <h1>{t('general:confirmDuplication')}</h1>
+              <p>{t('general:unsavedChangesDuplicate')}</p>
+            </div>
+            <div className={`${baseClass}__controls`}>
+              <Button
+                buttonStyle="secondary"
+                id="confirm-cancel"
+                onClick={() => toggleModal(modalSlug)}
+                size="large"
+                type="button"
+              >
+                {t('general:cancel')}
+              </Button>
+              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
+                {t('general:duplicateWithoutSaving')}
+              </Button>
+            </div>
           </div>
         </Modal>
       )}

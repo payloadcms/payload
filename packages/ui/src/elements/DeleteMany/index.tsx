@@ -125,20 +125,25 @@ export const DeleteMany: React.FC<Props> = (props) => {
         {t('general:delete')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__template`}>
-          <h1>{t('general:confirmDeletion')}</h1>
-          <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
-          <Button
-            buttonStyle="secondary"
-            id="confirm-cancel"
-            onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-            type="button"
-          >
-            {t('general:cancel')}
-          </Button>
-          <Button id="confirm-delete" onClick={deleting ? undefined : () => void handleDelete()}>
-            {deleting ? t('general:deleting') : t('general:confirm')}
-          </Button>
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__content`}>
+            <h1>{t('general:confirmDeletion')}</h1>
+            <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
+          </div>
+          <div className={`${baseClass}__controls`}>
+            <Button
+              buttonStyle="secondary"
+              id="confirm-cancel"
+              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+              size="large"
+              type="button"
+            >
+              {t('general:cancel')}
+            </Button>
+            <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete} size="large">
+              {deleting ? t('general:deleting') : t('general:confirm')}
+            </Button>
+          </div>
         </div>
       </Modal>
     </React.Fragment>

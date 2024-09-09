@@ -202,7 +202,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })
       }
 
-      if (shouldCommit) await commitTransaction(req)
+      if (shouldCommit) {
+        await commitTransaction(req)
+      }
 
       throw new AuthenticationError(req.t)
     }
@@ -332,7 +334,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

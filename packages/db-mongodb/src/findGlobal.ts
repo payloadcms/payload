@@ -4,7 +4,7 @@ import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(

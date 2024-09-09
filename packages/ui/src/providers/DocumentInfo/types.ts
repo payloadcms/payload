@@ -16,12 +16,12 @@ import type {
 import type React from 'react'
 
 export type DocumentInfoProps = {
+  action?: string
   AfterDocument?: React.ReactNode
   AfterFields?: React.ReactNode
+  apiURL?: string
   BeforeDocument?: React.ReactNode
   BeforeFields?: React.ReactNode
-  action?: string
-  apiURL?: string
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean

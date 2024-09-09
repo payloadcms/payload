@@ -53,11 +53,12 @@ For more granular control, pass a configuration object instead. Payload exposes 
 
 | Property           | Description                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Component`** \* | Pass in the component that should be rendered when a user navigates to this route.                                                                                                         |
+| **`Component`** \* | Pass in the component path that should be rendered when a user navigates to this route.                                                                                                         |
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
 | **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`sensitive`**    | When true, will match if the path is case sensitive.                                                                                                                                       |
+| **`sensitive`**    | When true, will match if the path is case sensitive.
+| **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -111,7 +112,20 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
     components: {
       views: {
         edit: {
-          Component: '/path/to/MyCustomEditView', // highlight-line
+          root: {
+            Component: '/path/to/MyCustomEditView', // highlight-line
+          }
+          // other options include:
+          // default
+          // versions
+          // version
+          // api
+          // livePreview
+          // [key: string]
+          // See "Document Views" for more details
+        },
+        list: {
+          Component: '/path/to/MyCustomListView',
         }
       },
     },
@@ -123,7 +137,7 @@ _For details on how to build Custom Views, see [Building Custom Views](#building
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
+  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
@@ -152,18 +166,29 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
   admin: {
     components: {
       views: {
-        edit: '/path/to/MyCustomEditView', // highlight-line
+        edit: {
+          root: {
+            Component: '/path/to/MyCustomEditView', // highlight-line
+          }
+          // other options include:
+          // default
+          // versions
+          // version
+          // api
+          // livePreview
+          // [key: string]
+        },
       },
     },
   },
-})
+}
 ```
 
 _For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
-  The `Edit` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `Edit.Default` key instead.
+  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
@@ -199,25 +224,26 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
       },
     },
   },
-})
+}
 ```
 
 _For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
  <strong>Note:</strong>
- If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `Edit` key itself. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
+ If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `root` key. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
 </Banner>
 
 The following options are available:
 
 | Property          | Description                                                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **`default`**     | The Default view is the primary view in which your document is edited.                                                      |
-| **`versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions).                    |
-| **`version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
-| **`api`**         | The API view is used to display the REST API JSON response for a given document.                                            |
-| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview).                        |
+| **`root`**        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.  |
+| **`default`**     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab.     |
+| **`versions`**    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions).                    |
+| **`version`**     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions). |
+| **`api`**         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                            |
+| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview).                        |
 
 ### Document Tabs
 

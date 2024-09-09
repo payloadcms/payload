@@ -5,10 +5,19 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import open from 'open'
+import { loadEnv } from 'payload/node'
 
-import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
+import { getNextRootDir } from './helpers/getNextRootDir.js'
 import { runInit } from './runInit.js'
 import { createTestHooks } from './testHooks.js'
+
+const prod = process.argv.includes('--prod')
+process.argv = process.argv.filter((arg) => arg !== '--prod')
+if (prod) {
+  process.env.PAYLOAD_TEST_PROD = 'true'
+}
+
+loadEnv()
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,7 +41,7 @@ if (args.turbo === true) {
 const { beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const { rootDir, adminRoute } = getNextJSRootDir(testSuiteArg)
+const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
 await runInit(testSuiteArg, true)
 

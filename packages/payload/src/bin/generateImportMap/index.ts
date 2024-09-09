@@ -1,5 +1,3 @@
-import type React from 'react'
-
 import fs from 'fs'
 import process from 'node:process'
 import path from 'path'
@@ -67,7 +65,7 @@ export function addPayloadComponentToImportMap({
   imports[importIdentifier] = {
     path:
       componentPath.startsWith('.') || componentPath.startsWith('/')
-        ? path.join(baseDir, componentPath.slice(1))
+        ? path.posix.join(baseDir.replace(/\\/g, '/'), componentPath.slice(1))
         : componentPath,
     specifier: exportName,
   }
@@ -85,6 +83,7 @@ export async function generateImportMap(
   if (shouldLog) {
     console.log('Generating import map')
   }
+
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 

@@ -8,18 +8,17 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
-import { PayloadIcon } from '@payloadcms/ui'
-
 import type { StepNavItem } from './types.js'
 
+import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 
 const baseClass = 'step-nav'
 
 const StepNav: React.FC<{
-  readonly Link?: React.ComponentType
   readonly className?: string
-}> = ({ Link, className }) => {
+  readonly Link?: React.ComponentType
+}> = ({ className, Link }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()

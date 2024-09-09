@@ -24,7 +24,7 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
-  OpenGraphConfig,
+  MetaConfig,
   PayloadComponent,
   StaticLabel,
 } from '../../config/types.js'
@@ -183,7 +183,7 @@ export type AfterErrorHook = (
   res: unknown,
   context: RequestContext,
   /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: SanitizedCollectionConfig | null,
+  collection: null | SanitizedCollectionConfig,
 ) => { response: any; status: number } | void
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
@@ -253,12 +253,11 @@ export type CollectionAdminOptions = {
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
     beforeListTable?: CustomComponent[]
+    Description?: EntityDescriptionComponent
     /**
      * Components within the edit view
      */
     edit?: {
-      Description?: EntityDescriptionComponent
-
       /**
        * Replaces the "Preview" button
        */
@@ -292,8 +291,8 @@ export type CollectionAdminOptions = {
        */
       edit?: EditConfig
       list?: {
-        Component?: PayloadComponent
         actions?: CustomComponent[]
+        Component?: PayloadComponent
       }
     }
   }
@@ -329,10 +328,7 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
-  meta?: {
-    description?: string
-    openGraph?: OpenGraphConfig
-  }
+  meta?: MetaConfig
   pagination?: {
     defaultLimit?: number
     limits?: number[]
@@ -353,7 +349,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Access control
    */
   access?: {
-    admin?: ({ req }: { req: PayloadRequest }) => Promise<boolean> | boolean
+    admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
     create?: Access
     delete?: Access
     read?: Access
@@ -370,7 +366,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    *
    * Use `true` to enable with default options
    */
-  auth?: IncomingAuthType | boolean
+  auth?: boolean | IncomingAuthType
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   /**
@@ -389,7 +385,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
-  endpoints?: Omit<Endpoint, 'root'>[] | false
+  endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
    * GraphQL configuration
@@ -462,7 +458,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    *
    * @default false // disable uploads
    */
-  upload?: UploadConfig | boolean
+  upload?: boolean | UploadConfig
   /**
    * Enable versioning. Set it to true to enable default versions settings,
    * or customize versions options by setting the property equal to an object
@@ -470,7 +466,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    *
    * @default false // disable versioning
    */
-  versions?: IncomingCollectionVersions | boolean
+  versions?: boolean | IncomingCollectionVersions
 }
 
 export interface SanitizedCollectionConfig
@@ -489,8 +485,8 @@ export type Collection = {
   config: SanitizedCollectionConfig
   customIDType?: 'number' | 'text'
   graphQL?: {
-    JWT: GraphQLObjectType
     countType: GraphQLObjectType
+    JWT: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>
     paginatedType: GraphQLObjectType
     type: GraphQLObjectType

@@ -257,10 +257,10 @@ export const getTableColumnFromPath = ({
             tableType = 'numbers'
             columnName = 'number'
           }
-          newTableName = `${tableName}_${tableType}`
+          newTableName = `${rootTableName}_${tableType}`
           const joinConstraints = [
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
-            eq(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
+            eq(adapter.tables[rootTableName].id, adapter.tables[newTableName].parent),
+            like(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
           ]
 
           if (locale && field.localized && adapter.payload.config.localization) {
@@ -445,7 +445,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
-        if (Array.isArray(field.relationTo) || (field.type === 'relationship' && field.hasMany)) {
+        if (Array.isArray(field.relationTo) || field.hasMany) {
           let relationshipFields
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
           const {
@@ -539,7 +539,9 @@ export const getTableColumnFromPath = ({
               field,
               getNotNullColumnByValue: (val) => {
                 const matchedRelation = relationTo.find((relation) => relation === val)
-                if (matchedRelation) return `${matchedRelation}ID`
+                if (matchedRelation) {
+                  return `${matchedRelation}ID`
+                }
                 return undefined
               },
               table: aliasRelationshipTable,

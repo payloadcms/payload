@@ -9,10 +9,10 @@ import {
   EditMany,
   Gutter,
   ListControls,
+  ListHeader,
   ListSelection,
   Pagination,
   PerPage,
-  Pill,
   PublishMany,
   RelationshipProvider,
   RenderComponent,
@@ -21,15 +21,17 @@ import {
   StaggeredShimmers,
   Table,
   UnpublishMany,
-  ViewDescription,
+  useBulkUpload,
   useConfig,
   useEditDepth,
   useListInfo,
   useListQuery,
-  useSearchParams,
+  useModal,
+  useRouteCache,
   useStepNav,
   useTranslation,
   useWindowInfo,
+  ViewDescription,
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/shared'
@@ -41,9 +43,21 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
-  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
-  const { searchParams } = useSearchParams()
+  const {
+    beforeActions,
+    collectionSlug,
+    disableBulkDelete,
+    disableBulkEdit,
+    hasCreatePermission,
+    Header,
+    newDocumentURL,
+  } = useListInfo()
+
+  const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
+  const { openModal } = useModal()
+  const { clearRouteCache } = useRouteCache()
+  const { setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { drawerSlug } = useBulkUpload()
 
   const { getEntityConfig } = useConfig()
 
@@ -52,11 +66,11 @@ export const DefaultListView: React.FC = () => {
   const {
     admin: {
       components: {
-        Description,
         afterList,
         afterListTable,
         beforeList,
         beforeListTable,
+        Description,
         views: {
           list: { actions },
         },
@@ -67,7 +81,7 @@ export const DefaultListView: React.FC = () => {
     labels,
   } = collectionConfig
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const drawerDepth = useEditDepth()
 
@@ -79,7 +93,9 @@ export const DefaultListView: React.FC = () => {
 
   let docs = data.docs || []
 
-  if (collectionConfig.upload) {
+  const isUploadCollection = Boolean(collectionConfig.upload)
+
+  if (isUploadCollection) {
     docs = docs?.map((doc) => {
       return {
         ...doc,
@@ -87,6 +103,12 @@ export const DefaultListView: React.FC = () => {
       }
     })
   }
+
+  const openBulkUpload = React.useCallback(() => {
+    setCollectionSlug(collectionSlug)
+    openModal(drawerSlug)
+    setOnSuccess(clearRouteCache)
+  }, [clearRouteCache, collectionSlug, drawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (drawerDepth <= 1) {
@@ -98,41 +120,53 @@ export const DefaultListView: React.FC = () => {
     }
   }, [setStepNav, labels, drawerDepth])
 
+  const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
       <SetViewActions actions={actions} />
-      <RenderComponent mappedComponent={beforeList} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        <RenderComponent mappedComponent={beforeList} />
         <Gutter className={`${baseClass}__wrap`}>
-          <header className={`${baseClass}__header`}>
-            {Header || (
-              <Fragment>
-                <h1>{getTranslation(labels?.plural, i18n)}</h1>
-                {hasCreatePermission && (
-                  <Pill
+          {Header || (
+            <ListHeader heading={getTranslation(labels?.plural, i18n)}>
+              {hasCreatePermission && (
+                <>
+                  <Button
                     aria-label={i18n.t('general:createNewLabel', {
                       label: getTranslation(labels?.singular, i18n),
                     })}
+                    buttonStyle="pill"
+                    el={'link'}
+                    Link={Link}
+                    size="small"
                     to={newDocumentURL}
                   >
                     {i18n.t('general:createNew')}
-                  </Pill>
-                )}
-                {!smallBreak && (
-                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
-                )}
-                {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderComponent
-                      Component={ViewDescription}
-                      clientProps={{ description }}
-                      mappedComponent={Description}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            )}
-          </header>
+                  </Button>
+
+                  {isBulkUploadEnabled && (
+                    <Button
+                      aria-label={t('upload:bulkUpload')}
+                      buttonStyle="pill"
+                      onClick={openBulkUpload}
+                      size="small"
+                    >
+                      {t('upload:bulkUpload')}
+                    </Button>
+                  )}
+                </>
+              )}
+              {!smallBreak && (
+                <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+              )}
+              {(description || Description) && (
+                <div className={`${baseClass}__sub-header`}>
+                  <ViewDescription Description={Description} description={description} />
+                </div>
+              )}
+            </ListHeader>
+          )}
           <ListControls collectionConfig={collectionConfig} fields={fields} />
           <RenderComponent mappedComponent={beforeListTable} />
           {!data.docs && (
@@ -157,7 +191,7 @@ export const DefaultListView: React.FC = () => {
             <div className={`${baseClass}__no-results`}>
               <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button Link={Link} el="link" to={newDocumentURL}>
+                <Button el="link" Link={Link} to={newDocumentURL}>
                   {i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}
@@ -174,7 +208,7 @@ export const DefaultListView: React.FC = () => {
                 limit={data.limit}
                 nextPage={data.nextPage}
                 numberOfNeighbors={1}
-                onChange={handlePageChange}
+                onChange={(page) => void handlePageChange(page)}
                 page={data.page}
                 prevPage={data.prevPage}
                 totalPages={data.totalPages}
@@ -189,10 +223,8 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
-                    handleChange={handlePerPageChange}
-                    limit={
-                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
-                    }
+                    handleChange={(limit) => void handlePerPageChange(limit)}
+                    limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
                     limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
@@ -200,10 +232,15 @@ export const DefaultListView: React.FC = () => {
                     <div className={`${baseClass}__list-selection`}>
                       <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany collection={collectionConfig} fields={fields} />
-                        <PublishMany collection={collectionConfig} />
-                        <UnpublishMany collection={collectionConfig} />
-                        <DeleteMany collection={collectionConfig} />
+                        {beforeActions && beforeActions}
+                        {!disableBulkEdit && (
+                          <Fragment>
+                            <EditMany collection={collectionConfig} fields={fields} />
+                            <PublishMany collection={collectionConfig} />
+                            <UnpublishMany collection={collectionConfig} />
+                          </Fragment>
+                        )}
+                        {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                       </div>
                     </div>
                   )}
@@ -212,8 +249,8 @@ export const DefaultListView: React.FC = () => {
             </div>
           )}
         </Gutter>
+        <RenderComponent mappedComponent={afterList} />
       </SelectionProvider>
-      <RenderComponent mappedComponent={afterList} />
     </div>
   )
 }

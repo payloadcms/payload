@@ -4,16 +4,16 @@ import type {
   I18nOptions,
   TFunction,
 } from '@payloadcms/translations'
-import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
+import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { DestinationStream, LoggerOptions } from 'pino'
+import type { DestinationStream, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, MappedComponent, RichTextAdapter } from '../admin/types.js'
+import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
 import type { Permissions } from '../auth/index.js'
 import type {
@@ -38,12 +38,12 @@ import type { PayloadLogger } from '../utilities/logger.js'
 /**
  * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
  *
- * If the path is an empty string, it will be treated as () => null
+ * If it is `false` an empty component will be rendered.
  */
 export type PayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
-> = RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
+> = false | RawPayloadComponent<TComponentServerProps, TComponentClientProps> | string
 
 // We need the actual object as its own type, otherwise the infers for the PayloadClientReactComponent / PayloadServerReactComponent will not work due to the string union.
 // We also NEED to actually use those generics for this to work, thus they are part of the props.
@@ -51,10 +51,10 @@ export type RawPayloadComponent<
   TComponentServerProps extends never | object = Record<string, any>,
   TComponentClientProps extends never | object = Record<string, any>,
 > = {
-  clientProps?: TComponentClientProps | object
+  clientProps?: object | TComponentClientProps
   exportName?: string
   path: string
-  serverProps?: TComponentServerProps | object
+  serverProps?: object | TComponentServerProps
 }
 
 export type PayloadComponentProps<TPayloadComponent> =
@@ -100,8 +100,8 @@ export type ResolvedComponent<
   TComponentServerProps extends never | object,
   TComponentClientProps extends never | object,
 > = {
-  Component: React.FC<TComponentClientProps | TComponentServerProps>
   clientProps?: TComponentClientProps
+  Component: React.FC<TComponentClientProps | TComponentServerProps>
   serverProps?: TComponentServerProps
 }
 
@@ -232,9 +232,13 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions,
-) => Promise<null | string> | null | string
+) => null | Promise<null | string> | string
 
 export type GraphQLInfo = {
+  collections: {
+    [slug: string]: Collection
+  }
+  globals: Globals
   Mutation: {
     fields: Record<string, any>
     name: string
@@ -243,10 +247,6 @@ export type GraphQLInfo = {
     fields: Record<string, any>
     name: string
   }
-  collections: {
-    [slug: string]: Collection
-  }
-  globals: Globals
   types: {
     arrayTypes: Record<string, GraphQL.GraphQLType>
     blockInputTypes: Record<string, GraphQL.GraphQLInputObjectType>
@@ -284,19 +284,6 @@ export type InitOptions = {
   importMap?: ImportMap
 
   /**
-   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
-   * This allows you to bring your own logger instance and let payload use it
-   */
-  logger?: PayloadLogger
-
-  loggerDestination?: DestinationStream
-  /**
-   * Specify options for the built-in Pino logger that Payload uses for internal logging.
-   *
-   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
-   */
-  loggerOptions?: LoggerOptions
-  /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
   onInit?: (payload: Payload) => Promise<void> | void
@@ -315,7 +302,7 @@ export type InitOptions = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type AccessResult = Where | boolean
+export type AccessResult = boolean | Where
 
 export type AccessArgs<TData = any> = {
   /**
@@ -375,13 +362,15 @@ export type Endpoint = {
 
 export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
 
-export type EditViewConfig =
+export type EditViewConfig = {
+  meta?: MetaConfig
+} & (
+  | {
+      actions?: CustomComponent[]
+    }
   | {
       Component: EditViewComponent
       path?: string
-    }
-  | {
-      actions?: CustomComponent[]
     }
   | {
       path?: string
@@ -393,16 +382,17 @@ export type EditViewConfig =
        */
       tab?: DocumentTabConfig
     }
+)
 
 export type ServerProps = {
-  [key: string]: unknown
-  i18n: I18nClient
-  locale?: Locale
-  params?: { [key: string]: string | string[] | undefined }
-  payload: Payload
-  permissions?: Permissions
-  searchParams?: { [key: string]: string | string[] | undefined }
-  user?: TypedUser
+  readonly i18n: I18nClient
+  readonly locale?: Locale
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly payload: Payload
+  readonly permissions?: Permissions
+  readonly [key: string]: unknown
+  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly user?: TypedUser
 }
 
 export const serverProps: (keyof ServerProps)[] = [
@@ -503,11 +493,11 @@ export type SharpDependency = (
     | Int8Array
     | Int16Array
     | Int32Array
+    | string
     | Uint8Array
     | Uint8ClampedArray
     | Uint16Array
-    | Uint32Array
-    | string,
+    | Uint32Array,
   options?: sharp.SharpOptions,
 ) => sharp.Sharp
 
@@ -532,6 +522,104 @@ export type AdminComponent = {
 export interface AdminDependencies {
   [key: string]: AdminComponent | AdminFunction
 }
+
+export type FetchAPIFileUploadOptions = {
+  /**
+   * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
+   * Otherwise, it will add a `truncated = true` to the resulting file structure.
+   * @default false
+   */
+  abortOnLimit?: boolean | undefined
+  /**
+   * Automatically creates the directory path specified in `.mv(filePathName)`
+   * @default false
+   */
+  createParentPath?: boolean | undefined
+  /**
+   * Turn on/off upload process logging. Can be useful for troubleshooting.
+   * @default false
+   */
+  debug?: boolean | undefined
+  /**
+   * User defined limit handler which will be invoked if the file is bigger than configured limits.
+   * @default false
+   */
+  limitHandler?: ((args: { request: Request; size: number }) => void) | boolean | undefined
+  /**
+   * By default, `req.body` and `req.files` are flattened like this:
+   * `{'name': 'John', 'hobbies[0]': 'Cinema', 'hobbies[1]': 'Bike'}
+   *
+   * When this option is enabled they are parsed in order to be nested like this:
+   * `{'name': 'John', 'hobbies': ['Cinema', 'Bike']}`
+   * @default false
+   */
+  parseNested?: boolean | undefined
+  /**
+   * Preserves filename extension when using `safeFileNames` option.
+   * If set to `true`, will default to an extension length of `3`.
+   * If set to `number`, this will be the max allowable extension length.
+   * If an extension is smaller than the extension length, it remains untouched. If the extension is longer,
+   * it is shifted.
+   * @default false
+   *
+   * @example
+   * // true
+   * app.use(fileUpload({ safeFileNames: true, preserveExtension: true }));
+   * // myFileName.ext --> myFileName.ext
+   *
+   * @example
+   * // max extension length 2, extension shifted
+   * app.use(fileUpload({ safeFileNames: true, preserveExtension: 2 }));
+   * // myFileName.ext --> myFileNamee.xt
+   */
+  preserveExtension?: boolean | number | undefined
+  /**
+   * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
+   * @default 'File size limit has been reached'
+   */
+  responseOnLimit?: string | undefined
+  /**
+   * Strips characters from the upload's filename.
+   * You can use custom regex to determine what to strip.
+   * If set to `true`, non-alphanumeric characters _except_ dashes and underscores will be stripped.
+   * This option is off by default.
+   * @default false
+   *
+   * @example
+   * // strip slashes from file names
+   * app.use(fileUpload({ safeFileNames: /\\/g }))
+   *
+   * @example
+   * app.use(fileUpload({ safeFileNames: true }))
+   */
+  safeFileNames?: boolean | RegExp | undefined
+  /**
+   * Path to store temporary files.
+   * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
+   * in the current working directory.
+   * You can use trailing slash, but it is not necessary.
+   * @default './tmp'
+   */
+  tempFileDir?: string | undefined
+  /**
+   * This defines how long to wait for data before aborting. Set to `0` if you want to turn off timeout checks.
+   * @default 60_000
+   */
+  uploadTimeout?: number | undefined
+  /**
+   * Applies uri decoding to file names if set `true`.
+   * @default false
+   */
+  uriDecodeFileNames?: boolean | undefined
+  /**
+   * By default this module uploads files into RAM.
+   * Setting this option to `true` turns on using temporary files instead of utilising RAM.
+   * This avoids memory overflow issues when uploading large files or in case of uploading
+   * lots of files at same time.
+   * @default false
+   */
+  useTempFiles?: boolean | undefined
+} & Partial<BusboyConfig>
 
 /**
  * This is the central configuration
@@ -574,10 +662,6 @@ export type Config = {
      * @see https://payloadcms.com/docs/admin/components
      */
     components?: {
-      /**
-       * Replace the navigation with a custom component
-       */
-      Nav?: CustomComponent
       /**
        * Add custom components to the top right of the Admin Panel
        */
@@ -622,6 +706,10 @@ export type Config = {
         /** Replace the logout button  */
         Button?: CustomComponent
       }
+      /**
+       * Replace the navigation with a custom component
+       */
+      Nav?: CustomComponent
       /**
        * Wrap the admin dashboard in custom context providers
        */
@@ -715,6 +803,19 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
+   * Compatibility flags for prior Payload versions
+   */
+  compatibility?: {
+    /**
+     * By default, Payload will remove the `localized: true` property
+     * from fields if a parent field is localized. Set this property
+     * to `true` only if you have an existing Payload database from pre-3.0
+     * that you would like to maintain without migrating. This is only
+     * relevant for MongoDB databases.
+     */
+    allowLocalizedWithinLocalized: true
+  }
+  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
@@ -797,6 +898,7 @@ export type Config = {
     afterError?: AfterErrorHook
   }
   /** i18n config settings */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
@@ -805,7 +907,34 @@ export type Config = {
    *
    * @default false // disable localization
    */
-  localization?: LocalizationConfig | false
+  localization?: false | LocalizationConfig
+
+  /**
+   * Logger options, logger options with a destination stream, or an instantiated logger instance.
+   *
+   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
+   *
+   * ```ts
+   * // Logger options only
+   * logger: {
+   *   level: 'info',
+   * }
+   *
+   * // Logger options with destination stream
+   * logger: {
+   *  options: {
+   *   level: 'info',
+   *  },
+   *  destination: process.stdout
+   * },
+   *
+   * // Logger instance
+   * logger: pino({ name: 'my-logger' })
+   *
+   * ```
+   */
+  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
@@ -886,7 +1015,7 @@ export type Config = {
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
-  upload?: ExpressFileUploadOptions
+  upload?: FetchAPIFileUploadOptions
 }
 
 export type SanitizedConfig = {
@@ -896,7 +1025,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  localization: SanitizedLocalizationConfig | false
+  localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
     configDir: string
@@ -907,7 +1036,7 @@ export type SanitizedConfig = {
      * Deduped list of adapters used in the project
      */
     adapters: string[]
-  } & ExpressFileUploadOptions
+  } & FetchAPIFileUploadOptions
 } & Omit<
   // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
@@ -916,28 +1045,44 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig = {
-  [key: string]: Partial<EditViewConfig>
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
-  // TODO: uncomment these as they are built
-  // references?: EditView
-  // relationships?: EditView
-}
+export type EditConfig =
+  | {
+      [key: string]: EditViewConfig
+      /**
+       * Replace or modify individual nested routes, or add new ones:
+       * + `default` - `/admin/collections/:collection/:id`
+       * + `api` - `/admin/collections/:collection/:id/api`
+       * + `livePreview` - `/admin/collections/:collection/:id/preview`
+       * + `references` - `/admin/collections/:collection/:id/references`
+       * + `relationships` - `/admin/collections/:collection/:id/relationships`
+       * + `versions` - `/admin/collections/:collection/:id/versions`
+       * + `version` - `/admin/collections/:collection/:id/versions/:version`
+       * + `customView` - `/admin/collections/:collection/:id/:path`
+       *
+       * To override the entire Edit View including all nested views, use the `root` key.
+       */
+      api?: Partial<EditViewConfig>
+      default?: Partial<EditViewConfig>
+      livePreview?: Partial<EditViewConfig>
+      root?: never
+      version?: Partial<EditViewConfig>
+      versions?: Partial<EditViewConfig>
+      // TODO: uncomment these as they are built
+      // references?: EditView
+      // relationships?: EditView
+    }
+  | {
+      api?: never
+      default?: never
+      livePreview?: never
+      /**
+       * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+       * + `root` - `/admin/collections/:collection/:id/**\/*`
+       */
+      root: Partial<EditViewConfig>
+      version?: never
+      versions?: never
+    }
 
 export type EntityDescriptionComponent = CustomComponent
 

@@ -24,8 +24,8 @@ import type {
   SelectField,
   Tab,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
@@ -92,7 +92,7 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
 const localizeSchema = (
   entity: NonPresentationalField | Tab,
   schema,
-  localization: SanitizedLocalizationConfig | false,
+  localization: false | SanitizedLocalizationConfig,
 ) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
@@ -111,7 +111,7 @@ const localizeSchema = (
   return schema
 }
 
-const buildSchema = (
+export const buildSchema = (
   config: SanitizedConfig,
   configFields: Field[],
   buildSchemaOptions: BuildSchemaOptions = {},
@@ -384,7 +384,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') return option.value
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }
@@ -511,7 +513,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
-        if (typeof option === 'object') return option.value
+        if (typeof option === 'object') {
+          return option.value
+        }
         return option
       }),
     }
@@ -595,16 +599,77 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const baseSchema = {
-      ...formatBaseSchema(field, buildSchemaOptions),
-      type: mongoose.Schema.Types.Mixed,
-      ref: field.relationTo,
+    const hasManyRelations = Array.isArray(field.relationTo)
+    let schemaToReturn: { [key: string]: any } = {}
+
+    if (field.localized && config.localization) {
+      schemaToReturn = {
+        type: config.localization.localeCodes.reduce((locales, locale) => {
+          let localeSchema: { [key: string]: any } = {}
+
+          if (hasManyRelations) {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
+              _id: false,
+              type: mongoose.Schema.Types.Mixed,
+              relationTo: { type: String, enum: field.relationTo },
+              value: {
+                type: mongoose.Schema.Types.Mixed,
+                refPath: `${field.name}.${locale}.relationTo`,
+              },
+            }
+          } else {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
+              type: mongoose.Schema.Types.Mixed,
+              ref: field.relationTo,
+            }
+          }
+
+          return {
+            ...locales,
+            [locale]: field.hasMany
+              ? { type: [localeSchema], default: formatDefaultValue(field) }
+              : localeSchema,
+          }
+        }, {}),
+        localized: true,
+      }
+    } else if (hasManyRelations) {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
+        _id: false,
+        type: mongoose.Schema.Types.Mixed,
+        relationTo: { type: String, enum: field.relationTo },
+        value: {
+          type: mongoose.Schema.Types.Mixed,
+          refPath: `${field.name}.relationTo`,
+        },
+      }
+
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: formatDefaultValue(field),
+        }
+      }
+    } else {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
+        type: mongoose.Schema.Types.Mixed,
+        ref: field.relationTo,
+      }
+
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: formatDefaultValue(field),
+        }
+      }
     }
 
     schema.add({
-      [field.name]: localizeSchema(field, baseSchema, config.localization),
+      [field.name]: schemaToReturn,
     })
   },
 }
-
-export default buildSchema

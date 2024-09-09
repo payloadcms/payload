@@ -11,23 +11,15 @@
     }
   }
 
-  &__header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: base(0.8);
-
-    h1 {
-      margin: 0;
-    }
-
+  .list-header {
     a {
       text-decoration: none;
     }
 
-    .pill {
+    .btn--withoutPopup,
+    .btn--withPopup {
       position: relative;
-      margin: 0;
+      margin: 0 0 base(0.2);
     }
   }
 

@@ -20,8 +20,8 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
-import { useTabs } from '../Tabs/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useTabs } from '../Tabs/provider.js'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'
 
@@ -32,7 +32,7 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
     descriptionProps,
     field,
     field: {
-      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width },
+      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
       fields,
       label,
     },
@@ -96,6 +96,7 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
                 <FieldDescription
                   Description={field?.admin?.components?.Description}
                   description={description}
+                  field={field}
                   {...(descriptionProps || {})}
                 />
               </header>

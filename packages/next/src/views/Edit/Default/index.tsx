@@ -23,9 +23,9 @@ import React, { Fragment, useCallback, useState } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
+import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -35,12 +35,12 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC = () => {
   const {
     id,
+    action,
     AfterDocument,
     AfterFields,
+    apiURL,
     BeforeDocument,
     BeforeFields,
-    action,
-    apiURL,
     collectionSlug,
     disableActions,
     disableLeaveWithoutSaving,
@@ -95,17 +95,25 @@ export const DefaultEditView: React.FC = () => {
 
   const classes = [baseClass, id && `${baseClass}--is-editing`]
 
-  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
-  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
+  if (globalSlug) {
+    classes.push(`global-edit--${globalSlug}`)
+  }
+  if (collectionSlug) {
+    classes.push(`collection-edit--${collectionSlug}`)
+  }
 
-  const [schemaPath, setSchemaPath] = React.useState(entitySlug)
+  const [schemaPath, setSchemaPath] = React.useState(() => {
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
+      return `_${entitySlug}.auth`
+    }
+
+    return entitySlug
+  })
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
-    if (
-      operation === 'create' &&
-      collectionConfig.auth &&
-      !collectionConfig.auth.disableLocalStrategy
-    )
+    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
       return true
+    }
+
     return false
   })
 
@@ -188,8 +196,8 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isInitializing || !hasSavePermission}
+          disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}

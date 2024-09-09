@@ -1,4 +1,3 @@
-
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
@@ -14,7 +13,7 @@ const mockModulePath = path.resolve(__dirname, './emptyModule.js')
 
 export default buildConfig({
   admin: {
-    webpack: config => ({
+    webpack: (config) => ({
       ...config,
       resolve: {
         ...config?.resolve,
@@ -36,10 +35,7 @@ export default buildConfig({
       },
     }),
   },
-  collections: [
-    Newsletter,
-    Users,
-  ],
+  collections: [Newsletter, Users],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },

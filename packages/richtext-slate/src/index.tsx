@@ -29,6 +29,7 @@ export function slateEditor(
     args.admin.link.fields = await sanitizeFields({
       config: config as unknown as Config,
       fields: transformExtraFields(args.admin?.link?.fields, config),
+      parentIsLocalized: false,
       validRelationships,
     })
 
@@ -38,6 +39,7 @@ export function slateEditor(
           args.admin.upload.collections[collection].fields = await sanitizeFields({
             config: config as unknown as Config,
             fields: args.admin?.upload?.collections[collection]?.fields,
+            parentIsLocalized: false,
             validRelationships,
           })
         }

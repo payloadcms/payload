@@ -44,11 +44,11 @@ export const ensureUsernameOrEmail = <TSlug extends CollectionSlug>({
         missingFields = true
       }
       // prevent clearing email if no username
-      if ('email' in data && !data.email && !originalDoc.username) {
+      if ('email' in data && !data.email && !originalDoc.username && !data?.username) {
         missingFields = true
       }
       // prevent clearing username if no email
-      if ('username' in data && !data.username && !originalDoc.email) {
+      if ('username' in data && !data.username && !originalDoc.email && !data?.email) {
         missingFields = true
       }
     }

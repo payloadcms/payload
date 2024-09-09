@@ -20,6 +20,7 @@
     flex-wrap: wrap;
     flex-grow: 1;
     align-items: flex-start;
+    align-items: center;
 
     button .pill {
       pointer-events: none;
@@ -43,10 +44,16 @@
     padding: 0;
     cursor: pointer;
     color: inherit;
+    border-radius: var(--style-radius-s);
 
     &:focus:not(:focus-visible),
     &:focus-within:not(:focus-visible) {
       outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     &:disabled {

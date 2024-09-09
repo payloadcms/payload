@@ -70,7 +70,7 @@ export const RTL_REGEX = new RegExp('^[^' + LTR + ']*[' + RTL + ']')
 // eslint-disable-next-line no-misleading-character-class
 export const LTR_REGEX = new RegExp('^[^' + RTL + ']*[' + LTR + ']')
 
-export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {
+export const TEXT_TYPE_TO_FORMAT: Record<string | TextFormatType, number> = {
   bold: NodeFormat.IS_BOLD,
   code: NodeFormat.IS_CODE,
   highlight: NodeFormat.IS_HIGHLIGHT,
@@ -81,7 +81,7 @@ export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {
   underline: NodeFormat.IS_UNDERLINE,
 }
 
-export const DETAIL_TYPE_TO_DETAIL: Record<TextDetailType | string, number> = {
+export const DETAIL_TYPE_TO_DETAIL: Record<string | TextDetailType, number> = {
   directionless: NodeFormat.IS_DIRECTIONLESS,
   unmergeable: NodeFormat.IS_UNMERGEABLE,
 }

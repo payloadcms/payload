@@ -3,22 +3,36 @@ import type { MarkOptional } from 'ts-essentials'
 import type {
   ClientField,
   NamedTab,
+  TabsField,
   TabsFieldClient,
   UnnamedTab,
 } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
 
 export type ClientTab =
   | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-export type TabsFieldProps = {
-  readonly field: MarkOptional<TabsFieldClient, 'type'>
-} & FormFieldBase
+export type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
-export type TabsFieldLabelComponent = LabelComponent<'tabs'>
+export type TabsFieldProps = FormFieldBase<TabsFieldClientWithoutType>
 
-export type TabsFieldDescriptionComponent = DescriptionComponent<'tabs'>
+export type TabsFieldLabelServerComponent = FieldLabelServerComponent<TabsField>
 
-export type TabsFieldErrorComponent = ErrorComponent<'tabs'>
+export type TabsFieldLabelClientComponent = FieldLabelClientComponent<TabsFieldClientWithoutType>
+
+export type TabsFieldDescriptionServerComponent = FieldDescriptionServerComponent<TabsField>
+
+export type TabsFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<TabsFieldClientWithoutType>
+
+export type TabsFieldErrorServerComponent = FieldErrorServerComponent<TabsField>
+
+export type TabsFieldErrorClientComponent = FieldErrorClientComponent<TabsFieldClientWithoutType>

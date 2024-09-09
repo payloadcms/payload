@@ -1,21 +1,37 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RichTextFieldClient } from '../../fields/config/types.js'
+import type { RichTextField, RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+  FormFieldBase,
+} from '../types.js'
+
+type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
 
 export type RichTextFieldProps<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
 > = {
-  readonly field: MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
   readonly validate?: RichTextFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+} & Omit<FormFieldBase<RichTextFieldClientWithoutType>, 'validate'>
 
-export type RichTextFieldLabelComponent = LabelComponent<'richText'>
+export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<RichTextField>
 
-export type RichTextFieldDescriptionComponent = DescriptionComponent<'richText'>
+export type RichTextFieldLabelClientComponent =
+  FieldLabelClientComponent<RichTextFieldClientWithoutType>
 
-export type RichTextFieldErrorComponent = ErrorComponent<'richText'>
+export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<RichTextField>
+
+export type RichTextFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<RichTextField>
+
+export type RichTextFieldErrorClientComponent =
+  FieldErrorClientComponent<RichTextFieldClientWithoutType>

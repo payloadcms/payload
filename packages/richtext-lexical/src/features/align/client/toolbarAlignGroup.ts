@@ -1,3 +1,4 @@
+'use client'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../toolbars/types.js'
 
 import { AlignLeftIcon } from '../../../lexical/ui/icons/AlignLeft/index.js'

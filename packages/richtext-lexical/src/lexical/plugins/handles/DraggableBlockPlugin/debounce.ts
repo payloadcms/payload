@@ -1,3 +1,4 @@
+'use client'
 export function debounce(func: Function, wait: number) {
   let timeout: null | number = null
   return function (...args: any[]) {

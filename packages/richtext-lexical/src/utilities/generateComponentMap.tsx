@@ -4,6 +4,7 @@ import { getComponent } from '@payloadcms/ui/shared'
 import { createClientFields } from '@payloadcms/ui/utilities/createClientConfig'
 import { deepCopyObjectSimple } from 'payload'
 
+import type { FeatureProviderProviderClient } from '../features/typesClient.js'
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { GeneratedFeatureProviderComponent } from '../types.js'
 
@@ -44,9 +45,11 @@ export const getGenerateComponentMap =
               const mappedComponent: MappedComponent = createMappedComponent(
                 payloadComponent,
                 {
-                  componentKey,
-                  featureKey: resolvedFeature.key,
-                  key: `${resolvedFeature.key}-${componentKey}`,
+                  clientProps: {
+                    componentKey,
+                    featureKey: resolvedFeature.key,
+                    key: `${resolvedFeature.key}-${componentKey}`,
+                  },
                 },
                 undefined,
                 'lexical-from-resolvedFeature',
@@ -102,37 +105,28 @@ export const getGenerateComponentMap =
           }
 
           const ClientComponent = resolvedFeature.ClientFeature
-          const ResolvedClientComponent = getComponent({
+          const resolvedClientFeature = getComponent({
             identifier: 'lexical-clientComponent',
             importMap,
             payloadComponent: ClientComponent,
           })
-          const clientComponentProps = resolvedFeature.clientFeatureProps
+          const featureProviderProviderClient =
+            resolvedClientFeature.Component as unknown as FeatureProviderProviderClient<any, any>
 
           if (!ClientComponent) {
             return null
           }
 
+          const clientFeatureProps = resolvedFeature.clientFeatureProps ?? {}
+          clientFeatureProps.featureKey = resolvedFeature.key
+          clientFeatureProps.order = resolvedFeature.order
+          if (resolvedClientFeature.clientProps) {
+            clientFeatureProps.clientProps = resolvedClientFeature.clientProps
+          }
+
           return {
-            ClientFeature:
-              clientComponentProps && typeof clientComponentProps === 'object' ? (
-                <ResolvedClientComponent.Component
-                  {...clientComponentProps}
-                  featureKey={resolvedFeature.key}
-                  key={resolvedFeature.key}
-                  order={resolvedFeature.order}
-                  {...(ResolvedClientComponent?.clientProps || {})}
-                />
-              ) : (
-                <ResolvedClientComponent.Component
-                  featureKey={resolvedFeature.key}
-                  key={resolvedFeature.key}
-                  order={resolvedFeature.order}
-                  {...(ResolvedClientComponent?.clientProps || {})}
-                />
-              ),
-            key: resolvedFeature.key,
-            order: resolvedFeature.order,
+            clientFeature: featureProviderProviderClient,
+            clientFeatureProps,
           } as GeneratedFeatureProviderComponent
         })
         .filter((feature) => feature !== null),

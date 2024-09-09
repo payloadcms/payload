@@ -3,7 +3,7 @@ import type { ImportMap, PayloadComponent, ResolvedComponent } from 'payload'
 import { parsePayloadComponent } from 'payload/shared'
 
 /**
- * Gets th resolved React component from `PayloadComponent` from the importMap
+ * Gets the resolved React component from `PayloadComponent` from the importMap
  */
 export const getComponent = <
   TComponentServerProps extends object,
@@ -17,15 +17,16 @@ export const getComponent = <
   identifier?: string
   importMap: ImportMap
   payloadComponent:
-    | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | null
+    | PayloadComponent<TComponentServerProps, TComponentClientProps>
     | undefined
   silent?: boolean
 }): ResolvedComponent<TComponentServerProps, TComponentClientProps> => {
   if (!payloadComponent) {
+    // undefined, null or false
     return {
-      Component: undefined,
       clientProps: undefined,
+      Component: undefined,
       serverProps: undefined,
     }
   }
@@ -37,19 +38,23 @@ export const getComponent = <
   const Component = importMap[key]
 
   if (!Component && !silent) {
-    console.error(`getComponent: Component not found in importMap`, {
-      identifier,
-      key,
-      payloadComponent,
-    })
+    console.error(
+      `getComponent: Component not found in importMap`,
+      {
+        identifier,
+        key,
+        payloadComponent,
+      },
+      'You may need to run the `payload generate:importmap` command to generate the importMap ahead of runtime.',
+    )
   }
 
   return {
-    Component,
     clientProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.clientProps as TComponentClientProps)
         : undefined,
+    Component,
     serverProps:
       typeof payloadComponent === 'object'
         ? (payloadComponent.serverProps as TComponentServerProps)

@@ -1,13 +1,13 @@
 import type { MappedComponent, ServerProps, VisibleEntities } from 'payload'
 
-import { AppHeader, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { AppHeader, BulkUploadProvider, EntityVisibilityProvider, NavToggler } from '@payloadcms/ui'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
-import './index.scss'
 
 const baseClass = 'template-default'
 
@@ -31,9 +31,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   const {
     admin: {
-      components: { Nav: CustomNav, header } = {
-        Nav: undefined,
+      components: { header: CustomHeader, Nav: CustomNav } = {
         header: undefined,
+        Nav: undefined,
       },
     } = {},
   } = payload.config || {}
@@ -60,24 +60,24 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      {CustomHeader && Array.isArray(CustomHeader) && CustomHeader.map((Component) => Component)}
-      <div style={{ position: 'relative' }}>
-        <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-          <div className={`${baseClass}__nav-toggler`}>
-            <NavToggler>
+      <BulkUploadProvider>
+        {CustomHeader && Array.isArray(CustomHeader) && CustomHeader.map((Component) => Component)}
+        <div style={{ position: 'relative' }}>
+          <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+            <NavToggler className={`${baseClass}__nav-toggler`}>
               <NavHamburger />
             </NavToggler>
           </div>
-        </div>
-        <Wrapper baseClass={baseClass} className={className}>
-          <RenderComponent mappedComponent={MappedDefaultNav} />
+          <Wrapper baseClass={baseClass} className={className}>
+            <RenderComponent mappedComponent={MappedDefaultNav} />
 
-          <div className={`${baseClass}__wrap`}>
-            <AppHeader />
-            {children}
-          </div>
-        </Wrapper>
-      </div>
+            <div className={`${baseClass}__wrap`}>
+              <AppHeader />
+              {children}
+            </div>
+          </Wrapper>
+        </div>
+      </BulkUploadProvider>
     </EntityVisibilityProvider>
   )
 }

@@ -1,3 +1,4 @@
+'use client'
 import type { JSX } from 'react'
 
 import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'

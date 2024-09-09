@@ -66,6 +66,8 @@ export default config
 | ------------- | ---------- | ----------------------------------------------------------------------------------------------- |
 | `collections` | `string[]` | An array of collection slugs to populate in the `to` field of each redirect.                    |
 | `overrides`   | `object`   | A partial collection config that allows you to override anything on the `redirects` collection. |
+| `redirectTypes`   | `string[]`   | Provide an array of redirects if you want to provide options for the type of redirects to be supported. |
+| `redirectTypeFieldOverride`   | `Field`   | A partial Field config that allows you to override the Redirect Type field if enabled above. |
 
 Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
 
@@ -82,6 +84,10 @@ redirectsPlugin({
         },
       ]
     },
+  },
+  redirectTypes: ['301', '302'],
+  redirectTypeFieldOverride: {
+    label: 'Redirect Type (Overridden)',
   },
 })
 ```

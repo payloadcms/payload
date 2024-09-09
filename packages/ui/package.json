@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.79",
+  "version": "3.0.0-beta.100",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -57,17 +57,18 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
-    "build:babel": "babel src --out-dir dist --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs",
-    "build:esbuild": "node bundle.js",
-    "build:reactcompiler": "pnpm copyfiles && pnpm build:babel && pnpm build:types",
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
@@ -76,7 +77,7 @@
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@faceless-ui/window-info": "3.0.0-beta.0",
-    "@monaco-editor/react": "4.5.1",
+    "@monaco-editor/react": "4.6.0",
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
@@ -108,9 +109,10 @@
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
-    "esbuild": "0.23.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -140,8 +142,8 @@
         "default": "./dist/providers/Config/createClientConfig/index.js"
       },
       "./css": {
-        "import": "./dist/prod/styles.css",
-        "default": "./dist/prod/styles.css"
+        "import": "./dist/styles.css",
+        "default": "./dist/styles.css"
       },
       "./scss": {
         "import": "./dist/scss/styles.scss",

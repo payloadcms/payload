@@ -2,7 +2,6 @@ import type { Field } from 'payload'
 
 import { isSuperAdmin } from '../../access/isSuperAdmin'
 import { tenantFieldUpdate } from './access/update'
-import { TenantFieldComponent } from './components/Field'
 import { autofillTenant } from './hooks/autofillTenant'
 
 export const tenantField: Field = {
@@ -17,7 +16,7 @@ export const tenantField: Field = {
   },
   admin: {
     components: {
-      Field: TenantFieldComponent,
+      Field: '@/fields/TenantField/components/Field#TenantFieldComponent',
     },
     position: 'sidebar',
   },

@@ -14,7 +14,9 @@ const convertValue = ({
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
-  if (!customIDField) return new mongoose.Types.ObjectId(value)
+  if (!customIDField) {
+    return new mongoose.Types.ObjectId(value)
+  }
 
   return value
 }

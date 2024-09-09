@@ -35,11 +35,17 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
 
   if (fieldValue) {
     let hideCheckbox = false
-    if (typeof fieldValue === 'number' && fieldValue > 0) hideCheckbox = true
-    if (Array.isArray(fieldValue) && fieldValue.length > 0) hideCheckbox = true
+    if (typeof fieldValue === 'number' && fieldValue > 0) {
+      hideCheckbox = true
+    }
+    if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+      hideCheckbox = true
+    }
 
     if (hideCheckbox) {
-      if (checked) setChecked(false) // uncheck when field has value
+      if (checked) {
+        setChecked(false)
+      } // uncheck when field has value
       return null
     }
   }

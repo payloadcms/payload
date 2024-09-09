@@ -69,8 +69,12 @@ export const createPayloadRequest = async ({
     fallbackLocale = locales.fallbackLocale
 
     // Override if query params are present, in order to respect HTTP method override
-    if (query.locale) locale = query.locale
-    if (query?.['fallback-locale']) fallbackLocale = query['fallback-locale']
+    if (query.locale) {
+      locale = query.locale
+    }
+    if (query?.['fallback-locale']) {
+      fallbackLocale = query['fallback-locale']
+    }
   }
 
   const customRequest: CustomPayloadRequestProperties = {
@@ -110,7 +114,9 @@ export const createPayloadRequest = async ({
 
   req.user = user
 
-  if (responseHeaders) req.responseHeaders = responseHeaders
+  if (responseHeaders) {
+    req.responseHeaders = responseHeaders
+  }
 
   return req
 }

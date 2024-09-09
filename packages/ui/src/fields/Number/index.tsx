@@ -148,6 +148,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       }}
     >
       <FieldLabel
+        field={field}
         Label={field?.admin?.components?.Label}
         label={label}
         required={required}
@@ -156,6 +157,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -210,6 +212,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

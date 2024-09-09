@@ -145,7 +145,7 @@ Instead, we utilize component paths to reference React Components. This method e
 
 When constructing the `ClientConfig`, Payload uses the component paths as keys to fetch the corresponding React Component imports from the Import Map. It then substitutes the `PayloadComponent` with a `MappedComponent`. A `MappedComponent` includes the React Component and additional metadata, such as whether it's a server or a client component and which props it should receive. These components are then rendered through the `<RenderComponent />` component within the Payload Admin Panel.
 
-Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map.
+Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map. If you encounter any errors running this command, see the [Troubleshooting](/docs/beta/local-api/outside-nextjs#troubleshooting) section.
 
 ### Component paths in external packages
 
@@ -195,6 +195,48 @@ import { MyFieldComponent } from 'my-external-package/client'
 ```
 
 which is a valid way to access MyFieldComponent that can be resolved by the consuming project.
+
+### Custom Components from unknown locations
+
+By default, any component paths from known locations are added to the import map. However, if you need to add any components from unknown locations to the import map, you can do so by adding them to the `admin.dependencies` array in your Payload Config. This is mostly only relevant for plugin authors and not for regular Payload users.
+
+Example:
+
+```ts
+export default {
+  // ...
+  admin: {
+    // ...
+    dependencies: {
+      myTestComponent: { // myTestComponent is the key - can be anything
+        path: '/components/TestComponent.js#TestComponent',
+        type: 'component',
+        clientProps: {
+          test: 'hello',
+        },
+      },
+    },
+  }
+}
+```
+
+This way, `TestComponent` is added to the import map, no matter if it's referenced in a known location or not. On the client, you can then use the component like this:
+
+```tsx
+'use client'
+
+import { RenderComponent, useConfig } from '@payloadcms/ui'
+import React from 'react'
+
+export const CustomView = () => {
+  const { config } = useConfig()
+  return (
+    <div>
+      <RenderComponent mappedComponent={config.admin.dependencies?.myTestComponent} />
+    </div>
+  )
+}
+```
 
 ## Root Components
 
@@ -397,7 +439,7 @@ All [Field Components](./fields) automatically receive their respective Client F
 import React from 'react'
 import type { TextFieldProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldProps = ({ field: { name } }) => {
+export const MyClientFieldComponent = ({ field: { name } }: TextFieldProps) => {
   return (
     <p>
       {`This field's name is ${name}`}

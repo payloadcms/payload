@@ -39,7 +39,9 @@ export const cloudStoragePlugin =
             prefix: options.prefix,
           })
 
-          if (adapter.onInit) initFunctions.push(adapter.onInit)
+          if (adapter.onInit) {
+            initFunctions.push(adapter.onInit)
+          }
 
           const fields = getFields({
             adapter,
@@ -90,7 +92,9 @@ export const cloudStoragePlugin =
       }),
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
-        if (config.onInit) await config.onInit(payload)
+        if (config.onInit) {
+          await config.onInit(payload)
+        }
       },
     }
   }

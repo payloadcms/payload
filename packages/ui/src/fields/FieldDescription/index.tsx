@@ -1,5 +1,5 @@
 'use client'
-import type { GenericDescriptionProps } from 'payload'
+import type { FieldDescriptionClientComponent, GenericDescriptionProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -38,7 +38,7 @@ const DefaultFieldDescription: React.FC<GenericDescriptionProps> = (props) => {
   return null
 }
 
-export const FieldDescription: React.FC<GenericDescriptionProps> = (props) => {
+export const FieldDescription: FieldDescriptionClientComponent = (props) => {
   const { Description, ...rest } = props
 
   if (Description) {

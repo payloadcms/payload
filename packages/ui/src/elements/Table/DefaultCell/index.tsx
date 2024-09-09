@@ -43,7 +43,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
     onClick: onClickFromContext,
   } = cellProps || {}
 
-  const classNameFromConfigContext = 'className' in admin ? admin.className : undefined
+  const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
   const className =
     classNameFromProps ||

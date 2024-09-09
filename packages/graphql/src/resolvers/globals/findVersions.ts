@@ -19,7 +19,7 @@ export type Resolver = (
   },
 ) => Promise<Document>
 
-export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig): Resolver {
+export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context: Context) {
     const options = {
       depth: 0,

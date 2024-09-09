@@ -40,7 +40,7 @@ const RichTextComponent: React.FC<
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      },
+      } = {},
       label,
       required,
     },
@@ -94,8 +94,20 @@ const RichTextComponent: React.FC<
         width,
       }}
     >
-      <FieldError CustomError={Error} path={path} {...(errorProps || {})} alignCaret="left" />
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldError
+        CustomError={Error}
+        field={field}
+        path={path}
+        {...(errorProps || {})}
+        alignCaret="left"
+      />
+      <FieldLabel
+        field={field}
+        Label={Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
@@ -119,7 +131,7 @@ const RichTextComponent: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription Description={Description} {...(descriptionProps || {})} />
+        <FieldDescription Description={Description} field={field} {...(descriptionProps || {})} />
       </div>
     </div>
   )

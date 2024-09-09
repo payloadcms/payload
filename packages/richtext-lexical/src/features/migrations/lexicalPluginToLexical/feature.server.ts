@@ -13,6 +13,7 @@ export type LexicalPluginToLexicalFeatureProps = {
         defaultConverters: LexicalPluginNodeConverter[]
       }) => LexicalPluginNodeConverter[])
     | LexicalPluginNodeConverter[]
+  disableHooks?: boolean
   quiet?: boolean
 }
 
@@ -37,23 +38,25 @@ export const LexicalPluginToLexicalFeature =
 
       return {
         ClientFeature: '@payloadcms/richtext-lexical/client#LexicalPluginToLexicalFeatureClient',
-        hooks: {
-          afterRead: [
-            ({ value }) => {
-              if (!value || !('jsonContent' in value)) {
-                // incomingEditorState null or not from Lexical Plugin
-                return value
-              }
+        hooks: props.disableHooks
+          ? undefined
+          : {
+              afterRead: [
+                ({ value }) => {
+                  if (!value || !('jsonContent' in value)) {
+                    // incomingEditorState null or not from Lexical Plugin
+                    return value
+                  }
 
-              // Lexical Plugin => convert to lexical
-              return convertLexicalPluginToLexical({
-                converters: props.converters as LexicalPluginNodeConverter[],
-                lexicalPluginData: value as PayloadPluginLexicalData,
-                quiet: props?.quiet,
-              })
+                  // Lexical Plugin => convert to lexical
+                  return convertLexicalPluginToLexical({
+                    converters: props.converters as LexicalPluginNodeConverter[],
+                    lexicalPluginData: value as PayloadPluginLexicalData,
+                    quiet: props?.quiet,
+                  })
+                },
+              ],
             },
-          ],
-        },
         nodes: [
           {
             node: UnknownConvertedNode,

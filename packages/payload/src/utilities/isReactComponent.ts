@@ -3,7 +3,7 @@ import type React from 'react'
 const clientRefSymbol = Symbol.for('react.client.reference')
 
 export function isReactServerComponentOrFunction<T extends any>(
-  component: React.ComponentType | any,
+  component: any | React.ComponentType,
 ): component is T {
   if (component === null || component === undefined) {
     return false
@@ -20,7 +20,7 @@ export function isReactServerComponentOrFunction<T extends any>(
 }
 
 export function isReactClientComponent<T extends any>(
-  component: React.ComponentType | any,
+  component: any | React.ComponentType,
 ): component is T {
   if (component === null || component === undefined) {
     return false
@@ -29,7 +29,7 @@ export function isReactClientComponent<T extends any>(
 }
 
 export function isReactComponentOrFunction<T extends any>(
-  component: React.ComponentType | any,
+  component: any | React.ComponentType,
 ): component is T {
   return isReactServerComponentOrFunction(component) || isReactClientComponent(component)
 }

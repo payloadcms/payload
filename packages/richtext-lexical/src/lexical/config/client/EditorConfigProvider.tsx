@@ -1,7 +1,6 @@
 'use client'
 
 import type { LexicalEditor } from 'lexical'
-import type { RichTextFieldClient } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
@@ -23,9 +22,9 @@ export interface EditorConfigContextType {
   editorConfig: SanitizedClientEditorConfig
   editorContainerRef: React.RefObject<HTMLDivElement>
   field: LexicalRichTextFieldProps['field']
+  focusedEditor: EditorConfigContextType | null
   // Editor focus handling
   focusEditor: (editorContext: EditorConfigContextType) => void
-  focusedEditor: EditorConfigContextType | null
   parentEditor: EditorConfigContextType
   registerChild: (uuid: string, editorContext: EditorConfigContextType) => void
   unregisterChild?: (uuid: string) => void
@@ -71,6 +70,7 @@ export const EditorConfigProvider = ({
         editorConfig,
         editorContainerRef,
         field,
+        focusedEditor,
         focusEditor: (editorContext: EditorConfigContextType) => {
           const editorUUID = editorContext.uuid
 
@@ -93,7 +93,6 @@ export const EditorConfigProvider = ({
 
           focusHistory.current.clear()
         },
-        focusedEditor,
         parentEditor: parentContext,
         registerChild: (childUUID, childEditorContext) => {
           if (!childrenEditors.current.has(childUUID)) {

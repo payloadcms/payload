@@ -1,5 +1,5 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
-import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
+import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
 
 import { spawn } from 'child_process'
@@ -57,11 +57,12 @@ import type { TypeWithVersion } from './versions/types.js'
 import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
+import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
-import { getDependencies } from './utilities/dependencies/getDependencies.js'
+import { checkDependencies } from './utilities/dependencies/dependencyChecker.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -285,9 +286,9 @@ export class BasePayload {
     return forgotPassword<TSlug>(this, options)
   }
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
-
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+
+  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
 
   globals: Globals
 
@@ -426,59 +427,11 @@ export class BasePayload {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    if (process.env.NODE_ENV !== 'production') {
-      // First load. First check if there are mismatching dependency versions of payload packages
-      const resolvedDependencies = await getDependencies(dirname, [
-        '@payloadcms/ui/shared',
-        'payload',
-        '@payloadcms/next/utilities',
-        '@payloadcms/richtext-lexical',
-        '@payloadcms/richtext-slate',
-        '@payloadcms/graphql',
-        '@payloadcms/plugin-cloud',
-        '@payloadcms/db-mongodb',
-        '@payloadcms/db-postgres',
-        '@payloadcms/plugin-form-builder',
-        '@payloadcms/plugin-nested-docs',
-        '@payloadcms/plugin-seo',
-        '@payloadcms/plugin-search',
-        '@payloadcms/plugin-cloud-storage',
-        '@payloadcms/plugin-stripe',
-        '@payloadcms/plugin-zapier',
-        '@payloadcms/plugin-redirects',
-        '@payloadcms/plugin-sentry',
-        '@payloadcms/bundler-webpack',
-        '@payloadcms/bundler-vite',
-        '@payloadcms/live-preview',
-        '@payloadcms/live-preview-react',
-        '@payloadcms/translations',
-        '@payloadcms/email-nodemailer',
-        '@payloadcms/email-resend',
-        '@payloadcms/storage-azure',
-        '@payloadcms/storage-s3',
-        '@payloadcms/storage-gcs',
-        '@payloadcms/storage-vercel-blob',
-        '@payloadcms/storage-uploadthing',
-      ])
-
-      // Go through each resolved dependency. If any dependency has a mismatching version, throw an error
-      const foundVersions: {
-        [version: string]: string
-      } = {}
-      for (const [_pkg, { version }] of resolvedDependencies.resolved) {
-        if (!Object.keys(foundVersions).includes(version)) {
-          foundVersions[version] = _pkg
-        }
-      }
-      if (Object.keys(foundVersions).length > 1) {
-        const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
-          .map(([version, pkg]) => `${pkg}@${version}`)
-          .join(', ')
-
-        throw new Error(
-          `Mismatching payload dependency versions found: ${formattedVersionsWithPackageNameString}. All payload and @payloadcms/* packages must have the same version. This is an error with your set-up, caused by you, not a bug in payload. Please go to your package.json and ensure all payload and @payloadcms/* packages have the same version.`,
-        )
-      }
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true'
+    ) {
+      await checkPayloadDependencies()
     }
 
     this.importMap = options.importMap
@@ -487,9 +440,8 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
-    this.logger = getLogger('payload', options.loggerOptions, options.loggerDestination)
-
     this.config = await options.config
+    this.logger = getLogger('payload', this.config.logger)
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
@@ -508,7 +460,9 @@ export class BasePayload {
 
       let customIDType
 
-      if (customID?.type === 'number' || customID?.type === 'text') customIDType = customID.type
+      if (customID?.type === 'number' || customID?.type === 'text') {
+        customIDType = customID.type
+      }
 
       this.collections[collection.slug] = {
         config: collection,
@@ -601,8 +555,12 @@ export class BasePayload {
     }
 
     if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') await options.onInit(this)
-      if (typeof this.config.onInit === 'function') await this.config.onInit(this)
+      if (typeof options.onInit === 'function') {
+        await options.onInit(this)
+      }
+      if (typeof this.config.onInit === 'function') {
+        await this.config.onInit(this)
+      }
     }
 
     return this
@@ -668,6 +626,7 @@ interface RequestContext {
   [key: string]: unknown
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export type * from './admin/types.js'
@@ -710,6 +669,7 @@ export type { ClientCollectionConfig } from './collections/config/client.js'
 export type {
   ServerOnlyCollectionAdminProperties,
   ServerOnlyCollectionProperties,
+  ServerOnlyUploadProperties,
 } from './collections/config/client.js'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -777,8 +737,8 @@ export { migrateDown } from './database/migrations/migrateDown.js'
 export { migrateRefresh } from './database/migrations/migrateRefresh.js'
 export { migrateReset } from './database/migrations/migrateReset.js'
 export { migrateStatus } from './database/migrations/migrateStatus.js'
-export { migrationTemplate } from './database/migrations/migrationTemplate.js'
 export { migrationsCollection } from './database/migrations/migrationsCollection.js'
+export { migrationTemplate } from './database/migrations/migrationTemplate.js'
 export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
@@ -801,8 +761,8 @@ export type {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
-  DBIdentifierName,
   DatabaseAdapterResult as DatabaseAdapterObj,
+  DBIdentifierName,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -947,10 +907,10 @@ export type {
   TabAsFieldClient,
   TabsField,
   TabsFieldClient,
-  TextField,
-  TextFieldClient,
   TextareaField,
   TextareaFieldClient,
+  TextField,
+  TextFieldClient,
   UIField,
   UIFieldClient,
   UnnamedTab,
@@ -984,8 +944,8 @@ export type {
   RelationshipFieldValidation,
   RichTextFieldValidation,
   SelectFieldValidation,
-  TextFieldValidation,
   TextareaFieldValidation,
+  TextFieldValidation,
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
@@ -1044,21 +1004,22 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
+export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
+export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
-export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from './utilities/mergeListSearchAndWhere.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
-export { getDependencies }
+export { checkDependencies }
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'

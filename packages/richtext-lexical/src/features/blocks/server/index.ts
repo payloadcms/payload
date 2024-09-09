@@ -22,7 +22,7 @@ export const BlocksFeature = createServerFeature<
   BlocksFeatureProps,
   BlocksFeatureClientProps
 >({
-  feature: async ({ config: _config, isRoot, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
     // Build clientProps
     const clientProps: BlocksFeatureClientProps = {
       clientBlockSlugs: [],
@@ -44,6 +44,7 @@ export const BlocksFeature = createServerFeature<
           blocks: props.inlineBlocks ?? [],
         },
       ],
+      parentIsLocalized,
       requireFieldLevelRichTextEditor: isRoot,
       validRelationships,
     })
@@ -57,36 +58,6 @@ export const BlocksFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
       clientFeatureProps: clientProps,
-      generateSchemaMap: ({ props }) => {
-        /**
-         * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
-         * sub-fields from the component map. Thus, we need to put them in the component map here.
-         */
-        const schemaMap = new Map<string, Field[]>()
-
-        if (props?.blocks?.length) {
-          schemaMap.set('lexical_blocks', [
-            {
-              name: 'lexical_blocks',
-              type: 'blocks',
-              blocks: props.blocks,
-            },
-          ])
-        }
-
-        if (props?.inlineBlocks?.length) {
-          // To generate block schemaMap which generates things like the componentMap for admin.Label
-          schemaMap.set('lexical_inline_blocks', [
-            {
-              name: 'lexical_inline_blocks',
-              type: 'blocks',
-              blocks: props.inlineBlocks,
-            },
-          ])
-        }
-
-        return schemaMap
-      },
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -124,6 +95,36 @@ export const BlocksFeature = createServerFeature<
 
           return currentSchema
         },
+      },
+      generateSchemaMap: ({ props }) => {
+        /**
+         * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
+         * sub-fields from the component map. Thus, we need to put them in the component map here.
+         */
+        const schemaMap = new Map<string, Field[]>()
+
+        if (props?.blocks?.length) {
+          schemaMap.set('lexical_blocks', [
+            {
+              name: 'lexical_blocks',
+              type: 'blocks',
+              blocks: props.blocks,
+            },
+          ])
+        }
+
+        if (props?.inlineBlocks?.length) {
+          // To generate block schemaMap which generates things like the componentMap for admin.Label
+          schemaMap.set('lexical_inline_blocks', [
+            {
+              name: 'lexical_inline_blocks',
+              type: 'blocks',
+              blocks: props.inlineBlocks,
+            },
+          ])
+        }
+
+        return schemaMap
       },
       i18n,
       nodes: [

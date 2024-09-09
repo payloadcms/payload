@@ -18,7 +18,7 @@ export const CustomTabComponentClient: React.FC<{
 
   const params = useParams()
 
-  const baseRoute = (params.segments.slice(0, 2) as string[]).join('/')
+  const baseRoute = (params.segments.slice(0, 3) as string[]).join('/')
 
   return <Link href={`${adminRoute}/${baseRoute}${path}`}>Custom Tab Component</Link>
 }

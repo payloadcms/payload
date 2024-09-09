@@ -45,7 +45,7 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
     icons = customIcons
   }
 
-  const metaTitle = `${title} ${titleSuffix}`
+  const metaTitle = [title, titleSuffix].filter(Boolean).join(' ')
 
   const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
 

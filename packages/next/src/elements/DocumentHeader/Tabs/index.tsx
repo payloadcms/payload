@@ -6,15 +6,14 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
-import { isPlainObject } from 'payload'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import { ShouldRenderTabs } from './ShouldRenderTabs.js'
-import { DocumentTab } from './Tab/index.js'
 import { getCustomViews } from './getCustomViews.js'
 import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
+import { ShouldRenderTabs } from './ShouldRenderTabs.js'
+import { DocumentTab } from './Tab/index.js'
 import { tabs as defaultTabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
@@ -41,9 +40,13 @@ export const DocumentTabs: React.FC<{
               // if no `order`, append the view to the end
               // TODO: open `order` to the config and merge `defaultViews` with `customViews`
               ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) return 0
-                else if (a.order === undefined) return 1
-                else if (b.order === undefined) return -1
+                if (a.order === undefined && b.order === undefined) {
+                  return 0
+                } else if (a.order === undefined) {
+                  return 1
+                } else if (b.order === undefined) {
+                  return -1
+                }
                 return a.order - b.order
               })
               ?.map(([name, tab], index) => {

@@ -42,7 +42,6 @@ export {
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
-
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
@@ -60,6 +59,8 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
+
+export { unflatten } from '../utilities/unflatten.js'
 
 export { wait } from '../utilities/wait.js'
 

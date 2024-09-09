@@ -55,12 +55,16 @@ export const Tooltip: React.FC<Props> = (props) => {
     }
 
     return () => {
-      if (timerId) clearTimeout(timerId)
+      if (timerId) {
+        clearTimeout(timerId)
+      }
     }
   }, [showFromProps, delay])
 
   useEffect(() => {
-    if (staticPositioning) return
+    if (staticPositioning) {
+      return
+    }
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
   }, [intersectionEntry, staticPositioning])
 

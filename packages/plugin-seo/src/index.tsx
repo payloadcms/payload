@@ -1,6 +1,5 @@
 import type { Config, GroupField, TabsField, TextField } from 'payload'
 
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -133,12 +132,17 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
-            req.t
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateTitle
-              ? await pluginConfig.generateTitle(
-                  req.data as unknown as Parameters<GenerateTitle>[0],
-                )
+              ? await pluginConfig.generateTitle({
+                  ...req.data,
+                  req,
+                } as unknown as Parameters<GenerateTitle>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -147,11 +151,17 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateDescription
-              ? await pluginConfig.generateDescription(
-                  req.data as unknown as Parameters<GenerateDescription>[0],
-                )
+              ? await pluginConfig.generateDescription({
+                  ...req.data,
+                  req,
+                } as unknown as Parameters<GenerateDescription>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -160,9 +170,17 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateURL
-              ? await pluginConfig.generateURL(req.data as unknown as Parameters<GenerateURL>[0])
+              ? await pluginConfig.generateURL({
+                  ...req.data,
+                  req,
+                } as unknown as Parameters<GenerateURL>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -171,11 +189,17 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
+
             const result = pluginConfig.generateImage
-              ? await pluginConfig.generateImage(
-                  req.data as unknown as Parameters<GenerateImage>[0],
-                )
+              ? await pluginConfig.generateImage({
+                  ...req.data,
+                  req,
+                } as unknown as Parameters<GenerateImage>[0])
               : ''
             return new Response(result, { status: 200 })
           },

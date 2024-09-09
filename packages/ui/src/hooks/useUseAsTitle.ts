@@ -1,3 +1,4 @@
+'use client'
 import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { flattenFieldMap } from '../utilities/flattenFieldMap.js'

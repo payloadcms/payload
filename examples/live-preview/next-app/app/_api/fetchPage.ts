@@ -8,7 +8,7 @@ export const fetchPage = async (slug: string): Promise<Page | undefined | null> 
     {
       method: 'GET',
     },
-  ).then(res => res.json())
+  ).then((res) => res.json())
 
   return pageRes?.docs?.[0] ?? null
 }

@@ -24,7 +24,9 @@ export type Props = {
 const baseClass = 'blocks-drawer'
 
 const getBlockLabel = (block: ClientBlock, i18n: I18nClient) => {
-  if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
+  if (typeof block.labels.singular === 'string') {
+    return block.labels.singular.toLowerCase()
+  }
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()
   }
@@ -50,7 +52,9 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
 
     const matchingBlocks = blocks?.reduce((matchedBlocks, block) => {
       const blockLabel = getBlockLabel(block, i18n)
-      if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block)
+      if (blockLabel.includes(searchTermToUse)) {
+        matchedBlocks.push(block)
+      }
       return matchedBlocks
     }, [])
 

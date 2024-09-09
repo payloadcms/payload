@@ -1,3 +1,4 @@
+'use client'
 import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'lexical'
 
 import { $applyNodeReplacement } from 'lexical'

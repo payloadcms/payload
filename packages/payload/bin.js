@@ -1,18 +1,14 @@
-#!/usr/bin/env node --no-deprecation
+#!/usr/bin/env node
 
-import { register } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const useTsx = process.argv.includes('--use-tsx')
+const useSwc = process.argv.includes('--use-swc')
+const disableTranspile = process.argv.includes('--disable-transpile')
 
-// Allow disabling SWC/TSX for debugging
-if (process.env.DISABLE_SWC !== 'true' && !useTsx) {
-  const filename = fileURLToPath(import.meta.url)
-  const dirname = path.dirname(filename)
-  const url = pathToFileURL(dirname).toString() + '/'
-
-  register('@swc-node/register/esm', url)
+if (disableTranspile) {
+  // Remove --disable-transpile from arguments
+  process.argv = process.argv.filter((arg) => arg !== '--disable-transpile')
 
   const start = async () => {
     const { bin } = await import('./dist/bin/index.js')
@@ -20,25 +16,39 @@ if (process.env.DISABLE_SWC !== 'true' && !useTsx) {
   }
 
   void start()
-} else if (useTsx) {
-  // Remove --use-tsx from arguments
-  process.argv = process.argv.filter((arg) => arg !== '--use-tsx')
+} else {
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
+  const url = pathToFileURL(dirname).toString() + '/'
 
-  const start = async () => {
-    // Use tsx
-    let tsImport
-    try {
-      tsImport = (await import('tsx/esm/api')).tsImport
-    } catch (_) {
-      console.error(
-        'tsx is not installed. Please install tsx in your project, if you want to use tsx in payload run.',
-      )
-      return
+  if (!useSwc) {
+    const start = async () => {
+      // Use tsx
+      let tsImport = (await import('tsx/esm/api')).tsImport
+
+      const { bin } = await tsImport('./dist/bin/index.js', url)
+      await bin()
     }
 
-    const { bin } = await tsImport('./dist/bin/index.js', import.meta.url)
-    await bin()
-  }
+    void start()
+  } else if (useSwc) {
+    const { register } = await import('node:module')
+    // Remove --use-swc from arguments
+    process.argv = process.argv.filter((arg) => arg !== '--use-swc')
 
-  void start()
+    try {
+      register('@swc-node/register/esm', url)
+    } catch (_) {
+      console.error(
+        '@swc-node/register is not installed. Please install @swc-node/register in your project, if you want to use swc in payload run.',
+      )
+    }
+
+    const start = async () => {
+      const { bin } = await import('./dist/bin/index.js')
+      await bin()
+    }
+
+    void start()
+  }
 }

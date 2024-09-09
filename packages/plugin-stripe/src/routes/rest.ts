@@ -38,9 +38,7 @@ export const stripeREST = async (args: {
     }
 
     responseJSON = await stripeProxy({
-      // @ts-expect-error
       stripeArgs,
-      // @ts-expect-error
       stripeMethod,
       stripeSecretKey,
     })

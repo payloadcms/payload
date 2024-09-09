@@ -13,9 +13,9 @@ export type WhereBuilderProps = {
 }
 
 export type FieldCondition = {
-  Filter: MappedComponent
   component?: string
   field: ClientField
+  Filter: MappedComponent
   label: string
   operators: {
     label: string

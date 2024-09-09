@@ -1,24 +1,23 @@
 # Order matters. The last matching pattern takes precedence.
+# Approvals are not required currently but may be enabled in the future.
 
 ### Package Exports ###
-/**/exports/ @denolfe @jmikrut
+/**/exports/ @denolfe @jmikrut @DanRibbens
 
 ### Packages ###
-/packages/richtext-*/ @AlessioGr
-/packages/plugin-cloud*/ @denolfe
-/packages/email-*/ @denolfe
-/packages/storage-*/ @denolfe
-/packages/create-payload-app/ @denolfe
-/packages/eslint-*/ @denolfe
+/packages/plugin-cloud*/src/ @denolfe
+/packages/email-*/src/ @denolfe
+/packages/storage-*/src/ @denolfe
+/packages/create-payload-app/src/ @denolfe
+/packages/eslint-*/ @denolfe @AlessioGr
 
 ### Templates ###
-/templates/ @jacobsfletch @denolfe
+/templates/_data/ @denolfe
+/templates/_template/ @denolfe
 
 ### Build Files ###
-/**/package.json @denolfe
 /tsconfig.json @denolfe
 /**/tsconfig*.json @denolfe
-
 /jest.config.js @denolfe
 /**/jest.config.js @denolfe
 
@@ -26,5 +25,5 @@
 /package.json @denolfe
 /scripts/ @denolfe
 /.husky/ @denolfe
-/.vscode/ @denolfe
+/.vscode/ @denolfe @AlessioGr
 /.github/ @denolfe

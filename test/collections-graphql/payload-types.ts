@@ -26,6 +26,9 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  db: {
+    defaultIDType: string;
+  };
   globals: {};
   locale: 'en' | 'es';
   user: User & {
@@ -35,12 +38,17 @@ export interface Config {
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
+    password: string;
   };
   login: {
-    password: string;
     email: string;
+    password: string;
   };
   registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
     email: string;
     password: string;
   };
@@ -212,7 +220,7 @@ export interface CyclicalRelationship {
   id: string;
   title?: string | null;
   relationToSelf?: (string | null) | CyclicalRelationship;
-  media?: string | Media | null;
+  media?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;

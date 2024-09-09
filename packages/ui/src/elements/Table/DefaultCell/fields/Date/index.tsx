@@ -1,9 +1,9 @@
 'use client'
 import type { DateFieldClient, DefaultCellComponentProps } from 'payload'
 
-import { useConfig } from '@payloadcms/ui'
 import React from 'react'
 
+import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../../utilities/formatDate.js'
 

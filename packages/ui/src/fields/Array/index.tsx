@@ -43,7 +43,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         description,
         isSortable = true,
         readOnly: readOnlyFromAdmin,
-      },
+      } = {},
       fields,
       label,
       localized,
@@ -66,7 +66,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     readOnly: readOnlyFromContext,
   } = useFieldProps()
 
-  const minRows = minRowsProp ?? required ? 1 : 0
+  const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -89,8 +89,12 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
-    if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p.field && p.field.label) return { plural: undefined, singular: p.field.label }
+    if ('labels' in p && p?.labels) {
+      return p.labels
+    }
+    if ('label' in p.field && p.field.label) {
+      return { plural: undefined, singular: p.field.label }
+    }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -215,6 +219,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       {showError && (
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -224,8 +229,9 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                Label={field?.admin?.components?.Label}
                 as="span"
+                field={field}
+                Label={field?.admin?.components?.Label}
                 label={label}
                 required={required}
                 unstyled
@@ -262,6 +268,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </header>
@@ -281,7 +288,6 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
-                    RowLabel={RowLabel}
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
@@ -299,6 +305,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                     row={row}
                     rowCount={rows.length}
                     rowIndex={i}
+                    RowLabel={RowLabel}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />

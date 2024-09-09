@@ -6,7 +6,6 @@ import type {
   StaticLabel,
 } from 'payload'
 
-import { DefaultCell } from '@payloadcms/ui'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
@@ -17,6 +16,7 @@ import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
+import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 type Args = {
   cellProps: Partial<CellComponentProps>[]
@@ -58,9 +58,15 @@ export const buildColumnState = (args: Args): Column[] => {
     sortedFieldMap = sortedFieldMap.sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
-      if (aIndex === -1 && bIndex === -1) return 0
-      if (aIndex === -1) return 1
-      if (bIndex === -1) return -1
+      if (aIndex === -1 && bIndex === -1) {
+        return 0
+      }
+      if (aIndex === -1) {
+        return 1
+      }
+      if (bIndex === -1) {
+        return -1
+      }
       return aIndex - bIndex
     })
   }
@@ -86,8 +92,6 @@ export const buildColumnState = (args: Args): Column[] => {
       activeColumnsIndices.push(index)
     }
 
-    const isFirstActiveColumn = activeColumnsIndices[0] === index
-
     const CustomLabelToRender =
       field &&
       'admin' in field &&
@@ -99,6 +103,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const Label = (
       <FieldLabel
+        field={field}
         Label={CustomLabelToRender}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         unstyled
@@ -112,8 +117,8 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const Heading = (
       <SortColumn
-        Label={Label}
         disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
+        Label={Label}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
       />
@@ -121,7 +126,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     if (field) {
       const column: Column = {
-        Label,
         accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
@@ -130,7 +134,6 @@ export const buildColumnState = (args: Args): Column[] => {
             ...(cellProps?.[index]?.field || ({} as ClientField)),
           } as ClientField,
           ...cellProps?.[index],
-          link: isFirstActiveColumn,
         },
         components: {
           Cell: field.admin?.components?.Cell || {
@@ -140,6 +143,7 @@ export const buildColumnState = (args: Args): Column[] => {
           },
           Heading,
         },
+        Label,
       }
 
       acc.push(column)
@@ -150,7 +154,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
   if (enableRowSelections) {
     sorted.unshift({
-      Label: null,
       accessor: '_select',
       active: true,
       components: {
@@ -161,6 +164,7 @@ export const buildColumnState = (args: Args): Column[] => {
         },
         Heading: <SelectAll />,
       },
+      Label: null,
     })
   }
 

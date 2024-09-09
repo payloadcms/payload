@@ -8,18 +8,20 @@ keywords: Postgres, documentation, typescript, Content Management System, cms, h
 
 To use Payload with Postgres, install the package `@payloadcms/db-postgres`. It leverages Drizzle ORM and `node-postgres` to interact with a Postgres database that you provide.
 
+Alternatively, the `@payloadcms/db-vercel-postgres` package is also available and is optimized for use with Vercel.
+
 It automatically manages changes to your database for you in development mode, and exposes a full suite of migration controls for you to leverage in order to keep other database environments in sync with your schema. DDL transformations are automatically generated.
 
 To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload Config as follows:
+
+### Usage
+
+`@payloadcms/db-postgres`:
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 export default buildConfig({
-  // Your config goes here
-  collections: [
-    // Collections go here
-  ],
   // Configure the Postgres adapter here
   db: postgresAdapter({
     // Postgres-specific arguments go here.
@@ -31,14 +33,30 @@ export default buildConfig({
 })
 ```
 
+`@payloadcms/db-vercel-postgres`:
+
+```ts
+import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+
+export default buildConfig({
+  // Automatically uses proces.env.POSTGRES_URL if no options are provided.
+  db: vercelPostgresAdapter(),
+  // Optionally, can accept the same options as the @vercel/postgres package.
+  db: vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL
+    },
+  }),
+})
+```
+
 ## Options
 
 | Option                      | Description                                                                                                                                                                      |
-|-----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pool` \*                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pool` \*                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`              |
 | `push`                      | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`              | Customize the directory that migrations are stored.                                                                                                                              |
-| `logger`                    | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
 | `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
 | `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
