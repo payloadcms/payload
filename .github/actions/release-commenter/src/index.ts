@@ -308,8 +308,6 @@ const releaseTagTemplateRegex = /{release_tag}/g
               )
             }
           }
-
-          requests.push(createCommentPromise())
         } else {
           core.info(
             `Issue/PR is locked: ${issueNumber}. Unlocking, commenting, and re-locking. ${payload.repository.html_url}/pull/${issueNumber}`,
