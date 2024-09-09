@@ -13,7 +13,6 @@ import {
   index,
   integer,
   numeric,
-  serial,
   timestamp,
   unique,
   varchar,
@@ -178,7 +177,7 @@ export const buildTable = ({
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
-    localesColumns.id = serial('id').primaryKey()
+    setColumnID({ adapter, columns: localesColumns })
     localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').notNull()
 
@@ -237,12 +236,13 @@ export const buildTable = ({
     if (hasManyTextField) {
       const textsTableName = `${rootTableName}_texts`
       const columns: Record<string, PgColumnBuilder> = {
-        id: serial('id').primaryKey(),
         order: integer('order').notNull(),
         parent: parentIDColumnMap[idColType]('parent_id').notNull(),
         path: varchar('path').notNull(),
         text: varchar('text'),
       }
+
+      setColumnID({ adapter, columns })
 
       if (hasLocalizedManyTextField) {
         columns.locale = adapter.enums.enum__locales('locale')
@@ -286,12 +286,13 @@ export const buildTable = ({
     if (hasManyNumberField) {
       const numbersTableName = `${rootTableName}_numbers`
       const columns: Record<string, PgColumnBuilder> = {
-        id: serial('id').primaryKey(),
         number: numeric('number'),
         order: integer('order').notNull(),
         parent: parentIDColumnMap[idColType]('parent_id').notNull(),
         path: varchar('path').notNull(),
       }
+
+      setColumnID({ adapter, columns })
 
       if (hasLocalizedManyNumberField) {
         columns.locale = adapter.enums.enum__locales('locale')
@@ -334,11 +335,12 @@ export const buildTable = ({
 
     if (relationships.size) {
       const relationshipColumns: Record<string, PgColumnBuilder> = {
-        id: serial('id').primaryKey(),
         order: integer('order'),
         parent: parentIDColumnMap[idColType]('parent_id').notNull(),
         path: varchar('path').notNull(),
       }
+
+      setColumnID({ adapter, columns })
 
       if (hasLocalizedRelationshipField) {
         relationshipColumns.locale = adapter.enums.enum__locales('locale')
