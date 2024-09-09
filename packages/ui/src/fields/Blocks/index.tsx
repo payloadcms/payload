@@ -284,7 +284,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
 
             if (blockToRender) {
               const rowErrorCount = errorPaths.filter((errorPath) =>
-                errorPath.startsWith(`${path}.${i}`),
+                errorPath.startsWith(`${path}.${i}.`),
               ).length
               return (
                 <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>

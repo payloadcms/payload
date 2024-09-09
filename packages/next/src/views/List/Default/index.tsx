@@ -28,7 +28,6 @@ import {
   useListQuery,
   useModal,
   useRouteCache,
-  useSearchParams,
   useStepNav,
   useTranslation,
   useWindowInfo,
@@ -54,8 +53,7 @@ export const DefaultListView: React.FC = () => {
     newDocumentURL,
   } = useListInfo()
 
-  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
-  const { searchParams } = useSearchParams()
+  const { data, defaultLimit, handlePageChange, handlePerPageChange, params } = useListQuery()
   const { openModal } = useModal()
   const { clearRouteCache } = useRouteCache()
   const { setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -226,9 +224,7 @@ export const DefaultListView: React.FC = () => {
                   </div>
                   <PerPage
                     handleChange={(limit) => void handlePerPageChange(limit)}
-                    limit={
-                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
-                    }
+                    limit={isNumber(params?.limit) ? Number(params.limit) : defaultLimit}
                     limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />

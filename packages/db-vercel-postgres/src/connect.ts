@@ -39,7 +39,7 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    this.payload.logger.error({ err, msg: `Error: cannot connect to Postgres: ${err.message}` })
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }

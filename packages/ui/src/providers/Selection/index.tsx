@@ -139,10 +139,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     }
     let some = false
     let all = true
-    Object.values(selected).forEach((val) => {
-      all = all && val
-      some = some || val
-    })
+
+    if (!Object.values(selected).length) {
+      all = false
+      some = false
+    } else {
+      Object.values(selected).forEach((val) => {
+        all = all && val
+        some = some || val
+      })
+    }
 
     if (all) {
       setSelectAll(SelectAllStatus.AllInPage)
