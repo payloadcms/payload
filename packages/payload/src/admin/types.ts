@@ -197,6 +197,8 @@ export type {
 } from './fields/Tabs.js'
 
 export type {
+  TextFieldClientComponent,
+  TextFieldClientProps,
   TextFieldDescriptionClientComponent,
   TextFieldDescriptionServerComponent,
   TextFieldErrorClientComponent,
@@ -204,6 +206,8 @@ export type {
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
   TextFieldProps,
+  TextFieldServerComponent,
+  TextFieldServerProps,
 } from './fields/Text.js'
 
 export type {

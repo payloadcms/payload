@@ -5,20 +5,39 @@ import type { TextField, TextFieldClient } from '../../fields/config/types.js'
 import type { TextFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
 
-export type TextFieldProps = {
+type TextFieldBaseClientProps = {
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextFieldValidation
-} & Omit<FormFieldBase<TextFieldClientWithoutType>, 'validate'>
+}
+
+export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
+  TextFieldBaseClientProps
+
+export type TextFieldProps = TextFieldClientProps // For backwards compatibility
+
+export type TextFieldServerProps = ServerFieldBase<TextField>
+
+export type TextFieldServerComponent = FieldServerComponent<TextField>
+
+export type TextFieldClientComponent = FieldClientComponent<
+  TextFieldClientWithoutType,
+  TextFieldBaseClientProps
+>
 
 export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
 
