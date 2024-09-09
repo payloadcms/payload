@@ -144,6 +144,7 @@ const DocumentInfo: React.FC<
 
     const versionParams = {
       depth: 0,
+      limit: 0,
       where: {
         and: [],
       },

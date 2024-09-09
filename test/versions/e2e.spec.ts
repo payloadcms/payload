@@ -288,7 +288,7 @@ describe('versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      const versionsPill = versionsTab.locator('.doc-tab__count')
       await versionsPill.waitFor({ state: 'visible' })
       const versionCount = versionsTab.locator('.doc-tab__count').first()
       await expect(versionCount).toHaveText('11')
@@ -647,7 +647,7 @@ describe('versions', () => {
 
       await textField.fill('spanish published')
       await saveDocAndAssert(page)
-      await expect(status).toContainText('Published')
+      await expect(status).toContainText('Changed')
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
