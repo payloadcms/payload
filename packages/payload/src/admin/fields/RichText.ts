@@ -26,8 +26,12 @@ type RichTextFieldBaseClientProps<
   readonly validate?: RichTextFieldValidation
 }
 
-export type RichTextFieldClientProps = ClientFieldBase<RichTextFieldClientWithoutType> &
-  RichTextFieldBaseClientProps
+export type RichTextFieldClientProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = ClientFieldBase<RichTextFieldClientWithoutType> &
+  RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
 
 export type RichTextFieldServerProps = ServerFieldBase<RichTextField>
 
