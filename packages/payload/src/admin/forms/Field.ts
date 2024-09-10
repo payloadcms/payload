@@ -1,7 +1,7 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import type { User } from '../../auth/types.js'
-import type { Locale } from '../../config/types.js'
+import type { Locale, ServerProps } from '../../config/types.js'
 import type { ClientField, Field, Validate } from '../../fields/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { FieldDescriptionClientProps, FieldDescriptionServerProps } from './Description.js'
@@ -24,7 +24,8 @@ export type ServerFieldBase<TFieldServer extends Field = Field> = {
   readonly errorProps?: FieldErrorServerProps<TFieldServer>
   readonly field: TFieldServer
   readonly labelProps?: FieldLabelServerProps<TFieldServer>
-} & FormFieldBase
+} & FormFieldBase &
+  Partial<ServerProps>
 
 export type FormFieldBase = {
   readonly docPreferences?: DocumentPreferences

@@ -5,6 +5,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
+import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ArrayFieldClientProps,
@@ -233,7 +234,7 @@ type Admin = {
   components?: {
     Cell?: CustomComponent
     Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Field?: CustomComponent
+    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */
