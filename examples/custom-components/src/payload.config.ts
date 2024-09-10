@@ -5,6 +5,8 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { CustomFields } from './collections/Fields'
+import { CustomRootViews } from './collections/RootViews'
+import { CustomViews } from './collections/Views'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,15 +22,15 @@ export default buildConfig({
       ],
       views: {
         CustomRootView: {
-          Component: '@/components/views/CustomRootView#CustomRootView',
+          Component: '@/components/views/root/CustomRootView#CustomRootView',
           path: '/custom',
         },
         DefaultCustomView: {
-          Component: '@/components/views/CustomDefaultRootView#CustomDefaultRootView',
+          Component: '@/components/views/root/CustomDefaultRootView#CustomDefaultRootView',
           path: '/custom-default',
         },
         MinimalCustomView: {
-          Component: '@/components/views/CustomMinimalRootView#CustomMinimalRootView',
+          Component: '@/components/views/root/CustomMinimalRootView#CustomMinimalRootView',
           path: '/custom-minimal',
         },
       },
@@ -37,7 +39,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [CustomFields],
+  collections: [CustomFields, CustomViews, CustomRootViews],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI as string,
   }),

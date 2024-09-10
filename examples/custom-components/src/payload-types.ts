@@ -12,6 +12,8 @@ export interface Config {
   };
   collections: {
     'custom-fields': CustomField;
+    'custom-views': CustomView;
+    'custom-root-views': CustomRootView;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -54,6 +56,26 @@ export interface CustomField {
   textFieldClientComponent?: string | null;
   textareaFieldServerComponent?: string | null;
   textareaFieldClientComponent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views".
+ */
+export interface CustomView {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-root-views".
+ */
+export interface CustomRootView {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
