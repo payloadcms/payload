@@ -1,10 +1,10 @@
 'use client'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
 import { TextField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomTextFieldClient: React.FC<TextFieldProps> = (props) => {
+export const CustomTextFieldClient: TextFieldClientComponent = (props) => {
   const { field } = props
 
   return <TextField field={field} />

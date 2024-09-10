@@ -4,12 +4,10 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { TextFields } from './collections/TextFields'
+import { CustomFields } from './collections/Fields'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-console.log(path.resolve(dirname))
 
 // eslint-disable-next-line no-restricted-exports
 export default buildConfig({
@@ -18,7 +16,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [TextFields],
+  collections: [CustomFields],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI as string,
   }),
