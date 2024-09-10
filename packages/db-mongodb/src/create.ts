@@ -12,7 +12,6 @@ export const create: Create = async function create(
 ) {
   const Model = this.collections[collection]
   const options = await withSession(this, req)
-
   let doc
 
   const sanitizedData = sanitizeRelationshipIDs({

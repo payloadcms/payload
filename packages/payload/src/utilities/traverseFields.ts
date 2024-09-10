@@ -57,7 +57,12 @@ export const traverseFields = ({
       const parentRef = ref
       if ('name' in field && field.name) {
         if (typeof ref[field.name] === 'undefined') {
-          ref[field.name] = {}
+          if (field.type === 'array') {
+            ref[field.name] = []
+          }
+          if (field.type === 'group') {
+            ref[field.name] = {}
+          }
         }
         ref = ref[field.name]
       }
