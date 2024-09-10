@@ -587,7 +587,12 @@ const validateFilterOptions: Validate<
         return true
       }
 
-      return options[collection].indexOf(requestedID) === -1
+      const idType =
+        payload.collections[collection]?.customIDType || payload?.db?.defaultIDType || 'text'
+
+      // Cast the ID to the correct type
+      const id = idType === 'number' ? Number(requestedID) : String(requestedID)
+      return options[collection].indexOf(id) === -1
     })
 
     if (invalidRelationships.length > 0) {
@@ -610,8 +615,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
   const {
     maxRows,
     minRows,
-    relationTo,
-    req: { payload, t },
+    req: { t },
     required,
   } = options
 
@@ -637,46 +641,6 @@ export const upload: UploadFieldValidation = async (value, options) => {
         max: maxRows,
         value: value.length,
       })
-    }
-  }
-
-  if (typeof value !== 'undefined' && value !== null) {
-    const values = Array.isArray(value) ? value : [value]
-
-    const invalidRelationships = values.filter((val) => {
-      let collectionSlug: string
-      let requestedID
-
-      if (typeof relationTo === 'string') {
-        collectionSlug = relationTo
-
-        // custom id
-        if (val || typeof val === 'number') {
-          requestedID = val
-        }
-      }
-
-      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
-        collectionSlug = val.relationTo
-        requestedID = val.value
-      }
-
-      if (requestedID === null) {
-        return false
-      }
-
-      const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
-
-      return !isValidID(requestedID, idType)
-    })
-
-    if (invalidRelationships.length > 0) {
-      return `This relationship field has the following invalid relationships: ${invalidRelationships
-        .map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`
-        })
-        .join(', ')}`
     }
   }
 
@@ -693,8 +657,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
   const {
     maxRows,
     minRows,
-    relationTo,
-    req: { payload, t },
+    req: { t },
     required,
   } = options
 
@@ -720,46 +683,6 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         max: maxRows,
         value: value.length,
       })
-    }
-  }
-
-  if (typeof value !== 'undefined' && value !== null) {
-    const values = Array.isArray(value) ? value : [value]
-
-    const invalidRelationships = values.filter((val) => {
-      let collectionSlug: string
-      let requestedID
-
-      if (typeof relationTo === 'string') {
-        collectionSlug = relationTo
-
-        // custom id
-        if (val || typeof val === 'number') {
-          requestedID = val
-        }
-      }
-
-      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
-        collectionSlug = val.relationTo
-        requestedID = val.value
-      }
-
-      if (requestedID === null) {
-        return false
-      }
-
-      const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
-
-      return !isValidID(requestedID, idType)
-    })
-
-    if (invalidRelationships.length > 0) {
-      return `This relationship field has the following invalid relationships: ${invalidRelationships
-        .map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`
-        })
-        .join(', ')}`
     }
   }
 
