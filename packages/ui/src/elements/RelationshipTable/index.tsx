@@ -3,7 +3,6 @@ import type {
   ClientCollectionConfig,
   ClientField,
   JoinFieldClient,
-  JoinFieldProps,
   PaginatedDocs,
   Where,
 } from 'payload'
@@ -36,7 +35,7 @@ import { RelationshipTableWrapper } from './TableWrapper.js'
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
-  readonly field: JoinFieldProps
+  readonly field: JoinFieldClient
   readonly filterOptions?: boolean | Where
   readonly initialData?: PaginatedDocs
   readonly Label?: React.ReactNode
@@ -241,12 +240,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     components: {
                       Cell: {
                         type: 'client',
-                        RenderedComponent: (
-                          <DrawerLink
-                            field={field as JoinFieldClient}
-                            onDrawerSave={onDrawerSave}
-                          />
-                        ),
+                        RenderedComponent: <DrawerLink field={field} onDrawerSave={onDrawerSave} />,
                       },
                     },
                   },
