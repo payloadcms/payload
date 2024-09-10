@@ -634,8 +634,7 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseAdapter extends BaseDatabaseAdapter {}
+export type DatabaseAdapter = BaseDatabaseAdapter
 export type { Payload, RequestContext }
 export type * from './admin/types.js'
 export type { MappedView } from './admin/views/types.js'

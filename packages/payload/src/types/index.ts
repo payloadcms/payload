@@ -92,7 +92,7 @@ export type Operator = (typeof validOperators)[number]
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
 
-export interface JsonArray extends Array<JsonValue> {}
+export type JsonArray = Array<JsonValue>
 
 export interface JsonObject {
   [key: string]: any

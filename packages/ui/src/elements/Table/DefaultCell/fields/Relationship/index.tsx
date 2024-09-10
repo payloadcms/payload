@@ -22,11 +22,10 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps
-  extends DefaultCellComponentProps<
-    any,
-    JoinFieldClient | RelationshipFieldClient | UploadFieldClient
-  > {}
+export type RelationshipCellProps = DefaultCellComponentProps<
+  any,
+  JoinFieldClient | RelationshipFieldClient | UploadFieldClient
+>
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData: cellDataFromProps,
