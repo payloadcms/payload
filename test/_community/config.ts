@@ -23,8 +23,32 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'tests',
+      versions: {},
+      fields: [
+        {
+          name: 'menu',
+          type: 'array',
+          fields: [
+            {
+              type: 'array',
+              name: 'array',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     MediaCollection,
   ],
+  localization: { defaultLocale: 'en', locales: ['en', 'es'] },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -151,25 +175,22 @@ export default buildConfigWithDefaults({
     // ...add more globals here
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'example post',
-      },
-    })
-
+    // await payload.create({
+    //   collection: 'users',
+    //   data: {
+    //     email: devUser.email,
+    //     password: devUser.password,
+    //   },
+    // })
+    // await payload.create({
+    //   collection: postsSlug,
+    //   data: {
+    //     text: 'example post',
+    //   },
+    // })
     // // Create image
     // const imageFilePath = path.resolve(dirname, '../uploads/image.png')
     // const imageFile = await getFileByPath(imageFilePath)
-
     // await payload.create({
     //   collection: 'media',
     //   data: {},

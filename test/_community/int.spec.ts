@@ -73,4 +73,38 @@ describe('_Community Tests', () => {
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
+
+  it('should work', async () => {
+    const data = await payload.create({
+      collection: 'tests',
+      data: {
+        menu: [
+          {
+            array: [
+              {
+                text: 'some',
+              },
+            ],
+          },
+        ],
+      },
+    })
+
+    const upd = await payload.update({
+      collection: 'tests',
+      id: data.id,
+      data: {
+        menu: [
+          ...data.menu,
+          {
+            // array: [{ text: 'asd' }],
+          },
+        ],
+      },
+    })
+
+    expect(upd.menu).toHaveLength(2)
+
+    console.log(ObjectId)
+  })
 })
