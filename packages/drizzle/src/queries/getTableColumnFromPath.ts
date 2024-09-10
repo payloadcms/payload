@@ -546,6 +546,27 @@ export const getTableColumnFromPath = ({
               },
               table: aliasRelationshipTable,
             }
+          } else if (newCollectionPath === '') {
+            const tableColumnsNames = field.relationTo.map((relationTo) => {
+              const relationTableName = adapter.tableNameMap.get(
+                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+              )
+              return `"${relationTableName}_id"`
+            })
+
+            let column: string
+            if (tableColumnsNames.length === 1) {
+              column = tableColumnsNames[0]
+            } else {
+              column = `COALESCE(${tableColumnsNames.join(', ')})`
+            }
+
+            return {
+              constraints,
+              field,
+              rawColumn: sql.raw(`${column}`),
+              table: aliasRelationshipTable,
+            }
           } else {
             throw new APIError('Not supported')
           }
