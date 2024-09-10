@@ -133,6 +133,25 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'relation-c',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: 'relation-a',
+          hasMany: true,
+        },
+      ],
+      labels: {
+        plural: 'Relation Bs',
+        singular: 'Relation B',
+      },
+    },
+    {
       slug: 'pg-migrations',
       fields: [
         {

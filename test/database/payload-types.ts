@@ -15,6 +15,7 @@ export interface Config {
     'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
+    'relation-c': RelationC;
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
     users: User;
@@ -22,7 +23,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     global: Global;
@@ -55,7 +56,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
   throwAfterChange?: boolean | null;
   updatedAt: string;
@@ -66,7 +67,7 @@ export interface Post {
  * via the `definition` "default-values".
  */
 export interface DefaultValue {
-  id: string;
+  id: number;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -87,7 +88,7 @@ export interface DefaultValue {
  * via the `definition` "relation-a".
  */
 export interface RelationA {
-  id: string;
+  id: number;
   title?: string | null;
   richText?: {
     root: {
@@ -112,9 +113,9 @@ export interface RelationA {
  * via the `definition` "relation-b".
  */
 export interface RelationB {
-  id: string;
+  id: number;
   title?: string | null;
-  relationship?: (string | null) | RelationA;
+  relationship?: (number | null) | RelationA;
   richText?: {
     root: {
       type: string;
@@ -135,17 +136,28 @@ export interface RelationB {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-c".
+ */
+export interface RelationC {
+  id: number;
+  title?: string | null;
+  relationship?: (number | RelationA)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pg-migrations".
  */
 export interface PgMigration {
-  id: string;
-  relation1?: (string | null) | RelationA;
+  id: number;
+  relation1?: (number | null) | RelationA;
   myArray?:
     | {
-        relation2?: (string | null) | RelationB;
+        relation2?: (number | null) | RelationB;
         mySubArray?:
           | {
-              relation3?: (string | null) | RelationB;
+              relation3?: (number | null) | RelationB;
               id?: string | null;
             }[]
           | null;
@@ -153,12 +165,12 @@ export interface PgMigration {
       }[]
     | null;
   myGroup?: {
-    relation4?: (string | null) | RelationB;
+    relation4?: (number | null) | RelationB;
   };
   myBlocks?:
     | {
-        relation5?: (string | null) | RelationA;
-        relation6?: (string | null) | RelationB;
+        relation5?: (number | null) | RelationA;
+        relation6?: (number | null) | RelationB;
         id?: string | null;
         blockName?: string | null;
         blockType: 'myBlock';
@@ -172,10 +184,10 @@ export interface PgMigration {
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
-  id: string;
+  id: number;
   text?: string | null;
   localizedText?: string | null;
-  relationship?: (string | RelationA)[] | null;
+  relationship?: (number | RelationA)[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -203,7 +215,7 @@ export interface CustomSchema {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -220,10 +232,10 @@ export interface User {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -243,7 +255,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -254,7 +266,7 @@ export interface PayloadMigration {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;

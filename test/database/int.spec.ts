@@ -2,6 +2,7 @@ import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import ObjectIdImport from 'bson-objectid'
 import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload'
@@ -13,6 +14,8 @@ import removeFiles from '../helpers/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 let payload: Payload
 let user: Record<string, unknown> & TypeWithID
@@ -70,6 +73,94 @@ describe('database', () => {
         .then((res) => res.json())
 
       expect(updated.id).toStrictEqual(created.doc.id)
+    })
+
+    it('should allow array of IDs for relationships', async () => {
+      const relation1 = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const relation2 = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const relation3 = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const created = await payload.create({
+        collection: 'relation-c',
+        data: {
+          title: 'hello',
+          relationship: [relation1.id, relation2.id, relation3.id],
+        },
+      })
+
+      expect(created.id).toBeTruthy()
+      expect(created.relationship).toHaveLength(3)
+    })
+  })
+
+  describe('id type casting', () => {
+    it('— mongoose — should convert IDs to ObjectID automatically in relationships', async () => {
+      const relation1 = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const created = await payload.create({
+        collection: 'relation-c',
+        data: {
+          title: 'hello',
+          // @ts-ignore - ignore type here as its just used for casting
+          relationship: [String(relation1.id)],
+        },
+      })
+
+      if (['mongoose'].includes(payload.db.name)) {
+        // @ts-ignore
+        expect(ObjectId.isValid(created.id)).toStrictEqual(true)
+        expect(created.relationship).toHaveLength(1)
+      }
+    })
+
+    it('— sql serial — should convert IDs to ObjectID automatically in relationships', async () => {
+      const relation1 = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const created = await payload.create({
+        collection: 'relation-c',
+        data: {
+          title: 'hello',
+          // @ts-ignore - ignore type here as its just used for casting
+          relationship: [String(relation1.id)],
+        },
+      })
+
+      if (
+        ['postgres', 'sqlite'].includes(payload.db.name) &&
+        payload.db.defaultIDType === 'number'
+      ) {
+        // @ts-ignore
+        expect(typeof created.id).toStrictEqual('number')
+        // @ts-ignore
+        expect(typeof created.relationship[0].id).toStrictEqual('number')
+      }
     })
   })
 

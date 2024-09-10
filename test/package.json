@@ -61,6 +61,7 @@
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
+    "bson-objectid": "2.0.4",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
