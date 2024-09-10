@@ -29,6 +29,18 @@ export type ToolbarGroup =
        */
       ChildComponent?: React.FC
       /**
+       * This is optional and controls if the toolbar group is highlighted or not.
+       */
+      isEnabled?: ({
+        editor,
+        editorConfigContext,
+        selection,
+      }: {
+        editor: LexicalEditor
+        editorConfigContext: EditorConfigContextType
+        selection: BaseSelection
+      }) => boolean
+      /**
        * All toolbar items part of this toolbar group need to be added here.
        */
       items: Array<ToolbarGroupItem>

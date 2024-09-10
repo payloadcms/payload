@@ -95,6 +95,7 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
+            group={group}
             groupKey={group.key}
             Icon={DropdownIcon}
             items={group.items}
@@ -105,6 +106,7 @@ function ToolbarGroupComponent({
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
+            group={group}
             groupKey={group.key}
             items={group.items}
             maxActiveItems={1}
