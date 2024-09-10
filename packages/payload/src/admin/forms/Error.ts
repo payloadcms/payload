@@ -1,8 +1,7 @@
-import type { MarkOptional } from 'ts-essentials'
-
 import type { ServerProps } from '../../config/types.js'
-import type { ClientField, Field } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
+import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type GenericErrorProps = {
   readonly alignCaret?: 'center' | 'left' | 'right'
@@ -11,8 +10,6 @@ export type GenericErrorProps = {
   readonly path?: string
   readonly showError?: boolean
 }
-
-type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldErrorClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

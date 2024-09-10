@@ -4,20 +4,37 @@ import type { SelectField, SelectFieldClient } from '../../fields/config/types.j
 import type { SelectFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 
-export type SelectFieldProps = {
+type SelectFieldBaseClientProps = {
   readonly onChange?: (e: string | string[]) => void
   readonly validate?: SelectFieldValidation
   readonly value?: string
-} & Omit<FormFieldBase<SelectFieldClientWithoutType>, 'validate'>
+}
+
+export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
+  SelectFieldBaseClientProps
+
+export type SelectFieldServerProps = ServerFieldBase<SelectField>
+
+export type SelectFieldServerComponent = FieldServerComponent<SelectField>
+
+export type SelectFieldClientComponent = FieldClientComponent<
+  SelectFieldClientWithoutType,
+  SelectFieldBaseClientProps
+>
 
 export type SelectFieldLabelServerComponent = FieldLabelServerComponent<SelectField>
 

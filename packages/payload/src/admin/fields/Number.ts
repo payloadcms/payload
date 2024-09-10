@@ -4,19 +4,36 @@ import type { NumberField, NumberFieldClient } from '../../fields/config/types.j
 import type { NumberFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
 
-export type NumberFieldProps = {
+type NumberFieldBaseClientProps = {
   readonly onChange?: (e: number) => void
   readonly validate?: NumberFieldValidation
-} & Omit<FormFieldBase<NumberFieldClientWithoutType>, 'validate'>
+}
+
+export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutType> &
+  NumberFieldBaseClientProps
+
+export type NumberFieldServerProps = ServerFieldBase<NumberField>
+
+export type NumberFieldServerComponent = FieldServerComponent<NumberField>
+
+export type NumberFieldClientComponent = FieldClientComponent<
+  NumberFieldClientWithoutType,
+  NumberFieldBaseClientProps
+>
 
 export type NumberFieldLabelServerComponent = FieldLabelServerComponent<NumberField>
 

@@ -4,18 +4,35 @@ import type { BlockField, BlockFieldClient } from '../../fields/config/types.js'
 import type { BlockFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type BlocksFieldClientWithoutType = MarkOptional<BlockFieldClient, 'type'>
 
-export type BlockFieldProps = {
+type BlocksFieldBaseClientProps = {
   readonly validate?: BlockFieldValidation
-} & Omit<FormFieldBase<BlocksFieldClientWithoutType>, 'validate'>
+}
+
+export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
+  ClientFieldBase<BlocksFieldClientWithoutType>
+
+export type BlocksFieldServerProps = ServerFieldBase<BlockField>
+
+export type BlocksFieldServerComponent = FieldServerComponent<BlockField>
+
+export type BlocksFieldClientComponent = FieldClientComponent<
+  BlocksFieldClientWithoutType,
+  BlocksFieldBaseClientProps
+>
 
 export type BlockFieldLabelServerComponent = FieldLabelServerComponent<BlockField>
 

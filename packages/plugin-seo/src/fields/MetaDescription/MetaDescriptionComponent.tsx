@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextareaFieldProps } from 'payload'
+import type { TextareaFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -25,7 +25,7 @@ const { maxLength, minLength } = defaults.description
 
 type MetaDescriptionProps = {
   readonly hasGenerateDescriptionFn: boolean
-} & TextareaFieldProps
+} & TextareaFieldClientProps
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
   const {

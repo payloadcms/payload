@@ -297,11 +297,13 @@ export const getTableColumnFromPath = ({
           `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
         )
 
+        const arrayParentTable = aliasTable || adapter.tables[tableName]
+
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins.push({
             condition: and(
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+              eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
               eq(adapter.tables[newTableName]._locale, locale),
             ),
             table: adapter.tables[newTableName],
@@ -315,7 +317,7 @@ export const getTableColumnFromPath = ({
           }
         } else {
           joins.push({
-            condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
             table: adapter.tables[newTableName],
           })
         }

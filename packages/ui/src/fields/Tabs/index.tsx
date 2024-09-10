@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, TabsFieldProps } from 'payload'
+import type { DocumentPreferences, TabsFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
@@ -22,7 +22,7 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
+const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field,
     field: {
