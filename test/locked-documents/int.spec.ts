@@ -77,8 +77,6 @@ describe('Locked documents', () => {
     }
   })
 
-  // Update unlocked documents (collection & global)
-
   it('should update unlocked document - collection', async () => {
     const updatedPost = await payload.update({
       collection: postsSlug,
@@ -102,8 +100,6 @@ describe('Locked documents', () => {
     expect(updatedGlobalMenu.globalText).toEqual('updated global text')
   })
 
-  // Delete unlocked document (collection)
-
   it('should delete unlocked document - collection', async () => {
     const { docs } = await payload.find({
       collection: postsSlug,
@@ -124,94 +120,6 @@ describe('Locked documents', () => {
 
     expect(deletedResults).toHaveLength(1)
   })
-
-  // Try to update locked document (collection & global)
-
-  it('should not allow update of locked document - collection', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'some post',
-      },
-    })
-
-    // Give locking ownership to another user
-    await payload.create({
-      collection: lockedDocumentCollection,
-      data: {
-        _lastEdited: {
-          editedAt: new Date().toISOString(),
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
-        document: {
-          relationTo: 'posts',
-          value: newPost.id,
-        },
-        globalSlug: undefined,
-        isLocked: true,
-      },
-    })
-
-    try {
-      await payload.update({
-        collection: postsSlug,
-        data: {
-          text: 'updated post',
-        },
-        id: newPost.id,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
-
-    // Should not allow update - expect data not to change
-    expect(newPost.text).toEqual('some post')
-  })
-
-  it('should not allow update of locked document - global', async () => {
-    // Give locking ownership to another user
-    const globalDocInstance = await payload.create({
-      collection: lockedDocumentCollection,
-      data: {
-        _lastEdited: {
-          editedAt: new Date().toISOString(),
-          user: {
-            relationTo: 'users',
-            value: user2.id,
-          },
-        },
-        document: undefined,
-        globalSlug: menuSlug,
-        isLocked: true,
-      },
-    })
-
-    try {
-      await payload.updateGlobal({
-        data: {
-          globalText: 'updated global text',
-        },
-        slug: menuSlug,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(APIError)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
-
-    // Should not allow update - expect data not to change
-    expect(menu.globalText).toEqual('global text')
-
-    await payload.delete({
-      collection: lockedDocumentCollection,
-      id: globalDocInstance.id,
-    })
-  })
-
-  // Try to update locked document (stale) (collection & global)
 
   it('should allow update of stale locked document - collection', async () => {
     const newPost2 = await payload.create({
@@ -268,17 +176,16 @@ describe('Locked documents', () => {
       expect(error).toBeInstanceOf(NotFound)
     }
 
-    const findDocs = await payload.find({
+    const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
       },
     })
 
-    expect(findDocs.docs).toHaveLength(0)
-
     // Updating a document with the local API should not keep a stored doc
     // in the payload-locked-documents collection
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
   })
 
   it('should allow update of stale locked document - global', async () => {
@@ -325,17 +232,95 @@ describe('Locked documents', () => {
       expect(error).toBeInstanceOf(NotFound)
     }
 
-    const findDocs = await payload.find({
+    const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedGlobalInstance.id },
       },
     })
 
-    expect(findDocs.docs).toHaveLength(0)
-
     // Updating a document with the local API should not keep a stored doc
     // in the payload-locked-documents collection
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
+  })
+
+  it('should not allow update of locked document - collection', async () => {
+    const newPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'some post',
+      },
+    })
+
+    // Give locking ownership to another user
+    await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        _lastEdited: {
+          editedAt: new Date().toISOString(),
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
+        },
+        document: {
+          relationTo: 'posts',
+          value: newPost.id,
+        },
+        globalSlug: undefined,
+        isLocked: true,
+      },
+    })
+
+    try {
+      await payload.update({
+        collection: postsSlug,
+        data: {
+          text: 'updated post',
+        },
+        id: newPost.id,
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(APIError)
+      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
+    }
+
+    // Should not allow update - expect data not to change
+    expect(newPost.text).toEqual('some post')
+  })
+
+  it('should not allow update of locked document - global', async () => {
+    // Give locking ownership to another user
+    await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        _lastEdited: {
+          editedAt: new Date().toISOString(),
+          user: {
+            relationTo: 'users',
+            value: user2.id,
+          },
+        },
+        document: undefined,
+        globalSlug: menuSlug,
+        isLocked: true,
+      },
+    })
+
+    try {
+      await payload.updateGlobal({
+        data: {
+          globalText: 'updated global text',
+        },
+        slug: menuSlug,
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(APIError)
+      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
+    }
+
+    // Should not allow update - expect data not to change
+    expect(menu.globalText).toEqual('global text')
   })
 
   // Try to delete locked document (collection)
@@ -377,8 +362,6 @@ describe('Locked documents', () => {
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
   })
-
-  // Try to delete locked document (stale) (collection)
 
   it('should allow delete of stale locked document - collection', async () => {
     const newPost4 = await payload.create({
@@ -437,13 +420,13 @@ describe('Locked documents', () => {
       expect(error).toBeInstanceOf(NotFound)
     }
 
-    const findDocs = await payload.find({
+    const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
       where: {
         id: { equals: lockedDocInstance.id },
       },
     })
 
-    expect(findDocs.docs).toHaveLength(0)
+    expect(docsFromLocksCollection.docs).toHaveLength(0)
   })
 })
