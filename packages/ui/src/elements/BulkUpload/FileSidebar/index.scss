@@ -82,12 +82,12 @@
       background-color: var(--theme-elevation-100);
     }
 
-    img {
-      width: 25px;
-      height: 25px;
+    .thumbnail {
+      width: base(1.2);
+      height: base(1.2);
       flex-shrink: 0;
       object-fit: cover;
-      border-radius: var(--style-radius-m);
+      border-radius: var(--style-radius-s);
     }
 
     p {

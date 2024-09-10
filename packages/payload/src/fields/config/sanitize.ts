@@ -13,6 +13,7 @@ import {
   MissingFieldType,
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { baseBeforeDuplicateArrays } from '../baseFields/baseBeforeDuplicateArrays.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
@@ -152,6 +153,15 @@ export const sanitizeFields = async ({
 
     if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField)
+      if (field.localized) {
+        if (!field.hooks) {
+          field.hooks = {}
+        }
+        if (!field.hooks.beforeDuplicate) {
+          field.hooks.beforeDuplicate = []
+        }
+        field.hooks.beforeDuplicate.push(baseBeforeDuplicateArrays)
+      }
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {
@@ -232,6 +242,15 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
+      if (field.localized) {
+        if (!field.hooks) {
+          field.hooks = {}
+        }
+        if (!field.hooks.beforeDuplicate) {
+          field.hooks.beforeDuplicate = []
+        }
+        field.hooks.beforeDuplicate.push(baseBeforeDuplicateArrays)
+      }
       for (const block of field.blocks) {
         if (block._sanitized === true) {
           continue

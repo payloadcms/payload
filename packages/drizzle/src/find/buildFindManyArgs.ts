@@ -92,6 +92,7 @@ export const buildFindManyArgs = ({
     joins,
     locale,
     path: '',
+    tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
   })

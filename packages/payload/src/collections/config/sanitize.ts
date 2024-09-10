@@ -14,6 +14,7 @@ import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
+import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
   config: Config,
@@ -46,6 +47,8 @@ export const sanitizeCollection = async (
     schemaPath: '',
     validRelationships,
   })
+
+  validateUseAsTitle(sanitized)
 
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed

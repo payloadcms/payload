@@ -1,5 +1,5 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type { RichTextAdapter, RichTextFieldProps, SanitizedConfig } from 'payload'
+import type { RichTextAdapter, RichTextFieldClientProps, SanitizedConfig } from 'payload'
 
 import type {
   BaseClientFeatureProps,
@@ -74,7 +74,7 @@ export type LexicalRichTextAdapterProvider =
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
   lexicalEditorConfig: LexicalEditorConfig
-} & RichTextFieldProps<SerializedEditorState, AdapterProps, object>
+} & RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

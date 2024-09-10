@@ -5,7 +5,6 @@ import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -21,11 +20,10 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
-  const { searchParams } = useSearchParams()
-  const { handleSortChange } = useListQuery()
+  const { handleSortChange, params } = useListQuery()
   const { t } = useTranslation()
 
-  const { sort } = searchParams
+  const { sort } = params
 
   const desc = `-${name}`
   const asc = name

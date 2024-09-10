@@ -29,22 +29,22 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { hoistQueryParamsToAnd } from '../ListDrawer/DrawerContent.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { RelationshipTableWrapper } from './TableWrapper.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
+import { RelationshipTableWrapper } from './TableWrapper.js'
 
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
-  readonly Label?: React.ReactNode
-  readonly field: JoinFieldProps['field']
-  readonly filterOptions?: Where | boolean
+  readonly field: JoinFieldProps
+  readonly filterOptions?: boolean | Where
   readonly initialData?: PaginatedDocs
+  readonly Label?: React.ReactNode
   readonly relationTo: string
 }
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
-  const { Label, field, filterOptions, initialData: initialDataFromProps, relationTo } = props
+  const { field, filterOptions, initialData: initialDataFromProps, Label, relationTo } = props
 
   const {
     config: {
@@ -63,7 +63,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [limit, setLimit] = useState<number>()
   const [sort, setSort] = useState<string | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
-  const [where, setWhere] = useState<Where | null>(null)
+  const [where, setWhere] = useState<null | Where>(null)
   const [search, setSearch] = useState<string>('')
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
@@ -213,7 +213,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <TableColumnsProvider
             beforeRows={[
               {
-                Heading: i18n.t('version:type'),
                 accessor: 'collection',
                 active: true,
                 cellProps: {
@@ -231,6 +230,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     },
                   } as ClientField,
                 },
+                Heading: i18n.t('version:type'),
               },
             ]}
             cellProps={[

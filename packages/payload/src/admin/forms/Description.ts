@@ -1,12 +1,9 @@
-import type { MarkOptional } from 'ts-essentials'
-
 import type { LabelFunction, ServerProps } from '../../config/types.js'
-import type { ClientField, Field } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
+import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type DescriptionFunction = LabelFunction
-
-type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type FieldDescriptionClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

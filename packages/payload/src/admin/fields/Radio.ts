@@ -4,20 +4,37 @@ import type { RadioField, RadioFieldClient } from '../../fields/config/types.js'
 import type { RadioFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
 
-export type RadioFieldProps = {
+type RadioFieldBaseClientProps = {
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string
-} & Omit<FormFieldBase<RadioFieldClientWithoutType>, 'validate'>
+}
+
+export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
+  RadioFieldBaseClientProps
+
+export type RadioFieldServerProps = ServerFieldBase<RadioField>
+
+export type RadioFieldServerComponent = FieldServerComponent<RadioField>
+
+export type RadioFieldClientComponent = FieldClientComponent<
+  RadioFieldClientWithoutType,
+  RadioFieldBaseClientProps
+>
 
 export type OnChange<T = string> = (value: T) => void
 
