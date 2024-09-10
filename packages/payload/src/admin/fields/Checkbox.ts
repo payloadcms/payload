@@ -4,23 +4,40 @@ import type { CheckboxField, CheckboxFieldClient } from '../../fields/config/typ
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type CheckboxFieldClientWithoutType = MarkOptional<CheckboxFieldClient, 'type'>
 
-export type CheckboxFieldProps = {
+type CheckboxFieldBaseClientProps = {
   readonly checked?: boolean
   readonly disableFormData?: boolean
   readonly id?: string
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean
   readonly validate?: CheckboxFieldValidation
-} & Omit<FormFieldBase<CheckboxFieldClientWithoutType>, 'validate'>
+}
+
+export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
+  ClientFieldBase<CheckboxFieldClientWithoutType>
+
+export type CheckboxFieldServerProps = ServerFieldBase<CheckboxField>
+
+export type CheckboxFieldServerComponent = FieldServerComponent<CheckboxField>
+
+export type CheckboxFieldClientComponent = FieldClientComponent<
+  CheckboxFieldClientWithoutType,
+  CheckboxFieldBaseClientProps
+>
 
 export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<CheckboxField>
 

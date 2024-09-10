@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadFieldProps } from 'payload'
+import type { UploadFieldClientProps } from 'payload'
 
 import React from 'react'
 
@@ -15,7 +15,7 @@ export type { UploadInputProps } from './Input.js'
 
 export const baseClass = 'upload'
 
-export function UploadComponent(props: UploadFieldProps) {
+export function UploadComponent(props: UploadFieldClientProps) {
   const {
     field: {
       _path,

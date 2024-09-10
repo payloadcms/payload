@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ import { TextInput } from './Input.js'
 
 export { TextInput, TextInputProps }
 
-const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
+const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field,
     field: {

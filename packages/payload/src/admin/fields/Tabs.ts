@@ -9,20 +9,31 @@ import type {
 } from '../../fields/config/types.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 export type ClientTab =
   | ({ fields: ClientField[] } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-export type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
+type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
-export type TabsFieldProps = FormFieldBase<TabsFieldClientWithoutType>
+export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType>
+
+export type TabsFieldServerProps = ServerFieldBase<TabsField>
+
+export type TabsFieldServerComponent = FieldServerComponent<TabsField>
+
+export type TabsFieldClientComponent = FieldClientComponent<TabsFieldClientWithoutType>
 
 export type TabsFieldLabelServerComponent = FieldLabelServerComponent<TabsField>
 
