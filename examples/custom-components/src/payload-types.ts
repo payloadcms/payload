@@ -11,7 +11,7 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    'text-fields': TextField;
+    'custom-fields': CustomField;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -45,13 +45,15 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
+ * via the `definition` "custom-fields".
  */
-export interface TextField {
+export interface CustomField {
   id: string;
   title?: string | null;
   textFieldServerComponent?: string | null;
   textFieldClientComponent?: string | null;
+  textareaFieldServerComponent?: string | null;
+  textareaFieldClientComponent?: string | null;
   updatedAt: string;
   createdAt: string;
 }

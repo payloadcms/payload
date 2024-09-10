@@ -2,17 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 export const textareaFields: CollectionConfig['fields'] = [
   {
-    name: 'title',
-    type: 'text',
-    label: 'Title',
-  },
-  {
     name: 'textareaFieldServerComponent',
     type: 'textarea',
     admin: {
       components: {
-        Field: '@/collections/TextareaFields/server/Field#CustomTextareaFieldServer',
-        Label: '@/collections/TextareaFields/server/Label#CustomTextareaFieldLabelServer',
+        Field: '@/components/fields/Textarea/server/Field#CustomTextareaFieldServer',
+        Label: '@/components/fields/Textarea/server/Label#CustomTextareaFieldLabelServer',
       },
     },
   },
@@ -21,8 +16,8 @@ export const textareaFields: CollectionConfig['fields'] = [
     type: 'textarea',
     admin: {
       components: {
-        Field: '@/collections/TextareaFields/client/Field#CustomTextareaFieldClient',
-        Label: '@/collections/TextareaFields/client/Label#CustomTextareaFieldLabelClient',
+        Field: '@/components/fields/Textarea/client/Field#CustomTextareaFieldClient',
+        Label: '@/components/fields/Textarea/client/Label#CustomTextareaFieldLabelClient',
       },
     },
   },

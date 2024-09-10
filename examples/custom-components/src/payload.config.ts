@@ -12,6 +12,15 @@ const dirname = path.dirname(filename)
 // eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
+    components: {
+      afterNavLinks: ['@/components/LinkToCustomView#LinkToCustomView'],
+      views: {
+        MyCustomView: {
+          Component: '@/components/views/CustomRootView#CustomRootView',
+          path: '/custom',
+        },
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

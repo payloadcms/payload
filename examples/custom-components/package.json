@@ -5,9 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "_dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && next dev",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev --turbo",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && pnpm seed && next dev --turbo",
     "generate:importmap": "payload generate:importmap",
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",

@@ -10,9 +10,9 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   })
 
   await payload.create({
-    collection: 'text-fields',
+    collection: 'custom-fields',
     data: {
-      title: 'Custom Text Field',
+      title: 'Custom Fields',
     },
   })
 }
