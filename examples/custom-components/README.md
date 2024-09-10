@@ -1,6 +1,6 @@
-# Payload Custom Fields Example
+# Payload Custom Components Example
 
-This example demonstrates how to use Custom Fields in [Payload](https://github.com/payloadcms/payload).
+This example demonstrates how to use Custom Components in [Payload](https://github.com/payloadcms/payload) Admin Panel. This example includes custom components for every field type available in Payload, including both server and client components. It also includes custom views, custom nav links, and more.
 
 ## Quick Start
 
@@ -19,21 +19,19 @@ To spin up this example locally, follow these steps:
 
 ## How it works
 
-TODO: write this section
-
 ### Collections
 
 See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend any of this functionality.
 
 - #### Users
 
-  The `users` collection is auth-enabled which provides access to the admin panel. When previewing documents on your front-end, the user's JWT is used to authenticate the request. See [Pages](#pages) for more details.
+  The `users` collection is auth-enabled which provides access to the admin panel.
 
   For additional help with authentication, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/cms#readme) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
 
-- #### Pages
+- #### Fields
 
-  Each page is assigned a `tenant` which is used to control access and scope API requests. Pages that are created by tenants are automatically assigned that tenant based on that user's `lastLoggedInTenant` field.
+  The `fields` collection contains every field type available in Payload, each with custom components filled in every available "slot", i.e. `admin.components.Field`, `admin.components.Label`, etc. There are two of every field, one for server components, and the other for client components. This pattern shows how to use custom components in both environments, no matter which field type you are using.
 
 ## Questions
 

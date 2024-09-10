@@ -13,11 +13,23 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     components: {
-      afterNavLinks: ['@/components/LinkToCustomView#LinkToCustomView'],
+      afterNavLinks: [
+        '@/components/elements/LinkToCustomView#LinkToCustomView',
+        '@/components/elements/LinkToCustomMinimalView#LinkToCustomMinimalView',
+        '@/components/elements/LinkToCustomDefaultView#LinkToCustomDefaultView',
+      ],
       views: {
-        MyCustomView: {
+        CustomRootView: {
           Component: '@/components/views/CustomRootView#CustomRootView',
           path: '/custom',
+        },
+        DefaultCustomView: {
+          Component: '@/components/views/CustomDefaultRootView#CustomDefaultRootView',
+          path: '/custom-default',
+        },
+        MinimalCustomView: {
+          Component: '@/components/views/CustomMinimalRootView#CustomMinimalRootView',
+          path: '/custom-minimal',
         },
       },
     },
