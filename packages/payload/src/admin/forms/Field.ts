@@ -20,6 +20,7 @@ export type ClientFieldBase<
 } & FormFieldBase
 
 export type ServerFieldBase<TFieldServer extends Field = Field> = {
+  readonly createClientField?: () => ClientField
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer>
   readonly errorProps?: FieldErrorServerProps<TFieldServer>
   readonly field: TFieldServer

@@ -19,6 +19,7 @@ export type FieldLabelClientProps<
 } & GenericLabelProps
 
 export type FieldLabelServerProps<TFieldServer extends Field> = {
+  readonly createClientField?: (field: Field) => ClientField
   field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>

@@ -19,6 +19,7 @@ import type {
   RowFieldClient,
   RowLabelComponent,
   SelectFieldClient,
+  ServerFieldBase,
   ServerOnlyFieldAdminProperties,
   ServerOnlyFieldProperties,
   TabsFieldClient,
@@ -40,15 +41,7 @@ function generateFieldPath(parentPath: string, name: string): string {
   return tabPath
 }
 
-export const createClientField = ({
-  clientField,
-  createMappedComponent,
-  field: incomingField,
-  i18n,
-  importMap,
-  parentPath,
-  payload,
-}: {
+export type CreateClientField = (props: {
   clientField: ClientField
   createMappedComponent: CreateMappedComponent
   field: Field
@@ -56,7 +49,17 @@ export const createClientField = ({
   importMap: ImportMap
   parentPath?: string
   payload: Payload
-}): ClientField => {
+}) => ClientField
+
+export const createClientField: CreateClientField = ({
+  clientField,
+  createMappedComponent,
+  field: incomingField,
+  i18n,
+  importMap,
+  parentPath,
+  payload,
+}) => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',
@@ -113,7 +116,32 @@ export const createClientField = ({
     'Label' in incomingField.admin.components &&
     incomingField.admin.components.Label
 
-  const serverProps = { serverProps: { field: incomingField } }
+  const serverProps: {
+    serverProps: ServerFieldBase
+  } = {
+    serverProps: {
+      createClientField: () =>
+        createClientField({
+          clientField: {} as ClientField,
+          createMappedComponent,
+          field: {
+            ...incomingField,
+            admin: {
+              ...incomingField.admin,
+              components: {
+                ...incomingField.admin?.components,
+                Field: null,
+              },
+            },
+          },
+          i18n,
+          importMap,
+          parentPath: clientField._schemaPath,
+          payload,
+        }),
+      field: incomingField,
+    },
+  }
 
   switch (incomingField.type) {
     case 'array':

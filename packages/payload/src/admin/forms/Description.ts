@@ -1,5 +1,5 @@
 import type { LabelFunction, ServerProps } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { ClientField, Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
 
@@ -24,6 +24,7 @@ export type GenericDescriptionProps = {
 }
 
 export type FieldDescriptionServerProps<TFieldServer extends Field = Field> = {
+  readonly createClientField?: (field: Field) => ClientField
   field: TFieldServer
 } & GenericDescriptionProps &
   Partial<ServerProps>

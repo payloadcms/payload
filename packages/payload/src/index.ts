@@ -846,6 +846,7 @@ export type {
   CollapsibleField,
   CollapsibleFieldClient,
   Condition,
+  CreateClientField,
   DateField,
   DateFieldClient,
   EmailField,
