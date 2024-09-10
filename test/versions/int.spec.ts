@@ -291,6 +291,23 @@ describe('Versions', () => {
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
       })
+
+      it('should have the same createdAt on new version create', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { description: 'descr', title: 'title' },
+        })
+
+        await new Promise((resolve) => setTimeout(resolve, 30))
+
+        const updated = await payload.update({
+          collection: autosaveCollectionSlug,
+          id: doc.id,
+          data: {},
+        })
+
+        expect(doc.createdAt).toBe(updated.createdAt)
+      })
     })
 
     describe('Restore', () => {

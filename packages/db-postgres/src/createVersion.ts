@@ -28,14 +28,20 @@ export async function createVersion<T extends TypeWithID>(
   const version = { ...versionData }
   if (version.id) delete version.id
 
+  const data: Record<string, unknown> = {
+    autosave,
+    latest: true,
+    parent,
+    version,
+  }
+
+  if (collection.timestamps && 'createdAt' in version) {
+    data.createdAt = version.createdAt
+  }
+
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
-    data: {
-      autosave,
-      latest: true,
-      parent,
-      version,
-    },
+    data,
     db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
