@@ -107,9 +107,9 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       showHiddenFields,
     })
 
-    // /////////////////////////////////////
-    // Handle potentially locked documents
-    // /////////////////////////////////////
+    // ///////////////////////////////////////////
+    // Handle potentially locked global documents
+    // ///////////////////////////////////////////
 
     let shouldUnlockDocument = false
 
@@ -117,6 +117,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
       collection: 'payload-locked-documents',
       depth: 1,
       limit: 1,
+      pagination: false,
       req,
       where: {
         globalSlug: {
@@ -269,7 +270,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // /////////////////////////////////////
 
     if (shouldUnlockDocument) {
-      await payload.delete({
+      await payload.db.deleteOne({
         collection: 'payload-locked-documents',
         req,
         where: {

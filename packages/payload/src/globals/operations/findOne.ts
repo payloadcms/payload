@@ -70,6 +70,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
           collection: 'payload-locked-documents',
           depth: 1,
           limit: 1,
+          pagination: false,
           req,
           where: {
             globalSlug: {

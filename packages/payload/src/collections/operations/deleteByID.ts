@@ -167,6 +167,20 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
     })
 
     // /////////////////////////////////////
+    // Unlock the document if necessary
+    // /////////////////////////////////////
+
+    if (shouldUnlockDocument && lockStatus.docs.length > 0) {
+      await payload.db.deleteOne({
+        collection: 'payload-locked-documents',
+        req,
+        where: {
+          id: { equals: lockStatus.docs[0].id },
+        },
+      })
+    }
+
+    // /////////////////////////////////////
     // Delete versions
     // /////////////////////////////////////
 
@@ -188,25 +202,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug>(
       req,
       where: { id: { equals: id } },
     })
-
-    // /////////////////////////////////////
-    // Unlock the document if necessary
-    // /////////////////////////////////////
-
-    if (shouldUnlockDocument) {
-      await payload.delete({
-        collection: 'payload-locked-documents',
-        req,
-        where: {
-          'document.relationTo': {
-            equals: collectionConfig.slug,
-          },
-          'document.value': {
-            equals: id,
-          },
-        },
-      })
-    }
 
     // /////////////////////////////////////
     // Delete Preferences

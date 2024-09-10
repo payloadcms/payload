@@ -381,17 +381,12 @@ export const updateOperation = async <TSlug extends CollectionSlug>(
         // Unlock the document if necessary
         // /////////////////////////////////////
 
-        if (shouldUnlockDocument) {
-          await payload.delete({
+        if (shouldUnlockDocument && lockStatus.docs.length > 0) {
+          await payload.db.deleteOne({
             collection: 'payload-locked-documents',
             req,
             where: {
-              'document.relationTo': {
-                equals: collectionConfig.slug,
-              },
-              'document.value': {
-                equals: id,
-              },
+              id: { equals: lockStatus.docs[0].id },
             },
           })
         }
