@@ -27,6 +27,19 @@ export const checkDocumentLockStatus = async ({
   req,
 }: CheckDocumentLockStatusArgs): Promise<CheckDocumentLockResult> => {
   const { payload } = req
+
+  // Retrieve the lockWhenEditing property for either collection or global
+  const lockWhenEditingProp = collectionSlug
+    ? payload.config?.collections?.find((c) => c.slug === collectionSlug)?.lockWhenEditing
+    : payload.config?.globals?.find((g) => g.slug === globalSlug)?.lockWhenEditing
+
+  const isLockingEnabled = lockWhenEditingProp !== undefined ? lockWhenEditingProp : true
+
+  // If lockWhenEditing is explicitly set to false, skip the lock logic and return early
+  if (isLockingEnabled === false) {
+    return { lockedDocument: undefined, shouldUnlockDocument: false }
+  }
+
   let lockedDocumentQuery = {}
 
   if (collectionSlug) {
@@ -62,13 +75,6 @@ export const checkDocumentLockStatus = async ({
     const lockedDoc = lockedDocumentResult.docs[0]
     const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
     const now = new Date()
-
-    const lockWhenEditingProp =
-      collectionSlug || globalSlug
-        ? req.payload.config?.collections?.find((c) => c.slug === collectionSlug)
-            ?.lockWhenEditing ||
-          req.payload.config?.globals?.find((g) => g.slug === globalSlug)?.lockWhenEditing
-        : true
 
     const lockDuration =
       typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp

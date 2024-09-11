@@ -177,7 +177,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
           return {
             ...doc,
             isLocked: !!lockedDoc,
-            userEditing: lockedDoc ? lockedDoc._lastEdited?.user?.value || null : null,
+            userEditing: lockedDoc ? lockedDoc._lastEdited?.user?.value : null,
           }
         })
       } catch (error) {
