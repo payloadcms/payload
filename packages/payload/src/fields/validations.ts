@@ -646,7 +646,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
   }
 
   // Only run this validation for mongodb
-  if (typeof value !== 'undefined' && value !== null && payload.db.name === 'mongoose') {
+  if (typeof value !== 'undefined' && value !== null && payload?.db?.name === 'mongoose') {
     const values = Array.isArray(value) ? value : [value]
 
     const invalidRelationships = values.filter((val) => {
@@ -730,7 +730,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
   }
 
   // Only run this validation for mongodb
-  if (typeof value !== 'undefined' && value !== null && payload.db.name === 'mongoose') {
+  if (typeof value !== 'undefined' && value !== null && payload?.db?.name === 'mongoose') {
     const values = Array.isArray(value) ? value : [value]
 
     const invalidRelationships = values.filter((val) => {
