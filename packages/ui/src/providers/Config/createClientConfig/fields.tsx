@@ -115,6 +115,22 @@ export const createClientField = ({
 
   const serverProps = { serverProps: { field: incomingField } }
 
+  if ('admin' in incomingField && 'width' in incomingField.admin) {
+    clientField.admin.style = {
+      ...clientField.admin.style,
+      '--field-width': clientField.admin.width,
+      width: undefined, // avoid needlessly adding this to the element's style attribute
+    }
+  } else {
+    if (!(clientField.admin instanceof Object)) {
+      clientField.admin = {}
+    }
+    if (!(clientField.admin.style instanceof Object)) {
+      clientField.admin.style = {}
+    }
+    clientField.admin.style.flex = '1 1 auto'
+  }
+
   switch (incomingField.type) {
     case 'array':
     case 'group':
@@ -521,7 +537,7 @@ export const createClientFields = ({
     })
 
     if (newField) {
-      newClientFields.push({ ...newField })
+      newClientFields.push(newField)
     }
   }
 
