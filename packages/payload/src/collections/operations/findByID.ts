@@ -116,12 +116,18 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
           pagination: false,
           req,
           where: {
-            'document.relationTo': {
-              equals: collectionConfig.slug,
-            },
-            'document.value': {
-              equals: id,
-            },
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  in: id,
+                },
+              },
+            ],
           },
         })
 

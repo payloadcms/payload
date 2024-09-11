@@ -161,12 +161,18 @@ export const findOperation = async <TSlug extends CollectionSlug>(
           pagination: false,
           req,
           where: {
-            'document.relationTo': {
-              equals: collectionConfig.slug,
-            },
-            'document.value': {
-              in: result.docs.map((doc) => doc.id),
-            },
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  in: result.docs.map((doc) => doc.id),
+                },
+              },
+            ],
           },
         })
 

@@ -44,8 +44,10 @@ export const checkDocumentLockStatus = async ({
 
   if (collectionSlug) {
     lockedDocumentQuery = {
-      'document.relationTo': { equals: collectionSlug },
-      'document.value': { equals: id },
+      and: [
+        { 'document.relationTo': { equals: collectionSlug } },
+        { 'document.value': { in: id } },
+      ],
     }
   } else if (globalSlug) {
     lockedDocumentQuery = { globalSlug: { equals: globalSlug } }
