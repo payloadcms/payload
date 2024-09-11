@@ -783,7 +783,7 @@ Here are the breaking changes and how to migrate:
 - New "Views" API added, which allows for custom sub-views on List and Edit views within Admin UI
 - New [bundler adapter pattern](https://payloadcms.com/docs/admin/bundlers) released
 - Official [Vite bundler](https://payloadcms.com/docs/admin/vite) released
-- Offical [Lexical rich text adapter](https://payloadcms.com/docs/rich-text/lexical) released
+- Offical [Lexical rich text adapter](https://payloadcms.com/docs/lexical/overview) released
 - Lexical rich text editor now supports drag and drop of rich text elements
 - Lexical rich text now supports Payload blocks directly within rich text editor
 - Upload image cropping added

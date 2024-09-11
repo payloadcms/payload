@@ -13,6 +13,9 @@ const TextFields: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+      hooks: {
+        beforeDuplicate: [({ value }) => `${value} - duplicate`],
+      },
     },
     {
       name: 'localizedText',

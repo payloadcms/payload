@@ -45,6 +45,7 @@ import {
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
+  relationshipFieldsSlug,
   richTextFieldsSlug,
   selectFieldsSlug,
   tabsFieldsSlug,
@@ -338,6 +339,37 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
     overrideAccess: true,
   })
+
+  const relationshipField1 = await _payload.create({
+    collection: relationshipFieldsSlug,
+    data: {
+      text: 'Relationship 1',
+      relationship: {
+        relationTo: textFieldsSlug,
+        value: createdTextDoc.id,
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  try {
+    await _payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        text: 'Relationship 2',
+        relationToSelf: relationshipField1.id,
+        relationship: {
+          relationTo: textFieldsSlug,
+          value: createdAnotherTextDoc.id,
+        },
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+  } catch (e) {
+    console.error(e)
+  }
 
   await _payload.create({
     collection: lexicalFieldsSlug,

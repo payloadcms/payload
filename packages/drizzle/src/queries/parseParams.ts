@@ -125,17 +125,25 @@ export async function parseParams({
                   }
 
                   const jsonQuery = adapter.convertPathToJSONTraversal(pathSegments)
-                  const operatorKeys = {
+                  const operatorKeys: Record<string, { operator: string; wildcard: string }> = {
                     contains: { operator: 'like', wildcard: '%' },
                     equals: { operator: '=', wildcard: '' },
-                    exists: { operator: val === true ? 'is not null' : 'is null' },
+                    exists: { operator: val === true ? 'is not null' : 'is null', wildcard: '' },
+                    in: { operator: 'in', wildcard: '' },
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
+                    not_in: { operator: 'not in', wildcard: '' },
                   }
 
                   let formattedValue = val
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
+                  } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
+                    if (adapter.name === 'sqlite') {
+                      formattedValue = `(${val.map((v) => `${v}`).join(',')})`
+                    } else {
+                      formattedValue = `(${val.map((v) => `'${v}'`).join(', ')})`
+                    }
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
                   }

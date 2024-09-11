@@ -37,14 +37,14 @@ export type {
 } from './fields/Array.js'
 
 export type {
-  BlockFieldDescriptionClientComponent,
-  BlockFieldDescriptionServerComponent,
-  BlockFieldErrorClientComponent,
-  BlockFieldErrorServerComponent,
-  BlockFieldLabelClientComponent,
-  BlockFieldLabelServerComponent,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
+  BlocksFieldDescriptionClientComponent,
+  BlocksFieldDescriptionServerComponent,
+  BlocksFieldErrorClientComponent,
+  BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   BlocksFieldServerComponent,
   BlocksFieldServerProps,
 } from './fields/Blocks.js'

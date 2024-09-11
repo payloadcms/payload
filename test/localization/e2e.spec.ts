@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,7 +13,6 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  openDocControls,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'

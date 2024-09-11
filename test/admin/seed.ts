@@ -21,6 +21,7 @@ export const seed = async (_payload) => {
         await new Promise((resolve, reject) => {
           _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
             if (err) {
+              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
               reject(err)
             }
             resolve(true)
@@ -42,12 +43,12 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      ...[...Array(11)].map(() => async () => {
+      ...[...Array(11)].map((_, i) => async () => {
         const postDoc = await _payload.create({
           collection: postsCollectionSlug,
           data: {
             description: 'Description',
-            title: 'Title',
+            title: `Post ${i + 1}`,
           },
           depth: 0,
           overrideAccess: true,
