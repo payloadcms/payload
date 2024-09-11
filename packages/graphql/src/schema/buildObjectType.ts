@@ -1,7 +1,7 @@
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -106,7 +106,7 @@ export function buildObjectType({
         [field.name]: { type: withNullableType(field, arrayType) },
       }
     },
-    blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
+    blocks: (objectTypeConfig: ObjectTypeConfig, field: BlocksField) => {
       const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
         if (!graphqlResult.types.blockTypes[block.slug]) {
           const interfaceName =

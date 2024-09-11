@@ -9,7 +9,7 @@ import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   DateField,
@@ -463,12 +463,17 @@ export const number: NumberFieldValidation = (
 }
 
 export type ArrayFieldValidation = Validate<unknown[], unknown, unknown, ArrayField>
+
 export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t }, required }) => {
   return validateArrayLength(value, { maxRows, minRows, required, t })
 }
 
-export type BlockFieldValidation = Validate<unknown, unknown, unknown, BlockField>
-export const blocks: BlockFieldValidation = (value, { maxRows, minRows, req: { t }, required }) => {
+export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
+
+export const blocks: BlocksFieldValidation = (
+  value,
+  { maxRows, minRows, req: { t }, required },
+) => {
   return validateArrayLength(value, { maxRows, minRows, required, t })
 }
 
