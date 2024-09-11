@@ -21,7 +21,10 @@ export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClient
 
 export type CollapsibleFieldServerProps = ServerFieldBase<CollapsibleField>
 
-export type CollapsibleFieldServerComponent = FieldServerComponent<CollapsibleField>
+export type CollapsibleFieldServerComponent = FieldServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClient
+>
 
 export type CollapsibleFieldClientComponent =
   FieldClientComponent<CollapsibleFieldClientWithoutType>

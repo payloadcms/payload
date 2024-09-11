@@ -29,7 +29,7 @@ export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType>
 
 export type RadioFieldServerProps = ServerFieldBase<RadioField>
 
-export type RadioFieldServerComponent = FieldServerComponent<RadioField>
+export type RadioFieldServerComponent = FieldServerComponent<RadioField, RadioFieldClient>
 
 export type RadioFieldClientComponent = FieldClientComponent<
   RadioFieldClientWithoutType,

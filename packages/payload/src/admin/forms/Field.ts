@@ -19,8 +19,11 @@ export type ClientFieldBase<
   readonly labelProps?: FieldLabelClientProps<TFieldClient>
 } & FormFieldBase
 
-export type ServerFieldBase<TFieldServer extends Field = Field> = {
-  readonly createClientField?: () => ClientField
+export type ServerFieldBase<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  readonly createClientField?: () => TFieldClient
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer>
   readonly errorProps?: FieldErrorServerProps<TFieldServer>
   readonly field: TFieldServer
@@ -50,5 +53,6 @@ export type FieldClientComponent<
 
 export type FieldServerComponent<
   TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
   AdditionalProps extends Record<string, unknown> = Record<string, unknown>,
-> = React.ComponentType<AdditionalProps & ServerFieldBase<TFieldServer>>
+> = React.ComponentType<AdditionalProps & ServerFieldBase<TFieldServer, TFieldClient>>

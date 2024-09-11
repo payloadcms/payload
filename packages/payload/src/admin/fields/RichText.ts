@@ -35,7 +35,7 @@ export type RichTextFieldClientProps<
 
 export type RichTextFieldServerProps = ServerFieldBase<RichTextField>
 
-export type RichTextFieldServerComponent = FieldServerComponent<RichTextField>
+export type RichTextFieldServerComponent = FieldServerComponent<RichTextField, RichTextFieldClient>
 
 export type RichTextFieldClientComponent = FieldClientComponent<
   RichTextFieldClientWithoutType,

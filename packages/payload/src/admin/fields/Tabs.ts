@@ -31,7 +31,7 @@ export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType>
 
 export type TabsFieldServerProps = ServerFieldBase<TabsField>
 
-export type TabsFieldServerComponent = FieldServerComponent<TabsField>
+export type TabsFieldServerComponent = FieldServerComponent<TabsField, TabsFieldClient>
 
 export type TabsFieldClientComponent = FieldClientComponent<TabsFieldClientWithoutType>
 

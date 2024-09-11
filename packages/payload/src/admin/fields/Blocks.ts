@@ -27,7 +27,7 @@ export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
 
 export type BlocksFieldServerProps = ServerFieldBase<BlockField>
 
-export type BlocksFieldServerComponent = FieldServerComponent<BlockField>
+export type BlocksFieldServerComponent = FieldServerComponent<BlockField, BlockFieldClient>
 
 export type BlocksFieldClientComponent = FieldClientComponent<
   BlocksFieldClientWithoutType,

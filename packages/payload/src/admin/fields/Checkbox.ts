@@ -32,7 +32,7 @@ export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
 
 export type CheckboxFieldServerProps = ServerFieldBase<CheckboxField>
 
-export type CheckboxFieldServerComponent = FieldServerComponent<CheckboxField>
+export type CheckboxFieldServerComponent = FieldServerComponent<CheckboxField, CheckboxFieldClient>
 
 export type CheckboxFieldClientComponent = FieldClientComponent<
   CheckboxFieldClientWithoutType,

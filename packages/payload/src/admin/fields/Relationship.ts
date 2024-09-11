@@ -27,7 +27,10 @@ export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClie
 
 export type RelationshipFieldServerProps = ServerFieldBase<RelationshipField>
 
-export type RelationshipFieldServerComponent = FieldServerComponent<RelationshipField>
+export type RelationshipFieldServerComponent = FieldServerComponent<
+  RelationshipField,
+  RelationshipFieldClient
+>
 
 export type RelationshipFieldClientComponent = FieldClientComponent<
   RelationshipFieldClientWithoutType,

@@ -21,7 +21,7 @@ export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
 
 export type GroupFieldServerProps = ServerFieldBase<GroupField>
 
-export type GroupFieldServerComponent = FieldServerComponent<GroupField>
+export type GroupFieldServerComponent = FieldServerComponent<GroupField, GroupFieldClient>
 
 export type GroupFieldClientComponent = FieldClientComponent<GroupFieldClientWithoutType>
 

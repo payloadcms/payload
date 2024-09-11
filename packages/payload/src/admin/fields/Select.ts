@@ -29,7 +29,7 @@ export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutTyp
 
 export type SelectFieldServerProps = ServerFieldBase<SelectField>
 
-export type SelectFieldServerComponent = FieldServerComponent<SelectField>
+export type SelectFieldServerComponent = FieldServerComponent<SelectField, SelectFieldClient>
 
 export type SelectFieldClientComponent = FieldClientComponent<
   SelectFieldClientWithoutType,

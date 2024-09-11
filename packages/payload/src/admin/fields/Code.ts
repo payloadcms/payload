@@ -28,7 +28,7 @@ export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
 
 export type CodeFieldServerProps = ServerFieldBase<CodeField>
 
-export type CodeFieldServerComponent = FieldServerComponent<CodeField>
+export type CodeFieldServerComponent = FieldServerComponent<CodeField, CodeFieldClient>
 
 export type CodeFieldClientComponent = FieldClientComponent<
   CodeFieldClientWithoutType,

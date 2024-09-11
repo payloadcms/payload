@@ -27,7 +27,7 @@ export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
 
 export type DateFieldServerProps = ServerFieldBase<DateField>
 
-export type DateFieldServerComponent = FieldServerComponent<DateField>
+export type DateFieldServerComponent = FieldServerComponent<DateField, DateFieldClient>
 
 export type DateFieldClientComponent = FieldClientComponent<
   DateFieldClientWithoutType,
