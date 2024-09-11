@@ -12,7 +12,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocControls,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -61,6 +60,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

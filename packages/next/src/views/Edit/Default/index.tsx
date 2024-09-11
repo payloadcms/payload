@@ -46,6 +46,7 @@ export const DefaultEditView: React.FC = () => {
     collectionSlug,
     currentEditor,
     disableActions,
+    disableCreate,
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
@@ -58,7 +59,12 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
     setCurrentEditor,
     setDocumentIsLocked,
     unlockDocument,
@@ -455,13 +461,20 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            disableCreate={disableCreate}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onDelete={onDelete}
+            onDrawerCreate={onDrawerCreate}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
             onTakeOver={handleTakeOverWithinDoc}
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+            redirectAfterDelete={redirectAfterDelete}
+            redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
