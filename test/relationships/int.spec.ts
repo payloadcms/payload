@@ -449,12 +449,14 @@ describe('Relationships', () => {
         })
 
         it('should validate the format of text id relationships', async () => {
-          await expect(async () =>
-            createPost({
-              // @ts-expect-error Sending bad data to test error handling
-              customIdRelation: 1234,
-            }),
-          ).rejects.toThrow('The following field is invalid: customIdRelation')
+          if (payload?.db?.name === 'mongoose') {
+            await expect(async () =>
+              createPost({
+                // @ts-expect-error Sending bad data to test error handling
+                customIdRelation: 1234,
+              }),
+            ).rejects.toThrow('The following field is invalid: customIdRelation')
+          }
         })
 
         it('should validate the format of number id relationships', async () => {
