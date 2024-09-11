@@ -41,18 +41,7 @@ function generateFieldPath(parentPath: string, name: string): string {
   return tabPath
 }
 
-export type CreateClientField = (props: {
-  clientField: ClientField
-  createMappedComponent: CreateMappedComponent
-  field: Field
-  i18n: I18nClient
-  importMap: ImportMap
-  parentPath?: string
-  payload: Payload
-  skipFieldComponent?: boolean
-}) => ClientField
-
-export const createClientField: CreateClientField = ({
+export const createClientField = ({
   clientField,
   createMappedComponent,
   field: incomingField,
@@ -61,7 +50,16 @@ export const createClientField: CreateClientField = ({
   parentPath,
   payload,
   skipFieldComponent,
-}) => {
+}: {
+  clientField: ClientField
+  createMappedComponent: CreateMappedComponent
+  field: Field
+  i18n: I18nClient
+  importMap: ImportMap
+  parentPath?: string
+  payload: Payload
+  skipFieldComponent?: boolean
+}): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',

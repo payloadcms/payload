@@ -427,16 +427,6 @@ export interface FieldBaseClient {
   unique?: boolean
 }
 
-export type CreateClientField = (props: {
-  clientField: ClientField
-  createMappedComponent: CreateMappedComponent
-  field: Field
-  i18n: I18nClient
-  importMap: ImportMap
-  parentPath?: string
-  payload: Payload
-}) => ClientField
-
 export type NumberField = {
   admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
