@@ -3,8 +3,7 @@ name: post-release
 on:
   release:
     types:
-      # - published # Re-enable this line for this to work with 2.x releases
-      - prereleased
+      - published
   workflow_dispatch:
 
 jobs:
