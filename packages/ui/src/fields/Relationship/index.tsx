@@ -482,6 +482,36 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     [i18n, config, hasMany, setValue],
   )
 
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
+    (args) => {
+      dispatchOptions({
+        type: 'ADD',
+        collection: args.collectionConfig,
+        config,
+        docs: [args.doc],
+        i18n,
+        sort: true,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).concat({
+                relationTo: args.collectionConfig.slug,
+                value: args.doc.id,
+              } as Option)
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
+    },
+    [i18n, config, hasMany, setValue],
+  )
+
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       dispatchOptions({
@@ -698,7 +728,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
-        <DocumentDrawer onDelete={onDelete} onDuplicate={onSave} onSave={onSave} />
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
     </div>
   )
