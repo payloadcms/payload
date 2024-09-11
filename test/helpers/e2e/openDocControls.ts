@@ -1,4 +1,4 @@
-import { type Locator, type Page, expect } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 export async function openDocControls(page: Locator | Page): Promise<void> {
   await page.locator('.doc-controls__popup >> .popup-button').click()

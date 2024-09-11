@@ -27,24 +27,36 @@ type ArrayFieldBaseClientProps = {
 export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
   ClientFieldBase<ArrayFieldClientWithoutType>
 
-export type ArrayFieldServerProps = ServerFieldBase<ArrayField>
+export type ArrayFieldServerProps = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
 
-export type ArrayFieldServerComponent = FieldServerComponent<ArrayField>
+export type ArrayFieldServerComponent = FieldServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
 
 export type ArrayFieldClientComponent = FieldClientComponent<
   ArrayFieldClientWithoutType,
   ArrayFieldBaseClientProps
 >
 
-export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<ArrayField>
+export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
 
 export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
 
-export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<ArrayField>
+export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
 
 export type ArrayFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<ArrayField>
+export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
 
 export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>
