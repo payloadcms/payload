@@ -26,24 +26,33 @@ type CodeFieldBaseClientProps = {
 export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
   CodeFieldBaseClientProps
 
-export type CodeFieldServerProps = ServerFieldBase<CodeField>
+export type CodeFieldServerProps = ServerFieldBase<CodeField, CodeFieldClientWithoutType>
 
-export type CodeFieldServerComponent = FieldServerComponent<CodeField, CodeFieldClient>
+export type CodeFieldServerComponent = FieldServerComponent<CodeField, CodeFieldClientWithoutType>
 
 export type CodeFieldClientComponent = FieldClientComponent<
   CodeFieldClientWithoutType,
   CodeFieldBaseClientProps
 >
 
-export type CodeFieldLabelServerComponent = FieldLabelServerComponent<CodeField>
+export type CodeFieldLabelServerComponent = FieldLabelServerComponent<
+  CodeField,
+  CodeFieldClientWithoutType
+>
 
 export type CodeFieldLabelClientComponent = FieldLabelClientComponent<CodeFieldClientWithoutType>
 
-export type CodeFieldDescriptionServerComponent = FieldDescriptionServerComponent<CodeField>
+export type CodeFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  CodeField,
+  CodeFieldClientWithoutType
+>
 
 export type CodeFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<CodeFieldClientWithoutType>
 
-export type CodeFieldErrorServerComponent = FieldErrorServerComponent<CodeField>
+export type CodeFieldErrorServerComponent = FieldErrorServerComponent<
+  CodeField,
+  CodeFieldClientWithoutType
+>
 
 export type CodeFieldErrorClientComponent = FieldErrorClientComponent<CodeFieldClientWithoutType>

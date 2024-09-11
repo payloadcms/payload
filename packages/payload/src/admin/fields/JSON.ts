@@ -25,24 +25,33 @@ type JSONFieldBaseClientProps = {
 export type JSONFieldClientProps = ClientFieldBase<JSONFieldClientWithoutType> &
   JSONFieldBaseClientProps
 
-export type JSONFieldServerProps = ServerFieldBase<JSONField>
+export type JSONFieldServerProps = ServerFieldBase<JSONField, JSONFieldClientWithoutType>
 
-export type JSONFieldServerComponent = FieldServerComponent<JSONField, JSONFieldClient>
+export type JSONFieldServerComponent = FieldServerComponent<JSONField, JSONFieldClientWithoutType>
 
 export type JSONFieldClientComponent = FieldClientComponent<
   JSONFieldClientWithoutType,
   JSONFieldBaseClientProps
 >
 
-export type JSONFieldLabelServerComponent = FieldLabelServerComponent<JSONField>
+export type JSONFieldLabelServerComponent = FieldLabelServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
 
 export type JSONFieldLabelClientComponent = FieldLabelClientComponent<JSONFieldClientWithoutType>
 
-export type JSONFieldDescriptionServerComponent = FieldDescriptionServerComponent<JSONField>
+export type JSONFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
 
 export type JSONFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<JSONFieldClientWithoutType>
 
-export type JSONFieldErrorServerComponent = FieldErrorServerComponent<JSONField>
+export type JSONFieldErrorServerComponent = FieldErrorServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
 
 export type JSONFieldErrorClientComponent = FieldErrorClientComponent<JSONFieldClientWithoutType>

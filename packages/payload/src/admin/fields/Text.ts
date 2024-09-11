@@ -28,7 +28,7 @@ type TextFieldBaseClientProps = {
 export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
   TextFieldBaseClientProps
 
-export type TextFieldServerProps = ServerFieldBase<TextField>
+export type TextFieldServerProps = ServerFieldBase<TextField, TextFieldClientWithoutType>
 
 export type TextFieldServerComponent = FieldServerComponent<TextField, TextFieldClient>
 
@@ -37,15 +37,24 @@ export type TextFieldClientComponent = FieldClientComponent<
   TextFieldBaseClientProps
 >
 
-export type TextFieldLabelServerComponent = FieldLabelServerComponent<TextField>
+export type TextFieldLabelServerComponent = FieldLabelServerComponent<
+  TextField,
+  TextFieldClientWithoutType
+>
 
 export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextField>
+export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  TextField,
+  TextFieldClientWithoutType
+>
 
 export type TextFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<TextFieldClientWithoutType>
 
-export type TextFieldErrorServerComponent = FieldErrorServerComponent<TextField>
+export type TextFieldErrorServerComponent = FieldErrorServerComponent<
+  TextField,
+  TextFieldClientWithoutType
+>
 
 export type TextFieldErrorClientComponent = FieldErrorClientComponent<TextFieldClientWithoutType>

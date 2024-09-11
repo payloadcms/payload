@@ -19,7 +19,10 @@ type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 't
 
 export type CollapsibleFieldClientProps = ClientFieldBase<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldServerProps = ServerFieldBase<CollapsibleField>
+export type CollapsibleFieldServerProps = ServerFieldBase<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
 
 export type CollapsibleFieldServerComponent = FieldServerComponent<
   CollapsibleField,
@@ -29,18 +32,26 @@ export type CollapsibleFieldServerComponent = FieldServerComponent<
 export type CollapsibleFieldClientComponent =
   FieldClientComponent<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<CollapsibleField>
+export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
 
 export type CollapsibleFieldLabelClientComponent =
   FieldLabelClientComponent<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldDescriptionServerComponent =
-  FieldDescriptionServerComponent<CollapsibleField>
+export type CollapsibleFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
 
 export type CollapsibleFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<CollapsibleFieldClientWithoutType>
 
-export type CollapsibleFieldErrorServerComponent = FieldErrorServerComponent<CollapsibleField>
+export type CollapsibleFieldErrorServerComponent = FieldErrorServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClientWithoutType
+>
 
 export type CollapsibleFieldErrorClientComponent =
   FieldErrorClientComponent<CollapsibleFieldClientWithoutType>

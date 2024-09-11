@@ -24,10 +24,10 @@ export type ServerFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
   readonly clientField: TFieldClient
-  readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer>
-  readonly errorProps?: FieldErrorServerProps<TFieldServer>
+  readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer, TFieldClient>
+  readonly errorProps?: FieldErrorServerProps<TFieldServer, TFieldClient>
   readonly field: TFieldServer
-  readonly labelProps?: FieldLabelServerProps<TFieldServer>
+  readonly labelProps?: FieldLabelServerProps<TFieldServer, TFieldClient>
 } & FormFieldBase &
   Partial<ServerProps>
 

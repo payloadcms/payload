@@ -26,7 +26,7 @@ type RowFieldBaseClientProps = {
 export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
   RowFieldBaseClientProps
 
-export type RowFieldServerProps = ServerFieldBase<RowField>
+export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
 
 export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClient>
 
@@ -35,15 +35,24 @@ export type RowFieldClientComponent = FieldClientComponent<
   RowFieldBaseClientProps
 >
 
-export type RowFieldLabelServerComponent = FieldLabelServerComponent<RowField>
+export type RowFieldLabelServerComponent = FieldLabelServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
 
 export type RowFieldLabelClientComponent = FieldLabelClientComponent<RowFieldClientWithoutType>
 
-export type RowFieldDescriptionServerComponent = FieldDescriptionServerComponent<RowField>
+export type RowFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
 
 export type RowFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<RowFieldClientWithoutType>
 
-export type RowFieldErrorServerComponent = FieldErrorServerComponent<RowField>
+export type RowFieldErrorServerComponent = FieldErrorServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
 
 export type RowFieldErrorClientComponent = FieldErrorClientComponent<RowFieldClientWithoutType>

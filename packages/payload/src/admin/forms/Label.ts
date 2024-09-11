@@ -18,8 +18,11 @@ export type FieldLabelClientProps<
   field: TFieldClient
 } & GenericLabelProps
 
-export type FieldLabelServerProps<TFieldServer extends Field> = {
-  readonly clientField?: ClientField
+export type FieldLabelServerProps<
+  TFieldServer extends Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  readonly clientField?: TFieldClient
   field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>
@@ -33,6 +36,7 @@ export type FieldLabelClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = React.ComponentType<FieldLabelClientProps<TFieldClient>>
 
-export type FieldLabelServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
-  FieldLabelServerProps<TFieldServer>
->
+export type FieldLabelServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelServerProps<TFieldServer, TFieldClient>>

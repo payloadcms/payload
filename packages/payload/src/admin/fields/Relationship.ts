@@ -25,7 +25,10 @@ type RelationshipFieldBaseClientProps = {
 export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClientWithoutType> &
   RelationshipFieldBaseClientProps
 
-export type RelationshipFieldServerProps = ServerFieldBase<RelationshipField>
+export type RelationshipFieldServerProps = ServerFieldBase<
+  RelationshipField,
+  RelationshipFieldClientWithoutType
+>
 
 export type RelationshipFieldServerComponent = FieldServerComponent<
   RelationshipField,
@@ -37,18 +40,26 @@ export type RelationshipFieldClientComponent = FieldClientComponent<
   RelationshipFieldBaseClientProps
 >
 
-export type RelationshipFieldLabelServerComponent = FieldLabelServerComponent<RelationshipField>
+export type RelationshipFieldLabelServerComponent = FieldLabelServerComponent<
+  RelationshipField,
+  RelationshipFieldClientWithoutType
+>
 
 export type RelationshipFieldLabelClientComponent =
   FieldLabelClientComponent<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldDescriptionServerComponent =
-  FieldDescriptionServerComponent<RelationshipField>
+export type RelationshipFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RelationshipField,
+  RelationshipFieldClientWithoutType
+>
 
 export type RelationshipFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldErrorServerComponent = FieldErrorServerComponent<RelationshipField>
+export type RelationshipFieldErrorServerComponent = FieldErrorServerComponent<
+  RelationshipField,
+  RelationshipFieldClientWithoutType
+>
 
 export type RelationshipFieldErrorClientComponent =
   FieldErrorClientComponent<RelationshipFieldClientWithoutType>

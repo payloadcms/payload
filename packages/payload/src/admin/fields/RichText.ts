@@ -33,7 +33,10 @@ export type RichTextFieldClientProps<
 > = ClientFieldBase<RichTextFieldClientWithoutType> &
   RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
 
-export type RichTextFieldServerProps = ServerFieldBase<RichTextField>
+export type RichTextFieldServerProps = ServerFieldBase<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
 
 export type RichTextFieldServerComponent = FieldServerComponent<RichTextField, RichTextFieldClient>
 
@@ -42,17 +45,26 @@ export type RichTextFieldClientComponent = FieldClientComponent<
   RichTextFieldBaseClientProps
 >
 
-export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<RichTextField>
+export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
 
 export type RichTextFieldLabelClientComponent =
   FieldLabelClientComponent<RichTextFieldClientWithoutType>
 
-export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<RichTextField>
+export type RichTextFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
 
 export type RichTextFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<RichTextFieldClientWithoutType>
 
-export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<RichTextField>
+export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<
+  RichTextField,
+  RichTextFieldClientWithoutType
+>
 
 export type RichTextFieldErrorClientComponent =
   FieldErrorClientComponent<RichTextFieldClientWithoutType>
