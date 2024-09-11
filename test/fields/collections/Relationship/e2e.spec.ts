@@ -424,13 +424,14 @@ describe('relationship', () => {
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
       await openDocControls(drawer1Content)
       await drawer1Content.locator('#action-duplicate').click()
-      await expect(drawer1Content.locator('.id-label')).not.toHaveText(originalID)
-      const newValue = `${originalText} - duplicate`
-      await drawer1Content.locator('#field-text').fill(newValue)
-      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+      const duplicateID = drawer1Content.locator('.id-label')
+      await expect(duplicateID).not.toHaveText(originalID)
+      await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
+
+      const newValue = `${originalText} - duplicate` // this is added via a `beforeDuplicate` hook
 
       await expect(
         page.locator('#field-relationship .relationship--single-value__text', {
