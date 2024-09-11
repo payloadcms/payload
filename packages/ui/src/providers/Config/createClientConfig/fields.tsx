@@ -49,6 +49,7 @@ export type CreateClientField = (props: {
   importMap: ImportMap
   parentPath?: string
   payload: Payload
+  skipFieldComponent?: boolean
 }) => ClientField
 
 export const createClientField: CreateClientField = ({
@@ -59,6 +60,7 @@ export const createClientField: CreateClientField = ({
   importMap,
   parentPath,
   payload,
+  skipFieldComponent,
 }) => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -122,22 +124,14 @@ export const createClientField: CreateClientField = ({
     serverProps: {
       createClientField: () =>
         createClientField({
-          clientField: {} as ClientField,
+          clientField: incomingField as ClientField,
           createMappedComponent,
-          field: {
-            ...incomingField,
-            admin: {
-              ...incomingField.admin,
-              components: {
-                ...incomingField.admin?.components,
-                Field: null,
-              },
-            },
-          },
+          field: incomingField,
           i18n,
           importMap,
-          parentPath: clientField._schemaPath,
+          parentPath: '_schemaPath' in incomingField && (incomingField._schemaPath as string),
           payload,
+          skipFieldComponent: true,
         }),
       field: incomingField,
     },
@@ -428,7 +422,7 @@ export const createClientField: CreateClientField = ({
     )
   }
 
-  if (incomingField?.admin?.components?.Field !== undefined) {
+  if (!skipFieldComponent && incomingField?.admin?.components?.Field !== undefined) {
     clientField.admin.components.Field = createMappedComponent(
       incomingField.admin.components.Field,
       serverProps,

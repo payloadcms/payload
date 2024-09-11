@@ -4,13 +4,9 @@ import { TextField } from '@payloadcms/ui'
 import React from 'react'
 
 export const MyServerComponent: TextFieldServerComponent = (props) => {
-  const { createClientField, field } = props
+  const { createClientField } = props
 
   const clientField = createClientField() as TextFieldClient
 
-  return (
-    <div>
-      <TextField field={clientField} />{' '}
-    </div>
-  )
+  return <TextField field={clientField} />
 }
