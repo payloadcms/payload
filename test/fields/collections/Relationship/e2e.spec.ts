@@ -428,7 +428,6 @@ describe('relationship', () => {
       await expect(duplicateID).not.toHaveText(originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
 
       const newValue = `${originalText} - duplicate` // this is added via a `beforeDuplicate` hook
