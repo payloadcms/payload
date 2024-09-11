@@ -930,7 +930,7 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type {
   ArrayFieldValidation,
-  BlockFieldValidation,
+  BlocksFieldValidation,
   CheckboxFieldValidation,
   CodeFieldValidation,
   ConfirmPasswordFieldValidation,
