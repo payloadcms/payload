@@ -18,7 +18,7 @@
     margin-right: 2px;
   }
 
-  &:hover:not([disabled]) {
+  &:hover:not(.disabled) {
     background-color: var(--theme-elevation-100);
   }
 

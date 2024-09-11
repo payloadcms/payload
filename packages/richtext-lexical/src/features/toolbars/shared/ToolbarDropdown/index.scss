@@ -23,10 +23,7 @@
 
   &:disabled {
     cursor: not-allowed;
-
-    .icon {
-      opacity: 0.2;
-    }
+    opacity: 0.2;
   }
 
   &:hover:not([disabled]) {

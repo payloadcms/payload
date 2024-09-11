@@ -6,7 +6,6 @@ export const toolbarTextDropdownGroupWithItems = (items: ToolbarGroupItem[]): To
   return {
     type: 'dropdown',
     ChildComponent: TextIcon,
-    isEnabled: () => false,
     items,
     key: 'text',
     order: 25,
