@@ -11,7 +11,7 @@ export const PostsCollection: CollectionConfig = {
     {
       admin: {
         components: {
-          Label: '/collections/Posts/MyClientComponent.js#MyClientComponent',
+          Field: '/collections/Posts/MyClientField.js#MyClientFieldComponent',
         },
       },
       name: 'text',
@@ -21,7 +21,7 @@ export const PostsCollection: CollectionConfig = {
     {
       admin: {
         components: {
-          Field: '/collections/Posts/MyServerComponent.js#MyServerComponent',
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
         },
       },
       name: 'serverTextField',
