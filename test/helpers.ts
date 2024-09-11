@@ -226,11 +226,6 @@ export async function closeNav(page: Page): Promise<void> {
   await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
-export async function openDocControls(page: Page): Promise<void> {
-  await page.locator('.doc-controls__popup >> .popup-button').click()
-  await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
-}
-
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
   await page
