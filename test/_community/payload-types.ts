@@ -56,6 +56,15 @@ export interface Post {
   id: string;
   text?: string | null;
   serverTextField?: string | null;
+  serverTextField1?: string | null;
+  serverTextField2?: string | null;
+  serverTextField3?: string | null;
+  serverTextField4?: string | null;
+  serverTextField5?: string | null;
+  serverTextField6?: string | null;
+  serverTextField7?: string | null;
+  serverTextField8?: string | null;
+  serverTextField9?: string | null;
   richText?: {
     root: {
       type: string;

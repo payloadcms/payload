@@ -24,7 +24,7 @@ export type GenericDescriptionProps = {
 }
 
 export type FieldDescriptionServerProps<TFieldServer extends Field = Field> = {
-  readonly createClientField?: (field: Field) => ClientField
+  readonly clientField?: ClientField
   field: TFieldServer
 } & GenericDescriptionProps &
   Partial<ServerProps>

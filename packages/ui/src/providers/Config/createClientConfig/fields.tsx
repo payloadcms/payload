@@ -122,17 +122,7 @@ export const createClientField: CreateClientField = ({
     serverProps: ServerFieldBase
   } = {
     serverProps: {
-      createClientField: () =>
-        createClientField({
-          clientField: incomingField as ClientField,
-          createMappedComponent,
-          field: incomingField,
-          i18n,
-          importMap,
-          parentPath: '_schemaPath' in incomingField && (incomingField._schemaPath as string),
-          payload,
-          skipFieldComponent: true,
-        }),
+      clientField: undefined,
       field: incomingField,
     },
   }
@@ -358,6 +348,15 @@ export const createClientField: CreateClientField = ({
     }
   })
 
+  const fieldServerProps: {
+    serverProps: ServerFieldBase
+  } = {
+    serverProps: {
+      clientField,
+      field: incomingField,
+    },
+  }
+
   type FieldWithDescription = {
     admin: AdminClient
   } & ClientField
@@ -378,7 +377,7 @@ export const createClientField: CreateClientField = ({
   if (incomingField?.admin?.components?.Cell !== undefined) {
     clientField.admin.components.Cell = createMappedComponent(
       incomingField.admin.components.Cell,
-      serverProps,
+      fieldServerProps,
       undefined,
       'incomingField.admin.components.Cell',
     )
@@ -396,7 +395,7 @@ export const createClientField: CreateClientField = ({
     ;(clientField as FieldWithDescriptionComponent).admin.components.Description =
       createMappedComponent(
         incomingField.admin.components.Description,
-        serverProps,
+        fieldServerProps,
         undefined,
         'incomingField.admin.components.Description',
       )
@@ -416,7 +415,7 @@ export const createClientField: CreateClientField = ({
   ) {
     ;(clientField as FieldWithErrorComponent).admin.components.Error = createMappedComponent(
       incomingField.admin.components.Error,
-      serverProps,
+      fieldServerProps,
       undefined,
       'incomingField.admin.components.Error',
     )
@@ -425,7 +424,7 @@ export const createClientField: CreateClientField = ({
   if (!skipFieldComponent && incomingField?.admin?.components?.Field !== undefined) {
     clientField.admin.components.Field = createMappedComponent(
       incomingField.admin.components.Field,
-      serverProps,
+      fieldServerProps,
       undefined,
       'incomingField.admin.components.Field',
     )
@@ -438,7 +437,7 @@ export const createClientField: CreateClientField = ({
   ) {
     clientField.admin.components.Filter = createMappedComponent(
       incomingField.admin.components.Filter,
-      serverProps,
+      fieldServerProps,
       undefined,
       'incomingField.admin.components.Filter',
     )
@@ -458,7 +457,7 @@ export const createClientField: CreateClientField = ({
   ) {
     ;(clientField as FieldWithLabelComponent).admin.components.Label = createMappedComponent(
       CustomLabel,
-      serverProps,
+      fieldServerProps,
       undefined,
       'incomingField.admin.components.Label',
     )
@@ -479,7 +478,7 @@ export const createClientField: CreateClientField = ({
     ;(clientField as FieldWithBeforeInputComponent).admin.components.beforeInput =
       createMappedComponent(
         incomingField.admin?.components?.beforeInput,
-        serverProps,
+        fieldServerProps,
         undefined,
         'incomingField.admin.components.beforeInput',
       )
@@ -500,7 +499,7 @@ export const createClientField: CreateClientField = ({
     ;(clientField as FieldWithAfterInputComponent).admin.components.afterInput =
       createMappedComponent(
         incomingField.admin?.components?.afterInput,
-        serverProps,
+        fieldServerProps,
         undefined,
         'incomingField.admin.components.afterInput',
       )

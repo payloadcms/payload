@@ -23,7 +23,7 @@ export type ServerFieldBase<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  readonly createClientField: () => TFieldClient
+  readonly clientField: TFieldClient
   readonly descriptionProps?: FieldDescriptionServerProps<TFieldServer>
   readonly errorProps?: FieldErrorServerProps<TFieldServer>
   readonly field: TFieldServer

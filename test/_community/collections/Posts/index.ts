@@ -28,6 +28,87 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField1',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField2',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField3',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField4',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField5',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField6',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField7',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField8',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Field: '/collections/Posts/MyServerField.js#MyServerFieldComponent',
+        },
+      },
+      name: 'serverTextField9',
+      type: 'text',
+    },
+    {
       name: 'richText',
       type: 'richText',
     },
