@@ -615,7 +615,8 @@ export const upload: UploadFieldValidation = async (value, options) => {
   const {
     maxRows,
     minRows,
-    req: { t },
+    relationTo,
+    req: { payload, t },
     required,
   } = options
 
@@ -641,6 +642,47 @@ export const upload: UploadFieldValidation = async (value, options) => {
         max: maxRows,
         value: value.length,
       })
+    }
+  }
+
+  // Only run this validation for mongodb
+  if (typeof value !== 'undefined' && value !== null && payload.db.name === 'mongoose') {
+    const values = Array.isArray(value) ? value : [value]
+
+    const invalidRelationships = values.filter((val) => {
+      let collectionSlug: string
+      let requestedID
+
+      if (typeof relationTo === 'string') {
+        collectionSlug = relationTo
+
+        // custom id
+        if (val || typeof val === 'number') {
+          requestedID = val
+        }
+      }
+
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
+        collectionSlug = val.relationTo
+        requestedID = val.value
+      }
+
+      if (requestedID === null) {
+        return false
+      }
+
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+
+      return !isValidID(requestedID, idType)
+    })
+
+    if (invalidRelationships.length > 0) {
+      return `This relationship field has the following invalid relationships: ${invalidRelationships
+        .map((err, invalid) => {
+          return `${err} ${JSON.stringify(invalid)}`
+        })
+        .join(', ')}`
     }
   }
 
@@ -657,7 +699,8 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
   const {
     maxRows,
     minRows,
-    req: { t },
+    relationTo,
+    req: { payload, t },
     required,
   } = options
 
@@ -683,6 +726,47 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         max: maxRows,
         value: value.length,
       })
+    }
+  }
+
+  // Only run this validation for mongodb
+  if (typeof value !== 'undefined' && value !== null && payload.db.name === 'mongoose') {
+    const values = Array.isArray(value) ? value : [value]
+
+    const invalidRelationships = values.filter((val) => {
+      let collectionSlug: string
+      let requestedID
+
+      if (typeof relationTo === 'string') {
+        collectionSlug = relationTo
+
+        // custom id
+        if (val || typeof val === 'number') {
+          requestedID = val
+        }
+      }
+
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
+        collectionSlug = val.relationTo
+        requestedID = val.value
+      }
+
+      if (requestedID === null) {
+        return false
+      }
+
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+
+      return !isValidID(requestedID, idType)
+    })
+
+    if (invalidRelationships.length > 0) {
+      return `This relationship field has the following invalid relationships: ${invalidRelationships
+        .map((err, invalid) => {
+          return `${err} ${JSON.stringify(invalid)}`
+        })
+        .join(', ')}`
     }
   }
 

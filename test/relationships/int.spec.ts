@@ -458,12 +458,14 @@ describe('Relationships', () => {
         })
 
         it('should validate the format of number id relationships', async () => {
-          await expect(async () =>
-            createPost({
-              // @ts-expect-error Sending bad data to test error handling
-              customIdNumberRelation: 'bad-input',
-            }),
-          ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
+          if (payload?.db?.name === 'mongoose') {
+            await expect(async () =>
+              createPost({
+                // @ts-expect-error Sending bad data to test error handling
+                customIdNumberRelation: 'bad-input',
+              }),
+            ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
+          }
         })
 
         it('should allow update removing a relationship', async () => {
