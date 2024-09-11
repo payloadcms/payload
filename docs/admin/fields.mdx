@@ -136,8 +136,8 @@ All Field Components receive the following props:
 | Property         | Description                                                                                                                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
-| **`_field`** | Server components receive the raw field config through this prop. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
 | **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
 | **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
@@ -190,9 +190,9 @@ import type {
 
 ### The `field` Prop
 
-All Field Components are passed their own Client Field Config through a common `field` prop. Because the raw Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), it cannot be passed into Client Components without first transforming it into a [Client Config](./components#accessing-the-payload-config).
+All Field Components are passed their own Field Config through a common `field` prop. Within Server Components, this is the original Field Config as written within your Payload Config. Within Client Components, however, this is a "Client Config", which is a sanitized, client-friendly version of the Field Config. This is because the original Field Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types), meaning it cannot be passed into Client Components without first being transformed.
 
-The Client Field Config is a sanitized version of the Field Config that is safe to pass into Client Components. The exact shape of this prop is unique to the specific [Field Type](../fields/overview) being rendered, minus all non-serializable properties. All functions, like field labels, are evaluated at this time, and all [Custom Components](../components) are resolved into a "mapped component".
+The Client Field Config is an exact copy of the original Field Config, minus all non-serializable properties, plus all evaluated functions such as field labels, [Custom Components](../components), etc.
 
 Server Component:
 
@@ -201,14 +201,14 @@ import React from 'react'
 import type { TextFieldServerComponent } from 'payload'
 import { TextField } from '@payloadcms/ui'
 
-export const MyServerField: TextFieldServerComponent = ({ field }) => {
-  return <TextField field={field} />
+export const MyServerField: TextFieldServerComponent = ({ clientField }) => {
+  return <TextField field={clientField} />
 }
 ```
 
 <Banner type="info">
   <strong>Tip:</strong>
-  Server Components can still access the raw Field Config through the `_field` prop.
+  Server Components can still access the original Field Config through the `field` prop.
 </Banner>
 
 Client Component:
@@ -276,8 +276,8 @@ All Cell Components receive the following props:
 
 | Property         | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
-| **`_field`** | Server components receive the raw field config through this prop. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 | **`link`** | A boolean representing whether this cell should be wrapped in a link. |
 | **`onClick`** | A function that is called when the cell is clicked. |
 
@@ -317,8 +317,8 @@ Custom Label Components receive all [Field Component](#the-field-component) prop
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
-| **`_field`** | Server components receive the raw field config through this prop. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -363,8 +363,8 @@ Custom Error Components receive all [Field Component](#the-field-component) prop
 
 | Property        | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
-| **`_field`** | Server components receive the raw field config through this prop. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -480,8 +480,8 @@ Custom Description Components receive all [Field Component](#the-field-component
 
 | Property       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`field`** | The sanitized, client-friendly version of the field's config. [More details](#the-field-prop) |
-| **`_field`** | Server components receive the raw field config through this prop. [More details](#the-field-prop) |
+| **`field`** | In Server Components, this is the original Field Config. In Client Components, this is the sanitized Client Field Config. [More details](#the-field-prop). |
+| **`clientField`** | Server components receive the Client Field Config through this prop. [More details](#the-field-prop). |
 
 <Banner type="success">
   <strong>Reminder:</strong>

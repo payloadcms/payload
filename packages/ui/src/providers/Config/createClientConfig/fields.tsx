@@ -118,8 +118,8 @@ export const createClientField = ({
     serverProps: ServerFieldBase
   } = {
     serverProps: {
-      _field: incomingField,
-      field: undefined,
+      clientField: undefined,
+      field: incomingField,
     },
   }
 
@@ -348,8 +348,8 @@ export const createClientField = ({
     serverProps: ServerFieldBase
   } = {
     serverProps: {
-      _field: incomingField,
-      field: clientField,
+      clientField,
+      field: incomingField,
     },
   }
 
