@@ -14,9 +14,9 @@ import type {
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
   ArrayFieldLabelServerComponent,
-  BlockFieldErrorClientComponent,
-  BlockFieldErrorServerComponent,
   BlocksFieldClientProps,
+  BlocksFieldErrorClientComponent,
+  BlocksFieldErrorServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -272,7 +272,7 @@ type Admin = {
   position?: 'sidebar'
   readOnly?: boolean
   style?: CSSProperties
-  width?: string
+  width?: CSSProperties['width']
 }
 
 export type AdminClient = {
@@ -304,8 +304,8 @@ export type AdminClient = {
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
-  style?: CSSProperties
-  width?: string
+  style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
+  width?: CSSProperties['width']
 }
 
 export type Labels = {
@@ -810,7 +810,7 @@ export type UIField = {
      */
     disableListColumn?: boolean
     position?: string
-    width?: string
+    width?: CSSProperties['width']
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1327,10 +1327,10 @@ export type ClientBlock = {
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
 
-export type BlockField = {
+export type BlocksField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<BlockFieldErrorClientComponent | BlockFieldErrorServerComponent>
+      Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1344,20 +1344,20 @@ export type BlockField = {
   maxRows?: number
   minRows?: number
   type: 'blocks'
-  validate?: Validate<string, unknown, unknown, BlockField>
+  validate?: Validate<string, unknown, unknown, BlocksField>
 } & FieldBase
 
-export type BlockFieldClient = {
+export type BlocksFieldClient = {
   admin?: {
     components?: {
       Error?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
-    Pick<BlockField['admin'], 'initCollapsed' | 'isSortable'>
+    Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
-  Pick<BlockField, 'maxRows' | 'minRows' | 'type'>
+  Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
 
 export type PointField = {
   admin?: {
@@ -1389,7 +1389,7 @@ export type PointFieldClient = {
 
 export type Field =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | CollapsibleField
@@ -1412,7 +1412,7 @@ export type Field =
 
 export type ClientField =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | CollapsibleFieldClient
@@ -1461,7 +1461,7 @@ export type FieldTypes = ExtractFieldTypes<Field>
 
 export type FieldAffectingData =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | DateField
@@ -1481,7 +1481,7 @@ export type FieldAffectingData =
 
 export type FieldAffectingDataClient =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | DateFieldClient
@@ -1501,7 +1501,7 @@ export type FieldAffectingDataClient =
 
 export type NonPresentationalField =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | CollapsibleField
@@ -1523,7 +1523,7 @@ export type NonPresentationalField =
 
 export type NonPresentationalFieldClient =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | CollapsibleFieldClient
@@ -1587,7 +1587,7 @@ export function fieldIsArrayType<TField extends ClientField | Field>(
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlockFieldClient : BlockField) {
+): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
   return field.type === 'blocks'
 }
 

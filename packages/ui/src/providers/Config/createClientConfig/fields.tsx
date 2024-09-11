@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   AdminClient,
   ArrayFieldClient,
-  BlockFieldClient,
+  BlocksFieldClient,
   ClientBlock,
   ClientField,
   CreateMappedComponent,
@@ -123,6 +123,22 @@ export const createClientField = ({
     },
   }
 
+  if ('admin' in incomingField && 'width' in incomingField.admin) {
+    clientField.admin.style = {
+      ...clientField.admin.style,
+      '--field-width': clientField.admin.width,
+      width: undefined, // avoid needlessly adding this to the element's style attribute
+    }
+  } else {
+    if (!(clientField.admin instanceof Object)) {
+      clientField.admin = {}
+    }
+    if (!(clientField.admin.style instanceof Object)) {
+      clientField.admin.style = {}
+    }
+    clientField.admin.style.flex = '1 1 auto'
+  }
+
   switch (incomingField.type) {
     case 'array':
     case 'group':
@@ -154,7 +170,7 @@ export const createClientField = ({
     }
 
     case 'blocks': {
-      const field = clientField as unknown as BlockFieldClient
+      const field = clientField as unknown as BlocksFieldClient
 
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
@@ -538,7 +554,7 @@ export const createClientFields = ({
     })
 
     if (newField) {
-      newClientFields.push({ ...newField })
+      newClientFields.push(newField)
     }
   }
 
