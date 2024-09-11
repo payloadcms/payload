@@ -1406,12 +1406,18 @@ export type JoinField = {
    * The slug of the collection to relate with.
    */
   collection: CollectionSlug
+  defaultValue?: never
   index?: never
+  maxDepth?: number
   /**
    * A string for the field in the collection being joined to.
    */
   on: string
+  required?: never
   type: 'join'
+  typescriptSchema?: never
+  unique?: never
+  validate?: never
 } & FieldBase
 
 export type JoinFieldClient = {
@@ -1422,7 +1428,7 @@ export type JoinFieldClient = {
   } & AdminClient &
     Pick<JoinField['admin'], 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'on' | 'type'>
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type'>
 
 export type Field =
   | ArrayField
@@ -1607,7 +1613,7 @@ export type FieldWithMany = RelationshipField | SelectField
 export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 
 export type FieldWithMaxDepth = RelationshipField | UploadField
-export type FieldWithMaxDepthClient = RelationshipFieldClient | UploadFieldClient
+export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
 export function fieldHasSubFields<TField extends ClientField | Field>(
   field: TField,
@@ -1660,7 +1666,8 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
   return (
-    (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number'
+    (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
+    typeof field.maxDepth === 'number'
   )
 }
 
