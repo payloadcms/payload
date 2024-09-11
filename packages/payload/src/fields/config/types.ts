@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
+import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type { I18nClient } from 'packages/translations/src/types.js'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
