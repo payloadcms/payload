@@ -11,11 +11,20 @@ export const PostsCollection: CollectionConfig = {
     {
       admin: {
         components: {
-          Label: '/collections/Posts/MyComponent.js#MyComponent',
+          Label: '/collections/Posts/MyClientComponent.js#MyClientComponent',
         },
-        description: 'This is a description',
       },
       name: 'text',
+      label: 'Client Text Field',
+      type: 'text',
+    },
+    {
+      admin: {
+        components: {
+          Label: '/collections/Posts/MyServerComponent.js#MyServerComponent',
+        },
+      },
+      name: 'serverTextField',
       type: 'text',
     },
     {

@@ -2,21 +2,38 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { RowField, RowFieldClient } from '../../fields/config/types.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldErrorClientComponent,
   FieldErrorServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
-export type RowFieldProps = {
+type RowFieldBaseClientProps = {
   readonly forceRender?: boolean
   readonly indexPath: string
-} & FormFieldBase<RowFieldClientWithoutType>
+}
+
+export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
+  RowFieldBaseClientProps
+
+export type RowFieldServerProps = ServerFieldBase<RowField>
+
+export type RowFieldServerComponent = FieldServerComponent<RowField>
+
+export type RowFieldClientComponent = FieldClientComponent<
+  RowFieldClientWithoutType,
+  RowFieldBaseClientProps
+>
 
 export type RowFieldLabelServerComponent = FieldLabelServerComponent<RowField>
 

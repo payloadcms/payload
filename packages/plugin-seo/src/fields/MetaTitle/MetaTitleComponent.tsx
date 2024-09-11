@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -26,7 +26,7 @@ const { maxLength, minLength } = defaults.title
 
 type MetaTitleProps = {
   readonly hasGenerateTitleFn: boolean
-} & TextFieldProps
+} & TextFieldClientProps
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {

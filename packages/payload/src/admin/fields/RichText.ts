@@ -4,22 +4,43 @@ import type { RichTextField, RichTextFieldClient } from '../../fields/config/typ
 import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
-  FormFieldBase,
 } from '../types.js'
 
 type RichTextFieldClientWithoutType = MarkOptional<RichTextFieldClient, 'type'>
 
-export type RichTextFieldProps<
+type RichTextFieldBaseClientProps<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
 > = {
   readonly validate?: RichTextFieldValidation
-} & Omit<FormFieldBase<RichTextFieldClientWithoutType>, 'validate'>
+}
+
+export type RichTextFieldClientProps<
+  TValue extends object = any,
+  TAdapterProps = any,
+  TExtraProperties = object,
+> = ClientFieldBase<RichTextFieldClientWithoutType> &
+  RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
+
+export type RichTextFieldServerProps = ServerFieldBase<RichTextField>
+
+export type RichTextFieldServerComponent = FieldServerComponent<RichTextField>
+
+export type RichTextFieldClientComponent = FieldClientComponent<
+  RichTextFieldClientWithoutType,
+  RichTextFieldBaseClientProps
+>
 
 export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<RichTextField>
 

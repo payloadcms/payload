@@ -1,5 +1,5 @@
 'use client'
-import type { BlockFieldProps } from 'payload'
+import type { BlocksFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -32,7 +32,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
+const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -284,7 +284,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
 
             if (blockToRender) {
               const rowErrorCount = errorPaths.filter((errorPath) =>
-                errorPath.startsWith(`${path}.${i}`),
+                errorPath.startsWith(`${path}.${i}.`),
               ).length
               return (
                 <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
