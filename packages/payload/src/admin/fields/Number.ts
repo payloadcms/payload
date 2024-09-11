@@ -28,7 +28,10 @@ export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutTyp
 
 export type NumberFieldServerProps = ServerFieldBase<NumberField, NumberFieldClientWithoutType>
 
-export type NumberFieldServerComponent = FieldServerComponent<NumberField, NumberFieldClient>
+export type NumberFieldServerComponent = FieldServerComponent<
+  NumberField,
+  NumberFieldClientWithoutType
+>
 
 export type NumberFieldClientComponent = FieldClientComponent<
   NumberFieldClientWithoutType,

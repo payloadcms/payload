@@ -27,7 +27,10 @@ export type PointFieldClientProps = ClientFieldBase<PointFieldClientWithoutType>
 
 export type PointFieldServerProps = ServerFieldBase<PointField, PointFieldClientWithoutType>
 
-export type PointFieldServerComponent = FieldServerComponent<PointField, PointFieldClient>
+export type PointFieldServerComponent = FieldServerComponent<
+  PointField,
+  PointFieldClientWithoutType
+>
 
 export type PointFieldClientComponent = FieldClientComponent<
   PointFieldClientWithoutType,

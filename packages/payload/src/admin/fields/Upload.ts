@@ -27,7 +27,10 @@ export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutTyp
 
 export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType>
 
-export type UploadFieldServerComponent = FieldServerComponent<UploadField, UploadFieldClient>
+export type UploadFieldServerComponent = FieldServerComponent<
+  UploadField,
+  UploadFieldClientWithoutType
+>
 
 export type UploadFieldClientComponent = FieldClientComponent<
   UploadFieldClientWithoutType,

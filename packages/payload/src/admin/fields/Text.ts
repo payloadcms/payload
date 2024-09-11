@@ -30,7 +30,7 @@ export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
 
 export type TextFieldServerProps = ServerFieldBase<TextField, TextFieldClientWithoutType>
 
-export type TextFieldServerComponent = FieldServerComponent<TextField, TextFieldClient>
+export type TextFieldServerComponent = FieldServerComponent<TextField, TextFieldClientWithoutType>
 
 export type TextFieldClientComponent = FieldClientComponent<
   TextFieldClientWithoutType,

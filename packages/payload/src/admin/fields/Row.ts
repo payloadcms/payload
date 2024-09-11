@@ -28,7 +28,7 @@ export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
 
-export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClient>
+export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClientWithoutType>
 
 export type RowFieldClientComponent = FieldClientComponent<
   RowFieldClientWithoutType,

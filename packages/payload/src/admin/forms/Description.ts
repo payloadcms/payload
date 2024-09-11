@@ -29,8 +29,8 @@ export type FieldDescriptionServerProps<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  readonly clientField?: TFieldClient
-  field: TFieldServer
+  _field: TFieldServer
+  readonly field?: TFieldClient
 } & GenericDescriptionProps &
   Partial<ServerProps>
 

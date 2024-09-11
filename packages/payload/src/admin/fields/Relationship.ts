@@ -32,7 +32,7 @@ export type RelationshipFieldServerProps = ServerFieldBase<
 
 export type RelationshipFieldServerComponent = FieldServerComponent<
   RelationshipField,
-  RelationshipFieldClient
+  RelationshipFieldClientWithoutType
 >
 
 export type RelationshipFieldClientComponent = FieldClientComponent<
