@@ -11,6 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -111,52 +112,11 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // Handle potentially locked global documents
     // ///////////////////////////////////////////
 
-    let shouldUnlockDocument = false
-
-    const lockStatusResult = await req.payload.find({
-      collection: 'payload-locked-documents',
-      depth: 1,
-      limit: 1,
-      pagination: false,
+    const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+      globalSlug: slug,
+      lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
       req,
-      where: {
-        globalSlug: {
-          equals: slug,
-        },
-      },
     })
-
-    if (lockStatusResult && lockStatusResult.docs.length > 0) {
-      const lockedDoc = lockStatusResult.docs[0]
-      const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
-      const now = new Date()
-
-      const lockWhenEditingProp =
-        globalConfig?.lockWhenEditing !== undefined ? globalConfig?.lockWhenEditing : true
-
-      const lockDuration =
-        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
-          ? lockWhenEditingProp.lockDuration
-          : 300 // 5 minutes in seconds
-
-      const lockDurationInMilliseconds = lockDuration * 1000
-      const currentUserId = req.user?.id
-
-      if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
-        // If the global is locked by another user and the lock has not expired, skip update
-        if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-          throw new APIError(
-            `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
-          )
-        } else {
-          // Lock has expired, proceed and unlock later
-          shouldUnlockDocument = true
-        }
-      } else {
-        // If the global is locked by the current user, proceed and unlock later
-        shouldUnlockDocument = true
-      }
-    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -269,7 +229,7 @@ export const updateOperation = async <TSlug extends GlobalSlug>(
     // Unlock the global if necessary
     // /////////////////////////////////////
 
-    if (shouldUnlockDocument) {
+    if (shouldUnlockDocument && lockedDocument) {
       await payload.db.deleteOne({
         collection: 'payload-locked-documents',
         req,

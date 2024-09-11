@@ -25,6 +25,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -134,57 +135,16 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       throw new Forbidden(req.t)
     }
 
-    // Check if the document is locked
-    const lockStatus = await payload.find({
-      collection: 'payload-locked-documents',
-      depth: 1,
-      limit: 1,
-      pagination: false,
+    // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    const { lockedDocument, shouldUnlockDocument } = await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
       req,
-      where: {
-        'document.relationTo': {
-          equals: collectionConfig.slug,
-        },
-        'document.value': {
-          equals: id,
-        },
-      },
     })
-
-    let shouldUnlockDocument = false
-
-    if (lockStatus.docs.length > 0) {
-      const lockedDoc = lockStatus.docs[0]
-      const lastEditedAt = new Date(lockedDoc?._lastEdited?.editedAt)
-      const now = new Date()
-
-      const lockWhenEditingProp =
-        collectionConfig?.lockWhenEditing !== undefined ? collectionConfig?.lockWhenEditing : true
-
-      const lockDuration =
-        typeof lockWhenEditingProp === 'object' && 'lockDuration' in lockWhenEditingProp
-          ? lockWhenEditingProp.lockDuration
-          : 300 // 5 minutes in seconds
-
-      const lockDurationInMilliseconds = lockDuration * 1000
-
-      const currentUserId = req.user?.id
-
-      if (lockedDoc._lastEdited?.user?.value?.id !== currentUserId) {
-        // If the document is locked by another user and the lock has not expired, skip update
-        if (now.getTime() - lastEditedAt.getTime() <= lockDurationInMilliseconds) {
-          throw new APIError(
-            `Document with ID ${id} is currently locked by another user and cannot be updated.`,
-          )
-        } else {
-          // If the lock has expired, proceed and unlock the document later
-          shouldUnlockDocument = true
-        }
-      } else {
-        // If the document is locked by the current user, proceed and unlock later
-        shouldUnlockDocument = true
-      }
-    }
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -376,12 +336,12 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     // Unlock the document if necessary
     // /////////////////////////////////////
 
-    if (shouldUnlockDocument && lockStatus.docs.length > 0) {
+    if (shouldUnlockDocument && lockedDocument) {
       await payload.db.deleteOne({
         collection: 'payload-locked-documents',
         req,
         where: {
-          id: { equals: lockStatus.docs[0].id },
+          id: { equals: lockedDocument.id },
         },
       })
     }

@@ -154,7 +154,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
     if (includeLockStatus) {
       try {
-        const lockStatuses = await payload.find({
+        const lockedDocuments = await payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
           limit: sanitizedLimit,
@@ -170,7 +170,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
           },
         })
 
-        const lockedDocs = Array.isArray(lockStatuses?.docs) ? lockStatuses.docs : []
+        const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
         result.docs = result.docs.map((doc) => {
           const lockedDoc = lockedDocs.find((lock) => lock?.document?.value === doc.id)

@@ -109,7 +109,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       let lockStatus = null
 
       try {
-        const lockStatusResult = await req.payload.find({
+        const lockedDocument = await req.payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
           limit: 1,
@@ -125,8 +125,8 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
           },
         })
 
-        if (lockStatusResult && lockStatusResult.docs.length > 0) {
-          lockStatus = lockStatusResult.docs[0]
+        if (lockedDocument && lockedDocument.docs.length > 0) {
+          lockStatus = lockedDocument.docs[0]
         }
       } catch {
         // swallow error

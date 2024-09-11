@@ -231,37 +231,37 @@ export const buildFormState = async ({
   }
 
   if (returnLockStatus && req.user && (id || globalSlug)) {
-    let lockStatusQuery
+    let lockedDocumentQuery
 
     if (collectionSlug) {
-      lockStatusQuery = {
+      lockedDocumentQuery = {
         'document.relationTo': { equals: collectionSlug },
         'document.value': { equals: id },
       }
     } else if (globalSlug) {
-      lockStatusQuery = {
+      lockedDocumentQuery = {
         globalSlug: { equals: globalSlug },
       }
     }
 
-    if (lockStatusQuery) {
-      const lockStatus = await req.payload.find({
+    if (lockedDocumentQuery) {
+      const lockedDocument = await req.payload.find({
         collection: 'payload-locked-documents',
         depth: 1,
         limit: 1,
         pagination: false,
-        where: lockStatusQuery,
+        where: lockedDocumentQuery,
       })
 
-      if (lockStatus.docs && lockStatus.docs.length > 0) {
+      if (lockedDocument.docs && lockedDocument.docs.length > 0) {
         const lockedState = {
           isLocked: true,
-          user: lockStatus.docs[0]?._lastEdited?.user?.value,
+          user: lockedDocument.docs[0]?._lastEdited?.user?.value,
         }
 
         if (updateLastEdited) {
           await req.payload.update({
-            id: lockStatus.docs[0].id,
+            id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
             data: {
               _lastEdited: {
