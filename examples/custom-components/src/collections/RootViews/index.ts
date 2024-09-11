@@ -7,7 +7,7 @@ export const CustomRootViews: CollectionConfig = {
       views: {
         edit: {
           root: {
-            Component: '@/components/views/collection/CustomRootEditView#CustomRootEditView',
+            Component: '@/collections/RootViews/components/CustomRootEditView#CustomRootEditView',
           },
         },
       },

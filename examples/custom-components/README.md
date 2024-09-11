@@ -33,6 +33,14 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   The `fields` collection contains every field type available in Payload, each with custom components filled in every available "slot", i.e. `admin.components.Field`, `admin.components.Label`, etc. There are two of every field, one for server components, and the other for client components. This pattern shows how to use custom components in both environments, no matter which field type you are using.
 
+- #### Views
+
+  The `views` collection demonstrates how to add collection-level views, including the default view and custom tabs.
+
+- #### Root Views
+
+  The `root-views` collection demonstrates how to add a root document-level view to the admin panel.
+
 ## Questions
 
 If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).

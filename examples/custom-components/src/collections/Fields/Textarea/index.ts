@@ -6,8 +6,9 @@ export const textareaFields: CollectionConfig['fields'] = [
     type: 'textarea',
     admin: {
       components: {
-        Field: '@/components/fields/Textarea/server/Field#CustomTextareaFieldServer',
-        Label: '@/components/fields/Textarea/server/Label#CustomTextareaFieldLabelServer',
+        Field: '@/collections/Fields/textarea/components/server/Field#CustomTextareaFieldServer',
+        Label:
+          '@/collections/Fields/textarea/components/server/Label#CustomTextareaFieldLabelServer',
       },
     },
   },
@@ -16,8 +17,9 @@ export const textareaFields: CollectionConfig['fields'] = [
     type: 'textarea',
     admin: {
       components: {
-        Field: '@/components/fields/Textarea/client/Field#CustomTextareaFieldClient',
-        Label: '@/components/fields/Textarea/client/Label#CustomTextareaFieldLabelClient',
+        Field: '@/collections/Fields/textarea/components/client/Field#CustomTextareaFieldClient',
+        Label:
+          '@/collections/Fields/textarea/components/client/Label#CustomTextareaFieldLabelClient',
       },
     },
   },

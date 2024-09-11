@@ -7,7 +7,7 @@ export const CustomViews: CollectionConfig = {
       views: {
         edit: {
           customView: {
-            Component: '@/components/views/collection/CustomTabEditView#CustomTabEditView',
+            Component: '@/collections/Views/components/CustomTabEditView#CustomTabEditView',
             path: '/custom-tab',
             tab: {
               href: '/custom-tab',
@@ -15,7 +15,7 @@ export const CustomViews: CollectionConfig = {
             },
           },
           default: {
-            Component: '@/components/views/collection/CustomDefaultEditView#CustomDefaultEditView',
+            Component: '@/collections/Views/components/CustomDefaultEditView#CustomDefaultEditView',
           },
         },
       },

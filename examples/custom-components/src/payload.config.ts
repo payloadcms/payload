@@ -16,21 +16,21 @@ export default buildConfig({
   admin: {
     components: {
       afterNavLinks: [
-        '@/components/elements/LinkToCustomView#LinkToCustomView',
-        '@/components/elements/LinkToCustomMinimalView#LinkToCustomMinimalView',
-        '@/components/elements/LinkToCustomDefaultView#LinkToCustomDefaultView',
+        '@/components/afterNavLinks/LinkToCustomView#LinkToCustomView',
+        '@/components/afterNavLinks/LinkToCustomMinimalView#LinkToCustomMinimalView',
+        '@/components/afterNavLinks/LinkToCustomDefaultView#LinkToCustomDefaultView',
       ],
       views: {
         CustomRootView: {
-          Component: '@/components/views/root/CustomRootView#CustomRootView',
+          Component: '@/components/views/CustomRootView#CustomRootView',
           path: '/custom',
         },
         DefaultCustomView: {
-          Component: '@/components/views/root/CustomDefaultRootView#CustomDefaultRootView',
+          Component: '@/components/views/CustomDefaultRootView#CustomDefaultRootView',
           path: '/custom-default',
         },
         MinimalCustomView: {
-          Component: '@/components/views/root/CustomMinimalRootView#CustomMinimalRootView',
+          Component: '@/components/views/CustomMinimalRootView#CustomMinimalRootView',
           path: '/custom-minimal',
         },
       },

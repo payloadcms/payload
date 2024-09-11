@@ -52,6 +52,58 @@ export interface UserAuthOperations {
 export interface CustomField {
   id: string;
   title?: string | null;
+  arrayFieldServerComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayFieldClientComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksFieldServerComponent?:
+    | {
+        content?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
+      }[]
+    | null;
+  blocksFieldClientComponent?:
+    | {
+        content?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
+      }[]
+    | null;
+  checkboxFieldServerComponent?: boolean | null;
+  checkboxFieldClientComponent?: boolean | null;
+  dateFieldServerComponent?: string | null;
+  dateFieldClientComponent?: string | null;
+  emailFieldServerComponent?: string | null;
+  emailFieldClientComponent?: string | null;
+  numberFieldServerComponent?: number | null;
+  numberFieldClientComponent?: number | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  pointFieldServerComponent?: [number, number] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  pointFieldClientComponent?: [number, number] | null;
+  radioFieldServerComponent?: ('option-1' | 'option-2') | null;
+  radioFieldClientComponent?: ('option-1' | 'option-2') | null;
+  relationshipFieldServerComponent?: (string | null) | CustomField;
+  relationshipFieldClientComponent?: (string | null) | CustomField;
+  selectFieldServerComponent?: ('option-1' | 'option-2' | 'option-3') | null;
+  selectFieldClientComponent?: ('option-1' | 'option-2' | 'option-3') | null;
   textFieldServerComponent?: string | null;
   textFieldClientComponent?: string | null;
   textareaFieldServerComponent?: string | null;

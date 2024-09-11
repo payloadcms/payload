@@ -6,8 +6,8 @@ export const textFields: CollectionConfig['fields'] = [
     type: 'text',
     admin: {
       components: {
-        Field: '@/components/fields/Text/server/Field#CustomTextFieldServer',
-        Label: '@/components/fields/Text/server/Label#CustomTextFieldLabelServer',
+        Field: '@/collections/Fields/text/components/server/Field#CustomTextFieldServer',
+        Label: '@/collections/Fields/text/components/server/Label#CustomTextFieldLabelServer',
       },
     },
   },
@@ -16,8 +16,8 @@ export const textFields: CollectionConfig['fields'] = [
     type: 'text',
     admin: {
       components: {
-        Field: '@/components/fields/Text/client/Field#CustomTextFieldClient',
-        Label: '@/components/fields/Text/client/Label#CustomTextFieldLabelClient',
+        Field: '@/collections/Fields/text/components/client/Field#CustomTextFieldClient',
+        Label: '@/collections/Fields/text/components/client/Label#CustomTextFieldLabelClient',
       },
     },
   },
