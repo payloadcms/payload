@@ -30,26 +30,41 @@ type CheckboxFieldBaseClientProps = {
 export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
   ClientFieldBase<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldServerProps = ServerFieldBase<CheckboxField>
+export type CheckboxFieldServerProps = ServerFieldBase<
+  CheckboxField,
+  CheckboxFieldClientWithoutType
+>
 
-export type CheckboxFieldServerComponent = FieldServerComponent<CheckboxField>
+export type CheckboxFieldServerComponent = FieldServerComponent<
+  CheckboxField,
+  CheckboxFieldClientWithoutType
+>
 
 export type CheckboxFieldClientComponent = FieldClientComponent<
   CheckboxFieldClientWithoutType,
   CheckboxFieldBaseClientProps
 >
 
-export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<CheckboxField>
+export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<
+  CheckboxField,
+  CheckboxFieldClientWithoutType
+>
 
 export type CheckboxFieldLabelClientComponent =
   FieldLabelClientComponent<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldDescriptionServerComponent = FieldDescriptionServerComponent<CheckboxField>
+export type CheckboxFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  CheckboxField,
+  CheckboxFieldClientWithoutType
+>
 
 export type CheckboxFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<CheckboxField>
+export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<
+  CheckboxField,
+  CheckboxFieldClientWithoutType
+>
 
 export type CheckboxFieldErrorClientComponent =
   FieldErrorClientComponent<CheckboxFieldClientWithoutType>

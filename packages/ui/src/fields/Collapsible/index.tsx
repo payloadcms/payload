@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -116,6 +116,11 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
+  const style: AdminClient['style'] = {
+    ...field.admin?.style,
+    '--field-width': field.admin.width,
+  }
+
   return (
     <Fragment>
       <WatchChildErrors fields={fields} path={path} setErrorCount={setErrorCount} />
@@ -129,6 +134,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           .filter(Boolean)
           .join(' ')}
         id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+        style={style}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}

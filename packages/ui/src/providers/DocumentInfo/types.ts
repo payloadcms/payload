@@ -16,14 +16,15 @@ import type {
 import type React from 'react'
 
 export type DocumentInfoProps = {
+  readonly action?: string
   readonly AfterDocument?: React.ReactNode
   readonly AfterFields?: React.ReactNode
+  readonly apiURL?: string
   readonly BeforeDocument?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
-  readonly action?: string
-  readonly apiURL?: string
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
   readonly disableActions?: boolean
+  readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: DocumentPermissions
   readonly globalSlug?: SanitizedGlobalConfig['slug']
@@ -33,8 +34,25 @@ export type DocumentInfoProps = {
   readonly initialData?: Data
   readonly initialState?: FormState
   readonly isEditing?: boolean
+  readonly onDelete?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    id: string
+  }) => Promise<void> | void
+  readonly onDrawerCreate?: () => void
+  /* only available if `redirectAfterDuplicate` is `false` */
+  readonly onDuplicate?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
   readonly onLoadError?: (data?: any) => Promise<void> | void
-  readonly onSave?: (data: Data) => Promise<void> | void
+  readonly onSave?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+    operation: 'create' | 'update'
+    result: Data
+  }) => Promise<void> | void
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 }
 
 export type DocumentInfoContext = {

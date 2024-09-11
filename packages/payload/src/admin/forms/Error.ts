@@ -17,8 +17,12 @@ export type FieldErrorClientProps<
   field: TFieldClient
 } & GenericErrorProps
 
-export type FieldErrorServerProps<TFieldServer extends Field> = {
-  field: TFieldServer
+export type FieldErrorServerProps<
+  TFieldServer extends Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField?: TFieldClient
+  readonly field: TFieldServer
 } & GenericErrorProps &
   Partial<ServerProps>
 
@@ -26,6 +30,7 @@ export type FieldErrorClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = React.ComponentType<FieldErrorClientProps<TFieldClient>>
 
-export type FieldErrorServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
-  FieldErrorServerProps<TFieldServer>
->
+export type FieldErrorServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldErrorServerProps<TFieldServer, TFieldClient>>

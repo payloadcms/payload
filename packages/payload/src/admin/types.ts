@@ -37,14 +37,14 @@ export type {
 } from './fields/Array.js'
 
 export type {
-  BlockFieldDescriptionClientComponent,
-  BlockFieldDescriptionServerComponent,
-  BlockFieldErrorClientComponent,
-  BlockFieldErrorServerComponent,
-  BlockFieldLabelClientComponent,
-  BlockFieldLabelServerComponent,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
+  BlocksFieldDescriptionClientComponent,
+  BlocksFieldDescriptionServerComponent,
+  BlocksFieldErrorClientComponent,
+  BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   BlocksFieldServerComponent,
   BlocksFieldServerProps,
 } from './fields/Blocks.js'
@@ -318,7 +318,7 @@ export type {
   GenericErrorProps,
 } from './forms/Error.js'
 
-export type { FormFieldBase } from './forms/Field.js'
+export type { FormFieldBase, ServerFieldBase } from './forms/Field.js'
 
 export type { Data, FilterOptionsResult, FormField, FormState, Row } from './forms/Form.js'
 
