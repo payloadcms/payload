@@ -25,24 +25,36 @@ type PointFieldBaseClientProps = {
 export type PointFieldClientProps = ClientFieldBase<PointFieldClientWithoutType> &
   PointFieldBaseClientProps
 
-export type PointFieldServerProps = ServerFieldBase<PointField>
+export type PointFieldServerProps = ServerFieldBase<PointField, PointFieldClientWithoutType>
 
-export type PointFieldServerComponent = FieldServerComponent<PointField>
+export type PointFieldServerComponent = FieldServerComponent<
+  PointField,
+  PointFieldClientWithoutType
+>
 
 export type PointFieldClientComponent = FieldClientComponent<
   PointFieldClientWithoutType,
   PointFieldBaseClientProps
 >
 
-export type PointFieldLabelServerComponent = FieldLabelServerComponent<PointField>
+export type PointFieldLabelServerComponent = FieldLabelServerComponent<
+  PointField,
+  PointFieldClientWithoutType
+>
 
 export type PointFieldLabelClientComponent = FieldLabelClientComponent<PointFieldClientWithoutType>
 
-export type PointFieldDescriptionServerComponent = FieldDescriptionServerComponent<PointField>
+export type PointFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  PointField,
+  PointFieldClientWithoutType
+>
 
 export type PointFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<PointFieldClientWithoutType>
 
-export type PointFieldErrorServerComponent = FieldErrorServerComponent<PointField>
+export type PointFieldErrorServerComponent = FieldErrorServerComponent<
+  PointField,
+  PointFieldClientWithoutType
+>
 
 export type PointFieldErrorClientComponent = FieldErrorClientComponent<PointFieldClientWithoutType>

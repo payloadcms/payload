@@ -28,26 +28,41 @@ type TextareaFieldBaseClientProps = {
 export type TextareaFieldClientProps = ClientFieldBase<TextareaFieldClientWithoutType> &
   TextareaFieldBaseClientProps
 
-export type TextareaFieldServerProps = ServerFieldBase<TextareaField>
+export type TextareaFieldServerProps = ServerFieldBase<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
-export type TextareaFieldServerComponent = FieldServerComponent<TextareaField>
+export type TextareaFieldServerComponent = FieldServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldClientComponent = FieldClientComponent<
   TextareaFieldClientWithoutType,
   TextareaFieldBaseClientProps
 >
 
-export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<TextareaField>
+export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldLabelClientComponent =
   FieldLabelClientComponent<TextareaFieldClientWithoutType>
 
-export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<TextareaField>
+export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<TextareaFieldClientWithoutType>
 
-export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<TextareaField>
+export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
 export type TextareaFieldErrorClientComponent =
   FieldErrorClientComponent<TextareaFieldClientWithoutType>

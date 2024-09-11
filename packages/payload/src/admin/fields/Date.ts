@@ -25,24 +25,33 @@ type DateFieldBaseClientProps = {
 export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
   DateFieldBaseClientProps
 
-export type DateFieldServerProps = ServerFieldBase<DateField>
+export type DateFieldServerProps = ServerFieldBase<DateField, DateFieldClientWithoutType>
 
-export type DateFieldServerComponent = FieldServerComponent<DateField>
+export type DateFieldServerComponent = FieldServerComponent<DateField, DateFieldClientWithoutType>
 
 export type DateFieldClientComponent = FieldClientComponent<
   DateFieldClientWithoutType,
   DateFieldBaseClientProps
 >
 
-export type DateFieldLabelServerComponent = FieldLabelServerComponent<DateField>
+export type DateFieldLabelServerComponent = FieldLabelServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
 
 export type DateFieldLabelClientComponent = FieldLabelClientComponent<DateFieldClientWithoutType>
 
-export type DateFieldDescriptionServerComponent = FieldDescriptionServerComponent<DateField>
+export type DateFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
 
 export type DateFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<DateFieldClientWithoutType>
 
-export type DateFieldErrorServerComponent = FieldErrorServerComponent<DateField>
+export type DateFieldErrorServerComponent = FieldErrorServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
 
 export type DateFieldErrorClientComponent = FieldErrorClientComponent<DateFieldClientWithoutType>

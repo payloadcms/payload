@@ -27,26 +27,38 @@ type SelectFieldBaseClientProps = {
 export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
   SelectFieldBaseClientProps
 
-export type SelectFieldServerProps = ServerFieldBase<SelectField>
+export type SelectFieldServerProps = ServerFieldBase<SelectField, SelectFieldClientWithoutType>
 
-export type SelectFieldServerComponent = FieldServerComponent<SelectField>
+export type SelectFieldServerComponent = FieldServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
 
 export type SelectFieldClientComponent = FieldClientComponent<
   SelectFieldClientWithoutType,
   SelectFieldBaseClientProps
 >
 
-export type SelectFieldLabelServerComponent = FieldLabelServerComponent<SelectField>
+export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
 
 export type SelectFieldLabelClientComponent =
   FieldLabelClientComponent<SelectFieldClientWithoutType>
 
-export type SelectFieldDescriptionServerComponent = FieldDescriptionServerComponent<SelectField>
+export type SelectFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
 
 export type SelectFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<SelectFieldClientWithoutType>
 
-export type SelectFieldErrorServerComponent = FieldErrorServerComponent<SelectField>
+export type SelectFieldErrorServerComponent = FieldErrorServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
 
 export type SelectFieldErrorClientComponent =
   FieldErrorClientComponent<SelectFieldClientWithoutType>
