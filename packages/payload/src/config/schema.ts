@@ -128,6 +128,7 @@ export default joi.object({
   }),
   i18n: joi.object(),
   indexSortableFields: joi.boolean(),
+  joiValidation: joi.boolean(),
   local: joi.boolean(),
   localization: joi.alternatives().try(
     joi.object().keys({
