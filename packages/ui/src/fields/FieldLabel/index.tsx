@@ -56,12 +56,12 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
       label={
         typeof props?.label !== 'undefined'
           ? props.label
-          : props?.field && 'label' in props.field && props.field.label
+          : props?.field && 'label' in props.field && (props.field.label as string)
       }
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && props.field?.required
+          : props?.field && 'required' in props.field && (props.field?.required as boolean)
       }
     />
   )
