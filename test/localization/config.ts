@@ -308,6 +308,16 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-array',
     },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: 'global-text',
+    },
   ],
   localization: {
     defaultLocale,

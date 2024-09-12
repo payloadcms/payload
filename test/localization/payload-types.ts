@@ -26,6 +26,7 @@ export interface Config {
     tabs: Tab;
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
+    'localized-within-localized': LocalizedWithinLocalized;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -34,6 +35,7 @@ export interface Config {
   };
   globals: {
     'global-array': GlobalArray;
+    'global-text': GlobalText;
   };
   locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
@@ -74,6 +76,14 @@ export interface BlocksField {
               blockType: 'textBlock';
             }[]
           | null;
+        array?:
+          | {
+              link?: {
+                label?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockInsideBlock';
@@ -93,6 +103,9 @@ export interface NestedArray {
         blocksWithinArray?:
           | {
               relationWithinBlock?: (string | null) | LocalizedPost;
+              myGroup?: {
+                text?: string | null;
+              };
               id?: string | null;
               blockName?: string | null;
               blockType: 'someBlock';
@@ -109,6 +122,7 @@ export interface NestedArray {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -415,6 +429,35 @@ export interface BlocksSameName {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-within-localized".
+ */
+export interface LocalizedWithinLocalized {
+  id: string;
+  myTab?: {
+    shouldNotBeLocalized?: string | null;
+  };
+  myArray?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  myBlocks?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  myGroup?: {
+    shouldNotBeLocalized?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -459,6 +502,16 @@ export interface GlobalArray {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
