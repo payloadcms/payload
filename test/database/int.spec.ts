@@ -10,6 +10,8 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { pushDevSchema } from '@payloadcms/drizzle'
+import { pgTable, serial } from 'drizzle-orm/pg-core'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -474,6 +476,30 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
+    })
+  })
+  describe('schema hooks', () => {
+    it('beforeSchemaInit', async () => {
+      if (payload.db.name === 'mongoose') return
+
+      // delete current
+      await payload.db.migrateFresh({ forceAcceptWarning: true })
+
+      if (payload.db.name.includes('postgres')) {
+        payload.db.beforeSchemaInit = [
+          (schema, adapter) => ({
+            ...schema,
+            tables: {
+              ...schema.tables,
+              custom: pgTable('custom', {
+                id: serial('id').primaryKey().notNull(),
+              }),
+            },
+          }),
+        ]
+      }
+
+      await pushDevSchema(payload.db as any)
     })
   })
 })
