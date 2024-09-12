@@ -73,4 +73,34 @@ describe('_Community Tests', () => {
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
+
+  it('should reproduce', async () => {
+    const postA = await payload.create({ collection: 'posts-a', data: {} })
+    const postB = await payload.create({ collection: 'posts-b', data: {} })
+    const postC = await payload.create({
+      collection: 'posts-custom-id',
+      data: { id: crypto.randomUUID() },
+    })
+
+    const root_1 = await payload.create({
+      collection: 'roots',
+      data: {
+        rel: {
+          value: postC.id,
+          relationTo: 'posts-custom-id',
+        },
+      },
+    })
+
+    const res_1 = await payload.find({
+      collection: 'roots',
+      where: {
+        'rel.value': { equals: postC.id },
+      },
+    })
+
+    // COALESCE types integer and character varying cannot be matched
+
+    expect(res_1.totalDocs).toBe(1)
+  })
 })

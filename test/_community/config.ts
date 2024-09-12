@@ -23,6 +23,28 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'posts-a',
+      fields: [],
+    },
+    {
+      slug: 'posts-b',
+      fields: [],
+    },
+    {
+      slug: 'posts-custom-id',
+      fields: [{ name: 'id', type: 'text' }],
+    },
+    {
+      slug: 'roots',
+      fields: [
+        {
+          name: 'rel',
+          relationTo: ['posts-a', 'posts-b', 'posts-custom-id'],
+          type: 'relationship',
+        },
+      ],
+    },
     MediaCollection,
   ],
   admin: {
