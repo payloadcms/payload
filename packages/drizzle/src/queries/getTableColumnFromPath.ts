@@ -515,7 +515,11 @@ export const getTableColumnFromPath = ({
                 toSnakeCase(adapter.payload.collections[relationTo].config.slug),
               )
 
-              return `"${aliasRelationshipTableName}"."${relationTableName}_id"::text`
+              if (adapter.name === 'postgres') {
+                return `"${aliasRelationshipTableName}"."${relationTableName}_id"::text`
+              } else if (adapter.name === 'sqlite') {
+                return `CAST("${aliasRelationshipTableName}"."${relationTableName}_id" AS TEXT)`
+              }
             })
 
             let column: string
