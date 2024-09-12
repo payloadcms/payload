@@ -72,9 +72,17 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   let versionDocs
   if (entityType === 'global') {
-    versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs
+    if (entity?.db?.findGlobalVersions) {
+      versionDocs = (await entity.db.findGlobalVersions<T>(findVersionsArgs)).docs
+    } else {
+      versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs
+    }
   } else {
-    versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs
+    if (entity?.db?.findVersions) {
+      versionDocs = (await entity.db.findVersions<T>(findVersionsArgs)).docs
+    } else {
+      versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs
+    }
   }
 
   let draft = versionDocs[0]

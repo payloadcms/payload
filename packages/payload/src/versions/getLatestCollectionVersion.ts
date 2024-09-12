@@ -26,14 +26,21 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   const hasConfigDb = Object.keys(config?.db ? config?.db : {}).length > 0
 
   if (config.versions?.drafts && !hasConfigDb) {
-    const { docs } = await payload.db.findVersions<T>({
+    const findVersionsDbArgs = {
       collection: config.slug,
       limit: 1,
       pagination: false,
       req,
       sort: '-updatedAt',
       where: { parent: { equals: id } },
-    })
+    }
+    let result: any
+    if (config?.db?.findVersions) {
+      result = await config.db.findVersions<T>(findVersionsDbArgs)
+    } else {
+      result = await payload.db.findVersions<T>(findVersionsDbArgs)
+    }
+    const docs = result.docs
     ;[latestVersion] = docs
   }
 

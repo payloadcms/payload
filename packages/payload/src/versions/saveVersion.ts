@@ -44,7 +44,7 @@ export const saveVersion = async ({
         sort: '-updatedAt',
       }
       if (collection) {
-        ;({ docs } = await payload.db.findVersions({
+        const findVersionsDbArgs = {
           ...findVersionArgs,
           collection: collection.slug,
           req,
@@ -53,13 +53,24 @@ export const saveVersion = async ({
               equals: id,
             },
           },
-        }))
+        }
+
+        if (collection?.db?.findVersions) {
+          ;({ docs } = await collection.db.findVersions(findVersionsDbArgs))
+        } else {
+          ;({ docs } = await payload.db.findVersions(findVersionsDbArgs))
+        }
       } else {
-        ;({ docs } = await payload.db.findGlobalVersions({
+        const findGlobalVersionsDbArgs = {
           ...findVersionArgs,
           global: global.slug,
           req,
-        }))
+        }
+        if (global?.db?.findGlobalVersions) {
+          ;({ docs } = await global.db.findGlobalVersions(findGlobalVersionsDbArgs))
+        } else {
+          ;({ docs } = await payload.db.findGlobalVersions(findGlobalVersionsDbArgs))
+        }
       }
       const [latestVersion] = docs
 
@@ -80,24 +91,34 @@ export const saveVersion = async ({
         }
 
         if (collection) {
-          result = await payload.db.updateVersion({
+          const updateVersionDbArgs = {
             ...updateVersionArgs,
             collection: collection.slug,
             req,
-          })
+          }
+          if (collection?.db?.updateVersion) {
+            result = await collection.db.updateVersion(updateVersionDbArgs)
+          } else {
+            result = await payload.db.updateVersion(updateVersionDbArgs)
+          }
         } else {
-          result = await payload.db.updateGlobalVersion({
+          const updateGlobalVersionDbArgs = {
             ...updateVersionArgs,
             global: global.slug,
             req,
-          })
+          }
+          if (global?.db?.updateGlobalVersion) {
+            result = await global.db.updateGlobalVersion(updateGlobalVersionDbArgs)
+          } else {
+            result = await payload.db.updateGlobalVersion(updateGlobalVersionDbArgs)
+          }
         }
       }
     }
 
     if (createNewVersion) {
       if (collection) {
-        result = await payload.db.createVersion({
+        const createVersionDbArgs = {
           autosave: Boolean(autosave),
           collectionSlug: collection.slug,
           createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
@@ -105,11 +126,16 @@ export const saveVersion = async ({
           req,
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
           versionData,
-        })
+        }
+        if (collection?.db?.createVersion) {
+          result = await collection.db.createVersion(createVersionDbArgs)
+        } else {
+          result = await payload.db.createVersion(createVersionDbArgs)
+        }
       }
 
       if (global) {
-        result = await payload.db.createGlobalVersion({
+        const createGlobalVersionDbArgs = {
           autosave: Boolean(autosave),
           createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
           globalSlug: global.slug,
@@ -117,7 +143,12 @@ export const saveVersion = async ({
           req,
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
           versionData,
-        })
+        }
+        if (global?.db?.createGlobalVersion) {
+          result = await global.db.createGlobalVersion(createGlobalVersionDbArgs)
+        } else {
+          result = await payload.db.createGlobalVersion(createGlobalVersionDbArgs)
+        }
       }
     }
   } catch (err) {
