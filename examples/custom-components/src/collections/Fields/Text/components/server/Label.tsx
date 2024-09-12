@@ -3,10 +3,9 @@ import type { TextFieldLabelServerComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = (props) => {
-  const { field } = props
-
-  // return <FieldLabel field={field} />
-
-  return 'This is a server component for the text field label.'
+export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = ({
+  clientField,
+  label,
+}) => {
+  return <FieldLabel field={clientField} label={label} />
 }

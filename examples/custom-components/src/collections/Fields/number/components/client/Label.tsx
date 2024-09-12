@@ -4,8 +4,6 @@ import type { NumberFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = (props) => {
-  const { field, label } = props
-
+export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = ({ field, label }) => {
   return <FieldLabel field={field} label={label} />
 }

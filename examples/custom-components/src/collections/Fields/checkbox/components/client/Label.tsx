@@ -4,8 +4,9 @@ import type { CheckboxFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomCheckboxFieldLabelClient: CheckboxFieldLabelClientComponent = (props) => {
-  const { field, label } = props
-
+export const CustomCheckboxFieldLabelClient: CheckboxFieldLabelClientComponent = ({
+  field,
+  label,
+}) => {
   return <FieldLabel field={field} label={label} />
 }
