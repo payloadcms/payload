@@ -14,7 +14,7 @@ process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const dbAdapter = process.env.PAYLOAD_DATABASE || 'sqlite'
+const dbAdapter = process.env.PAYLOAD_DATABASE || 'mongodb'
 
 // Generate databaseAdapter.ts
 const databaseAdapter = getDatabaseAdapter(dbAdapter)
