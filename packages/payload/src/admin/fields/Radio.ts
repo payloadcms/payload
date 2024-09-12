@@ -27,9 +27,12 @@ type RadioFieldBaseClientProps = {
 export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
   RadioFieldBaseClientProps
 
-export type RadioFieldServerProps = ServerFieldBase<RadioField>
+export type RadioFieldServerProps = ServerFieldBase<RadioField, RadioFieldClientWithoutType>
 
-export type RadioFieldServerComponent = FieldServerComponent<RadioField>
+export type RadioFieldServerComponent = FieldServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
 
 export type RadioFieldClientComponent = FieldClientComponent<
   RadioFieldClientWithoutType,
@@ -38,15 +41,24 @@ export type RadioFieldClientComponent = FieldClientComponent<
 
 export type OnChange<T = string> = (value: T) => void
 
-export type RadioFieldLabelServerComponent = FieldLabelServerComponent<RadioField>
+export type RadioFieldLabelServerComponent = FieldLabelServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
 
 export type RadioFieldLabelClientComponent = FieldLabelClientComponent<RadioFieldClientWithoutType>
 
-export type RadioFieldDescriptionServerComponent = FieldDescriptionServerComponent<RadioField>
+export type RadioFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
 
 export type RadioFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<RadioFieldClientWithoutType>
 
-export type RadioFieldErrorServerComponent = FieldErrorServerComponent<RadioField>
+export type RadioFieldErrorServerComponent = FieldErrorServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
 
 export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>

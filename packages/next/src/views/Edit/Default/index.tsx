@@ -43,6 +43,7 @@ export const DefaultEditView: React.FC = () => {
     BeforeFields,
     collectionSlug,
     disableActions,
+    disableCreate,
     disableLeaveWithoutSaving,
     docPermissions,
     getDocPreferences,
@@ -54,7 +55,12 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
@@ -223,11 +229,18 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            disableCreate={disableCreate}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onDelete={onDelete}
+            onDrawerCreate={onDrawerCreate}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
             permissions={docPermissions}
+            redirectAfterDelete={redirectAfterDelete}
+            redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.102",
+  "version": "3.0.0-beta.103",
   "private": true,
   "type": "module",
   "scripts": {
@@ -86,6 +86,7 @@
     "test:e2e:prod:ci": "rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd .. && pnpm runts ./test/runE2E.ts --prod",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },

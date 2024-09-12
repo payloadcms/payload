@@ -47,7 +47,7 @@ export type SelectInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: string
+  readonly width?: React.CSSProperties['width']
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
