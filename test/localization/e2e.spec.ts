@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { englishLocale } from 'globals/config.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -251,11 +252,41 @@ describe('Localization', () => {
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
     })
   })
+
+  describe('copy localized data', () => {
+    test('should show copy button', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.copy-locale-data')).toBeVisible()
+    })
+
+    test('should show popup', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, englishLocale)
+      await page.locator('.copy-locale-data').click()
+      const firstButton = page.locator('.popup-button-list__button').first()
+      await expect(firstButton).toContainText('English to Spanish')
+    })
+
+    test('should show correct locales', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, englishLocale)
+      await page.locator('.copy-locale-data').click()
+      // const firstButton = page.locator('.popup-button-list__button').first()
+      // await expect(firstButton).toContainText('English to Spanish')
+    })
+
+    // should copy data to correct locale
+    // should throw error if unsaved data
+  })
 })
 
 async function fillValues(data: Partial<LocalizedPost>) {
   const { description: descVal, title: titleVal } = data
 
-  if (titleVal) {await page.locator('#field-title').fill(titleVal)}
-  if (descVal) {await page.locator('#field-description').fill(descVal)}
+  if (titleVal) {
+    await page.locator('#field-title').fill(titleVal)
+  }
+  if (descVal) {
+    await page.locator('#field-description').fill(descVal)
+  }
 }

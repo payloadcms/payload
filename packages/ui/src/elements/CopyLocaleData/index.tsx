@@ -36,15 +36,18 @@ export const DefaultComponent: React.FC = () => {
       if (modified) {
         // todo: add translation
         toast.error('you have unsaved data')
+        return null
       }
 
       try {
         let url
+        let method = 'PATCH'
 
         if (collectionSlug) {
           url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${from}`
         } else if (globalSlug) {
           url = `${serverURL}${api}/globals/${globalSlug}?locale=${from}`
+          method = 'POST'
         }
 
         const response = await fetch(url)
@@ -57,7 +60,7 @@ export const DefaultComponent: React.FC = () => {
 
         await submit({
           action,
-          method: 'PATCH',
+          method,
           overrides: {
             ...data,
             _status: 'draft',
@@ -65,7 +68,7 @@ export const DefaultComponent: React.FC = () => {
           skipValidation: true,
         })
       } catch (error) {
-        console.error('Error copying locale data:', error)
+        toast.error('Error copying locale data:', error)
       }
     },
     [modified, collectionSlug, globalSlug, submit, serverURL, api, id],
