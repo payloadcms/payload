@@ -16,6 +16,7 @@ import type {
   pgEnum,
   PgInsertOnConflictDoUpdateConfig,
   PgSchema,
+  PgTable,
   PgTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core'
@@ -94,7 +95,7 @@ type Schema =
 type PostgresSchema = {
   enums: Record<string, GenericEnum>
   relations: Record<string, GenericRelation>
-  tables: Record<string, GenericTable>
+  tables: Record<string, PgTable>
 }
 
 export type PostgresSchemaHook = (

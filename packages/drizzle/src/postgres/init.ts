@@ -114,16 +114,5 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
     }
   })
 
-  await this.afterSchemaInit.reduce(async (promise, transform) => {
-    await promise
-    const result = await transform(
-      { enums: this.enums, relations: this.relations, tables: this.tables },
-      this,
-    )
-    this.enums = result.enums
-    this.tables = result.tables
-    this.relations = result.relations
-  }, Promise.resolve())
-
   await executeSchemaHooks(this, 'afterSchemaInit')
 }
