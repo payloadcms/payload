@@ -30,6 +30,7 @@ const Context = createContext({} as SelectionContext)
 
 type Props = {
   readonly children: React.ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
 }
@@ -106,11 +107,17 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           id: { not_equals: '' },
         }
       } else {
+        const ids = []
+
+        for (const [key, value] of selected) {
+          if (value) {
+            ids.push(key)
+          }
+        }
+
         where = {
           id: {
-            in: Object.keys(selected)
-              .filter((id) => selected[id])
-              .map((id) => id),
+            in: ids,
           },
         }
       }
@@ -141,23 +148,38 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       all = false
       some = false
     } else {
-      for (const [key, value] of selected) {
+      for (const [_, value] of selected) {
         all = all && value
         some = some || value
       }
     }
 
     if (all && selected.size === docs.length) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.Some)
     } else {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.None)
     }
   }, [selectAll, selected, totalDocs, docs])
 
   useEffect(() => {
-    const newCount = selectAll === SelectAllStatus.AllAvailable ? totalDocs : selected.size
+    let newCount = 0
+
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      newCount = totalDocs
+    } else {
+      for (const [_, value] of selected) {
+        if (value) {
+          newCount++
+        }
+      }
+    }
+
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
