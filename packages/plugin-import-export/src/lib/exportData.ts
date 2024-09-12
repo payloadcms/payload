@@ -14,7 +14,9 @@ export const exportData = async ({ payload }: { payload: Payload }) => {
     return
   }
 
-  payload.logger.info(`Exporting data from collections: ${collectionSlugs.join(', ')}`)
+  payload.logger.info(
+    `Exporting data from collections: ${collectionSlugs.filter((slug) => [exportsCollectionSlug, exportsUploadsCollectionSlug].includes(slug)).join(', ')}`,
+  )
 
   const promiseMap: Record<string, Promise<JsonObject | PaginatedDocs['docs']>> = {}
 

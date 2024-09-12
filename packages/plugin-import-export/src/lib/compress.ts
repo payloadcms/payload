@@ -1,21 +1,28 @@
-import type { Payload } from 'payload'
+import type { PaginatedDocs, Payload, PayloadRequest } from 'payload'
 
 import archiver from 'archiver'
 import { createWriteStream } from 'fs'
 import fs from 'fs/promises'
 import path from 'path'
 
+import type { CollectionExport } from '../types.js'
+
 import { exportsCollectionSlug } from '../constants.js'
 
 export const compress = async (args: {
-  destination: string
+  destination: string // Should this optionally accept a write stream as well?
   payload: Payload
 }): Promise<{ zipPath: string }> => {
   const { destination, payload } = args
 
-  const rawData = await payload.find({
+  const rawData: PaginatedDocs<{
+    collectionExports: CollectionExport[]
+    createdAt: string
+    id: string
+  }> = await payload.db.find({
     collection: exportsCollectionSlug,
     limit: 1,
+    req: {} as PayloadRequest,
     sort: 'createdAt',
   })
 

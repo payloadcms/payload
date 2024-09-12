@@ -6,7 +6,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { postsSlug } from './collections/Posts/index.js'
 
 let payload: Payload
 
