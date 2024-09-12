@@ -63,7 +63,7 @@ export type UploadInputProps = {
   readonly hasMany?: boolean
   readonly isSortable?: boolean
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly maxRows?: number
   readonly onChange?: (e) => void

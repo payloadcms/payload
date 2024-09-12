@@ -107,14 +107,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? field.admin.components.Label
         : undefined
 
-    const Label = (
-      <FieldLabel
-        Label={CustomLabelToRender}
-        field={field}
-        label={'label' in field ? (field.label as StaticLabel) : undefined}
-        unstyled
-      />
-    )
+    const Label = <FieldLabel field={field} Label={CustomLabelToRender} unstyled />
 
     const fieldAffectsDataSubFields =
       field &&
@@ -123,8 +116,8 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const Heading = (
       <SortColumn
-        Label={Label}
         disable={fieldAffectsDataSubFields || field?._isPresentational || undefined}
+        Label={Label}
         label={'label' in field ? (field.label as StaticLabel) : undefined}
         name={'name' in field ? field.name : undefined}
         {...(sortColumnProps || {})}
@@ -133,7 +126,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     if (field) {
       const column: Column = {
-        Heading,
         accessor: 'name' in field ? field.name : undefined,
         active,
         cellProps: {
@@ -153,6 +145,7 @@ export const buildColumnState = (args: Args): Column[] => {
             },
           } as ClientField,
         },
+        Heading,
       }
 
       acc.push(column)
@@ -163,7 +156,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
   if (enableRowSelections) {
     sorted.unshift({
-      Heading: <SelectAll />,
       accessor: '_select',
       active: true,
       cellProps: {
@@ -180,6 +172,7 @@ export const buildColumnState = (args: Args): Column[] => {
           },
         } as ClientField,
       },
+      Heading: <SelectAll />,
     })
   }
 

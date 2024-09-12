@@ -33,7 +33,6 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
         width,
       } = {},
       hasMany,
-      label,
       localized,
       maxLength,
       maxRows,
@@ -131,7 +130,6 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       hasMany={hasMany}
       inputRef={inputRef}
       Label={field?.admin?.components?.Label}
-      label={label}
       maxRows={maxRows}
       minRows={minRows}
       onChange={
