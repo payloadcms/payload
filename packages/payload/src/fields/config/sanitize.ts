@@ -25,6 +25,9 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  /**
+   * When not passed in, assume that join are not supported (globals, arrays, blocks)
+   */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
   /**
@@ -101,10 +104,9 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
+      // the `joins` arg is not passed for globals or for when recursing on fields that do not allow a join field
       if (typeof joins === 'undefined') {
-        throw new APIError(
-          'Join fields cannot be added to arrays or blocks to avoid duplicate data.',
-        )
+        throw new APIError('Join fields cannot be added to arrays, blocks or globals.')
       }
       const join = {
         field,
@@ -116,6 +118,7 @@ export const sanitizeFields = async ({
         joins[field.collection].push(join)
       }
     }
+
     if (field.type === 'relationship' || field.type === 'upload') {
       if (validRelationships) {
         const relationships = Array.isArray(field.relationTo)
