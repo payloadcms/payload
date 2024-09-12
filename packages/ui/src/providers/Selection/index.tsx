@@ -20,7 +20,7 @@ type SelectionContext = {
   disableBulkEdit?: boolean
   getQueryParams: (additionalParams?: Where) => string
   selectAll: SelectAllStatus
-  selected: Record<number | string, boolean>
+  selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
@@ -39,35 +39,33 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const { code: locale } = useLocale()
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
-    const rows = {}
+    const rows = new Map()
     docs.forEach(({ id }) => {
-      rows[id] = false
+      rows.set(id, false)
     })
     return rows
   })
+
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const { searchParams } = useSearchParams()
 
   const toggleAll = useCallback(
     (allAvailable = false) => {
-      const rows = {}
+      const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
         docs.forEach(({ id }) => {
-          rows[id] = true
+          rows.set(id, true)
         })
       } else if (
         selectAll === SelectAllStatus.AllAvailable ||
         selectAll === SelectAllStatus.AllInPage
       ) {
         setSelectAll(SelectAllStatus.None)
-        docs.forEach(({ id }) => {
-          rows[id] = false
-        })
       } else {
         docs.forEach(({ id }) => {
-          rows[id] = selectAll !== SelectAllStatus.Some
+          rows.set(id, selectAll !== SelectAllStatus.Some)
         })
       }
       setSelected(rows)
@@ -77,15 +75,24 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const setSelection = useCallback(
     (id) => {
-      const isSelected = !selected[id]
-      const newSelected = {
-        ...selected,
-        [id]: isSelected,
+      let isSelected = true
+
+      for (const [key, value] of selected) {
+        if (key === id) {
+          isSelected = !value
+          break
+        }
       }
-      if (!isSelected) {
-        setSelectAll(SelectAllStatus.Some)
+
+      let newMap = new Map()
+
+      if (isSelected) {
+        newMap = new Map(selected.set(id, isSelected))
+      } else {
+        newMap = new Map(selected.set(id, false))
       }
-      setSelected(newSelected)
+
+      setSelected(newMap)
     },
     [selected],
   )
@@ -130,30 +137,27 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     let some = false
     let all = true
 
-    if (!Object.values(selected).length) {
+    if (!selected.size) {
       all = false
       some = false
     } else {
-      Object.values(selected).forEach((val) => {
-        all = all && val
-        some = some || val
-      })
+      for (const [key, value] of selected) {
+        all = all && value
+        some = some || value
+      }
     }
 
-    if (all) {
+    if (all && selected.size === docs.length) {
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
       setSelectAll(SelectAllStatus.Some)
     } else {
       setSelectAll(SelectAllStatus.None)
     }
-  }, [selectAll, selected])
+  }, [selectAll, selected, totalDocs, docs])
 
   useEffect(() => {
-    const newCount =
-      selectAll === SelectAllStatus.AllAvailable
-        ? totalDocs
-        : Object.keys(selected).filter((id) => selected[id]).length
+    const newCount = selectAll === SelectAllStatus.AllAvailable ? totalDocs : selected.size
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
