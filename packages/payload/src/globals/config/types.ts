@@ -178,7 +178,25 @@ export type GlobalConfig = {
     | DatabaseAdapter
     | Pick<
         DatabaseAdapter,
-        'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'init' | 'updateOne'
+        | 'count'
+        | 'create'
+        | 'createGlobal'
+        | 'createGlobalVersion'
+        | 'createVersion'
+        | 'deleteMany'
+        | 'deleteOne'
+        | 'deleteVersions'
+        | 'find'
+        | 'findGlobal'
+        | 'findGlobalVersions'
+        | 'findOne'
+        | 'findVersions'
+        | 'init'
+        | 'queryDrafts'
+        | 'updateGlobal'
+        | 'updateGlobalVersion'
+        | 'updateOne'
+        | 'updateVersion'
       >
   /**
    * Customize the SQL table name
