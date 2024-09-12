@@ -147,13 +147,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}

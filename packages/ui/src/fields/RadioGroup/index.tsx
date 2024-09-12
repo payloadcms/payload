@@ -99,13 +99,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         {...(errorProps || {})}
         alignCaret="left"
       />
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
