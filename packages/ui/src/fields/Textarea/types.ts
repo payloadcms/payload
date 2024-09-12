@@ -24,7 +24,7 @@ export type TextAreaInputProps = {
   readonly field?: MarkOptional<TextareaFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<TextareaFieldClient, 'type'>>
   readonly onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
