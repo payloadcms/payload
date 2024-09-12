@@ -1,5 +1,5 @@
 'use client'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
