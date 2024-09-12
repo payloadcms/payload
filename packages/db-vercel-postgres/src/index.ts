@@ -76,6 +76,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
 
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
       defaultDrizzleSnapshot,
       drizzle: undefined,
       enums: {},

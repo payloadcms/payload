@@ -91,7 +91,20 @@ type Schema =
     }
   | PgSchema
 
+type PostgresSchema = {
+  enums: Record<string, GenericEnum>
+  relations: Record<string, GenericRelation>
+  tables: Record<string, GenericTable>
+}
+
+export type PostgresSchemaHook = (
+  schema: PostgresSchema,
+  adapter: PostgresDrizzleAdapter,
+) => PostgresSchema | Promise<PostgresSchema>
+
 export type BasePostgresAdapter = {
+  afterSchemaInit: PostgresSchemaHook[]
+  beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
