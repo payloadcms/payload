@@ -13,10 +13,6 @@ export interface Config {
   collections: {
     posts: Post;
     simple: Simple;
-    'posts-a': PostsA;
-    'posts-b': PostsB;
-    'posts-custom-id': PostsCustomId;
-    roots: Root;
     media: Media;
     users: User;
     'payload-preferences': PayloadPreference;
@@ -102,55 +98,6 @@ export interface Post {
 export interface Simple {
   id: string;
   text?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-a".
- */
-export interface PostsA {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-b".
- */
-export interface PostsB {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-custom-id".
- */
-export interface PostsCustomId {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roots".
- */
-export interface Root {
-  id: string;
-  rel?:
-    | ({
-        relationTo: 'posts-a';
-        value: string | PostsA;
-      } | null)
-    | ({
-        relationTo: 'posts-b';
-        value: string | PostsB;
-      } | null)
-    | ({
-        relationTo: 'posts-custom-id';
-        value: string | PostsCustomId;
-      } | null);
   updatedAt: string;
   createdAt: string;
 }
