@@ -22,7 +22,7 @@ export type FieldLabelServerProps<
   TFieldServer extends Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = {
-  clientField?: TFieldClient
+  clientField: TFieldClient
   readonly field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>
