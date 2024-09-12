@@ -108,6 +108,9 @@ export const sanitizeFields = async ({
       if (typeof joins === 'undefined') {
         throw new APIError('Join fields cannot be added to arrays, blocks or globals.')
       }
+      if (!field.maxDepth) {
+        field.maxDepth = 1
+      }
       const join = {
         field,
         schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
