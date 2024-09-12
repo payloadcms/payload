@@ -101,14 +101,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? field.admin.components.Label
         : undefined
 
-    const Label = (
-      <FieldLabel
-        field={field}
-        Label={CustomLabelToRender}
-        label={'label' in field ? (field.label as StaticLabel) : undefined}
-        unstyled
-      />
-    )
+    const Label = <FieldLabel field={field} Label={CustomLabelToRender} unstyled />
 
     const fieldAffectsDataSubFields =
       field &&

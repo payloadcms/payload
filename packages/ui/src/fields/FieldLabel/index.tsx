@@ -1,7 +1,6 @@
 'use client'
 
-import type { ClientField, FieldLabelClientComponent, GenericLabelProps } from 'payload'
-import type { MarkOptional } from 'ts-essentials'
+import type { FieldLabelClientComponent, GenericLabelProps, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -42,13 +41,11 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   return null
 }
 
-type ClientFieldWithLabel = MarkOptional<Exclude<ClientField, { type: 'row' }>, 'type'>
-
-export const FieldLabel: FieldLabelClientComponent<ClientFieldWithLabel> = (props) => {
+export const FieldLabel: FieldLabelClientComponent = (props) => {
   const { Label, ...rest } = props
 
   // Don't get `Label` from `field.admin.components.Label` here because
-  // this will cause an infinite loop within a custom `Label` component
+  // this will cause an infinite loop when threading field through custom usages of `FieldLabel`
   if (Label) {
     return <RenderComponent clientProps={rest} mappedComponent={Label} />
   }
@@ -59,7 +56,7 @@ export const FieldLabel: FieldLabelClientComponent<ClientFieldWithLabel> = (prop
       label={
         typeof props?.label !== 'undefined'
           ? props.label
-          : props?.field && 'label' in props.field && props.field.label
+          : props?.field && 'label' in props.field && (props.field.label as StaticLabel) // type assertion needed for `row` fields
       }
       required={
         typeof props.required !== 'undefined'
