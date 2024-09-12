@@ -1413,10 +1413,7 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
-  required?: never
   type: 'join'
-  typescriptSchema?: never
-  unique?: never
   validate?: never
 } & FieldBase
 
