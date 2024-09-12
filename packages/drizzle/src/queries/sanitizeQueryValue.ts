@@ -100,10 +100,10 @@ export const sanitizeQueryValue = ({
         }
         idType = typeMap[mixedType]
       } else {
-        // LIMITATION: Only cast to the first relationTo id type,
-        // otherwise we need to make the db cast which is inefficient
-        const collection = adapter.payload.collections[field.relationTo[0]]
-        idType = collection.customIDType || adapter.idType === 'uuid' ? 'text' : 'number'
+        const hasCollectionWithCustomID = field.relationTo.some(
+          (each) => !!adapter.payload.collections[each].customIDType,
+        )
+        idType = hasCollectionWithCustomID || adapter.idType === 'uuid' ? 'text' : 'number'
       }
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.map((value) => {

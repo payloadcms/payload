@@ -510,16 +510,28 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
+            const hasCollectionWithCustomID = field.relationTo.some(
+              (each) => !!adapter.payload.collections[each].customIDType,
+            )
+
             const tableColumnsNames = field.relationTo.map((relationTo) => {
               const relationTableName = adapter.tableNameMap.get(
                 toSnakeCase(adapter.payload.collections[relationTo].config.slug),
               )
 
-              if (adapter.name === 'postgres') {
-                return `"${aliasRelationshipTableName}"."${relationTableName}_id"::text`
-              } else if (adapter.name === 'sqlite') {
-                return `CAST("${aliasRelationshipTableName}"."${relationTableName}_id" AS TEXT)`
+              const columnName = `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+
+              if (!hasCollectionWithCustomID) {
+                return columnName
               }
+              if (adapter.name.includes('postgres')) {
+                return `${columnName}::text`
+              }
+              if (adapter.name.includes('sqlite')) {
+                return `cast(${columnName} as text)`
+              }
+
+              throw new APIError(`Cast is not implemented for database adapter: ${adapter.name}`)
             })
 
             let column: string
