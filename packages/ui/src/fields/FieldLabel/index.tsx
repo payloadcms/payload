@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldLabelClientComponent, GenericLabelProps } from 'payload'
+import type { ClientField, FieldLabelClientComponent, GenericLabelProps } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -41,7 +42,9 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
   return null
 }
 
-export const FieldLabel: FieldLabelClientComponent = (props) => {
+type ClientFieldWithLabel = MarkOptional<Exclude<ClientField, { type: 'row' }>, 'type'>
+
+export const FieldLabel: FieldLabelClientComponent<ClientFieldWithLabel> = (props) => {
   const { Label, ...rest } = props
 
   // Don't get `Label` from `field.admin.components.Label` here because
@@ -56,12 +59,12 @@ export const FieldLabel: FieldLabelClientComponent = (props) => {
       label={
         typeof props?.label !== 'undefined'
           ? props.label
-          : props?.field && 'label' in props.field && (props.field.label as string)
+          : props?.field && 'label' in props.field && props.field.label
       }
       required={
         typeof props.required !== 'undefined'
           ? props.required
-          : props?.field && 'required' in props.field && (props.field?.required as boolean)
+          : props?.field && 'required' in props.field && (props.field?.required as boolean) // type assertion needed for `group` fields
       }
     />
   )
