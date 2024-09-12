@@ -239,8 +239,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 as="span"
                 field={field}
                 Label={field?.admin?.components?.Label}
-                label={label}
-                required={required}
                 unstyled
                 {...(labelProps || {})}
               />
