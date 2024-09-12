@@ -391,7 +391,25 @@ export type CollectionConfig = {
     | DatabaseAdapter
     | Pick<
         DatabaseAdapter,
-        'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'init' | 'updateOne'
+        | 'count'
+        | 'create'
+        | 'createGlobal'
+        | 'createGlobalVersion'
+        | 'createVersion'
+        | 'deleteMany'
+        | 'deleteOne'
+        | 'deleteVersions'
+        | 'find'
+        | 'findGlobal'
+        | 'findGlobalVersions'
+        | 'findOne'
+        | 'findVersions'
+        | 'init'
+        | 'queryDrafts'
+        | 'updateGlobal'
+        | 'updateGlobalVersion'
+        | 'updateOne'
+        | 'updateVersion'
       >
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
