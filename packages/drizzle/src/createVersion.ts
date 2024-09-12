@@ -36,7 +36,7 @@ export async function createVersion<T extends TypeWithID>(
     version,
   }
 
-  if (collection.timestamps && 'createdAt' in version) {
+  if ('createdAt' in version) {
     data.createdAt = version.createdAt
   }
 
