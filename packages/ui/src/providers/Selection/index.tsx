@@ -76,14 +76,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const setSelection = useCallback(
     (id) => {
-      let isSelected = true
-
-      for (const [key, value] of selected) {
-        if (key === id) {
-          isSelected = !value
-          break
-        }
-      }
+      const existingValue = selected.get(id)
+      const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
       let newMap = new Map()
 
