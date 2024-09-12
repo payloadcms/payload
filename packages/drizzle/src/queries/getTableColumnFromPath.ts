@@ -515,7 +515,7 @@ export const getTableColumnFromPath = ({
                 toSnakeCase(adapter.payload.collections[relationTo].config.slug),
               )
 
-              return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+              return `"${aliasRelationshipTableName}"."${relationTableName}_id"::text`
             })
 
             let column: string
@@ -546,27 +546,6 @@ export const getTableColumnFromPath = ({
                 }
                 return undefined
               },
-              table: aliasRelationshipTable,
-            }
-          } else if (newCollectionPath === '') {
-            const tableColumnsNames = field.relationTo.map((relationTo) => {
-              const relationTableName = adapter.tableNameMap.get(
-                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
-              )
-              return `"${relationTableName}_id"`
-            })
-
-            let column: string
-            if (tableColumnsNames.length === 1) {
-              column = tableColumnsNames[0]
-            } else {
-              column = `COALESCE(${tableColumnsNames.join(', ')})`
-            }
-
-            return {
-              constraints,
-              field,
-              rawColumn: sql.raw(`${column}`),
               table: aliasRelationshipTable,
             }
           } else {
