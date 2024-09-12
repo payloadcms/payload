@@ -12,9 +12,7 @@ export type GenericLabelProps = {
   readonly unstyled?: boolean
 }
 
-export type FieldLabelClientProps<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
+export type FieldLabelClientProps<TFieldClient extends ClientField = ClientField> = {
   field: TFieldClient
 } & GenericLabelProps
 
@@ -32,9 +30,8 @@ export type SanitizedLabelProps<TFieldClient extends ClientField> = Omit<
   'label' | 'required'
 >
 
-export type FieldLabelClientComponent<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldLabelClientProps<TFieldClient>>
+export type FieldLabelClientComponent<TFieldClient extends ClientField = ClientField> =
+  React.ComponentType<FieldLabelClientProps<TFieldClient>>
 
 export type FieldLabelServerComponent<
   TFieldServer extends Field = Field,

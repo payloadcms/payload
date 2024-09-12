@@ -110,6 +110,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       <ul className={`${baseClass}__wrap`}>
         <li>
           <FieldLabel
+            field={field}
             Label={field?.admin?.components?.Label}
             {...getCoordinateFieldLabel('longitude')}
           />

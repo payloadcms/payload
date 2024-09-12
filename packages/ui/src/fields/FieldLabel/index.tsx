@@ -44,9 +44,25 @@ const DefaultFieldLabel: React.FC<GenericLabelProps> = (props) => {
 export const FieldLabel: FieldLabelClientComponent = (props) => {
   const { Label, ...rest } = props
 
+  // Don't get `Label` from `field.admin.components.Label` here because
+  // this will cause an infinite loop within a custom `Label` component
   if (Label) {
     return <RenderComponent clientProps={rest} mappedComponent={Label} />
   }
 
-  return <DefaultFieldLabel {...rest} />
+  return (
+    <DefaultFieldLabel
+      {...rest}
+      label={
+        typeof props?.label !== 'undefined'
+          ? props.label
+          : props?.field && 'label' in props.field && props.field.label
+      }
+      required={
+        typeof props.required !== 'undefined'
+          ? props.required
+          : props?.field && 'required' in props.field && props.field?.required
+      }
+    />
+  )
 }
