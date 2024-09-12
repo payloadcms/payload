@@ -50,12 +50,18 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // Perform database operation
     // /////////////////////////////////////
 
-    let doc = await req.payload.db.findGlobal({
+    const findGlobalArgs = {
       slug,
       locale,
       req,
       where: overrideAccess ? undefined : (accessResult as Where),
-    })
+    }
+    let doc
+    if (globalConfig?.db?.findGlobal) {
+      doc = await globalConfig.db.findGlobal(findGlobalArgs)
+    } else {
+      doc = await req.payload.db.findGlobal(findGlobalArgs)
+    }
     if (!doc) {
       doc = {}
     }

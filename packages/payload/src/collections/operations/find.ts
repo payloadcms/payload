@@ -124,7 +124,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         where: fullWhere,
       })
 
-      result = await payload.db.queryDrafts<T>({
+      const queryDraftArgs = {
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
         locale,
@@ -133,7 +133,12 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         req,
         sort: getQueryDraftsSort(sort),
         where: fullWhere,
-      })
+      }
+      if (collectionConfig?.db?.queryDrafts) {
+        result = await collectionConfig.db.queryDrafts<T>(queryDraftArgs)
+      } else {
+        result = await payload.db.queryDrafts<T>(queryDraftArgs)
+      }
     } else {
       await validateQueryPaths({
         collectionConfig,

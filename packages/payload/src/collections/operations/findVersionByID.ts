@@ -65,14 +65,21 @@ async function findVersionByID<T extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
-    const versionsQuery = await payload.db.findVersions<T>({
+    const findVersionsDbArgs = {
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       pagination: false,
       req,
       where: fullWhere,
-    })
+    }
+
+    let versionsQuery
+    if (collectionConfig?.db?.findVersions) {
+      versionsQuery = await collectionConfig.db.findVersions<T>(findVersionsDbArgs)
+    } else {
+      versionsQuery = await payload.db.findVersions<T>(findVersionsDbArgs)
+    }
 
     const result = versionsQuery.docs[0]
 

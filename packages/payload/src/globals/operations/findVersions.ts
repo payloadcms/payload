@@ -69,7 +69,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
-    const paginatedDocs = await payload.db.findGlobalVersions<T>({
+    const paginatedDocsArgs = {
       global: globalConfig.slug,
       limit: limit ?? 10,
       locale,
@@ -77,7 +77,13 @@ async function findVersions<T extends TypeWithVersion<T>>(
       req,
       sort,
       where: fullWhere,
-    })
+    }
+    let paginatedDocs: any
+    if (globalConfig?.db?.findGlobalVersions) {
+      paginatedDocs = await globalConfig.db.findGlobalVersions<T>(paginatedDocsArgs)
+    } else {
+      paginatedDocs = await payload.db.findGlobalVersions<T>(paginatedDocsArgs)
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields

@@ -23,19 +23,25 @@ async function verifyEmail(args: Args): Promise<boolean> {
   try {
     const shouldCommit = await initTransaction(req)
 
-    const user = await req.payload.db.findOne<any>({
+    const userDbArgs = {
       collection: collection.config.slug,
       req,
       where: {
         _verificationToken: { equals: token },
       },
-    })
+    }
+    let user: any
+    if (collection.config?.db?.findOne) {
+      user = await collection.config.db.findOne<any>(userDbArgs)
+    } else {
+      user = await req.payload.db.findOne<any>(userDbArgs)
+    }
 
     if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST)
     if (user && user._verified === true)
       throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
 
-    await req.payload.db.updateOne({
+    const updateDbArgs = {
       id: user.id,
       collection: collection.config.slug,
       data: {
@@ -44,7 +50,13 @@ async function verifyEmail(args: Args): Promise<boolean> {
         _verified: true,
       },
       req,
-    })
+    }
+
+    if (collection.config?.db?.updateOne) {
+      await collection.config.db.updateOne(updateDbArgs)
+    } else {
+      await req.payload.db.updateOne(updateDbArgs)
+    }
 
     if (shouldCommit) await commitTransaction(req)
 

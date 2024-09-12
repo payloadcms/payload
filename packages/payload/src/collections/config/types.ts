@@ -387,10 +387,12 @@ export type CollectionConfig = {
   /**
    * Add a custom database adapter to this collection.
    */
-  db?: Pick<
-    DatabaseAdapter,
-    'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'updateOne'
-  >
+  db?:
+    | DatabaseAdapter
+    | Pick<
+        DatabaseAdapter,
+        'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'init' | 'updateOne'
+      >
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations

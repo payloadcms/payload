@@ -49,13 +49,21 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // Retrieve original raw version
     // /////////////////////////////////////
 
-    const { docs: versionDocs } = await req.payload.db.findVersions({
+    const findVersionDbArgs = {
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       req,
       where: { id: { equals: id } },
-    })
+    }
+
+    let queryResult: any
+    if (collectionConfig?.db?.findVersions) {
+      queryResult = await collectionConfig.db.findVersions(findVersionDbArgs)
+    } else {
+      queryResult = await req.payload.db.findVersions(findVersionDbArgs)
+    }
+    const versionDocs = queryResult.docs
 
     const [rawVersion] = versionDocs
 
@@ -132,7 +140,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
     delete prevVersion.id
 
-    await payload.db.createVersion({
+    const createVersionDbArgs = {
       autosave: false,
       collectionSlug: collectionConfig.slug,
       createdAt: prevVersion.createdAt,
@@ -140,7 +148,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       req,
       updatedAt: new Date().toISOString(),
       versionData: rawVersion.version,
-    })
+    }
+    if (collectionConfig?.db?.createVersion) {
+      await collectionConfig.db.createVersion(createVersionDbArgs)
+    } else {
+      await payload.db.createVersion(createVersionDbArgs)
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields

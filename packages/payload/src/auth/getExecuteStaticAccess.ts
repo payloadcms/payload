@@ -49,11 +49,21 @@ const getExecuteStaticAccess =
             })
           }
 
-          const doc = await req.payload.db.findOne({
-            collection: config.slug,
-            req,
-            where: queryToBuild,
-          })
+          let doc: Record<string, unknown> | undefined
+
+          if (config?.db?.findOne) {
+            doc = await config.db.findOne({
+              collection: config.slug,
+              req,
+              where: queryToBuild,
+            })
+          } else {
+            doc = await req.payload.db.findOne({
+              collection: config.slug,
+              req,
+              where: queryToBuild,
+            })
+          }
 
           if (!doc) {
             throw new Forbidden(req.t)

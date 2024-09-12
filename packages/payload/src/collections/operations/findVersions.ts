@@ -73,7 +73,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
-    const paginatedDocs = await payload.db.findVersions<T>({
+    const findVersionsDbArgs = {
       collection: collectionConfig.slug,
       limit: limit ?? 10,
       locale,
@@ -82,7 +82,14 @@ async function findVersions<T extends TypeWithVersion<T>>(
       req,
       sort,
       where: fullWhere,
-    })
+    }
+    let paginatedDocs
+
+    if (collectionConfig?.db?.findVersions) {
+      paginatedDocs = await collectionConfig.db.findVersions<T>(findVersionsDbArgs)
+    } else {
+      paginatedDocs = await payload.db.findVersions<T>(findVersionsDbArgs)
+    }
 
     // /////////////////////////////////////
     // beforeRead - Collection
