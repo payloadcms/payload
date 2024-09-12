@@ -1415,6 +1415,7 @@ export type JoinField = {
    */
   collection: CollectionSlug
   defaultValue?: never
+  hidden?: false
   index?: never
   maxDepth?: number
   /**
