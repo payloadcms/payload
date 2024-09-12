@@ -14,11 +14,11 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { findUp } from 'find-up'
-import { existsSync, promises as fs } from 'fs'
+import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { findUp } from '../findUp.js'
 import { resolveFrom } from './resolveFrom.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -65,9 +65,9 @@ export async function getDependencies(
           payloadPkgDirname.split('node_modules').slice(0, -1)
         }
 
-        await findUp('package.json', { type: 'file', cwd: pkgDir }).then((foundPath) => {
-          if (foundPath) {
-            const resolvedFoundPath = path.resolve(foundPath)
+        await findUp({
+          condition: (dir) => {
+            const resolvedFoundPath = path.resolve(dir, 'package.json')
             const resolvedCwd = path.resolve(processCwd)
 
             if (
@@ -75,12 +75,16 @@ export async function getDependencies(
               resolvedFoundPath.startsWith(payloadPkgDirname)
             ) {
               // We don't want to match node modules outside the user's project. Checking for both process.cwd and dirname is a reliable way to do this.
-              packageJsonFilePath = foundPath
+              packageJsonFilePath = resolvedFoundPath
+              return true
             }
-          }
+          },
+          dir: pkgDir,
+          fileNames: ['package.json'],
         })
 
-        if (packageJsonFilePath && existsSync(packageJsonFilePath)) {
+        // No need to check if packageJsonFilePath exists - findUp checks that for us
+        if (packageJsonFilePath) {
           // parse version
           const packageJson = JSON.parse(await fs.readFile(packageJsonFilePath, 'utf8'))
           const version = packageJson.version

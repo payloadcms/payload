@@ -5,7 +5,6 @@ const esModules = [
   'readable-web-to-node-stream',
   'token-types',
   'peek-readable',
-  'find-up',
   'locate-path',
   'p-locate',
   'p-limit',
