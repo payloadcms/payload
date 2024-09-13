@@ -67,15 +67,8 @@ export async function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
-                const {
-                  columnName,
-                  constraints: queryConstraints,
-                  field,
-                  getNotNullColumnByValue,
-                  pathSegments,
-                  rawColumn,
-                  table,
-                } = getTableColumnFromPath({
+
+                const result = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -86,6 +79,20 @@ export async function parseParams({
                   tableName,
                   value: val,
                 })
+
+                if (!result) {
+                  break
+                }
+
+                const {
+                  columnName,
+                  constraints: queryConstraints,
+                  field,
+                  getNotNullColumnByValue,
+                  pathSegments,
+                  rawColumn,
+                  table,
+                } = result
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {

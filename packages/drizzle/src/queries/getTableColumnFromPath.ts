@@ -73,7 +73,7 @@ export const getTableColumnFromPath = ({
   tableName,
   tableNameSuffix = '',
   value,
-}: Args): TableColumn => {
+}: Args): null | TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
@@ -521,11 +521,11 @@ export const getTableColumnFromPath = ({
                   idType = customIDType
                 }
 
-                if (typeof value === 'string') {
-                  return idType === 'text'
+                if (typeof value === 'number' || Number.isInteger(Number(value))) {
+                  return idType === 'number'
                 }
 
-                return idType === 'number'
+                return idType === 'text'
               })
               .map((relationTo) => {
                 const relationTableName = adapter.tableNameMap.get(
@@ -534,6 +534,10 @@ export const getTableColumnFromPath = ({
 
                 return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
               })
+
+            if (!tableColumnsNames.length) {
+              return null
+            }
 
             let column: string
             if (tableColumnsNames.length === 1) {
