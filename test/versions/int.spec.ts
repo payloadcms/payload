@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { ValidationError } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -298,6 +299,23 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
+      })
+
+      it('should have the same createdAt on new version create', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { description: 'descr', title: 'title' },
+        })
+
+        await wait(30)
+
+        const updated = await payload.update({
+          collection: autosaveCollectionSlug,
+          id: doc.id,
+          data: {},
+        })
+
+        expect(doc.createdAt).toBe(updated.createdAt)
       })
     })
 
