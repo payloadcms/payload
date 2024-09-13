@@ -1,5 +1,5 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { Table } from 'drizzle-orm';
+import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
@@ -482,11 +482,15 @@ describe('database', () => {
   })
   describe('schema hooks', () => {
     it('should modify the schema with hooks', async () => {
-      if (payload.db.name === 'mongoose') {return}
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'mongoose') {
+        return
+      }
 
       let added_table_before: Table
       let added_table_after: Table
 
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('postgres')) {
         added_table_before = drrizlePg.pgTable('added_table_before', {
           id: drrizlePg.serial('id').primaryKey(),
@@ -499,6 +503,7 @@ describe('database', () => {
         })
       }
 
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('sqlite')) {
         added_table_before = drizzleSqlite.sqliteTable('added_table_before', {
           id: drizzleSqlite.integer('id').primaryKey(),
