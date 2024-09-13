@@ -136,6 +136,15 @@ describe('locked documents', () => {
 
       await expect(page.locator('.table .row-2 .checkbox-input__input')).toBeVisible()
     })
+
+    test('should only allow bulk delete on unlocked documents', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.delete-documents__toggle').click()
+      await expect(page.locator('.delete-documents__content p')).toHaveText(
+        'You are about to delete 1 Posts',
+      )
+    })
   })
 
   describe('document locking / unlocking - one user', () => {
