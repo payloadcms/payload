@@ -24,6 +24,13 @@ import { resolveFrom } from './resolveFrom.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
+// if node_modules is in payloadPkgDirname, go to parent dir which contains node_modules
+if (payloadPkgDirname.includes('node_modules')) {
+  payloadPkgDirname.split('node_modules').slice(0, -1)
+}
+const resolvedCwd = path.resolve(process.cwd())
+
 export type NecessaryDependencies = {
   missing: string[]
   resolved: Map<
@@ -52,36 +59,26 @@ export async function getDependencies(
     requiredPackages.map(async (pkg) => {
       try {
         const pkgPath = await fs.realpath(resolveFrom(baseDir, pkg))
-
         const pkgDir = path.dirname(pkgPath)
 
         let packageJsonFilePath = null
 
-        const processCwd = process.cwd()
-        const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
-
-        // if node_modules is in payloadPkgDirname, go to parent dir which contains node_modules
-        if (payloadPkgDirname.includes('node_modules')) {
-          payloadPkgDirname.split('node_modules').slice(0, -1)
-        }
-
-        await findUp({
-          condition: (dir) => {
-            const resolvedFoundPath = path.resolve(dir, 'package.json')
-            const resolvedCwd = path.resolve(processCwd)
-
-            if (
-              resolvedFoundPath.startsWith(resolvedCwd) ||
-              resolvedFoundPath.startsWith(payloadPkgDirname)
-            ) {
-              // We don't want to match node modules outside the user's project. Checking for both process.cwd and dirname is a reliable way to do this.
-              packageJsonFilePath = resolvedFoundPath
-              return true
-            }
-          },
+        const foundPackageJsonDir = await findUp({
           dir: pkgDir,
           fileNames: ['package.json'],
         })
+
+        if (foundPackageJsonDir) {
+          const resolvedFoundPath = path.resolve(foundPackageJsonDir)
+
+          if (
+            resolvedFoundPath.startsWith(resolvedCwd) ||
+            resolvedFoundPath.startsWith(payloadPkgDirname)
+          ) {
+            // We don't want to match node modules outside the user's project. Checking for both process.cwd and dirname is a reliable way to do this.
+            packageJsonFilePath = resolvedFoundPath
+          }
+        }
 
         // No need to check if packageJsonFilePath exists - findUp checks that for us
         if (packageJsonFilePath) {
