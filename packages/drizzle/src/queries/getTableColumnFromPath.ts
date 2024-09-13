@@ -1,12 +1,13 @@
 import type { SQL } from 'drizzle-orm'
-import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
+import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
+import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -514,6 +515,10 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
+            const hasCustomCollectionWithCustomID = field.relationTo.some(
+              (relationTo) => !!adapter.payload.collections[relationTo].customIDType,
+            )
+
             const columns: TableColumn['columns'] = field.relationTo
               .map((relationTo) => {
                 let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
@@ -524,10 +529,23 @@ export const getTableColumnFromPath = ({
                   idType = customIDType
                 }
 
-                // Do not add the column to OR if we know that it can't match by type
+                // Do not add the column to OR if we know that it can't match by the type
                 // We can't do the same with idType: 'number' because `value` can be from the REST search query params
-                if (typeof value === 'number' && idType === 'text') {
+                if (typeof value === 'number' && ['text', 'uuid'].includes(idType)) {
                   return null
+                }
+
+                // Do not add the UUID type column if incoming query value doesn't match UUID. If there aren't any collections with
+                // a custom ID type, we skip this check
+                if (
+                  value &&
+                  !customIDType &&
+                  adapter.idType === 'uuid' &&
+                  hasCustomCollectionWithCustomID
+                ) {
+                  if (!uuidValidate(value)) {
+                    return null
+                  }
                 }
 
                 const relationTableName = adapter.tableNameMap.get(
