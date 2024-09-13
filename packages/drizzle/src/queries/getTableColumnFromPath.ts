@@ -531,12 +531,13 @@ export const getTableColumnFromPath = ({
 
                 // Do not add the column to OR if we know that it can't match by the type
                 // We can't do the same with idType: 'number' because `value` can be from the REST search query params
-                if (typeof value === 'number' && ['text', 'uuid'].includes(idType)) {
+                if (typeof value === 'number' && idType === 'text') {
                   return null
                 }
 
                 // Do not add the UUID type column if incoming query value doesn't match UUID. If there aren't any collections with
                 // a custom ID type, we skip this check
+                // We need this because Postgres throws an error if querying by UUID column with a value that isn't a valid UUID.
                 if (
                   value &&
                   !customIDType &&
