@@ -147,8 +147,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
-  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
+  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
