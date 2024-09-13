@@ -5,8 +5,7 @@ import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../.
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
-
-type Args<T extends JsonObject> = {
+export type Args<T extends JsonObject> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T

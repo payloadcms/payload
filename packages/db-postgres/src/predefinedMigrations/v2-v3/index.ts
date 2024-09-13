@@ -118,7 +118,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       const versionsTableName = adapter.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${adapter.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(collection)
+      const versionFields = buildVersionCollectionFields(payload.config, collection)
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
@@ -191,7 +191,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
         `_${toSnakeCase(global.slug)}${adapter.versionsSuffix}`,
       )
 
-      const versionFields = buildVersionGlobalFields(global)
+      const versionFields = buildVersionGlobalFields(payload.config, global)
 
       const versionPathsToQuery: PathsToQuery = new Set()
 

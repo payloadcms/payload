@@ -256,6 +256,7 @@ const DocumentInfo: React.FC<
 
     const versionParams = {
       depth: 0,
+      limit: 0,
       where: {
         and: [],
       },
@@ -343,9 +344,18 @@ const DocumentInfo: React.FC<
               and: [
                 ...versionParams.where.and,
                 {
-                  updatedAt: {
-                    greater_than: publishedJSON?.updatedAt,
-                  },
+                  or: [
+                    {
+                      updatedAt: {
+                        greater_than: publishedJSON.updatedAt,
+                      },
+                    },
+                    {
+                      latest: {
+                        equals: true,
+                      },
+                    },
+                  ],
                 },
               ],
             },

@@ -14,7 +14,9 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     parent,
+    publishedLocale,
     req = {} as PayloadRequest,
+    snapshot,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
@@ -33,6 +35,8 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     latest: true,
     parent,
+    publishedLocale,
+    snapshot,
     version,
   }
 
@@ -44,7 +48,7 @@ export async function createVersion<T extends TypeWithID>(
     adapter: this,
     data,
     db,
-    fields: buildVersionCollectionFields(collection),
+    fields: buildVersionCollectionFields(this.payload.config, collection),
     operation: 'create',
     req,
     tableName,
