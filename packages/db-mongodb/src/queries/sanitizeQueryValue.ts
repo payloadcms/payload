@@ -117,6 +117,13 @@ export const sanitizeQueryValue = ({
       formattedValue.value &&
       formattedValue.relationTo
     ) {
+      const { value } = formattedValue
+      const isValid = mongoose.Types.ObjectId.isValid(value)
+
+      if (isValid) {
+        formattedValue.value = ObjectId(value)
+      }
+
       return {
         rawQuery: {
           $and: [
