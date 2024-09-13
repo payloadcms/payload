@@ -35,7 +35,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
         style,
         width,
       } = {},
-      label,
       localized,
       maxLength,
       minLength,
@@ -91,7 +90,6 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       Error={field?.admin?.components?.Error}
       errorProps={errorProps}
       Label={field?.admin?.components?.Label}
-      label={label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)

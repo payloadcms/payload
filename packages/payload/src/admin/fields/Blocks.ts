@@ -25,26 +25,38 @@ type BlocksFieldBaseClientProps = {
 export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
   ClientFieldBase<BlocksFieldClientWithoutType>
 
-export type BlocksFieldServerProps = ServerFieldBase<BlocksField>
+export type BlocksFieldServerProps = ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
 
-export type BlocksFieldServerComponent = FieldServerComponent<BlocksField>
+export type BlocksFieldServerComponent = FieldServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
 
 export type BlocksFieldClientComponent = FieldClientComponent<
   BlocksFieldClientWithoutType,
   BlocksFieldBaseClientProps
 >
 
-export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<BlocksField>
+export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
 
 export type BlocksFieldLabelClientComponent =
   FieldLabelClientComponent<BlocksFieldClientWithoutType>
 
-export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<BlocksField>
+export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
 
 export type BlocksFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<BlocksFieldClientWithoutType>
 
-export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<BlocksField>
+export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<
+  BlocksField,
+  BlocksFieldClientWithoutType
+>
 
 export type BlocksFieldErrorClientComponent =
   FieldErrorClientComponent<BlocksFieldClientWithoutType>

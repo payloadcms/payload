@@ -81,13 +81,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}

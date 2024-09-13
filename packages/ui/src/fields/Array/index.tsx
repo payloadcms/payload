@@ -96,6 +96,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     if ('labels' in p && p?.labels) {
       return p.labels
     }
+    if ('labels' in p.field && p.field.labels) {
+      return { plural: p.field.labels?.plural, singular: p.field.labels?.singular }
+    }
     if ('label' in p.field && p.field.label) {
       return { plural: undefined, singular: p.field.label }
     }
@@ -236,8 +239,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 as="span"
                 field={field}
                 Label={field?.admin?.components?.Label}
-                label={label}
-                required={required}
                 unstyled
                 {...(labelProps || {})}
               />

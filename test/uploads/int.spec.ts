@@ -216,7 +216,6 @@ describe('Collections - Uploads', () => {
         expect(doc.filename).toBeDefined()
       })
     })
-
     describe('update', () => {
       it('should replace image and delete old files - by ID', async () => {
         const filePath = path.resolve(dirname, './image.png')
@@ -342,6 +341,25 @@ describe('Collections - Uploads', () => {
         expect(errors).toHaveLength(0)
 
         expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
+      })
+    })
+    describe('read', () => {
+      it('should return the media document with the correct file type', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = 'renamed.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+
+        expect(response.headers.get('content-type')).toContain('image/png')
       })
     })
   })

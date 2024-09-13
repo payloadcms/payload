@@ -231,8 +231,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 as="span"
                 field={field}
                 Label={field?.admin?.components?.Description}
-                label={label}
-                required={required}
                 unstyled
                 {...(labelProps || {})}
               />

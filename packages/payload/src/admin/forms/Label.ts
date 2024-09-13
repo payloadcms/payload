@@ -1,5 +1,5 @@
 import type { ServerProps, StaticLabel } from '../../config/types.js'
-import type { ClientField, Field } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
 
@@ -18,12 +18,16 @@ export type FieldLabelClientProps<
   field: TFieldClient
 } & GenericLabelProps
 
-export type FieldLabelServerProps<TFieldServer extends Field> = {
-  field: TFieldServer
+export type FieldLabelServerProps<
+  TFieldServer extends Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField: TFieldClient
+  readonly field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps<TFieldClient extends ClientField> = Omit<
+export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType> = Omit<
   FieldLabelClientProps<TFieldClient>,
   'label' | 'required'
 >
@@ -32,6 +36,7 @@ export type FieldLabelClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = React.ComponentType<FieldLabelClientProps<TFieldClient>>
 
-export type FieldLabelServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
-  FieldLabelServerProps<TFieldServer>
->
+export type FieldLabelServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelServerProps<TFieldServer, TFieldClient>>

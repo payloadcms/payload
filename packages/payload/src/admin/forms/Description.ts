@@ -9,8 +9,10 @@ export type FieldDescriptionClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = React.ComponentType<FieldDescriptionClientProps<TFieldClient>>
 
-export type FieldDescriptionServerComponent<TFieldServer extends Field = Field> =
-  React.ComponentType<FieldDescriptionServerProps<TFieldServer>>
+export type FieldDescriptionServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldDescriptionServerProps<TFieldServer, TFieldClient>>
 
 export type StaticDescription = Record<string, string> | string
 
@@ -23,8 +25,12 @@ export type GenericDescriptionProps = {
   readonly marginPlacement?: 'bottom' | 'top'
 }
 
-export type FieldDescriptionServerProps<TFieldServer extends Field = Field> = {
-  field: TFieldServer
+export type FieldDescriptionServerProps<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField: TFieldClient
+  readonly field: TFieldServer
 } & GenericDescriptionProps &
   Partial<ServerProps>
 

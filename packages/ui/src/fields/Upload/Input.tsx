@@ -63,7 +63,7 @@ export type UploadInputProps = {
   readonly hasMany?: boolean
   readonly isSortable?: boolean
   readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
   readonly maxRows?: number
   readonly onChange?: (e) => void
@@ -290,12 +290,14 @@ export function UploadInput(props: UploadInputProps) {
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs) => {
-      const selectedDocIDs = Object.entries(docs).reduce<string[]>((acc, [docID, isSelected]) => {
+      const selectedDocIDs = []
+
+      for (const [id, isSelected] of docs) {
         if (isSelected) {
-          acc.push(docID)
+          selectedDocIDs.push(id)
         }
-        return acc
-      }, [])
+      }
+
       const loadedDocs = await populateDocs(selectedDocIDs, activeRelationTo)
       if (loadedDocs) {
         setPopulatedDocs((currentDocs) => [

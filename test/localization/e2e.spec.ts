@@ -256,6 +256,6 @@ describe('Localization', () => {
 async function fillValues(data: Partial<LocalizedPost>) {
   const { description: descVal, title: titleVal } = data
 
-  if (titleVal) await page.locator('#field-title').fill(titleVal)
-  if (descVal) await page.locator('#field-description').fill(descVal)
+  if (titleVal) {await page.locator('#field-title').fill(titleVal)}
+  if (descVal) {await page.locator('#field-description').fill(descVal)}
 }

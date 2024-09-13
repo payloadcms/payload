@@ -26,24 +26,36 @@ type EmailFieldBaseClientProps = {
 export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType> &
   EmailFieldBaseClientProps
 
-export type EmailFieldServerProps = ServerFieldBase<EmailField>
+export type EmailFieldServerProps = ServerFieldBase<EmailField, EmailFieldClientWithoutType>
 
-export type EmailFieldServerComponent = FieldServerComponent<EmailField>
+export type EmailFieldServerComponent = FieldServerComponent<
+  EmailField,
+  EmailFieldClientWithoutType
+>
 
 export type EmailFieldClientComponent = FieldClientComponent<
   EmailFieldClientWithoutType,
   EmailFieldBaseClientProps
 >
 
-export type EmailFieldLabelServerComponent = FieldLabelServerComponent<EmailField>
+export type EmailFieldLabelServerComponent = FieldLabelServerComponent<
+  EmailField,
+  EmailFieldClientWithoutType
+>
 
 export type EmailFieldLabelClientComponent = FieldLabelClientComponent<EmailFieldClientWithoutType>
 
-export type EmailFieldDescriptionServerComponent = FieldDescriptionServerComponent<EmailField>
+export type EmailFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  EmailField,
+  EmailFieldClientWithoutType
+>
 
 export type EmailFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<EmailFieldClientWithoutType>
 
-export type EmailFieldErrorServerComponent = FieldErrorServerComponent<EmailField>
+export type EmailFieldErrorServerComponent = FieldErrorServerComponent<
+  EmailField,
+  EmailFieldClientWithoutType
+>
 
 export type EmailFieldErrorClientComponent = FieldErrorClientComponent<EmailFieldClientWithoutType>
