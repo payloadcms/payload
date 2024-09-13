@@ -1,7 +1,7 @@
-import type { SQL, SQLWrapper } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
-import { and, eq, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
