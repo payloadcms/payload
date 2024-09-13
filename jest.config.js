@@ -12,6 +12,7 @@ const esModules = [
   'unicorn-magic',
   'path-exists',
   'qs-esm',
+  'uint8array-extras',
 ].join('|')
 
 /** @type {import('jest').Config}  */

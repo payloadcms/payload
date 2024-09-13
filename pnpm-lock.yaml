@@ -695,8 +695,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
       file-type:
-        specifier: 19.5.0
-        version: 19.5.0
+        specifier: 19.3.0
+        version: 19.3.0
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
@@ -822,8 +822,8 @@ importers:
         specifier: 4.3.1
         version: 4.3.1
       file-type:
-        specifier: 19.5.0
-        version: 19.5.0
+        specifier: 19.3.0
+        version: 19.3.0
       get-tsconfig:
         specifier: ^4.7.2
         version: 4.7.6
@@ -1782,8 +1782,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       file-type:
-        specifier: 19.5.0
-        version: 19.5.0
+        specifier: 19.3.0
+        version: 19.3.0
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -3924,9 +3924,6 @@ packages:
   '@react-email/render@0.0.7':
     resolution: {integrity: sha512-hMMhxk6TpOcDC5qnKzXPVJoVGEwfm+U5bGOPH+MyTTlx0F02RLQygcATBKsbP7aI/mvkmBAZoFbgPIHop7ovug==}
     engines: {node: '>=16.0.0'}
-
-  '@sec-ant/readable-stream@0.4.1':
-    resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
   '@selderee/plugin-htmlparser2@0.10.0':
     resolution: {integrity: sha512-gW69MEamZ4wk1OsOq1nG1jcyhXIQcnrsX5JwixVw/9xaiav8TCyjESAruu1Rz9yyInhgBXxkNwMeygKnN2uxNA==}
@@ -6104,8 +6101,8 @@ packages:
     resolution: {integrity: sha512-hlDw5Ev+9e883s0pwUsuuYNu4tD7GgpUnOvykjv1Gya0ZIjuKumthDRua90VUn6/nlRKAjcxLUnHNTIUWwWIiw==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  file-type@19.5.0:
-    resolution: {integrity: sha512-dMuq6WWnP6BpQY0zYJNpTtQWgeCImSMG0BTIzUBXvxbwc1HWP/E7AE4UWU9XSCOPGJuOHda0HpDnwM2FW+d90A==}
+  file-type@19.3.0:
+    resolution: {integrity: sha512-mROwiKLZf/Kwa/2Rol+OOZQn1eyTkPB3ZTwC0ExY6OLFCbgxHYZvBm7xI77NvfZFMKBsmuXfmLJnD4eEftEhrA==}
     engines: {node: '>=18'}
 
   filelist@1.0.4:
@@ -6291,10 +6288,6 @@ packages:
   get-stream@8.0.1:
     resolution: {integrity: sha512-VaUJspBffn/LMCJVoMvSAdmscJyS1auj5Zulnn5UoYcY531UWmdwhRWkcGKnGU93m5HSXP9LP2usOryrBtQowA==}
     engines: {node: '>=16'}
-
-  get-stream@9.0.1:
-    resolution: {integrity: sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA==}
-    engines: {node: '>=18'}
 
   get-symbol-description@1.0.2:
     resolution: {integrity: sha512-g0QYk1dZBxGwk+Ngc+ltRH2IBp2f7zBkBMBJZCDerh6EhlhSR6+9irMCuT/09zD6qkarHUSn529sK/yL4S27mg==}
@@ -6778,10 +6771,6 @@ packages:
   is-stream@3.0.0:
     resolution: {integrity: sha512-LnQR4bZ9IADDRSkvpqMGvt/tEJWclzklNgSw48V5EAaAeDd6qGvN8ei6k5p0tvxSR171VmGyHuTiAOfxAbr8kA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  is-stream@4.0.1:
-    resolution: {integrity: sha512-Dnz92NInDqYckGEUJv689RbRiTSEHCQ7wOVeALbkOz999YpqT46yMRIGtSNl2iCL1waAZSx40+h59NV/EwzV/A==}
-    engines: {node: '>=18'}
 
   is-string@1.0.7:
     resolution: {integrity: sha512-tE2UXzivje6ofPW7l23cjDOMa09gb7xlAqG6jG5ej6uPV32TlWP3NKPigtaGeHNu9fohccRYvIiZMfOOnOYUtg==}
@@ -12353,8 +12342,6 @@ snapshots:
       react: 19.0.0-rc-06d0b89e-20240801
       react-dom: 19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801)
 
-  '@sec-ant/readable-stream@0.4.1': {}
-
   '@selderee/plugin-htmlparser2@0.10.0':
     dependencies:
       domhandler: 5.0.3
@@ -15097,9 +15084,8 @@ snapshots:
       strtok3: 7.1.1
       token-types: 5.0.1
 
-  file-type@19.5.0:
+  file-type@19.3.0:
     dependencies:
-      get-stream: 9.0.1
       strtok3: 8.1.0
       token-types: 6.0.0
       uint8array-extras: 1.4.0
@@ -15302,11 +15288,6 @@ snapshots:
   get-stream@6.0.1: {}
 
   get-stream@8.0.1: {}
-
-  get-stream@9.0.1:
-    dependencies:
-      '@sec-ant/readable-stream': 0.4.1
-      is-stream: 4.0.1
 
   get-symbol-description@1.0.2:
     dependencies:
@@ -15784,8 +15765,6 @@ snapshots:
   is-stream@2.0.1: {}
 
   is-stream@3.0.0: {}
-
-  is-stream@4.0.1: {}
 
   is-string@1.0.7:
     dependencies:
