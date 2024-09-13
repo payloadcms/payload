@@ -21,6 +21,10 @@ type Constraint = {
 
 type TableColumn = {
   columnName?: string
+  columns?: {
+    idType: 'number' | 'text'
+    rawColumn: SQL<unknown>
+  }[]
   constraints: Constraint[]
   field: FieldAffectingData
   getNotNullColumnByValue?: (val: unknown) => string
@@ -53,7 +57,7 @@ type Args = {
   value: unknown
 }
 /**
- * Transforms path to table and column name
+ * Transforms path to table and column name or to a list of OR columns
  * Adds tables to `join`
  * @returns TableColumn
  */
@@ -73,7 +77,7 @@ export const getTableColumnFromPath = ({
   tableName,
   tableNameSuffix = '',
   value,
-}: Args): null | TableColumn => {
+}: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
@@ -510,9 +514,8 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
-            // Match only columns with the same type as `value`, as we don't want to do a database cast which is inefficient
-            const tableColumnsNames = field.relationTo
-              .filter((relationTo) => {
+            const columns: TableColumn['columns'] = field.relationTo
+              .map((relationTo) => {
                 let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
 
                 const { customIDType } = adapter.payload.collections[relationTo]
@@ -521,35 +524,27 @@ export const getTableColumnFromPath = ({
                   idType = customIDType
                 }
 
-                if (typeof value === 'number' || Number.isInteger(Number(value))) {
-                  return idType === 'number'
+                // Do not add the column to OR if we know that it can't match by type
+                // We can't do the same with idType: 'number' because `value` can be from the REST search query params
+                if (typeof value === 'number' && idType === 'text') {
+                  return null
                 }
 
-                return idType === 'text'
-              })
-              .map((relationTo) => {
                 const relationTableName = adapter.tableNameMap.get(
                   toSnakeCase(adapter.payload.collections[relationTo].config.slug),
                 )
 
-                return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+                return {
+                  idType,
+                  rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+                }
               })
-
-            if (!tableColumnsNames.length) {
-              return null
-            }
-
-            let column: string
-            if (tableColumnsNames.length === 1) {
-              column = tableColumnsNames[0]
-            } else {
-              column = `COALESCE(${tableColumnsNames.join(', ')})`
-            }
+              .filter(Boolean)
 
             return {
+              columns,
               constraints,
               field,
-              rawColumn: sql.raw(`${column}`),
               table: aliasRelationshipTable,
             }
           } else if (newCollectionPath === 'relationTo') {

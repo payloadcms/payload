@@ -1,3 +1,5 @@
+import type { SQL } from 'drizzle-orm'
+
 import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
@@ -5,21 +7,36 @@ import type { DrizzleAdapter } from '../types.js'
 
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
+  columns?: {
+    idType: 'number' | 'text'
+    rawColumn: SQL<unknown>
+  }[]
   field: Field | TabAsField
   operator: string
   relationOrPath: string
   val: any
 }
 
+type SanitizedColumn = {
+  rawColumn: SQL<unknown>
+  value: unknown
+}
+
 export const sanitizeQueryValue = ({
   adapter,
+  columns,
   field,
   operator: operatorArg,
   relationOrPath,
   val,
-}: SanitizeQueryValueArgs): { operator: string; value: unknown } => {
+}: SanitizeQueryValueArgs): {
+  columns?: SanitizedColumn[]
+  operator: string
+  value: unknown
+} => {
   let operator = operatorArg
   let formattedValue = val
+  let formattedColumns: SanitizedColumn[]
 
   if (!fieldAffectsData(field)) {
     return { operator, value: formattedValue }
@@ -99,6 +116,27 @@ export const sanitizeQueryValue = ({
           uuid: 'text',
         }
         idType = typeMap[mixedType]
+      } else {
+        formattedColumns = columns
+          .map(({ idType, rawColumn }) => {
+            let formattedValue: number | string
+            if (idType === 'number') {
+              formattedValue = Number(val)
+
+              if (Number.isNaN(formattedValue)) {
+                return null
+              }
+            }
+            if (idType === 'text') {
+              formattedValue = String(val)
+            }
+
+            return {
+              rawColumn,
+              value: formattedValue,
+            }
+          })
+          .filter(Boolean)
       }
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.map((value) => {
@@ -142,5 +180,9 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  return { operator, value: formattedValue }
+  return {
+    columns: formattedColumns,
+    operator,
+    value: formattedValue,
+  }
 }

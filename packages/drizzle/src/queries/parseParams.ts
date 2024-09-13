@@ -1,7 +1,7 @@
-import type { SQL } from 'drizzle-orm'
+import type { SQL, SQLWrapper } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload'
 
-import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, eq, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -68,7 +68,16 @@ export async function parseParams({
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
 
-                const result = getTableColumnFromPath({
+                const {
+                  columnName,
+                  columns,
+                  constraints: queryConstraints,
+                  field,
+                  getNotNullColumnByValue,
+                  pathSegments,
+                  rawColumn,
+                  table,
+                } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -79,20 +88,6 @@ export async function parseParams({
                   tableName,
                   value: val,
                 })
-
-                if (!result) {
-                  break
-                }
-
-                const {
-                  columnName,
-                  constraints: queryConstraints,
-                  field,
-                  getNotNullColumnByValue,
-                  pathSegments,
-                  rawColumn,
-                  table,
-                } = result
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
@@ -197,6 +192,7 @@ export async function parseParams({
 
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
+                  columns,
                   field,
                   operator,
                   relationOrPath,
@@ -207,9 +203,13 @@ export async function parseParams({
                   break
                 }
 
-                const { operator: queryOperator, value: queryValue } = sanitizedQueryValue
+                const {
+                  columns: queryColumns,
+                  operator: queryOperator,
+                  value: queryValue,
+                } = sanitizedQueryValue
 
-                if (queryOperator === 'not_equals' && queryValue !== null) {
+                if (queryOperator === 'not_equals' && queryValue !== null && !queryColumns) {
                   constraints.push(
                     or(
                       isNull(rawColumn || table[columnName]),
@@ -242,6 +242,34 @@ export async function parseParams({
 
                 if (operator === 'not_equals' && queryValue === null) {
                   constraints.push(isNotNull(rawColumn || table[columnName]))
+                  break
+                }
+
+                // Handle polymorphic relationships
+                if (queryColumns) {
+                  if (!queryColumns.length) {
+                    break
+                  }
+
+                  if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
+                    constraints.push(
+                      and(
+                        ...queryColumns.map(({ rawColumn }) =>
+                          operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
+                        ),
+                      ),
+                    )
+                    break
+                  }
+
+                  constraints.push(
+                    (['not_equals', 'not_in'].includes(operator) ? and : or)(
+                      ...queryColumns.map(({ rawColumn, value }) =>
+                        adapter.operators[queryOperator](rawColumn, value),
+                      ),
+                    ),
+                  )
+
                   break
                 }
 
