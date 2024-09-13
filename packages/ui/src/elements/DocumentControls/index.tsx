@@ -182,10 +182,10 @@ export const DocumentControls: React.FC<{
           <div className={`${baseClass}__controls`}>
             {localization && (
               <CopyLocaleData
-              // CustomComponent={
-              //   collectionConfig?.admin?.components?.edit?.CopyLocaleDataButton ||
-              //   globalConfig?.admin?.components?.elements?.CopyLocaleDataButton
-              // }
+                CustomComponent={
+                  collectionConfig?.admin?.components?.edit?.CopyLocaleButton ||
+                  globalConfig?.admin?.components?.elements?.CopyLocaleButton
+                }
               />
             )}
             {(collectionConfig?._isPreviewEnabled || globalConfig?._isPreviewEnabled) && (
