@@ -483,7 +483,7 @@ describe('database', () => {
       if (payload.db.name === 'mongoose') return
 
       // delete current
-      await payload.db.migrateFresh({ forceAcceptWarning: true })
+      await payload.db.dropDatabase({ adapter: payload.db })
 
       if (payload.db.name.includes('postgres')) {
         payload.db.beforeSchemaInit = [
