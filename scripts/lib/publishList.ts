@@ -44,7 +44,6 @@ export const packagePublishList = [
   'plugin-search',
   'plugin-seo',
   'plugin-stripe',
-  'plugin-relationship-object-ids',
 
   // Unpublished
   // 'plugin-sentry'

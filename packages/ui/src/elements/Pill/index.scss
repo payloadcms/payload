@@ -15,6 +15,7 @@
   padding: 0 base(0.4);
   align-items: center;
   flex-shrink: 0;
+  gap: base(0.2);
 
   &--rounded {
     border-radius: var(--style-radius-l);
@@ -54,7 +55,8 @@
 
   &--has-icon {
     padding-inline-start: base(0.4);
-    padding-inline-end: base(0.1);
+    padding-inline-end: base(0.3);
+
     svg {
       display: block;
     }

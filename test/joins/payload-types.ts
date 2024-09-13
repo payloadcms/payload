@@ -11,10 +11,10 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    uploads: Upload;
-    pages: Page;
     posts: Post;
-    relations: Relation;
+    categories: Category;
+    'localized-posts': LocalizedPost;
+    'localized-categories': LocalizedCategory;
     users: User;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -23,7 +23,7 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {};
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
@@ -48,72 +48,60 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
- */
-export interface Upload {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
-  title: string;
+  title?: string | null;
+  category?: (string | null) | Category;
+  group?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relations".
+ * via the `definition` "categories".
  */
-export interface Relation {
+export interface Category {
   id: string;
-  hasOne?: (string | null) | Post;
-  hasOnePoly?:
-    | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null);
-  hasMany?: (string | Post)[] | null;
-  hasManyPoly?:
-    | (
-        | {
-            relationTo: 'pages';
-            value: string | Page;
-          }
-        | {
-            relationTo: 'posts';
-            value: string | Post;
-          }
-      )[]
-    | null;
-  upload?: (string | null) | Upload;
+  name?: string | null;
+  relatedPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  group?: {
+    relatedPosts?: {
+      docs?: (string | Post)[] | null;
+      hasNextPage?: boolean | null;
+    } | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | LocalizedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories".
+ */
+export interface LocalizedCategory {
+  id: string;
+  name?: string | null;
+  relatedPosts?: {
+    docs?: (string | LocalizedPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }

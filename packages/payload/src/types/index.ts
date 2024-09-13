@@ -92,7 +92,7 @@ export type Operator = (typeof validOperators)[number]
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
 
-export interface JsonArray extends Array<JsonValue> {}
+export type JsonArray = Array<JsonValue>
 
 export interface JsonObject {
   [key: string]: any
@@ -108,6 +108,19 @@ export type Where = {
   and?: Where[]
   or?: Where[]
 }
+
+/**
+ * Applies pagination for join fields for including collection relationships
+ */
+export type JoinQuery =
+  | {
+      [schemaPath: string]: {
+        limit?: number
+        sort?: string
+        where?: Where
+      }
+    }
+  | false
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any

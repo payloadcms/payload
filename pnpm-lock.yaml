@@ -268,6 +268,9 @@ importers:
       mongoose:
         specifier: 6.12.3
         version: 6.12.3(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
+      mongoose-aggregate-paginate-v2:
+        specifier: 1.0.6
+        version: 1.0.6
       mongoose-paginate-v2:
         specifier: 1.7.22
         version: 1.7.22
@@ -282,8 +285,8 @@ importers:
         specifier: workspace:*
         version: link:../eslint-config
       '@types/mongoose-aggregate-paginate-v2':
-        specifier: 1.0.9
-        version: 1.0.9(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
+        specifier: 1.0.6
+        version: 1.0.6(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
       mongodb:
         specifier: 4.17.1
         version: 4.17.1(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
@@ -1060,19 +1063,6 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
-  packages/plugin-relationship-object-ids:
-    dependencies:
-      mongoose:
-        specifier: 6.12.3
-        version: 6.12.3(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
-    devDependencies:
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      payload:
-        specifier: workspace:*
-        version: link:../payload
-
   packages/plugin-search:
     dependencies:
       '@payloadcms/ui':
@@ -1712,9 +1702,6 @@ importers:
       '@payloadcms/plugin-redirects':
         specifier: workspace:*
         version: link:../packages/plugin-redirects
-      '@payloadcms/plugin-relationship-object-ids':
-        specifier: workspace:*
-        version: link:../packages/plugin-relationship-object-ids
       '@payloadcms/plugin-search':
         specifier: workspace:*
         version: link:../packages/plugin-search
@@ -4449,8 +4436,8 @@ packages:
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
 
-  '@types/mongoose-aggregate-paginate-v2@1.0.9':
-    resolution: {integrity: sha512-YKDKtSuE1vzMY/SAtlDTWJr52UhTYdrOypCqyx7T2xFYEWfybLnV98m4ZoVgYJH0XowVl7Y2Gnn6p1sF+3NbLA==}
+  '@types/mongoose-aggregate-paginate-v2@1.0.6':
+    resolution: {integrity: sha512-EXkgB/nJ1x3UcoEk1pD67+uXtijveHZtbg2H3wtZk2SnCFBB5cMw7MQRu9/GgyEP/KKXuWFt1JABv7m+Kls0ug==}
 
   '@types/node@20.12.5':
     resolution: {integrity: sha512-BD+BjQ9LS/D8ST9p5uqBxghlN+S42iuNxjsUGjeZobe/ciXzk2qb1B6IXc6AnRLS+yFJRpN2IPEHMzwspfDJNw==}
@@ -7458,6 +7445,10 @@ packages:
         optional: true
       snappy:
         optional: true
+
+  mongoose-aggregate-paginate-v2@1.0.6:
+    resolution: {integrity: sha512-UuALu+mjhQa1K9lMQvjLL3vm3iALvNw8PQNIh2gp1b+tO5hUa0NC0Wf6/8QrT9PSJVTihXaD8hQVy3J4e0jO0Q==}
+    engines: {node: '>=4.0.0'}
 
   mongoose-paginate-v2@1.7.22:
     resolution: {integrity: sha512-xW5GugkE21DJiu9e13EOxKt4ejEKQkRP/S1PkkXRjnk2rRZVKBcld1nPV+VJ/YCPfm8hb3sz9OvI7O38RmixkA==}
@@ -13075,7 +13066,7 @@ snapshots:
 
   '@types/minimist@1.2.5': {}
 
-  '@types/mongoose-aggregate-paginate-v2@1.0.9(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))':
+  '@types/mongoose-aggregate-paginate-v2@1.0.6(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))':
     dependencies:
       mongoose: 6.12.3(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
     transitivePeerDependencies:
@@ -16718,6 +16709,8 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/credential-providers': 3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0))
       '@mongodb-js/saslprep': 1.1.8
+
+  mongoose-aggregate-paginate-v2@1.0.6: {}
 
   mongoose-paginate-v2@1.7.22: {}
 
