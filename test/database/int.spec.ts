@@ -1,7 +1,11 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { Table } from 'drizzle-orm';
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import { sql } from 'drizzle-orm'
+import * as drrizlePg from 'drizzle-orm/pg-core'
+import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import path from 'path'
 import { commitTransaction, initTransaction } from 'payload'
@@ -10,8 +14,6 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { pushDevSchema } from '@payloadcms/drizzle'
-import { pgTable, serial } from 'drizzle-orm/pg-core'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -479,27 +481,78 @@ describe('database', () => {
     })
   })
   describe('schema hooks', () => {
-    it('beforeSchemaInit', async () => {
-      if (payload.db.name === 'mongoose') return
+    it('should modify the schema with hooks', async () => {
+      if (payload.db.name === 'mongoose') {return}
 
-      // delete current
-      await payload.db.dropDatabase({ adapter: payload.db })
+      let added_table_before: Table
+      let added_table_after: Table
 
       if (payload.db.name.includes('postgres')) {
-        payload.db.beforeSchemaInit = [
-          (schema, adapter) => ({
-            ...schema,
-            tables: {
-              ...schema.tables,
-              custom: pgTable('custom', {
-                id: serial('id').primaryKey().notNull(),
-              }),
-            },
-          }),
-        ]
+        added_table_before = drrizlePg.pgTable('added_table_before', {
+          id: drrizlePg.serial('id').primaryKey(),
+          text: drrizlePg.text('text'),
+        })
+
+        added_table_after = drrizlePg.pgTable('added_table_after', {
+          id: drrizlePg.serial('id').primaryKey(),
+          text: drrizlePg.text('text'),
+        })
       }
 
-      await pushDevSchema(payload.db as any)
+      if (payload.db.name.includes('sqlite')) {
+        added_table_before = drizzleSqlite.sqliteTable('added_table_before', {
+          id: drizzleSqlite.integer('id').primaryKey(),
+          text: drizzleSqlite.text('text'),
+        })
+
+        added_table_after = drizzleSqlite.sqliteTable('added_table_after', {
+          id: drizzleSqlite.integer('id').primaryKey(),
+          text: drizzleSqlite.text('text'),
+        })
+      }
+
+      payload.db.beforeSchemaInit = [
+        (schema, adapter) => ({
+          ...schema,
+          tables: {
+            ...schema.tables,
+            added_table_before,
+          },
+        }),
+      ]
+
+      payload.db.afterSchemaInit = [
+        (schema, adapter) => ({
+          ...schema,
+          tables: {
+            ...schema.tables,
+            added_table_after,
+          },
+        }),
+      ]
+
+      delete payload.db.pool
+      await payload.db.init()
+
+      expect(payload.db.tables.added_table_before).toBeDefined()
+
+      await payload.db.connect()
+
+      await payload.db.drizzle.execute(
+        sql`INSERT into added_table_before (text) VALUES ('some-text')`,
+      )
+
+      const res_before = await payload.db.drizzle.execute(sql`SELECT * from added_table_before`)
+
+      expect(res_before.rows[0].text).toBe('some-text')
+
+      await payload.db.drizzle.execute(
+        sql`INSERT into added_table_after (text) VALUES ('some-text')`,
+      )
+
+      const res_after = await payload.db.drizzle.execute(sql`SELECT * from added_table_after`)
+
+      expect(res_after.rows[0].text).toBe('some-text')
     })
   })
 })
