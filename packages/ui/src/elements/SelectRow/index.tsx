@@ -22,7 +22,7 @@ export const SelectRow: React.FC = () => {
 
   return (
     <CheckboxInput
-      checked={selected?.[rowData?.id]}
+      checked={Boolean(selected.get(rowData.id))}
       className={[baseClass, `${baseClass}__checkbox`].join(' ')}
       onToggle={() => setSelection(rowData.id)}
     />
