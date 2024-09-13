@@ -133,7 +133,7 @@ export function UploadInput(props: UploadInputProps) {
         id: {
           ...((filterOptionsFromProps?.[activeRelationTo] as any)?.id || {}),
           not_in: ((filterOptionsFromProps?.[activeRelationTo] as any)?.id?.not_in || []).concat(
-            ...((Array.isArray(value) || value ? [value] : []) || []),
+            ...(Array.isArray(value) || value ? [value] : []),
           ),
         },
       },
