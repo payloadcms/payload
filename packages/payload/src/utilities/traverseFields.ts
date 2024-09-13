@@ -58,7 +58,11 @@ export const traverseFields = ({
       if ('name' in field && field.name) {
         if (typeof ref[field.name] === 'undefined') {
           if (field.type === 'array') {
-            ref[field.name] = []
+            if (field.localized) {
+              ref[field.name] = {}
+            } else {
+              ref[field.name] = []
+            }
           }
           if (field.type === 'group') {
             ref[field.name] = {}
