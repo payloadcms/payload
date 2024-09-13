@@ -543,19 +543,26 @@ describe('database', () => {
 
       await payload.db.connect()
 
-      await payload.db.drizzle.execute(
-        sql`INSERT into added_table_before (text) VALUES ('some-text')`,
-      )
+      await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `INSERT into added_table_before (text) VALUES ('some-text')`,
+      })
 
-      const res_before = await payload.db.drizzle.execute(sql`SELECT * from added_table_before`)
-
+      const res_before = await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: 'SELECT * from added_table_before',
+      })
       expect(res_before.rows[0].text).toBe('some-text')
 
-      await payload.db.drizzle.execute(
-        sql`INSERT into added_table_after (text) VALUES ('some-text')`,
-      )
+      await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `INSERT into added_table_after (text) VALUES ('some-text')`,
+      })
 
-      const res_after = await payload.db.drizzle.execute(sql`SELECT * from added_table_after`)
+      const res_after = await payload.db.execute({
+        drizzle: payload.db.drizzle,
+        raw: `SELECT * from added_table_after`,
+      })
 
       expect(res_after.rows[0].text).toBe('some-text')
     })
