@@ -76,6 +76,7 @@ export const usePreviewURL = (): {
   )
 
   return {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     generatePreviewURL,
     isLoading,
     label: isLoading ? t('general:loading') : t('version:preview'),

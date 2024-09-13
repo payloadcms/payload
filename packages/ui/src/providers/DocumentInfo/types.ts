@@ -1,6 +1,7 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
+  ClientUser,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -56,7 +57,9 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
+  currentEditor?: ClientUser
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
+  documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
@@ -66,14 +69,18 @@ export type DocumentInfoContext = {
   isLoading: boolean
   preferencesKey?: string
   publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
+  setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
   setDocFieldPreferences: (
     field: string,
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
+  setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
   slug?: string
   title: string
+  unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 } & DocumentInfoProps

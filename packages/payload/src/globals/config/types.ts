@@ -164,6 +164,15 @@ export type GlobalConfig = {
     beforeValidate?: BeforeValidateHook[]
   }
   label?: Record<string, string> | string
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockWhenEditing?:
+    | {
+        lockDuration: number
+      }
+    | boolean
   slug: string
   /**
    * Options used in typescript generation
