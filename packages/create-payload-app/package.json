@@ -68,6 +68,6 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.5"
+    "@types/node": "22.5.4"
   }
 }

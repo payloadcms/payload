@@ -48,7 +48,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.5",
+    "@types/node": "22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "copyfiles": "^2.4.1",
