@@ -510,7 +510,7 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
-            // Match only columns with the same type as `value`, as we don't
+            // Match only columns with the same type as `value`, as we don't want to do a database cast which is inefficient
             const tableColumnsNames = field.relationTo
               .filter((relationTo) => {
                 let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
