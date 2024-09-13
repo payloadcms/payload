@@ -25,6 +25,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       i18n,
       payload,
       payload: { config },
+      t,
       user,
     },
   } = initPageResult
@@ -141,13 +142,19 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
     latestPublishedVersion: latestPublishedVersion?.id,
   })
 
+  const pluralLabel = collectionConfig?.labels?.plural
+    ? typeof collectionConfig.labels.plural === 'function'
+      ? collectionConfig.labels.plural({ t })
+      : collectionConfig.labels.plural
+    : globalConfig?.label
+
   return (
     <React.Fragment>
       <SetDocumentStepNav
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />
