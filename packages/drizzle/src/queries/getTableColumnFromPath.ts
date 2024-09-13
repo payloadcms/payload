@@ -510,29 +510,30 @@ export const getTableColumnFromPath = ({
               }
             }
           } else if (newCollectionPath === 'value') {
-            const hasCollectionWithCustomID = field.relationTo.some(
-              (each) => !!adapter.payload.collections[each].customIDType,
-            )
+            // Match only columns with the same type as `value`, as we don't
+            const tableColumnsNames = field.relationTo
+              .filter((relationTo) => {
+                let idType: 'number' | 'text' = adapter.idType === 'uuid' ? 'text' : 'number'
 
-            const tableColumnsNames = field.relationTo.map((relationTo) => {
-              const relationTableName = adapter.tableNameMap.get(
-                toSnakeCase(adapter.payload.collections[relationTo].config.slug),
-              )
+                const { customIDType } = adapter.payload.collections[relationTo]
 
-              const columnName = `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+                if (customIDType) {
+                  idType = customIDType
+                }
 
-              if (!hasCollectionWithCustomID) {
-                return columnName
-              }
-              if (adapter.name.includes('postgres')) {
-                return `${columnName}::text`
-              }
-              if (adapter.name.includes('sqlite')) {
-                return `cast(${columnName} as text)`
-              }
+                if (typeof value === 'string') {
+                  return idType === 'text'
+                }
 
-              throw new APIError(`Cast is not implemented for database adapter: ${adapter.name}`)
-            })
+                return idType === 'number'
+              })
+              .map((relationTo) => {
+                const relationTableName = adapter.tableNameMap.get(
+                  toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+                )
+
+                return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+              })
 
             let column: string
             if (tableColumnsNames.length === 1) {

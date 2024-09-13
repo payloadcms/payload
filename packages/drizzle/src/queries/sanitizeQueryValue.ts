@@ -99,12 +99,6 @@ export const sanitizeQueryValue = ({
           uuid: 'text',
         }
         idType = typeMap[mixedType]
-      } else {
-        const hasCollectionWithCustomID = field.relationTo.some(
-          (each) => !!adapter.payload.collections[each].customIDType,
-        )
-
-        idType = hasCollectionWithCustomID || adapter.idType === 'uuid' ? 'text' : 'number'
       }
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.map((value) => {
