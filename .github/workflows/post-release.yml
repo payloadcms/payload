@@ -1,0 +1,11 @@
+name: post-release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy step
+        run: echo "Dummy job to trigger post-release workflow on beta branch"
