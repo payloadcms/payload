@@ -253,7 +253,7 @@ export async function parseParams({
 
                   if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
                     constraints.push(
-                      and(
+                      (operator === 'not_equals' ? or : and)(
                         ...queryColumns.map(({ rawColumn }) =>
                           operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
                         ),
