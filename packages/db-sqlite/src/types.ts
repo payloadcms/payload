@@ -6,7 +6,6 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
-  SQLiteTable,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
 } from 'drizzle-orm/sqlite-core'
@@ -14,14 +13,15 @@ import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
 
 type SQLiteSchema = {
-  relations: GenericRelation
-  tables: SQLiteTable
+  relations: Record<string, GenericRelation>
+  tables: Record<string, GenericTable>
 }
 
-export type SQLiteSchemaHook = (
-  schema: SQLiteSchema,
-  adapter: SQLiteAdapter,
-) => Promise<SQLiteSchema> | SQLiteSchema
+type SQLiteSchemaHookArgs = {
+  schema: SQLiteSchema
+}
+
+export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
 export type Args = {
   /**

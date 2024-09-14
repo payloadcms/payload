@@ -7,28 +7,32 @@ type DatabaseSchema = {
 }
 
 type Adapter = {
-  afterSchemaInit: DatabaseSchemaTransform[]
-  beforeSchemaInit: DatabaseSchemaTransform[]
+  afterSchemaInit: DatabaseSchemaHook[]
+  beforeSchemaInit: DatabaseSchemaHook[]
 } & DatabaseSchema
 
-type DatabaseSchemaTransform = (
-  schema: DatabaseSchema,
-  adapter: Record<string, unknown>,
-) => DatabaseSchema | Promise<DatabaseSchema>
+type DatabaseSchemaHookArgs = {
+  adapter: Record<string, unknown>
+  schema: DatabaseSchema
+}
 
-export const executeSchemaHooks = async (
-  adapter: Adapter,
-  type: 'afterSchemaInit' | 'beforeSchemaInit',
-) => {
+type DatabaseSchemaHook = (args: DatabaseSchemaHookArgs) => DatabaseSchema | Promise<DatabaseSchema>
+
+type Args = {
+  adapter: Adapter
+  type: 'afterSchemaInit' | 'beforeSchemaInit'
+}
+
+export const executeSchemaHooks = async ({ type, adapter }: Args) => {
   for (const hook of adapter[type]) {
-    const result = await hook(
-      {
+    const result = await hook({
+      adapter,
+      schema: {
         enums: adapter.enums,
         relations: adapter.relations,
         tables: adapter.tables,
       },
-      adapter,
-    )
+    })
     if (result.enums) {
       adapter.enums = result.enums
     }

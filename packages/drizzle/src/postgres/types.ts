@@ -97,9 +97,13 @@ type PostgresSchema = {
   tables: Record<string, GenericTable>
 }
 
+type PostgresSchemaHookArgs = {
+  adapter: PostgresDrizzleAdapter
+  schema: PostgresSchema
+}
+
 export type PostgresSchemaHook = (
-  schema: PostgresSchema,
-  adapter: PostgresDrizzleAdapter,
+  args: PostgresSchemaHookArgs,
 ) => PostgresSchema | Promise<PostgresSchema>
 
 export type BasePostgresAdapter = {

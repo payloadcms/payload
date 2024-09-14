@@ -13,7 +13,7 @@ import { buildTable } from './schema/build.js'
 
 export const init: Init = async function init(this: SQLiteAdapter) {
   let locales: [string, ...string[]] | undefined
-  await executeSchemaHooks(this, 'beforeSchemaInit')
+  await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
   if (this.payload.config.localization) {
     locales = this.payload.config.localization.locales.map(({ code }) => code) as [
@@ -122,5 +122,5 @@ export const init: Init = async function init(this: SQLiteAdapter) {
     }
   })
 
-  await executeSchemaHooks(this, 'afterSchemaInit')
+  await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
 }

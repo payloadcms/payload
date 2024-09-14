@@ -11,7 +11,7 @@ import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
 import { buildTable } from './schema/build.js'
 
 export const init: Init = async function init(this: BasePostgresAdapter) {
-  await executeSchemaHooks(this, 'beforeSchemaInit')
+  await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
   if (this.payload.config.localization) {
     this.enums.enum__locales = this.pgSchema.enum(
@@ -114,5 +114,5 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
     }
   })
 
-  await executeSchemaHooks(this, 'afterSchemaInit')
+  await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
 }

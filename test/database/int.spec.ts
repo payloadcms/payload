@@ -3,8 +3,7 @@ import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
-import { sql } from 'drizzle-orm'
-import * as drrizlePg from 'drizzle-orm/pg-core'
+import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import path from 'path'
@@ -492,14 +491,14 @@ describe('database', () => {
 
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('postgres')) {
-        added_table_before = drrizlePg.pgTable('added_table_before', {
-          id: drrizlePg.serial('id').primaryKey(),
-          text: drrizlePg.text('text'),
+        added_table_before = drizzlePg.pgTable('added_table_before', {
+          id: drizzlePg.serial('id').primaryKey(),
+          text: drizzlePg.text('text'),
         })
 
-        added_table_after = drrizlePg.pgTable('added_table_after', {
-          id: drrizlePg.serial('id').primaryKey(),
-          text: drrizlePg.text('text'),
+        added_table_after = drizzlePg.pgTable('added_table_after', {
+          id: drizzlePg.serial('id').primaryKey(),
+          text: drizzlePg.text('text'),
         })
       }
 
@@ -517,7 +516,7 @@ describe('database', () => {
       }
 
       payload.db.beforeSchemaInit = [
-        (schema, adapter) => ({
+        ({ schema }) => ({
           ...schema,
           tables: {
             ...schema.tables,
@@ -527,7 +526,7 @@ describe('database', () => {
       ]
 
       payload.db.afterSchemaInit = [
-        (schema, adapter) => ({
+        ({ schema }) => ({
           ...schema,
           tables: {
             ...schema.tables,
