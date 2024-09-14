@@ -209,7 +209,45 @@ export async function parseParams({
                   value: queryValue,
                 } = sanitizedQueryValue
 
-                if (queryOperator === 'not_equals' && queryValue !== null && !queryColumns) {
+                // Handle polymorphic relationships by value
+                if (queryColumns) {
+                  if (!queryColumns.length) {
+                    break
+                  }
+
+                  let wrapOperator = or
+
+                  if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
+                    if (operator === 'equals') {
+                      wrapOperator = and
+                    }
+
+                    constraints.push(
+                      wrapOperator(
+                        ...queryColumns.map(({ rawColumn }) =>
+                          operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
+                        ),
+                      ),
+                    )
+                    break
+                  }
+
+                  if (['not_equals', 'not_in'].includes(operator)) {
+                    wrapOperator = and
+                  }
+
+                  constraints.push(
+                    wrapOperator(
+                      ...queryColumns.map(({ rawColumn, value }) =>
+                        adapter.operators[queryOperator](rawColumn, value),
+                      ),
+                    ),
+                  )
+
+                  break
+                }
+
+                if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
                     or(
                       isNull(rawColumn || table[columnName]),
@@ -242,34 +280,6 @@ export async function parseParams({
 
                 if (operator === 'not_equals' && queryValue === null) {
                   constraints.push(isNotNull(rawColumn || table[columnName]))
-                  break
-                }
-
-                // Handle polymorphic relationships
-                if (queryColumns) {
-                  if (!queryColumns.length) {
-                    break
-                  }
-
-                  if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
-                    constraints.push(
-                      (operator === 'not_equals' ? or : and)(
-                        ...queryColumns.map(({ rawColumn }) =>
-                          operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
-                        ),
-                      ),
-                    )
-                    break
-                  }
-
-                  constraints.push(
-                    (['not_equals', 'not_in'].includes(operator) ? and : or)(
-                      ...queryColumns.map(({ rawColumn, value }) =>
-                        adapter.operators[queryOperator](rawColumn, value),
-                      ),
-                    ),
-                  )
-
                   break
                 }
 
