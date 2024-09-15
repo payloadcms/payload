@@ -49,8 +49,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           {
             fields: [
               {
-                name: 'completionTime',
+                name: 'completedAt',
                 type: 'date',
+                index: true,
               },
               {
                 name: 'hasError',
@@ -69,12 +70,12 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                 type: 'array',
                 fields: [
                   {
-                    name: 'executionTime',
+                    name: 'executedAt',
                     type: 'date',
                     required: true,
                   },
                   {
-                    name: 'lastCompletedStepIndex',
+                    name: 'stepIndex',
                     type: 'number',
                     required: true,
                   },
@@ -118,6 +119,11 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         defaultValue: 'default',
         index: true,
         options: [...queueNames],
+      },
+      {
+        name: 'waitUntil',
+        type: 'date',
+        index: true,
       },
       {
         name: 'processing',

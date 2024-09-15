@@ -146,7 +146,7 @@ export interface PayloadJob {
           }
       )[]
     | null;
-  completionTime?: string | null;
+  completedAt?: string | null;
   hasError?: boolean | null;
   error?:
     | {
@@ -159,8 +159,8 @@ export interface PayloadJob {
     | null;
   log?:
     | {
-        executionTime: string;
-        lastCompletedStepIndex: number;
+        executedAt: string;
+        stepIndex: number;
         state: 'failed' | 'succeeded';
         error?:
           | {
@@ -176,6 +176,7 @@ export interface PayloadJob {
     | null;
   type: 'updatePost';
   queue?: 'default' | null;
+  waitUntil?: string | null;
   processing?: boolean | null;
   seenByWorker?: boolean | null;
   updatedAt: string;

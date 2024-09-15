@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Block } from '../../fields/config/types.js'
-import type { Payload, PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 export type JobRunnerArgs<TStep> = {
   // TODO:
@@ -14,10 +14,37 @@ export type JobRunnerResult = {
   state: 'failed' | 'succeeded'
 }
 
+export type BaseJob = {
+  completedAt?: string
+  error?: unknown
+  hasError?: boolean
+  id: number | string
+  log: {
+    error?: unknown
+    executedAt: string
+    state: 'failed' | 'succeeded'
+    stepIndex: number
+  }[]
+  processing?: boolean
+  queue: string
+  seenByWorker?: boolean
+  steps: Record<string, unknown>[]
+  type: string
+  waitUntil?: string
+}
+
 export type JobRunner<TStep> = (
   args: JobRunnerArgs<TStep>,
 ) => JobRunnerResult | Promise<JobRunnerResult>
 
+export type StepStatus = Map<
+  string,
+  {
+    complete: boolean
+    retries: number
+    totalTried: number
+  }
+>
 export type StepConfig<TStep = unknown> = {
   /**
    * Specify the number of times that this step should be retried if it fails.
@@ -49,10 +76,6 @@ export type JobConfig = {
    */
   queue?: string
   /**
-   * Specify the number of times that this job should be retried if it fails.
-   */
-  retries?: number
-  /**
    * Define a slug-based name for this job.
    */
   slug: string
@@ -78,6 +101,10 @@ export type QueueConfig = {
      */
     run?: RunJobAccess
   }
+  /**
+   * Determine whether or not to delete a job after it has successfully completed.
+   */
+  deleteJobOnComplete?: boolean
   /**
    * Define all jobs for the queue here.
    */

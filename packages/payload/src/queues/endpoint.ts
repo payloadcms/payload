@@ -22,6 +22,7 @@ export const runJobsEndpoint: Endpoint = {
 
     const runJobsArgs: RunJobsArgs = {
       queue: 'default',
+      req,
     }
 
     if (typeof queue === 'string') {

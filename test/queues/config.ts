@@ -65,6 +65,7 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    autoLogin: false,
   },
   queues: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
@@ -78,7 +79,6 @@ export default buildConfigWithDefaults({
     },
     jobs: [
       {
-        retries: 2,
         slug: 'updatePost',
         steps: [
           {

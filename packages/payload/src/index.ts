@@ -981,6 +981,7 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type {
+  BaseJob,
   JobConfig,
   JobRunner,
   JobRunnerArgs,
