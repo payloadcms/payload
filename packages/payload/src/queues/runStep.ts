@@ -170,6 +170,7 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
           stepIndex,
         },
       ],
+      processing: false,
     }
 
     // If the step has failed more than the allowed retries,
