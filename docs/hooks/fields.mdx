@@ -200,7 +200,7 @@ user-friendly.
 The `beforeDuplicate` field hook is called on each locale (when using localization), when duplicating a document. It may be used when documents having the
 exact same properties may cause issue. This gives you a way to avoid duplicate names on `unique`, `required` fields or when external systems expect non-repeating values on documents.
 
-This hook gets called after `beforeChange` hooks are called and before the document is saved to the database.
+This hook gets called before the `beforeValidate` and `beforeChange` hooks are called.
 
 By Default, unique and required text fields Payload will append "- Copy" to the original document value. The default is not added if your field has its own, you must return non-unique values from your beforeDuplicate hook to avoid errors or enable the `disableDuplicate` option on the collection.
 Here is an example of a number field with a hook that increments the number to avoid unique constraint errors when duplicating a document:
