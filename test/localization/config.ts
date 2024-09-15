@@ -174,7 +174,7 @@ export default buildConfigWithDefaults({
                   localized: true,
                   fields: [
                     {
-                      name: 'nestedArray',
+                      name: 'nestedArray2',
                       type: 'array',
                       fields: [
                         {

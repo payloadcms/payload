@@ -414,7 +414,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             const {
               collection,
               context: _context,
-              duplicate,
               errors,
               field,
               global,
@@ -494,7 +493,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   }
                   node = await hook({
                     context,
-                    duplicate,
                     errors,
                     mergeLocaleActions,
                     node,
@@ -532,7 +530,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     data,
                     doc: originalData,
                     docWithLocales: originalDataWithLocales ?? {},
-                    duplicate,
                     errors,
                     fields: subFields,
                     global,
@@ -635,7 +632,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
              * - afterChange
              * - beforeChange
              * - beforeValidate
-             * - beforeDuplicate
              *
              * Other hooks are handled by the flattenedNodes. All nodes in the nodeIDMap are part of flattenedNodes.
              */

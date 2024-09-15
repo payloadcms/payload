@@ -1143,7 +1143,7 @@ describe('Localization', () => {
             text: 'hello',
             group: {
               nestedText: 'hello',
-              nestedArray: [
+              nestedArray2: [
                 {
                   nestedText: 'hello',
                 },
@@ -1181,7 +1181,7 @@ describe('Localization', () => {
             text: 'hola',
             group: {
               nestedText: 'hola',
-              nestedArray: [
+              nestedArray2: [
                 {
                   nestedText: 'hola',
                 },
@@ -1214,12 +1214,12 @@ describe('Localization', () => {
       expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
 
       expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
-      // expect(allLocales.myTab.group.en.nestedArray[0].nestedText).toStrictEqual('hello')
-      // expect(allLocales.myTab.group.en.nestedArray[1].nestedText).toStrictEqual('goodbye')
+      expect(allLocales.myTab.group.en.nestedArray2[0].nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[1].nestedText).toStrictEqual('goodbye')
 
       expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
-      // expect(allLocales.myTab.group.es.nestedArray[0].nestedText).toStrictEqual('hola')
-      // expect(allLocales.myTab.group.es.nestedArray[1].nestedText).toStrictEqual('adios')
+      expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
     })
   })
 
