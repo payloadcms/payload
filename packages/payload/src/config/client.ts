@@ -21,6 +21,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'hooks'
   | 'onInit'
   | 'plugins'
+  | 'queues'
   | 'secret'
   | 'sharp'
   | 'typescript'
@@ -63,5 +64,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'email',
   'custom',
   'graphQL',
+  'queues',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]

@@ -16,6 +16,7 @@ import { migrationsCollection } from '../database/migrations/migrationsCollectio
 import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import { getDefaultJobsCollection } from '../queues/config/config.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
 
@@ -148,6 +149,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
+
+  if (Array.isArray(configWithDefaults.queues?.jobs) && configWithDefaults.queues.jobs.length > 0) {
+    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+
+    if (typeof configWithDefaults.queues.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = configWithDefaults.queues.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+    }
+
+    configWithDefaults.collections.push(defaultJobsCollection)
+  }
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
   for (let i = 0; i < config.collections.length; i++) {

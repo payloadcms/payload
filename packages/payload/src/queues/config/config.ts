@@ -25,6 +25,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
 
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',
+    admin: {
+      group: 'System',
+    },
     fields: [
       {
         type: 'tabs',
@@ -41,6 +44,22 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           },
           {
             fields: [
+              {
+                name: 'completionTime',
+                type: 'date',
+              },
+              {
+                name: 'hasError',
+                type: 'checkbox',
+                index: true,
+              },
+              {
+                name: 'error',
+                type: 'json',
+                admin: {
+                  condition: (data) => data.hasError,
+                },
+              },
               {
                 name: 'log',
                 type: 'array',
@@ -70,22 +89,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                     required: true,
                   },
                 ],
-              },
-              {
-                name: 'completionTime',
-                type: 'date',
-              },
-              {
-                name: 'hasError',
-                type: 'checkbox',
-                index: true,
-              },
-              {
-                name: 'error',
-                type: 'json',
-                admin: {
-                  condition: (data) => data.hasError,
-                },
               },
             ],
             label: 'Status',
