@@ -14,6 +14,7 @@ type Args = {
 
 export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
   const { stepIndex, stepSlug } = findStepToRun(stepStatus)
+  const isLastStep = stepIndex === stepStatus.size - 1
 
   if (!stepSlug) {
     return
@@ -99,8 +100,6 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
       complete: true,
     })
 
-    const isLastStep = stepIndex === stepStatus.size - 1
-
     if (isLastStep) {
       // If we should delete the job on completion,
       // simply delete it at this point
@@ -159,20 +158,31 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
       msg: `There was an error while running job ${job.id}.`,
     })
 
+    const failedStepStatus = stepStatus.get(stepSlug)
+
+    const dataToUpdate: Record<string, unknown> = {
+      log: [
+        ...job.log,
+        {
+          error: err,
+          executedAt: new Date(),
+          state: 'failed',
+          stepIndex,
+        },
+      ],
+    }
+
+    // If the step has failed more than the allowed retries,
+    // then set the entire job to errored
+    if (failedStepStatus.retries >= failedStepStatus.totalTried + 1) {
+      dataToUpdate.hasError = true
+      dataToUpdate.error = err
+    }
+
     await req.payload.update({
       id: job.id,
       collection: 'payload-jobs',
-      data: {
-        log: [
-          ...job.log,
-          {
-            error: err,
-            executedAt: new Date(),
-            state: 'failed',
-            stepIndex,
-          },
-        ],
-      },
+      data: dataToUpdate,
       req,
     })
   }
