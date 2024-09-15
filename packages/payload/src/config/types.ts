@@ -32,6 +32,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, TypedUser } from '../index.js'
+import type { QueueConfig } from '../queues/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -893,9 +894,9 @@ export type Config = {
   hooks?: {
     afterError?: AfterErrorHook
   }
-  /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
+  /** i18n config settings */
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
@@ -904,7 +905,6 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -939,6 +939,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -947,6 +948,7 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  queues?: QueueConfig
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.
