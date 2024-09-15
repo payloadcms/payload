@@ -41,7 +41,7 @@ export const promise = async <T>({
   })
 
   if (fieldAffectsData(field)) {
-    const fieldData = siblingDoc?.[field.name]
+    let fieldData = siblingDoc?.[field.name]
     const fieldIsLocalized = field.localized && localization
 
     // Run field beforeDuplicate hooks
@@ -59,12 +59,12 @@ export const promise = async <T>({
               global: undefined,
               path: fieldPath,
               previousSiblingDoc: siblingDoc,
-              previousValue: siblingDoc[field.name][locale],
+              previousValue: siblingDoc[field.name]?.[locale],
               req,
               schemaPath: parentSchemaPath,
               siblingData: siblingDoc,
               siblingDocWithLocales: siblingDoc,
-              value: siblingDoc[field.name][locale],
+              value: siblingDoc[field.name]?.[locale],
             }
 
             const hookResult = await runBeforeDuplicateHooks(beforeDuplicateArgs)
@@ -112,6 +112,7 @@ export const promise = async <T>({
     if (fieldIsLocalized) {
       if (typeof fieldData !== 'object' || fieldData === null) {
         siblingDoc[field.name] = {}
+        fieldData = siblingDoc[field.name]
       }
 
       const promises = []
