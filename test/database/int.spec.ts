@@ -7,7 +7,7 @@ import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import path from 'path'
-import { commitTransaction, initTransaction } from 'payload'
+import { commitTransaction, initTransaction, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -577,5 +577,115 @@ describe('database', () => {
 
       expect(res_after.rows[0].text).toBe('some-text')
     })
+  })
+
+  it('should extend the existing table with extra column', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name === 'mongoose') {
+      return
+    }
+
+    const isSQLite = payload.db.name === 'sqlite'
+
+    payload.db.afterSchemaInit = [
+      ({ schema, extendTable }) => {
+        extendTable({
+          table: schema.tables.places,
+          columns: {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            extraColumn: isSQLite
+              ? drizzleSqlite.integer('extra_column')
+              : drizzleSqlite.integer('extra_column'),
+          },
+        })
+
+        return schema
+      },
+    ]
+
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+
+    expect(payload.db.tables.places.extraColumn).toBeDefined()
+
+    await payload.db.execute({
+      drizzle: payload.db.drizzle,
+      raw: `UPDATE table places SET extra_column = 10`,
+    })
+
+    const res_with_extra_col = await payload.db.execute({
+      drizzle: payload.db.drizzle,
+      raw: `SELECT * from places`,
+    })
+
+    expect(res_with_extra_col.rows[0].extra_column).toBe(10)
+  })
+
+  it('should extend the existing table with composite unique constraint and throw ValidationError on it', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name === 'mongoose') {
+      return
+    }
+
+    const isSQLite = payload.db.name === 'sqlite'
+
+    payload.db.afterSchemaInit = [
+      ({ schema, extendTable }) => {
+        extendTable({
+          table: schema.tables.places,
+          extraConfig: (t) => ({
+            // eslint-disable-next-line jest/no-conditional-in-test
+            uniqueOnCityAndCountry: (isSQLite ? drizzleSqlite : drizzlePg)
+              .unique()
+              .on(t.city, t.country),
+          }),
+        })
+
+        return schema
+      },
+    ]
+
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+
+    await payload.create({
+      collection: 'places',
+      data: {
+        city: 'Frankfurt',
+        country: 'Germany',
+      },
+    })
+
+    await expect(
+      payload.create({
+        collection: 'places',
+        data: {
+          city: 'Berlin',
+          country: 'Germany',
+        },
+      }),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      payload.create({
+        collection: 'places',
+        data: {
+          city: 'Frankfurt',
+          country: 'France',
+        },
+      }),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      payload.create({
+        collection: 'places',
+        data: {
+          city: 'Frankfurt',
+          country: 'Germany',
+        },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError)
   })
 })
