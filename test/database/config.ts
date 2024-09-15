@@ -275,6 +275,19 @@ export default buildConfigWithDefaults({
         drafts: true,
       },
     },
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
   ],
   globals: [
     {

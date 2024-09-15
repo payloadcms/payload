@@ -1,5 +1,7 @@
 import type { DrizzleAdapter } from '../types.js'
 
+import { extendDrizzleTable } from './extendDrizzleTable.js'
+
 type DatabaseSchema = {
   enums?: DrizzleAdapter['enums']
   relations: Record<string, any>
@@ -13,6 +15,7 @@ type Adapter = {
 
 type DatabaseSchemaHookArgs = {
   adapter: Record<string, unknown>
+  extendTable: typeof extendDrizzleTable
   schema: DatabaseSchema
 }
 
@@ -27,6 +30,7 @@ export const executeSchemaHooks = async ({ type, adapter }: Args): Promise<void>
   for (const hook of adapter[type]) {
     const result = await hook({
       adapter,
+      extendTable: extendDrizzleTable,
       schema: {
         enums: adapter.enums,
         relations: adapter.relations,

@@ -525,15 +525,30 @@ describe('database', () => {
         }),
       ]
 
-      payload.db.afterSchemaInit = [
-        ({ schema }) => ({
-          ...schema,
-          tables: {
-            ...schema.tables,
-            added_table_after,
-          },
-        }),
-      ]
+      const places = (payload.db.afterSchemaInit = [
+        ({ schema, extendTable }) => {
+          extendTable({
+            table: schema.tables.places,
+            columns: {
+              extraColumn: drizzlePg.integer('added_extra_column'),
+            },
+          })
+
+          return {
+            ...schema,
+            tables: {
+              ...schema.tables,
+              added_table_after,
+              // places: extendTable({
+              //   table: schema.tables.places,
+              //   columns: {
+              //     extraColumn: drizzlePg.integer('added_extra_column'),
+              //   },
+              // }),
+            },
+          }
+        },
+      ])
 
       delete payload.db.pool
       await payload.db.init()

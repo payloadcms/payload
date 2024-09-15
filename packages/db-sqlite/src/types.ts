@@ -1,5 +1,5 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type { Operators } from '@payloadcms/drizzle'
+import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
@@ -13,6 +13,7 @@ import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
 
 type SQLiteSchema = {
+  extendTable: typeof extendDrizzleTable
   relations: Record<string, GenericRelation>
   tables: Record<string, GenericTable>
 }
