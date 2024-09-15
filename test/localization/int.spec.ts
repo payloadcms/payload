@@ -1120,6 +1120,13 @@ describe('Localization', () => {
     })
 
     it('should duplicate with localized blocks', async () => {
+      // This test covers a few things:
+      // 1. make sure we can duplicate localized blocks
+      //    - in relational DBs, we need to create new block / array IDs
+      //    - and this needs to be done recursively for all block / array fields
+      // 2. make sure localized arrays / blocks work inside of localized groups / tabs
+      //    - this is covered with myTab.group.nestedArray2
+
       const englishText = 'english'
       const spanishText = 'spanish'
       const doc = await payload.create({
