@@ -23,7 +23,7 @@ type Args = {
   type: 'afterSchemaInit' | 'beforeSchemaInit'
 }
 
-export const executeSchemaHooks = async ({ type, adapter }: Args) => {
+export const executeSchemaHooks = async ({ type, adapter }: Args): Promise<void> => {
   for (const hook of adapter[type]) {
     const result = await hook({
       adapter,
