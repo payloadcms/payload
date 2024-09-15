@@ -143,7 +143,7 @@ importers:
         version: 9.4.1(@aws-sdk/credential-providers@3.630.0(@aws-sdk/client-sso-oidc@3.629.0(@aws-sdk/client-sts@3.629.0)))
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -695,8 +695,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
       file-type:
-        specifier: 17.1.6
-        version: 17.1.6
+        specifier: 19.3.0
+        version: 19.3.0
       graphql:
         specifier: ^16.8.1
         version: 16.9.0
@@ -822,11 +822,8 @@ importers:
         specifier: 4.3.1
         version: 4.3.1
       file-type:
-        specifier: 17.1.6
-        version: 17.1.6
-      find-up:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 19.3.0
+        version: 19.3.0
       get-tsconfig:
         specifier: ^4.7.2
         version: 4.7.6
@@ -1467,7 +1464,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1785,8 +1782,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       file-type:
-        specifier: 17.1.6
-        version: 17.1.6
+        specifier: 19.3.0
+        version: 19.3.0
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -1798,7 +1795,7 @@ importers:
         version: 0.17.0
       next:
         specifier: 15.0.0-canary.104
-        version: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+        version: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../packages/payload
@@ -1828,7 +1825,7 @@ importers:
         version: 5.6.2
       uploadthing:
         specifier: ^6.10.1
-        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
+        version: 6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4))
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -6107,6 +6104,10 @@ packages:
     resolution: {integrity: sha512-hlDw5Ev+9e883s0pwUsuuYNu4tD7GgpUnOvykjv1Gya0ZIjuKumthDRua90VUn6/nlRKAjcxLUnHNTIUWwWIiw==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  file-type@19.3.0:
+    resolution: {integrity: sha512-mROwiKLZf/Kwa/2Rol+OOZQn1eyTkPB3ZTwC0ExY6OLFCbgxHYZvBm7xI77NvfZFMKBsmuXfmLJnD4eEftEhrA==}
+    engines: {node: '>=18'}
+
   filelist@1.0.4:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
 
@@ -6143,10 +6144,6 @@ packages:
   find-up@5.0.0:
     resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
     engines: {node: '>=10'}
-
-  find-up@7.0.0:
-    resolution: {integrity: sha512-YyZM99iHrqLKjmt4LJDj58KI+fYyufRLBSYcqycxf//KpBk9FoewoGX0450m9nB44qrZnovzC2oeP5hUibxc/g==}
-    engines: {node: '>=18'}
 
   find-versions@5.1.0:
     resolution: {integrity: sha512-+iwzCJ7C5v5KgcBuueqVoNiHVoQpwiUK5XFLjf0affFTep+Wcw93tPvmb8tqujDNmzhBDPddnWV/qgWSXgq+Hg==}
@@ -7204,10 +7201,6 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  locate-path@7.2.0:
-    resolution: {integrity: sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
   lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
 
@@ -7729,10 +7722,6 @@ packages:
     resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
     engines: {node: '>=10'}
 
-  p-limit@4.0.0:
-    resolution: {integrity: sha512-5b0R4txpzjPWVw/cXXUResoD4hb6U/x9BH08L7nw+GN1sezDzPdxeRvpc9c433fZhBan/wusjbCsqwqm4EIBIQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
   p-limit@5.0.0:
     resolution: {integrity: sha512-/Eaoq+QyLSiXQ4lyYV23f14mZRQcXnxfHrN0vCai+ak9G0pp9iEQukIIZq5NccEvwRB8PUnZT0KsOoDCINS1qQ==}
     engines: {node: '>=18'}
@@ -7744,10 +7733,6 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
-
-  p-locate@6.0.0:
-    resolution: {integrity: sha512-wPrq66Llhl7/4AGC6I+cqxT07LhXvWL08LNXz1fENOw0Ap4sRZZ/gZpTTJ5jpurzzzfS2W/Ge9BY3LgLjCShcw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   p-map@4.0.0:
     resolution: {integrity: sha512-/bjOqmgETBYB5BoEeGVea8dmvHb2m9GLy1E9W43yeyfP6QQCZGFNa+XRceJEuDB6zqr+gKpIAmlLebMpykw/MQ==}
@@ -7788,10 +7773,6 @@ packages:
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
-
-  path-exists@5.0.0:
-    resolution: {integrity: sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
@@ -8887,6 +8868,10 @@ packages:
     resolution: {integrity: sha512-mKX8HA/cdBqMKUr0MMZAFssCkIGoZeSCMXgnt79yKxNFguMLVFgRe6wB+fsL0NmoHDbeyZXczy7vEPSoo3rkzg==}
     engines: {node: '>=16'}
 
+  strtok3@8.1.0:
+    resolution: {integrity: sha512-ExzDvHYPj6F6QkSNe/JxSlBxTh3OrI6wrAIz53ulxo1c4hBJ1bT9C/JrAthEKHWG9riVH3Xzg7B03Oxty6S2Lw==}
+    engines: {node: '>=16'}
+
   stubs@3.0.0:
     resolution: {integrity: sha512-PdHt7hHUJKxvTCgbKX9C1V/ftOcjJQgz8BZwNfV5c4B6dcGqlpelTbJ999jBGZ2jYiPAwcX5dP6oBwVlBlUbxw==}
 
@@ -9024,6 +9009,10 @@ packages:
 
   token-types@5.0.1:
     resolution: {integrity: sha512-Y2fmSnZjQdDb9W4w4r1tswlMHylzWIeOKpx0aZH9BgGtACHhrk3OkT52AzwcuqTRBZtvvnTjDBh8eynMulu8Vg==}
+    engines: {node: '>=14.16'}
+
+  token-types@6.0.0:
+    resolution: {integrity: sha512-lbDrTLVsHhOMljPscd0yitpozq7Ga2M5Cvez5AjGg8GASBjtt6iERCAJ93yommPmz62fb45oFIXHEZ3u9bfJEA==}
     engines: {node: '>=14.16'}
 
   totalist@3.0.1:
@@ -9217,6 +9206,10 @@ packages:
   ufo@1.5.4:
     resolution: {integrity: sha512-UsUk3byDzKd04EyoZ7U4DOlxQaD14JUKQl6/P7wiX4FNvUfm3XL246n9W5AmqwW5RSFJ27NAuM0iLscAOYUiGQ==}
 
+  uint8array-extras@1.4.0:
+    resolution: {integrity: sha512-ZPtzy0hu4cZjv3z5NW9gfKnNLjoz4y6uv4HlelAjDK7sY/xOkKZv9xK/WQpcsBB3jEybChz9DPC2U/+cusjJVQ==}
+    engines: {node: '>=18'}
+
   unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
 
@@ -9248,10 +9241,6 @@ packages:
   unicode-property-aliases-ecmascript@2.1.0:
     resolution: {integrity: sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==}
     engines: {node: '>=4'}
-
-  unicorn-magic@0.1.0:
-    resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
-    engines: {node: '>=18'}
 
   unique-string@2.0.0:
     resolution: {integrity: sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==}
@@ -15124,6 +15113,12 @@ snapshots:
       strtok3: 7.1.1
       token-types: 5.0.1
 
+  file-type@19.3.0:
+    dependencies:
+      strtok3: 8.1.0
+      token-types: 6.0.0
+      uint8array-extras: 1.4.0
+
   filelist@1.0.4:
     dependencies:
       minimatch: 5.1.6
@@ -15174,12 +15169,6 @@ snapshots:
     dependencies:
       locate-path: 6.0.0
       path-exists: 4.0.0
-
-  find-up@7.0.0:
-    dependencies:
-      locate-path: 7.2.0
-      path-exists: 5.0.0
-      unicorn-magic: 0.1.0
 
   find-versions@5.1.0:
     dependencies:
@@ -16484,10 +16473,6 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  locate-path@7.2.0:
-    dependencies:
-      p-locate: 6.0.0
-
   lodash.debounce@4.0.8: {}
 
   lodash.deburr@4.1.0: {}
@@ -16807,6 +16792,36 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4):
+    dependencies:
+      '@next/env': 15.0.0-canary.104
+      '@swc/counter': 0.1.3
+      '@swc/helpers': 0.5.12
+      busboy: 1.6.0
+      caniuse-lite: 1.0.30001651
+      graceful-fs: 4.2.11
+      postcss: 8.4.31
+      react: 19.0.0-rc-06d0b89e-20240801
+      react-dom: 19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801)
+      styled-jsx: 5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-06d0b89e-20240801)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.0.0-canary.104
+      '@next/swc-darwin-x64': 15.0.0-canary.104
+      '@next/swc-linux-arm64-gnu': 15.0.0-canary.104
+      '@next/swc-linux-arm64-musl': 15.0.0-canary.104
+      '@next/swc-linux-x64-gnu': 15.0.0-canary.104
+      '@next/swc-linux-x64-musl': 15.0.0-canary.104
+      '@next/swc-win32-arm64-msvc': 15.0.0-canary.104
+      '@next/swc-win32-ia32-msvc': 15.0.0-canary.104
+      '@next/swc-win32-x64-msvc': 15.0.0-canary.104
+      '@playwright/test': 1.46.0
+      babel-plugin-react-compiler: 0.0.0-experimental-48eb8f4-20240822
+      sass: 1.77.4
+      sharp: 0.33.4
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
   nice-napi@1.0.2:
     dependencies:
       node-addon-api: 3.2.1
@@ -17013,10 +17028,6 @@ snapshots:
     dependencies:
       yocto-queue: 0.1.0
 
-  p-limit@4.0.0:
-    dependencies:
-      yocto-queue: 1.1.1
-
   p-limit@5.0.0:
     dependencies:
       yocto-queue: 1.1.1
@@ -17028,10 +17039,6 @@ snapshots:
   p-locate@5.0.0:
     dependencies:
       p-limit: 3.1.0
-
-  p-locate@6.0.0:
-    dependencies:
-      p-limit: 4.0.0
 
   p-map@4.0.0:
     dependencies:
@@ -17068,8 +17075,6 @@ snapshots:
   parseurl@1.3.3: {}
 
   path-exists@4.0.0: {}
-
-  path-exists@5.0.0: {}
 
   path-is-absolute@1.0.1: {}
 
@@ -18201,6 +18206,11 @@ snapshots:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.1.4
 
+  strtok3@8.1.0:
+    dependencies:
+      '@tokenizer/token': 0.3.0
+      peek-readable: 5.1.4
+
   stubs@3.0.0: {}
 
   styled-jsx@5.1.6(@babel/core@7.25.2)(babel-plugin-macros@3.1.0)(react@19.0.0-rc-06d0b89e-20240801):
@@ -18359,6 +18369,11 @@ snapshots:
   toidentifier@1.0.1: {}
 
   token-types@5.0.1:
+    dependencies:
+      '@tokenizer/token': 0.3.0
+      ieee754: 1.2.1
+
+  token-types@6.0.0:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
@@ -18540,6 +18555,8 @@ snapshots:
 
   ufo@1.5.4: {}
 
+  uint8array-extras@1.4.0: {}
+
   unbox-primitive@1.0.2:
     dependencies:
       call-bind: 1.0.7
@@ -18568,8 +18585,6 @@ snapshots:
 
   unicode-property-aliases-ecmascript@2.1.0: {}
 
-  unicorn-magic@0.1.0: {}
-
   unique-string@2.0.0:
     dependencies:
       crypto-random-string: 2.0.0
@@ -18588,7 +18603,7 @@ snapshots:
       escalade: 3.1.2
       picocolors: 1.0.1
 
-  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)):
+  uploadthing@6.13.2(express@4.19.2)(next@15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)):
     dependencies:
       '@effect/schema': 0.68.12(effect@3.4.5)
       '@uploadthing/mime-types': 0.2.10
@@ -18598,7 +18613,7 @@ snapshots:
       std-env: 3.7.0
     optionalDependencies:
       express: 4.19.2
-      next: 15.0.0-canary.104(@babel/core@7.25.2)(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
+      next: 15.0.0-canary.104(@playwright/test@1.46.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-48eb8f4-20240822)(react-dom@19.0.0-rc-06d0b89e-20240801(react@19.0.0-rc-06d0b89e-20240801))(react@19.0.0-rc-06d0b89e-20240801)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
