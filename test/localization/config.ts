@@ -131,6 +131,16 @@ export default buildConfigWithDefaults({
                   name: 'text',
                   type: 'text',
                 },
+                {
+                  name: 'nestedArray',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                    },
+                  ],
+                },
               ],
               slug: 'text',
             },
@@ -147,6 +157,41 @@ export default buildConfigWithDefaults({
           localized: true,
           required: true,
           type: 'blocks',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
       slug: withRequiredLocalizedFields,
