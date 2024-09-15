@@ -166,7 +166,8 @@ export const traverseFields = ({
         if (field.hasMany) {
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             hasLocalizedManyTextField = true
@@ -199,7 +200,8 @@ export const traverseFields = ({
         if (field.hasMany) {
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             hasLocalizedManyNumberField = true
@@ -279,7 +281,8 @@ export const traverseFields = ({
 
           const isLocalized =
             Boolean(field.localized && adapter.payload.config.localization) ||
-            withinLocalizedArrayOrBlock
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
 
           if (isLocalized) {
             baseColumns.locale = text('locale', { enum: locales }).notNull()
@@ -365,7 +368,8 @@ export const traverseFields = ({
 
         const isLocalized =
           Boolean(field.localized && adapter.payload.config.localization) ||
-          withinLocalizedArrayOrBlock
+          withinLocalizedArrayOrBlock ||
+          forceLocalized
 
         if (isLocalized) {
           baseColumns._locale = text('_locale', { enum: locales }).notNull()
@@ -503,7 +507,8 @@ export const traverseFields = ({
 
             const isLocalized =
               Boolean(field.localized && adapter.payload.config.localization) ||
-              withinLocalizedArrayOrBlock
+              withinLocalizedArrayOrBlock ||
+              forceLocalized
 
             if (isLocalized) {
               baseColumns._locale = text('_locale', { enum: locales }).notNull()
