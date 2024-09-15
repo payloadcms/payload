@@ -69,7 +69,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }): Promise<
 
   let fieldSchema: Field[]
 
-  if (schemaPathSegments.length === 1) {
+  if (schemaPathSegments?.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
     } else {
