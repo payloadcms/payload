@@ -66,6 +66,8 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  jobStep1Ran?: string | null;
+  jobStep2Ran?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -129,18 +131,18 @@ export interface PayloadJob {
   steps?:
     | (
         | {
-            someData?: string | null;
-            owner?: (string | null) | User;
+            post: string | Post;
+            message: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'logStuff';
+            blockType: 'step1';
           }
         | {
-            someData?: string | null;
-            owner?: (string | null) | User;
+            post: string | Post;
+            message: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'logMoreStuff';
+            blockType: 'step2';
           }
       )[]
     | null;
@@ -172,8 +174,8 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  type: 'myJob';
-  queue: 'default';
+  type: 'updatePost';
+  queue?: 'default' | null;
   processing?: boolean | null;
   seenByWorker?: boolean | null;
   updatedAt: string;

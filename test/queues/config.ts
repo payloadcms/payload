@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -15,6 +16,30 @@ export default buildConfigWithDefaults({
       admin: {
         useAsTitle: 'title',
       },
+      hooks: {
+        afterChange: [
+          async ({ req, doc }) => {
+            await req.payload.create({
+              collection: 'payload-jobs',
+              data: {
+                type: 'updatePost',
+                steps: [
+                  {
+                    blockType: 'step1',
+                    post: doc.id,
+                    message: 'hello',
+                  },
+                  {
+                    blockType: 'step2',
+                    post: doc.id,
+                    message: 'goodbye',
+                  },
+                ],
+              },
+            })
+          },
+        ],
+      },
       fields: [
         {
           name: 'title',
@@ -24,6 +49,14 @@ export default buildConfigWithDefaults({
         {
           name: 'content',
           type: 'richText',
+        },
+        {
+          name: 'jobStep1Ran',
+          type: 'text',
+        },
+        {
+          name: 'jobStep2Ran',
+          type: 'text',
         },
       ],
     },
@@ -46,43 +79,49 @@ export default buildConfigWithDefaults({
     jobs: [
       {
         retries: 2,
-        slug: 'myJob',
+        slug: 'updatePost',
         steps: [
           {
             retries: 2,
             schema: {
-              slug: 'logStuff',
+              slug: 'step1',
               fields: [
                 {
-                  name: 'someData',
-                  type: 'text',
+                  name: 'post',
+                  type: 'relationship',
+                  relationTo: 'posts',
+                  maxDepth: 0,
+                  required: true,
                 },
                 {
-                  name: 'owner',
-                  type: 'relationship',
-                  relationTo: 'users',
+                  name: 'message',
+                  type: 'text',
+                  required: true,
                 },
               ],
             },
-            run: '/my-path/run',
+            run: updatePostStep1,
           },
           {
             retries: 2,
             schema: {
-              slug: 'logMoreStuff',
+              slug: 'step2',
               fields: [
                 {
-                  name: 'someData',
-                  type: 'text',
+                  name: 'post',
+                  type: 'relationship',
+                  relationTo: 'posts',
+                  maxDepth: 0,
+                  required: true,
                 },
                 {
-                  name: 'owner',
-                  type: 'relationship',
-                  relationTo: 'users',
+                  name: 'message',
+                  type: 'text',
+                  required: true,
                 },
               ],
             },
-            run: '/my-path/run',
+            run: updatePostStep2,
           },
         ],
       },

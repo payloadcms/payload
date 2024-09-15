@@ -16,7 +16,7 @@ import { migrationsCollection } from '../database/migrations/migrationsCollectio
 import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
-import { getDefaultJobsCollection } from '../queues/config/config.js'
+import { getDefaultJobsCollection } from '../queues/jobsCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
 

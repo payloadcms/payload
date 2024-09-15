@@ -1,6 +1,8 @@
-import type { CollectionConfig } from '../../collections/config/types.js'
-import type { Config } from '../../config/types.js'
-import type { Block } from '../../fields/config/types.js'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config } from '../config/types.js'
+import type { Block } from '../fields/config/types.js'
+
+import { runJobsEndpoint } from './endpoint.js'
 
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
   if (!Array.isArray(config?.queues?.jobs)) {
@@ -27,7 +29,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     slug: 'payload-jobs',
     admin: {
       group: 'System',
+      hidden: true,
     },
+    endpoints: [runJobsEndpoint],
     fields: [
       {
         type: 'tabs',
@@ -114,7 +118,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         defaultValue: 'default',
         index: true,
         options: [...queueNames],
-        required: true,
       },
       {
         name: 'processing',

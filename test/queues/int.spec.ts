@@ -4,7 +4,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { postsSlug } from './collections/Posts/index.js'
 
 let payload: Payload
 
@@ -25,12 +24,12 @@ describe('Queues', () => {
 
   it('can create new jobs', async () => {
     const newPost = await payload.create({
-      collection: postsSlug,
+      collection: 'posts',
       data: {
-        text: 'LOCAL API EXAMPLE',
+        title: 'LOCAL API EXAMPLE',
       },
     })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
   })
 })
