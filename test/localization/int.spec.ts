@@ -1129,8 +1129,30 @@ describe('Localization', () => {
             {
               blockType: 'text',
               text: englishText,
+              nestedArray: [
+                {
+                  text: 'hello',
+                },
+                {
+                  text: 'goodbye',
+                },
+              ],
             },
           ],
+          myTab: {
+            text: 'hello',
+            group: {
+              nestedText: 'hello',
+              nestedArray: [
+                {
+                  nestedText: 'hello',
+                },
+                {
+                  nestedText: 'goodbye',
+                },
+              ],
+            },
+          },
           title: 'hello',
         },
         locale: defaultLocale,
@@ -1144,9 +1166,31 @@ describe('Localization', () => {
             {
               blockType: 'text',
               text: spanishText,
+              nestedArray: [
+                {
+                  text: 'hola',
+                },
+                {
+                  text: 'adios',
+                },
+              ],
             },
           ],
           title: 'hello',
+          myTab: {
+            text: 'hola',
+            group: {
+              nestedText: 'hola',
+              nestedArray: [
+                {
+                  nestedText: 'hola',
+                },
+                {
+                  nestedText: 'adios',
+                },
+              ],
+            },
+          },
         },
         locale: spanishLocale,
       })
@@ -1168,6 +1212,14 @@ describe('Localization', () => {
 
       expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
       expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
+
+      expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
+      // expect(allLocales.myTab.group.en.nestedArray[0].nestedText).toStrictEqual('hello')
+      // expect(allLocales.myTab.group.en.nestedArray[1].nestedText).toStrictEqual('goodbye')
+
+      expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
+      // expect(allLocales.myTab.group.es.nestedArray[0].nestedText).toStrictEqual('hola')
+      // expect(allLocales.myTab.group.es.nestedArray[1].nestedText).toStrictEqual('adios')
     })
   })
 
