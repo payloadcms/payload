@@ -14,6 +14,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
+import { beforeDuplicate } from '../../fields/hooks/beforeDuplicate/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -93,7 +94,7 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
-    const docWithLocales = await getLatestCollectionVersion({
+    let docWithLocales = await getLatestCollectionVersion({
       id,
       config: collectionConfig,
       payload,
@@ -111,6 +112,15 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
     // remove the createdAt timestamp and id to rely on the db to set the default it
     delete docWithLocales.createdAt
     delete docWithLocales.id
+
+    docWithLocales = await beforeDuplicate({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      doc: docWithLocales,
+      overrideAccess,
+      req,
+    })
 
     // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
     if (shouldSaveDraft) {
@@ -205,7 +215,6 @@ export const duplicateOperation = async <TSlug extends CollectionSlug>(
       data,
       doc: originalDoc,
       docWithLocales,
-      duplicate: true,
       global: null,
       operation,
       req,
