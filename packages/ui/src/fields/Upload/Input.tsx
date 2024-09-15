@@ -133,7 +133,7 @@ export function UploadInput(props: UploadInputProps) {
         id: {
           ...((filterOptionsFromProps?.[activeRelationTo] as any)?.id || {}),
           not_in: ((filterOptionsFromProps?.[activeRelationTo] as any)?.id?.not_in || []).concat(
-            ...((Array.isArray(value) || value ? [value] : []) || []),
+            ...(Array.isArray(value) || value ? [value] : []),
           ),
         },
       },
@@ -290,12 +290,14 @@ export function UploadInput(props: UploadInputProps) {
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs) => {
-      const selectedDocIDs = Object.entries(docs).reduce<string[]>((acc, [docID, isSelected]) => {
+      const selectedDocIDs = []
+
+      for (const [id, isSelected] of docs) {
         if (isSelected) {
-          acc.push(docID)
+          selectedDocIDs.push(id)
         }
-        return acc
-      }, [])
+      }
+
       const loadedDocs = await populateDocs(selectedDocIDs, activeRelationTo)
       if (loadedDocs) {
         setPopulatedDocs((currentDocs) => [

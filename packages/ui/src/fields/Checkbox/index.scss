@@ -102,6 +102,19 @@
     }
   }
 
+  .checkbox-input__icon {
+    .icon--line {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    &.partial {
+      svg {
+        opacity: 1;
+      }
+    }
+  }
+
   &--read-only {
     .checkbox-input__input {
       @include readOnly;

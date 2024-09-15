@@ -5,6 +5,9 @@ dist
 !/.idea/runConfigurations
 !/.idea/payload.iml
 
+# Custom actions
+!.github/actions/**/dist
+
 test/packed
 test-results
 .devcontainer
