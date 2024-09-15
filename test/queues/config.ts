@@ -21,6 +21,7 @@ export default buildConfigWithDefaults({
           async ({ req, doc }) => {
             await req.payload.create({
               collection: 'payload-jobs',
+              req,
               data: {
                 type: 'updatePost',
                 steps: [

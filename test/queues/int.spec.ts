@@ -72,8 +72,8 @@ describe('Queues', () => {
       id: newPost.id,
     })
 
-    expect(retrievedPost.jobStep1Ran).toBeUndefined()
-    expect(retrievedPost.jobStep2Ran).toBeUndefined()
+    expect(retrievedPost.jobStep1Ran).toBeFalsy()
+    expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
     await restClient.GET('/payload-jobs/run', {
       headers: {
