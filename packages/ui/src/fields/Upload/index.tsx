@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadFieldProps } from 'payload'
+import type { UploadFieldClientProps } from 'payload'
 
 import React from 'react'
 
@@ -15,13 +15,12 @@ export type { UploadInputProps } from './Input.js'
 
 export const baseClass = 'upload'
 
-export function UploadComponent(props: UploadFieldProps) {
+export function UploadComponent(props: UploadFieldClientProps) {
   const {
     field: {
       _path,
       admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
       hasMany,
-      label,
       maxRows,
       relationTo,
       required,
@@ -70,7 +69,6 @@ export function UploadComponent(props: UploadFieldProps) {
       hasMany={hasMany}
       isSortable={isSortable}
       Label={field?.admin?.components?.Label}
-      label={label}
       maxRows={maxRows}
       onChange={setValue}
       path={path}

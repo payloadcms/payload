@@ -12,7 +12,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocControls,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -61,6 +60,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -976,18 +976,14 @@ describe('admin1', () => {
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await page
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       await wait(500)
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
       const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
       await drawer1Content
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
       await expect(drawer2Content).toBeVisible()

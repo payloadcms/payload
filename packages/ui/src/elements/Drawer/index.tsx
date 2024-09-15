@@ -11,7 +11,8 @@ import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
 const baseClass = 'drawer'
-const zBase = 100
+
+export const drawerZBase = 100
 
 export const formatDrawerSlug = ({ slug, depth }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
@@ -83,7 +84,7 @@ export const Drawer: React.FC<Props> = ({
           .join(' ')}
         slug={slug}
         style={{
-          zIndex: zBase + drawerDepth,
+          zIndex: drawerZBase + drawerDepth,
         }}
       >
         {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}

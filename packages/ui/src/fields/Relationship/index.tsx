@@ -1,14 +1,16 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
+import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -34,7 +36,7 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -53,7 +55,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       } = {},
       hasMany,
-      label,
       relationTo,
       required,
     },
@@ -75,6 +76,15 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const hasMultipleRelations = Array.isArray(relationTo)
+
+  const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+  >({
+    id: undefined,
+    collectionSlug: undefined,
+    hasReadPermission: false,
+  })
+
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
@@ -114,7 +124,12 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const valueRef = useRef(value)
   valueRef.current = value
 
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false)
+  const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    id: currentlyOpenRelationship.id,
+    collectionSlug: currentlyOpenRelationship.collectionSlug,
+  })
+
+  const openDrawerWhenRelationChanges = useRef(false)
 
   const getResults: GetResults = useCallback(
     async ({
@@ -235,8 +250,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 dispatchOptions({
                   type: 'ADD',
                   collection,
-                  // TODO: fix this
-                  // @ts-expect-error-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -248,8 +261,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               dispatchOptions({
                 type: 'ADD',
                 collection,
-                // TODO: fix this
-                // @ts-expect-error-next-line
                 config,
                 docs: [],
                 i18n,
@@ -364,8 +375,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             dispatchOptions({
               type: 'ADD',
               collection,
-              // TODO: fix this
-              // @ts-expect-error-next-line
               config,
               docs,
               i18n,
@@ -406,7 +415,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useIgnoredEffect(
-     
     () => {
       // If the menu is open while filterOptions changes
       // due to latency of getFormState and fast clicking into this field,
@@ -443,14 +451,91 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       dispatchOptions({
         type: 'UPDATE',
         collection: args.collectionConfig,
-        // TODO: fix this
-        // @ts-expect-error-next-line
         config,
         doc: args.doc,
         i18n,
       })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).map((option) => {
+                if (option.value === args.doc.id) {
+                  return {
+                    relationTo: args.collectionConfig.slug,
+                    value: args.doc.id,
+                  }
+                }
+
+                return option
+              })
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
     },
-    [i18n, config],
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
+    (args) => {
+      dispatchOptions({
+        type: 'ADD',
+        collection: args.collectionConfig,
+        config,
+        docs: [args.doc],
+        i18n,
+        sort: true,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).concat({
+                relationTo: args.collectionConfig.slug,
+                value: args.doc.id,
+              } as Option)
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
+    },
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      dispatchOptions({
+        id: args.id,
+        type: 'REMOVE',
+        collection: args.collectionConfig,
+        config,
+        i18n,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).filter((option) => {
+                return option.value !== args.id
+              })
+            : null,
+        )
+      } else {
+        setValue(null)
+      }
+
+      return
+    },
+    [i18n, config, hasMany, setValue],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -472,6 +557,24 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     }
     return r.test(string.slice(-breakApartThreshold))
   }, [])
+
+  const onDocumentDrawerOpen = useCallback<
+    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+  >(({ id, collectionSlug, hasReadPermission }) => {
+    openDrawerWhenRelationChanges.current = true
+    setCurrentlyOpenRelationship({
+      id,
+      collectionSlug,
+      hasReadPermission,
+    })
+  }, [])
+
+  useEffect(() => {
+    if (openDrawerWhenRelationChanges.current) {
+      openDrawer()
+      openDrawerWhenRelationChanges.current = false
+    }
+  }, [openDrawer, currentlyOpenRelationship])
 
   const valueToRender = findOptionsByValue({ options, value })
 
@@ -498,13 +601,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         width,
       }}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
@@ -515,18 +612,18 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!drawerIsOpen}
+              backspaceRemovesValue={!isDrawerOpen}
               components={{
                 MultiValueLabel,
                 SingleValue,
               }}
               customProps={{
-                disableKeyDown: drawerIsOpen,
-                disableMouseDown: drawerIsOpen,
+                disableKeyDown: isDrawerOpen,
+                disableMouseDown: isDrawerOpen,
+                onDocumentDrawerOpen,
                 onSave,
-                setDrawerIsOpen,
               }}
-              disabled={readOnly || formProcessing || drawerIsOpen}
+              disabled={readOnly || formProcessing || isDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -623,6 +720,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           {...(descriptionProps || {})}
         />
       </div>
+      {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+      )}
     </div>
   )
 }

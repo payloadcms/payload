@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.98",
+  "version": "3.0.0-beta.105",
   "private": true,
   "type": "module",
   "scripts": {
@@ -87,6 +87,7 @@
     "test:e2e:prod:ci": "rm -rf test/node_modules && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd .. && pnpm runts ./test/runE2E.ts --prod",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
@@ -115,7 +116,7 @@
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
-    "@types/node": "20.12.5",
+    "@types/node": "22.5.4",
     "@types/prompts": "^2.4.5",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
@@ -158,9 +159,9 @@
     "sort-package-json": "^2.10.0",
     "swc-plugin-transform-remove-imports": "1.15.0",
     "tempy": "1.0.1",
-    "tsx": "4.17.0",
-    "turbo": "^2.1.0",
-    "typescript": "5.5.4"
+    "tsx": "4.19.1",
+    "turbo": "^2.1.1",
+    "typescript": "5.6.2"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^19.0.0-rc-06d0b89e-20240801",

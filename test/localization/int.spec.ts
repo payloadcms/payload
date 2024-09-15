@@ -22,9 +22,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -1117,6 +1117,116 @@ describe('Localization', () => {
 
       expect(allLocales.localizedCheckbox.en).toBeTruthy()
       expect(allLocales.localizedCheckbox.es).toBeFalsy()
+    })
+
+    it('should duplicate with localized blocks', async () => {
+      // This test covers a few things:
+      // 1. make sure we can duplicate localized blocks
+      //    - in relational DBs, we need to create new block / array IDs
+      //    - and this needs to be done recursively for all block / array fields
+      // 2. make sure localized arrays / blocks work inside of localized groups / tabs
+      //    - this is covered with myTab.group.nestedArray2
+
+      const englishText = 'english'
+      const spanishText = 'spanish'
+      const doc = await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: englishText,
+              nestedArray: [
+                {
+                  text: 'hello',
+                },
+                {
+                  text: 'goodbye',
+                },
+              ],
+            },
+          ],
+          myTab: {
+            text: 'hello',
+            group: {
+              nestedText: 'hello',
+              nestedArray2: [
+                {
+                  nestedText: 'hello',
+                },
+                {
+                  nestedText: 'goodbye',
+                },
+              ],
+            },
+          },
+          title: 'hello',
+        },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        data: {
+          layout: [
+            {
+              blockType: 'text',
+              text: spanishText,
+              nestedArray: [
+                {
+                  text: 'hola',
+                },
+                {
+                  text: 'adios',
+                },
+              ],
+            },
+          ],
+          title: 'hello',
+          myTab: {
+            text: 'hola',
+            group: {
+              nestedText: 'hola',
+              nestedArray2: [
+                {
+                  nestedText: 'hola',
+                },
+                {
+                  nestedText: 'adios',
+                },
+              ],
+            },
+          },
+        },
+        locale: spanishLocale,
+      })
+
+      const result = await payload.duplicate({
+        id: doc.id,
+        collection: withRequiredLocalizedFields,
+        locale: defaultLocale,
+      })
+
+      const allLocales = await payload.findByID({
+        id: result.id,
+        collection: withRequiredLocalizedFields,
+        locale: 'all',
+      })
+
+      // check fields
+      expect(result.layout[0].text).toStrictEqual(englishText)
+
+      expect(allLocales.layout.en[0].text).toStrictEqual(englishText)
+      expect(allLocales.layout.es[0].text).toStrictEqual(spanishText)
+
+      expect(allLocales.myTab.group.en.nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[0].nestedText).toStrictEqual('hello')
+      expect(allLocales.myTab.group.en.nestedArray2[1].nestedText).toStrictEqual('goodbye')
+
+      expect(allLocales.myTab.group.es.nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[0].nestedText).toStrictEqual('hola')
+      expect(allLocales.myTab.group.es.nestedArray2[1].nestedText).toStrictEqual('adios')
     })
   })
 

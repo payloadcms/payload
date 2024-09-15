@@ -97,7 +97,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const whereInputFields = [...fields]
 
     if (!hasIDField) {
-      baseFields.id = { type: idType }
+      baseFields.id = { type: new GraphQLNonNull(idType) }
       whereInputFields.push({
         name: 'id',
         type: config.db.defaultIDType as 'text',

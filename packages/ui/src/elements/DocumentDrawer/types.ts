@@ -7,9 +7,14 @@ import type { Props as DrawerProps } from '../Drawer/types.js'
 export type DocumentDrawerProps = {
   readonly AfterFields?: React.ReactNode
   readonly collectionSlug: string
+  readonly disableActions?: boolean
   readonly drawerSlug?: string
   readonly id?: null | number | string
+  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
   readonly onSave?: DocumentInfoContext['onSave']
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {

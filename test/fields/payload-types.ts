@@ -931,6 +931,20 @@ export interface GroupField {
       };
     };
   };
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -943,8 +957,15 @@ export interface RowField {
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
+  field_with_width_30_percent?: string | null;
+  field_with_width_60_percent?: string | null;
+  field_with_width_20_percent?: string | null;
   field_within_collapsible_a?: string | null;
   field_within_collapsible_b?: string | null;
+  field_20_percent_width_within_row_a?: string | null;
+  no_set_width_within_row_b?: string | null;
+  no_set_width_within_row_c?: string | null;
+  field_20_percent_width_within_row_d?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1366,6 +1387,20 @@ export interface TabsField {
     beforeChange?: boolean | null;
     afterChange?: boolean | null;
     afterRead?: boolean | null;
+  };
+  camelCaseTab?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   textarea?: string | null;
   anotherText: string;

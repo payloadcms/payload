@@ -1,7 +1,7 @@
 import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -76,7 +76,7 @@ export type FieldGeneratorFunction<TSchema, TField extends Field> = (
  */
 export type FieldToSchemaMap<TSchema> = {
   array: FieldGeneratorFunction<TSchema, ArrayField>
-  blocks: FieldGeneratorFunction<TSchema, BlockField>
+  blocks: FieldGeneratorFunction<TSchema, BlocksField>
   checkbox: FieldGeneratorFunction<TSchema, CheckboxField>
   code: FieldGeneratorFunction<TSchema, CodeField>
   collapsible: FieldGeneratorFunction<TSchema, CollapsibleField>

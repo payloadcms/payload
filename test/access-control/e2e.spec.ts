@@ -3,6 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -21,7 +22,6 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   login,
-  openDocControls,
   openNav,
   saveDocAndAssert,
 } from '../helpers.js'
