@@ -27,9 +27,7 @@ type Args = {
  * Extends the passed table with additional columns / extra config
  * @example
  */
-export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): Table => {
-  const resultTable = table
-
+export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): void => {
   const InlineForeignKeys = Object.getOwnPropertySymbols(table).find((symbol) => {
     return symbol.description?.includes('InlineForeignKeys')
   })
@@ -40,27 +38,27 @@ export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): Table
 
   if (columns) {
     for (const [name, columnBuilder] of Object.entries(columns) as [string, any][]) {
-      const column = columnBuilder.build(resultTable)
+      const column = columnBuilder.build(table)
 
-      resultTable[name] = column
-      resultTable[InlineForeignKeys].push(...columnBuilder.buildForeignKeys(column, resultTable))
-      resultTable[DrizzleSymbol.Columns][name] = column
+      table[name] = column
+      table[InlineForeignKeys].push(...columnBuilder.buildForeignKeys(column, table))
+      table[DrizzleSymbol.Columns][name] = column
 
-      resultTable[DrizzleSymbol.ExtraConfigColumns][name] =
+      table[DrizzleSymbol.ExtraConfigColumns][name] =
         'buildExtraConfigColumn' in columnBuilder
-          ? columnBuilder.buildExtraConfigColumn(resultTable)
+          ? columnBuilder.buildExtraConfigColumn(table)
           : column
     }
   }
 
   if (extraConfig) {
-    resultTable[DrizzleSymbol.ExtraConfigBuilder] = (t) => {
+    const originalExtraConfigBuilder = table[DrizzleSymbol.ExtraConfigBuilder]
+
+    table[DrizzleSymbol.ExtraConfigBuilder] = (t) => {
       return {
-        ...table[DrizzleSymbol.ExtraConfigBuilder](t),
+        ...originalExtraConfigBuilder(t),
         ...extraConfig(t),
       }
     }
   }
-
-  return resultTable
 }
