@@ -16,20 +16,20 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.0.0-beta.102",
-    "@payloadcms/next": "3.0.0-beta.102",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.102",
-    "@payloadcms/ui": "3.0.0-beta.102",
+    "@payloadcms/db-mongodb": "3.0.0-beta.106",
+    "@payloadcms/next": "3.0.0-beta.106",
+    "@payloadcms/richtext-lexical": "3.0.0-beta.106",
+    "@payloadcms/ui": "3.0.0-beta.106",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "graphql": "^16.9.0",
     "next": "15.0.0-canary.104",
-    "payload": "3.0.0-beta.102",
+    "payload": "3.0.0-beta.106",
     "react": "19.0.0-rc-06d0b89e-20240801",
     "react-dom": "19.0.0-rc-06d0b89e-20240801"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "3.0.0-beta.102",
+    "@payloadcms/graphql": "3.0.0-beta.106",
     "@types/react": "npm:types-react@19.0.0-beta.2",
     "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
     "eslint": "^8.57.0",
