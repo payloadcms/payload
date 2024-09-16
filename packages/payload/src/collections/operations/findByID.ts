@@ -124,7 +124,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
               },
               {
                 'document.value': {
-                  in: id,
+                  equals: id,
                 },
               },
             ],

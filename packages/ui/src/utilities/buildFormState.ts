@@ -237,7 +237,7 @@ export const buildFormState = async ({
       lockedDocumentQuery = {
         and: [
           { 'document.relationTo': { equals: collectionSlug } },
-          { 'document.value': { in: id } },
+          { 'document.value': { equals: id } },
         ],
       }
     } else if (globalSlug) {
