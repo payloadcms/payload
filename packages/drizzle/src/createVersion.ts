@@ -31,16 +31,20 @@ export async function createVersion<T extends TypeWithID>(
     delete version.id
   }
 
-  const result = await upsertRow<TypeWithVersion<T>>({
-    adapter: this,
-    data: {
-      autosave,
-      latest: true,
-      parent,
-      publishedLocale,
+  const data: Record<string, unknown> = {
+    autosave,
+    latest: true,
+    parent,
+    publishedLocale,
       snapshot,
       version,
-    },
+    }if ('createdAt' in version) {
+    data.createdAt = version.createdAt
+  }
+
+  const result = await upsertRow<TypeWithVersion<T>>({
+    adapter: this,
+    data,
     db,
     fields: buildVersionCollectionFields(this.payload.config, collection),
     operation: 'create',

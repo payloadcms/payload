@@ -12,7 +12,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocControls,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -61,6 +60,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -677,6 +677,14 @@ describe('admin1', () => {
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+    })
+  })
+
+  describe('custom components', () => {
+    test('should render custom header', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const header = page.locator('.custom-header')
+      await expect(header).toContainText('Here is a custom header')
     })
   })
 

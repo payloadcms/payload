@@ -1,98 +1,101 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
+import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
 
+import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
+  ArrayFieldClientProps,
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
   ArrayFieldLabelServerComponent,
-  ArrayFieldProps,
-  BlockFieldErrorClientComponent,
-  BlockFieldErrorServerComponent,
-  BlockFieldProps,
+  BlocksFieldClientProps,
+  BlocksFieldErrorClientComponent,
+  BlocksFieldErrorServerComponent,
+  CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
   CheckboxFieldLabelClientComponent,
   CheckboxFieldLabelServerComponent,
-  CheckboxFieldProps,
   ClientTab,
+  CodeFieldClientProps,
   CodeFieldErrorClientComponent,
   CodeFieldErrorServerComponent,
   CodeFieldLabelClientComponent,
   CodeFieldLabelServerComponent,
-  CodeFieldProps,
+  CollapsibleFieldClientProps,
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
-  CollapsibleFieldProps,
   ConditionalDateProps,
+  CreateMappedComponent,
+  DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
-  DateFieldProps,
   Description,
+  EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  EmailFieldProps,
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
-  GroupFieldProps,
   HiddenFieldProps,
+  JSONFieldClientProps,
   JSONFieldErrorClientComponent,
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  JSONFieldProps,
   MappedComponent,
+  NumberFieldClientProps,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
   NumberFieldLabelClientComponent,
   NumberFieldLabelServerComponent,
-  NumberFieldProps,
+  PointFieldClientProps,
   PointFieldErrorClientComponent,
   PointFieldErrorServerComponent,
   PointFieldLabelClientComponent,
   PointFieldLabelServerComponent,
-  PointFieldProps,
+  RadioFieldClientProps,
   RadioFieldErrorClientComponent,
   RadioFieldErrorServerComponent,
   RadioFieldLabelClientComponent,
   RadioFieldLabelServerComponent,
-  RadioFieldProps,
+  RelationshipFieldClientProps,
   RelationshipFieldErrorClientComponent,
   RelationshipFieldErrorServerComponent,
   RelationshipFieldLabelClientComponent,
   RelationshipFieldLabelServerComponent,
-  RelationshipFieldProps,
-  RichTextFieldProps,
-  RowFieldProps,
+  RichTextFieldClientProps,
+  RowFieldClientProps,
   RowLabelComponent,
+  SelectFieldClientProps,
   SelectFieldErrorClientComponent,
   SelectFieldErrorServerComponent,
   SelectFieldLabelClientComponent,
   SelectFieldLabelServerComponent,
-  SelectFieldProps,
   StaticDescription,
-  TabsFieldProps,
+  TabsFieldClientProps,
+  TextareaFieldClientProps,
   TextareaFieldErrorClientComponent,
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
-  TextareaFieldProps,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
   TextFieldLabelServerComponent,
-  UploadFieldProps,
+  UploadFieldClientProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
@@ -103,9 +106,15 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, ImportMap } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type {
+  Operation,
+  Payload,
+  PayloadRequest,
+  RequestContext,
+  Where,
+} from '../../types/index.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -233,7 +242,7 @@ type Admin = {
   components?: {
     Cell?: CustomComponent
     Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Field?: CustomComponent
+    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */
@@ -263,7 +272,7 @@ type Admin = {
   position?: 'sidebar'
   readOnly?: boolean
   style?: CSSProperties
-  width?: string
+  width?: CSSProperties['width']
 }
 
 export type AdminClient = {
@@ -295,8 +304,8 @@ export type AdminClient = {
   hidden?: boolean
   position?: 'sidebar'
   readOnly?: boolean
-  style?: CSSProperties
-  width?: string
+  style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
+  width?: CSSProperties['width']
 }
 
 export type Labels = {
@@ -801,7 +810,7 @@ export type UIField = {
      */
     disableListColumn?: boolean
     position?: string
-    width?: string
+    width?: CSSProperties['width']
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1318,10 +1327,10 @@ export type ClientBlock = {
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
 
-export type BlockField = {
+export type BlocksField = {
   admin?: {
     components?: {
-      Error?: CustomComponent<BlockFieldErrorClientComponent | BlockFieldErrorServerComponent>
+      Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1335,20 +1344,20 @@ export type BlockField = {
   maxRows?: number
   minRows?: number
   type: 'blocks'
-  validate?: Validate<string, unknown, unknown, BlockField>
+  validate?: Validate<string, unknown, unknown, BlocksField>
 } & FieldBase
 
-export type BlockFieldClient = {
+export type BlocksFieldClient = {
   admin?: {
     components?: {
       Error?: MappedComponent
     } & AdminClient['components']
   } & AdminClient &
-    Pick<BlockField['admin'], 'initCollapsed' | 'isSortable'>
+    Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
-  Pick<BlockField, 'maxRows' | 'minRows' | 'type'>
+  Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
 
 export type PointField = {
   admin?: {
@@ -1380,7 +1389,7 @@ export type PointFieldClient = {
 
 export type Field =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | CollapsibleField
@@ -1403,7 +1412,7 @@ export type Field =
 
 export type ClientField =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | CollapsibleFieldClient
@@ -1425,26 +1434,26 @@ export type ClientField =
   | UploadFieldClient
 
 export type ClientFieldProps =
-  | ArrayFieldProps
-  | BlockFieldProps
-  | CheckboxFieldProps
-  | CodeFieldProps
-  | CollapsibleFieldProps
-  | DateFieldProps
-  | EmailFieldProps
-  | GroupFieldProps
+  | ArrayFieldClientProps
+  | BlocksFieldClientProps
+  | CheckboxFieldClientProps
+  | CodeFieldClientProps
+  | CollapsibleFieldClientProps
+  | DateFieldClientProps
+  | EmailFieldClientProps
+  | GroupFieldClientProps
   | HiddenFieldProps
-  | JSONFieldProps
-  | NumberFieldProps
-  | PointFieldProps
-  | RadioFieldProps
-  | RelationshipFieldProps
-  | RichTextFieldProps
-  | RowFieldProps
-  | SelectFieldProps
-  | TabsFieldProps
-  | TextareaFieldProps
-  | UploadFieldProps
+  | JSONFieldClientProps
+  | NumberFieldClientProps
+  | PointFieldClientProps
+  | RadioFieldClientProps
+  | RelationshipFieldClientProps
+  | RichTextFieldClientProps
+  | RowFieldClientProps
+  | SelectFieldClientProps
+  | TabsFieldClientProps
+  | TextareaFieldClientProps
+  | UploadFieldClientProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
 
@@ -1452,7 +1461,7 @@ export type FieldTypes = ExtractFieldTypes<Field>
 
 export type FieldAffectingData =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | DateField
@@ -1472,7 +1481,7 @@ export type FieldAffectingData =
 
 export type FieldAffectingDataClient =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | DateFieldClient
@@ -1492,7 +1501,7 @@ export type FieldAffectingDataClient =
 
 export type NonPresentationalField =
   | ArrayField
-  | BlockField
+  | BlocksField
   | CheckboxField
   | CodeField
   | CollapsibleField
@@ -1514,7 +1523,7 @@ export type NonPresentationalField =
 
 export type NonPresentationalFieldClient =
   | ArrayFieldClient
-  | BlockFieldClient
+  | BlocksFieldClient
   | CheckboxFieldClient
   | CodeFieldClient
   | CollapsibleFieldClient
@@ -1578,7 +1587,7 @@ export function fieldIsArrayType<TField extends ClientField | Field>(
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlockFieldClient : BlockField) {
+): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
   return field.type === 'blocks'
 }
 

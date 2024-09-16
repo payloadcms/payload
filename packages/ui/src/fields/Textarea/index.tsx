@@ -1,5 +1,5 @@
 'use client'
-import type { TextareaFieldProps, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -17,7 +17,7 @@ import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
-const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
+const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -35,7 +35,6 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
         style,
         width,
       } = {},
-      label,
       localized,
       maxLength,
       minLength,
@@ -91,7 +90,6 @@ const TextareaFieldComponent: React.FC<TextareaFieldProps> = (props) => {
       Error={field?.admin?.components?.Error}
       errorProps={errorProps}
       Label={field?.admin?.components?.Label}
-      label={label}
       labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)

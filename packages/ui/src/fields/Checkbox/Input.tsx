@@ -76,7 +76,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           type="checkbox"
         />
         <span
-          className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'check' : 'partial']
+          className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'partial' : 'check']
             .filter(Boolean)
             .join(' ')}
         >

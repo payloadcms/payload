@@ -8,15 +8,15 @@ type Props = {
   readOnly: boolean
 }
 export function TenantFieldComponentClient({ initialValue, path, readOnly }: Props) {
-  const { formInitializing, setValue } = useField({ path })
+  const { formInitializing, setValue, value } = useField({ path })
   const hasSetInitialValue = React.useRef(false)
 
   React.useEffect(() => {
-    if (!hasSetInitialValue.current && !formInitializing && initialValue) {
+    if (!hasSetInitialValue.current && !formInitializing && initialValue && !value) {
       setValue(initialValue)
       hasSetInitialValue.current = true
     }
-  }, [initialValue, setValue, formInitializing])
+  }, [initialValue, setValue, formInitializing, value])
 
   return (
     <RelationshipField

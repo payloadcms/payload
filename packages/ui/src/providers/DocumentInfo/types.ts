@@ -24,6 +24,7 @@ export type DocumentInfoProps = {
   BeforeFields?: React.ReactNode
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableActions?: boolean
+  disableCreate?: boolean
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
   globalSlug?: SanitizedGlobalConfig['slug']
@@ -33,8 +34,25 @@ export type DocumentInfoProps = {
   initialData?: Data
   initialState?: FormState
   isEditing?: boolean
+  onDelete?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    id: string
+  }) => Promise<void> | void
+  onDrawerCreate?: () => void
+  /* only available if `redirectAfterDuplicate` is `false` */
+  onDuplicate?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+  }) => Promise<void> | void
   onLoadError?: (data?: any) => Promise<void> | void
-  onSave?: (data: Data) => Promise<void> | void
+  onSave?: (args: {
+    collectionConfig?: ClientCollectionConfig
+    doc: TypeWithID
+    operation: 'create' | 'update'
+    result: Data
+  }) => Promise<void> | void
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
 }
 
 export type DocumentInfoContext = {

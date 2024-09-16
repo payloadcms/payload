@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.100",
+  "version": "3.0.0-beta.107",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -92,7 +92,7 @@
     "react-select": "5.8.0",
     "scheduler": "0.25.0-rc-f994737d14-20240522",
     "sonner": "^1.5.0",
-    "ts-essentials": "7.0.3",
+    "ts-essentials": "10.0.2",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },

@@ -590,7 +590,7 @@ const DocumentInfo: React.FC<
 
 export const DocumentInfoProvider: React.FC<
   {
-    children: React.ReactNode
+    readonly children: React.ReactNode
   } & DocumentInfoProps
 > = (props) => {
   return (

@@ -835,8 +835,8 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
-  BlockField,
-  BlockFieldClient,
+  BlocksField,
+  BlocksFieldClient,
   CheckboxField,
   CheckboxFieldClient,
   ClientBlock,
@@ -930,7 +930,7 @@ export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/b
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export type {
   ArrayFieldValidation,
-  BlockFieldValidation,
+  BlocksFieldValidation,
   CheckboxFieldValidation,
   CodeFieldValidation,
   ConfirmPasswordFieldValidation,
@@ -1005,6 +1005,12 @@ export {
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export {
+  findUp,
+  findUpSync,
+  pathExistsAndIsAccessible,
+  pathExistsAndIsAccessibleSync,
+} from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'

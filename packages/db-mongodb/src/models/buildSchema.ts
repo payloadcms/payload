@@ -2,7 +2,7 @@ import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mon
 import type {
   ArrayField,
   Block,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -176,7 +176,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     })
   },
   blocks: (
-    field: BlockField,
+    field: BlocksField,
     schema: Schema,
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
