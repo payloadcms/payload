@@ -339,6 +339,25 @@ describe('Lexical', () => {
       expect(htmlField1).toStrictEqual('<p>array 1</p>')
       expect(htmlField2).toStrictEqual('<p>array 2</p>')
     })
+    it('htmlConverter: should output correct HTML for lexical field nested in blocks', async () => {
+      const lexicalDoc: LexicalMigrateField = (
+        await payload.find({
+          collection: lexicalMigrateFieldsSlug,
+          depth: 0,
+          where: {
+            title: {
+              equals: lexicalMigrateDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField = lexicalDoc?.lexicalWithLexicalPluginData_html
+
+      console.log('lexicalField:', lexicalField)
+
+      expect(lexicalField).toStrictEqual('<p>lexical plugin</p>')
+    })
   })
   describe('advanced - blocks', () => {
     it('should not populate relationships in blocks if depth is 0', async () => {

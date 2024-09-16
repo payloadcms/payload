@@ -156,6 +156,7 @@ export interface LexicalMigrateField {
     };
     [k: string]: unknown;
   } | null;
+  lexicalWithLexicalPluginData_html?: string | null;
   lexicalWithSlateData?: {
     root: {
       type: string;

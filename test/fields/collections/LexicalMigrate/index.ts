@@ -72,6 +72,7 @@ export const LexicalMigrateFields: CollectionConfig = {
         ],
       }),
     },
+    lexicalHTML('lexicalWithLexicalPluginData', { name: 'lexicalWithLexicalPluginData_html' }),
     {
       name: 'lexicalWithSlateData',
       type: 'richText',
