@@ -205,10 +205,10 @@ describe('Localization', () => {
       await page.goto(urlWithRequiredLocalizedFields.create)
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
-      await page.locator('#field-layout .blocks-field__drawer-toggler').click()
+      await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
-      await page.fill('#field-layout__0__text', 'test')
-      await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
+      await page.fill('#field-nav__layout__0__text', 'test')
+      await expect(page.locator('#field-nav__layout__0__text')).toHaveValue('test')
       await saveDocAndAssert(page)
       const originalID = await page.locator('.id-label').innerText()
       await openDocControls(page)
@@ -256,6 +256,10 @@ describe('Localization', () => {
 async function fillValues(data: Partial<LocalizedPost>) {
   const { description: descVal, title: titleVal } = data
 
-  if (titleVal) {await page.locator('#field-title').fill(titleVal)}
-  if (descVal) {await page.locator('#field-description').fill(descVal)}
+  if (titleVal) {
+    await page.locator('#field-title').fill(titleVal)
+  }
+  if (descVal) {
+    await page.locator('#field-description').fill(descVal)
+  }
 }
