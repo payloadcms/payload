@@ -169,7 +169,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
               },
               {
                 'document.value': {
-                  equals: result.docs.map((doc) => doc.id),
+                  in: result.docs.map((doc) => doc.id),
                 },
               },
             ],
