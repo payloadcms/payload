@@ -13,7 +13,14 @@ type Args = {
 }
 
 export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
-  const { stepIndex, stepSlug } = findStepToRun(stepStatus)
+  const stepToRun = findStepToRun(stepStatus)
+
+  if (!stepToRun) {
+    return
+  }
+
+  const { stepIndex, stepSlug } = stepToRun
+
   const isLastStep = stepIndex === stepStatus.size - 1
 
   if (!stepSlug) {
@@ -40,7 +47,8 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
 
   try {
     // the runner will either be passed to the config
-    // OR it will be a path, which we will need to eval via importing
+    // OR it will be a path, which we will need to import via eval to avoid
+    // Next.js compiler dynamic import expression errors
 
     let runner: JobRunner<unknown>
 
@@ -70,9 +78,31 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
       }
 
       if (!runner) {
-        req.payload.logger.error(
-          `Can\'t find runner while importing with the path ${stepConfig.run}`,
-        )
+        const errorMessage = `Can't find runner while importing with the path ${stepConfig.run} in job type ${job.type}.`
+        req.payload.logger.error(errorMessage)
+
+        await req.payload.update({
+          id: job.id,
+          collection: 'payload-jobs',
+          data: {
+            error: {
+              error: errorMessage,
+            },
+            hasError: true,
+            log: [
+              ...job.log,
+              {
+                error: errorMessage,
+                executedAt: new Date(),
+                state: 'failed',
+                stepIndex,
+              },
+            ],
+            processing: false,
+          },
+          req,
+        })
+
         return
       }
     }
@@ -90,6 +120,7 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
     // Run the job
     await runner({ job, req, step: stepData })
 
+    // Job step has completed.
     // Create a new instance of stepStatus
     // and mark the current step as complete
     // so that when the next call to `runStep` is initiated,
@@ -173,9 +204,9 @@ export const runStep = async ({ job, jobConfig, req, stepStatus }: Args) => {
       processing: false,
     }
 
-    // If the step has failed more than the allowed retries,
+    // If the step has tried and failed more than the allowed retries,
     // then set the entire job to errored
-    if (failedStepStatus.retries >= failedStepStatus.totalTried + 1) {
+    if (failedStepStatus.totalTried + 1 >= failedStepStatus.retries) {
       dataToUpdate.hasError = true
       dataToUpdate.error = err
     }

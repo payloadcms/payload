@@ -47,9 +47,11 @@ export const runJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<
   }
 
   if (queue) {
-    where.queue = {
-      equals: queue,
-    }
+    where.and.push({
+      queue: {
+        equals: queue,
+      },
+    })
   }
 
   req.payload.logger.info({
