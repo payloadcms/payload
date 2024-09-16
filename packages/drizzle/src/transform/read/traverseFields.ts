@@ -534,6 +534,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           valuesToTransform.push({
             ref: localizedFieldData,
             table: {
+              ...table,
               ...localeRow,
             },
           })
@@ -571,7 +572,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               relationships,
               table,
               texts,
-              withinArrayOrBlockLocale,
+              withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
             })
 
             if ('_order' in ref) {

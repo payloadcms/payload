@@ -67,8 +67,10 @@ export function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+
                 const {
                   columnName,
+                  columns,
                   constraints: queryConstraints,
                   field,
                   getNotNullColumnByValue,
@@ -190,6 +192,7 @@ export function parseParams({
 
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
+                  columns,
                   field,
                   operator,
                   relationOrPath,
@@ -200,7 +203,49 @@ export function parseParams({
                   break
                 }
 
-                const { operator: queryOperator, value: queryValue } = sanitizedQueryValue
+                const {
+                  columns: queryColumns,
+                  operator: queryOperator,
+                  value: queryValue,
+                } = sanitizedQueryValue
+
+                // Handle polymorphic relationships by value
+                if (queryColumns) {
+                  if (!queryColumns.length) {
+                    break
+                  }
+
+                  let wrapOperator = or
+
+                  if (queryValue === null && ['equals', 'not_equals'].includes(operator)) {
+                    if (operator === 'equals') {
+                      wrapOperator = and
+                    }
+
+                    constraints.push(
+                      wrapOperator(
+                        ...queryColumns.map(({ rawColumn }) =>
+                          operator === 'equals' ? isNull(rawColumn) : isNotNull(rawColumn),
+                        ),
+                      ),
+                    )
+                    break
+                  }
+
+                  if (['not_equals', 'not_in'].includes(operator)) {
+                    wrapOperator = and
+                  }
+
+                  constraints.push(
+                    wrapOperator(
+                      ...queryColumns.map(({ rawColumn, value }) =>
+                        adapter.operators[queryOperator](rawColumn, value),
+                      ),
+                    ),
+                  )
+
+                  break
+                }
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(

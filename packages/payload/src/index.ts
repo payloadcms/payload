@@ -1015,6 +1015,12 @@ export {
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export {
+  findUp,
+  findUpSync,
+  pathExistsAndIsAccessible,
+  pathExistsAndIsAccessibleSync,
+} from './utilities/findUp.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'

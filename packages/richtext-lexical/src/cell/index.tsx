@@ -3,8 +3,10 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import type { CellComponentProps, RichTextFieldClient } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { useTableCell } from '@payloadcms/ui'
+import { useConfig, useTableCell } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { $getRoot } from 'lexical'
+import LinkImport from 'next/link.js'
 import React, { useEffect, useMemo } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
@@ -15,6 +17,8 @@ import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
 import { getEnabledNodes } from '../lexical/nodes/index.js'
+
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const RichTextCell: React.FC<
   {
@@ -30,7 +34,35 @@ export const RichTextCell: React.FC<
 
   const [preview, setPreview] = React.useState('Loading...')
 
-  const { cellData } = useTableCell()
+  const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
+
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+  } = useConfig()
+
+  const { link } = cellProps || {}
+  let WrapElement: React.ComponentType<any> | string = 'span'
+
+  const wrapElementProps: {
+    className?: string
+    href?: string
+    onClick?: () => void
+    type?: 'button'
+  } = {}
+
+  const isLink = link !== undefined ? link : columnIndex === 0
+
+  if (isLink) {
+    WrapElement = Link
+    wrapElementProps.href = customCellContext?.collectionSlug
+      ? formatAdminURL({
+          adminRoute,
+          path: `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
+        })
+      : ''
+  }
 
   const finalSanitizedEditorConfig = useMemo<SanitizedClientEditorConfig>(() => {
     const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
@@ -105,6 +137,10 @@ export const RichTextCell: React.FC<
     // Limiting the number of characters shown is done in a CSS rule
     setPreview(textContent)
   }, [cellData, finalSanitizedEditorConfig])
+
+  if (isLink) {
+    return <WrapElement {...wrapElementProps}>{preview}</WrapElement>
+  }
 
   return <span>{preview}</span>
 }
