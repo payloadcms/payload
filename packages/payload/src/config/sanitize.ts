@@ -16,6 +16,7 @@ import { migrationsCollection } from '../database/migrations/migrationsCollectio
 import { InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import { queueDefaults } from '../queues/config/defaults.js'
 import { getDefaultJobsCollection } from '../queues/jobsCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
@@ -151,6 +152,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(migrationsCollection)
 
   if (Array.isArray(configWithDefaults.queues?.jobs) && configWithDefaults.queues.jobs.length > 0) {
+    configWithDefaults.queues = {
+      ...queueDefaults,
+      ...configWithDefaults.queues,
+      access: {
+        ...queueDefaults.access,
+        ...(configWithDefaults.queues?.access || {}),
+      },
+    }
+
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
     if (typeof configWithDefaults.queues.jobsCollectionOverrides === 'function') {

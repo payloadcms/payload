@@ -1,13 +1,23 @@
 import type { Endpoint } from '../config/types.js'
 import type { RunJobsArgs } from './run.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
 import { runJobs } from './run.js'
 
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
-    const access = req.payload.config.queues?.access?.run || defaultAccess
-    const hasAccess = await access({ req })
+    if (
+      !Array.isArray(req.payload.config.queues?.jobs) ||
+      !(req.payload.config.queues?.jobs?.length > 0)
+    ) {
+      return Response.json(
+        {
+          message: 'No jobs to run.',
+        },
+        { status: 200 },
+      )
+    }
+
+    const hasAccess = await req.payload.config.queues.access.run({ req })
 
     if (!hasAccess) {
       return Response.json(
