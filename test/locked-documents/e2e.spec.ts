@@ -44,7 +44,7 @@ describe('locked documents', () => {
   })
 
   describe('disabled locking', () => {
-    test('should prevent locking of documents if lockWhenEditing is false', async () => {
+    test('should prevent locking of documents if lockDocuments is false', async () => {
       const { id } = await createPageDoc({})
 
       await page.goto(pagesUrl.edit(id))

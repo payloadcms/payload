@@ -168,11 +168,11 @@ export type GlobalConfig = {
    * Enables / Disables the ability to lock documents while editing
    * @default true
    */
-  lockWhenEditing?:
+  lockDocuments?:
     | {
-        lockDuration: number
+        duration: number
       }
-    | boolean
+    | false
   slug: string
   /**
    * Options used in typescript generation

@@ -441,11 +441,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Enables / Disables the ability to lock documents while editing
    * @default true
    */
-  lockWhenEditing?:
+  lockDocuments?:
     | {
-        lockDuration: number
+        duration: number
       }
-    | boolean
+    | false
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields

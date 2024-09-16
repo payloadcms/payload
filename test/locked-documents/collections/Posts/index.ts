@@ -7,8 +7,8 @@ export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
-  lockWhenEditing: {
-    lockDuration: 180,
+  lockDocuments: {
+    duration: 180,
   },
   fields: [
     {

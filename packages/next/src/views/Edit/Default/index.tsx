@@ -103,10 +103,9 @@ export const DefaultEditView: React.FC = () => {
 
   const docConfig = collectionConfig || globalConfig
 
-  const lockWhenEditingProp =
-    docConfig?.lockWhenEditing !== undefined ? docConfig?.lockWhenEditing : true
+  const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
 
-  const isLockingEnabled = lockWhenEditingProp === true || typeof lockWhenEditingProp === 'object'
+  const isLockingEnabled = lockDocumentsProp !== false
 
   const preventLeaveWithoutSaving =
     (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||

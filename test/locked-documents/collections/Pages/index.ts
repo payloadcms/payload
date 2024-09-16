@@ -7,7 +7,7 @@ export const PagesCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
-  lockWhenEditing: false,
+  lockDocuments: false,
   fields: [
     {
       name: 'text',
