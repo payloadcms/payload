@@ -13,10 +13,11 @@ import { MetaTitleComponent as MetaTitleComponent_11 } from '@payloadcms/plugin-
 import { MetaImageComponent as MetaImageComponent_12 } from '@payloadcms/plugin-seo/client'
 import { MetaDescriptionComponent as MetaDescriptionComponent_13 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_14 } from '@payloadcms/plugin-seo/client'
-import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_15 } from '@payloadcms/richtext-lexical/client'
-import { BlocksFeatureClient as BlocksFeatureClient_16 } from '@payloadcms/richtext-lexical/client'
-import { default as default_17 } from 'src/payload/components/BeforeDashboard'
-import { default as default_18 } from 'src/payload/components/BeforeLogin'
+import { SlugComponent as SlugComponent_15 } from '@/fields/slug/SlugComponent'
+import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_16 } from '@payloadcms/richtext-lexical/client'
+import { BlocksFeatureClient as BlocksFeatureClient_17 } from '@payloadcms/richtext-lexical/client'
+import { default as default_18 } from '@/components/BeforeDashboard'
+import { default as default_19 } from '@/components/BeforeLogin'
 
 export const importMap = {
   '@payloadcms/richtext-lexical/client#RichTextCell': RichTextCell_0,
@@ -35,8 +36,9 @@ export const importMap = {
   '@payloadcms/plugin-seo/client#MetaImageComponent': MetaImageComponent_12,
   '@payloadcms/plugin-seo/client#MetaDescriptionComponent': MetaDescriptionComponent_13,
   '@payloadcms/plugin-seo/client#PreviewComponent': PreviewComponent_14,
-  '@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient': HorizontalRuleFeatureClient_15,
-  '@payloadcms/richtext-lexical/client#BlocksFeatureClient': BlocksFeatureClient_16,
-  '/payload/components/BeforeDashboard#default': default_17,
-  '/payload/components/BeforeLogin#default': default_18,
+  '@/fields/slug/SlugComponent#SlugComponent': SlugComponent_15,
+  '@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient': HorizontalRuleFeatureClient_16,
+  '@payloadcms/richtext-lexical/client#BlocksFeatureClient': BlocksFeatureClient_17,
+  '@/components/BeforeDashboard#default': default_18,
+  '@/components/BeforeLogin#default': default_19,
 }

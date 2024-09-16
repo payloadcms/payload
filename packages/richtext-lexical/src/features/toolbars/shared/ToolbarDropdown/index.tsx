@@ -67,22 +67,22 @@ const ToolbarItem = ({
 }
 
 export const ToolbarDropdown = ({
-  Icon,
   anchorElem,
   classNames,
   editor,
   groupKey,
+  Icon,
   items,
   itemsContainerClassNames,
   label,
   maxActiveItems,
   onActiveChange,
 }: {
-  Icon?: React.FC
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
   groupKey: string
+  Icon?: React.FC
   items: ToolbarGroupItem[]
   itemsContainerClassNames?: string[]
   label?: string
@@ -136,13 +136,6 @@ export const ToolbarDropdown = ({
   }, [updateStates])
 
   useEffect(() => {
-    document.addEventListener('mouseup', updateStates)
-    return () => {
-      document.removeEventListener('mouseup', updateStates)
-    }
-  }, [updateStates])
-
-  useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(() => {
         updateStates()
@@ -152,11 +145,11 @@ export const ToolbarDropdown = ({
 
   return (
     <DropDown
-      Icon={Icon}
       buttonAriaLabel={`${groupKey} dropdown`}
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
+      Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}

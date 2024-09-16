@@ -1,21 +1,64 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RadioFieldClient } from '../../fields/config/types.js'
+import type { RadioField, RadioFieldClient } from '../../fields/config/types.js'
 import type { RadioFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type RadioFieldProps = {
-  readonly field: MarkOptional<RadioFieldClient, 'type'>
+type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
+
+type RadioFieldBaseClientProps = {
   readonly onChange?: OnChange
   readonly validate?: RadioFieldValidation
   readonly value?: string
-} & Omit<FormFieldBase, 'validate'>
+}
+
+export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
+  RadioFieldBaseClientProps
+
+export type RadioFieldServerProps = ServerFieldBase<RadioField, RadioFieldClientWithoutType>
+
+export type RadioFieldServerComponent = FieldServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
+
+export type RadioFieldClientComponent = FieldClientComponent<
+  RadioFieldClientWithoutType,
+  RadioFieldBaseClientProps
+>
 
 export type OnChange<T = string> = (value: T) => void
 
-export type RadioFieldLabelComponent = LabelComponent<'radio'>
+export type RadioFieldLabelServerComponent = FieldLabelServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
 
-export type RadioFieldDescriptionComponent = DescriptionComponent<'radio'>
+export type RadioFieldLabelClientComponent = FieldLabelClientComponent<RadioFieldClientWithoutType>
 
-export type RadioFieldErrorComponent = ErrorComponent<'radio'>
+export type RadioFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
+
+export type RadioFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RadioFieldClientWithoutType>
+
+export type RadioFieldErrorServerComponent = FieldErrorServerComponent<
+  RadioField,
+  RadioFieldClientWithoutType
+>
+
+export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>

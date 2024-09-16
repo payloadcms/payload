@@ -1,5 +1,11 @@
 'use client'
-import type { LabelProps, MappedComponent, SanitizedLabelProps } from 'payload'
+import type {
+  CheckboxFieldClient,
+  FieldLabelClientProps,
+  MappedComponent,
+  StaticLabel,
+} from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import React from 'react'
 
@@ -9,15 +15,16 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly checked?: boolean
   readonly className?: string
+  readonly field?: MarkOptional<CheckboxFieldClient, 'type'>
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
-  readonly label?: LabelProps<'checkbox'>['label']
-  readonly labelProps?: SanitizedLabelProps
+  readonly Label?: MappedComponent
+  readonly label?: StaticLabel
+  readonly labelProps?: FieldLabelClientProps<MarkOptional<CheckboxFieldClient, 'type'>>
   readonly name?: string
   readonly onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly partialChecked?: boolean
@@ -30,12 +37,13 @@ export const inputBaseClass = 'checkbox-input'
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id,
   name,
-  Label,
   afterInput,
   beforeInput,
   checked,
   className,
+  field,
   inputRef,
+  Label,
   label,
   labelProps,
   onToggle,
@@ -68,7 +76,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           type="checkbox"
         />
         <span
-          className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'check' : 'partial']
+          className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'partial' : 'check']
             .filter(Boolean)
             .join(' ')}
         >
@@ -78,8 +86,9 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         <RenderComponent mappedComponent={afterInput} />
       </div>
       <FieldLabel
-        Label={Label}
+        field={field}
         htmlFor={id}
+        Label={Label}
         label={label}
         required={required}
         {...(labelProps || {})}

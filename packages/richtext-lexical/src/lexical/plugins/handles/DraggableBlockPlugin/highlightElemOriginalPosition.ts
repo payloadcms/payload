@@ -1,3 +1,4 @@
+'use client'
 import type React from 'react'
 
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'

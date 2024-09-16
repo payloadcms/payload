@@ -1,7 +1,6 @@
 'use client'
 import type { TypeWithID } from 'payload'
 
-import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -15,7 +14,7 @@ import { reducer } from './reducer.js'
 // or set to the document returned
 export type Documents = {
   [slug: string]: {
-    [id: number | string]: TypeWithID | false | null
+    [id: number | string]: false | null | TypeWithID
   }
 }
 

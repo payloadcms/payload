@@ -15,17 +15,17 @@ import type {
   RowField,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
-import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js'
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
+import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
 
 type Args = {
@@ -33,7 +33,7 @@ type Args = {
   parentName: string
 }
 
-const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
+export const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
   array: (field: ArrayField) =>
     recursivelyBuildNestedPaths({
       field,
@@ -130,9 +130,34 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
   textarea: (field: TextareaField) => ({
     type: withOperators(field, parentName),
   }),
-  upload: (field: UploadField) => ({
-    type: withOperators(field, parentName),
-  }),
-})
+  upload: (field: UploadField) => {
+    if (Array.isArray(field.relationTo)) {
+      return {
+        type: new GraphQLInputObjectType({
+          name: `${combineParentName(parentName, field.name)}_Relation`,
+          fields: {
+            relationTo: {
+              type: new GraphQLEnumType({
+                name: `${combineParentName(parentName, field.name)}_Relation_RelationTo`,
+                values: field.relationTo.reduce(
+                  (values, relation) => ({
+                    ...values,
+                    [formatName(relation)]: {
+                      value: relation,
+                    },
+                  }),
+                  {},
+                ),
+              }),
+            },
+            value: { type: GraphQLJSON },
+          },
+        }),
+      }
+    }
 
-export default fieldToSchemaMap
+    return {
+      type: withOperators(field, parentName),
+    }
+  },
+})

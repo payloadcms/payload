@@ -1,3 +1,4 @@
+'use client'
 import type { FormState } from 'payload'
 
 type Result = {
@@ -13,7 +14,9 @@ export const separateRows = (path: string, fields: FormState): Result => {
 
     if (fieldPath.indexOf(`${path}.`) === 0) {
       const [rowIndex] = fieldPath.replace(`${path}.`, '').split('.')
-      if (!newRows[rowIndex]) newRows[rowIndex] = {}
+      if (!newRows[rowIndex]) {
+        newRows[rowIndex] = {}
+      }
       newRows[rowIndex][fieldPath.replace(`${path}.${String(rowIndex)}.`, '')] = { ...field }
     } else {
       remainingFields[fieldPath] = field

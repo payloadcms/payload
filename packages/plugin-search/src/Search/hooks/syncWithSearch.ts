@@ -141,7 +141,7 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
                 req,
               })
             } catch (err: unknown) {
-              payload.logger.error(`Error deleting search document: ${err}`)
+              payload.logger.error({ err, msg: `Error deleting search document.` })
             }
           }
         } else if (doSync) {
@@ -155,17 +155,18 @@ export const syncWithSearch: SyncWithSearch = async (args) => {
               req,
             })
           } catch (err: unknown) {
-            payload.logger.error(`Error creating search document: ${err}`)
+            payload.logger.error({ err, msg: `Error creating search document.` })
           }
         }
       } catch (err: unknown) {
-        payload.logger.error(`Error finding search document: ${err}`)
+        payload.logger.error({ err, msg: `Error finding search document.` })
       }
     }
   } catch (err: unknown) {
-    payload.logger.error(
-      `Error syncing search document related to ${collection} with id: '${id}': ${err}`,
-    )
+    payload.logger.error({
+      err,
+      msg: `Error syncing search document related to ${collection} with id: '${id}'.`,
+    })
   }
 
   return doc

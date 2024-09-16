@@ -1,5 +1,5 @@
 'use client'
-import type { JSONFieldProps } from 'payload'
+import type { JSONFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -17,7 +17,7 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
+const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -49,8 +49,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, jsonError, required })
+      }
     },
     [validate, required, jsonError],
   )
@@ -67,7 +68,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleMount = useCallback(
     (editor, monaco) => {
-      if (!jsonSchema) return
+      if (!jsonSchema) {
+        return
+      }
 
       const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
       const modelUri = monaco.Uri.parse(jsonSchema.uri)
@@ -86,7 +89,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       setStringValue(val)
 
       try {
@@ -101,7 +106,9 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) return
+    if (hasLoadedValue || value === undefined) {
+      return
+    }
 
     setStringValue(
       value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
@@ -126,15 +133,11 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -152,6 +155,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

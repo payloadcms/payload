@@ -32,7 +32,7 @@ const Newsletter: CollectionConfig = {
       name: 'email',
       type: 'text',
       required: true,
-    }
+    },
   ],
 }
 

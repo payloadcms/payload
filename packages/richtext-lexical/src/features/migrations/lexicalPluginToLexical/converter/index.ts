@@ -47,7 +47,7 @@ export function convertLexicalPluginNodesToLexical({
   parentNodeType: string
   quiet?: boolean
 }): SerializedLexicalNode[] {
-  if (!lexicalPluginNodes?.length) {
+  if (!lexicalPluginNodes?.length || !converters?.length) {
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))

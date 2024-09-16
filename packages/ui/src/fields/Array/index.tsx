@@ -1,5 +1,9 @@
 'use client'
-import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
+import type {
+  ArrayFieldClientComponent,
+  ArrayFieldClientProps,
+  ArrayField as ArrayFieldType,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -29,7 +33,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -66,7 +70,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
     readOnly: readOnlyFromContext,
   } = useFieldProps()
 
-  const minRows = minRowsProp ?? required ? 1 : 0
+  const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -88,9 +92,16 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
-    if ('labels' in p && p?.labels) return p.labels
-    if ('label' in p.field && p.field.label) return { plural: undefined, singular: p.field.label }
+  const getLabels = (p: ArrayFieldClientProps): Partial<ArrayFieldType['labels']> => {
+    if ('labels' in p && p?.labels) {
+      return p.labels
+    }
+    if ('labels' in p.field && p.field.labels) {
+      return { plural: p.field.labels?.plural, singular: p.field.labels?.singular }
+    }
+    if ('label' in p.field && p.field.label) {
+      return { plural: undefined, singular: p.field.label }
+    }
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -215,6 +226,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       {showError && (
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -224,10 +236,9 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
-                Label={field?.admin?.components?.Label}
                 as="span"
-                label={label}
-                required={required}
+                field={field}
+                Label={field?.admin?.components?.Label}
                 unstyled
                 {...(labelProps || {})}
               />
@@ -262,6 +273,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         <FieldDescription
           Description={field?.admin?.components?.Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </header>
@@ -281,7 +293,6 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
-                    RowLabel={RowLabel}
                     addRow={addRow}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
@@ -299,6 +310,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
                     row={row}
                     rowCount={rows.length}
                     rowIndex={i}
+                    RowLabel={RowLabel}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />

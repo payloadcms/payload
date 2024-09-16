@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url'
 import { Pages } from './collections/Pages'
 import { Tenants } from './collections/Tenants'
 import Users from './collections/Users'
-import { TenantSelectorRSC } from './components/TenantSelector'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -15,7 +14,7 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     components: {
-      afterNavLinks: [TenantSelectorRSC],
+      afterNavLinks: ['@/components/TenantSelector#TenantSelectorRSC'],
     },
     user: 'users',
   },

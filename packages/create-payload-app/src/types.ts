@@ -16,6 +16,7 @@ export interface Args extends arg.Spec {
   '--secret': StringConstructor
   '--template': StringConstructor
   '--template-branch': StringConstructor
+  '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
@@ -57,7 +58,7 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'mongodb' | 'postgres' | 'sqlite'
+export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
 
 export type DbDetails = {
   dbUri: string

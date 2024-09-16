@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 export type SearchFilterProps = {
   fieldName?: string
@@ -12,30 +12,53 @@ export type SearchFilterProps = {
 
 import type { ParsedQs } from 'qs-esm'
 
+import { usePathname } from 'next/navigation.js'
+
 import { useDebounce } from '../../hooks/useDebounce.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
 
 export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
-  const { handleChange, initialParams, label, setValue, value } = props
-
-  const previousSearch = useRef(
-    typeof initialParams?.search === 'string' ? initialParams?.search : '',
+  const { handleChange, initialParams, label } = props
+  const pathname = usePathname()
+  const [search, setSearch] = useState(
+    typeof initialParams?.search === 'string' ? initialParams?.search : undefined,
   )
 
-  const debouncedSearch = useDebounce(value, 300)
+  /**
+   * Tracks whether the state should be updated based on the search value.
+   * If the value is updated from the URL, we don't want to update the state as it causes additional renders.
+   */
+  const shouldUpdateState = useRef(true)
+
+  /**
+   * Tracks the previous search value to compare with the current debounced search value.
+   */
+  const previousSearch = useRef(
+    typeof initialParams?.search === 'string' ? initialParams?.search : undefined,
+  )
+
+  const debouncedSearch = useDebounce(search, 300)
 
   useEffect(() => {
-    if (debouncedSearch !== previousSearch.current) {
-      if (handleChange) handleChange(debouncedSearch)
+    if (initialParams?.search !== previousSearch.current) {
+      shouldUpdateState.current = false
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+      setSearch(initialParams?.search as string)
+      previousSearch.current = initialParams?.search as string
+    }
+  }, [initialParams?.search, pathname])
+
+  useEffect(() => {
+    if (debouncedSearch !== previousSearch.current && shouldUpdateState.current) {
+      if (handleChange) {
+        handleChange(debouncedSearch)
+      }
 
       previousSearch.current = debouncedSearch
     }
-  }, [debouncedSearch, previousSearch, handleChange])
-
-  // Cleans up the search input when the component is unmounted
-  useEffect(() => () => setValue(''), [])
+  }, [debouncedSearch, handleChange])
 
   return (
     <div className={baseClass}>
@@ -43,10 +66,13 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
         aria-label={label}
         className={`${baseClass}__input`}
         id="search-filter-input"
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          shouldUpdateState.current = true
+          setSearch(e.target.value)
+        }}
         placeholder={label}
         type="text"
-        value={value || ''}
+        value={search || ''}
       />
     </div>
   )

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { ArrayRowToInsert } from '../transform/write/types.js'
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 

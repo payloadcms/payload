@@ -9,8 +9,12 @@ import { unwrapList } from './unwrapList.js'
 export const toggleList = (editor: Editor, format: string): void => {
   let currentListFormat: string
 
-  if (isListActive(editor, 'ol')) currentListFormat = 'ol'
-  if (isListActive(editor, 'ul')) currentListFormat = 'ul'
+  if (isListActive(editor, 'ol')) {
+    currentListFormat = 'ol'
+  }
+  if (isListActive(editor, 'ul')) {
+    currentListFormat = 'ul'
+  }
 
   // If the format is currently active,
   // remove the list

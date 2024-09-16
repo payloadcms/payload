@@ -9,7 +9,7 @@ import type { GeneratedTypes } from './sdk/types.js'
 
 import { runInitSeparateProcess } from '../runInitSeparateProcess.js'
 import { createTestHooks } from '../testHooks.js'
-import { getNextJSRootDir } from './getNextJSRootDir.js'
+import { getNextRootDir } from './getNextRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
 import startMemoryDB from './startMemoryDB.js'
 
@@ -39,13 +39,13 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   const port = 3000
   process.env.PORT = String(port)
-  process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER = 'true'
+  process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 
   const serverURL = `http://localhost:${port}`
 
   await startMemoryDB()
 
-  const { rootDir } = getNextJSRootDir(testSuiteName)
+  const { rootDir } = getNextRootDir(testSuiteName)
 
   if (prebuild) {
     await new Promise<void>((res, rej) => {

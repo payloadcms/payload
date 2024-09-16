@@ -1,5 +1,5 @@
 'use client'
-import type { PointFieldProps, PointFieldValidation } from 'payload'
+import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -18,7 +18,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 
-export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
+export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -110,6 +110,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
       <ul className={`${baseClass}__wrap`}>
         <li>
           <FieldLabel
+            field={field}
             Label={field?.admin?.components?.Label}
             {...getCoordinateFieldLabel('longitude')}
           />
@@ -132,12 +133,14 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
         </li>
         <li>
           <FieldLabel
+            field={field}
             Label={field?.admin?.components?.Label}
             {...getCoordinateFieldLabel('latitude')}
           />
           <div className="input-wrapper">
             <FieldError
               CustomError={field?.admin?.components?.Error}
+              field={field}
               path={path}
               {...(errorProps || {})}
             />
@@ -161,6 +164,7 @@ export const PointFieldComponent: React.FC<PointFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

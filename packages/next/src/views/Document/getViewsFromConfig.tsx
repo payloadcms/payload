@@ -128,8 +128,6 @@ export const getViewsFromConfig = ({
                   views,
                 })
 
-              console.log('CustomViewComponent', customViewKey)
-
               if (customViewKey) {
                 viewKey = customViewKey
 

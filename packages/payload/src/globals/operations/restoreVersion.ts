@@ -183,7 +183,9 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {

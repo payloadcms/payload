@@ -47,7 +47,9 @@ export const createTableName = ({
 
   let defaultTableName = `${prefix}${toSnakeCase(name ?? slug)}`
 
-  if (versions) defaultTableName = `_${defaultTableName}${adapter.versionsSuffix}`
+  if (versions) {
+    defaultTableName = `_${defaultTableName}${adapter.versionsSuffix}`
+  }
 
   let customTableNameResult: string
 
@@ -61,8 +63,9 @@ export const createTableName = ({
         ? customNameDefinition({ tableName: parentTableName })
         : customNameDefinition
 
-    if (versionsCustomName)
+    if (versionsCustomName) {
       customTableNameResult = `_${customTableNameResult}${adapter.versionsSuffix}`
+    }
   }
 
   const result = customTableNameResult || defaultTableName

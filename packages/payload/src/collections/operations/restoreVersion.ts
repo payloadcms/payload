@@ -87,8 +87,12 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
 
     const doc = await req.payload.db.findOne(findOneArgs)
 
-    if (!doc && !hasWherePolicy) throw new NotFound(req.t)
-    if (!doc && hasWherePolicy) throw new Forbidden(req.t)
+    if (!doc && !hasWherePolicy) {
+      throw new NotFound(req.t)
+    }
+    if (!doc && hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
 
     // /////////////////////////////////////
     // fetch previousDoc

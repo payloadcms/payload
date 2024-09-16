@@ -13,11 +13,11 @@ import type {
   IndexBuilder,
   PgColumn,
   PgEnum,
+  pgEnum,
   PgInsertOnConflictDoUpdateConfig,
   PgSchema,
   PgTableWithColumns,
   UniqueConstraintBuilder,
-  pgEnum,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload, PayloadRequest } from 'payload'
@@ -111,8 +111,6 @@ export type BasePostgresAdapter = {
   logger: DrizzleConfig['logger']
   operators: Operators
   pgSchema?: Schema
-  // pool: Pool
-  // poolOptions: Args['pool']
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
     name: string

@@ -1,17 +1,58 @@
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { RowFieldClient } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
+import type { RowField, RowFieldClient } from '../../fields/config/types.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldErrorClientComponent,
+  FieldErrorServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type RowFieldProps = {
-  field: MarkOptional<RowFieldClient, 'type'>
-  forceRender?: boolean
-  indexPath: string
-} & FormFieldBase
+type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
-export type RowFieldLabelComponent = LabelComponent<'row'>
+type RowFieldBaseClientProps = {
+  readonly forceRender?: boolean
+  readonly indexPath: string
+}
 
-export type RowFieldDescriptionComponent = DescriptionComponent<'row'>
+export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
+  RowFieldBaseClientProps
 
-export type RowFieldErrorComponent = ErrorComponent<'row'>
+export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
+
+export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClientWithoutType>
+
+export type RowFieldClientComponent = FieldClientComponent<
+  RowFieldClientWithoutType,
+  RowFieldBaseClientProps
+>
+
+export type RowFieldLabelServerComponent = FieldLabelServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
+
+export type RowFieldLabelClientComponent = FieldLabelClientComponent<RowFieldClientWithoutType>
+
+export type RowFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
+
+export type RowFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<RowFieldClientWithoutType>
+
+export type RowFieldErrorServerComponent = FieldErrorServerComponent<
+  RowField,
+  RowFieldClientWithoutType
+>
+
+export type RowFieldErrorClientComponent = FieldErrorClientComponent<RowFieldClientWithoutType>

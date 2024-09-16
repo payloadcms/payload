@@ -1,12 +1,12 @@
 import type { ServerProps } from 'payload'
 
 import { Logout } from '@payloadcms/ui'
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
-import './index.scss'
 
 const baseClass = 'nav'
 

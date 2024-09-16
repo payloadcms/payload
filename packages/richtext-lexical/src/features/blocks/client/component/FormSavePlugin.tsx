@@ -1,3 +1,4 @@
+'use client'
 import type { Data, FormState } from 'payload'
 import type React from 'react'
 

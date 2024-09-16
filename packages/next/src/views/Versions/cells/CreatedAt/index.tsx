@@ -32,17 +32,19 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   let to: string
 
-  if (collectionSlug)
+  if (collectionSlug) {
     to = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/${docID}/versions/${versionID}`,
     })
+  }
 
-  if (globalSlug)
+  if (globalSlug) {
     to = formatAdminURL({
       adminRoute,
       path: `/globals/${globalSlug}/versions/${versionID}`,
     })
+  }
 
   return (
     <Link href={to}>

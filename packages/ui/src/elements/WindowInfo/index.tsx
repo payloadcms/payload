@@ -1,2 +1,3 @@
-import { WindowInfoProvider, useWindowInfo } from '@faceless-ui/window-info'
-export { WindowInfoProvider, useWindowInfo }
+'use client'
+import { useWindowInfo, WindowInfoProvider } from '@faceless-ui/window-info'
+export { useWindowInfo, WindowInfoProvider }

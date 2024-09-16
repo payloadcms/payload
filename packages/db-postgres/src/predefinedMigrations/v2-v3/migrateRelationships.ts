@@ -35,7 +35,9 @@ export const migrateRelationships = async ({
   req,
   tableName,
 }: Args) => {
-  if (pathsToQuery.size === 0) return
+  if (pathsToQuery.size === 0) {
+    return
+  }
 
   let offset = 0
 
@@ -54,7 +56,9 @@ export const migrateRelationships = async ({
 
     paginationResult = await adapter.drizzle.execute(sql.raw(`${paginationStatement}`))
 
-    if (paginationResult.rows.length === 0) return
+    if (paginationResult.rows.length === 0) {
+      return
+    }
 
     offset += 1
 
@@ -74,7 +78,9 @@ export const migrateRelationships = async ({
       const parentID = row.parent_id
 
       if (typeof parentID === 'string' || typeof parentID === 'number') {
-        if (!docsToResave[parentID]) docsToResave[parentID] = []
+        if (!docsToResave[parentID]) {
+          docsToResave[parentID] = []
+        }
         docsToResave[parentID].push(row)
       }
     })

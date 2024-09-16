@@ -18,17 +18,17 @@ import { deepCopyObjectSimple } from 'payload'
 import { createClientFields } from './fields.js'
 
 export const createClientGlobalConfig = ({
-  DefaultEditView,
   clientGlobal,
   createMappedComponent,
+  DefaultEditView,
   global,
   i18n,
   importMap,
   payload,
 }: {
-  DefaultEditView: React.FC<EditViewProps>
   clientGlobal: ClientGlobalConfig
   createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
   importMap: ImportMap
@@ -142,7 +142,9 @@ export const createClientGlobalConfig = ({
           ? global.admin.components.views.edit.default.Component
           : null,
         {
-          globalSlug: global.slug,
+          clientProps: {
+            globalSlug: global.slug,
+          },
         },
         DefaultEditView,
         'global.admin.components.views.edit.default',
@@ -160,7 +162,9 @@ export const createClientGlobalConfig = ({
           clientGlobal.admin.components.views.edit[key].Component = createMappedComponent(
             view.Component,
             {
-              globalSlug: global.slug,
+              clientProps: {
+                globalSlug: global.slug,
+              },
             },
             undefined,
             'global.admin.components.views.edit.key.Component',
@@ -193,17 +197,17 @@ export const createClientGlobalConfig = ({
 }
 
 export const createClientGlobalConfigs = ({
-  DefaultEditView,
   clientGlobals,
   createMappedComponent,
+  DefaultEditView,
   globals,
   i18n,
   importMap,
   payload,
 }: {
-  DefaultEditView: React.FC<EditViewProps>
   clientGlobals: ClientGlobalConfig[]
   createMappedComponent: CreateMappedComponent
+  DefaultEditView: React.FC<EditViewProps>
   globals: SanitizedConfig['globals']
   i18n: I18nClient
   importMap: ImportMap
@@ -213,9 +217,9 @@ export const createClientGlobalConfigs = ({
     const global = globals[i]
     const clientGlobal = clientGlobals[i]
     clientGlobals[i] = createClientGlobalConfig({
-      DefaultEditView,
       clientGlobal,
       createMappedComponent,
+      DefaultEditView,
       global,
       i18n,
       importMap,

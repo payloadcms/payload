@@ -1,18 +1,63 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { NumberFieldClient } from '../../fields/config/types.js'
+import type { NumberField, NumberFieldClient } from '../../fields/config/types.js'
 import type { NumberFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type NumberFieldProps = {
-  readonly field: MarkOptional<NumberFieldClient, 'type'>
+type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
+
+type NumberFieldBaseClientProps = {
   readonly onChange?: (e: number) => void
   readonly validate?: NumberFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type NumberFieldLabelComponent = LabelComponent<'number'>
+export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutType> &
+  NumberFieldBaseClientProps
 
-export type NumberFieldDescriptionComponent = DescriptionComponent<'number'>
+export type NumberFieldServerProps = ServerFieldBase<NumberField, NumberFieldClientWithoutType>
 
-export type NumberFieldErrorComponent = ErrorComponent<'number'>
+export type NumberFieldServerComponent = FieldServerComponent<
+  NumberField,
+  NumberFieldClientWithoutType
+>
+
+export type NumberFieldClientComponent = FieldClientComponent<
+  NumberFieldClientWithoutType,
+  NumberFieldBaseClientProps
+>
+
+export type NumberFieldLabelServerComponent = FieldLabelServerComponent<
+  NumberField,
+  NumberFieldClientWithoutType
+>
+
+export type NumberFieldLabelClientComponent =
+  FieldLabelClientComponent<NumberFieldClientWithoutType>
+
+export type NumberFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  NumberField,
+  NumberFieldClientWithoutType
+>
+
+export type NumberFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<NumberFieldClientWithoutType>
+
+export type NumberFieldErrorServerComponent = FieldErrorServerComponent<
+  NumberField,
+  NumberFieldClientWithoutType
+>
+
+export type NumberFieldErrorClientComponent =
+  FieldErrorClientComponent<NumberFieldClientWithoutType>

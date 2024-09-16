@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -8,25 +8,37 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
 export type Props = {
-  id: string
-  singularLabel: SanitizedCollectionConfig['labels']['singular']
-  slug: string
+  readonly id: string
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly redirectAfterDuplicate?: boolean
+  readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
+  readonly slug: string
 }
 
-export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
+export const DuplicateDocument: React.FC<Props> = ({
+  id,
+  slug,
+  onDuplicate,
+  redirectAfterDuplicate = true,
+  singularLabel,
+}) => {
   const router = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -35,15 +47,20 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   const {
     config: {
-      serverURL,
       routes: { admin: adminRoute, api: apiRoute },
+      serverURL,
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
+
+  const editDepth = useEditDepth()
 
   const handleClick = useCallback(
     async (override = false) => {
@@ -72,13 +89,21 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
               message ||
                 t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
             )
+
             setModified(false)
-            router.push(
-              formatAdminURL({
-                adminRoute,
-                path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
-              }),
-            )
+
+            if (redirectAfterDuplicate) {
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+                }),
+              )
+            }
+
+            if (typeof onDuplicate === 'function') {
+              void onDuplicate({ collectionConfig, doc })
+            }
           } else {
             toast.error(
               errors?.[0].message ||
@@ -100,9 +125,12 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
       modalSlug,
       t,
       singularLabel,
+      onDuplicate,
+      redirectAfterDuplicate,
       setModified,
       router,
       adminRoute,
+      collectionConfig,
     ],
   )
 
@@ -113,25 +141,36 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
+      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
-        <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-          <div className={`${baseClass}__modal-template`}>
-            <h1>{t('general:confirmDuplication')}</h1>
-            <p>{t('general:unsavedChangesDuplicate')}</p>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={() => toggleModal(modalSlug)}
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button id="confirm-duplicate" onClick={confirm}>
-              {t('general:duplicateWithoutSaving')}
-            </Button>
+        <Modal
+          className={`${baseClass}__modal`}
+          slug={modalSlug}
+          style={{
+            zIndex: drawerZBase + editDepth,
+          }}
+        >
+          <div className={`${baseClass}__wrapper`}>
+            <div className={`${baseClass}__content`}>
+              <h1>{t('general:confirmDuplication')}</h1>
+              <p>{t('general:unsavedChangesDuplicate')}</p>
+            </div>
+            <div className={`${baseClass}__controls`}>
+              <Button
+                buttonStyle="secondary"
+                id="confirm-cancel"
+                onClick={() => toggleModal(modalSlug)}
+                size="large"
+                type="button"
+              >
+                {t('general:cancel')}
+              </Button>
+              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
+                {t('general:duplicateWithoutSaving')}
+              </Button>
+            </div>
           </div>
         </Modal>
       )}

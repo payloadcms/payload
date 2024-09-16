@@ -1,17 +1,57 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { JSONFieldClient } from '../../fields/config/types.js'
+import type { JSONField, JSONFieldClient } from '../../fields/config/types.js'
 import type { JSONFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type JSONFieldProps = {
-  readonly field: MarkOptional<JSONFieldClient, 'type'>
+type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
+
+type JSONFieldBaseClientProps = {
   readonly validate?: JSONFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type JSONFieldLabelComponent = LabelComponent<'json'>
+export type JSONFieldClientProps = ClientFieldBase<JSONFieldClientWithoutType> &
+  JSONFieldBaseClientProps
 
-export type JSONFieldDescriptionComponent = DescriptionComponent<'json'>
+export type JSONFieldServerProps = ServerFieldBase<JSONField, JSONFieldClientWithoutType>
 
-export type JSONFieldErrorComponent = ErrorComponent<'json'>
+export type JSONFieldServerComponent = FieldServerComponent<JSONField, JSONFieldClientWithoutType>
+
+export type JSONFieldClientComponent = FieldClientComponent<
+  JSONFieldClientWithoutType,
+  JSONFieldBaseClientProps
+>
+
+export type JSONFieldLabelServerComponent = FieldLabelServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldLabelClientComponent = FieldLabelClientComponent<JSONFieldClientWithoutType>
+
+export type JSONFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<JSONFieldClientWithoutType>
+
+export type JSONFieldErrorServerComponent = FieldErrorServerComponent<
+  JSONField,
+  JSONFieldClientWithoutType
+>
+
+export type JSONFieldErrorClientComponent = FieldErrorClientComponent<JSONFieldClientWithoutType>

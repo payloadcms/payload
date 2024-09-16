@@ -6,7 +6,7 @@ export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
   fields: [
     {
-      name: 'customTextField',
+      name: 'customTextServerField',
       type: 'text',
       maxLength: 100,
       admin: {
@@ -14,8 +14,26 @@ export const CustomFields: CollectionConfig = {
         components: {
           afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
           beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
-          Label: '/collections/CustomFields/fields/Text/Label.js#CustomLabel',
-          Description: '/collections/CustomFields/fields/Text/Description.js#CustomDescription',
+          Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
+          Description:
+            '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
+          Error: '/collections/CustomFields/CustomError.js#CustomError',
+        },
+      },
+      minLength: 3,
+    },
+    {
+      name: 'customTextClientField',
+      type: 'text',
+      maxLength: 100,
+      admin: {
+        placeholder: 'This is a placeholder',
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+          Label: '/collections/CustomFields/fields/Text/LabelClient.js#CustomClientLabel',
+          Description:
+            '/collections/CustomFields/fields/Text/DescriptionClient.js#CustomClientDescription',
           Error: '/collections/CustomFields/CustomError.js#CustomError',
         },
       },

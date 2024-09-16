@@ -1,3 +1,4 @@
+'use client'
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -99,7 +100,7 @@ export function $createRelationshipNode(data: RelationshipData): RelationshipNod
 }
 
 export function $isRelationshipNode(
-  node: LexicalNode | RelationshipNode | null | undefined,
+  node: LexicalNode | null | RelationshipNode | undefined,
 ): node is RelationshipNode {
   return node instanceof RelationshipNode
 }

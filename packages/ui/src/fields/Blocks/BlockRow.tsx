@@ -18,7 +18,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = {
+type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: ClientBlock[]
@@ -41,7 +41,7 @@ type BlockFieldProps = {
   setCollapse: (id: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
-export const BlockRow: React.FC<BlockFieldProps> = ({
+export const BlockRow: React.FC<BlocksFieldProps> = ({
   addRow,
   attributes,
   block,
@@ -93,8 +93,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           !readOnly ? (
             <RowActions
               addRow={addRow}
-              blockType={row.blockType}
               blocks={blocks}
+              blockType={row.blockType}
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}

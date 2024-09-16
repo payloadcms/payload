@@ -9,7 +9,9 @@ export async function parseTemplate(
   if (args['--template']) {
     const templateName = args['--template']
     const template = validTemplates.find((t) => t.name === templateName)
-    if (!template) throw new Error('Invalid template given')
+    if (!template) {
+      throw new Error('Invalid template given')
+    }
     return template
   }
 

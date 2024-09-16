@@ -27,30 +27,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payloadcms/ui": ["../packages/ui/src/exports/client/index.ts"],
-      "@payloadcms/ui/shared": ["../packages/ui/src/exports/shared/index.ts"],
-      "@payloadcms/ui/scss": ["../packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["../packages/ui/src/scss/app.scss"],
-      "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
-      "@payloadcms/richtext-lexical/client": [
-        "./packages/richtext-lexical/src/exports/client/index.ts"
-      ],
-      "@payloadcms/richtext-lexical/generateComponentMap": [
-        "./packages/richtext-lexical/src/utilities/generateComponentMap.tsx"
-      ],
-      "@payloadcms/richtext-slate/client": [
-        "./packages/richtext-slate/src/exports/client/index.ts"
-      ],
-      "@payloadcms/richtext-slate/generateComponentMap": [
-        "./packages/richtext-slate/src/generateComponentMap.tsx"
-      ],
-      "@payload-config": ["./_community/config.ts", "./versions/config.ts"],
-      "@payloadcms/plugin-seo/client": ["./packages/plugin-seo/src/exports/client.ts"],
-      "@payloadcms/plugin-stripe/client": ["./packages/plugin-stripe/src/exports/client.ts"],
-      "@payloadcms/plugin-search/client": ["./packages/plugin-search/src/exports/client.ts"],
-      "@payloadcms/plugin-form-builder/client": [
-        "./packages/plugin-form-builder/src/exports/client.ts"
-      ]
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": [
@@ -61,6 +38,6 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
+  "include": ["./**/*.ts", "./**/*.tsx", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }

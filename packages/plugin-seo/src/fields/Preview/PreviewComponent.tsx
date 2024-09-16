@@ -15,16 +15,18 @@ import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../tran
 import type { GenerateURL } from '../../types.js'
 
 type PreviewProps = {
-  descriptionPath?: string
-  hasGenerateURLFn: boolean
-  titlePath?: string
+  readonly descriptionPath?: string
+  readonly hasGenerateURLFn: boolean
+  readonly titlePath?: string
 } & UIField
 
-export const PreviewComponent: React.FC<PreviewProps> = ({
-  descriptionPath: descriptionPathFromContext,
-  hasGenerateURLFn,
-  titlePath: titlePathFromContext,
-}) => {
+export const PreviewComponent: React.FC<PreviewProps> = (props) => {
+  const {
+    descriptionPath: descriptionPathFromContext,
+    hasGenerateURLFn,
+    titlePath: titlePathFromContext,
+  } = props
+
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
@@ -46,9 +48,15 @@ export const PreviewComponent: React.FC<PreviewProps> = ({
     const getHref = async () => {
       const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
         body: JSON.stringify({
-          ...docInfo,
-          doc: { ...getData() },
+          id: docInfo.id,
+          doc: getData(),
+          docPermissions: docInfo.docPermissions,
+          hasPublishPermission: docInfo.hasPublishPermission,
+          hasSavePermission: docInfo.hasSavePermission,
+          initialData: docInfo.initialData,
+          initialState: docInfo.initialState,
           locale: typeof locale === 'object' ? locale?.code : locale,
+          title: docInfo.title,
         } satisfies Omit<Parameters<GenerateURL>[0], 'req'>),
         credentials: 'include',
         headers: {

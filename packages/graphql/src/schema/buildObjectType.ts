@@ -1,7 +1,7 @@
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   CollapsibleField,
@@ -21,8 +21,8 @@ import type {
   SanitizedConfig,
   SelectField,
   TabsField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
 } from 'payload'
 
@@ -38,30 +38,17 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { MissingEditorProp, createDataloaderCacheKey, toWords } from 'payload'
+import { createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
 import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
-import combineParentName from '../utilities/combineParentName.js'
-import formatName from '../utilities/formatName.js'
-import formatOptions from '../utilities/formatOptions.js'
-import buildWhereInputType from './buildWhereInputType.js'
-import isFieldNullable from './isFieldNullable.js'
-import withNullableType from './withNullableType.js'
-
-type LocaleInputType = {
-  fallbackLocale: {
-    type: GraphQLType
-  }
-  locale: {
-    type: GraphQLType
-  }
-  where: {
-    type: GraphQLType
-  }
-}
+import { combineParentName } from '../utilities/combineParentName.js'
+import { formatName } from '../utilities/formatName.js'
+import { formatOptions } from '../utilities/formatOptions.js'
+import { isFieldNullable } from './isFieldNullable.js'
+import { withNullableType } from './withNullableType.js'
 
 export type ObjectTypeConfig = {
   [path: string]: GraphQLFieldConfig<any, any>
@@ -119,7 +106,7 @@ export function buildObjectType({
         [field.name]: { type: withNullableType(field, arrayType) },
       }
     },
-    blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
+    blocks: (objectTypeConfig: ObjectTypeConfig, field: BlocksField) => {
       const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
         if (!graphqlResult.types.blockTypes[block.slug]) {
           const interfaceName =
@@ -184,7 +171,9 @@ export function buildObjectType({
     collapsible: (objectTypeConfig: ObjectTypeConfig, field: CollapsibleField) =>
       field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(objectTypeConfigWithCollapsibleFields, subField)
+        if (addSubField) {
+          return addSubField(objectTypeConfigWithCollapsibleFields, subField)
+        }
         return objectTypeConfigWithCollapsibleFields
       }, objectTypeConfig),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
@@ -297,7 +286,7 @@ export function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                resolveType(data, { req }) {
+                resolveType(data) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
@@ -472,7 +461,9 @@ export function buildObjectType({
         },
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
-          if (typeof args.depth !== 'undefined') depth = args.depth
+          if (typeof args.depth !== 'undefined') {
+            depth = args.depth
+          }
           if (!field?.editor) {
             throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
           }
@@ -519,7 +510,9 @@ export function buildObjectType({
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) =>
       field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
         const addSubField = fieldToSchemaMap[subField.type]
-        if (addSubField) return addSubField(objectTypeConfigWithRowFields, subField)
+        if (addSubField) {
+          return addSubField(objectTypeConfigWithRowFields, subField)
+        }
         return objectTypeConfigWithRowFields
       }, objectTypeConfig),
     select: (objectTypeConfig: ObjectTypeConfig, field: SelectField) => {
@@ -573,7 +566,9 @@ export function buildObjectType({
           ...tabSchema,
           ...tab.fields.reduce((subFieldSchema, subField) => {
             const addSubField = fieldToSchemaMap[subField.type]
-            if (addSubField) return addSubField(subFieldSchema, subField)
+            if (addSubField) {
+              return addSubField(subFieldSchema, subField)
+            }
             return subFieldSchema
           }, tabSchema),
         }
@@ -594,44 +589,159 @@ export function buildObjectType({
     }),
     upload: (objectTypeConfig: ObjectTypeConfig, field: UploadField) => {
       const { relationTo } = field
+      const isRelatedToManyCollections = Array.isArray(relationTo)
+      const hasManyValues = field.hasMany
+      const relationshipName = combineParentName(parentName, toWords(field.name, true))
 
-      const uploadName = combineParentName(parentName, toWords(field.name, true))
+      let type
+      let relationToType = null
+
+      if (Array.isArray(relationTo)) {
+        relationToType = new GraphQLEnumType({
+          name: `${relationshipName}_RelationTo`,
+          values: relationTo.reduce(
+            (relations, relation) => ({
+              ...relations,
+              [formatName(relation)]: {
+                value: relation,
+              },
+            }),
+            {},
+          ),
+        })
+
+        const types = relationTo.map((relation) => graphqlResult.collections[relation].graphQL.type)
+
+        type = new GraphQLObjectType({
+          name: `${relationshipName}_Relationship`,
+          fields: {
+            relationTo: {
+              type: relationToType,
+            },
+            value: {
+              type: new GraphQLUnionType({
+                name: relationshipName,
+                resolveType(data) {
+                  return graphqlResult.collections[data.collection].graphQL.type.name
+                },
+                types,
+              }),
+            },
+          },
+        })
+      } else {
+        ;({ type } = graphqlResult.collections[relationTo].graphQL)
+      }
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = withNullableType(
-        field,
-        graphqlResult.collections[relationTo].graphQL.type || newlyCreatedBlockType,
-        forceNullable,
+      type = type || newlyCreatedBlockType
+
+      const relationshipArgs: {
+        draft?: unknown
+        fallbackLocale?: unknown
+        limit?: unknown
+        locale?: unknown
+        page?: unknown
+        where?: unknown
+      } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => graphqlResult.collections[relation].config.versions?.drafts,
       )
 
-      const uploadArgs = {} as LocaleInputType
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (config.localization) {
-        uploadArgs.locale = {
+        relationshipArgs.locale = {
           type: graphqlResult.types.localeInputType,
         }
 
-        uploadArgs.fallbackLocale = {
+        relationshipArgs.fallbackLocale = {
           type: graphqlResult.types.fallbackLocaleInputType,
         }
       }
 
-      const relatedCollectionSlug = field.relationTo
-
-      const upload = {
-        type,
-        args: uploadArgs,
-        extensions: { complexity: 20 },
+      const relationship = {
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
+        args: relationshipArgs,
+        extensions: { complexity: 10 },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
-          const id = value
+          let relatedCollectionSlug = field.relationTo
           const draft = Boolean(args.draft ?? context.req.query?.draft)
+
+          if (hasManyValues) {
+            const results = []
+            const resultPromises = []
+
+            const createPopulationPromise = async (relatedDoc, i) => {
+              let id = relatedDoc
+              let collectionSlug = field.relationTo
+
+              if (isRelatedToManyCollections) {
+                collectionSlug = relatedDoc.relationTo
+                id = relatedDoc.value
+              }
+
+              const result = await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
+
+              if (result) {
+                if (isRelatedToManyCollections) {
+                  results[i] = {
+                    relationTo: collectionSlug,
+                    value: {
+                      ...result,
+                      collection: collectionSlug,
+                    },
+                  }
+                } else {
+                  results[i] = result
+                }
+              }
+            }
+
+            if (value) {
+              value.forEach((relatedDoc, i) => {
+                resultPromises.push(createPopulationPromise(relatedDoc, i))
+              })
+            }
+
+            await Promise.all(resultPromises)
+            return results
+          }
+
+          let id = value
+          if (isRelatedToManyCollections && value) {
+            id = value.value
+            relatedCollectionSlug = value.relationTo
+          }
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
@@ -649,26 +759,30 @@ export function buildObjectType({
               }),
             )
 
-            return relatedDocument || null
+            if (relatedDocument) {
+              if (isRelatedToManyCollections) {
+                return {
+                  relationTo: relatedCollectionSlug,
+                  value: {
+                    ...relatedDocument,
+                    collection: relatedCollectionSlug,
+                  },
+                }
+              }
+
+              return relatedDocument
+            }
+
+            return null
           }
 
           return null
         },
       }
 
-      const whereFields = graphqlResult.collections[relationTo].config.fields
-
-      upload.args.where = {
-        type: buildWhereInputType({
-          name: uploadName,
-          fields: whereFields,
-          parentName: uploadName,
-        }),
-      }
-
       return {
         ...objectTypeConfig,
-        [field.name]: upload,
+        [field.name]: relationship,
       }
     },
   }

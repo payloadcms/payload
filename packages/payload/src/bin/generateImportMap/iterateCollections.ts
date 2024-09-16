@@ -33,8 +33,8 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.afterListTable)
     addToImportMap(collection.admin?.components?.beforeList)
     addToImportMap(collection.admin?.components?.beforeListTable)
+    addToImportMap(collection.admin?.components?.Description)
 
-    addToImportMap(collection.admin?.components?.edit?.Description)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
     addToImportMap(collection.admin?.components?.edit?.SaveButton)

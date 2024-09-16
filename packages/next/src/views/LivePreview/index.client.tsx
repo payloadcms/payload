@@ -29,8 +29,8 @@ import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle/index.js'
 import { useLivePreviewContext } from './Context/context.js'
 import { LivePreviewProvider } from './Context/index.js'
-import { LivePreview } from './Preview/index.js'
 import './index.scss'
+import { LivePreview } from './Preview/index.js'
 import { usePopupWindow } from './usePopupWindow.js'
 
 const baseClass = 'live-preview'
@@ -56,12 +56,12 @@ const PreviewView: React.FC<Props> = ({
 }) => {
   const {
     id,
+    action,
     AfterDocument,
     AfterFields,
+    apiURL,
     BeforeDocument,
     BeforeFields,
-    action,
-    apiURL,
     collectionSlug,
     disableActions,
     disableLeaveWithoutSaving,

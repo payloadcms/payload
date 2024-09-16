@@ -1,24 +1,42 @@
-import type { CustomComponent, ServerProps, StaticLabel } from '../../config/types.js'
-import type { FieldTypes } from '../../fields/config/types.js'
+import type { ServerProps, StaticLabel } from '../../config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { MappedComponent } from '../types.js'
+import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type GenericLabelProps = {
-  readonly Label?: MappedComponent
   readonly as?: 'label' | 'span'
   readonly htmlFor?: string
+  readonly Label?: MappedComponent
   readonly label?: StaticLabel
   readonly required?: boolean
   readonly unstyled?: boolean
 }
 
-export type LabelProps<T extends 'hidden' | FieldTypes = any> = {
-  type: T
+export type FieldLabelClientProps<
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  field: TFieldClient
+} & GenericLabelProps
+
+export type FieldLabelServerProps<
+  TFieldServer extends Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField: TFieldClient
+  readonly field: TFieldServer
 } & GenericLabelProps &
   Partial<ServerProps>
 
-export type SanitizedLabelProps<T extends 'hidden' | FieldTypes = any> = Omit<
-  LabelProps<T>,
+export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType> = Omit<
+  FieldLabelClientProps<TFieldClient>,
   'label' | 'required'
 >
 
-export type LabelComponent<T extends 'hidden' | FieldTypes = any> = CustomComponent<LabelProps<T>>
+export type FieldLabelClientComponent<
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelClientProps<TFieldClient>>
+
+export type FieldLabelServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelServerProps<TFieldServer, TFieldClient>>

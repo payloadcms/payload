@@ -27,10 +27,15 @@ export function getCreateMappedComponent({
   const createSingleMappedComponent = (
     payloadComponent: { ReactComponent: React.FC<any> } | PayloadComponent,
     key: number | string,
-    props: JsonObject,
+    props: {
+      clientProps: JsonObject
+      serverProps: object
+    },
     Fallback: React.FC<any>,
     identifier: string,
   ): MappedComponent => {
+    const { clientProps, serverProps: componentServerProps } = props || {}
+
     if (payloadComponent === undefined || payloadComponent === null) {
       if (!Fallback) {
         return undefined
@@ -40,7 +45,9 @@ export function getCreateMappedComponent({
         return {
           type: 'server',
           Component: null,
-          RenderedComponent: <Fallback key={key} {...serverProps} {...props} />,
+          RenderedComponent: (
+            <Fallback key={key} {...serverProps} {...componentServerProps} {...clientProps} />
+          ),
         }
       } else {
         const toReturn: MappedComponent = {
@@ -49,7 +56,9 @@ export function getCreateMappedComponent({
         }
 
         // conditionally set props here to avoid bloating the HTML with `$undefined` props
-        if (props) toReturn.props = props
+        if (clientProps) {
+          toReturn.props = clientProps
+        }
 
         return toReturn
       }
@@ -88,7 +97,13 @@ export function getCreateMappedComponent({
         type: 'server',
         Component: null,
         RenderedComponent: (
-          <Component key={key} {...serverProps} {...resolvedComponent.serverProps} {...props} />
+          <Component
+            key={key}
+            {...serverProps}
+            {...resolvedComponent.serverProps}
+            {...componentServerProps}
+            {...clientProps}
+          />
         ),
       }
     } else {
@@ -101,7 +116,7 @@ export function getCreateMappedComponent({
         Component: resolvedComponent.Component,
         props: {
           ...(resolvedComponent.clientProps || {}),
-          ...props,
+          ...clientProps,
         },
       }
     }

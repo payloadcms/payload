@@ -107,7 +107,7 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: User | null
+  user: null | User
 }
 
 export type AuthStrategyFunction = (
@@ -132,24 +132,70 @@ export type LoginWithUsernameOptions =
     }
 
 export interface IncomingAuthType {
+  /**
+   * Set cookie options, including secure, sameSite, and domain. For advanced users.
+   */
   cookies?: {
     domain?: string
     sameSite?: 'Lax' | 'None' | 'Strict' | boolean
     secure?: boolean
   }
+  /**
+   * How many levels deep a user document should be populated when creating the JWT and binding the user to the req. Defaults to 0 and should only be modified if absolutely necessary, as this will affect performance.
+   * @default 0
+   */
   depth?: number
+  /**
+   * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
+   */
   disableLocalStrategy?: true
+  /**
+   * Customize the way that the forgotPassword operation functions.
+   * @link https://payloadcms.com/docs/beta/authentication/email#forgot-password
+   */
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  /**
+   * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
+   */
   lockTime?: number
-  loginWithUsername?: LoginWithUsernameOptions | boolean
+  /**
+   * Ability to allow users to login with username/password.
+   *
+   * @link https://payloadcms.com/docs/beta/authentication/overview#login-with-username
+   */
+  loginWithUsername?: boolean | LoginWithUsernameOptions
+  /**
+   * Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to 0 to disable.
+   */
   maxLoginAttempts?: number
+  /***
+   * Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.
+   */
   removeTokenFromResponses?: true
+  /**
+   * Advanced - an array of custom authentification strategies to extend this collection's authentication with.
+   * @link https://payloadcms.com/docs/beta/authentication/custom-strategies
+   */
   strategies?: AuthStrategy[]
+  /**
+   * Controls how many seconds the token will be valid for. Default is 2 hours.
+   * @default 7200
+   * @link https://payloadcms.com/docs/beta/authentication/overview#config-options
+   */
   tokenExpiration?: number
+  /**
+   * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
+   * @default false
+   * @link https://payloadcms.com/docs/beta/authentication/api-keys
+   */
   useAPIKey?: boolean
+  /**
+   * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
+   * @link https://payloadcms.com/docs/beta/authentication/email#email-verification
+   */
   verify?:
     | {
         generateEmailHTML?: GenerateVerifyEmailHTML
@@ -169,10 +215,10 @@ export interface Auth
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
-  loginWithUsername: LoginWithUsernameOptions | false
-  verify?: VerifyConfig | boolean
+  loginWithUsername: false | LoginWithUsernameOptions
+  verify?: boolean | VerifyConfig
 }
 
-export function hasWhereAccessResult(result: Where | boolean): result is Where {
+export function hasWhereAccessResult(result: boolean | Where): result is Where {
   return result && typeof result === 'object'
 }

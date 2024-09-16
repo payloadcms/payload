@@ -12,7 +12,7 @@ const baseClass = 'banner'
 
 type onClick = (event: MouseEvent) => void
 
-export type Props = {
+export type Props = Readonly<{
   alignIcon?: 'left' | 'right'
   children?: React.ReactNode
   className?: string
@@ -20,7 +20,7 @@ export type Props = {
   onClick?: onClick
   to?: string
   type?: 'default' | 'error' | 'info' | 'success'
-}
+}>
 
 export type RenderedTypeProps = {
   children?: React.ReactNode
@@ -52,8 +52,12 @@ export const Banner: React.FC<Props> = ({
 
   let RenderedType: React.ComponentType<RenderedTypeProps> | React.ElementType = 'div'
 
-  if (onClick && !to) RenderedType = 'button'
-  if (to) RenderedType = Link
+  if (onClick && !to) {
+    RenderedType = 'button'
+  }
+  if (to) {
+    RenderedType = Link
+  }
 
   return (
     <RenderedType className={classes} href={to || null} onClick={onClick}>

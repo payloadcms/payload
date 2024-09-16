@@ -17,7 +17,7 @@ async function autoLogin({
   isGraphQL: boolean
   payload: Payload
 }): Promise<{
-  user: User | null
+  user: null | User
 }> {
   if (
     typeof payload?.config?.admin?.autoLogin !== 'object' ||
@@ -81,7 +81,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       return { user: null }
     }
 
-    const decodedPayload = jwt.verify(token, payload.secret) as JWTToken & jwt.JwtPayload
+    const decodedPayload = jwt.verify(token, payload.secret) as jwt.JwtPayload & JWTToken
 
     const collection = payload.collections[decodedPayload.collection]
 

@@ -1,5 +1,3 @@
-import type React from 'react'
-
 import fs from 'fs'
 import process from 'node:process'
 import path from 'path'
@@ -85,6 +83,7 @@ export async function generateImportMap(
   if (shouldLog) {
     console.log('Generating import map')
   }
+
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 

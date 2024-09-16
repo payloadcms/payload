@@ -12,7 +12,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocControls,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -61,6 +60,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -336,6 +336,20 @@ describe('admin1', () => {
   })
 
   describe('routing', () => {
+    test('should 404 not found root pages', async () => {
+      await page.goto(`${serverURL}/admin/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should 404 not found documents', async () => {
+      await page.goto(`${postsUrl.collection(postsCollectionSlug)}/1234`)
+      const response = await page.waitForResponse((response) => response.status() === 404)
+      expect(response).toBeTruthy()
+      await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
     test('should use custom logout route', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`)
 
@@ -555,25 +569,47 @@ describe('admin1', () => {
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-label')).toBeVisible()
+      await expect(page.locator('#custom-client-field-label')).toBeVisible()
+      await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
-    test('renders custom description component', async () => {
+    test('renders custom field description text', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-field-description')).toBeVisible()
+      await expect(page.locator('#custom-client-field-description')).toBeVisible()
+      await expect(page.locator('#custom-server-field-description')).toBeVisible()
     })
 
-    // test('ensure custom components receive field props', async () => {
-    //   await page.goto(customFieldsURL.create)
-    //   await page.waitForURL(customFieldsURL.create)
-    //   await expect(page.locator('#custom-field-label')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    //   await expect(page.locator('#custom-field-description')).toContainText(
-    //     'The max length of this field is: 100',
-    //   )
-    // })
+    test('custom server components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-server-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#custom-server-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('custom client components should receive field props', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(
+        page.locator('#custom-client-field-label', {
+          hasText: exactText('Label: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('#custom-client-field-description', {
+          hasText: exactText('Description: the max length of this field is: 100'),
+        }),
+      ).toBeVisible()
+    })
 
     describe('field descriptions', () => {
       test('should render static field description', async () => {
@@ -606,10 +642,10 @@ describe('admin1', () => {
     test('should render custom error component', async () => {
       await page.goto(customFieldsURL.create)
       await page.waitForURL(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
       await input.fill('ab')
       await expect(input).toHaveValue('ab')
-      const error = page.locator('.custom-error:near(input[id="field-customTextField"])')
+      const error = page.locator('.custom-error:near(input[id="field-customTextClientField"])')
       const submit = page.locator('button[type="button"][id="action-save"]')
       await submit.click()
       await expect(error).toHaveText('#custom-error')
@@ -617,17 +653,19 @@ describe('admin1', () => {
 
     test('should render beforeInput and afterInput', async () => {
       await page.goto(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextField"]')
+      const input = page.locator('input[id="field-customTextClientField"]')
 
       const prevSibling = await input.evaluateHandle((el) => {
         return el.previousElementSibling
       })
+
       const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
       expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
+
       const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
@@ -639,6 +677,14 @@ describe('admin1', () => {
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+    })
+  })
+
+  describe('custom components', () => {
+    test('should render custom header', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const header = page.locator('.custom-header')
+      await expect(header).toContainText('Here is a custom header')
     })
   })
 
@@ -938,18 +984,14 @@ describe('admin1', () => {
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await page
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       await wait(500)
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
       const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
       await drawer1Content
-        .locator(
-          '.field-type.relationship .relationship--single-value__drawer-toggler.doc-drawer__toggler',
-        )
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
       await expect(drawer2Content).toBeVisible()

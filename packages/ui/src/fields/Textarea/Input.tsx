@@ -14,15 +14,16 @@ import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
+    field,
+    Label,
     label,
     labelProps,
     onChange,
@@ -56,9 +57,15 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        field={field}
+        Label={Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
@@ -80,6 +87,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         <FieldDescription
           Description={Description}
           description={description}
+          field={field}
           {...(descriptionProps || {})}
         />
       </div>

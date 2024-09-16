@@ -1,3 +1,4 @@
+'use client'
 import * as facelessUIImport from '@faceless-ui/scroll-info'
 const { ScrollInfoProvider } =
   facelessUIImport && 'ScrollInfoProvider' in facelessUIImport

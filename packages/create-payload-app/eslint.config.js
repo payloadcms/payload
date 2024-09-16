@@ -7,11 +7,11 @@ let FlatConfig
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['bin/cli.js'],
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.json',
-        tsconfigDirName: import.meta.dirname,
         ...rootParserOptions,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },

@@ -3,9 +3,11 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 import type { CellComponentProps, RichTextFieldClient } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { useClientFunctions, useTableCell } from '@payloadcms/ui'
+import { useConfig, useTableCell } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { $getRoot } from 'lexical'
-import React, { useEffect, useState } from 'react'
+import LinkImport from 'next/link.js'
+import React, { useEffect, useMemo } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -16,106 +18,81 @@ import { loadClientFeatures } from '../lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from '../lexical/config/client/sanitize.js'
 import { getEnabledNodes } from '../lexical/nodes/index.js'
 
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
 export const RichTextCell: React.FC<
   {
-    admin?: LexicalFieldAdminProps
-    lexicalEditorConfig: LexicalEditorConfig
+    readonly admin?: LexicalFieldAdminProps
+    readonly lexicalEditorConfig: LexicalEditorConfig
   } & CellComponentProps<RichTextFieldClient>
 > = (props) => {
   const {
     admin,
-    field: { _schemaPath, richTextComponentMap },
+    field: { richTextComponentMap },
     lexicalEditorConfig,
   } = props
 
   const [preview, setPreview] = React.useState('Loading...')
 
-  const { cellData } = useTableCell()
+  const { cellData, cellProps, columnIndex, customCellContext, rowData } = useTableCell()
 
-  const clientFunctions = useClientFunctions()
-  const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+  } = useConfig()
 
-  const [featureProviders, setFeatureProviders] = useState<
-    FeatureProviderClient<unknown, unknown>[]
-  >([])
+  const { link } = cellProps || {}
+  let WrapElement: React.ComponentType<any> | string = 'span'
 
-  const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
-    useState<SanitizedClientEditorConfig>(null)
+  const wrapElementProps: {
+    className?: string
+    href?: string
+    onClick?: () => void
+    type?: 'button'
+  } = {}
 
-  const featureProviderComponents: GeneratedFeatureProviderComponent[] = (
-    richTextComponentMap.get('features') as GeneratedFeatureProviderComponent[]
-  ).sort((a, b) => a.order - b.order) // order by order
+  const isLink = link !== undefined ? link : columnIndex === 0
 
-  let featureProvidersAndComponentsToLoad = 0 // feature providers and components
-  for (const featureProvider of featureProviderComponents) {
-    const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-      key.startsWith(`feature.${featureProvider.key}.components.`),
-    )
-
-    featureProvidersAndComponentsToLoad += 1
-    featureProvidersAndComponentsToLoad += featureComponentKeys.length
+  if (isLink) {
+    WrapElement = Link
+    wrapElementProps.href = customCellContext?.collectionSlug
+      ? formatAdminURL({
+          adminRoute,
+          path: `/collections/${customCellContext?.collectionSlug}/${rowData.id}`,
+        })
+      : ''
   }
 
-  useEffect(() => {
-    if (!hasLoadedFeatures) {
-      const featureProvidersLocal: FeatureProviderClient<unknown, unknown>[] = []
-      let featureProvidersAndComponentsLoaded = 0 // feature providers and components only
+  const finalSanitizedEditorConfig = useMemo<SanitizedClientEditorConfig>(() => {
+    const clientFeatures: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+      'features',
+    ) as GeneratedFeatureProviderComponent[]
 
-      Object.entries(clientFunctions).forEach(([key, plugin]) => {
-        if (key.startsWith(`lexicalFeature.${_schemaPath}.`)) {
-          if (!key.includes('.lexical_internal_components.')) {
-            featureProvidersLocal.push(plugin)
-          }
-          featureProvidersAndComponentsLoaded++
-        }
-      })
-
-      if (featureProvidersAndComponentsLoaded === featureProvidersAndComponentsToLoad) {
-        setFeatureProviders(featureProvidersLocal)
-        setHasLoadedFeatures(true)
-
-        /**
-         * Loaded feature provided => create the final sanitized editor config
-         */
-
-        const resolvedClientFeatures = loadClientFeatures({
-          clientFunctions,
-          schemaPath: _schemaPath,
-          unSanitizedEditorConfig: {
-            features: featureProvidersLocal,
-            lexical: lexicalEditorConfig,
-          },
-        })
-
-        setFinalSanitizedEditorConfig(
-          sanitizeClientEditorConfig(
-            lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
-            resolvedClientFeatures,
-            admin,
-          ),
-        )
-      }
+    const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
+    for (const clientFeature of clientFeatures) {
+      featureProvidersLocal.push(clientFeature.clientFeature(clientFeature.clientFeatureProps))
     }
-  }, [
-    admin,
-    featureProviderComponents,
-    hasLoadedFeatures,
-    clientFunctions,
-    _schemaPath,
-    featureProviderComponents.length,
-    featureProviders,
-    finalSanitizedEditorConfig,
-    lexicalEditorConfig,
-    richTextComponentMap,
-    featureProvidersAndComponentsToLoad,
-  ])
+
+    const finalLexicalEditorConfig = lexicalEditorConfig
+      ? lexicalEditorConfig
+      : defaultEditorLexicalConfig
+
+    const resolvedClientFeatures = loadClientFeatures({
+      unSanitizedEditorConfig: {
+        features: featureProvidersLocal,
+        lexical: finalLexicalEditorConfig,
+      },
+    })
+
+    return sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig)
+  }, [richTextComponentMap, lexicalEditorConfig])
+
+  finalSanitizedEditorConfig.admin = admin
 
   useEffect(() => {
-    if (!hasLoadedFeatures) {
-      return
-    }
     let dataToUse = cellData
-    if (dataToUse == null || !hasLoadedFeatures || !finalSanitizedEditorConfig) {
+    if (dataToUse == null || !finalSanitizedEditorConfig) {
       setPreview('')
       return
     }
@@ -159,37 +136,10 @@ export const RichTextCell: React.FC<
 
     // Limiting the number of characters shown is done in a CSS rule
     setPreview(textContent)
-  }, [cellData, lexicalEditorConfig, hasLoadedFeatures, finalSanitizedEditorConfig])
+  }, [cellData, finalSanitizedEditorConfig])
 
-  if (!hasLoadedFeatures) {
-    return (
-      <React.Fragment>
-        {Array.isArray(featureProviderComponents) &&
-          featureProviderComponents.map((featureProvider) => {
-            // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
-            const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
-              key.startsWith(
-                `lexical_internal_feature.${featureProvider.key}.lexical_internal_components.`,
-              ),
-            )
-
-            const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
-              return richTextComponentMap.get(key)
-            }) as React.ReactNode[]
-
-            return (
-              <React.Fragment key={featureProvider.key}>
-                {featureComponents?.length
-                  ? featureComponents.map((FeatureComponent) => {
-                      return FeatureComponent
-                    })
-                  : null}
-                {featureProvider.ClientFeature}
-              </React.Fragment>
-            )
-          })}
-      </React.Fragment>
-    )
+  if (isLink) {
+    return <WrapElement {...wrapElementProps}>{preview}</WrapElement>
   }
 
   return <span>{preview}</span>

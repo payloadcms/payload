@@ -31,8 +31,9 @@ const config = buildConfig({
   admin: {
     components: {
       views: {
-        dashboard: {
-          Component: '/path/to/MyCustomDashboardView#MyCustomDashboardViewComponent', // highlight-line
+        customView: {
+          Component: '/path/to/MyCustomView#MyCustomView', // highlight-line
+          path: '/my-custom-view',
         }
       },
     },
@@ -40,7 +41,42 @@ const config = buildConfig({
 })
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+Your Custom Root Views can optionally use one of the templates that Payload provides. The most common of these is the Default Template which provides the basic layout and navigation. Here is an example of what that might look like:
+
+```tsx
+import type { AdminViewProps } from 'payload'
+
+import { DefaultTemplate } from '@payloadcms/next/templates'
+import { Gutter } from '@payloadcms/ui'
+import React from 'react'
+
+export const MyCustomView: React.FC<AdminViewProps> = ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
+  return (
+    <DefaultTemplate
+      i18n={initPageResult.req.i18n}
+      locale={initPageResult.locale}
+      params={params}
+      payload={initPageResult.req.payload}
+      permissions={initPageResult.permissions}
+      searchParams={searchParams}
+      user={initPageResult.req.user || undefined}
+      visibleEntities={initPageResult.visibleEntities}
+    >
+      <Gutter>
+        <h1>Custom Default Root View</h1>
+        <br />
+        <p>This view uses the Default Template.</p>
+      </Gutter>
+    </DefaultTemplate>
+  )
+}
+```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 The following options are available:
 
@@ -57,7 +93,8 @@ For more granular control, pass a configuration object instead. Payload exposes 
 | **`path`** \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
 | **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
 | **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`sensitive`**    | When true, will match if the path is case sensitive.                                                                                                                                       |
+| **`sensitive`**    | When true, will match if the path is case sensitive.
+| **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -132,7 +169,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -183,7 +220,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
 }
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -226,7 +263,7 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
 }
 ```
 
-_For details on how to build Custom Views, see [Building Custom Views](#building-custom-views)._
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
  <strong>Note:</strong>
@@ -311,13 +348,11 @@ Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`user`**                    | The currently logged in user.                                                                                                          |
-| **`locale`**                  | The current [Locale](../configuration/localization) of the [Admin Panel](./overview).                                                  |
-| **`navGroups`**               | The grouped navigation items according to `admin.group` in your [Collection Config](../collections/overview) or [Global Config](../globals/overview). |
-| **`params`**                  | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
-| **`permissions`**             | The permissions of the currently logged in user.                                                                                       |
-| **`searchParams`**            | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
-| **`visibleEntities`**         | The current user's visible entities according to your [Access Control](../access-control/overview).                                    |
+| **`initPageResult`**      | An object containing `req`, `payload`, `permissions`, etc.                                                                  |
+| **`clientConfig`**        | The Client Config object. [More details](../components#accessing-the-payload-config).                                                             |
+| **`importMap`**           | The import map object.                                                        |
+| **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
+| **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
 
 <Banner type="success">
   <strong>Reminder:</strong>

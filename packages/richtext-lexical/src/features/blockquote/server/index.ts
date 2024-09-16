@@ -6,8 +6,8 @@ import { QuoteNode } from '@lexical/rich-text'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
-import { i18n } from './i18n.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
+import { i18n } from './i18n.js'
 
 export type SerializedQuoteNode = Spread<
   {
@@ -28,6 +28,8 @@ export const BlockquoteFeature = createServerFeature({
           html: {
             converter: async ({
               converters,
+              currentDepth,
+              depth,
               draft,
               node,
               overrideAccess,
@@ -37,6 +39,8 @@ export const BlockquoteFeature = createServerFeature({
             }) => {
               const childrenText = await convertLexicalNodesToHTML({
                 converters,
+                currentDepth,
+                depth,
                 draft,
                 lexicalNodes: node.children,
                 overrideAccess,

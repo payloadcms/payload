@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 const baseClass = 'lexical-block'
-import type { BlockFieldClient, FormState } from 'payload'
+import type { BlocksFieldClient, FormState } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFormState } from '@payloadcms/ui/shared'
@@ -44,7 +44,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { path, schemaPath } = useFieldProps()
   const { field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const [initialState, setInitialState] = useState<FormState | false>(false)
+  const [initialState, setInitialState] = useState<false | FormState>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
@@ -52,7 +52,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.lexical_blocks.${formData.blockType}`
 
   const componentMapRenderedBlockPath = `lexical_internal_feature.blocks.fields.lexical_blocks`
-  const blocksField: BlockFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
+  const blocksField: BlocksFieldClient = richTextComponentMap.get(componentMapRenderedBlockPath)[0]
 
   const clientBlock = blocksField.blocks.find((block) => block.slug === formData.blockType)
 

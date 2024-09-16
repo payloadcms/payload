@@ -1,8 +1,23 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
-import type { Field, PayloadRequest, TextField, TextareaField, UploadField } from 'payload'
+import type { Field, PayloadRequest, TextareaField, TextField, UploadField } from 'payload'
+
+export type PartialDocumentInfoContext = Pick<
+  DocumentInfoContext,
+  | 'docPermissions'
+  | 'hasPublishPermission'
+  | 'hasSavePermission'
+  | 'id'
+  | 'initialData'
+  | 'initialState'
+  | 'preferencesKey'
+  | 'publishedDoc'
+  | 'slug'
+  | 'title'
+  | 'versionsCount'
+>
 
 export type GenerateTitle<T = any> = (
-  args: { doc: T; locale?: string; req: PayloadRequest } & DocumentInfoContext,
+  args: { doc: T; locale?: string; req: PayloadRequest } & PartialDocumentInfoContext,
 ) => Promise<string> | string
 
 export type GenerateDescription<T = any> = (
@@ -10,15 +25,15 @@ export type GenerateDescription<T = any> = (
     doc: T
     locale?: string
     req: PayloadRequest
-  } & DocumentInfoContext,
+  } & PartialDocumentInfoContext,
 ) => Promise<string> | string
 
 export type GenerateImage<T = any> = (
-  args: { doc: T; locale?: string; req: PayloadRequest } & DocumentInfoContext,
+  args: { doc: T; locale?: string; req: PayloadRequest } & PartialDocumentInfoContext,
 ) => Promise<string> | string
 
 export type GenerateURL<T = any> = (
-  args: { doc: T; locale?: string; req: PayloadRequest } & DocumentInfoContext,
+  args: { doc: T; locale?: string; req: PayloadRequest } & PartialDocumentInfoContext,
 ) => Promise<string> | string
 
 export type SEOPluginConfig = {

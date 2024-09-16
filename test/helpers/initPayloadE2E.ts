@@ -32,7 +32,7 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
 
   const port = 3000
   process.env.PORT = String(port)
-  process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER = 'true'
+  process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 
   const serverURL = `http://localhost:${port}`
 

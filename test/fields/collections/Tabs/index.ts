@@ -199,14 +199,18 @@ const TabsFields: CollectionConfig = {
           hooks: {
             beforeValidate: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeValidate = true
                 return data.hooksTab
               },
             ],
             beforeChange: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeChange = true
                 return data.hooksTab
               },
@@ -219,7 +223,9 @@ const TabsFields: CollectionConfig = {
             ],
             afterRead: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.afterRead = true
                 return data.hooksTab
               },
@@ -242,6 +248,32 @@ const TabsFields: CollectionConfig = {
             {
               name: 'afterRead',
               type: 'checkbox',
+            },
+          ],
+        },
+        {
+          name: 'camelCaseTab',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'text',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },

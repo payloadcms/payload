@@ -1,5 +1,12 @@
 'use client'
-import type { MappedComponent, OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type {
+  MappedComponent,
+  OptionObject,
+  SelectFieldClient,
+  StaticDescription,
+  StaticLabel,
+} from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -16,19 +23,20 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectInputProps = {
-  readonly Description?: MappedComponent
-  readonly Error?: MappedComponent
-  readonly Label?: MappedComponent
   readonly afterInput?: MappedComponent[]
   readonly beforeInput?: MappedComponent[]
   readonly className?: string
+  readonly Description?: MappedComponent
   readonly description?: StaticDescription
   readonly descriptionProps?: Record<string, unknown>
+  readonly Error?: MappedComponent
   readonly errorProps?: Record<string, unknown>
+  readonly field?: MarkOptional<SelectFieldClient, 'type'>
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
-  readonly label: StaticLabel
+  readonly Label?: MappedComponent
+  readonly label?: StaticLabel
   readonly labelProps?: Record<string, unknown>
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
@@ -39,23 +47,24 @@ export type SelectInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: string
+  readonly width?: React.CSSProperties['width']
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label,
     afterInput,
     beforeInput,
     className,
+    Description,
     description,
     descriptionProps,
+    Error,
     errorProps,
+    field,
     hasMany = false,
     isClearable = true,
     isSortable = true,
+    Label,
     label,
     labelProps,
     onChange,
@@ -106,9 +115,15 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel Label={Label} label={label} required={required} {...(labelProps || {})} />
+      <FieldLabel
+        field={field}
+        Label={Label}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} path={path} {...(errorProps || {})} />
+        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
         <RenderComponent mappedComponent={beforeInput} />
         <ReactSelect
           disabled={readOnly}
@@ -128,6 +143,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       <FieldDescription
         Description={Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

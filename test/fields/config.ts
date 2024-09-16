@@ -20,6 +20,7 @@ import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
@@ -33,6 +34,9 @@ import TextFields from './collections/Text/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
+import UploadsMulti from './collections/UploadMulti/index.js'
+import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
+import UploadsPoly from './collections/UploadPoly/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -71,6 +75,7 @@ export const collectionSlugs: CollectionConfig[] = [
   NumberFields,
   PointFields,
   RelationshipFields,
+  LexicalRelationshipsFields,
   RichTextFields,
   SelectFields,
   TabsFields2,
@@ -79,6 +84,9 @@ export const collectionSlugs: CollectionConfig[] = [
   Uploads,
   Uploads2,
   Uploads3,
+  UploadsMulti,
+  UploadsPoly,
+  UploadsMultiPoly,
   UIFields,
 ]
 
@@ -96,6 +104,9 @@ export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
     },
     custom: {
       client: {

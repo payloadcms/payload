@@ -1,23 +1,62 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { ArrayFieldClient } from '../../fields/config/types.js'
+import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
-  DescriptionComponent,
-  FormFieldBase,
-  LabelComponent,
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
   MappedComponent,
 } from '../types.js'
 
-export type ArrayFieldProps = {
+type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
+
+type ArrayFieldBaseClientProps = {
   readonly CustomRowLabel?: MappedComponent
-  readonly field: MarkOptional<ArrayFieldClient, 'type'>
   readonly validate?: ArrayFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type ArrayFieldLabelComponent = LabelComponent<'array'>
+export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
+  ClientFieldBase<ArrayFieldClientWithoutType>
 
-export type ArrayFieldDescriptionComponent = DescriptionComponent<'array'>
+export type ArrayFieldServerProps = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorComponent = ErrorComponent<'array'>
+export type ArrayFieldServerComponent = FieldServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldClientComponent = FieldClientComponent<
+  ArrayFieldClientWithoutType,
+  ArrayFieldBaseClientProps
+>
+
+export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<
+  ArrayField,
+  ArrayFieldClientWithoutType
+>
+
+export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>

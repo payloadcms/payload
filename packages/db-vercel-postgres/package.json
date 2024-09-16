@@ -1,0 +1,91 @@
+{
+  "name": "@payloadcms/db-vercel-postgres",
+  "version": "3.0.0-beta.107",
+  "description": "Vercel Postgres adapter for Payload",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-vercel-postgres"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/types.ts",
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/types.ts",
+  "files": [
+    "dist",
+    "mock.js"
+  ],
+  "scripts": {
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:esbuild": "echo skipping esbuild",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepack": "pnpm clean && pnpm turbo build",
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
+  },
+  "dependencies": {
+    "@payloadcms/drizzle": "workspace:*",
+    "@vercel/postgres": "^0.9.0",
+    "console-table-printer": "2.11.2",
+    "drizzle-kit": "0.23.2-df9e596",
+    "drizzle-orm": "0.32.1",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0",
+    "uuid": "10.0.0"
+  },
+  "devDependencies": {
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/pg": "8.10.2",
+    "@types/to-snake-case": "1.0.0",
+    "esbuild": "0.23.1",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/types.js",
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
+}

@@ -26,7 +26,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { ClientComponentProps } from './typesClient.js'
+import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,
@@ -110,6 +110,7 @@ export type FeatureProviderServer<
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ServerFeatureProviderMap
         isRoot?: boolean
+        parentIsLocalized: boolean
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
@@ -179,7 +180,6 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
   /**
    * Only available in `beforeChange` hooks.
    */
@@ -281,7 +281,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: PayloadComponent<never, ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, BaseClientFeatureProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
@@ -294,14 +294,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | {
         [key: string]: PayloadComponent
       }
-  generateSchemaMap?: (args: {
-    config: SanitizedConfig
-    field: RichTextField
-    i18n: I18nClient
-    props: ServerProps
-    schemaMap: Map<string, Field[]>
-    schemaPath: string
-  }) => Map<string, Field[]> | null
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
@@ -325,6 +317,14 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  generateSchemaMap?: (args: {
+    config: SanitizedConfig
+    field: RichTextField
+    i18n: I18nClient
+    props: ServerProps
+    schemaMap: Map<string, Field[]>
+    schemaPath: string
+  }) => Map<string, Field[]> | null
   hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.

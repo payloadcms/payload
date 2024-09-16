@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -12,12 +12,12 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextInput } from './Input.js'
 import './index.scss'
+import { TextInput } from './Input.js'
 
 export { TextInput, TextInputProps }
 
-const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
+const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
     field,
     field: {
@@ -33,7 +33,6 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
         width,
       } = {},
       hasMany,
-      label,
       localized,
       maxLength,
       maxRows,
@@ -55,8 +54,9 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...options, maxLength, minLength, required })
+      }
     },
     [validate, minLength, maxLength, required],
   )
@@ -120,16 +120,16 @@ const TextFieldComponent: React.FC<TextFieldProps> = (props) => {
 
   return (
     <TextInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       inputRef={inputRef}
-      label={label}
+      Label={field?.admin?.components?.Label}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

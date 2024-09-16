@@ -6,6 +6,8 @@ import { v4 as uuid } from 'uuid'
 
 import type { MongooseAdapter } from '../index.js'
 
+// Needs await to fulfill the interface
+// eslint-disable-next-line @typescript-eslint/require-await
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: MongooseAdapter,
   options: TransactionOptions,

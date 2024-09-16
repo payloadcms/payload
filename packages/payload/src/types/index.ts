@@ -1,5 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { URL } from 'url'
 
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
 import type payload from '../index.js'
@@ -24,7 +25,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'REST' | 'local'
+  payloadAPI: 'GraphQL' | 'local' | 'REST'
   /** Optimized document loader */
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
@@ -45,13 +46,13 @@ export type CustomPayloadRequestProperties = {
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
    * Can also be used to ensure consistency when multiple operations try to create a transaction concurrently on the same request.
    */
-  transactionID?: Promise<number | string> | number | string
+  transactionID?: number | Promise<number | string> | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
    */
   transactionIDPromise?: Promise<void>
   /** The signed-in user */
-  user: TypedUser | null
+  user: null | TypedUser
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
@@ -95,7 +96,7 @@ export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | Js
 export interface JsonArray extends Array<JsonValue> {}
 
 export interface JsonObject {
-  [key: string]: JsonValue
+  [key: string]: any
 }
 
 export type WhereField = {

@@ -1,20 +1,68 @@
 import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { TextareaFieldClient } from '../../fields/config/types.js'
+import type { TextareaField, TextareaFieldClient } from '../../fields/config/types.js'
 import type { TextareaFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type TextareaFieldProps = {
-  readonly field: MarkOptional<TextareaFieldClient, 'type'>
+type TextareaFieldClientWithoutType = MarkOptional<TextareaFieldClient, 'type'>
+
+type TextareaFieldBaseClientProps = {
   readonly inputRef?: React.Ref<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly validate?: TextareaFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type TextareaFieldLabelComponent = LabelComponent<'textarea'>
+export type TextareaFieldClientProps = ClientFieldBase<TextareaFieldClientWithoutType> &
+  TextareaFieldBaseClientProps
 
-export type TextareaFieldDescriptionComponent = DescriptionComponent<'textarea'>
+export type TextareaFieldServerProps = ServerFieldBase<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
 
-export type TextareaFieldErrorComponent = ErrorComponent<'textarea'>
+export type TextareaFieldServerComponent = FieldServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldClientComponent = FieldClientComponent<
+  TextareaFieldClientWithoutType,
+  TextareaFieldBaseClientProps
+>
+
+export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldLabelClientComponent =
+  FieldLabelClientComponent<TextareaFieldClientWithoutType>
+
+export type TextareaFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<TextareaFieldClientWithoutType>
+
+export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<
+  TextareaField,
+  TextareaFieldClientWithoutType
+>
+
+export type TextareaFieldErrorClientComponent =
+  FieldErrorClientComponent<TextareaFieldClientWithoutType>

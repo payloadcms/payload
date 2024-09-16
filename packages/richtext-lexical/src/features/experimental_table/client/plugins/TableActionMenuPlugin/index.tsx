@@ -24,9 +24,9 @@ import {
   $isTableRowNode,
   $isTableSelection,
   $unmergeCell,
+  getTableObserverFromTableElement,
   TableCellHeaderStates,
   TableCellNode,
-  getTableObserverFromTableElement,
 } from '@lexical/table'
 import { useScrollInfo } from '@payloadcms/ui'
 import {
@@ -70,7 +70,7 @@ function isTableSelectionRectangular(selection: TableSelection): boolean {
     const node = nodes[i]
     if ($isTableCellNode(node)) {
       const row = node.getParentOrThrow()
-      if ($isTableRowNode(row)) {
+      if (!$isTableRowNode(row)) {
         throw new Error('Expected CellNode to have a RowNode parent')
       }
       if (currentRow !== row) {
@@ -272,7 +272,7 @@ function TableActionMenu({
       if ($isTableSelection(selection)) {
         const { columns, rows } = computeSelectionCount(selection)
         const nodes = selection.getNodes()
-        let firstCell: TableCellNode | null = null
+        let firstCell: null | TableCellNode = null
         for (let i = 0; i < nodes.length; i++) {
           const node = nodes[i]
           if ($isTableCellNode(node)) {
@@ -579,7 +579,7 @@ function TableCellActionMenuContainer({
   const menuRootRef = useRef(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const [tableCellNode, setTableMenuCellNode] = useState<TableCellNode | null>(null)
+  const [tableCellNode, setTableMenuCellNode] = useState<null | TableCellNode>(null)
 
   const $moveMenu = useCallback(() => {
     const menu = menuButtonRef.current

@@ -1,19 +1,64 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { SelectFieldClient } from '../../fields/config/types.js'
+import type { SelectField, SelectFieldClient } from '../../fields/config/types.js'
 import type { SelectFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type SelectFieldProps = {
-  readonly field: MarkOptional<SelectFieldClient, 'type'>
+type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
+
+type SelectFieldBaseClientProps = {
   readonly onChange?: (e: string | string[]) => void
   readonly validate?: SelectFieldValidation
   readonly value?: string
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type SelectFieldLabelComponent = LabelComponent<'select'>
+export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
+  SelectFieldBaseClientProps
 
-export type SelectFieldDescriptionComponent = DescriptionComponent<'select'>
+export type SelectFieldServerProps = ServerFieldBase<SelectField, SelectFieldClientWithoutType>
 
-export type SelectFieldErrorComponent = ErrorComponent<'select'>
+export type SelectFieldServerComponent = FieldServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldClientComponent = FieldClientComponent<
+  SelectFieldClientWithoutType,
+  SelectFieldBaseClientProps
+>
+
+export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldLabelClientComponent =
+  FieldLabelClientComponent<SelectFieldClientWithoutType>
+
+export type SelectFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<SelectFieldClientWithoutType>
+
+export type SelectFieldErrorServerComponent = FieldErrorServerComponent<
+  SelectField,
+  SelectFieldClientWithoutType
+>
+
+export type SelectFieldErrorClientComponent =
+  FieldErrorClientComponent<SelectFieldClientWithoutType>

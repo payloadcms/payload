@@ -23,9 +23,9 @@ import React, { Fragment, useCallback, useState } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 import { Auth } from './Auth/index.js'
+import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -35,14 +35,15 @@ const baseClass = 'collection-edit'
 export const DefaultEditView: React.FC = () => {
   const {
     id,
+    action,
     AfterDocument,
     AfterFields,
+    apiURL,
     BeforeDocument,
     BeforeFields,
-    action,
-    apiURL,
     collectionSlug,
     disableActions,
+    disableCreate,
     disableLeaveWithoutSaving,
     docPermissions,
     getDocPreferences,
@@ -54,7 +55,12 @@ export const DefaultEditView: React.FC = () => {
     initialState,
     isEditing,
     isInitializing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
     onSave: onSaveFromContext,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
@@ -95,8 +101,12 @@ export const DefaultEditView: React.FC = () => {
 
   const classes = [baseClass, id && `${baseClass}--is-editing`]
 
-  if (globalSlug) classes.push(`global-edit--${globalSlug}`)
-  if (collectionSlug) classes.push(`collection-edit--${collectionSlug}`)
+  if (globalSlug) {
+    classes.push(`global-edit--${globalSlug}`)
+  }
+  if (collectionSlug) {
+    classes.push(`collection-edit--${collectionSlug}`)
+  }
 
   const [schemaPath, setSchemaPath] = React.useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
@@ -192,8 +202,8 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disableValidationOnSubmit={!validateBeforeSubmit}
           disabled={isInitializing || !hasSavePermission}
+          disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
@@ -219,11 +229,18 @@ export const DefaultEditView: React.FC = () => {
             apiURL={apiURL}
             data={data}
             disableActions={disableActions}
+            disableCreate={disableCreate}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            onDelete={onDelete}
+            onDrawerCreate={onDrawerCreate}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
             permissions={docPermissions}
+            redirectAfterDelete={redirectAfterDelete}
+            redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields

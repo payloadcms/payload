@@ -28,7 +28,6 @@ export const buildVersionColumns = ({
 
   const columns: Column[] = [
     {
-      Label: '',
       accessor: 'updatedAt',
       active: true,
       cellProps: {
@@ -51,9 +50,9 @@ export const buildVersionColumns = ({
         },
         Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
       },
+      Label: '',
     },
     {
-      Label: '',
       accessor: 'id',
       active: true,
       cellProps: {
@@ -68,8 +67,9 @@ export const buildVersionColumns = ({
           Component: null,
           RenderedComponent: <IDCell />,
         },
-        Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
+        Heading: <SortColumn disable Label={t('version:versionID')} name="id" />,
       },
+      Label: '',
     },
   ]
 
@@ -78,7 +78,6 @@ export const buildVersionColumns = ({
     (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
   ) {
     columns.push({
-      Label: '',
       accessor: '_status',
       active: true,
       cellProps: {
@@ -99,8 +98,9 @@ export const buildVersionColumns = ({
           ),
         },
 
-        Heading: <SortColumn Label={t('version:status')} disable name="status" />,
+        Heading: <SortColumn disable Label={t('version:status')} name="status" />,
       },
+      Label: '',
     })
   }
 

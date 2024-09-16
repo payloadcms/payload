@@ -1,10 +1,4 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+'use client'
 
 import type { TableCellNode, TableRowNode } from '@lexical/table'
 import type { EditorConfig, NodeKey } from 'lexical'
@@ -57,8 +51,8 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
 
       tableDOMNodeRef.current = tableDOMNode
 
-      let hoveredRowNode: TableCellNode | null = null
-      let hoveredColumnNode: TableCellNode | null = null
+      let hoveredRowNode: null | TableCellNode = null
+      let hoveredColumnNode: null | TableCellNode = null
       let tableDOMElement: HTMLElement | null = null
 
       editor.update(() => {
@@ -238,6 +232,6 @@ export function TableHoverActionsPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement
-}): React.ReactPortal | null {
+}): null | React.ReactPortal {
   return createPortal(<TableHoverActionsContainer anchorElem={anchorElem} />, anchorElem)
 }

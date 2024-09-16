@@ -1,5 +1,5 @@
 'use client'
-import type { CodeFieldProps } from 'payload'
+import type { CodeFieldClientComponent } from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -21,7 +21,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
+const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -83,15 +83,11 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -108,6 +104,7 @@ const CodeFieldComponent: React.FC<CodeFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

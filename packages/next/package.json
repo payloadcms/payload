@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.84",
+  "version": "3.0.0-beta.107",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -50,15 +50,18 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
     "build:esbuild": "node bundleScss.js",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:cjs && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" \"src/app/api/**\" dist/",
-    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
@@ -67,7 +70,7 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
-    "file-type": "17.1.6",
+    "file-type": "19.3.0",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "http-status": "1.6.2",
@@ -80,15 +83,22 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^14.1.0",
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
+    "@next/eslint-plugin-next": "15.0.0-canary.104",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/busboy": "^1.5.3",
+    "@types/busboy": "1.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
-    "esbuild": "0.23.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-48eb8f4-20240822",
+    "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-72f06b2-20240822",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },

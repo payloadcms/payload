@@ -1,5 +1,5 @@
 'use client'
-import type { DateFieldProps, DateFieldValidation } from 'payload'
+import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -19,7 +19,7 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 
-const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
+const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
     descriptionProps,
     errorProps,
@@ -81,15 +81,11 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-      />
+      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <FieldError
           CustomError={field?.admin?.components?.Error}
+          field={field}
           path={path}
           {...(errorProps || {})}
         />
@@ -97,7 +93,9 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
         <DatePickerField
           {...datePickerProps}
           onChange={(incomingDate) => {
-            if (!disabled) setValue(incomingDate?.toISOString() || null)
+            if (!disabled) {
+              setValue(incomingDate?.toISOString() || null)
+            }
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={disabled}
@@ -108,6 +106,7 @@ const DateTimeFieldComponent: React.FC<DateFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

@@ -29,7 +29,9 @@ export const reduceClientFields = ({
   pathPrefix,
 }: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if (field.admin?.disableListFilter) return reduced
+    if (field.admin?.disableListFilter) {
+      return reduced
+    }
 
     if (field.type === 'tabs' && 'tabs' in field) {
       const tabs = field.tabs
@@ -158,6 +160,8 @@ export const reduceClientFields = ({
         field: {
           ...field,
           ...(field?.admin?.components?.Cell || {}),
+          // Override the type with the field type, it can come back from the Cell component with type 'client' or 'server' which is an unintended assignment
+          type: field.type,
         },
         operators,
       }

@@ -100,7 +100,9 @@ export const generateFileData = async <T>({
   }
 
   if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t)
+    if (throwOnMissingFile) {
+      throw new MissingFile(req.t)
+    }
 
     return {
       data,
@@ -133,7 +135,9 @@ export const generateFileData = async <T>({
 
     const sharpOptions: SharpOptions = {}
 
-    if (fileIsAnimatedType) sharpOptions.animated = true
+    if (fileIsAnimatedType) {
+      sharpOptions.animated = true
+    }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
       if (file.tempFilePath) {
@@ -191,7 +195,9 @@ export const generateFileData = async <T>({
     }
 
     // Adjust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
+    if (mime === 'application/xml' && ext === 'svg') {
+      mime = 'image/svg+xml'
+    }
     fileData.mimeType = mime
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
@@ -324,7 +330,9 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       ? (req.query.uploadEdits as UploadEdits)
       : {}
 
-  if (uploadEdits.focalPoint) return uploadEdits
+  if (uploadEdits.focalPoint) {
+    return uploadEdits
+  }
 
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData

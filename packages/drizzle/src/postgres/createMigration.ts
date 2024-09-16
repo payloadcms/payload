@@ -1,4 +1,3 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
@@ -112,6 +111,7 @@ export const createMigration: CreateMigration = async function createMigration(
     getMigrationTemplate({
       downSQL: downSQL || `  // Migration code`,
       imports,
+      packageName: payload.db.packageName,
       upSQL: upSQL || `  // Migration code`,
     }),
   )

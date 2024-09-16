@@ -1,3 +1,4 @@
+'use client'
 export const getFormattedLocale = (language = 'enUS') => {
   const formattedLocales = {
     en: 'enUS',

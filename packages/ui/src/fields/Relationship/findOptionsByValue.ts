@@ -1,3 +1,4 @@
+'use client'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { OptionGroup, Value } from './types.js'
 

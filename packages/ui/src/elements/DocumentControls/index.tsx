@@ -10,7 +10,10 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
@@ -32,12 +35,20 @@ export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly data?: any
   readonly disableActions?: boolean
+  readonly disableCreate?: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
-  readonly id?: number | string
+  id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDrawerCreate?: () => void
+  /* Only available if `redirectAfterDuplicate` is `false` */
+  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly onSave?: DocumentInfoContext['onSave']
   readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
 }> = (props) => {
   const {
@@ -45,13 +56,21 @@ export const DocumentControls: React.FC<{
     slug,
     data,
     disableActions,
+    disableCreate,
     hasSavePermission,
     isAccountView,
     isEditing,
+    onDelete,
+    onDrawerCreate,
+    onDuplicate,
     permissions,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
   } = props
 
   const { i18n } = useTranslation()
+
+  const editDepth = useEditDepth()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -218,18 +237,30 @@ export const DocumentControls: React.FC<{
               <PopupList.ButtonGroup>
                 {hasCreatePermission && (
                   <React.Fragment>
-                    <PopupList.Button
-                      href={formatAdminURL({
-                        adminRoute,
-                        path: `/collections/${collectionConfig?.slug}/create`,
-                      })}
-                      id="action-create"
-                    >
-                      {i18n.t('general:createNew')}
-                    </PopupList.Button>
+                    {!disableCreate && (
+                      <Fragment>
+                        {editDepth > 1 ? (
+                          <PopupList.Button id="action-create" onClick={onDrawerCreate}>
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        ) : (
+                          <PopupList.Button
+                            href={formatAdminURL({
+                              adminRoute,
+                              path: `/collections/${collectionConfig?.slug}/create`,
+                            })}
+                            id="action-create"
+                          >
+                            {i18n.t('general:createNew')}
+                          </PopupList.Button>
+                        )}
+                      </Fragment>
+                    )}
                     {!collectionConfig.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
+                        onDuplicate={onDuplicate}
+                        redirectAfterDuplicate={redirectAfterDuplicate}
                         singularLabel={collectionConfig?.labels?.singular}
                         slug={collectionConfig?.slug}
                       />
@@ -241,6 +272,8 @@ export const DocumentControls: React.FC<{
                     buttonId="action-delete"
                     collectionSlug={collectionConfig?.slug}
                     id={id.toString()}
+                    onDelete={onDelete}
+                    redirectAfterDelete={redirectAfterDelete}
                     singularLabel={collectionConfig?.labels?.singular}
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />

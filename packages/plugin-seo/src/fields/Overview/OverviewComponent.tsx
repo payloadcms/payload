@@ -47,7 +47,6 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
   const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const resetAll = useCallback(() => {
     const fields = getFields()
     const fieldsWithoutMeta = fields
@@ -58,10 +57,12 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   }, [getFields])
 
   useEffect(() => {
-    if (typeof metaTitle === 'string')
+    if (typeof metaTitle === 'string') {
       setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle)
-    if (typeof metaDesc === 'string')
+    }
+    if (typeof metaDesc === 'string') {
       setDescIsValid(metaDesc.length >= minDesc && metaDesc.length <= maxDesc)
+    }
     setImageIsValid(Boolean(metaImage))
   }, [metaTitle, metaDesc, metaImage])
 

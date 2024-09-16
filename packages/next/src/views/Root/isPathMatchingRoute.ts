@@ -25,6 +25,10 @@ export const isPathMatchingRoute = ({
   const match = regex.exec(currentRoute)
   const viewRoute = match?.[0] || viewPath
 
-  if (exact) return currentRoute === viewRoute
-  if (!exact) return viewRoute.startsWith(currentRoute)
+  if (exact) {
+    return currentRoute === viewRoute
+  }
+  if (!exact) {
+    return viewRoute.startsWith(currentRoute)
+  }
 }

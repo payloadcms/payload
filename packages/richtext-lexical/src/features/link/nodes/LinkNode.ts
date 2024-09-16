@@ -18,8 +18,8 @@ import {
   $getSelection,
   $isElementNode,
   $isRangeSelection,
-  ElementNode,
   createCommand,
+  ElementNode,
 } from 'lexical'
 
 import type { LinkPayload } from '../client/plugins/floatingLinkEditor/types.js'
@@ -386,7 +386,7 @@ function $getAncestor(
   predicate: (ancestor: LexicalNode) => boolean,
 ): LexicalNode | null {
   let parent: LexicalNode | null = node
-  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent));
+  while (parent !== null && (parent = parent.getParent()) !== null && !predicate(parent)) {}
   return parent
 }
 

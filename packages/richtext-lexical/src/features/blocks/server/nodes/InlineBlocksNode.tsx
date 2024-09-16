@@ -131,7 +131,7 @@ export function $createServerInlineBlockNode(
 }
 
 export function $isServerInlineBlockNode(
-  node: LexicalNode | ServerInlineBlockNode | null | undefined,
+  node: LexicalNode | null | ServerInlineBlockNode | undefined,
 ): node is ServerInlineBlockNode {
   return node instanceof ServerInlineBlockNode
 }

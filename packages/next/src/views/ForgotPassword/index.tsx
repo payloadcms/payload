@@ -51,7 +51,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
           />
         </p>
         <br />
-        <Button Link={Link} buttonStyle="secondary" el="link" size="large" to={adminRoute}>
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>

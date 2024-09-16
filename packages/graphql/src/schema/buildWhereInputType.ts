@@ -4,8 +4,8 @@ import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 import { flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/shared'
 
-import formatName from '../utilities/formatName.js'
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
+import { formatName } from '../utilities/formatName.js'
+import { fieldToSchemaMap } from './fieldToWhereInputSchemaMap.js'
 import { withOperators } from './withOperators.js'
 
 type Args = {
@@ -28,7 +28,7 @@ type Args = {
  *    directly searchable. Instead, we need to build a chained pathname
  *    using dot notation so MongoDB can properly search nested paths.
  */
-const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQLInputObjectType => {
+export const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
@@ -109,5 +109,3 @@ const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQLInputOb
     },
   })
 }
-
-export default buildWhereInputType

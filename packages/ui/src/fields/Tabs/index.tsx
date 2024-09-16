@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, TabsFieldProps } from 'payload'
+import type { DocumentPreferences, TabsFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
@@ -14,15 +14,15 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { TabComponent } from './Tab/index.js'
 import './index.scss'
 import { TabsProvider } from './provider.js'
+import { TabComponent } from './Tab/index.js'
 
 const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
+const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field,
     field: {
@@ -154,7 +154,7 @@ const TabsFieldComponent: React.FC<TabsFieldProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <FieldDescription Description={field?.admin?.components?.Description} />
+              <FieldDescription Description={field?.admin?.components?.Description} field={field} />
               <RenderFields
                 fields={activeTabConfig.fields}
                 forceRender={forceRender}

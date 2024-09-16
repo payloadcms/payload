@@ -27,6 +27,11 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
     title: 'SQLite (beta)',
     value: 'sqlite',
   },
+  'vercel-postgres': {
+    dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
+    title: 'Vercel Postgres (beta)',
+    value: 'vercel-postgres',
+  },
 }
 
 export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
@@ -49,7 +54,9 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
         value: dbChoice.value,
       })),
     })
-    if (p.isCancel(dbType)) process.exit(0)
+    if (p.isCancel(dbType)) {
+      process.exit(0)
+    }
   }
 
   const dbChoice = dbChoiceRecord[dbType]
@@ -68,7 +75,9 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
       initialValue: initialDbUri,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
     })
-    if (p.isCancel(dbUri)) process.exit(0)
+    if (p.isCancel(dbUri)) {
+      process.exit(0)
+    }
   }
 
   return {

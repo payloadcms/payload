@@ -5,7 +5,10 @@ dist
 !/.idea/runConfigurations
 !/.idea/payload.iml
 
+# Custom actions
+!.github/actions/**/dist
 
+test/packed
 test-results
 .devcontainer
 .localstack
@@ -154,6 +157,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+dist_optimized
 
 # Gatsby files
 .cache/
@@ -306,3 +310,7 @@ test/live-preview/app/(payload)/admin/importMap.js
 /test/live-preview/app/(payload)/admin/importMap.js
 test/admin-root/app/(payload)/admin/importMap.js
 /test/admin-root/app/(payload)/admin/importMap.js
+test/app/(payload)/admin/importMap.js
+/test/app/(payload)/admin/importMap.js
+test/pnpm-lock.yaml
+test/databaseAdapter.js

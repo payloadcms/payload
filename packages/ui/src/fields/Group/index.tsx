@@ -1,6 +1,6 @@
 'use client'
 
-import type { GroupFieldProps } from 'payload'
+import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -20,14 +20,14 @@ import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { useRow } from '../Row/provider.js'
-import { useTabs } from '../Tabs/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useTabs } from '../Tabs/provider.js'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
+export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     descriptionProps,
     field,
@@ -96,6 +96,7 @@ export const GroupFieldComponent: React.FC<GroupFieldProps> = (props) => {
                 <FieldDescription
                   Description={field?.admin?.components?.Description}
                   description={description}
+                  field={field}
                   {...(descriptionProps || {})}
                 />
               </header>

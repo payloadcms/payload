@@ -47,11 +47,11 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DateField } from './Date/index.js'
+import './index.scss'
 import { NumberField } from './Number/index.js'
 import { RelationshipField } from './Relationship/index.js'
 import { Select } from './Select/index.js'
 import { Text } from './Text/index.js'
-import './index.scss'
 
 const baseClass = 'condition'
 
@@ -109,6 +109,7 @@ export const Condition: React.FC<Props> = (props) => {
   }> = {
     date: DateField,
     number: NumberField,
+    radio: Select,
     relationship: RelationshipField,
     select: Select,
     text: Text,

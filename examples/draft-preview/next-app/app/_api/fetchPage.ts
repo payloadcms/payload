@@ -33,7 +33,7 @@ export const fetchPage = async (
           }
         : {}),
     },
-  ).then(res => res.json())
+  ).then((res) => res.json())
 
   return pageRes?.docs?.[0] ?? null
 }

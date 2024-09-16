@@ -20,15 +20,24 @@ export const richTextValidateHOC = ({
     } = options
 
     if (required) {
-      const hasChildren = value?.root?.children?.length
+      const hasChildren = !!value?.root?.children?.length
 
-      const hasOnlyEmptyParagraph =
-        (value?.root?.children?.length === 1 &&
-          value?.root?.children[0]?.type === 'paragraph' &&
-          (value?.root?.children[0] as SerializedParagraphNode)?.children?.length === 0) ||
-        ((value?.root?.children[0] as SerializedParagraphNode)?.children?.length === 1 &&
-          (value?.root?.children[0] as SerializedParagraphNode)?.children[0]?.type === 'text' &&
-          (value?.root?.children[0] as SerializedParagraphNode)?.children[0]?.['text'] === '')
+      let hasOnlyEmptyParagraph = false
+      if (value?.root?.children?.length === 1) {
+        if (value?.root?.children[0]?.type === 'paragraph') {
+          const paragraphNode = value?.root?.children[0] as SerializedParagraphNode
+          if (paragraphNode?.children?.length === 0) {
+            hasOnlyEmptyParagraph = true
+          } else if (paragraphNode?.children?.length === 1) {
+            const paragraphNodeChild = paragraphNode?.children[0]
+            if (paragraphNodeChild.type === 'text') {
+              if (!paragraphNodeChild?.['text']?.length) {
+                hasOnlyEmptyParagraph = true
+              }
+            }
+          }
+        }
+      }
 
       if (!hasChildren || hasOnlyEmptyParagraph) {
         return t('validation:required')
@@ -41,8 +50,8 @@ export const richTextValidateHOC = ({
     const rootNodes = value?.root?.children
     if (rootNodes && Array.isArray(rootNodes) && rootNodes?.length) {
       return await validateNodes({
-        nodeValidations: editorConfig.features.validations,
         nodes: rootNodes,
+        nodeValidations: editorConfig.features.validations,
         validation: {
           options,
           value,

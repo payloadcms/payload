@@ -1,7 +1,7 @@
 'use client'
 
 import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextFieldProps } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -25,8 +25,8 @@ import '../index.scss'
 const { maxLength, minLength } = defaults.title
 
 type MetaTitleProps = {
-  hasGenerateTitleFn: boolean
-} & TextFieldProps
+  readonly hasGenerateTitleFn: boolean
+} & TextFieldClientProps
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
@@ -55,13 +55,22 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
-    if (!hasGenerateTitleFn) return
+    if (!hasGenerateTitleFn) {
+      return
+    }
 
     const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
       body: JSON.stringify({
-        ...docInfo,
-        doc: { ...getData() },
+        id: docInfo.id,
+        slug: docInfo.slug,
+        doc: getData(),
+        docPermissions: docInfo.docPermissions,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
+        title: docInfo.title,
       } satisfies Omit<Parameters<GenerateTitle>[0], 'req'>),
       credentials: 'include',
       headers: {
@@ -88,7 +97,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

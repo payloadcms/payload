@@ -1,17 +1,57 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { DateFieldClient } from '../../fields/config/types.js'
+import type { DateField, DateFieldClient } from '../../fields/config/types.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type DateFieldProps = {
-  readonly field: MarkOptional<DateFieldClient, 'type'>
+type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
+
+type DateFieldBaseClientProps = {
   readonly validate?: DateFieldValidation
-} & Omit<FormFieldBase, 'validate'>
+}
 
-export type DateFieldLabelComponent = LabelComponent<'date'>
+export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
+  DateFieldBaseClientProps
 
-export type DateFieldDescriptionComponent = DescriptionComponent<'date'>
+export type DateFieldServerProps = ServerFieldBase<DateField, DateFieldClientWithoutType>
 
-export type DateFieldErrorComponent = ErrorComponent<'date'>
+export type DateFieldServerComponent = FieldServerComponent<DateField, DateFieldClientWithoutType>
+
+export type DateFieldClientComponent = FieldClientComponent<
+  DateFieldClientWithoutType,
+  DateFieldBaseClientProps
+>
+
+export type DateFieldLabelServerComponent = FieldLabelServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
+
+export type DateFieldLabelClientComponent = FieldLabelClientComponent<DateFieldClientWithoutType>
+
+export type DateFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
+
+export type DateFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<DateFieldClientWithoutType>
+
+export type DateFieldErrorServerComponent = FieldErrorServerComponent<
+  DateField,
+  DateFieldClientWithoutType
+>
+
+export type DateFieldErrorClientComponent = FieldErrorClientComponent<DateFieldClientWithoutType>

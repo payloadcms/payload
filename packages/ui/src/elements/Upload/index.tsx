@@ -50,7 +50,9 @@ export const UploadActions = ({
 
   const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
 
-  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) return null
+  if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) {
+    return null
+  }
 
   return (
     <div className={`${baseClass}__upload-actions`}>
@@ -88,23 +90,24 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
-  const [replacingFile, setReplacingFile] = useState(false)
-  const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
 
+  const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
+  const [fileSrc, setFileSrc] = useState<null | string>(null)
+  const [replacingFile, setReplacingFile] = useState(false)
+  const [filename, setFilename] = useState<string>(value?.name || '')
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
 
-  const cursorPositionRef = useRef(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -122,27 +125,26 @@ export const Upload: React.FC<UploadProps> = (props) => {
     [onChange, setValue],
   )
 
-  const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedFileName = e.target.value
-    const cursorPosition = e.target.selectionStart
-
-    cursorPositionRef.current = cursorPosition
-
-    if (value) {
-      const fileValue = value
-      // Creating a new File object with updated properties
-      const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
-      handleFileChange(newFile)
-    }
+  const renameFile = (fileToChange: File, newName: string): File => {
+    // Creating a new File object with updated properties
+    const newFile = new File([fileToChange], newName, {
+      type: fileToChange.type,
+      lastModified: fileToChange.lastModified,
+    })
+    return newFile
   }
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const inputElement = document.querySelector(`.${baseClass}__filename`) as HTMLInputElement
-    if (inputElement && cursorPositionRef.current !== null) {
-      inputElement.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current)
-    }
-  }, [value])
+  const handleFileNameChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const updatedFileName = e.target.value
+
+      if (value) {
+        handleFileChange(renameFile(value, updatedFileName))
+        setFilename(updatedFileName)
+      }
+    },
+    [handleFileChange, value],
+  )
 
   const handleFileSelection = useCallback(
     (files: FileList) => {
@@ -169,10 +171,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
     },
     [setModified, updateUploadEdits],
   )
-
-  const handlePasteUrlClick = () => {
-    setShowUrlInput((prev) => !prev)
-  }
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
@@ -202,7 +200,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   useEffect(() => {
     if (showUrlInput && urlInputRef.current) {
-      urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
+      // urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
     }
   }, [showUrlInput])
 
@@ -222,7 +220,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
-      <FieldError message={errorMessage} showError={showError} />
+      <FieldError field={null} message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
           collectionSlug={collectionSlug}
@@ -238,12 +236,49 @@ export const Upload: React.FC<UploadProps> = (props) => {
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
-            <Dropzone
-              className={`${baseClass}__dropzone`}
-              mimeTypes={uploadConfig?.mimeTypes}
-              onChange={handleFileSelection}
-              onPasteUrlClick={handlePasteUrlClick}
-            />
+            <Dropzone onChange={handleFileSelection}>
+              <div className={`${baseClass}__dropzoneContent`}>
+                <div className={`${baseClass}__dropzoneButtons`}>
+                  <Button
+                    buttonStyle="pill"
+                    onClick={() => {
+                      if (inputRef.current) {
+                        inputRef.current.click()
+                      }
+                    }}
+                    size="small"
+                  >
+                    {t('upload:selectFile')}
+                  </Button>
+                  <input
+                    aria-hidden="true"
+                    className={`${baseClass}__hidden-input`}
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleFileSelection(e.target.files)
+                      }
+                    }}
+                    ref={inputRef}
+                    type="file"
+                  />
+                  <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                  <Button
+                    buttonStyle="pill"
+                    onClick={() => {
+                      setShowUrlInput(true)
+                    }}
+                    size="small"
+                  >
+                    {t('upload:pasteURL')}
+                  </Button>
+                </div>
+
+                <p className={`${baseClass}__dragAndDropText`}>
+                  {t('general:or')} {t('upload:dragAndDrop')}
+                </p>
+              </div>
+            </Dropzone>
           )}
           {showUrlInput && (
             <React.Fragment>
@@ -275,7 +310,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 className={`${baseClass}__remove`}
                 icon="x"
                 iconStyle="with-border"
-                onClick={handleFileRemoval}
+                onClick={() => {
+                  setShowUrlInput(false)
+                }}
                 round
                 tooltip={t('general:cancel')}
               />
@@ -295,7 +332,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
                   type="text"
-                  value={value.name}
+                  value={filename || value.name}
                 />
                 <UploadActions
                   customActions={customActions}

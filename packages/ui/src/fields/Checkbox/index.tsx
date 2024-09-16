@@ -1,5 +1,9 @@
 'use client'
-import type { CheckboxFieldProps, CheckboxFieldValidation } from 'payload'
+import type {
+  CheckboxFieldClientComponent,
+  CheckboxFieldClientProps,
+  CheckboxFieldValidation,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -14,14 +18,14 @@ import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { CheckboxInput } from './Input.js'
 import './index.scss'
+import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
 
-export { CheckboxFieldProps, CheckboxInput, type CheckboxInputProps }
+export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
+const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const {
     id,
     checked: checkedFromProps,
@@ -38,10 +42,10 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      } = {} as CheckboxFieldProps['field']['admin'],
+      } = {} as CheckboxFieldClientProps['field']['admin'],
       label,
       required,
-    } = {} as CheckboxFieldProps['field'],
+    } = {} as CheckboxFieldClientProps['field'],
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
@@ -76,7 +80,9 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
   const onToggle = useCallback(() => {
     if (!disabled) {
       setValue(!value)
-      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(!value)
+      }
     }
   }, [onChangeFromProps, disabled, setValue, value])
 
@@ -103,17 +109,18 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
     >
       <FieldError
         CustomError={field?.admin?.components?.Error}
+        field={field}
         path={path}
         {...(errorProps || {})}
         alignCaret="left"
       />
       <CheckboxInput
-        Label={field?.admin?.components?.Label}
         afterInput={field?.admin?.components?.afterInput}
         beforeInput={field?.admin?.components?.beforeInput}
         checked={checked}
         id={fieldID}
         inputRef={null}
+        Label={field?.admin?.components?.Label}
         label={label}
         labelProps={labelProps}
         name={path}
@@ -125,6 +132,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = (props) => {
       <FieldDescription
         Description={field?.admin?.components?.Description}
         description={description}
+        field={field}
         {...(descriptionProps || {})}
       />
     </div>

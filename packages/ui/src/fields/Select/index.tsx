@@ -1,5 +1,10 @@
 'use client'
-import type { Option, OptionObject, SelectFieldProps } from 'payload'
+import type {
+  Option,
+  OptionObject,
+  SelectFieldClientComponent,
+  SelectFieldClientProps,
+} from 'payload'
 
 import React, { useCallback } from 'react'
 
@@ -23,7 +28,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
     field,
     field: {
@@ -37,9 +42,8 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
         readOnly: readOnlyFromAdmin,
         style,
         width,
-      } = {} as SelectFieldProps['field']['admin'],
+      } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
-      label,
       options: optionsFromProps = [],
       required,
     },
@@ -53,8 +57,9 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, hasMany, options, required })
+      }
     },
     [validate, required, hasMany, options],
   )
@@ -94,17 +99,17 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
 
   return (
     <SelectInput
-      Description={field?.admin?.components?.Description}
-      Error={field?.admin?.components?.Error}
-      Label={field?.admin?.components?.Label}
       afterInput={field?.admin?.components?.afterInput}
       beforeInput={field?.admin?.components?.beforeInput}
       className={className}
+      Description={field?.admin?.components?.Description}
       description={description}
+      Error={field?.admin?.components?.Error}
+      field={field}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
-      label={label}
+      Label={field?.admin?.components?.Label}
       name={name}
       onChange={onChange}
       options={options}

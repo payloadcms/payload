@@ -1,10 +1,10 @@
 import type { DocumentTabConfig, DocumentTabProps } from 'payload'
 
-import { RenderComponent, getCreateMappedComponent } from '@payloadcms/ui/shared'
+import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
-import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
+import { DocumentTabLink } from './TabLink.js'
 
 export const baseClass = 'doc-tab'
 
@@ -12,8 +12,6 @@ export const DocumentTab: React.FC<
   { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
 > = (props) => {
   const {
-    Pill,
-    Pill_Component,
     apiURL,
     collectionConfig,
     condition,
@@ -25,6 +23,8 @@ export const DocumentTab: React.FC<
     newTab,
     payload,
     permissions,
+    Pill,
+    Pill_Component,
   } = props
   const { config } = payload
   const { routes } = config

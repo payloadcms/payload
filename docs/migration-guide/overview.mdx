@@ -467,10 +467,10 @@ export const ServerRenderedDescription = () => <ClientRenderedDescription />
 // file: components/ClientRenderedDescription.tsx
 'use client'
 import React from 'react'
-import type { DescriptionComponent } from 'payload'
+import type { TextFieldDescriptionClientComponent } from 'payload'
 import { useFieldProps, useFormFields } from '@payloadcms/ui'
 
-export const ClientRenderedDescription: DescriptionComponent = () ={
+export const ClientRenderedDescription: TextFieldDescriptionClientComponent = () ={
   const { path } = useFieldProps()
   const { value } = useFormFields(([fields]) => fields[path])
   const customDescription = `Component description: ${path} - ${value}`
@@ -659,8 +659,8 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
+        edit: {
+          tab: {
             pillLabel: '',
           },
         },
@@ -675,9 +675,11 @@ export const ClientArrayRowLabel = () => {
   admin: {
     components: {
       views: {
-        Edit: {
-          Tab: {
-            Pill: MyPill,
+        edit: {
+          tab: {
+            pill: {
+              Component: './path/to/CustomPill.js',
+            },
           },
         },
       },

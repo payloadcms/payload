@@ -1,6 +1,5 @@
 import type { Config, GroupField, TabsField, TextField } from 'payload'
 
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -133,7 +132,11 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
 
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
@@ -148,7 +151,11 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
 
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
@@ -163,7 +170,11 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
 
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
@@ -178,7 +189,11 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            await addDataAndFileToRequest(req)
+            const data = await req.json()
+
+            if (data) {
+              req.data = data
+            }
 
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({

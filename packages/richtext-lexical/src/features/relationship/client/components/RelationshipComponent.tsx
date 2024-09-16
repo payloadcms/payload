@@ -39,9 +39,15 @@ type Props = {
 
 const Component: React.FC<Props> = (props) => {
   const {
-    data: { relationTo, value: id },
+    data: { relationTo, value },
     nodeKey,
   } = props
+
+  if (typeof value === 'object') {
+    throw new Error(
+      'Relationship value should be a string or number. The Lexical Relationship component should not receive the populated value object.',
+    )
+  }
 
   const relationshipElemRef = useRef<HTMLDivElement | null>(null)
 
@@ -63,12 +69,12 @@ const Component: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${id}`,
+    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
     { initialParams },
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
-    id,
+    id: value,
     collectionSlug: relatedCollection.slug,
   })
 
@@ -153,7 +159,7 @@ const Component: React.FC<Props> = (props) => {
         </p>
         <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
           <p className={`${baseClass}__title`}>
-            {data ? data[relatedCollection?.admin?.useAsTitle || 'id'] : id}
+            {data ? data[relatedCollection?.admin?.useAsTitle || 'id'] : value}
           </p>
         </DocumentDrawerToggler>
       </div>
@@ -188,7 +194,7 @@ const Component: React.FC<Props> = (props) => {
         </div>
       )}
 
-      {id && <DocumentDrawer onSave={updateRelationship} />}
+      {!!value && <DocumentDrawer onSave={updateRelationship} />}
     </div>
   )
 }

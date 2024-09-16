@@ -1,6 +1,7 @@
 'use client'
 
-import type { FieldType, Options, UploadFieldProps } from '@payloadcms/ui'
+import type { FieldType, Options } from '@payloadcms/ui'
+import type { UploadFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -21,8 +22,8 @@ import type { GenerateImage } from '../../types.js'
 import { Pill } from '../../ui/Pill.js'
 
 type MetaImageProps = {
-  hasGenerateImageFn: boolean
-} & UploadFieldProps
+  readonly hasGenerateImageFn: boolean
+} & UploadFieldClientProps
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
@@ -50,13 +51,22 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
-    if (!hasGenerateImageFn) return
+    if (!hasGenerateImageFn) {
+      return
+    }
 
     const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
       body: JSON.stringify({
-        ...docInfo,
-        doc: { ...getData() },
+        id: docInfo.id,
+        slug: docInfo.slug,
+        doc: getData(),
+        docPermissions: docInfo.docPermissions,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: docInfo.initialState,
         locale: typeof locale === 'object' ? locale?.code : locale,
+        title: docInfo.title,
       } satisfies Omit<Parameters<GenerateImage>[0], 'req'>),
       credentials: 'include',
       headers: {
@@ -91,7 +101,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel Label={Label} label={label} {...(labelProps || {})} />
+          <FieldLabel field={null} Label={Label} label={label} {...(labelProps || {})} />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -132,23 +142,28 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          api={api}
+          collection={collection}
           Error={{
             type: 'client',
             Component: null,
             RenderedComponent: errorMessage,
           }}
-          api={api}
-          collection={collection}
           filterOptions={field.filterOptions}
           label={undefined}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
-              const { id: incomingID } = incomingImage
-              setValue(incomingID)
+              if (typeof incomingImage === 'object') {
+                const { id: incomingID } = incomingImage
+                setValue(incomingID)
+              } else {
+                setValue(incomingImage)
+              }
             } else {
               setValue(null)
             }
           }}
+          path={field.path}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

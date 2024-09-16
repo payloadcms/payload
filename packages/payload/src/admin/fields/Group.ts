@@ -1,15 +1,51 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { GroupFieldClient } from '../../fields/config/types.js'
-import type { ErrorComponent } from '../forms/Error.js'
-import type { DescriptionComponent, FormFieldBase, LabelComponent } from '../types.js'
+import type { GroupField, GroupFieldClient } from '../../fields/config/types.js'
+import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type {
+  ClientFieldBase,
+  FieldClientComponent,
+  FieldServerComponent,
+  ServerFieldBase,
+} from '../forms/Field.js'
+import type {
+  FieldDescriptionClientComponent,
+  FieldDescriptionServerComponent,
+  FieldLabelClientComponent,
+  FieldLabelServerComponent,
+} from '../types.js'
 
-export type GroupFieldProps = {
-  readonly field: MarkOptional<GroupFieldClient, 'type'>
-} & FormFieldBase
+type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldLabelComponent = LabelComponent<'group'>
+export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
 
-export type GroupFieldDescriptionComponent = DescriptionComponent<'group'>
+export type GroupFieldServerProps = ServerFieldBase<GroupField, GroupFieldClientWithoutType>
 
-export type GroupFieldErrorComponent = ErrorComponent<'group'>
+export type GroupFieldServerComponent = FieldServerComponent<
+  GroupField,
+  GroupFieldClientWithoutType
+>
+
+export type GroupFieldClientComponent = FieldClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldLabelServerComponent = FieldLabelServerComponent<
+  GroupField,
+  GroupFieldClientWithoutType
+>
+
+export type GroupFieldLabelClientComponent = FieldLabelClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  GroupField,
+  GroupFieldClientWithoutType
+>
+
+export type GroupFieldDescriptionClientComponent =
+  FieldDescriptionClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldErrorServerComponent = FieldErrorServerComponent<
+  GroupField,
+  GroupFieldClientWithoutType
+>
+
+export type GroupFieldErrorClientComponent = FieldErrorClientComponent<GroupFieldClientWithoutType>
