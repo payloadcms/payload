@@ -1,6 +1,5 @@
-import type { Payload, Where } from 'payload'
-
 import path from 'path'
+import { type Payload, type Where } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -1831,6 +1830,44 @@ describe('Localization', () => {
 
       expect(retrieved.array.en[0].text).toEqual(['hello', 'goodbye'])
       expect(retrieved.array.es[0].text).toEqual(['hola', 'adios'])
+    })
+  })
+
+  describe('localized with unique', () => {
+    it('localized with unique should work for each locale', async () => {
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'ar',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'en',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await payload.create({
+        collection: 'localized-posts',
+        locale: 'es',
+        data: {
+          unique: 'text',
+        },
+      })
+
+      await expect(
+        payload.create({
+          collection: 'localized-posts',
+          locale: 'en',
+          data: {
+            unique: 'text',
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 })

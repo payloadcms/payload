@@ -26,6 +26,7 @@ export interface Config {
     tabs: Tab;
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
+    'localized-within-localized': LocalizedWithinLocalized;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -74,6 +75,14 @@ export interface BlocksField {
               blockType: 'textBlock';
             }[]
           | null;
+        array?:
+          | {
+              link?: {
+                label?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockInsideBlock';
@@ -93,6 +102,9 @@ export interface NestedArray {
         blocksWithinArray?:
           | {
               relationWithinBlock?: (string | null) | LocalizedPost;
+              myGroup?: {
+                text?: string | null;
+              };
               id?: string | null;
               blockName?: string | null;
               blockType: 'someBlock';
@@ -109,6 +121,7 @@ export interface NestedArray {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -124,6 +137,7 @@ export interface LocalizedPost {
   group?: {
     children?: string | null;
   };
+  unique?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -410,6 +424,35 @@ export interface BlocksSameName {
           }
       )[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-within-localized".
+ */
+export interface LocalizedWithinLocalized {
+  id: string;
+  myTab?: {
+    shouldNotBeLocalized?: string | null;
+  };
+  myArray?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  myBlocks?:
+    | {
+        shouldNotBeLocalized?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  myGroup?: {
+    shouldNotBeLocalized?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }

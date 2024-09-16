@@ -153,7 +153,7 @@ export const traverseFields = ({
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
         targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
-          name: fieldName,
+          name: field.localized ? [fieldName, '_locale'] : fieldName,
           columnName,
           tableName: newTableName,
           unique,

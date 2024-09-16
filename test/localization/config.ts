@@ -111,6 +111,12 @@ export default buildConfigWithDefaults({
           ],
           type: 'group',
         },
+        {
+          name: 'unique',
+          type: 'text',
+          localized: true,
+          unique: true,
+        },
       ],
     },
     ArrayCollection,
