@@ -38,10 +38,10 @@ export const DefaultComponent: React.FC = () => {
         return null
       }
 
-      try {
-        let url
-        let method = 'PATCH'
+      let url
+      let method = 'PATCH'
 
+      try {
         if (collectionSlug) {
           url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${from}`
         } else if (globalSlug) {
@@ -50,11 +50,6 @@ export const DefaultComponent: React.FC = () => {
         }
 
         const response = await fetch(url)
-
-        if (!response.ok) {
-          throw new Error(response.statusText)
-        }
-
         const data = await response.json()
         const action = url.replace(from, to)
 
