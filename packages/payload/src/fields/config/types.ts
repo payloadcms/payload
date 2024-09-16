@@ -1228,7 +1228,7 @@ export type ArrayField = {
   minRows?: number
   type: 'array'
   validate?: Validate<unknown[], unknown, unknown, ArrayField>
-} & Omit<FieldBase, 'required' | 'validate'>
+} & Omit<FieldBase, 'validate'>
 
 export type ArrayFieldClient = {
   admin?: {
@@ -1349,7 +1349,7 @@ export type BlocksField = {
   minRows?: number
   type: 'blocks'
   validate?: Validate<string, unknown, unknown, BlocksField>
-} & Omit<FieldBase, 'required' | 'validate'>
+} & Omit<FieldBase, 'validate'>
 
 export type BlocksFieldClient = {
   admin?: {
