@@ -572,7 +572,13 @@ export function entityToJSONSchema(
     (field) => fieldAffectsData(field) && field.name === 'id',
   ) as FieldAffectingData
 
-  if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
+  if (
+    customIdField &&
+    customIdField.type !== 'group' &&
+    customIdField.type !== 'tab' &&
+    customIdField.type !== 'blocks' &&
+    customIdField.type !== 'array'
+  ) {
     customIdField.required = true
   } else {
     entity.fields.unshift(idField)

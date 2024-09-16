@@ -123,13 +123,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         collectionSlug,
         data: fullData,
+        jsonError,
         operation,
+        preferences,
         req,
         siblingData: data,
-        // @ts-expect-error-next-line
-        jsonError,
-        preferences,
-      })
+      } as any)
     }
 
     const addErrorPathToParent = (errorPath: string) => {

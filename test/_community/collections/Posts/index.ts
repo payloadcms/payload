@@ -28,6 +28,13 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'myField',
+      type: 'text',
+      validate: (value) => {
+        return ''
+      },
+    },
+    {
       name: 'richText',
       type: 'richText',
     },
