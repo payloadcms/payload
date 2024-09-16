@@ -184,7 +184,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'لغو',
     changesNotSaved:
       'تغییرات شما ذخیره نشده، اگر این برگه را ترک کنید. تمام تغییرات از دست خواهد رفت.',
-    clearAll: undefined,
+    clearAll: 'همه را پاک کنید',
     close: 'بستن',
     collapse: 'بستن',
     collections: 'مجموعه‌ها',
@@ -291,6 +291,7 @@ export const faTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     true: 'درست',
     unauthorized: 'غیرمجاز',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate: 'شما تغییرات ذخیره نشده دارید. مطمئنید میخواهید به رونوشت ادامه دهید؟',
     untitled: 'بدون عنوان',
     updatedAt: 'بروز شده در',

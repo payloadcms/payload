@@ -294,6 +294,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate:
       'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',
     untitled: 'Без названия',

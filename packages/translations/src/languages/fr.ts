@@ -192,7 +192,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
-    clearAll: undefined,
+    clearAll: 'Tout effacer',
     close: 'Fermer',
     collapse: 'Réduire',
     collections: 'Collections',
@@ -299,6 +299,7 @@ export const frTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate:
       'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
     untitled: 'Sans titre',

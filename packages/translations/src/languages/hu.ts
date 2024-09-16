@@ -187,7 +187,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
-    clearAll: undefined,
+    clearAll: 'Töröl Mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collections: 'Gyűjtemények',
@@ -294,6 +294,7 @@ export const huTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate: 'Nem mentett módosításai vannak. Szeretné folytatni a duplikációt?',
     untitled: 'Névtelen',
     updatedAt: 'Frissítve:',

@@ -292,6 +292,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     true: 'Правда',
     unauthorized: 'Немає доступу',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate: 'Ви маєте незбережені зміни. Чи бажаєте ви продовжити дублювання?',
     untitled: 'Без назви',
     updatedAt: 'Змінено',

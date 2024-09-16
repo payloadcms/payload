@@ -284,6 +284,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}"已被成功刪除。',
     true: '真實',
     unauthorized: '未經授權',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate: '您有還沒儲存的修改，確定要繼續複製嗎？',
     untitled: '無標題',
     updatedAt: '更新於',

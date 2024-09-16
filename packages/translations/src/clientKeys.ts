@@ -236,6 +236,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:user',
   'general:username',
   'general:unauthorized',
+  'general:unsavedChanges',
   'general:unsavedChangesDuplicate',
   'general:untitled',
   'general:updatedAt',

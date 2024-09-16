@@ -185,7 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
-    clearAll: undefined,
+    clearAll: 'Hamısını Təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
     collections: 'Kolleksiyalar',
@@ -292,6 +292,8 @@ export const azTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unsavedChanges:
+      'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:
       'Saxlanılmamış dəyişiklikləriniz var. Dublikatla davam etmək istəyirsiniz?',
     untitled: 'Başlıqsız',
@@ -403,7 +405,7 @@ export const azTranslations: DefaultTranslationsObject = {
     lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
-    noRowsSelected: undefined,
+    noRowsSelected: 'Heç bir {{label}} seçilməyib',
     preview: 'Öncədən baxış',
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',

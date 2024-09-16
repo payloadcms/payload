@@ -294,6 +294,8 @@ export const myTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unsavedChanges:
+      'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:
       'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
     untitled: 'ခေါင်းစဥ်မဲ့',

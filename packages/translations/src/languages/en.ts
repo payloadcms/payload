@@ -294,6 +294,7 @@ export const enTranslations = {
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     true: 'True',
     unauthorized: 'Unauthorized',
+    unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',
     unsavedChangesDuplicate: 'You have unsaved changes. Would you like to continue to duplicate?',
     untitled: 'Untitled',
     updatedAt: 'Updated At',

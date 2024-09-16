@@ -290,6 +290,7 @@ export const viTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
     true: 'Thật',
     unauthorized: 'Không có quyền truy cập.',
+    unsavedChanges: undefined,
     unsavedChangesDuplicate: 'Bạn chưa lưu các thay đổi. Bạn có muốn tiếp tục tạo bản sao?',
     untitled: 'Chưa có tiêu đề',
     updatedAt: 'Ngày cập nhật',

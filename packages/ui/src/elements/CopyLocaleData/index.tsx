@@ -34,8 +34,7 @@ export const DefaultComponent: React.FC = () => {
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
       if (modified) {
-        // todo: add translation
-        toast.error('you have unsaved data')
+        toast.error(t('general:unsavedChanges'))
         return null
       }
 
@@ -51,8 +50,9 @@ export const DefaultComponent: React.FC = () => {
         }
 
         const response = await fetch(url)
+
         if (!response.ok) {
-          throw new Error(`Failed to fetch data: ${response.statusText}`)
+          throw new Error(response.statusText)
         }
 
         const data = await response.json()
@@ -68,10 +68,10 @@ export const DefaultComponent: React.FC = () => {
           skipValidation: true,
         })
       } catch (error) {
-        toast.error('Error copying locale data:', error)
+        toast.error(error.message)
       }
     },
-    [modified, collectionSlug, globalSlug, submit, serverURL, api, id],
+    [modified, collectionSlug, globalSlug, t, submit, serverURL, api, id],
   )
 
   if (!localization) {
