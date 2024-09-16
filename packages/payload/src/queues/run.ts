@@ -60,7 +60,7 @@ export const runJobs = async ({ limit = 10, queue, req }: RunJobsArgs): Promise<
 
   const jobsQuery = (await req.payload.find({
     collection: 'payload-jobs',
-    depth: 0,
+    depth: req.payload.config.queues.depth,
     limit,
     showHiddenFields: true,
     where,

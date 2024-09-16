@@ -128,24 +128,7 @@ export interface PayloadMigration {
  */
 export interface PayloadJob {
   id: string;
-  steps?:
-    | (
-        | {
-            post: string | Post;
-            message: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'step1';
-          }
-        | {
-            post: string | Post;
-            message: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'step2';
-          }
-      )[]
-    | null;
+  steps?: (UpdatePostStep1 | UpdatePostStep2)[] | null;
   completedAt?: string | null;
   hasError?: boolean | null;
   error?:
@@ -181,6 +164,28 @@ export interface PayloadJob {
   seenByWorker?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UpdatePostStep1".
+ */
+export interface UpdatePostStep1 {
+  post: string | Post;
+  message: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'step1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UpdatePostStep2".
+ */
+export interface UpdatePostStep2 {
+  post: string | Post;
+  message: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'step2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

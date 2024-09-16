@@ -52,6 +52,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       run: defaultAccess,
     },
     deleteJobOnComplete: true,
+    depth: 0,
     jobs: [],
   },
   routes: {

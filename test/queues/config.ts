@@ -86,6 +86,7 @@ export default buildConfigWithDefaults({
             retries: 2,
             schema: {
               slug: 'step1',
+              interfaceName: 'UpdatePostStep1',
               fields: [
                 {
                   name: 'post',
@@ -107,6 +108,7 @@ export default buildConfigWithDefaults({
             retries: 2,
             schema: {
               slug: 'step2',
+              interfaceName: 'UpdatePostStep2',
               fields: [
                 {
                   name: 'post',

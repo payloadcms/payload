@@ -106,6 +106,12 @@ export type QueueConfig = {
    */
   deleteJobOnComplete?: boolean
   /**
+   * Specify depth for retrieving jobs from the queue.
+   * This should be as low as possible in order for job retrieval
+   * to be as efficient as possible. Defaults to 0.
+   */
+  depth?: number
+  /**
    * Define all jobs for the queue here.
    */
   jobs: JobConfig[]
