@@ -4,7 +4,7 @@
  * Drizzle uses @internal JSDoc to remove their internal methods from types, for example
  * Table.Symbol, columnBuilder.build - but they actually exist.
  */
-import type { Column, ColumnBuilder, ColumnBuilderBase } from 'drizzle-orm'
+import type { ColumnBuilderBase } from 'drizzle-orm'
 
 import { Table } from 'drizzle-orm'
 import { APIError } from 'payload'
@@ -19,7 +19,7 @@ const { Symbol: DrizzleSymbol } = Table as unknown as {
 
 type Args = {
   columns?: Record<string, ColumnBuilderBase<any>>
-  extraConfig?: (self: Table) => object
+  extraConfig?: (self: Record<string, any>) => object
   table: Table
 }
 

@@ -13,12 +13,12 @@ import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { Payload, PayloadRequest } from 'payload'
 
 type SQLiteSchema = {
-  extendTable: typeof extendDrizzleTable
   relations: Record<string, GenericRelation>
   tables: Record<string, GenericTable>
 }
 
 type SQLiteSchemaHookArgs = {
+  extendTable: typeof extendDrizzleTable
   schema: SQLiteSchema
 }
 
