@@ -71,7 +71,6 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentTitle: (title: string) => void
-  slug?: string
   title: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
