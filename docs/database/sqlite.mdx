@@ -90,7 +90,7 @@ Runs before the schema is built. You can use this hook to extend your database s
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { integer, sqliteTable } from 'drizzle-orm/sqlite-core'
 
-postgresAdapter({
+sqliteAdapter({
   beforeSchemaInit: [
     ({ schema, adapter }) => {
       return {

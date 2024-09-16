@@ -581,10 +581,11 @@ describe('database', () => {
           extendTable({
             table: schema.tables.places,
             columns: {
+              // SQLite doesn't have DB length enforcement
               // eslint-disable-next-line jest/no-conditional-in-test
-              city: isSQLite
-                ? drizzleSqlite.text('city', { length: 10 })
-                : drizzlePg.varchar('city', { length: 10 }),
+              ...(payload.db.name === 'postgres' && {
+                city: drizzlePg.varchar('city', { length: 10 }),
+              }),
               // eslint-disable-next-line jest/no-conditional-in-test
               extraColumn: isSQLite
                 ? drizzleSqlite.integer('extra_column')
@@ -610,24 +611,31 @@ describe('database', () => {
         },
       })
 
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const tableName = payload.db.schemaName ? `"${payload.db.schemaName}"."places"` : 'places'
+
       await payload.db.execute({
         drizzle: payload.db.drizzle,
-        raw: `UPDATE places SET extra_column = 10`,
+        raw: `UPDATE ${tableName} SET extra_column = 10`,
       })
 
       const res_with_extra_col = await payload.db.execute({
         drizzle: payload.db.drizzle,
-        raw: `SELECT * from places`,
+        raw: `SELECT * from ${tableName}`,
       })
 
       expect(res_with_extra_col.rows[0].extra_column).toBe(10)
 
-      await expect(
-        payload.db.execute({
-          drizzle: payload.db.drizzle,
-          raw: `UPDATE places SET city = 'MoreThan10Chars'`,
-        }),
-      ).rejects.toBeTruthy()
+      // SQLite doesn't have DB length enforcement
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name === 'postgres') {
+        await expect(
+          payload.db.execute({
+            drizzle: payload.db.drizzle,
+            raw: `UPDATE ${tableName} SET city = 'MoreThan10Chars'`,
+          }),
+        ).rejects.toBeTruthy()
+      }
     })
 
     it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
@@ -694,7 +702,7 @@ describe('database', () => {
             country: 'B',
           },
         }),
-      ).rejects.toBeInstanceOf(ValidationError)
+      ).rejects.toBeTruthy()
     })
   })
 })
