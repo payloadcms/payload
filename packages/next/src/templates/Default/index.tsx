@@ -31,7 +31,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   const {
     admin: {
-      components: { Nav: CustomNav } = {
+      components: { header: CustomHeader, Nav: CustomNav } = {
+        header: undefined,
         Nav: undefined,
       },
     } = {},
@@ -57,10 +58,18 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     'CustomNav',
   )
 
+  const MappedCustomHeader = createMappedComponent(
+    CustomHeader,
+    undefined,
+    undefined,
+    'CustomHeader',
+  )
+
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <div>
+        <RenderComponent mappedComponent={MappedCustomHeader} />
+        <div style={{ position: 'relative' }}>
           <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
             <NavToggler className={`${baseClass}__nav-toggler`}>
               <NavHamburger />

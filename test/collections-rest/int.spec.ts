@@ -33,7 +33,9 @@ describe('collections-rest', () => {
     if (payload.db.name === 'mongoose') {
       await new Promise((resolve, reject) => {
         payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) reject(err)
+          if (err) {
+            reject(err)
+          }
           resolve(true)
         })
       })

@@ -71,18 +71,21 @@ function ToolbarGroupComponent({
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-    if (!activeItems.length) {
-      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-        setDropdownIcon(() => group.ChildComponent)
-      } else {
-        setDropdownIcon(null)
+  const onActiveChange = useCallback(
+    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
+      if (!activeItems.length) {
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent)
+        } else {
+          setDropdownIcon(null)
+        }
+        return
       }
-      return
-    }
-    const item = activeItems[0]
-    setDropdownIcon(() => item.ChildComponent)
-  }
+      const item = activeItems[0]
+      setDropdownIcon(() => item.ChildComponent)
+    },
+    [group],
+  )
 
   return (
     <div

@@ -28,12 +28,12 @@
     "react-dom": "19.0.0-rc-06d0b89e-20240801"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.0",
     "eslint": "^8",
     "eslint-config-next": "15.0.0-canary.104",
-    "typescript": "5.5.4"
+    "typescript": "5.6.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
