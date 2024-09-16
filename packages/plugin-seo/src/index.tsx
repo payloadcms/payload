@@ -17,6 +17,21 @@ import { OverviewField } from './fields/Overview/index.js'
 import { PreviewField } from './fields/Preview/index.js'
 import { translations } from './translations/index.js'
 
+const getEntityConfig = ({
+  collectionSlug,
+  config,
+  globalSlug,
+}: {
+  collectionSlug?: string
+  config: Config
+  globalSlug?: string
+}) =>
+  collectionSlug
+    ? config.collections?.find((c) => c.slug === collectionSlug)
+    : globalSlug
+      ? config.globals?.find((g) => g.slug === globalSlug)
+      : null
+
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
@@ -138,11 +153,11 @@ export const seoPlugin =
               req.data = data
             }
 
-            const docConfig = req.data.collectionSlug
-              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
-              : req.data.globalSlug
-                ? config.globals.find((g) => g.slug === req.data.globalSlug)
-                : null
+            const docConfig = getEntityConfig({
+              collectionSlug: req.data.collectionSlug,
+              config,
+              globalSlug: req.data.globalSlug,
+            })
 
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
@@ -164,11 +179,11 @@ export const seoPlugin =
               req.data = data
             }
 
-            const docConfig = req.data.collectionSlug
-              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
-              : req.data.globalSlug
-                ? config.globals.find((g) => g.slug === req.data.globalSlug)
-                : null
+            const docConfig = getEntityConfig({
+              collectionSlug: req.data.collectionSlug,
+              config,
+              globalSlug: req.data.globalSlug,
+            })
 
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
@@ -190,11 +205,11 @@ export const seoPlugin =
               req.data = data
             }
 
-            const docConfig = req.data.collectionSlug
-              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
-              : req.data.globalSlug
-                ? config.globals.find((g) => g.slug === req.data.globalSlug)
-                : null
+            const docConfig = getEntityConfig({
+              collectionSlug: req.data.collectionSlug,
+              config,
+              globalSlug: req.data.globalSlug,
+            })
 
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
@@ -216,11 +231,11 @@ export const seoPlugin =
               req.data = data
             }
 
-            const docConfig = req.data.collectionSlug
-              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
-              : req.data.globalSlug
-                ? config.globals.find((g) => g.slug === req.data.globalSlug)
-                : null
+            const docConfig = getEntityConfig({
+              collectionSlug: req.data.collectionSlug,
+              config,
+              globalSlug: req.data.globalSlug,
+            })
 
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({

@@ -17,9 +17,7 @@ import { PagesWithImportedFields } from './collections/PagesWithImportedFields.j
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
-const generateTitle: GenerateTitle<Page> = (args) => {
-  const { doc } = args
-  console.log(args)
+const generateTitle: GenerateTitle<Page> = ({ doc }) => {
   return `Website.com — ${doc?.title}`
 }
 
