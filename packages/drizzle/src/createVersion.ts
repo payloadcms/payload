@@ -36,9 +36,11 @@ export async function createVersion<T extends TypeWithID>(
     latest: true,
     parent,
     publishedLocale,
-      snapshot,
-      version,
-    }if ('createdAt' in version) {
+    snapshot,
+    version,
+  }
+
+  if ('createdAt' in version) {
     data.createdAt = version.createdAt
   }
 
@@ -58,11 +60,11 @@ export async function createVersion<T extends TypeWithID>(
     await this.execute({
       db,
       sql: sql`
-      UPDATE ${table}
-      SET latest = false
-      WHERE ${table.id} != ${result.id}
-        AND ${table.parent} = ${parent}
-    `,
+        UPDATE ${table}
+        SET latest = false
+        WHERE ${table.id} != ${result.id}
+          AND ${table.parent} = ${parent}
+      `,
     })
   }
 
