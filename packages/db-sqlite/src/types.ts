@@ -14,7 +14,7 @@ import type { Payload, PayloadRequest } from 'payload'
 
 type SQLiteSchema = {
   relations: Record<string, GenericRelation>
-  tables: Record<string, GenericTable>
+  tables: Record<string, SQLiteTableWithColumns<any>>
 }
 
 type SQLiteSchemaHookArgs = {
