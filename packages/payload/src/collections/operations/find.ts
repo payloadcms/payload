@@ -142,7 +142,7 @@ export const findOperation = async <TSlug extends CollectionSlug>(
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
-        joins,
+        joins: req.payloadAPI === 'GraphQL' ? false : joins,
         limit: sanitizedLimit,
         locale,
         page: sanitizedPage,

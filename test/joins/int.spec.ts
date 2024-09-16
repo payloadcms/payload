@@ -7,6 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Category, Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -20,6 +21,7 @@ const { email, password } = devUser
 
 describe('Joins Field', () => {
   let category: Category
+  let categoryID
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -44,6 +46,8 @@ describe('Joins Field', () => {
         group: {},
       },
     })
+
+    categoryID = idToString(category.id, payload)
 
     for (let i = 0; i < 15; i++) {
       await createPost({
@@ -216,6 +220,172 @@ describe('Joins Field', () => {
         .GET(`/categories?where[id][in]=${category.id}`)
         .then((res) => res.json())
       expect(response.docs[0].name).toStrictEqual(category.name)
+    })
+  })
+
+  describe('GraphQL', () => {
+    it('should have simple paginate for joins', async () => {
+      const queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 4
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      const pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      expect(unlimited.data.Categories.docs[0].relatedPosts.docs).toHaveLength(15)
+      expect(unlimited.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
+      expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should have simple paginate for joins inside groups', async () => {
+      const queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            group {
+              relatedPosts(
+                sort: "createdAt",
+                limit: 4
+              ) {
+                docs {
+                  title
+                }
+                hasNextPage
+              }
+            }
+          }
+        }
+      }`
+      const pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            group {
+              relatedPosts(
+                sort: "createdAt",
+                limit: 0
+              ) {
+                docs {
+                  title
+                }
+                hasNextPage
+              }
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].group.relatedPosts.docs).toHaveLength(4)
+      expect(pageWithLimit.data.Categories.docs[0].group.relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(pageWithLimit.data.Categories.docs[0].group.relatedPosts.hasNextPage).toStrictEqual(
+        true,
+      )
+
+      expect(unlimited.data.Categories.docs[0].group.relatedPosts.docs).toHaveLength(15)
+      expect(unlimited.data.Categories.docs[0].group.relatedPosts.docs[0].title).toStrictEqual(
+        'test 0',
+      )
+      expect(unlimited.data.Categories.docs[0].group.relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should sort joins', async () => {
+      const query = `query {
+        Category(id: ${categoryID}) {
+          relatedPosts(
+            sort: "-title"
+          ) {
+            docs {
+              title
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 9')
+    })
+
+    it('should query in on collections with joins', async () => {
+      const query = `query {
+         Category(id: ${categoryID}) {
+          relatedPosts(
+            where: {
+              title: {
+                equals: "test 3"
+              }
+            }
+          ) {
+            docs {
+              title
+            }
+          }
+        }
+      }`
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
   })
 })

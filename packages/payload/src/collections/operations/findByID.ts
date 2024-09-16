@@ -76,7 +76,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      joins,
+      joins: req.payloadAPI === 'GraphQL' ? false : joins,
       locale,
       req: {
         transactionID: req.transactionID,
