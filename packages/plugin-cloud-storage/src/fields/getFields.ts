@@ -151,7 +151,7 @@ export const getFields = ({
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    } as TextField)
+    })
   }
 
   return fields

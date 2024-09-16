@@ -47,8 +47,8 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
 
   fields.push({
     ...baseURLField,
-    ...(existingURLField || ({} as TextField)),
-  } as TextField)
+    ...(existingURLField || {}),
+  })
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -117,9 +117,9 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
 
     fields.push({
       ...basePrefixField,
-      ...(existingPrefixField || ({} as TextField)),
+      ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    } as TextField)
+    })
   }
 
   return fields

@@ -447,6 +447,7 @@ export type NumberField = {
   /** Minimum value accepted. Used in the default `validate` function. */
   min?: number
   type: 'number'
+  validate?: Validate<number | number[], unknown, unknown, NumberField>
 } & (
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -455,7 +456,6 @@ export type NumberField = {
       maxRows?: number
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: number
-      validate?: Validate<number[], unknown, unknown, NumberField>
     }
   | {
       /** Makes this field an ordered array of numbers instead of just a single number. */
@@ -464,7 +464,6 @@ export type NumberField = {
       maxRows?: undefined
       /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
       minRows?: undefined
-      validate?: Validate<number, unknown, unknown, NumberField>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -497,6 +496,7 @@ export type TextField = {
   maxLength?: number
   minLength?: number
   type: 'text'
+  validate?: Validate<string | string[], unknown, unknown, TextField>
 } & (
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -505,7 +505,6 @@ export type TextField = {
       maxRows?: number
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: number
-      validate?: Validate<string[], unknown, unknown, TextField>
     }
   | {
       /** Makes this field an ordered array of strings instead of just a single string. */
@@ -514,7 +513,6 @@ export type TextField = {
       maxRows?: undefined
       /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
       minRows?: undefined
-      validate?: Validate<string, unknown, unknown, TextField>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -852,6 +850,7 @@ type SharedUploadProperties = {
    */
   maxDepth?: number
   type: 'upload'
+  validate?: Validate<string | string[], unknown, unknown, SharedUploadProperties>
 } & (
   | {
       hasMany: true
@@ -865,7 +864,6 @@ type SharedUploadProperties = {
        */
       min?: number
       minRows?: number
-      validate?: Validate<string[], unknown, unknown, SharedUploadProperties>
     }
   | {
       hasMany?: false | undefined
@@ -879,7 +877,6 @@ type SharedUploadProperties = {
        */
       min?: undefined
       minRows?: undefined
-      validate?: Validate<string, unknown, unknown, SharedUploadProperties>
     }
 ) &
   Omit<FieldBase, 'validate'>
@@ -1051,6 +1048,7 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
+  validate?: Validate<string | string[], unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
@@ -1064,7 +1062,6 @@ type SharedRelationshipProperties = {
        */
       min?: number
       minRows?: number
-      validate?: Validate<string[], unknown, unknown, SharedRelationshipProperties>
     }
   | {
       hasMany?: false | undefined
@@ -1078,7 +1075,6 @@ type SharedRelationshipProperties = {
        */
       min?: undefined
       minRows?: undefined
-      validate?: Validate<string, unknown, unknown, SharedRelationshipProperties>
     }
 ) &
   Omit<FieldBase, 'validate'>
