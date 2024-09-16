@@ -680,6 +680,14 @@ describe('admin1', () => {
     })
   })
 
+  describe('custom components', () => {
+    test('should render custom header', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const header = page.locator('.custom-header')
+      await expect(header).toContainText('Here is a custom header')
+    })
+  })
+
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
