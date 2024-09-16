@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
-import type { I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type { DeepUndefinable } from 'ts-essentials'
@@ -850,7 +849,7 @@ type SharedUploadProperties = {
    */
   maxDepth?: number
   type: 'upload'
-  validate?: Validate<string | string[], unknown, unknown, SharedUploadProperties>
+  validate?: Validate<unknown, unknown, unknown, SharedUploadProperties>
 } & (
   | {
       hasMany: true
@@ -1048,7 +1047,7 @@ type SharedRelationshipProperties = {
    */
   maxDepth?: number
   type: 'relationship'
-  validate?: Validate<string | string[], unknown, unknown, SharedRelationshipProperties>
+  validate?: Validate<any, unknown, unknown, SharedRelationshipProperties>
 } & (
   | {
       hasMany: true
