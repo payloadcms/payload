@@ -49,15 +49,17 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
       const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
         body: JSON.stringify({
           id: docInfo.id,
+          collectionSlug: docInfo.collectionSlug,
           doc: getData(),
           docPermissions: docInfo.docPermissions,
+          globalSlug: docInfo.globalSlug,
           hasPublishPermission: docInfo.hasPublishPermission,
           hasSavePermission: docInfo.hasSavePermission,
           initialData: docInfo.initialData,
           initialState: docInfo.initialState,
           locale: typeof locale === 'object' ? locale?.code : locale,
           title: docInfo.title,
-        } satisfies Omit<Parameters<GenerateURL>[0], 'req'>),
+        } satisfies Omit<Parameters<GenerateURL>[0], 'docConfig' | 'req'>),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

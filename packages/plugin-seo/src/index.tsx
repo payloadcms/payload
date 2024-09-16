@@ -132,17 +132,24 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
 
             if (data) {
               req.data = data
             }
 
+            const docConfig = req.data.collectionSlug
+              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
+              : req.data.globalSlug
+                ? config.globals.find((g) => g.slug === req.data.globalSlug)
+                : null
+
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
-                  ...req.data,
+                  ...data,
+                  docConfig,
                   req,
-                } as unknown as Parameters<GenerateTitle>[0])
+                } satisfies Parameters<GenerateTitle>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -151,17 +158,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
 
             if (data) {
               req.data = data
             }
 
+            const docConfig = req.data.collectionSlug
+              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
+              : req.data.globalSlug
+                ? config.globals.find((g) => g.slug === req.data.globalSlug)
+                : null
+
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
-                  ...req.data,
+                  ...data,
+                  docConfig,
                   req,
-                } as unknown as Parameters<GenerateDescription>[0])
+                } satisfies Parameters<GenerateDescription>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -170,17 +184,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
 
             if (data) {
               req.data = data
             }
 
+            const docConfig = req.data.collectionSlug
+              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
+              : req.data.globalSlug
+                ? config.globals.find((g) => g.slug === req.data.globalSlug)
+                : null
+
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
-                  ...req.data,
+                  ...data,
+                  docConfig,
                   req,
-                } as unknown as Parameters<GenerateURL>[0])
+                } satisfies Parameters<GenerateURL>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -189,17 +210,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<Parameters<GenerateTitle>[0], 'docConfig' | 'req'> = await req.json()
 
             if (data) {
               req.data = data
             }
 
+            const docConfig = req.data.collectionSlug
+              ? config.collections.find((c) => c.slug === req.data.collectionSlug)
+              : req.data.globalSlug
+                ? config.globals.find((g) => g.slug === req.data.globalSlug)
+                : null
+
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
-                  ...req.data,
+                  ...data,
+                  docConfig,
                   req,
-                } as unknown as Parameters<GenerateImage>[0])
+                } as Parameters<GenerateImage>[0])
               : ''
             return new Response(result, { status: 200 })
           },
