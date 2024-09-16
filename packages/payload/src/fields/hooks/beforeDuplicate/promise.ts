@@ -40,6 +40,24 @@ export const promise = async <T>({
     parentSchemaPath,
   })
 
+  // Handle unnamed tabs
+  if (field.type === 'tab' && !tabHasName(field)) {
+    await traverseFields({
+      id,
+      collection,
+      context,
+      doc,
+      fields: field.fields,
+      overrideAccess,
+      path: fieldPath,
+      req,
+      schemaPath: fieldSchemaPath,
+      siblingDoc,
+    })
+
+    return
+  }
+
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]
     const fieldIsLocalized = field.localized && localization
@@ -207,39 +225,24 @@ export const promise = async <T>({
       switch (field.type) {
         case 'tab':
         case 'group': {
-          if (field.type === 'tab' && !tabHasName(field)) {
-            await traverseFields({
-              id,
-              collection,
-              context,
-              doc,
-              fields: field.fields,
-              overrideAccess,
-              path: fieldPath,
-              req,
-              schemaPath: fieldSchemaPath,
-              siblingDoc,
-            })
-          } else {
-            if (typeof siblingDoc[field.name] !== 'object') {
-              siblingDoc[field.name] = {}
-            }
-
-            const groupDoc = siblingDoc[field.name] as Record<string, unknown>
-
-            await traverseFields({
-              id,
-              collection,
-              context,
-              doc,
-              fields: field.fields,
-              overrideAccess,
-              path: fieldPath,
-              req,
-              schemaPath: fieldSchemaPath,
-              siblingDoc: groupDoc as JsonObject,
-            })
+          if (typeof siblingDoc[field.name] !== 'object') {
+            siblingDoc[field.name] = {}
           }
+
+          const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+
+          await traverseFields({
+            id,
+            collection,
+            context,
+            doc,
+            fields: field.fields,
+            overrideAccess,
+            path: fieldPath,
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingDoc: groupDoc as JsonObject,
+          })
 
           break
         }
