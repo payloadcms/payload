@@ -28,7 +28,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { queue } = req.query
+    const { limit, queue } = req.query
 
     const runJobsArgs: RunJobsArgs = {
       queue: 'default',
@@ -37,6 +37,10 @@ export const runJobsEndpoint: Endpoint = {
 
     if (typeof queue === 'string') {
       runJobsArgs.queue = queue
+    }
+
+    if (typeof limit !== 'undefined') {
+      runJobsArgs.limit = Number(limit)
     }
 
     try {

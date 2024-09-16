@@ -9,6 +9,7 @@ export const updatePostStep1: JobRunner<StepType> = async ({ req, step }) => {
   await req.payload.update({
     collection: 'posts',
     id: step.post,
+    req,
     data: {
       jobStep1Ran: step.message,
     },
@@ -23,6 +24,7 @@ export const updatePostStep2: JobRunner<StepType> = async ({ req, step }) => {
   await req.payload.update({
     collection: 'posts',
     id: step.post,
+    req,
     data: {
       jobStep2Ran: step.message,
     },
