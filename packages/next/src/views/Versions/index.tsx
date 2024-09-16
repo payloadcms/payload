@@ -57,9 +57,18 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         sort: sort as string,
         user,
         where: {
-          parent: {
-            equals: id,
-          },
+          and: [
+            {
+              parent: {
+                equals: id,
+              },
+            },
+            {
+              snapshot: {
+                not_equals: true,
+              },
+            },
+          ],
         },
       })
       if (collectionConfig?.versions?.drafts) {
@@ -93,6 +102,11 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
+        where: {
+          snapshot: {
+            not_equals: true,
+          },
+        },
       })
 
       if (globalConfig?.versions?.drafts) {
