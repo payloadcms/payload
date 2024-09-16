@@ -137,6 +137,7 @@ export interface LocalizedPost {
   group?: {
     children?: string | null;
   };
+  unique?: string | null;
   updatedAt: string;
   createdAt: string;
 }
